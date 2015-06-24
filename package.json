@@ -1,0 +1,8 @@
+{
+  "name": "HybridMobileDeploy",
+  "version": "0.0.1",
+  "keywords": "react-native",
+  "dependencies": {
+    "react-native": "^0.5.0"
+  }
+}
