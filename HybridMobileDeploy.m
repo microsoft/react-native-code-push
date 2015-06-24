@@ -26,21 +26,24 @@ RCT_EXPORT_MODULE()
     return [[NSBundle mainBundle] URLForResource:bundleName withExtension:@"jsbundle"];
 }
 
-+ (NSURL *) appBundleUrl:(NSString*)bundleName {
++ (NSURL *) appBundleUrl:(NSString*)bundleName
+        nativeBundleName:(NSString*)nativeBundleName
+{
     NSFileManager *fileManager = [NSFileManager defaultManager];
 
     NSString *bundlePath = [self getBundlePath:bundleName];
     if ([fileManager fileExistsAtPath:bundlePath]) {
         return [[NSURL alloc] initFileURLWithPath:bundlePath];
     } else {
-        return [self getNativeBundleURL:bundleName];
+        return [self getNativeBundleURL:nativeBundleName];
     }
 }
 
 + (void) loadBundle:(NSString*)moduleName
+   nativeBundleName:(NSString*)nativeBundleName
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:[self appBundleUrl:moduleName]
+        RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:[self appBundleUrl:moduleName nativeBundleName:nativeBundleName]
                                                             moduleName:moduleName
                                                          launchOptions:nil];
 
@@ -52,6 +55,7 @@ RCT_EXPORT_MODULE()
 
 RCT_EXPORT_METHOD(installUpdateFromUrl:(NSString*)updateUrl
                   bundleName:(NSString*)bundleName
+                  nativeBundleName:(NSString*)nativeBundleName
                   failureCallback:(RCTResponseSenderBlock)failureCallback
                   successCallback:(RCTResponseSenderBlock)successCallback)
 {
@@ -93,7 +97,7 @@ RCT_EXPORT_METHOD(installUpdateFromUrl:(NSString*)updateUrl
                     if (saveError) {
                         failureCallback(@[saveError]);
                     } else {
-                        [HybridMobileDeploy loadBundle:bundleName];
+                        [HybridMobileDeploy loadBundle:bundleName nativeBundleName:nativeBundleName];
                         successCallback(@[]);
                     }
                 });
