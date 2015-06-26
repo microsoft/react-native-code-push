@@ -1,7 +1,7 @@
 /**
- * Stub of HybridMobileDeploy for Android.
+ * Stub of UpdateManager for Android.
  *
- * @providesModule HybridMobileDeploy
+ * @providesModule UpdateManager
  * @flow
  */
 'use strict';

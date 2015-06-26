@@ -12,6 +12,8 @@ var {
   View,
 } = React;
 
+var HybridMobileDeploy = require('react-native-hybrid-mobile-deploy')('http://localhost:3000/', 'HybridMobileDeployCompanion');
+
 var HybridMobileDeployCompanion = React.createClass({
   render: function() {
     return (

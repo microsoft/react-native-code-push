@@ -1,8 +1,10 @@
 {
-  "name": "HybridMobileDeploy",
+  "name": "react-native-hybrid-mobile-deploy",
   "version": "0.0.1",
+  "main": "HybridMobileDeploy.ios.js",
   "keywords": "react-native",
   "dependencies": {
-    "react-native": "^0.5.0"
+    "react-native": "^0.5.0",
+    "semver": "^4.3.6"
   }
 }
