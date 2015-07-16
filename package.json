@@ -4,7 +4,7 @@
   "main": "HybridMobileDeploy.ios.js",
   "keywords": "react-native",
   "dependencies": {
-    "react-native": "^0.5.0",
+    "hybrid-mobile-deploy-sdk": "file:../website/sdk/bin",
     "semver": "^4.3.6"
   }
 }
