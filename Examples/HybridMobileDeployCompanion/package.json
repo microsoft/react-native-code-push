@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "react-native": "^0.8.0-rc",
-    "react-native-hybrid-mobile-deploy": "file:../.."
+    "react-native-hybrid-mobile-deploy": "file:../..",
+    "react-native-button": "^1.2.0"
   }
 }
