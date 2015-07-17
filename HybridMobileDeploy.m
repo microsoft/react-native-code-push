@@ -26,6 +26,12 @@ RCT_EXPORT_MODULE()
     return [[NSBundle mainBundle] URLForResource:bundleName withExtension:@"jsbundle"];
 }
 
++ (NSURL *) appBundleUrl
+{
+    return [self appBundleUrl:@"bundle"
+             nativeBundleName:@"main"];
+}
+
 + (NSURL *) appBundleUrl:(NSString*)bundleName
         nativeBundleName:(NSString*)nativeBundleName
 {
