@@ -5,7 +5,7 @@
 
 'use strict';
 
-var NativeHybridMobileDeploy = require('NativeModules').HybridMobileDeploy;
+var NativeHybridMobileDeploy = require('react-native').NativeModules.HybridMobileDeploy;
 var requestFetchAdapter = require("./request-fetch-adapter.js");
 var semver = require('semver');
 var Sdk = require("hybrid-mobile-deploy-sdk/script/acquisition-sdk");
