@@ -6,5 +6,8 @@
   "dependencies": {
     "hybrid-mobile-deploy-sdk": "file:../website/sdk/bin",
     "semver": "^4.3.6"
+  },
+  "devDependencies": {
+    "react-native": "^0.8.0-rc"
   }
 }
