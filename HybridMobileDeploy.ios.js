@@ -8,7 +8,7 @@
 var NativeHybridMobileDeploy = require('react-native').NativeModules.HybridMobileDeploy;
 var requestFetchAdapter = require("./request-fetch-adapter.js");
 var semver = require('semver');
-var Sdk = require("hybrid-mobile-deploy-sdk/script/acquisition-sdk");
+var Sdk = require("hybrid-mobile-deploy-sdk/script/acquisition-sdk").AcquisitionManager;
 var serverUrl;
 var appName;
 var sdk;
