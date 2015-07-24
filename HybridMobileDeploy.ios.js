@@ -9,25 +9,53 @@ var NativeHybridMobileDeploy = require('react-native').NativeModules.HybridMobil
 var requestFetchAdapter = require("./request-fetch-adapter.js");
 var semver = require('semver');
 var Sdk = require("hybrid-mobile-deploy-sdk/script/acquisition-sdk").AcquisitionManager;
-var serverUrl;
-var appName;
 var sdk;
+var config;
+
+function getConfiguration(cb) {
+  if (config) {
+    setTimeout(function() {
+      cb(null, config);
+    });
+  } else {
+    NativeHybridMobileDeploy.getConfiguration(function(err, configuration) {
+      if (err) cb(err);
+      config = configuration;
+      cb(null, config);
+    });
+  }
+}
+
+function getSdk(cb) {
+  if (sdk) {
+    setTimeout(function() {
+      cb(null, sdk);
+    });
+  } else {
+    getConfiguration(function(err, configuration) {
+      sdk = new Sdk(requestFetchAdapter, configuration);
+      cb(null, sdk);
+    });
+  }
+}
+
+function queryUpdate(cb) {
+  getSdk(function(err, sdk) {
+    var pkg = {appVersion: "1.2.3"};
+    sdk.queryUpdateWithCurrentPackage(pkg, cb);
+  });
+}
+
+function installUpdate(update) {
+  getConfiguration(function(err, config) {
+    NativeHybridMobileDeploy.installUpdateFromUrl(config.serverUrl + "acquire/" + config.deploymentKey, (err) => console.log(err));
+  });
+}
 
 var HybridMobileDeploy = {
-  queryUpdate: function(cb) {
-    var pkg = {nativeVersion: "1.2.3", scriptVersion: "1.2.0"};
-    sdk.queryUpdateWithCurrentPackage(pkg, cb);
-  },
-  installUpdate: function(update) {
-    NativeHybridMobileDeploy.installUpdateFromUrl(update.updateUrl, update.bundleName, (err) => console.log(err), () => console.log("success"));
-  }
+  getConfiguration: getConfiguration,
+  queryUpdate: queryUpdate,
+  installUpdate: installUpdate
 };
 
-module.exports = function(serverUrl, deploymentKey, ignoreNativeVersion) {
-  sdk = new Sdk(requestFetchAdapter, {
-      serverUrl: serverUrl,
-      deploymentKey: deploymentKey,
-      ignoreNativeVersion: ignoreNativeVersion
-  });
-  return HybridMobileDeploy; 
-};
+module.exports = HybridMobileDeploy;

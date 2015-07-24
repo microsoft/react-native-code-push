@@ -14,43 +14,35 @@ RCT_EXPORT_MODULE()
     return bundleFolder;
 }
 
-+ (NSString *) getBundlePath:(NSString*)bundleName
++ (NSString *) getBundlePath
 {
     NSString * bundleFolderPath = [self getBundleFolderPath];
-    NSString* appBundleName = [bundleName stringByAppendingString:@".jsbundle"];
+    NSString* appBundleName = @"main.jsbundle";
     return [bundleFolderPath stringByAppendingPathComponent:appBundleName];
 }
 
-+ (NSURL *) getNativeBundleURL:(NSString*)bundleName
++ (NSURL *) getNativeBundleURL
 {
-    return [[NSBundle mainBundle] URLForResource:bundleName withExtension:@"jsbundle"];
+    return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 }
 
-+ (NSURL *) appBundleUrl
-{
-    return [self appBundleUrl:@"bundle"
-             nativeBundleName:@"main"];
-}
-
-+ (NSURL *) appBundleUrl:(NSString*)bundleName
-        nativeBundleName:(NSString*)nativeBundleName
++ (NSURL *) getBundleUrl
 {
     NSFileManager *fileManager = [NSFileManager defaultManager];
 
-    NSString *bundlePath = [self getBundlePath:bundleName];
+    NSString *bundlePath = [self getBundlePath];
     if ([fileManager fileExistsAtPath:bundlePath]) {
         return [[NSURL alloc] initFileURLWithPath:bundlePath];
     } else {
-        return [self getNativeBundleURL:nativeBundleName];
+        return [self getNativeBundleURL];
     }
 }
 
-+ (void) loadBundle:(NSString*)moduleName
-   nativeBundleName:(NSString*)nativeBundleName
++ (void) loadBundle:(NSString*)rootComponent
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:[self appBundleUrl:moduleName nativeBundleName:nativeBundleName]
-                                                            moduleName:moduleName
+        RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:[self getBundleUrl]
+                                                            moduleName:rootComponent
                                                          launchOptions:nil];
 
         UIViewController *rootViewController = [[UIViewController alloc] init];
@@ -59,57 +51,46 @@ RCT_EXPORT_MODULE()
     });
 }
 
-RCT_EXPORT_METHOD(installUpdateFromUrl:(NSString*)updateUrl
-                  bundleName:(NSString*)bundleName
-                  nativeBundleName:(NSString*)nativeBundleName
-                  failureCallback:(RCTResponseSenderBlock)failureCallback
-                  successCallback:(RCTResponseSenderBlock)successCallback)
+RCT_EXPORT_METHOD(getConfiguration:(RCTResponseSenderBlock)callback)
 {
-    NSError *parameterError;
-    NSMutableDictionary *errorData;
-    if (!updateUrl) {
-        errorData = [NSMutableDictionary dictionary];
-        [errorData setValue:@"missing-updateUrl" forKey:NSLocalizedDescriptionKey];
-    } else if (!bundleName) {
-        errorData = [NSMutableDictionary dictionary];
-        [errorData setValue:@"missing-bundleName" forKey:NSLocalizedDescriptionKey];
-    }
+        callback(@[[NSNull null], [HybridMobileDeployConfig getConfiguration]]);
+}
 
-    if (errorData) {
-        parameterError = [NSError errorWithDomain:@"HybridMobileDeploy"code:200 userInfo:errorData];
-        NSDictionary *rctError = RCTMakeError(@"Error with input to installUpdateFromUrl", parameterError, errorData);
-        failureCallback(@[rctError]);
-    } else {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            NSURL* url = [NSURL URLWithString:updateUrl];
-            NSError *err;
+RCT_EXPORT_METHOD(installUpdateFromUrl:(NSString*)updateUrl
+                  callback:(RCTResponseSenderBlock)callback)
+{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        NSURL* url = [NSURL URLWithString:updateUrl];
+        NSError *err;
 
-            NSString *updateContents = [[NSString alloc] initWithContentsOfURL:url
-                                                                      encoding:NSUTF8StringEncoding
-                                                                         error:&err];
-            if (err) {
-                failureCallback(@[err]);
-            } else {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    NSError *saveError;
-                    NSString *bundleFolderPath = [HybridMobileDeploy getBundleFolderPath];
-                    if (![[NSFileManager defaultManager] fileExistsAtPath:bundleFolderPath]) {
-                        [[NSFileManager defaultManager] createDirectoryAtPath:bundleFolderPath withIntermediateDirectories:YES attributes:nil error:&saveError];
-                    }
-                    [updateContents writeToFile:[HybridMobileDeploy getBundlePath:bundleName]
-                                     atomically:YES
-                                       encoding:NSUTF8StringEncoding
-                                          error:&saveError];
-                    if (saveError) {
-                        failureCallback(@[saveError]);
-                    } else {
-                        [HybridMobileDeploy loadBundle:bundleName nativeBundleName:nativeBundleName];
-                        successCallback(@[]);
-                    }
-                });
-            }
-        });
-    }
+        NSString *updateContents = [[NSString alloc] initWithContentsOfURL:url
+                                                                  encoding:NSUTF8StringEncoding
+                                                                     error:&err];
+        
+        if (err) {
+            // TODO send download url
+            callback(@[RCTMakeError(@"Error downloading url", err, [[NSDictionary alloc] initWithObjectsAndKeys:updateUrl,@"updateUrl", nil])]);
+        } else {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSError *saveError;
+                NSString *bundleFolderPath = [HybridMobileDeploy getBundleFolderPath];
+                if (![[NSFileManager defaultManager] fileExistsAtPath:bundleFolderPath]) {
+                    [[NSFileManager defaultManager] createDirectoryAtPath:bundleFolderPath withIntermediateDirectories:YES attributes:nil error:&saveError];
+                }
+                [updateContents writeToFile:[HybridMobileDeploy getBundlePath]
+                                 atomically:YES
+                                   encoding:NSUTF8StringEncoding
+                                      error:&saveError];
+                if (saveError) {
+                    // TODO send file path
+                    callback(@[RCTMakeError(@"Error saving file", err, [[NSDictionary alloc] initWithObjectsAndKeys:[HybridMobileDeploy getBundlePath],@"bundlePath", nil])]);
+                } else {
+                    [HybridMobileDeploy loadBundle:[HybridMobileDeployConfig getRootComponent]];
+                    callback(@[[NSNull null]]);
+                }
+            });
+        }
+    });
 }
 
 @end

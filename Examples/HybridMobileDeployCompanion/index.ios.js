@@ -15,7 +15,7 @@ var {
 
 var Button = require("react-native-button");
 
-var HybridMobileDeploy = require('react-native-hybrid-mobile-deploy')('http://localhost:3000/', '<deployment key here>');
+var HybridMobileDeploy = require('react-native-hybrid-mobile-deploy');
 
 var HybridMobileDeployCompanion = React.createClass({
   componentDidMount: function() {
