@@ -11,11 +11,11 @@
 + (void)setDeploymentKey:(NSString *)deploymentKey;
 + (NSString *)getDeploymentKey;
 
-+ (void)setBaseUrl:(NSString *)baseUrl;
-+ (NSString *)getBaseUrl;
++ (void)setServerUrl:(NSString *)setServerUrl;
++ (NSString *)getServerUrl;
 
-+ (void)setVersionString:(NSString *)versionString;
-+ (NSString *)getVersionString;
++ (void)setAppVersion:(NSString *)appVersion;
++ (NSString *)getAppVersion;
 
 + (void)setBuildVersion:(NSString *)buildVersion;
 + (NSString *)getBuildVersion;

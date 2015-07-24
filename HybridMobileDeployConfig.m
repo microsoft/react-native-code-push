@@ -8,8 +8,8 @@ NSMutableDictionary *configuration;
 {
     NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
     
-    NSString *version = [infoDictionary objectForKey:@"CFBundleShortVersionString"];
-    NSString *buildVersion = [infoDictionary objectForKey:@"CFBundleVersion"];
+    NSString *appVersion = [infoDictionary objectForKey:@"CFBundleShortVersionString"];
+    NSString *buildVersion = [infoDictionary objectForKey:(NSString *)kCFBundleVersionKey];
     NSString *deploymentKey = [infoDictionary objectForKey:@"CodePushDeploymentKey"];
     NSString *serverUrl = [infoDictionary objectForKey:@"CodePushServerUrl"];
     if (!serverUrl) {
@@ -19,7 +19,7 @@ NSMutableDictionary *configuration;
     
     configuration = [[NSMutableDictionary alloc]
                                    initWithObjectsAndKeys:
-                                   version,@"versionString",
+                                   appVersion,@"appVersion",
                                    buildVersion,@"buildVersion",
                                    deploymentKey,@"deploymentKey",
                                    serverUrl,@"serverUrl",
@@ -47,14 +47,14 @@ NSMutableDictionary *configuration;
     return [configuration objectForKey:@"serverUrl"];
 }
 
-+ (void)setVersionString:(NSString *)versionString
++ (void)setAppVersion:(NSString *)appVersion
 {
-    [configuration setValue:versionString forKey:@"versionString"];
+    [configuration setValue:appVersion forKey:@"appVersion"];
 }
 
-+ (NSString *)getVersionString
++ (NSString *)getAppVersion
 {
-    return [configuration objectForKey:@"versionString"];
+    return [configuration objectForKey:@"appVersion"];
 }
 
 + (void)setBuildVersion:(NSString *)buildVersion
