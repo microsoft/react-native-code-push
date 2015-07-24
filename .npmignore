@@ -25,3 +25,6 @@ DerivedData
 #
 node_modules/
 npm-debug.log
+
+# Don't publish example apps
+Examples/

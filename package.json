@@ -1,0 +1,13 @@
+{
+  "name": "react-native-hybrid-mobile-deploy",
+  "version": "0.0.1",
+  "main": "HybridMobileDeploy.ios.js",
+  "keywords": "react-native",
+  "dependencies": {
+    "hybrid-mobile-deploy-sdk": "file:../website/sdk/bin",
+    "semver": "^4.3.6"
+  },
+  "devDependencies": {
+    "react-native": "^0.8.0-rc"
+  }
+}
