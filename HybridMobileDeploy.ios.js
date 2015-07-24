@@ -12,37 +12,37 @@ var Sdk = require("hybrid-mobile-deploy-sdk/script/acquisition-sdk").Acquisition
 var sdk;
 var config;
 
-function getConfiguration(cb) {
+function getConfiguration(callback) {
   if (config) {
-    setTimeout(function() {
-      cb(null, config);
+    setImmediate(function() {
+      callback(/*error=*/ null, config);
     });
   } else {
     NativeHybridMobileDeploy.getConfiguration(function(err, configuration) {
-      if (err) cb(err);
+      if (err) callback(err);
       config = configuration;
-      cb(null, config);
+      callback(/*error=*/ null, config);
     });
   }
 }
 
-function getSdk(cb) {
+function getSdk(callback) {
   if (sdk) {
-    setTimeout(function() {
-      cb(null, sdk);
+    setImmediate(function() {
+      callback(/*error=*/ null, sdk);
     });
   } else {
     getConfiguration(function(err, configuration) {
       sdk = new Sdk(requestFetchAdapter, configuration);
-      cb(null, sdk);
+      callback(/*error=*/ null, sdk);
     });
   }
 }
 
-function queryUpdate(cb) {
+function queryUpdate(callback) {
   getSdk(function(err, sdk) {
     var pkg = {appVersion: "1.2.3"};
-    sdk.queryUpdateWithCurrentPackage(pkg, cb);
+    sdk.queryUpdateWithCurrentPackage(pkg, callback);
   });
 }
 
