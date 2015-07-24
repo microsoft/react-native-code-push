@@ -30,7 +30,7 @@ var HybridMobileDeployCompanion = React.createClass({
     return { update: false, updateString: "" };
   },
   handlePress: function() {
-    console.log("pressed");
+    HybridMobileDeploy.installUpdate(this.state.update);
   },
   render: function() {
     var updateView;
@@ -38,7 +38,7 @@ var HybridMobileDeployCompanion = React.createClass({
       updateView = (
         <View>
           <Text>Update Available: {'\n'} {this.state.update.scriptVersion} - {this.state.update.description}</Text>
-          <Button style={{color: 'green'}} onPress={this._handlePress}>
+          <Button style={{color: 'green'}} onPress={this.handlePress}>
             Update
           </Button>
         </View>
