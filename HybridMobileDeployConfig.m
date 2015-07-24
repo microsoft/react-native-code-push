@@ -47,9 +47,9 @@ NSMutableDictionary *configuration;
     return [configuration objectForKey:@"serverUrl"];
 }
 
-+ (void)setVersionString:(NSString *)baseUrl
++ (void)setVersionString:(NSString *)versionString
 {
-    [configuration setValue:baseUrl forKey:@"versionString"];
+    [configuration setValue:versionString forKey:@"versionString"];
 }
 
 + (NSString *)getVersionString
@@ -67,9 +67,9 @@ NSMutableDictionary *configuration;
     return [configuration objectForKey:@"buildVersion"];
 }
 
-+ (void)setRootComponent:(NSString *)buildVersion
++ (void)setRootComponent:(NSString *)rootComponent
 {
-    [configuration setValue:buildVersion forKey:@"rootComponent"];
+    [configuration setValue:rootComponent forKey:@"rootComponent"];
 }
 
 + (NSString *)getRootComponent

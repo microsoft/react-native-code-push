@@ -14,7 +14,7 @@
 + (void)setBaseUrl:(NSString *)baseUrl;
 + (NSString *)getBaseUrl;
 
-+ (void)setVersionString:(NSString *)baseUrl;
++ (void)setVersionString:(NSString *)versionString;
 + (NSString *)getVersionString;
 
 + (void)setBuildVersion:(NSString *)buildVersion;
