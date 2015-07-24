@@ -40,9 +40,13 @@ function getSdk(callback) {
 }
 
 function queryUpdate(callback) {
-  getSdk(function(err, sdk) {
-    var pkg = {appVersion: "1.2.3"};
-    sdk.queryUpdateWithCurrentPackage(pkg, callback);
+  getConfiguration(function(err, configuration) {
+    if (err) callback(err);
+    getSdk(function(err, sdk) {
+      if (err) callback(err);
+      var pkg = {appVersion: configuration.appVersion};
+      sdk.queryUpdateWithCurrentPackage(pkg, callback);
+    });
   });
 }
 
