@@ -1,11 +1,16 @@
 #import "HybridMobileDeploy.h"
 
+#import "RCTBridgeModule.h"
 #import "RCTRootView.h"
 #import "RCTUtils.h"
 
 @implementation HybridMobileDeploy
 
 RCT_EXPORT_MODULE()
+
+RCTBridge * _bridge;
+
+@synthesize bridge = _bridge;
 
 + (NSString *) getBundleFolderPath
 {
@@ -38,16 +43,11 @@ RCT_EXPORT_MODULE()
     }
 }
 
-+ (void) loadBundle:(NSString*)rootComponent
+- (void) reloadBundle
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:[self getBundleUrl]
-                                                            moduleName:rootComponent
-                                                         launchOptions:nil];
-
-        UIViewController *rootViewController = [[UIViewController alloc] init];
-        rootViewController.view = rootView;
-        [UIApplication sharedApplication].delegate.window.rootViewController = rootViewController;
+        self.bridge.bundleURL = [HybridMobileDeploy getBundleUrl];
+        [self.bridge reload];
     });
 }
 
@@ -85,7 +85,7 @@ RCT_EXPORT_METHOD(installUpdateFromUrl:(NSString*)updateUrl
                     // TODO send file path
                     callback(@[RCTMakeError(@"Error saving file", err, [[NSDictionary alloc] initWithObjectsAndKeys:[HybridMobileDeploy getBundlePath],@"bundlePath", nil])]);
                 } else {
-                    [HybridMobileDeploy loadBundle:[HybridMobileDeployConfig getRootComponent]];
+                    [self reloadBundle];
                     callback(@[[NSNull null]]);
                 }
             });
