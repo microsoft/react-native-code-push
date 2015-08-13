@@ -8,7 +8,7 @@
 var NativeHybridMobileDeploy = require('react-native').NativeModules.HybridMobileDeploy;
 var requestFetchAdapter = require("./request-fetch-adapter.js");
 var semver = require('semver');
-var Sdk = require("hybrid-mobile-deploy-sdk/script/acquisition-sdk").AcquisitionManager;
+var Sdk = require("code-push/script/acquisition-sdk").AcquisitionManager;
 var sdk;
 var config;
 
@@ -44,16 +44,26 @@ function queryUpdate(callback) {
     if (err) callback(err);
     getSdk(function(err, sdk) {
       if (err) callback(err);
-      var pkg = {appVersion: configuration.appVersion};
-      sdk.queryUpdateWithCurrentPackage(pkg, callback);
+      NativeHybridMobileDeploy.getLocalPackage(function(err, localPackage) {
+        if(err){   
+          console.log(err);
+          var pkg = {appVersion: configuration.appVersion};
+          sdk.queryUpdateWithCurrentPackage(pkg, callback);
+        }else if(localPackage == null){
+          var pkg = {appVersion: configuration.appVersion};
+          sdk.queryUpdateWithCurrentPackage(pkg, callback);
+        }else{
+          sdk.queryUpdateWithCurrentPackage(localPackage, callback);
+        }
+      });
     });
   });
 }
 
 function installUpdate(update) {
-  getConfiguration(function(err, config) {
-    NativeHybridMobileDeploy.installUpdateFromUrl(config.serverUrl + "acquire/" + config.deploymentKey, (err) => console.log(err));
-  });
+  // use the downloaded package info. native code will save the package info
+  // so that the client knows what the current package version is.
+  NativeHybridMobileDeploy.installUpdate(update, JSON.stringify(update), (err) => console.log(err));
 }
 
 var HybridMobileDeploy = {

@@ -39,6 +39,8 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
 	<key>CodePushDeploymentKey</key>
-	<string>deployment-key-here</string>
+	<string>b6883b8f-3e7b-4e48-98b1-ec509dc22aaa</string>
+	<key>CodePushServerUrl</key>
+	<string>http://ryuyu-test.azurewebsites.net/</string>
 </dict>
 </plist>
