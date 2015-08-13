@@ -8,6 +8,6 @@
     "semver": "^4.3.6"
   },
   "devDependencies": {
-    "react-native": "^0.8.0-rc"
+    "react-native": "^0.8.0"
   }
 }

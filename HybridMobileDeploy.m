@@ -1,11 +1,16 @@
 #import "HybridMobileDeploy.h"
 
+#import "RCTBridgeModule.h"
 #import "RCTRootView.h"
 #import "RCTUtils.h"
 
 @implementation HybridMobileDeploy
 
 RCT_EXPORT_MODULE()
+
+RCTBridge * _bridge;
+
+@synthesize bridge = _bridge;
 
 + (NSString *) getBundleFolderPath
 {
@@ -59,7 +64,7 @@ RCT_EXPORT_MODULE()
         RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:[self getBundleUrl]
                                                             moduleName:rootComponent
                                                          launchOptions:nil];
-
+        
         UIViewController *rootViewController = [[UIViewController alloc] init];
         rootViewController.view = rootView;
         [UIApplication sharedApplication].delegate.window.rootViewController = rootViewController;
@@ -101,7 +106,6 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
                     // TODO send file path
                     callback(@[RCTMakeError(@"Error saving file", err, [[NSDictionary alloc] initWithObjectsAndKeys:[HybridMobileDeploy getBundlePath],@"bundlePath", nil])]);
                 } else {
-                    
                     // save the package info too
                     NSString *packageFolderPath = [HybridMobileDeploy getPackageFolderPath];
                     if (![[NSFileManager defaultManager] fileExistsAtPath:packageFolderPath]) {
