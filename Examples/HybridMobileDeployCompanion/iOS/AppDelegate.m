@@ -33,7 +33,7 @@
    * on the same Wi-Fi network.
    */
 
-  jsCodeLocation = [NSURL URLWithString:@"http://localhost:8081/index.ios.bundle"];
+  //jsCodeLocation = [NSURL URLWithString:@"http://localhost:8081/index.ios.bundle"];
 
   /**
    * OPTION 2
@@ -45,7 +45,7 @@
    * see http://facebook.github.io/react-native/docs/runningondevice.html
    */
 
-  //jsCodeLocation = [HybridMobileDeploy getBundleUrl];
+  jsCodeLocation = [HybridMobileDeploy getBundleUrl];
 
   RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
                                                       moduleName:@"HybridMobileDeployCompanion"
