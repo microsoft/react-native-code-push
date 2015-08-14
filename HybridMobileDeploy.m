@@ -155,7 +155,6 @@ RCT_EXPORT_METHOD(getLocalPackage: (RCTResponseSenderBlock)callback)
             }
         }
     });
-    
 }
 
 @end
