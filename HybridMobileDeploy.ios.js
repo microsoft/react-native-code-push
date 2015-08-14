@@ -45,15 +45,18 @@ function queryUpdate(callback) {
     getSdk(function(err, sdk) {
       if (err) callback(err);
       NativeHybridMobileDeploy.getLocalPackage(function(err, localPackage) {
+        var defaultPackage = {appVersion: configuration.appVersion};
         if (err) {   
           console.log(err);
-          var pkg = {appVersion: configuration.appVersion};
-          sdk.queryUpdateWithCurrentPackage(pkg, callback);
+          sdk.queryUpdateWithCurrentPackage(defaultPackage, callback);
         } else if (localPackage == null) {
-          var pkg = {appVersion: configuration.appVersion};
-          sdk.queryUpdateWithCurrentPackage(pkg, callback);
+          sdk.queryUpdateWithCurrentPackage(defaultPackage, callback);
         } else {
-          sdk.queryUpdateWithCurrentPackage(localPackage, callback);
+          if (localPackage.appVersion !== configuration.appVersion) {
+            sdk.queryUpdateWithCurrentPackage(defaultPackage, callback)
+          } else {
+            sdk.queryUpdateWithCurrentPackage(localPackage, callback);
+          }
         }
       });
     });
@@ -61,7 +64,7 @@ function queryUpdate(callback) {
 }
 
 function installUpdate(update) {
-  // use the downloaded package info. native code will save the package info
+  // Use the downloaded package info. Native code will save the package info
   // so that the client knows what the current package version is.
   NativeHybridMobileDeploy.installUpdate(update, JSON.stringify(update), (err) => console.log(err));
 }

@@ -87,7 +87,6 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
         NSString *updateContents = [[NSString alloc] initWithContentsOfURL:url
                                                                   encoding:NSUTF8StringEncoding
                                                                      error:&err];
-        
         if (err) {
             // TODO send download url
             callback(@[RCTMakeError(@"Error downloading url", err, [[NSDictionary alloc] initWithObjectsAndKeys:[url absoluteString],@"updateUrl", nil])]);
@@ -139,7 +138,6 @@ RCT_EXPORT_METHOD(getLocalPackage: (RCTResponseSenderBlock)callback)
     dispatch_async(dispatch_get_main_queue(), ^{
         
         NSError* readError;
-        
         NSString *content = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:&readError];
         if (readError) {
             callback(@[RCTMakeError(@"Error finding local package ", readError, [[NSDictionary alloc] initWithObjectsAndKeys:path,@"packagePath", nil]), [NSNull null]]);
@@ -155,7 +153,6 @@ RCT_EXPORT_METHOD(getLocalPackage: (RCTResponseSenderBlock)callback)
                 callback(@[[NSNull null], json]);
             }
         }
-        
     });
     
 }
