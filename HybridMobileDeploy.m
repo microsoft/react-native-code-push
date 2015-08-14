@@ -106,7 +106,7 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
                     // TODO send file path
                     callback(@[RCTMakeError(@"Error saving file", err, [[NSDictionary alloc] initWithObjectsAndKeys:[HybridMobileDeploy getBundlePath],@"bundlePath", nil])]);
                 } else {
-                    // save the package info too
+                    // Save the package info too.
                     NSString *packageFolderPath = [HybridMobileDeploy getPackageFolderPath];
                     if (![[NSFileManager defaultManager] fileExistsAtPath:packageFolderPath]) {
                         [[NSFileManager defaultManager] createDirectoryAtPath:packageFolderPath withIntermediateDirectories:YES attributes:nil error:&saveError];
