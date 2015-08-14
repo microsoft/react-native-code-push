@@ -51,12 +51,10 @@ function queryUpdate(callback) {
           sdk.queryUpdateWithCurrentPackage(defaultPackage, callback);
         } else if (localPackage == null) {
           sdk.queryUpdateWithCurrentPackage(defaultPackage, callback);
+        } else if (localPackage.appVersion !== configuration.appVersion) {
+          sdk.queryUpdateWithCurrentPackage(defaultPackage, callback)
         } else {
-          if (localPackage.appVersion !== configuration.appVersion) {
-            sdk.queryUpdateWithCurrentPackage(defaultPackage, callback)
-          } else {
-            sdk.queryUpdateWithCurrentPackage(localPackage, callback);
-          }
+          sdk.queryUpdateWithCurrentPackage(localPackage, callback);
         }
       });
     });
