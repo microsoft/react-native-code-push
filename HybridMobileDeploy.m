@@ -97,6 +97,7 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
                 if (![[NSFileManager defaultManager] fileExistsAtPath:bundleFolderPath]) {
                     [[NSFileManager defaultManager] createDirectoryAtPath:bundleFolderPath withIntermediateDirectories:YES attributes:nil error:&saveError];
                 }
+                
                 [updateContents writeToFile:[HybridMobileDeploy getBundlePath]
                                  atomically:YES
                                    encoding:NSUTF8StringEncoding
@@ -141,7 +142,7 @@ RCT_EXPORT_METHOD(getLocalPackage: (RCTResponseSenderBlock)callback)
         NSString *content = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:&readError];
         if (readError) {
             callback(@[RCTMakeError(@"Error finding local package ", readError, [[NSDictionary alloc] initWithObjectsAndKeys:path,@"packagePath", nil]), [NSNull null]]);
-        }else{
+        } else {
             NSError * parseError;
             NSData *data = [content dataUsingEncoding:NSUTF8StringEncoding];
             NSDictionary* json = [NSJSONSerialization JSONObjectWithData:data
