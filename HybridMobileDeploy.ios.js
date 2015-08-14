@@ -45,17 +45,14 @@ function queryUpdate(callback) {
     getSdk(function(err, sdk) {
       if (err) callback(err);
       NativeHybridMobileDeploy.getLocalPackage(function(err, localPackage) {
-        var defaultPackage = {appVersion: configuration.appVersion};
-        if (err) {   
+        var queryPackage = {appVersion: configuration.appVersion};
+        if (!err && localPackage !== null && localPackage.appVersion === configuration.appVersion) {
+          queryPackage = localPackage;
+        } else if (err) {
           console.log(err);
-          sdk.queryUpdateWithCurrentPackage(defaultPackage, callback);
-        } else if (localPackage == null) {
-          sdk.queryUpdateWithCurrentPackage(defaultPackage, callback);
-        } else if (localPackage.appVersion !== configuration.appVersion) {
-          sdk.queryUpdateWithCurrentPackage(defaultPackage, callback)
-        } else {
-          sdk.queryUpdateWithCurrentPackage(localPackage, callback);
         }
+        
+        sdk.queryUpdateWithCurrentPackage(queryPackage, callback);
       });
     });
   });
