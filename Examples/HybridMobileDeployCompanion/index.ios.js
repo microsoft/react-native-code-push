@@ -76,7 +76,7 @@ var styles = StyleSheet.create({
   },
   instructions: {
     textAlign: 'center',
-    color: '#333333',
+    color: '#0000ff',
     marginBottom: 5,
   },
 });

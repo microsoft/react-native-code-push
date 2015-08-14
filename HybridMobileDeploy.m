@@ -111,6 +111,7 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
                     if (![[NSFileManager defaultManager] fileExistsAtPath:packageFolderPath]) {
                         [[NSFileManager defaultManager] createDirectoryAtPath:packageFolderPath withIntermediateDirectories:YES attributes:nil error:&saveError];
                     }
+                    
                     [packageJsonString writeToFile:[HybridMobileDeploy getPackagePath]
                                      atomically:YES
                                        encoding:NSUTF8StringEncoding
@@ -140,8 +141,7 @@ RCT_EXPORT_METHOD(getLocalPackage: (RCTResponseSenderBlock)callback)
         NSError* readError;
         
         NSString *content = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:&readError];
-        if(readError){
-            
+        if (readError) {
             callback(@[RCTMakeError(@"Error finding local package ", readError, [[NSDictionary alloc] initWithObjectsAndKeys:path,@"packagePath", nil]), [NSNull null]]);
         }else{
             NSError * parseError;
@@ -149,16 +149,14 @@ RCT_EXPORT_METHOD(getLocalPackage: (RCTResponseSenderBlock)callback)
             NSDictionary* json = [NSJSONSerialization JSONObjectWithData:data
                                                                  options:kNilOptions
                                                                    error:&parseError];
-            if(parseError){
+            if (parseError) {
                 callback(@[RCTMakeError(@"Error parsing contents of local package ", parseError, [[NSDictionary alloc] initWithObjectsAndKeys:path,@"packagePath", nil]), [NSNull null]]);
-            }else{
+            } else {
                 callback(@[[NSNull null], json]);
             }
-            
         }
         
     });
-    
     
 }
 

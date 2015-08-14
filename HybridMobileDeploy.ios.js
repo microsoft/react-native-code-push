@@ -45,14 +45,14 @@ function queryUpdate(callback) {
     getSdk(function(err, sdk) {
       if (err) callback(err);
       NativeHybridMobileDeploy.getLocalPackage(function(err, localPackage) {
-        if(err){   
+        if (err) {   
           console.log(err);
           var pkg = {appVersion: configuration.appVersion};
           sdk.queryUpdateWithCurrentPackage(pkg, callback);
-        }else if(localPackage == null){
+        } else if (localPackage == null) {
           var pkg = {appVersion: configuration.appVersion};
           sdk.queryUpdateWithCurrentPackage(pkg, callback);
-        }else{
+        } else {
           sdk.queryUpdateWithCurrentPackage(localPackage, callback);
         }
       });
