@@ -46,7 +46,7 @@ function queryUpdate(callback) {
       if (err) callback(err);
       NativeHybridMobileDeploy.getLocalPackage(function(err, localPackage) {
         var queryPackage = {appVersion: configuration.appVersion};
-        if (!err && localPackage !== null && localPackage.appVersion === configuration.appVersion) {
+        if (!err && localPackage && localPackage.appVersion === configuration.appVersion) {
           queryPackage = localPackage;
         } else if (err) {
           console.log(err);
