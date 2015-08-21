@@ -44,8 +44,8 @@
    *
    * see http://facebook.github.io/react-native/docs/runningondevice.html
    */
-  
-  jsCodeLocation = [HybridMobileDeploy appBundleUrl];
+
+  jsCodeLocation = [HybridMobileDeploy getBundleUrl];
 
   RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
                                                       moduleName:@"HybridMobileDeployCompanion"
