@@ -22,9 +22,9 @@ var HybridMobileDeployCompanion = React.createClass({
     this.fetchData();
   },
   fetchData: function() {
-      HybridMobileDeploy.queryUpdate((err, update) => {
-        this.setState({ update: update, updateString: JSON.stringify(update) });
-      });
+    HybridMobileDeploy.queryUpdate((err, update) => {
+      this.setState({ update: update, updateString: JSON.stringify(update) });
+    });
   },
   getInitialState: function() {
     return { update: false, updateString: "" };

@@ -40,5 +40,7 @@
 	<string></string>
 	<key>CodePushDeploymentKey</key>
 	<string>deployment-key-here</string>
+	<key>CodePushServerUrl</key>
+	<string>server-url-here</string>
 </dict>
 </plist>
