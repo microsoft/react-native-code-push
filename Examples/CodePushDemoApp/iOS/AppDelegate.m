@@ -11,7 +11,7 @@
 
 #import "RCTRootView.h"
 
-#import "HybridMobileDeploy.h"
+#import "CodePush.h"
 
 @implementation AppDelegate
 
@@ -33,7 +33,7 @@
    * on the same Wi-Fi network.
    */
 
-  //jsCodeLocation = [NSURL URLWithString:@"http://localhost:8081/index.ios.bundle"];
+  //jsCodeLocation = [NSURL URLWithString:@"http://localhost:8081/index.ios.includeRequire.runModule.bundle?dev=true"];
 
   /**
    * OPTION 2
@@ -45,10 +45,10 @@
    * see http://facebook.github.io/react-native/docs/runningondevice.html
    */
 
-  jsCodeLocation = [HybridMobileDeploy getBundleUrl];
+  jsCodeLocation = [CodePush getBundleUrl];
 
   RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
-                                                      moduleName:@"HybridMobileDeployCompanion"
+                                                      moduleName:@"CodePushDemoApp"
                                                    launchOptions:launchOptions];
 
   self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];

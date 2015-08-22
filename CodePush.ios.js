@@ -1,16 +1,23 @@
 /**
- * @providesModule HybridMobileDeploy
+ * @providesModule CodePush
  * @flow
  */
 
 'use strict';
 
-var NativeHybridMobileDeploy = require('react-native').NativeModules.HybridMobileDeploy;
+var NativeCodePush = require('react-native').NativeModules.CodePush;
 var requestFetchAdapter = require("./request-fetch-adapter.js");
 var semver = require('semver');
 var Sdk = require("code-push/script/acquisition-sdk").AcquisitionManager;
 var sdk;
 var config;
+
+// This function is only used for tests. Replaces the default SDK, configuration and native bridge
+function setUpTestDependencies(testSdk, testConfiguration, testNativeBridge){
+  if (testSdk) sdk = testSdk;
+  if (testConfiguration) config = testConfiguration;
+  if (testNativeBridge) NativeCodePush = testNativeBridge;
+}
 
 function getConfiguration(callback) {
   if (config) {
@@ -18,7 +25,7 @@ function getConfiguration(callback) {
       callback(/*error=*/ null, config);
     });
   } else {
-    NativeHybridMobileDeploy.getConfiguration(function(err, configuration) {
+    NativeCodePush.getConfiguration(function(err, configuration) {
       if (err) callback(err);
       config = configuration;
       callback(/*error=*/ null, config);
@@ -44,7 +51,7 @@ function queryUpdate(callback) {
     if (err) callback(err);
     getSdk(function(err, sdk) {
       if (err) callback(err);
-      NativeHybridMobileDeploy.getLocalPackage(function(err, localPackage) {
+      NativeCodePush.getLocalPackage(function(err, localPackage) {
         var queryPackage = {appVersion: configuration.appVersion};
         if (!err && localPackage && localPackage.appVersion === configuration.appVersion) {
           queryPackage = localPackage;
@@ -61,13 +68,14 @@ function queryUpdate(callback) {
 function installUpdate(update) {
   // Use the downloaded package info. Native code will save the package info
   // so that the client knows what the current package version is.
-  NativeHybridMobileDeploy.installUpdate(update, JSON.stringify(update), (err) => console.log(err));
+  NativeCodePush.installUpdate(update, JSON.stringify(update), (err) => console.log(err));
 }
 
-var HybridMobileDeploy = {
+var CodePush = {
   getConfiguration: getConfiguration,
   queryUpdate: queryUpdate,
-  installUpdate: installUpdate
+  installUpdate: installUpdate,
+  setUpTestDependencies: setUpTestDependencies
 };
 
-module.exports = HybridMobileDeploy;
+module.exports = CodePush;

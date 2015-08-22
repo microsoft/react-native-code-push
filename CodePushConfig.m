@@ -1,8 +1,8 @@
-#import "HybridMobileDeploy.h"
+#import "CodePush.h"
 
 NSMutableDictionary *configuration;
 
-@implementation HybridMobileDeployConfig
+@implementation CodePushConfig
 
 + (void)initialize
 {
