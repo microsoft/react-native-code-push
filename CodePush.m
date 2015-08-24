@@ -1,21 +1,24 @@
-#import "HybridMobileDeploy.h"
+#import "CodePush.h"
 
 #import "RCTBridgeModule.h"
 #import "RCTRootView.h"
 #import "RCTUtils.h"
 
-@implementation HybridMobileDeploy
+
+@implementation CodePush
 
 RCT_EXPORT_MODULE()
 
 RCTBridge * _bridge;
+BOOL usingTestFolder = NO;
 
 @synthesize bridge = _bridge;
 
 + (NSString *) getBundleFolderPath
 {
     NSString* home = NSHomeDirectory();
-    NSString* bundleFolder = [home stringByAppendingPathComponent:@"HybridMobileDeploy/bundle"];
+    NSString* pathExtension = [[@"CodePush/" stringByAppendingString: (usingTestFolder ? @"test/" : @"")] stringByAppendingString: @"bundle"];
+    NSString* bundleFolder = [home stringByAppendingPathComponent:pathExtension];
     return bundleFolder;
 }
 
@@ -29,7 +32,8 @@ RCTBridge * _bridge;
 + (NSString *) getPackageFolderPath
 {
     NSString* home = NSHomeDirectory();
-    NSString* packageFolder = [home stringByAppendingPathComponent:@"HybridMobileDeploy/package"];
+    NSString* pathExtension = [[@"CodePush/" stringByAppendingString: (usingTestFolder ? @"test/" : @"")] stringByAppendingString: @"package"];
+    NSString* packageFolder = [home stringByAppendingPathComponent:pathExtension];
     return packageFolder;
 }
 
@@ -71,9 +75,14 @@ RCTBridge * _bridge;
     });
 }
 
+RCT_EXPORT_METHOD(setUsingTestFolder:(BOOL) shouldUseTestFolder)
+{
+    usingTestFolder = shouldUseTestFolder;
+}
+
 RCT_EXPORT_METHOD(getConfiguration:(RCTResponseSenderBlock)callback)
 {
-        callback(@[[NSNull null], [HybridMobileDeployConfig getConfiguration]]);
+    callback(@[[NSNull null], [CodePushConfig getConfiguration]]);
 }
 
 RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
@@ -93,34 +102,34 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
         } else {
             dispatch_async(dispatch_get_main_queue(), ^{
                 NSError *saveError;
-                NSString *bundleFolderPath = [HybridMobileDeploy getBundleFolderPath];
+                NSString *bundleFolderPath = [CodePush getBundleFolderPath];
                 if (![[NSFileManager defaultManager] fileExistsAtPath:bundleFolderPath]) {
                     [[NSFileManager defaultManager] createDirectoryAtPath:bundleFolderPath withIntermediateDirectories:YES attributes:nil error:&saveError];
                 }
                 
-                [updateContents writeToFile:[HybridMobileDeploy getBundlePath]
+                [updateContents writeToFile:[CodePush getBundlePath]
                                  atomically:YES
                                    encoding:NSUTF8StringEncoding
                                       error:&saveError];
                 if (saveError) {
                     // TODO send file path
-                    callback(@[RCTMakeError(@"Error saving file", err, [[NSDictionary alloc] initWithObjectsAndKeys:[HybridMobileDeploy getBundlePath],@"bundlePath", nil])]);
+                    callback(@[RCTMakeError(@"Error saving file", saveError, [[NSDictionary alloc] initWithObjectsAndKeys:[CodePush getBundlePath],@"bundlePath", nil])]);
                 } else {
                     // Save the package info too.
-                    NSString *packageFolderPath = [HybridMobileDeploy getPackageFolderPath];
+                    NSString *packageFolderPath = [CodePush getPackageFolderPath];
                     if (![[NSFileManager defaultManager] fileExistsAtPath:packageFolderPath]) {
                         [[NSFileManager defaultManager] createDirectoryAtPath:packageFolderPath withIntermediateDirectories:YES attributes:nil error:&saveError];
                     }
                     
-                    [packageJsonString writeToFile:[HybridMobileDeploy getPackagePath]
+                    [packageJsonString writeToFile:[CodePush getPackagePath]
                                      atomically:YES
                                        encoding:NSUTF8StringEncoding
                                           error:&saveError];
                     
                     if (saveError) {
-                        callback(@[RCTMakeError(@"Error saving file", err, [[NSDictionary alloc] initWithObjectsAndKeys:[HybridMobileDeploy getPackagePath],@"packagePath", nil])]);
+                        callback(@[RCTMakeError(@"Error saving file", saveError, [[NSDictionary alloc] initWithObjectsAndKeys:[CodePush getPackagePath],@"packagePath", nil])]);
                     } else {
-                        [HybridMobileDeploy loadBundle:[HybridMobileDeployConfig getRootComponent]];
+                        [CodePush loadBundle:[CodePushConfig getRootComponent]];
                         callback(@[[NSNull null]]);
                     }
                 }
@@ -129,12 +138,52 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
     });
 }
 
+RCT_EXPORT_METHOD(writeToLocalPackage:(NSString*)packageJsonString
+                  callback:(RCTResponseSenderBlock)callback)
+{
+    NSError *saveError;
+    
+    // Save the package info too.
+    NSString *packageFolderPath = [CodePush getPackageFolderPath];
+    if (![[NSFileManager defaultManager] fileExistsAtPath:packageFolderPath]) {
+        [[NSFileManager defaultManager] createDirectoryAtPath:packageFolderPath withIntermediateDirectories:YES attributes:nil error:&saveError];
+    }
+    
+    [packageJsonString writeToFile:[CodePush getPackagePath]
+                        atomically:YES
+                          encoding:NSUTF8StringEncoding
+                             error:&saveError];
+    
+    if (saveError) {
+        callback(@[RCTMakeError(@"Error saving file", saveError, [[NSDictionary alloc] initWithObjectsAndKeys:[CodePush getPackagePath],@"packagePath", nil])]);
+    } else {
+        callback(@[[NSNull null]]);
+    }
+    
+}
+
+RCT_EXPORT_METHOD(removeLocalPackage: (RCTResponseSenderBlock)callback)
+{
+    NSError *error;
+    
+    // Save the package info too.
+    NSString *packagePath = [CodePush getPackagePath];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:packagePath]) {
+        [[NSFileManager defaultManager] removeItemAtPath:packagePath error: &error];
+    }
+         
+    if (error) {
+        callback(@[RCTMakeError(@"Error saving file", error, [[NSDictionary alloc] initWithObjectsAndKeys:[CodePush getPackagePath],@"packagePath", nil])]);
+    } else {
+        callback(@[[NSNull null]]);
+    }
+}
 
 
 RCT_EXPORT_METHOD(getLocalPackage: (RCTResponseSenderBlock)callback)
 {
     
-    NSString *path = [HybridMobileDeploy getPackagePath];
+    NSString *path = [CodePush getPackagePath];
     
     dispatch_async(dispatch_get_main_queue(), ^{
         

@@ -1,5 +1,5 @@
 {
-  "name": "HybridMobileDeployCompanion",
+  "name": "CodePushDemoApp",
   "version": "0.0.1",
   "private": true,
   "scripts": {
@@ -8,6 +8,6 @@
   "dependencies": {
     "react-native": "^0.8.0",
     "react-native-button": "^1.2.0",
-    "react-native-hybrid-mobile-deploy": "file:../../"
+    "react-native-code-push": "file:../../"
   }
 }
