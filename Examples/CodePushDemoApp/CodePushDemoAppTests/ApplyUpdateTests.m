@@ -52,8 +52,6 @@
 #pragma mark Logic Tests
 - (void)testDownloadAndApplyUpdate
 {
-  
-  
   NSString *sanitizedAppName = [app stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
   sanitizedAppName = [sanitizedAppName stringByReplacingOccurrencesOfString:@"\\" withString:@"-"];
   NSURL* scriptURL;
