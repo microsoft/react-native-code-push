@@ -39,8 +39,8 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
 	<key>CodePushDeploymentKey</key>
-	<string>deployment-key-here</string>
+	<string>3fd3773b-4554-4f56-b7d7-ce5b587f54de</string>
 	<key>CodePushServerUrl</key>
-	<string>server-url-here</string>
+	<string>http://localhost:3000</string>
 </dict>
 </plist>

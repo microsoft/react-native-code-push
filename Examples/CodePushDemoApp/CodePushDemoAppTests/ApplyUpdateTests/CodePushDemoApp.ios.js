@@ -29,7 +29,6 @@ var CodePushDemoApp = React.createClass({
             throw new Error("The local package is still different from the updated package after installation");
           }
         }
-        RCTTestModule.markTestCompleted();
       }
     });
   },
