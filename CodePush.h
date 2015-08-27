@@ -1,12 +1,12 @@
 #import "RCTBridgeModule.h"
 
-@interface HybridMobileDeploy : NSObject <RCTBridgeModule>
+@interface CodePush : NSObject <RCTBridgeModule>
 
 + (NSURL *) getBundleUrl;
 
 @end
 
-@interface HybridMobileDeployConfig : NSObject
+@interface CodePushConfig : NSObject
 
 + (void)setDeploymentKey:(NSString *)deploymentKey;
 + (NSString *)getDeploymentKey;

@@ -8,10 +8,10 @@
 
 var warning = require('warning');
 
-var HybridMobileDeploy = {
+var CodePush = {
   test: function() {
     warning("Not yet implemented for Android.");
   }
 };
 
-module.exports = HybridMobileDeploy;
+module.exports = CodePush;

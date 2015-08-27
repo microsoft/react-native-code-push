@@ -1,7 +1,7 @@
 {
-  "name": "react-native-hybrid-mobile-deploy",
+  "name": "react-native-code-push",
   "version": "0.0.1",
-  "main": "HybridMobileDeploy.ios.js",
+  "main": "CodePush.ios.js",
   "keywords": "react-native",
   "dependencies": {
     "code-push": "file:../website/sdk/bin",

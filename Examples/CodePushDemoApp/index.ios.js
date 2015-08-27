@@ -15,22 +15,22 @@ var {
 
 var Button = require("react-native-button");
 
-var HybridMobileDeploy = require('react-native-hybrid-mobile-deploy');
+var CodePush = require('react-native-code-push');
 
-var HybridMobileDeployCompanion = React.createClass({
+var CodePushDemoApp = React.createClass({
   componentDidMount: function() {
     this.fetchData();
   },
   fetchData: function() {
-    HybridMobileDeploy.queryUpdate((err, update) => {
-      this.setState({ update: update, updateString: JSON.stringify(update) });
+    CodePush.queryUpdate((err, update) => {
+      this.setState({ update: update });
     });
   },
   getInitialState: function() {
-    return { update: false, updateString: "" };
+    return { update: false };
   },
   handlePress: function() {
-    HybridMobileDeploy.installUpdate(this.state.update);
+    CodePush.installUpdate(this.state.update);
   },
   render: function() {
     var updateView;
@@ -81,4 +81,4 @@ var styles = StyleSheet.create({
   },
 });
 
-AppRegistry.registerComponent('HybridMobileDeployCompanion', () => HybridMobileDeployCompanion);
+AppRegistry.registerComponent('CodePushDemoApp', () => CodePushDemoApp);

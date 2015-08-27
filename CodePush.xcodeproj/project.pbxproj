@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		13BE3DEE1AC21097009241FE /* HybridMobileDeploy.m in Sources */ = {isa = PBXBuildFile; fileRef = 13BE3DED1AC21097009241FE /* HybridMobileDeploy.m */; };
-		81D51F3A1B6181C2000DA084 /* HybridMobileDeployConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 81D51F391B6181C2000DA084 /* HybridMobileDeployConfig.m */; };
+		13BE3DEE1AC21097009241FE /* CodePush.m in Sources */ = {isa = PBXBuildFile; fileRef = 13BE3DED1AC21097009241FE /* CodePush.m */; };
+		81D51F3A1B6181C2000DA084 /* CodePushConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 81D51F391B6181C2000DA084 /* CodePushConfig.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -24,10 +24,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		134814201AA4EA6300B7C361 /* libHybridMobileDeploy.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libHybridMobileDeploy.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		13BE3DEC1AC21097009241FE /* HybridMobileDeploy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HybridMobileDeploy.h; sourceTree = "<group>"; };
-		13BE3DED1AC21097009241FE /* HybridMobileDeploy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HybridMobileDeploy.m; sourceTree = "<group>"; };
-		81D51F391B6181C2000DA084 /* HybridMobileDeployConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HybridMobileDeployConfig.m; sourceTree = "<group>"; };
+		134814201AA4EA6300B7C361 /* libCodePush.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libCodePush.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		13BE3DEC1AC21097009241FE /* CodePush.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CodePush.h; sourceTree = "<group>"; };
+		13BE3DED1AC21097009241FE /* CodePush.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CodePush.m; sourceTree = "<group>"; };
+		81D51F391B6181C2000DA084 /* CodePushConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CodePushConfig.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -44,7 +44,7 @@
 		134814211AA4EA7D00B7C361 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				134814201AA4EA6300B7C361 /* libHybridMobileDeploy.a */,
+				134814201AA4EA6300B7C361 /* libCodePush.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -52,9 +52,9 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
-				81D51F391B6181C2000DA084 /* HybridMobileDeployConfig.m */,
-				13BE3DEC1AC21097009241FE /* HybridMobileDeploy.h */,
-				13BE3DED1AC21097009241FE /* HybridMobileDeploy.m */,
+				81D51F391B6181C2000DA084 /* CodePushConfig.m */,
+				13BE3DEC1AC21097009241FE /* CodePush.h */,
+				13BE3DED1AC21097009241FE /* CodePush.m */,
 				134814211AA4EA7D00B7C361 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -62,9 +62,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		58B511DA1A9E6C8500147676 /* HybridMobileDeploy */ = {
+		58B511DA1A9E6C8500147676 /* CodePush */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "HybridMobileDeploy" */;
+			buildConfigurationList = 58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "CodePush" */;
 			buildPhases = (
 				58B511D71A9E6C8500147676 /* Sources */,
 				58B511D81A9E6C8500147676 /* Frameworks */,
@@ -74,9 +74,9 @@
 			);
 			dependencies = (
 			);
-			name = HybridMobileDeploy;
+			name = CodePush;
 			productName = RCTDataManager;
-			productReference = 134814201AA4EA6300B7C361 /* libHybridMobileDeploy.a */;
+			productReference = 134814201AA4EA6300B7C361 /* libCodePush.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -93,7 +93,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "HybridMobileDeploy" */;
+			buildConfigurationList = 58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "CodePush" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -105,7 +105,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				58B511DA1A9E6C8500147676 /* HybridMobileDeploy */,
+				58B511DA1A9E6C8500147676 /* CodePush */,
 			);
 		};
 /* End PBXProject section */
@@ -115,8 +115,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				81D51F3A1B6181C2000DA084 /* HybridMobileDeployConfig.m in Sources */,
-				13BE3DEE1AC21097009241FE /* HybridMobileDeploy.m in Sources */,
+				81D51F3A1B6181C2000DA084 /* CodePushConfig.m in Sources */,
+				13BE3DEE1AC21097009241FE /* CodePush.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -209,7 +209,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_NAME = HybridMobileDeploy;
+				PRODUCT_NAME = CodePush;
 				SKIP_INSTALL = YES;
 			};
 			name = Debug;
@@ -224,7 +224,7 @@
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = "-ObjC";
-				PRODUCT_NAME = HybridMobileDeploy;
+				PRODUCT_NAME = CodePush;
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
@@ -232,7 +232,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "HybridMobileDeploy" */ = {
+		58B511D61A9E6C8500147676 /* Build configuration list for PBXProject "CodePush" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				58B511ED1A9E6C8500147676 /* Debug */,
@@ -241,7 +241,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "HybridMobileDeploy" */ = {
+		58B511EF1A9E6C8500147676 /* Build configuration list for PBXNativeTarget "CodePush" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				58B511F01A9E6C8500147676 /* Debug */,
