@@ -71,10 +71,6 @@ function download(updatePackage) {
   return NativeCodePush.downloadUpdate(updatePackage);
 }
 
-function abortDownload() {
-  return NativeCodePush.abortDownload();
-}
-
 function apply(updatePackage) {
   return NativeCodePush.applyUpdate(updatePackage);
 }
@@ -87,7 +83,6 @@ var CodePush = {
   getConfiguration: getConfiguration,
   checkForUpdate: checkForUpdate,
   download: download,
-  abortDownload: abortDownload,
   apply: apply,
   getCurrentPackage: getCurrentPackage,
   setUpTestDependencies: setUpTestDependencies
