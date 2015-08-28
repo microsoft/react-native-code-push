@@ -46,7 +46,7 @@ function getSdk(callback) {
   }
 }
 
-function queryUpdate(callback) {
+function checkForUpdate(callback) {
   getConfiguration(function(err, configuration) {
     if (err) callback(err);
     getSdk(function(err, sdk) {
@@ -58,23 +58,38 @@ function queryUpdate(callback) {
         } else if (err) {
           console.log(err);
         }
-        
+
         sdk.queryUpdateWithCurrentPackage(queryPackage, callback);
       });
     });
   });
 }
 
-function installUpdate(update) {
+function download(updatePackage) {
   // Use the downloaded package info. Native code will save the package info
   // so that the client knows what the current package version is.
-  return NativeCodePush.installUpdate(update);
+  return NativeCodePush.downloadUpdate(updatePackage);
+}
+
+function abortDownload() {
+  return NativeCodePush.abortDownload();
+}
+
+function apply(updatePackage) {
+  return NativeCodePush.applyUpdate(updatePackage);
+}
+
+function getCurrentPackage() {
+  return NativeCodePush.getCurrentPackage();
 }
 
 var CodePush = {
   getConfiguration: getConfiguration,
-  queryUpdate: queryUpdate,
-  installUpdate: installUpdate,
+  checkForUpdate: checkForUpdate,
+  download: download,
+  abortDownload: abortDownload,
+  apply: apply,
+  getCurrentPackage: getCurrentPackage,
   setUpTestDependencies: setUpTestDependencies
 };
 
