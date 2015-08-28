@@ -86,8 +86,8 @@ RCT_EXPORT_METHOD(getConfiguration:(RCTResponseSenderBlock)callback)
 }
 
 RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
-                  packageJsonString:(NSString*) packageJsonString
-                  callback:(RCTResponseSenderBlock)callback)
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSURL* url = [NSURL URLWithString:updatePackage[@"downloadUrl"]];
@@ -98,43 +98,51 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
                                                                      error:&err];
         if (err) {
             // TODO send download url
-            callback(@[RCTMakeError(@"Error downloading url", err, [[NSDictionary alloc] initWithObjectsAndKeys:[url absoluteString],@"updateUrl", nil])]);
-        } else {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                NSError *saveError;
-                NSString *bundleFolderPath = [CodePush getBundleFolderPath];
-                if (![[NSFileManager defaultManager] fileExistsAtPath:bundleFolderPath]) {
-                    [[NSFileManager defaultManager] createDirectoryAtPath:bundleFolderPath withIntermediateDirectories:YES attributes:nil error:&saveError];
-                }
-                
-                [updateContents writeToFile:[CodePush getBundlePath]
-                                 atomically:YES
-                                   encoding:NSUTF8StringEncoding
-                                      error:&saveError];
-                if (saveError) {
-                    // TODO send file path
-                    callback(@[RCTMakeError(@"Error saving file", saveError, [[NSDictionary alloc] initWithObjectsAndKeys:[CodePush getBundlePath],@"bundlePath", nil])]);
-                } else {
-                    // Save the package info too.
-                    NSString *packageFolderPath = [CodePush getPackageFolderPath];
-                    if (![[NSFileManager defaultManager] fileExistsAtPath:packageFolderPath]) {
-                        [[NSFileManager defaultManager] createDirectoryAtPath:packageFolderPath withIntermediateDirectories:YES attributes:nil error:&saveError];
-                    }
-                    
-                    [packageJsonString writeToFile:[CodePush getPackagePath]
-                                     atomically:YES
-                                       encoding:NSUTF8StringEncoding
-                                          error:&saveError];
-                    
-                    if (saveError) {
-                        callback(@[RCTMakeError(@"Error saving file", saveError, [[NSDictionary alloc] initWithObjectsAndKeys:[CodePush getPackagePath],@"packagePath", nil])]);
-                    } else {
-                        [CodePush loadBundle:[CodePushConfig getRootComponent]];
-                        callback(@[[NSNull null]]);
-                    }
-                }
-            });
+            return reject(err);
         }
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSError *saveError;
+            NSString *bundleFolderPath = [CodePush getBundleFolderPath];
+            if (![[NSFileManager defaultManager] fileExistsAtPath:bundleFolderPath]) {
+                [[NSFileManager defaultManager] createDirectoryAtPath:bundleFolderPath withIntermediateDirectories:YES attributes:nil error:&saveError];
+            }
+            
+            [updateContents writeToFile:[CodePush getBundlePath]
+                             atomically:YES
+                               encoding:NSUTF8StringEncoding
+                                  error:&saveError];
+            if (saveError) {
+                // TODO send file path
+                return reject(saveError);
+            }
+            
+            // Save the package info too.
+            NSString *packageFolderPath = [CodePush getPackageFolderPath];
+            if (![[NSFileManager defaultManager] fileExistsAtPath:packageFolderPath]) {
+                [[NSFileManager defaultManager] createDirectoryAtPath:packageFolderPath withIntermediateDirectories:YES attributes:nil error:&saveError];
+            }
+            
+            NSError *updateSerializeError;
+            NSData *updateSerializedData = [NSJSONSerialization dataWithJSONObject:updatePackage options:0 error:&updateSerializeError];
+            
+            if (updateSerializeError) {
+                return reject(updateSerializeError);
+            }
+            
+            NSString *packageJsonString = [[NSString alloc] initWithData:updateSerializedData encoding:NSUTF8StringEncoding];
+            [packageJsonString writeToFile:[CodePush getPackagePath]
+                                atomically:YES
+                                  encoding:NSUTF8StringEncoding
+                                     error:&saveError];
+            
+            if (saveError) {
+                return reject(saveError);
+            }
+            
+            [CodePush loadBundle:[CodePushConfig getRootComponent]];
+            resolve([NSNull null]);
+        });
     });
 }
 

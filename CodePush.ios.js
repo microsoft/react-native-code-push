@@ -68,7 +68,7 @@ function queryUpdate(callback) {
 function installUpdate(update) {
   // Use the downloaded package info. Native code will save the package info
   // so that the client knows what the current package version is.
-  NativeCodePush.installUpdate(update, JSON.stringify(update), (err) => console.log(err));
+  return NativeCodePush.installUpdate(update);
 }
 
 var CodePush = {
