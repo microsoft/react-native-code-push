@@ -62,8 +62,6 @@ function checkForUpdate(callback) {
       var queryPackage = {appVersion: config.appVersion};
       if (localPackage && localPackage.appVersion === config.appVersion) {
         queryPackage = localPackage;
-      } else if (err) {
-        console.log(err);
       }
 
       sdk.queryUpdateWithCurrentPackage(queryPackage, callback);
