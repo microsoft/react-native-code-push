@@ -57,7 +57,7 @@ function checkForUpdate(callback) {
     })
     .then((sdkResult) => {
       sdk = sdkResult;
-      return NativeCodePush.getLocalPackage();
+      return getCurrentPackage();
     })
     .then((localPackage) => {
       var queryPackage = {appVersion: config.appVersion};

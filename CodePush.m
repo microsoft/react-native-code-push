@@ -189,7 +189,7 @@ RCT_EXPORT_METHOD(removeLocalPackage: (RCTResponseSenderBlock)callback)
 }
 
 
-RCT_EXPORT_METHOD(getLocalPackage:(RCTPromiseResolveBlock)resolve
+RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
     
