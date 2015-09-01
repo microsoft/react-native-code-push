@@ -20,12 +20,15 @@ function setUpTestDependencies(testSdk, testConfiguration, testNativeBridge){
 }
 
 function getConfiguration() {
-  return Promise
-    .resolve(config || NativeCodePush.getConfiguration())
-    .then((configuration) => {
-      if (!config) config = configuration;
-      return config;
-    });
+  if (config) {
+    return Promise.resolve(config);
+  } else {
+    return NativeCodePush.getConfiguration()
+      .then((configuration) => {
+        if (!config) config = configuration;
+        return config;
+      });
+  }
 }
 
 function getSdk() {
