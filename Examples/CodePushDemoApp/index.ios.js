@@ -1,4 +1,4 @@
-/**
+/*y
  * Sample React Native App
  * https://github.com/facebook/react-native
  */
@@ -22,7 +22,7 @@ var CodePushDemoApp = React.createClass({
     this.fetchData();
   },
   fetchData: function() {
-    CodePush.queryUpdate((err, update) => {
+    CodePush.checkForUpdate((err, update) => {
       this.setState({ update: update });
     });
   },
