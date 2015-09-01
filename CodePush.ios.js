@@ -9,8 +9,6 @@ var NativeCodePush = require('react-native').NativeModules.CodePush;
 var requestFetchAdapter = require("./request-fetch-adapter.js");
 var semver = require('semver');
 var Sdk = require("code-push/script/acquisition-sdk").AcquisitionManager;
-var sdk;
-var config;
 
 // This function is only used for tests. Replaces the default SDK, configuration and native bridge
 function setUpTestDependencies(testSdk, testConfiguration, testNativeBridge){
@@ -19,29 +17,35 @@ function setUpTestDependencies(testSdk, testConfiguration, testNativeBridge){
   if (testNativeBridge) NativeCodePush = testNativeBridge;
 }
 
-function getConfiguration() {
-  if (config) {
-    return Promise.resolve(config);
-  } else {
-    return NativeCodePush.getConfiguration()
-      .then((configuration) => {
-        if (!config) config = configuration;
-        return config;
-      });
+var getConfiguration = (() => {
+  var config;
+  return function getConfiguration() {
+    if (config) {
+      return Promise.resolve(config);
+    } else {
+      return NativeCodePush.getConfiguration()
+        .then((configuration) => {
+          if (!config) config = configuration;
+          return config;
+        });
+    }
   }
-}
+})();
 
-function getSdk() {
-  if (sdk) {
-    return Promise.resolve(sdk);
-  } else {
-    return getConfiguration()
-      .then((configuration) => {
-        sdk = new Sdk(requestFetchAdapter, configuration);
-        return sdk;
-      });
+var getSdk = (() => {
+  var sdk;
+  return function getSdk() {
+    if (sdk) {
+      return Promise.resolve(sdk);
+    } else {
+      return getConfiguration()
+        .then((configuration) => {
+          sdk = new Sdk(requestFetchAdapter, configuration);
+          return sdk;
+        });
+    }
   }
-}
+})();
 
 function checkForUpdate(callback) {
   getConfiguration().then(function(configuration) {
