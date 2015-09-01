@@ -28,23 +28,21 @@ function getConfiguration() {
     });
 }
 
-function getSdk(callback) {
+function getSdk() {
   if (sdk) {
-    setImmediate(function() {
-      callback(/*error=*/ null, sdk);
-    });
+    return Promise.resolve(sdk);
   } else {
-    getConfiguration().then(function(configuration) {
-      sdk = new Sdk(requestFetchAdapter, configuration);
-      callback(/*error=*/ null, sdk);
-    });
+    return getConfiguration()
+      .then((configuration) => {
+        sdk = new Sdk(requestFetchAdapter, configuration);
+        return sdk;
+      });
   }
 }
 
 function checkForUpdate(callback) {
   getConfiguration().then(function(configuration) {
-    getSdk(function(err, sdk) {
-      if (err) callback(err);
+    getSdk.then(function(sdk) {
       NativeCodePush.getLocalPackage(function(err, localPackage) {
         var queryPackage = {appVersion: configuration.appVersion};
         if (!err && localPackage && localPackage.appVersion === configuration.appVersion) {
