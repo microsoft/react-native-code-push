@@ -82,7 +82,7 @@ function getCurrentPackage() {
   return NativeCodePush.getCurrentPackage();
 }
 
-functino notifyApplicationReady() {
+function notifyApplicationReady() {
   return NativeCodePush.notifyApplicationReady();
 }
 
