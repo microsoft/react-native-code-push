@@ -189,7 +189,8 @@ RCT_EXPORT_METHOD(removeLocalPackage: (RCTResponseSenderBlock)callback)
 }
 
 
-RCT_EXPORT_METHOD(getLocalPackage: (RCTResponseSenderBlock)callback)
+RCT_EXPORT_METHOD(getLocalPackage:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     
     NSString *path = [CodePush getPackagePath];
@@ -199,7 +200,7 @@ RCT_EXPORT_METHOD(getLocalPackage: (RCTResponseSenderBlock)callback)
         NSError* readError;
         NSString *content = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:&readError];
         if (readError) {
-            callback(@[RCTMakeError(@"Error finding local package ", readError, [[NSDictionary alloc] initWithObjectsAndKeys:path,@"packagePath", nil]), [NSNull null]]);
+            reject(readError);
         } else {
             NSError * parseError;
             NSData *data = [content dataUsingEncoding:NSUTF8StringEncoding];
@@ -207,9 +208,9 @@ RCT_EXPORT_METHOD(getLocalPackage: (RCTResponseSenderBlock)callback)
                                                                  options:kNilOptions
                                                                    error:&parseError];
             if (parseError) {
-                callback(@[RCTMakeError(@"Error parsing contents of local package ", parseError, [[NSDictionary alloc] initWithObjectsAndKeys:path,@"packagePath", nil]), [NSNull null]]);
+                reject(parseError);
             } else {
-                callback(@[[NSNull null], json]);
+                resolve(json);
             }
         }
     });

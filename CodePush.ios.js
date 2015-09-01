@@ -48,20 +48,27 @@ var getSdk = (() => {
 })();
 
 function checkForUpdate(callback) {
-  getConfiguration().then(function(configuration) {
-    getSdk.then(function(sdk) {
-      NativeCodePush.getLocalPackage(function(err, localPackage) {
-        var queryPackage = {appVersion: configuration.appVersion};
-        if (!err && localPackage && localPackage.appVersion === configuration.appVersion) {
-          queryPackage = localPackage;
-        } else if (err) {
-          console.log(err);
-        }
+  var config;
+  var sdk;
+  return getConfiguration()
+    .then((configResult) => {
+      config = configResult;
+      return getSdk();
+    })
+    .then((sdkResult) => {
+      sdk = sdkResult;
+      return NativeCodePush.getLocalPackage();
+    })
+    .then((localPackage) => {
+      var queryPackage = {appVersion: config.appVersion};
+      if (localPackage && localPackage.appVersion === config.appVersion) {
+        queryPackage = localPackage;
+      } else if (err) {
+        console.log(err);
+      }
 
-        sdk.queryUpdateWithCurrentPackage(queryPackage, callback);
-      });
+      sdk.queryUpdateWithCurrentPackage(queryPackage, callback);
     });
-  });
 }
 
 function download(updatePackage) {

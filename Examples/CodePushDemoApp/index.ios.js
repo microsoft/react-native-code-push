@@ -22,7 +22,7 @@ var CodePushDemoApp = React.createClass({
     this.fetchData();
   },
   fetchData: function() {
-    CodePush.checkForUpdate((err, update) => {
+    CodePush.checkForUpdate().done((update) => {
       this.setState({ update: update });
     });
   },
