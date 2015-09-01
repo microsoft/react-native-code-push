@@ -84,12 +84,17 @@ function getCurrentPackage() {
   return NativeCodePush.getCurrentPackage();
 }
 
+functino notifyApplicationReady() {
+  return NativeCodePush.notifyApplicationReady();
+}
+
 var CodePush = {
   getConfiguration: getConfiguration,
   checkForUpdate: checkForUpdate,
   download: download,
   apply: apply,
   getCurrentPackage: getCurrentPackage,
+  notifyApplicationReady: notifyApplicationReady,
   setUpTestDependencies: setUpTestDependencies
 };
 
