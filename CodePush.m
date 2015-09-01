@@ -80,9 +80,10 @@ RCT_EXPORT_METHOD(setUsingTestFolder:(BOOL) shouldUseTestFolder)
     usingTestFolder = shouldUseTestFolder;
 }
 
-RCT_EXPORT_METHOD(getConfiguration:(RCTResponseSenderBlock)callback)
+RCT_EXPORT_METHOD(getConfiguration:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
 {
-    callback(@[[NSNull null], [CodePushConfig getConfiguration]]);
+    resolve([CodePushConfig getConfiguration]);
 }
 
 RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage

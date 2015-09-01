@@ -19,18 +19,13 @@ function setUpTestDependencies(testSdk, testConfiguration, testNativeBridge){
   if (testNativeBridge) NativeCodePush = testNativeBridge;
 }
 
-function getConfiguration(callback) {
-  if (config) {
-    setImmediate(function() {
-      callback(/*error=*/ null, config);
+function getConfiguration() {
+  return Promise
+    .resolve(config || NativeCodePush.getConfiguration())
+    .then((configuration) => {
+      if (!config) config = configuration;
+      return config;
     });
-  } else {
-    NativeCodePush.getConfiguration(function(err, configuration) {
-      if (err) callback(err);
-      config = configuration;
-      callback(/*error=*/ null, config);
-    });
-  }
 }
 
 function getSdk(callback) {
@@ -39,7 +34,7 @@ function getSdk(callback) {
       callback(/*error=*/ null, sdk);
     });
   } else {
-    getConfiguration(function(err, configuration) {
+    getConfiguration().then(function(configuration) {
       sdk = new Sdk(requestFetchAdapter, configuration);
       callback(/*error=*/ null, sdk);
     });
@@ -47,8 +42,7 @@ function getSdk(callback) {
 }
 
 function checkForUpdate(callback) {
-  getConfiguration(function(err, configuration) {
-    if (err) callback(err);
+  getConfiguration().then(function(configuration) {
     getSdk(function(err, sdk) {
       if (err) callback(err);
       NativeCodePush.getLocalPackage(function(err, localPackage) {
