@@ -46,7 +46,7 @@ var getSdk = (() => {
   }
 })();
 
-function checkForUpdate(callback) {
+function checkForUpdate() {
   var config;
   var sdk;
   return getConfiguration()
@@ -64,7 +64,12 @@ function checkForUpdate(callback) {
         queryPackage = localPackage;
       }
 
-      sdk.queryUpdateWithCurrentPackage(queryPackage, callback);
+      return new Promise((resolve, reject) => {
+        sdk.queryUpdateWithCurrentPackage(queryPackage, (err, update) => {
+          if (err) return reject(err);
+          resolve(update);
+        });
+      });
     });
 }
 
