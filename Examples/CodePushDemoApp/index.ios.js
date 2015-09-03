@@ -30,7 +30,9 @@ var CodePushDemoApp = React.createClass({
     return { update: false };
   },
   handlePress: function() {
-    CodePush.installUpdate(this.state.update).done();
+    this.state.update.download((localPackage) => {
+      localPackage.apply().done();
+    });
   },
   render: function() {
     var updateView;

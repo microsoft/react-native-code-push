@@ -26,3 +26,16 @@
 + (NSDictionary *)getConfiguration;
 
 @end
+
+@interface CodePushPackage : NSObject
+
++ (NSString *)getCurrentPackageFolderPath:(NSError **)error;
+
++ (NSString *)getPackageFolderPath:(NSString *)packageHash;
+
++ (void)downloadPackage:(NSDictionary *)updatePackage
+                            error:(NSError **)error;
+
++ (void)applyPackage:(NSString *)packageHash;
+
+@end

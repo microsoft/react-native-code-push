@@ -5,9 +5,11 @@
 
 'use strict';
 
+var extend = require("extend");
 var NativeCodePush = require('react-native').NativeModules.CodePush;
 var requestFetchAdapter = require("./request-fetch-adapter.js");
 var Sdk = require("code-push/script/acquisition-sdk").AcquisitionManager;
+var packageMixins = require("./package-mixins")(NativeCodePush);
 
 // This function is only used for tests. Replaces the default SDK, configuration and native bridge
 function setUpTestDependencies(testSdk, testConfiguration, testNativeBridge){
@@ -67,16 +69,10 @@ function checkForUpdate() {
       return new Promise((resolve, reject) => {
         sdk.queryUpdateWithCurrentPackage(queryPackage, (err, update) => {
           if (err) return reject(err);
-          resolve(update);
+          resolve(extend({}, update, packageMixins.remote));
         });
       });
     });
-}
-
-function download(updatePackage) {
-  // Use the downloaded package info. Native code will save the package info
-  // so that the client knows what the current package version is.
-  return NativeCodePush.downloadUpdate(updatePackage);
 }
 
 function apply(updatePackage) {
@@ -94,7 +90,6 @@ function notifyApplicationReady() {
 var CodePush = {
   getConfiguration: getConfiguration,
   checkForUpdate: checkForUpdate,
-  download: download,
   apply: apply,
   getCurrentPackage: getCurrentPackage,
   notifyApplicationReady: notifyApplicationReady,

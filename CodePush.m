@@ -14,17 +14,9 @@ BOOL usingTestFolder = NO;
 
 @synthesize bridge = _bridge;
 
-+ (NSString *) getBundleFolderPath
-{
-    NSString* home = NSHomeDirectory();
-    NSString* pathExtension = [[@"CodePush/" stringByAppendingString: (usingTestFolder ? @"test/" : @"")] stringByAppendingString: @"bundle"];
-    NSString* bundleFolder = [home stringByAppendingPathComponent:pathExtension];
-    return bundleFolder;
-}
-
 + (NSString *) getBundlePath
 {
-    NSString * bundleFolderPath = [self getBundleFolderPath];
+    NSString * bundleFolderPath = [self getPackageFolderPath];
     NSString* appBundleName = @"main.jsbundle";
     return [bundleFolderPath stringByAppendingPathComponent:appBundleName];
 }
@@ -32,14 +24,29 @@ BOOL usingTestFolder = NO;
 + (NSString *) getPackageFolderPath
 {
     NSString* home = NSHomeDirectory();
-    NSString* pathExtension = [[@"CodePush/" stringByAppendingString: (usingTestFolder ? @"test/" : @"")] stringByAppendingString: @"package"];
+    NSString* pathExtension = [[@"CodePush/" stringByAppendingString: (usingTestFolder ? @"test/" : @"")] stringByAppendingString: @"currentPackage"];
+    NSString* packageFolder = [home stringByAppendingPathComponent:pathExtension];
+    return packageFolder;
+}
+
++ (NSString *) getPreviousPackageFolderPath
+{
+    NSString* home = NSHomeDirectory();
+    NSString* pathExtension = [[@"CodePush/" stringByAppendingString: (usingTestFolder ? @"test/" : @"")] stringByAppendingString: @"previous"];
     NSString* packageFolder = [home stringByAppendingPathComponent:pathExtension];
     return packageFolder;
 }
 
 + (NSString *) getPackagePath
 {
-    NSString * packageFolderPath = [self getPackageFolderPath];
+    NSString *packageFolderPath = [self getPackageFolderPath];
+    NSString* appPackageName = @"localpackage.json";
+    return [packageFolderPath stringByAppendingPathComponent:appPackageName];
+}
+
++ (NSString *) getPreviousPackagePath
+{
+    NSString * packageFolderPath = [self getPreviousPackageFolderPath];
     NSString* appPackageName = @"localpackage.json";
     return [packageFolderPath stringByAppendingPathComponent:appPackageName];
 }
@@ -86,65 +93,29 @@ RCT_EXPORT_METHOD(getConfiguration:(RCTPromiseResolveBlock)resolve
     resolve([CodePushConfig getConfiguration]);
 }
 
-RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
+RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        NSURL* url = [NSURL URLWithString:updatePackage[@"downloadUrl"]];
         NSError *err;
-
-        NSString *updateContents = [[NSString alloc] initWithContentsOfURL:url
-                                                                  encoding:NSUTF8StringEncoding
-                                                                     error:&err];
-        if (err) {
-            // TODO send download url
-            return reject(err);
-        }
+        [CodePushPackage downloadPackage:updatePackage
+                                   error:&err];
         
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSError *saveError;
-            NSString *bundleFolderPath = [CodePush getBundleFolderPath];
-            if (![[NSFileManager defaultManager] fileExistsAtPath:bundleFolderPath]) {
-                [[NSFileManager defaultManager] createDirectoryAtPath:bundleFolderPath withIntermediateDirectories:YES attributes:nil error:&saveError];
-            }
-            
-            [updateContents writeToFile:[CodePush getBundlePath]
-                             atomically:YES
-                               encoding:NSUTF8StringEncoding
-                                  error:&saveError];
-            if (saveError) {
-                // TODO send file path
-                return reject(saveError);
-            }
-            
-            // Save the package info too.
-            NSString *packageFolderPath = [CodePush getPackageFolderPath];
-            if (![[NSFileManager defaultManager] fileExistsAtPath:packageFolderPath]) {
-                [[NSFileManager defaultManager] createDirectoryAtPath:packageFolderPath withIntermediateDirectories:YES attributes:nil error:&saveError];
-            }
-            
-            NSError *updateSerializeError;
-            NSData *updateSerializedData = [NSJSONSerialization dataWithJSONObject:updatePackage options:0 error:&updateSerializeError];
-            
-            if (updateSerializeError) {
-                return reject(updateSerializeError);
-            }
-            
-            NSString *packageJsonString = [[NSString alloc] initWithData:updateSerializedData encoding:NSUTF8StringEncoding];
-            [packageJsonString writeToFile:[CodePush getPackagePath]
-                                atomically:YES
-                                  encoding:NSUTF8StringEncoding
-                                     error:&saveError];
-            
-            if (saveError) {
-                return reject(saveError);
-            }
-            
-            [CodePush loadBundle:[CodePushConfig getRootComponent]];
+        if (err) {
+            reject(err);
+        } else {
             resolve([NSNull null]);
-        });
+        }
     });
+}
+
+RCT_EXPORT_METHOD(applyUpdate:(NSDictionary*)updatePackage
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [CodePush loadBundle:[CodePushConfig getRootComponent]];
+    resolve([NSNull null]);
 }
 
 RCT_EXPORT_METHOD(writeToLocalPackage:(NSString*)packageJsonString
