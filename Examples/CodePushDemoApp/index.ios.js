@@ -30,7 +30,7 @@ var CodePushDemoApp = React.createClass({
     return { update: false };
   },
   handlePress: function() {
-    this.state.update.download((localPackage) => {
+    this.state.update.download().then((localPackage) => {
       localPackage.apply().done();
     });
   },

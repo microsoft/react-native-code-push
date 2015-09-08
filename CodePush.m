@@ -51,7 +51,6 @@ BOOL usingTestFolder = NO;
     return [packageFolderPath stringByAppendingPathComponent:appPackageName];
 }
 
-
 + (NSURL *) getNativeBundleURL
 {
     return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
@@ -59,21 +58,22 @@ BOOL usingTestFolder = NO;
 
 + (NSURL *) getBundleUrl
 {
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-
-    NSString *bundlePath = [self getBundlePath];
-    if ([fileManager fileExistsAtPath:bundlePath]) {
-        return [[NSURL alloc] initFileURLWithPath:bundlePath];
-    } else {
-        return [self getNativeBundleURL];
+    NSError *error;
+    NSString *packageFolder = [CodePushPackage getCurrentPackageFolderPath:&error];
+    
+    if (error || !packageFolder) {
+        [self getNativeBundleURL];
     }
+    
+    NSString *packageFile = [packageFolder stringByAppendingPathComponent:@"app.jsbundle"];
+    return [[NSURL alloc] initFileURLWithPath:packageFile];
 }
 
-+ (void) loadBundle:(NSString*)rootComponent
++ (void) loadBundle
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:[self getBundleUrl]
-                                                            moduleName:rootComponent
+                                                            moduleName:[CodePushConfig getRootComponent]
                                                          launchOptions:nil];
         
         UIViewController *rootViewController = [[UIViewController alloc] init];
@@ -103,10 +103,17 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
                                    error:&err];
         
         if (err) {
-            reject(err);
-        } else {
-            resolve([NSNull null]);
+            return reject(err);
         }
+        
+        NSDictionary *newPackage = [CodePushPackage getPackage:updatePackage[@"packageHash"]
+                                                         error:&err];
+        
+        if (err) {
+            return reject(err);
+        }
+        
+        resolve(newPackage);
     });
 }
 
@@ -114,75 +121,32 @@ RCT_EXPORT_METHOD(applyUpdate:(NSDictionary*)updatePackage
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
-    [CodePush loadBundle:[CodePushConfig getRootComponent]];
-    resolve([NSNull null]);
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        NSError *error;
+        [CodePushPackage applyPackage:updatePackage
+                                error:&error];
+        
+        if (error) {
+            reject(error);
+        }
+        
+        [CodePush loadBundle];
+        
+        //resolve([NSNull null]);
+    });
 }
-
-RCT_EXPORT_METHOD(writeToLocalPackage:(NSString*)packageJsonString
-                  callback:(RCTResponseSenderBlock)callback)
-{
-    NSError *saveError;
-    
-    // Save the package info too.
-    NSString *packageFolderPath = [CodePush getPackageFolderPath];
-    if (![[NSFileManager defaultManager] fileExistsAtPath:packageFolderPath]) {
-        [[NSFileManager defaultManager] createDirectoryAtPath:packageFolderPath withIntermediateDirectories:YES attributes:nil error:&saveError];
-    }
-    
-    [packageJsonString writeToFile:[CodePush getPackagePath]
-                        atomically:YES
-                          encoding:NSUTF8StringEncoding
-                             error:&saveError];
-    
-    if (saveError) {
-        callback(@[RCTMakeError(@"Error saving file", saveError, [[NSDictionary alloc] initWithObjectsAndKeys:[CodePush getPackagePath],@"packagePath", nil])]);
-    } else {
-        callback(@[[NSNull null]]);
-    }
-    
-}
-
-RCT_EXPORT_METHOD(removeLocalPackage: (RCTResponseSenderBlock)callback)
-{
-    NSError *error;
-    
-    // Save the package info too.
-    NSString *packagePath = [CodePush getPackagePath];
-    if ([[NSFileManager defaultManager] fileExistsAtPath:packagePath]) {
-        [[NSFileManager defaultManager] removeItemAtPath:packagePath error: &error];
-    }
-         
-    if (error) {
-        callback(@[RCTMakeError(@"Error saving file", error, [[NSDictionary alloc] initWithObjectsAndKeys:[CodePush getPackagePath],@"packagePath", nil])]);
-    } else {
-        callback(@[[NSNull null]]);
-    }
-}
-
 
 RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
-    
-    NSString *path = [CodePush getPackagePath];
-    
     dispatch_async(dispatch_get_main_queue(), ^{
-        
-        NSError* readError;
-        NSString *content = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:&readError];
-        if (readError) {
-            reject(readError);
+        NSError *error;
+        NSDictionary *package = [CodePushPackage getCurrentPackage:&error];
+        if (error) {
+            reject(error);
         } else {
-            NSError * parseError;
-            NSData *data = [content dataUsingEncoding:NSUTF8StringEncoding];
-            NSDictionary* json = [NSJSONSerialization JSONObjectWithData:data
-                                                                 options:kNilOptions
-                                                                   error:&parseError];
-            if (parseError) {
-                reject(parseError);
-            } else {
-                resolve(json);
-            }
+            resolve(package);
         }
     });
 }

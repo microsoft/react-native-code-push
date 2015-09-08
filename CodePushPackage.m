@@ -2,21 +2,26 @@
 
 @implementation CodePushPackage
 
-NSString * const PackageInfoFile = @"packages.json";
+NSString * const StatusFile = @"codepush.json";
 
 + (NSString *)getCodePushPath
 {
     return [NSHomeDirectory() stringByAppendingPathComponent:@"CodePush"];
 }
 
-+ (NSString *)getCurrentPackageInfoPath
++ (NSString *)getStatusFilePath
 {
-    return [[self getCodePushPath] stringByAppendingPathComponent:PackageInfoFile];
+    return [[self getCodePushPath] stringByAppendingPathComponent:StatusFile];
 }
 
-+ (NSDictionary *)getCurrentPackageInfo:(NSError **)error
++ (NSMutableDictionary *)getCurrentPackageInfo:(NSError **)error
 {
-    NSString *content = [NSString stringWithContentsOfFile:[self getCurrentPackageInfoPath]
+    NSString *statusFilePath = [self getStatusFilePath];
+    if (![[NSFileManager defaultManager] fileExistsAtPath:statusFilePath]) {
+        return [NSMutableDictionary dictionary];
+    }
+    
+    NSString *content = [NSString stringWithContentsOfFile:statusFilePath
                                                   encoding:NSUTF8StringEncoding
                                                      error:error];
     if (*error) {
@@ -31,7 +36,7 @@ NSString * const PackageInfoFile = @"packages.json";
         return NULL;
     }
     
-    return json;
+    return [json mutableCopy];
 }
 
 + (void)updateCurrentPackageInfo:(NSDictionary *)packageInfo
@@ -44,7 +49,7 @@ NSString * const PackageInfoFile = @"packages.json";
     
     NSString *packageInfoString = [[NSString alloc] initWithData:packageInfoData
                                                         encoding:NSUTF8StringEncoding];
-    [packageInfoString writeToFile:[self getCurrentPackageInfoPath]
+    [packageInfoString writeToFile:[self getStatusFilePath]
                         atomically:YES
                           encoding:NSUTF8StringEncoding
                              error:error];
@@ -58,7 +63,65 @@ NSString * const PackageInfoFile = @"packages.json";
         return NULL;
     }
     
-    return [self getPackageFolderPath:info[@"currentPackage"]];
+    NSString *packageHash = info[@"currentPackage"];
+    
+    if (!packageHash) {
+        return NULL;
+    }
+    
+    return [self getPackageFolderPath:packageHash];
+}
+
+
++ (NSDictionary *)getCurrentPackage:(NSError **)error
+{
+    NSString *folderPath = [CodePushPackage getCurrentPackageFolderPath:error];
+    if (!*error) {
+        if (!folderPath) {
+            return [NSDictionary dictionary];
+        }
+        
+        NSString *packagePath = [folderPath stringByAppendingPathComponent:@"app.json"];
+        NSString *content = [NSString stringWithContentsOfFile:packagePath
+                                                      encoding:NSUTF8StringEncoding
+                                                         error:error];
+        if (!*error) {
+            NSData *data = [content dataUsingEncoding:NSUTF8StringEncoding];
+            NSDictionary* jsonDict = [NSJSONSerialization JSONObjectWithData:data
+                                                                     options:kNilOptions
+                                                                       error:error];
+
+            return jsonDict;
+        }
+    }
+    
+    return NULL;
+}
+
++ (NSDictionary *)getPackage:(NSString *)packageHash
+                       error:(NSError **)error
+{
+    NSString *folderPath = [self getPackageFolderPath:packageHash];
+    
+    if (!folderPath) {
+        return [NSDictionary dictionary];
+    }
+    
+    NSString *packageFilePath = [folderPath stringByAppendingPathComponent:@"app.json"];
+    
+    NSString *content = [NSString stringWithContentsOfFile:packageFilePath
+                                                  encoding:NSUTF8StringEncoding
+                                                     error:error];
+    if (!*error) {
+        NSData *data = [content dataUsingEncoding:NSUTF8StringEncoding];
+        NSDictionary* jsonDict = [NSJSONSerialization JSONObjectWithData:data
+                                                                 options:kNilOptions
+                                                                   error:error];
+        
+        return jsonDict;
+    }
+    
+    return NULL;
 }
 
 + (NSString *)getPackageFolderPath:(NSString *)packageHash
@@ -78,7 +141,7 @@ NSString * const PackageInfoFile = @"packages.json";
                                                         error:error];
     }
     
-    if (error) {
+    if (*error) {
         return;
     }
     
@@ -86,7 +149,7 @@ NSString * const PackageInfoFile = @"packages.json";
     NSString *updateContents = [[NSString alloc] initWithContentsOfURL:url
                                                               encoding:NSUTF8StringEncoding
                                                                  error:error];
-    if (error) {
+    if (*error) {
         return;
     }
     
@@ -94,7 +157,7 @@ NSString * const PackageInfoFile = @"packages.json";
                      atomically:YES
                        encoding:NSUTF8StringEncoding
                           error:error];
-    if (error) {
+    if (*error) {
         return;
     }
     
@@ -102,7 +165,7 @@ NSString * const PackageInfoFile = @"packages.json";
                                                                    options:0
                                                                      error:error];
     
-    if (error) {
+    if (*error) {
         return;
     }
     
@@ -113,12 +176,13 @@ NSString * const PackageInfoFile = @"packages.json";
                              error:error];
 }
 
-+ (void)applyPackage:(NSString *)packageHash
++ (void)applyPackage:(NSDictionary *)updatePackage
                error:(NSError **)error
 {
-    NSDictionary *info = [self getCurrentPackageInfo:error];
+    NSString *packageHash = updatePackage[@"packageHash" ];
+    NSMutableDictionary *info = [self getCurrentPackageInfo:error];
     
-    if (error) {
+    if (*error) {
         return;
     }
     

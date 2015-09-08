@@ -69,7 +69,11 @@ function checkForUpdate() {
       return new Promise((resolve, reject) => {
         sdk.queryUpdateWithCurrentPackage(queryPackage, (err, update) => {
           if (err) return reject(err);
-          resolve(extend({}, update, packageMixins.remote));
+          if (update) {
+            resolve(extend({}, update, packageMixins.remote));
+          } else {
+            resolve(update);
+          }
         });
       });
     });

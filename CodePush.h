@@ -33,9 +33,15 @@
 
 + (NSString *)getPackageFolderPath:(NSString *)packageHash;
 
++ (NSDictionary *)getCurrentPackage:(NSError **)error;
+
++ (NSDictionary *)getPackage:(NSString *)packageHash
+                       error:(NSError **)error;
+
 + (void)downloadPackage:(NSDictionary *)updatePackage
                             error:(NSError **)error;
 
-+ (void)applyPackage:(NSString *)packageHash;
++ (void)applyPackage:(NSDictionary *)updatePackage
+               error:(NSError **)error;
 
 @end
