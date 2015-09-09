@@ -132,8 +132,6 @@ RCT_EXPORT_METHOD(applyUpdate:(NSDictionary*)updatePackage
         }
         
         [CodePush loadBundle];
-        
-        //resolve([NSNull null]);
     });
 }
 

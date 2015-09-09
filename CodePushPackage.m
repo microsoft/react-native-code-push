@@ -72,7 +72,6 @@ NSString * const StatusFile = @"codepush.json";
     return [self getPackageFolderPath:packageHash];
 }
 
-
 + (NSDictionary *)getCurrentPackage:(NSError **)error
 {
     NSString *folderPath = [CodePushPackage getCurrentPackageFolderPath:error];
