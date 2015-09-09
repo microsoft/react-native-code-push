@@ -79,10 +79,6 @@ function checkForUpdate() {
     });
 }
 
-function apply(updatePackage) {
-  return NativeCodePush.applyUpdate(updatePackage);
-}
-
 function getCurrentPackage() {
   return NativeCodePush.getCurrentPackage();
 }
@@ -94,7 +90,6 @@ function notifyApplicationReady() {
 var CodePush = {
   getConfiguration: getConfiguration,
   checkForUpdate: checkForUpdate,
-  apply: apply,
   getCurrentPackage: getCurrentPackage,
   notifyApplicationReady: notifyApplicationReady,
   setUpTestDependencies: setUpTestDependencies
