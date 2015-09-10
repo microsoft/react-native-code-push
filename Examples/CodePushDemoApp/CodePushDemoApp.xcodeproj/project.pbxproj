@@ -25,6 +25,7 @@
 		5451ACBA1B86A5B600E2A7DF /* QueryUpdateTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5451ACB81B86A5B600E2A7DF /* QueryUpdateTests.m */; };
 		5451ACEC1B86E40A00E2A7DF /* libRCTTest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5451ACEB1B86E34300E2A7DF /* libRCTTest.a */; };
 		54D774BA1B87DAF800F2ABF8 /* ApplyUpdateTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 54D774B91B87DAF800F2ABF8 /* ApplyUpdateTests.m */; };
+		810D4E6F1BA0E99300B397E9 /* main.jsbundle in Resources */ = {isa = PBXBuildFile; fileRef = 810D4E6E1BA0E99300B397E9 /* main.jsbundle */; };
 		81551E1B1B3B428000F5B9F1 /* libCodePush.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 81551E0F1B3B427200F5B9F1 /* libCodePush.a */; };
 /* End PBXBuildFile section */
 
@@ -152,6 +153,7 @@
 		5451ACE61B86E34300E2A7DF /* RCTTest.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTTest.xcodeproj; path = "node_modules/react-native/Libraries/RCTTest/RCTTest.xcodeproj"; sourceTree = "<group>"; };
 		54D774B91B87DAF800F2ABF8 /* ApplyUpdateTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ApplyUpdateTests.m; sourceTree = "<group>"; };
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
+		810D4E6E1BA0E99300B397E9 /* main.jsbundle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = main.jsbundle; path = iOS/main.jsbundle; sourceTree = "<group>"; };
 		81551E0A1B3B427200F5B9F1 /* CodePush.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = CodePush.xcodeproj; path = ../../CodePush.xcodeproj; sourceTree = "<group>"; };
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -272,6 +274,7 @@
 		13B07FAE1A68108700A75B9A /* CodePushDemoApp */ = {
 			isa = PBXGroup;
 			children = (
+				810D4E6E1BA0E99300B397E9 /* main.jsbundle */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
@@ -595,6 +598,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				810D4E6F1BA0E99300B397E9 /* main.jsbundle in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
 			);
