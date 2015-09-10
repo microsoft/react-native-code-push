@@ -10,6 +10,7 @@
 RCT_EXPORT_MODULE()
 
 RCTBridge * _bridge;
+NSTimer *_timer;
 BOOL usingTestFolder = NO;
 
 @synthesize bridge = _bridge;
@@ -62,7 +63,7 @@ BOOL usingTestFolder = NO;
     NSString *packageFolder = [CodePushPackage getCurrentPackageFolderPath:&error];
     
     if (error || !packageFolder) {
-        [self getNativeBundleURL];
+        return [self getNativeBundleURL];
     }
     
     NSString *packageFile = [packageFolder stringByAppendingPathComponent:@"app.jsbundle"];
@@ -79,6 +80,28 @@ BOOL usingTestFolder = NO;
         UIViewController *rootViewController = [[UIViewController alloc] init];
         rootViewController.view = rootView;
         [UIApplication sharedApplication].delegate.window.rootViewController = rootViewController;
+    });
+}
+
++ (void) rollbackPackage:(NSTimer *)timer {
+    [CodePushPackage rollbackPackage];
+    [self loadBundle];
+}
+
++ (void) startRollbackTimer:(int)rollbackTimeout
+{
+    double timeoutInSeconds = rollbackTimeout / 1000;
+    _timer = [NSTimer scheduledTimerWithTimeInterval:timeoutInSeconds
+                                              target:self
+                                            selector:@selector(rollbackPackage:)
+                                            userInfo:nil
+                                             repeats:NO];
+}
+
++ (void) cancelRollbackTimer
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [_timer invalidate];
     });
 }
 
@@ -118,6 +141,7 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
 }
 
 RCT_EXPORT_METHOD(applyUpdate:(NSDictionary*)updatePackage
+                  rollbackTimeout:(int)rollbackTimeout
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
@@ -132,7 +156,15 @@ RCT_EXPORT_METHOD(applyUpdate:(NSDictionary*)updatePackage
         }
         
         [CodePush loadBundle];
+        
+        if (0 != rollbackTimeout) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [CodePush startRollbackTimer:rollbackTimeout];
+            });
+
+        }
     });
+    
 }
 
 RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
@@ -147,6 +179,14 @@ RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
             resolve(package);
         }
     });
+}
+
+RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [CodePush cancelRollbackTimer];
+    
+    resolve([NSNull null]);
 }
 
 @end

@@ -72,6 +72,18 @@ NSString * const StatusFile = @"codepush.json";
     return [self getPackageFolderPath:packageHash];
 }
 
++ (NSString *)getCurrentPackageHash:(NSError **)error
+{
+    NSDictionary *info = [self getCurrentPackageInfo:error];
+    return info[@"currentPackage"];
+}
+
++ (NSString *)getPreviousPackageHash:(NSError **)error
+{
+    NSDictionary *info = [self getCurrentPackageInfo:error];
+    return info[@"previousPackage"];
+}
+
 + (NSDictionary *)getCurrentPackage:(NSError **)error
 {
     NSString *folderPath = [CodePushPackage getCurrentPackageFolderPath:error];
@@ -185,10 +197,26 @@ NSString * const StatusFile = @"codepush.json";
         return;
     }
     
+    [info setValue:info[@"currentPackage"] forKey:@"previousPackage"];
     [info setValue:packageHash forKey:@"currentPackage"];
 
     [self updateCurrentPackageInfo:info
                              error:error];
+}
+
++ (void)rollbackPackage
+{
+    NSError *error;
+    NSMutableDictionary *info = [self getCurrentPackageInfo:&error];
+    
+    if (error) {
+        return;
+    }
+    
+    [info setValue:info[@"previousPackage"] forKey:@"currentPackage"];
+    [info removeObjectForKey:@"previousPackage"];
+    
+    [self updateCurrentPackageInfo:info error:&error];
 }
 
 @end

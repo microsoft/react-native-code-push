@@ -21,6 +21,7 @@
 + (NSString *)getBuildVersion;
 
 + (void)setRootComponent:(NSString *)rootComponent;
+
 + (NSString *)getRootComponent;
 
 + (NSDictionary *)getConfiguration;
@@ -44,4 +45,5 @@
 + (void)applyPackage:(NSDictionary *)updatePackage
                error:(NSError **)error;
 
++ (void)rollbackPackage;
 @end
