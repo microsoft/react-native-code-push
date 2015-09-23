@@ -15,7 +15,7 @@ var {
 
 var Button = require("react-native-button");
 
-var CodePush = require('react-native-code-push');
+var CodePush = require('ReactNativeCodePush')('ios');
 
 var CodePushDemoApp = React.createClass({
   componentDidMount: function() {

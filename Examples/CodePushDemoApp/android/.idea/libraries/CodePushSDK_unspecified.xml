@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="CodePushSDK-unspecified">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/app/build/intermediates/exploded-aar/CodePushDemoApp/CodePushSDK/unspecified/jars/classes.jar!/" />
+      <root url="file://$PROJECT_DIR$/app/build/intermediates/exploded-aar/CodePushDemoApp/CodePushSDK/unspecified/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
