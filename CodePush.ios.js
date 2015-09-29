@@ -5,12 +5,11 @@
 
 'use strict';
 
+var extend = require("extend");
 var NativeCodePush = require('react-native').NativeModules.CodePush;
 var requestFetchAdapter = require("./request-fetch-adapter.js");
-var semver = require('semver');
 var Sdk = require("code-push/script/acquisition-sdk").AcquisitionManager;
-var sdk;
-var config;
+var packageMixins = require("./package-mixins")(NativeCodePush);
 
 // This function is only used for tests. Replaces the default SDK, configuration and native bridge
 function setUpTestDependencies(testSdk, testConfiguration, testNativeBridge){
@@ -19,62 +18,80 @@ function setUpTestDependencies(testSdk, testConfiguration, testNativeBridge){
   if (testNativeBridge) NativeCodePush = testNativeBridge;
 }
 
-function getConfiguration(callback) {
-  if (config) {
-    setImmediate(function() {
-      callback(/*error=*/ null, config);
-    });
-  } else {
-    NativeCodePush.getConfiguration(function(err, configuration) {
-      if (err) callback(err);
-      config = configuration;
-      callback(/*error=*/ null, config);
-    });
+var getConfiguration = (() => {
+  var config;
+  return function getConfiguration() {
+    if (config) {
+      return Promise.resolve(config);
+    } else {
+      return NativeCodePush.getConfiguration()
+        .then((configuration) => {
+          if (!config) config = configuration;
+          return config;
+        });
+    }
   }
-}
+})();
 
-function getSdk(callback) {
-  if (sdk) {
-    setImmediate(function() {
-      callback(/*error=*/ null, sdk);
-    });
-  } else {
-    getConfiguration(function(err, configuration) {
-      sdk = new Sdk(requestFetchAdapter, configuration);
-      callback(/*error=*/ null, sdk);
-    });
+var getSdk = (() => {
+  var sdk;
+  return function getSdk() {
+    if (sdk) {
+      return Promise.resolve(sdk);
+    } else {
+      return getConfiguration()
+        .then((configuration) => {
+          sdk = new Sdk(requestFetchAdapter, configuration);
+          return sdk;
+        });
+    }
   }
-}
+})();
 
-function queryUpdate(callback) {
-  getConfiguration(function(err, configuration) {
-    if (err) callback(err);
-    getSdk(function(err, sdk) {
-      if (err) callback(err);
-      NativeCodePush.getLocalPackage(function(err, localPackage) {
-        var queryPackage = {appVersion: configuration.appVersion};
-        if (!err && localPackage && localPackage.appVersion === configuration.appVersion) {
-          queryPackage = localPackage;
-        } else if (err) {
-          console.log(err);
-        }
-        
-        sdk.queryUpdateWithCurrentPackage(queryPackage, callback);
+function checkForUpdate() {
+  var config;
+  var sdk;
+  return getConfiguration()
+    .then((configResult) => {
+      config = configResult;
+      return getSdk();
+    })
+    .then((sdkResult) => {
+      sdk = sdkResult;
+      return getCurrentPackage();
+    })
+    .then((localPackage) => {
+      var queryPackage = {appVersion: config.appVersion};
+      if (localPackage && localPackage.appVersion === config.appVersion) {
+        queryPackage = localPackage;
+      }
+
+      return new Promise((resolve, reject) => {
+        sdk.queryUpdateWithCurrentPackage(queryPackage, (err, update) => {
+          if (err) return reject(err);
+          if (update) {
+            resolve(extend({}, update, packageMixins.remote));
+          } else {
+            resolve(update);
+          }
+        });
       });
     });
-  });
 }
 
-function installUpdate(update) {
-  // Use the downloaded package info. Native code will save the package info
-  // so that the client knows what the current package version is.
-  NativeCodePush.installUpdate(update, JSON.stringify(update), (err) => console.log(err));
+function getCurrentPackage() {
+  return NativeCodePush.getCurrentPackage();
+}
+
+function notifyApplicationReady() {
+  return NativeCodePush.notifyApplicationReady();
 }
 
 var CodePush = {
   getConfiguration: getConfiguration,
-  queryUpdate: queryUpdate,
-  installUpdate: installUpdate,
+  checkForUpdate: checkForUpdate,
+  getCurrentPackage: getCurrentPackage,
+  notifyApplicationReady: notifyApplicationReady,
   setUpTestDependencies: setUpTestDependencies
 };
 

@@ -21,8 +21,29 @@
 + (NSString *)getBuildVersion;
 
 + (void)setRootComponent:(NSString *)rootComponent;
+
 + (NSString *)getRootComponent;
 
 + (NSDictionary *)getConfiguration;
 
+@end
+
+@interface CodePushPackage : NSObject
+
++ (NSString *)getCurrentPackageFolderPath:(NSError **)error;
+
++ (NSString *)getPackageFolderPath:(NSString *)packageHash;
+
++ (NSDictionary *)getCurrentPackage:(NSError **)error;
+
++ (NSDictionary *)getPackage:(NSString *)packageHash
+                       error:(NSError **)error;
+
++ (void)downloadPackage:(NSDictionary *)updatePackage
+                            error:(NSError **)error;
+
++ (void)applyPackage:(NSDictionary *)updatePackage
+               error:(NSError **)error;
+
++ (void)rollbackPackage;
 @end

@@ -10,21 +10,14 @@
 RCT_EXPORT_MODULE()
 
 RCTBridge * _bridge;
+NSTimer *_timer;
 BOOL usingTestFolder = NO;
 
 @synthesize bridge = _bridge;
 
-+ (NSString *) getBundleFolderPath
-{
-    NSString* home = NSHomeDirectory();
-    NSString* pathExtension = [[@"CodePush/" stringByAppendingString: (usingTestFolder ? @"test/" : @"")] stringByAppendingString: @"bundle"];
-    NSString* bundleFolder = [home stringByAppendingPathComponent:pathExtension];
-    return bundleFolder;
-}
-
 + (NSString *) getBundlePath
 {
-    NSString * bundleFolderPath = [self getBundleFolderPath];
+    NSString * bundleFolderPath = [self getPackageFolderPath];
     NSString* appBundleName = @"main.jsbundle";
     return [bundleFolderPath stringByAppendingPathComponent:appBundleName];
 }
@@ -32,18 +25,32 @@ BOOL usingTestFolder = NO;
 + (NSString *) getPackageFolderPath
 {
     NSString* home = NSHomeDirectory();
-    NSString* pathExtension = [[@"CodePush/" stringByAppendingString: (usingTestFolder ? @"test/" : @"")] stringByAppendingString: @"package"];
+    NSString* pathExtension = [[@"CodePush/" stringByAppendingString: (usingTestFolder ? @"test/" : @"")] stringByAppendingString: @"currentPackage"];
+    NSString* packageFolder = [home stringByAppendingPathComponent:pathExtension];
+    return packageFolder;
+}
+
++ (NSString *) getPreviousPackageFolderPath
+{
+    NSString* home = NSHomeDirectory();
+    NSString* pathExtension = [[@"CodePush/" stringByAppendingString: (usingTestFolder ? @"test/" : @"")] stringByAppendingString: @"previous"];
     NSString* packageFolder = [home stringByAppendingPathComponent:pathExtension];
     return packageFolder;
 }
 
 + (NSString *) getPackagePath
 {
-    NSString * packageFolderPath = [self getPackageFolderPath];
+    NSString *packageFolderPath = [self getPackageFolderPath];
     NSString* appPackageName = @"localpackage.json";
     return [packageFolderPath stringByAppendingPathComponent:appPackageName];
 }
 
++ (NSString *) getPreviousPackagePath
+{
+    NSString * packageFolderPath = [self getPreviousPackageFolderPath];
+    NSString* appPackageName = @"localpackage.json";
+    return [packageFolderPath stringByAppendingPathComponent:appPackageName];
+}
 
 + (NSURL *) getNativeBundleURL
 {
@@ -52,21 +59,22 @@ BOOL usingTestFolder = NO;
 
 + (NSURL *) getBundleUrl
 {
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-
-    NSString *bundlePath = [self getBundlePath];
-    if ([fileManager fileExistsAtPath:bundlePath]) {
-        return [[NSURL alloc] initFileURLWithPath:bundlePath];
-    } else {
+    NSError *error;
+    NSString *packageFolder = [CodePushPackage getCurrentPackageFolderPath:&error];
+    
+    if (error || !packageFolder) {
         return [self getNativeBundleURL];
     }
+    
+    NSString *packageFile = [packageFolder stringByAppendingPathComponent:@"app.jsbundle"];
+    return [[NSURL alloc] initFileURLWithPath:packageFile];
 }
 
-+ (void) loadBundle:(NSString*)rootComponent
++ (void) loadBundle
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:[self getBundleUrl]
-                                                            moduleName:rootComponent
+                                                            moduleName:[CodePushConfig getRootComponent]
                                                          launchOptions:nil];
         
         UIViewController *rootViewController = [[UIViewController alloc] init];
@@ -75,135 +83,110 @@ BOOL usingTestFolder = NO;
     });
 }
 
++ (void) rollbackPackage:(NSTimer *)timer {
+    [CodePushPackage rollbackPackage];
+    [self loadBundle];
+}
+
++ (void) startRollbackTimer:(int)rollbackTimeout
+{
+    double timeoutInSeconds = rollbackTimeout / 1000;
+    _timer = [NSTimer scheduledTimerWithTimeInterval:timeoutInSeconds
+                                              target:self
+                                            selector:@selector(rollbackPackage:)
+                                            userInfo:nil
+                                             repeats:NO];
+}
+
++ (void) cancelRollbackTimer
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [_timer invalidate];
+    });
+}
+
 RCT_EXPORT_METHOD(setUsingTestFolder:(BOOL) shouldUseTestFolder)
 {
     usingTestFolder = shouldUseTestFolder;
 }
 
-RCT_EXPORT_METHOD(getConfiguration:(RCTResponseSenderBlock)callback)
+RCT_EXPORT_METHOD(getConfiguration:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
 {
-    callback(@[[NSNull null], [CodePushConfig getConfiguration]]);
+    resolve([CodePushConfig getConfiguration]);
 }
 
-RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
-                  packageJsonString:(NSString*) packageJsonString
-                  callback:(RCTResponseSenderBlock)callback)
+RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        NSURL* url = [NSURL URLWithString:updatePackage[@"downloadUrl"]];
         NSError *err;
-
-        NSString *updateContents = [[NSString alloc] initWithContentsOfURL:url
-                                                                  encoding:NSUTF8StringEncoding
-                                                                     error:&err];
-        if (err) {
-            // TODO send download url
-            callback(@[RCTMakeError(@"Error downloading url", err, [[NSDictionary alloc] initWithObjectsAndKeys:[url absoluteString],@"updateUrl", nil])]);
-        } else {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                NSError *saveError;
-                NSString *bundleFolderPath = [CodePush getBundleFolderPath];
-                if (![[NSFileManager defaultManager] fileExistsAtPath:bundleFolderPath]) {
-                    [[NSFileManager defaultManager] createDirectoryAtPath:bundleFolderPath withIntermediateDirectories:YES attributes:nil error:&saveError];
-                }
-                
-                [updateContents writeToFile:[CodePush getBundlePath]
-                                 atomically:YES
-                                   encoding:NSUTF8StringEncoding
-                                      error:&saveError];
-                if (saveError) {
-                    // TODO send file path
-                    callback(@[RCTMakeError(@"Error saving file", saveError, [[NSDictionary alloc] initWithObjectsAndKeys:[CodePush getBundlePath],@"bundlePath", nil])]);
-                } else {
-                    // Save the package info too.
-                    NSString *packageFolderPath = [CodePush getPackageFolderPath];
-                    if (![[NSFileManager defaultManager] fileExistsAtPath:packageFolderPath]) {
-                        [[NSFileManager defaultManager] createDirectoryAtPath:packageFolderPath withIntermediateDirectories:YES attributes:nil error:&saveError];
-                    }
-                    
-                    [packageJsonString writeToFile:[CodePush getPackagePath]
-                                     atomically:YES
-                                       encoding:NSUTF8StringEncoding
-                                          error:&saveError];
-                    
-                    if (saveError) {
-                        callback(@[RCTMakeError(@"Error saving file", saveError, [[NSDictionary alloc] initWithObjectsAndKeys:[CodePush getPackagePath],@"packagePath", nil])]);
-                    } else {
-                        [CodePush loadBundle:[CodePushConfig getRootComponent]];
-                        callback(@[[NSNull null]]);
-                    }
-                }
-            });
-        }
-    });
-}
-
-RCT_EXPORT_METHOD(writeToLocalPackage:(NSString*)packageJsonString
-                  callback:(RCTResponseSenderBlock)callback)
-{
-    NSError *saveError;
-    
-    // Save the package info too.
-    NSString *packageFolderPath = [CodePush getPackageFolderPath];
-    if (![[NSFileManager defaultManager] fileExistsAtPath:packageFolderPath]) {
-        [[NSFileManager defaultManager] createDirectoryAtPath:packageFolderPath withIntermediateDirectories:YES attributes:nil error:&saveError];
-    }
-    
-    [packageJsonString writeToFile:[CodePush getPackagePath]
-                        atomically:YES
-                          encoding:NSUTF8StringEncoding
-                             error:&saveError];
-    
-    if (saveError) {
-        callback(@[RCTMakeError(@"Error saving file", saveError, [[NSDictionary alloc] initWithObjectsAndKeys:[CodePush getPackagePath],@"packagePath", nil])]);
-    } else {
-        callback(@[[NSNull null]]);
-    }
-    
-}
-
-RCT_EXPORT_METHOD(removeLocalPackage: (RCTResponseSenderBlock)callback)
-{
-    NSError *error;
-    
-    // Save the package info too.
-    NSString *packagePath = [CodePush getPackagePath];
-    if ([[NSFileManager defaultManager] fileExistsAtPath:packagePath]) {
-        [[NSFileManager defaultManager] removeItemAtPath:packagePath error: &error];
-    }
-         
-    if (error) {
-        callback(@[RCTMakeError(@"Error saving file", error, [[NSDictionary alloc] initWithObjectsAndKeys:[CodePush getPackagePath],@"packagePath", nil])]);
-    } else {
-        callback(@[[NSNull null]]);
-    }
-}
-
-
-RCT_EXPORT_METHOD(getLocalPackage: (RCTResponseSenderBlock)callback)
-{
-    
-    NSString *path = [CodePush getPackagePath];
-    
-    dispatch_async(dispatch_get_main_queue(), ^{
+        [CodePushPackage downloadPackage:updatePackage
+                                   error:&err];
         
-        NSError* readError;
-        NSString *content = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:&readError];
-        if (readError) {
-            callback(@[RCTMakeError(@"Error finding local package ", readError, [[NSDictionary alloc] initWithObjectsAndKeys:path,@"packagePath", nil]), [NSNull null]]);
-        } else {
-            NSError * parseError;
-            NSData *data = [content dataUsingEncoding:NSUTF8StringEncoding];
-            NSDictionary* json = [NSJSONSerialization JSONObjectWithData:data
-                                                                 options:kNilOptions
-                                                                   error:&parseError];
-            if (parseError) {
-                callback(@[RCTMakeError(@"Error parsing contents of local package ", parseError, [[NSDictionary alloc] initWithObjectsAndKeys:path,@"packagePath", nil]), [NSNull null]]);
-            } else {
-                callback(@[[NSNull null], json]);
-            }
+        if (err) {
+            return reject(err);
+        }
+        
+        NSDictionary *newPackage = [CodePushPackage getPackage:updatePackage[@"packageHash"]
+                                                         error:&err];
+        
+        if (err) {
+            return reject(err);
+        }
+        
+        resolve(newPackage);
+    });
+}
+
+RCT_EXPORT_METHOD(applyUpdate:(NSDictionary*)updatePackage
+                  rollbackTimeout:(int)rollbackTimeout
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        NSError *error;
+        [CodePushPackage applyPackage:updatePackage
+                                error:&error];
+        
+        if (error) {
+            reject(error);
+        }
+        
+        [CodePush loadBundle];
+        
+        if (0 != rollbackTimeout) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [CodePush startRollbackTimer:rollbackTimeout];
+            });
+
         }
     });
+    
+}
+
+RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSError *error;
+        NSDictionary *package = [CodePushPackage getCurrentPackage:&error];
+        if (error) {
+            reject(error);
+        } else {
+            resolve(package);
+        }
+    });
+}
+
+RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [CodePush cancelRollbackTimer];
+    
+    resolve([NSNull null]);
 }
 
 @end

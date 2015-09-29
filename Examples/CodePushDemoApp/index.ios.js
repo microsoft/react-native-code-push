@@ -19,18 +19,21 @@ var CodePush = require('react-native-code-push');
 
 var CodePushDemoApp = React.createClass({
   componentDidMount: function() {
-    this.fetchData();
+    this.checkUpdate();
   },
-  fetchData: function() {
-    CodePush.queryUpdate((err, update) => {
+  checkUpdate: function() {
+    CodePush.checkForUpdate().done((update) => {
       this.setState({ update: update });
     });
+    CodePush.notifyApplicationReady().done();
   },
   getInitialState: function() {
     return { update: false };
   },
   handlePress: function() {
-    CodePush.installUpdate(this.state.update);
+    this.state.update.download().done((localPackage) => {
+      localPackage.apply(1000).done();
+    });
   },
   render: function() {
     var updateView;
