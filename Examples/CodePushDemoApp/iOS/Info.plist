@@ -22,6 +22,11 @@
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>
@@ -40,7 +45,5 @@
 	<string></string>
 	<key>CodePushDeploymentKey</key>
 	<string>deployment-key-here</string>
-	<key>CodePushServerUrl</key>
-	<string>server-url-here</string>
 </dict>
 </plist>
