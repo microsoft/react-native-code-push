@@ -31,15 +31,15 @@ This change allows Code Push to load the updated app location after an update ha
 Methods
 ---
 
-* checkForUpdate: Checks the service for updates
-* notifyApplicationReady: Notifies the plugin that the update operation succeeded.
-* getCurrentPackage: Gets information about the currently applied package.
+* [checkForUpdate](#codepushcheckforupdate): Checks the service for updates
+* [notifyApplicationReady](#codepushnotifyapplicationready): Notifies the plugin that the update operation succeeded.
+* [getCurrentPackage](#codepushgetcurrentpackage): Gets information about the currently applied package.
 
 Objects
 ---
 
-* LocalPackage: Contains information about a locally installed package.
-* RemotePackage: Contains information about an updated package available for download.
+* [LocalPackage](#localpackage): Contains information about a locally installed package.
+* [RemotePackage](#remotepackage): Contains information about an updated package available for download.
 
 Getting Started:
 ---
