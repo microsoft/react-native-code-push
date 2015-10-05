@@ -101,3 +101,34 @@ Contains details about an update package that is available for download.
 ### Methods
 - __download(downloadSuccess, downloadError)__: Downloads the package update from the Code Push service. The ```downloadSuccess``` callback is invoked with a ```LocalPackage``` argument, representing the downloaded package.
 
+
+## codePush.checkForUpdate
+Queries the Code Push server for updates.
+```javascript
+codePush.checkForUpdate(): Promise<RemotePackage>;
+```
+
+`checkForUpdate` returns a Promise that resolves when the server responds with an update.
+
+
+Usage: 
+```javascript
+codePush.checkForUpdate().then((update) => {
+    console.log(update);
+});
+```
+
+## codePush.getCurrentPackage
+```javascript
+codePush.getCurrentPackage(): Promise<LocalPackage>;
+```
+Get the currently installed package information. Returns a Promise that resolves with the local package.
+
+## codePush.notifyApplicationReady
+```javascript
+codePush.notifyApplicationReady(): Promise<void>;
+```
+
+Notifies the plugin that the update operation succeeded.
+Calling this function is required if a rollbackTimeout parameter is passed to your ```LocalPackage.apply``` call.
+If automatic rollback was not used, calling this function is not required and will result in a noop.
