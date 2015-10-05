@@ -1,7 +1,7 @@
 react-native-code-push
 ===
 
-React Native module for deploying script updates using the Code Push service.
+React Native module for deploying script updates using the CodePush service.
 
 Installation
 ---
@@ -10,7 +10,7 @@ Installation
 npm install --save react-native-code-push
 ```
 
-After installing the React Native Code Push plugin, open your project in Xcode. Open the `react-native-code-push` in Finder, and drag the `CodePush.xcodeproj` into the Libraries folder of Xcode.
+After installing the React Native CodePush plugin, open your project in Xcode. Open the `react-native-code-push` in Finder, and drag the `CodePush.xcodeproj` into the Libraries folder of Xcode.
 
 In Xcode, click on your project, and select the "Build Phases" tab of your project configuration. Drag libCodePush.a from `Libraries/CodePush.xcodeproj/Products` into the "Link Binary With Libraries" secton of your project's "Build Phases" configuration.
 
@@ -26,7 +26,7 @@ Replace it with the following:
 jsCodeLocation = [CodePush getBundleUrl];
 ```
 
-This change allows Code Push to load the updated app location after an update has been applied.
+This change allows CodePush to load the updated app location after an update has been applied.
 
 Methods
 ---
@@ -46,7 +46,7 @@ Getting Started:
 
 * Add the plugin to your app
 * Open your app's `Info.plist` and add a "CodePushDeploymentKey" entry with your app's deployment key
-* To publish an update for your app, run `react-native bundle`, and then publish `iOS/main.jsbundle` using the Code Push CLI.
+* To publish an update for your app, run `react-native bundle`, and then publish `iOS/main.jsbundle` using the CodePush CLI.
 
 Running the Example
 ---
@@ -99,10 +99,10 @@ Contains details about an update package that is available for download.
 - __downloadUrl__: The URL at which the package is available for download. (String)
 
 ### Methods
-- __download(): Promise<LocalPackage>__: Downloads the package update from the Code Push service. Returns a Promise that resolves with the LocalPackage.
+- __download(): Promise<LocalPackage>__: Downloads the package update from the CodePush service. Returns a Promise that resolves with the LocalPackage.
 
 ## codePush.checkForUpdate
-Queries the Code Push server for updates.
+Queries the CodePush server for updates.
 ```javascript
 codePush.checkForUpdate(): Promise<RemotePackage>;
 ```
