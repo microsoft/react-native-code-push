@@ -27,6 +27,8 @@ jsCodeLocation = [CodePush getBundleUrl];
 ```
 
 This change allows CodePush to load the updated app location after an update has been applied.
+Before any updates are installed, CodePush will load your app from the bundled "main.jsbundle" file.
+After updates are installed, CodePush will load your app from the writable user directory, where the update has been downloaded.
 
 Methods
 ---
