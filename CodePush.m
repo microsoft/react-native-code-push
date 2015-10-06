@@ -75,6 +75,7 @@ BOOL usingTestFolder = NO;
     dispatch_async(dispatch_get_main_queue(), ^{
         RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:[self getBundleUrl]
                                                             moduleName:[CodePushConfig getRootComponent]
+                                                     initialProperties:nil
                                                          launchOptions:nil];
         
         UIViewController *rootViewController = [[UIViewController alloc] init];
