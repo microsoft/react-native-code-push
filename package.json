@@ -5,9 +5,9 @@
   "keywords": "react-native",
   "dependencies": {
     "code-push": "file:../website/sdk/bin",
-    "extend": "^3.0.0"
+    "extend": "3.0.0"
   },
   "devDependencies": {
-    "react-native": "^0.11.4"
+    "react-native": "0.11.4"
   }
 }
