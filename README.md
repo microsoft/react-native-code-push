@@ -12,15 +12,33 @@ npm install --save react-native-code-push
 
 After installing the React Native CodePush plugin, open your project in Xcode. Open the `react-native-code-push` in Finder, and drag the `CodePush.xcodeproj` into the Libraries folder of Xcode.
 
+![Add CodePush to project](https://cloud.githubusercontent.com/assets/516559/10322414/7688748e-6c32-11e5-83c1-00d3e6758df4.png)
+
+
 In Xcode, click on your project, and select the "Build Phases" tab of your project configuration. Drag libCodePush.a from `Libraries/CodePush.xcodeproj/Products` into the "Link Binary With Libraries" secton of your project's "Build Phases" configuration.
 
-Finally, edit your project's `AppDelegate.m`. Find the following code:
+![Link CodePush during build](https://cloud.githubusercontent.com/assets/516559/10322221/a75ea066-6c31-11e5-9d88-ff6f6a4d6968.png)
+
+Under the "Build Settings" tab of your project configuration, find the "Header Search Paths" section and edit the value.
+Add a new value, `$(SRCROOT)/../node_modules/react-native-code-push` and select "recursive" in the dropdown.
+
+![Add CodePush library reference](https://cloud.githubusercontent.com/assets/516559/10322038/b8157962-6c30-11e5-9264-494d65fd2626.png)
+
+Finally, edit your project's `AppDelegate.m`.
+
+At the top of the file, add the following line to import the CodePush headers.
+
+```
+#import "CodePush.h"
+```
+
+Then, find the following code:
 
 ```
 jsCodeLocation = [NSURL URLWithString:@"http://localhost:8081/index.ios.bundle?platform=ios&dev=true"];
 ```
 
-Replace it with the following:
+Replace it with this:
 
 ```
 jsCodeLocation = [CodePush getBundleUrl];
