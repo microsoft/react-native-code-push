@@ -11,7 +11,6 @@ var requestFetchAdapter = require("./request-fetch-adapter.js");
 var Sdk = require("code-push/script/acquisition-sdk").AcquisitionManager;
 var packageMixins = require("./package-mixins")(NativeCodePush);
 
-
 // This function is only used for tests. Replaces the default SDK, configuration and native bridge
 function setUpTestDependencies(providedTestSdk, providedTestConfig, testNativeBridge){
   if (providedTestSdk) testSdk = providedTestSdk;
