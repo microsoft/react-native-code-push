@@ -27,7 +27,7 @@
 
 - (void)setUp
 {
-  app = @"CodePushDemoAppTests/ApplyUpdateTests/ApplyUpdateTestApp";
+  app = @"CodePushDemoAppTests/ApplyUpdateTests/ApplyUpdateTestApp.ios";
 #if __LP64__
   RCTAssert(false, @"Tests should be run on 32-bit device simulators (e.g. iPhone 5)");
 #endif
@@ -70,7 +70,7 @@
   RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge
                                                    moduleName:@"DownloadAndApplyUpdateTest"
                                                    initialProperties:nil];
-  
+
   NSDate *date = [NSDate dateWithTimeIntervalSinceNow:TIMEOUT_SECONDS];
   BOOL foundElement = NO;
   

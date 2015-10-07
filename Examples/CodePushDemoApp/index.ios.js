@@ -19,9 +19,6 @@ var CodePush = require('react-native-code-push');
 
 var CodePushDemoApp = React.createClass({
 
-  getInitialState: function() {
-    return {};
-  },
   componentDidMount: function() {
     this.checkUpdate();
   },

@@ -6,8 +6,9 @@
     "start": "node_modules/react-native/packager/packager.sh --root ../../"
   },
   "dependencies": {
-    "react-native": "^0.10.0",
+    "react-native": "0.11.4",
     "react-native-button": "^1.2.0",
-    "react-native-code-push": "file:../../"
+    "react-native-code-push": "file:../../",
+    "extend": "3.0.0"
   }
 }

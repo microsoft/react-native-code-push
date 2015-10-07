@@ -11,18 +11,23 @@ var requestFetchAdapter = require("./request-fetch-adapter.js");
 var Sdk = require("code-push/script/acquisition-sdk").AcquisitionManager;
 var packageMixins = require("./package-mixins")(NativeCodePush);
 
+
 // This function is only used for tests. Replaces the default SDK, configuration and native bridge
-function setUpTestDependencies(testSdk, testConfiguration, testNativeBridge){
-  if (testSdk) sdk = testSdk;
-  if (testConfiguration) config = testConfiguration;
+function setUpTestDependencies(providedTestSdk, providedTestConfig, testNativeBridge){
+  if (providedTestSdk) testSdk = providedTestSdk;
+  if (providedTestConfig) testConfig = providedTestConfig;
   if (testNativeBridge) NativeCodePush = testNativeBridge;
 }
+var testConfig;
+var testSdk;
 
 var getConfiguration = (() => {
   var config;
   return function getConfiguration() {
     if (config) {
       return Promise.resolve(config);
+    } else if (testConfig) {
+      return Promise.resolve(testConfig);
     } else {
       return NativeCodePush.getConfiguration()
         .then((configuration) => {
@@ -38,6 +43,8 @@ var getSdk = (() => {
   return function getSdk() {
     if (sdk) {
       return Promise.resolve(sdk);
+    } else if (testSdk) {
+      return Promise.resolve(testSdk);
     } else {
       return getConfiguration()
         .then((configuration) => {
