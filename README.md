@@ -66,6 +66,8 @@ Getting Started:
 
 * Add the plugin to your app
 * Open your app's `Info.plist` and add a "CodePushDeploymentKey" entry with your app's deployment key
+* In your app's `Info.plist` make sure your "CFBundleShortVersionString" value is a valid [semver](http://semver.org/) version.
+
 * To publish an update for your app, run `react-native bundle`, and then publish `iOS/main.jsbundle` using the CodePush CLI.
 
 Running the Example
