@@ -19,18 +19,23 @@ var NativeCodePush = require('react-native').NativeModules.CodePush;
 var CodePushDemoApp = React.createClass({
   componentDidMount: function() {
     NativeCodePush.setUsingTestFolder(true);
-    NativeCodePush.getLocalPackage(function(err, savedPackage) {
-      if (err || !savedPackage) {
-        throw new Error("The updated package was not saved");
-      } else {
-        var testPackage = require("./TestPackage");
-        for (var key in testPackage) {
-          if (savedPackage[key] !== testPackage[key]) {
-            throw new Error("The local package is still different from the updated package after installation");
+    NativeCodePush.getCurrentPackage().then(
+      (savedPackage) => {
+        if (savedPackage) {
+          var testPackage = require("./TestPackage");
+          for (var key in testPackage) {
+            if (savedPackage[key] !== testPackage[key]) {
+              throw new Error("The local package is still different from the updated package after installation");
+            }
           }
+        } else {
+          throw new Error("The updated package was not saved");
         }
+      }, 
+      (err) => {
+        throw new Error("The updated package was not saved");
       }
-    });
+    );
   },
   render: function() {
     return (
