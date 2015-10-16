@@ -14,7 +14,7 @@ How does it work?
 
 A React Native application's assets (JavaScript code and other resources) are traditionally bundled up as a ```.jsbundle``` file which is loaded from the application installation location on the target device during runtime. After you submit an update to the store, the user downloads the update, and those assets will be replaced with the new assets.
 
-CodePush is here to simplify this process by allowing you to instantly update your application's assets without having to submit a new update to the store. We do this by allowing you to upload and manage your React Native app bundles on our CodePush server. In the application, we check for the presence of updated bundles on the server and install and persist them to the internal storage of the device if they are available. If a new bundle is installed, the application will reload from the updated package location.
+CodePush is here to simplify this process by allowing you to instantly update your application's assets without having to submit a new update to the store. We do this by allowing you to upload and manage your React Native app bundles on our CodePush server. In the application, we check for the presence of updated bundles on the server. If they are available, we will install and persist them to the internal storage of the device. If a new bundle is installed, the application will reload from the updated package location.
 
 For an easy way to get started, please see our [demo application](/Examples/CodePushDemoApp) and our [getting started guide](#getting-started).
 
