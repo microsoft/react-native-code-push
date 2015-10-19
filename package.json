@@ -1,5 +1,5 @@
 {
-  "name": "ReactNativeCodePush",
+  "name": "react-native-code-push",
   "version": "0.0.1",
   "main": "CodePush.js",
   "keywords": "react-native",
