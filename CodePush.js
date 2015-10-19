@@ -3,10 +3,10 @@
  * @flow
  */
 
-var CodePush = function(platform){
-  if (platform == 'ios') return require('./CodePush.ios.js');
-  else if (platform == 'android') return require('./CodePush.android.js');
-  else throw "Platform not supported: " + platform;
-};
+var Platform = require("Platform");
 
-module.exports = CodePush;
+if (Platform.OS === "android") {
+    module.exports = require("./CodePush.ios.js");
+} else if (Platform.OS === "ios") {
+    module.exports = require("./CodePush.android.js");    
+}

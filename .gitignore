@@ -98,3 +98,15 @@ xcuserdata
 *.xccheckout
 *.moved-aside
 *.xcuserstate
+
+# Intellij project files
+*.iml
+*.ipr
+*.iws
+.idea/
+
+#Gradle
+.gradletasknamecache
+.gradle/
+build/
+bin/
