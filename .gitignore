@@ -110,3 +110,6 @@ xcuserdata
 .gradle/
 build/
 bin/
+
+#Android Library
+*.aar
