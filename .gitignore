@@ -115,4 +115,4 @@ bin/
 *.aar
 
 #Android SDK properties
-android/local.properties
+*/local.properties
