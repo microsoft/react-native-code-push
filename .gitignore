@@ -113,3 +113,6 @@ bin/
 
 #Android Library
 *.aar
+
+#Android SDK properties
+android/local.properties
