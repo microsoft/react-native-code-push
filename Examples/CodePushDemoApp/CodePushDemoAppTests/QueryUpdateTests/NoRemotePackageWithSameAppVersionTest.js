@@ -2,7 +2,7 @@
 
 var React = require('react-native');
 var RCTTestModule = React.NativeModules.TestModule;
-var CodePushSdk = require('ReactNativeCodePush')('ios');
+var CodePushSdk = require('react-native-code-push');
 var NativeBridge = require('react-native').NativeModules.CodePush;
 
 var {

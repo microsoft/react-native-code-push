@@ -5,8 +5,7 @@
 'use strict';
 
 var React = require('react-native');
-var CodePushLoader = require("ReactNativeCodePush");
-var CodePush = CodePushLoader("android");
+var CodePush = require("react-native-code-push");
 var Button = require("react-native-button");
 
 var {

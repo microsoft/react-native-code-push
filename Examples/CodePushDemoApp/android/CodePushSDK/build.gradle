@@ -1,2 +1,2 @@
 configurations.create("default")
-artifacts.add("default", file('app-debug.aar'))
+artifacts.add("default", file('ReactNativeCodePush.aar'))

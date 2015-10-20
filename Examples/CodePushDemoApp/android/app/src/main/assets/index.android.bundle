@@ -1399,8 +1399,7 @@ __d('CodePushDemoApp/index.android.js',["react-native/Libraries/react-native/rea
 
 
 var React=require('react-native/Libraries/react-native/react-native.js');
-var CodePushLoader=require("CodePush");
-var CodePush=CodePushLoader("android");
+var CodePush=require("CodePush");
 var Button=require("react-native-button/Button.js");var 
 
 
@@ -1410,7 +1409,7 @@ AppRegistry=
 
 React.AppRegistry;var StyleSheet=React.StyleSheet;var Text=React.Text;var View=React.View;
 
-var CodePushDemoApp=React.createClass({
+var CodePushDemoApp=React.createClass({displayName:'CodePushDemoApp',
 componentDidMount:function(){
 this.checkUpdate();},
 
@@ -22807,7 +22806,7 @@ __d('ActivityIndicatorIOS',["React","View"],function(global, require, module, ex
 var React=require('React');
 var View=require('View');
 
-var ActivityIndicatorIOS=React.createClass({
+var ActivityIndicatorIOS=React.createClass({displayName:'ActivityIndicatorIOS',
 render:function(){
 return React.createElement(View,this.props);}});
 
@@ -22881,7 +22880,7 @@ var AccessibilityTraits=[
 
 
 
-var View=React.createClass({
+var View=React.createClass({displayName:'View',
 mixins:[NativeMethodsMixin],
 
 
@@ -23300,7 +23299,7 @@ var StyleSheet=require('StyleSheet');
 var Text=require('Text');
 var View=require('View');
 
-var DummyDatePickerIOS=React.createClass({
+var DummyDatePickerIOS=React.createClass({displayName:'DummyDatePickerIOS',
 render:function(){
 return (
 React.createElement(View,{style:[styles.dummyDatePickerIOS,this.props.style]},
@@ -23546,7 +23545,7 @@ uiViewClassName:'RCTText'};
 
 
 
-var Text=React.createClass({
+var Text=React.createClass({displayName:'Text',
 
 mixins:[Touchable.Mixin,NativeMethodsMixin],
 
@@ -24633,7 +24632,7 @@ var DRAWER_STATES=[
 
 
 
-var DrawerLayoutAndroid=React.createClass({
+var DrawerLayoutAndroid=React.createClass({displayName:'DrawerLayoutAndroid',
 statics:{
 positions:DrawerConsts.DrawerPosition},
 
@@ -24867,7 +24866,7 @@ src:true,
 resizeMode:true});
 
 
-var Image=React.createClass({
+var Image=React.createClass({displayName:'Image',
 propTypes:{
 source:PropTypes.shape({
 
@@ -25408,7 +25407,7 @@ var SCROLLVIEW_REF='listviewscroll';
 
 
 
-var ListView=React.createClass({
+var ListView=React.createClass({displayName:'ListView',
 mixins:[ScrollResponder.Mixin,TimerMixin],
 
 statics:{
@@ -26396,7 +26395,7 @@ var INNERVIEW='InnerScrollView';
 
 
 
-var ScrollView=React.createClass({
+var ScrollView=React.createClass({displayName:'ScrollView',
 propTypes:{
 
 
@@ -27644,7 +27643,7 @@ var React=require('React');
 var StyleSheet=require('StyleSheet');
 var View=require('View');
 
-var UnimplementedView=React.createClass({
+var UnimplementedView=React.createClass({displayName:'UnimplementedView',
 setNativeProps:function(){},
 
 
@@ -27684,7 +27683,7 @@ __d('StaticRenderer',["React"],function(global, require, module, exports) {  'us
 
 var React=require('React');
 
-var StaticRenderer=React.createClass({
+var StaticRenderer=React.createClass({displayName:'StaticRenderer',
 propTypes:{
 shouldUpdate:React.PropTypes.bool.isRequired,
 render:React.PropTypes.func.isRequired},
@@ -27827,7 +27826,7 @@ var requireNativeComponent=require('requireNativeComponent');
 
 
 
-var MapView=React.createClass({
+var MapView=React.createClass({displayName:'MapView',
 mixins:[NativeMethodsMixin],
 
 checkAnnotationIds:function(annotations){
@@ -28325,7 +28324,7 @@ var GESTURE_ACTIONS=[
 
 
 
-var Navigator=React.createClass({
+var Navigator=React.createClass({displayName:'Navigator',
 
 propTypes:{
 
@@ -29683,7 +29682,7 @@ index < presentedIndex?NavigatorBreadcrumbNavigationBarStyles.Left[index]:
 NavigatorBreadcrumbNavigationBarStyles.Right[index];};
 
 
-var NavigatorBreadcrumbNavigationBar=React.createClass({
+var NavigatorBreadcrumbNavigationBar=React.createClass({displayName:'NavigatorBreadcrumbNavigationBar',
 propTypes:{
 navigator:PropTypes.shape({
 push:PropTypes.func,
@@ -35885,7 +35884,7 @@ return navState.presentedIndex;}
 return navState.observedTopOfStack;};
 
 
-var NavigatorNavigationBar=React.createClass({
+var NavigatorNavigationBar=React.createClass({displayName:'NavigatorNavigationBar',
 
 propTypes:{
 navigator:React.PropTypes.object,
@@ -38404,7 +38403,7 @@ var STYLE_ATTRIBUTES=[
 
 
 
-var ProgressBarAndroid=React.createClass({
+var ProgressBarAndroid=React.createClass({displayName:'ProgressBarAndroid',
 propTypes:{
 
 
@@ -38465,7 +38464,7 @@ var StyleSheet=require('StyleSheet');
 var Text=require('Text');
 var View=require('View');
 
-var DummyProgressViewIOS=React.createClass({
+var DummyProgressViewIOS=React.createClass({displayName:'DummyProgressViewIOS',
 render:function(){
 return (
 React.createElement(View,{style:[styles.dummy,this.props.style]},
@@ -38515,7 +38514,7 @@ var StyleSheet=require('StyleSheet');
 var Text=require('Text');
 var View=require('View');
 
-var DummySegmentedControlIOS=React.createClass({
+var DummySegmentedControlIOS=React.createClass({displayName:'DummySegmentedControlIOS',
 render:function(){
 return (
 React.createElement(View,{style:[styles.dummy,this.props.style]},
@@ -38584,7 +38583,7 @@ var SWITCH='switch';
 
 
 
-var SwitchAndroid=React.createClass({
+var SwitchAndroid=React.createClass({displayName:'SwitchAndroid',
 mixins:[NativeMethodsMixin],
 
 propTypes:{
@@ -38660,7 +38659,7 @@ var StyleSheet=require('StyleSheet');
 var Text=require('Text');
 var View=require('View');
 
-var DummySwitchIOS=React.createClass({
+var DummySwitchIOS=React.createClass({displayName:'DummySwitchIOS',
 render:function(){
 return (
 React.createElement(View,{style:[styles.dummySwitchIOS,this.props.style]},
@@ -38706,7 +38705,7 @@ var React=require('React');
 var View=require('View');
 var StyleSheet=require('StyleSheet');
 
-var DummyTabBarIOS=React.createClass({
+var DummyTabBarIOS=React.createClass({displayName:'DummyTabBarIOS',
 render:function(){
 return (
 React.createElement(View,{style:[this.props.style,styles.tabGroup]},
@@ -38775,7 +38774,6 @@ textAlignVertical:true,
 keyboardType:true,
 mostRecentEventCount:true,
 multiline:true,
-numberOfLines:true,
 password:true,
 placeholder:true,
 placeholderTextColor:true,
@@ -38826,7 +38824,7 @@ var RCTTextField=requireNativeComponent('RCTTextField',null);
 
 
 
-var TextInput=React.createClass({
+var TextInput=React.createClass({displayName:'TextInput',
 propTypes:{
 
 
@@ -38920,12 +38918,6 @@ returnKeyType:PropTypes.oneOf([
 
 
 maxLength:PropTypes.number,
-
-
-
-
-
-numberOfLines:PropTypes.number,
 
 
 
@@ -39217,7 +39209,6 @@ textAlignVertical:textAlignVertical,
 keyboardType:this.props.keyboardType,
 mostRecentEventCount:this.state.mostRecentEventCount,
 multiline:this.props.multiline,
-numberOfLines:this.props.numberOfLines,
 onFocus:this._onFocus,
 onBlur:this._onBlur,
 onChange:this._onChange,
@@ -40125,7 +40116,7 @@ var PRESS_RECT_OFFSET={top:20,left:20,right:20,bottom:30};
 
 
 
-var TouchableWithoutFeedback=React.createClass({
+var TouchableWithoutFeedback=React.createClass({displayName:'TouchableWithoutFeedback',
 mixins:[TimerMixin,Touchable.Mixin],
 
 propTypes:{
@@ -40332,7 +40323,7 @@ var createReactNativeComponentClass=require('createReactNativeComponentClass');
 
 
 
-var ToolbarAndroid=React.createClass({
+var ToolbarAndroid=React.createClass({displayName:'ToolbarAndroid',
 mixins:[NativeMethodsMixin],
 
 propTypes:{
@@ -40518,7 +40509,7 @@ underlayColor:'black'};
 
 
 
-var TouchableHighlight=React.createClass({
+var TouchableHighlight=React.createClass({displayName:'TouchableHighlight',
 propTypes:_extends({},
 TouchableWithoutFeedback.propTypes,{
 
@@ -41007,7 +40998,7 @@ var PRESS_RECT_OFFSET={top:20,left:20,right:20,bottom:30};
 
 
 
-var TouchableNativeFeedback=React.createClass({
+var TouchableNativeFeedback=React.createClass({displayName:'TouchableNativeFeedback',
 propTypes:_extends({},
 TouchableWithoutFeedback.propTypes,{
 
@@ -41202,7 +41193,7 @@ var keyOf=require('keyOf');
 
 
 
-var TouchableOpacity=React.createClass({
+var TouchableOpacity=React.createClass({displayName:'TouchableOpacity',
 mixins:[TimerMixin,Touchable.Mixin,NativeMethodsMixin],
 
 propTypes:_extends({},
@@ -43321,7 +43312,7 @@ LOADING:null,
 ERROR:null});
 
 
-var WebView=React.createClass({
+var WebView=React.createClass({displayName:'WebView',
 
 propTypes:{
 renderError:PropTypes.func,
@@ -43817,7 +43808,7 @@ var invariant=require('invariant');
 
 require('BackAndroid');
 
-var AppContainer=React.createClass({
+var AppContainer=React.createClass({displayName:'AppContainer',
 mixins:[Subscribable.Mixin],
 
 getInitialState:function(){
@@ -44144,7 +44135,7 @@ var PropTypes=React.PropTypes;
 
 
 
-var InspectorOverlay=React.createClass({
+var InspectorOverlay=React.createClass({displayName:'InspectorOverlay',
 propTypes:{
 inspected:PropTypes.shape({
 frame:PropTypes.object,
@@ -44533,7 +44524,7 @@ var View=require('View');
 var flattenStyle=require('flattenStyle');
 var mapWithSeparator=require('mapWithSeparator');
 
-var ElementProperties=React.createClass({
+var ElementProperties=React.createClass({displayName:'ElementProperties',
 propTypes:{
 hierarchy:PropTypes.array.isRequired,
 style:PropTypes.oneOfType([
@@ -44831,7 +44822,7 @@ var StyleSheet=require('StyleSheet');
 var Text=require('Text');
 var View=require('View');
 
-var PerformanceOverlay=React.createClass({
+var PerformanceOverlay=React.createClass({displayName:'PerformanceOverlay',
 render:function(){
 var perfLogs=PerformanceLogger.getTimespans();
 var items=[];
@@ -44908,10 +44899,7 @@ var lastUsedTag=0;
 
 
 
-
-
-
-var Portal=React.createClass({
+var Portal=React.createClass({displayName:'Portal',
 statics:{
 
 
@@ -50543,343 +50531,19 @@ Object.keys(componentOrElement));}
 
 module.exports = findDOMNode;
 });
-__d('CodePush',["CodePush-ios","CodePush-android"],function(global, require, module, exports) {  var 
+__d('CodePush',["Platform","CodePush-android","CodePush-ios"],function(global, require, module, exports) {  var 
 
 
 
 
-CodePush=function(platform){
-if(platform == 'ios')return require('CodePush-ios');else 
-if(platform == 'android')return require('CodePush-android');else 
-throw "Platform not supported: " + platform;};
+Platform=require("Platform");
 
-
-module.exports = CodePush;
+if(Platform.OS === "android"){
+module.exports = require("CodePush-android");}else 
+if(Platform.OS === "ios"){
+module.exports = require("CodePush-ios");}
 });
-__d('CodePush-ios',["extend/index.js","react-native/Libraries/react-native/react-native.js","ReactNativeCodePush/request-fetch-adapter.js","code-push/script/acquisition-sdk.js","ReactNativeCodePush/package-mixins.js"],function(global, require, module, exports) {  'use strict';
-
-
-
-
-
-
-var extend=require("extend/index.js");
-var NativeCodePush=require('react-native/Libraries/react-native/react-native.js').NativeModules.CodePush;
-var requestFetchAdapter=require("ReactNativeCodePush/request-fetch-adapter.js");
-var Sdk=require("code-push/script/acquisition-sdk.js").AcquisitionManager;
-var packageMixins=require("ReactNativeCodePush/package-mixins.js")(NativeCodePush);
-
-
-function setUpTestDependencies(testSdk,testConfiguration,testNativeBridge){
-if(testSdk)sdk = testSdk;
-if(testConfiguration)config = testConfiguration;
-if(testNativeBridge)NativeCodePush = testNativeBridge;}
-
-
-var getConfiguration=(function(){
-var config;
-return function getConfiguration(){
-if(config){
-return Promise.resolve(config);}else 
-{
-return NativeCodePush.getConfiguration().
-then(function(configuration){
-if(!config)config = configuration;
-return config;});}};})();
-
-
-
-
-
-var getSdk=(function(){
-var sdk;
-return function getSdk(){
-if(sdk){
-return Promise.resolve(sdk);}else 
-{
-return getConfiguration().
-then(function(configuration){
-sdk = new Sdk(requestFetchAdapter,configuration);
-return sdk;});}};})();
-
-
-
-
-
-function checkForUpdate(){
-var config;
-var sdk;
-return getConfiguration().
-then(function(configResult){
-config = configResult;
-return getSdk();}).
-
-then(function(sdkResult){
-sdk = sdkResult;
-return getCurrentPackage();}).
-
-then(function(localPackage){
-var queryPackage={appVersion:config.appVersion};
-if(localPackage && localPackage.appVersion === config.appVersion){
-queryPackage = localPackage;}
-
-
-return new Promise(function(resolve,reject){
-sdk.queryUpdateWithCurrentPackage(queryPackage,function(err,update){
-if(err)return reject(err);
-if(update){
-resolve(extend({},update,packageMixins.remote));}else 
-{
-resolve(update);}});});});}
-
-
-
-
-
-
-function getCurrentPackage(){
-return NativeCodePush.getCurrentPackage();}
-
-
-function notifyApplicationReady(){
-return NativeCodePush.notifyApplicationReady();}
-
-
-var CodePush={
-getConfiguration:getConfiguration,
-checkForUpdate:checkForUpdate,
-getCurrentPackage:getCurrentPackage,
-notifyApplicationReady:notifyApplicationReady,
-setUpTestDependencies:setUpTestDependencies};
-
-
-module.exports = CodePush;
-});
-__d('extend/index.js',[],function(global, require, module, exports) {  'use strict';
-
-var hasOwn=Object.prototype.hasOwnProperty;
-var toStr=Object.prototype.toString;
-
-var isArray=function isArray(arr){
-if(typeof Array.isArray === 'function'){
-return Array.isArray(arr);}
-
-
-return toStr.call(arr) === '[object Array]';};
-
-
-var isPlainObject=function isPlainObject(obj){
-if(!obj || toStr.call(obj) !== '[object Object]'){
-return false;}
-
-
-var hasOwnConstructor=hasOwn.call(obj,'constructor');
-var hasIsPrototypeOf=obj.constructor && obj.constructor.prototype && hasOwn.call(obj.constructor.prototype,'isPrototypeOf');
-
-if(obj.constructor && !hasOwnConstructor && !hasIsPrototypeOf){
-return false;}
-
-
-
-
-var key;
-for(key in obj) {}
-
-return typeof key === 'undefined' || hasOwn.call(obj,key);};
-
-
-module.exports = function extend(){
-var options,name,src,copy,copyIsArray,clone,
-target=arguments[0],
-i=1,
-length=arguments.length,
-deep=false;
-
-
-if(typeof target === 'boolean'){
-deep = target;
-target = arguments[1] || {};
-
-i = 2;}else 
-if(typeof target !== 'object' && typeof target !== 'function' || target == null){
-target = {};}
-
-
-for(;i < length;++i) {
-options = arguments[i];
-
-if(options != null){
-
-for(name in options) {
-src = target[name];
-copy = options[name];
-
-
-if(target !== copy){
-
-if(deep && copy && (isPlainObject(copy) || (copyIsArray = isArray(copy)))){
-if(copyIsArray){
-copyIsArray = false;
-clone = src && isArray(src)?src:[];}else 
-{
-clone = src && isPlainObject(src)?src:{};}
-
-
-
-target[name] = extend(deep,clone,copy);}else 
-
-
-if(typeof copy !== 'undefined'){
-target[name] = copy;}}}}}
-
-
-
-
-
-
-
-return target;};
-});
-__d('ReactNativeCodePush/request-fetch-adapter.js',[],function(global, require, module, exports) {  module.exports.request = function request(verb,url,body,callback){
-if(typeof body === "function"){
-callback = body;
-body = null;}
-
-
-var headers={
-'Accept':'application/json',
-'Content-Type':'application/json'};
-
-
-if(body && typeof body === "object"){
-body = JSON.stringify(body);}
-
-
-var statusCode;
-
-fetch(url,{
-method:verb,
-headers:headers,
-body:body}).
-then(function(response){
-statusCode = response.status;
-return response.text();}).
-then(function(body){
-callback(null,{statusCode:statusCode,body:body});}).
-catch(function(err){
-callback(err);});};
-});
-__d('code-push/script/acquisition-sdk.js',[],function(global, require, module, exports) {  var 
-AcquisitionManager=(function(){
-function AcquisitionManager(httpRequester,configuration){
-this._httpRequester = httpRequester;
-this._serverUrl = configuration.serverUrl;
-if(this._serverUrl.slice(-1) !== "/"){
-this._serverUrl += "/";}
-
-this._deploymentKey = configuration.deploymentKey;
-this._ignoreAppVersion = configuration.ignoreAppVersion;}
-
-AcquisitionManager.prototype.queryUpdateWithCurrentPackage = function(currentPackage,callback){
-var _this=this;
-if(!currentPackage || !currentPackage.appVersion){
-throw new Error("Calling common acquisition SDK with incorrect package");}
-
-var updateRequest={
-deploymentKey:this._deploymentKey,
-appVersion:currentPackage.appVersion,
-packageHash:currentPackage.packageHash,
-isCompanion:this._ignoreAppVersion};
-
-var requestUrl=this._serverUrl + "updateCheck?" + queryStringify(updateRequest);
-this._httpRequester.request(0,requestUrl,function(error,response){
-if(error){
-callback(error,null);}
-
-if(response.statusCode !== 200){
-callback(new Error(response.statusCode + ": " + response.body),null);
-return;}
-
-try{
-var responseObject=JSON.parse(response.body);
-var updateInfo=responseObject.updateInfo;}
-
-catch(error) {
-callback(error,null);}
-
-if(!updateInfo){
-callback(error,null);}else 
-
-if(updateInfo.updateAppVersion){
-callback(null,{updateAppVersion:true,appVersion:updateInfo.appVersion});
-return;}else 
-
-if(!updateInfo.isAvailable){
-callback(null,null);
-return;}
-
-var remotePackage={
-deploymentKey:_this._deploymentKey,
-description:updateInfo.description,
-label:updateInfo.label,
-appVersion:updateInfo.appVersion,
-isMandatory:updateInfo.isMandatory,
-packageHash:updateInfo.packageHash,
-packageSize:updateInfo.packageSize,
-downloadUrl:updateInfo.downloadURL};
-
-callback(null,remotePackage);});};
-
-
-return AcquisitionManager;})();
-
-exports.AcquisitionManager = AcquisitionManager;
-function queryStringify(object){
-var queryString="";
-var isFirst=true;
-for(var property in object) {
-if(object.hasOwnProperty(property)){
-var value=object[property];
-if(!isFirst){
-queryString += "&";}
-
-queryString += encodeURIComponent(property) + "=";
-if(value !== null && typeof value !== "undefined"){
-queryString += encodeURIComponent(value);}
-
-isFirst = false;}}
-
-
-return queryString;}
-});
-__d('ReactNativeCodePush/package-mixins.js',["extend/index.js"],function(global, require, module, exports) {  var extend=require("extend/index.js");
-
-module.exports = function(NativeCodePush){
-var remote={
-download:function download(){
-
-
-return NativeCodePush.downloadUpdate(this).
-then(function(downloadedPackage){
-return extend({},downloadedPackage,local);});},
-
-
-abortDownload:function abortDownload(){
-return NativeCodePush.abortDownload(this);}};
-
-
-
-var local={
-apply:function apply(){var rollbackTimeout=arguments.length <= 0 || arguments[0] === undefined?0:arguments[0];
-return NativeCodePush.applyUpdate(this,rollbackTimeout);}};
-
-
-
-return {
-remote:remote,
-local:local};};
-});
-__d('CodePush-android',["extend/index.js","react-native/Libraries/react-native/react-native.js","code-push/script/acquisition-sdk.js","ReactNativeCodePush/request-fetch-adapter.js"],function(global, require, module, exports) {  'use strict';
+__d('CodePush-android',["extend/index.js","react-native/Libraries/react-native/react-native.js","code-push/script/acquisition-sdk.js","react-native-code-push/request-fetch-adapter.js"],function(global, require, module, exports) {  'use strict';
 
 
 
@@ -50889,7 +50553,7 @@ __d('CodePush-android',["extend/index.js","react-native/Libraries/react-native/r
 var extend=require("extend/index.js");
 var NativeCodePush=require('react-native/Libraries/react-native/react-native.js').NativeModules.CodePush;
 var Sdk=require("code-push/script/acquisition-sdk.js").AcquisitionManager;
-var requestFetchAdapter=require("ReactNativeCodePush/request-fetch-adapter.js");
+var requestFetchAdapter=require("react-native-code-push/request-fetch-adapter.js");
 
 var getConfiguration=(function(){
 var config;
@@ -50991,6 +50655,369 @@ getCurrentPackage:getCurrentPackage};
 
 module.exports = CodePush;
 });
+__d('extend/index.js',[],function(global, require, module, exports) {  'use strict';
+
+var hasOwn=Object.prototype.hasOwnProperty;
+var toStr=Object.prototype.toString;
+
+var isArray=function isArray(arr){
+if(typeof Array.isArray === 'function'){
+return Array.isArray(arr);}
+
+
+return toStr.call(arr) === '[object Array]';};
+
+
+var isPlainObject=function isPlainObject(obj){
+if(!obj || toStr.call(obj) !== '[object Object]'){
+return false;}
+
+
+var hasOwnConstructor=hasOwn.call(obj,'constructor');
+var hasIsPrototypeOf=obj.constructor && obj.constructor.prototype && hasOwn.call(obj.constructor.prototype,'isPrototypeOf');
+
+if(obj.constructor && !hasOwnConstructor && !hasIsPrototypeOf){
+return false;}
+
+
+
+
+var key;
+for(key in obj) {}
+
+return typeof key === 'undefined' || hasOwn.call(obj,key);};
+
+
+module.exports = function extend(){
+var options,name,src,copy,copyIsArray,clone,
+target=arguments[0],
+i=1,
+length=arguments.length,
+deep=false;
+
+
+if(typeof target === 'boolean'){
+deep = target;
+target = arguments[1] || {};
+
+i = 2;}else 
+if(typeof target !== 'object' && typeof target !== 'function' || target == null){
+target = {};}
+
+
+for(;i < length;++i) {
+options = arguments[i];
+
+if(options != null){
+
+for(name in options) {
+src = target[name];
+copy = options[name];
+
+
+if(target !== copy){
+
+if(deep && copy && (isPlainObject(copy) || (copyIsArray = isArray(copy)))){
+if(copyIsArray){
+copyIsArray = false;
+clone = src && isArray(src)?src:[];}else 
+{
+clone = src && isPlainObject(src)?src:{};}
+
+
+
+target[name] = extend(deep,clone,copy);}else 
+
+
+if(typeof copy !== 'undefined'){
+target[name] = copy;}}}}}
+
+
+
+
+
+
+
+return target;};
+});
+__d('code-push/script/acquisition-sdk.js',[],function(global, require, module, exports) {  var 
+AcquisitionStatus=(function(){
+function AcquisitionStatus(){}
+
+AcquisitionStatus.DeploymentSucceeded = "DeploymentSucceeded";
+AcquisitionStatus.DeploymentFailed = "DeploymentFailed";
+return AcquisitionStatus;})();
+
+exports.AcquisitionStatus = AcquisitionStatus;
+var AcquisitionManager=(function(){
+function AcquisitionManager(httpRequester,configuration){
+this._httpRequester = httpRequester;
+this._serverUrl = configuration.serverUrl;
+if(this._serverUrl.slice(-1) !== "/"){
+this._serverUrl += "/";}
+
+this._deploymentKey = configuration.deploymentKey;
+this._ignoreAppVersion = configuration.ignoreAppVersion;}
+
+AcquisitionManager.prototype.queryUpdateWithCurrentPackage = function(currentPackage,callback){
+var _this=this;
+if(!currentPackage || !currentPackage.appVersion){
+throw new Error("Calling common acquisition SDK with incorrect package");}
+
+var updateRequest={
+deploymentKey:this._deploymentKey,
+appVersion:currentPackage.appVersion,
+packageHash:currentPackage.packageHash,
+isCompanion:this._ignoreAppVersion};
+
+var requestUrl=this._serverUrl + "updateCheck?" + queryStringify(updateRequest);
+this._httpRequester.request(0,requestUrl,function(error,response){
+if(error){
+callback(error,null);
+return;}
+
+if(response.statusCode !== 200){
+callback(new Error(response.statusCode + ": " + response.body),null);
+return;}
+
+try{
+var responseObject=JSON.parse(response.body);
+var updateInfo=responseObject.updateInfo;}
+
+catch(error) {
+callback(error,null);
+return;}
+
+if(!updateInfo){
+callback(error,null);
+return;}else 
+
+if(updateInfo.updateAppVersion){
+callback(null,{updateAppVersion:true,appVersion:updateInfo.appVersion});
+return;}else 
+
+if(!updateInfo.isAvailable){
+callback(null,null);
+return;}
+
+var remotePackage={
+deploymentKey:_this._deploymentKey,
+description:updateInfo.description,
+label:updateInfo.label,
+appVersion:updateInfo.appVersion,
+isMandatory:updateInfo.isMandatory,
+packageHash:updateInfo.packageHash,
+packageSize:updateInfo.packageSize,
+downloadUrl:updateInfo.downloadURL};
+
+callback(null,remotePackage);});};
+
+
+AcquisitionManager.prototype.reportStatus = function(status,message,callback){
+var url=this._serverUrl + "reportStatus";
+var body;
+switch(status){
+case AcquisitionStatus.DeploymentSucceeded:
+case AcquisitionStatus.DeploymentFailed:
+url += "/deploy";
+body = JSON.stringify({deploymentKey:this._deploymentKey,status:status,message:message});
+break;
+default:
+if(callback){
+callback(new Error("Unrecognized status."),null);}
+
+return;}
+
+this._httpRequester.request(2,url,body,function(error,response){
+if(callback){
+if(error){
+callback(error,null);
+return;}
+
+if(response.statusCode !== 200){
+callback(new Error(response.statusCode + ": " + response.body),null);
+return;}
+
+callback(null,null);}});};
+
+
+
+return AcquisitionManager;})();
+
+exports.AcquisitionManager = AcquisitionManager;
+function queryStringify(object){
+var queryString="";
+var isFirst=true;
+for(var property in object) {
+if(object.hasOwnProperty(property)){
+var value=object[property];
+if(!isFirst){
+queryString += "&";}
+
+queryString += encodeURIComponent(property) + "=";
+if(value !== null && typeof value !== "undefined"){
+queryString += encodeURIComponent(value);}
+
+isFirst = false;}}
+
+
+return queryString;}
+});
+__d('react-native-code-push/request-fetch-adapter.js',[],function(global, require, module, exports) {  module.exports.request = function request(verb,url,body,callback){
+if(typeof body === "function"){
+callback = body;
+body = null;}
+
+
+var headers={
+'Accept':'application/json',
+'Content-Type':'application/json'};
+
+
+if(body && typeof body === "object"){
+body = JSON.stringify(body);}
+
+
+var statusCode;
+
+fetch(url,{
+method:verb,
+headers:headers,
+body:body}).
+then(function(response){
+statusCode = response.status;
+return response.text();}).
+then(function(body){
+callback(null,{statusCode:statusCode,body:body});}).
+catch(function(err){
+callback(err);});};
+});
+__d('CodePush-ios',["extend/index.js","react-native/Libraries/react-native/react-native.js","react-native-code-push/request-fetch-adapter.js","code-push/script/acquisition-sdk.js","react-native-code-push/package-mixins.js"],function(global, require, module, exports) {  'use strict';
+
+
+
+
+
+
+var extend=require("extend/index.js");
+var NativeCodePush=require('react-native/Libraries/react-native/react-native.js').NativeModules.CodePush;
+var requestFetchAdapter=require("react-native-code-push/request-fetch-adapter.js");
+var Sdk=require("code-push/script/acquisition-sdk.js").AcquisitionManager;
+var packageMixins=require("react-native-code-push/package-mixins.js")(NativeCodePush);
+
+
+function setUpTestDependencies(testSdk,testConfiguration,testNativeBridge){
+if(testSdk)sdk = testSdk;
+if(testConfiguration)config = testConfiguration;
+if(testNativeBridge)NativeCodePush = testNativeBridge;}
+
+
+var getConfiguration=(function(){
+var config;
+return function getConfiguration(){
+if(config){
+return Promise.resolve(config);}else 
+{
+return NativeCodePush.getConfiguration().
+then(function(configuration){
+if(!config)config = configuration;
+return config;});}};})();
+
+
+
+
+
+var getSdk=(function(){
+var sdk;
+return function getSdk(){
+if(sdk){
+return Promise.resolve(sdk);}else 
+{
+return getConfiguration().
+then(function(configuration){
+sdk = new Sdk(requestFetchAdapter,configuration);
+return sdk;});}};})();
+
+
+
+
+
+function checkForUpdate(){
+var config;
+var sdk;
+return getConfiguration().
+then(function(configResult){
+config = configResult;
+return getSdk();}).
+
+then(function(sdkResult){
+sdk = sdkResult;
+return getCurrentPackage();}).
+
+then(function(localPackage){
+var queryPackage={appVersion:config.appVersion};
+if(localPackage && localPackage.appVersion === config.appVersion){
+queryPackage = localPackage;}
+
+
+return new Promise(function(resolve,reject){
+sdk.queryUpdateWithCurrentPackage(queryPackage,function(err,update){
+if(err)return reject(err);
+if(update){
+resolve(extend({},update,packageMixins.remote));}else 
+{
+resolve(update);}});});});}
+
+
+
+
+
+
+function getCurrentPackage(){
+return NativeCodePush.getCurrentPackage();}
+
+
+function notifyApplicationReady(){
+return NativeCodePush.notifyApplicationReady();}
+
+
+var CodePush={
+getConfiguration:getConfiguration,
+checkForUpdate:checkForUpdate,
+getCurrentPackage:getCurrentPackage,
+notifyApplicationReady:notifyApplicationReady,
+setUpTestDependencies:setUpTestDependencies};
+
+
+module.exports = CodePush;
+});
+__d('react-native-code-push/package-mixins.js',["extend/index.js"],function(global, require, module, exports) {  var extend=require("extend/index.js");
+
+module.exports = function(NativeCodePush){
+var remote={
+download:function download(){
+
+
+return NativeCodePush.downloadUpdate(this).
+then(function(downloadedPackage){
+return extend({},downloadedPackage,local);});},
+
+
+abortDownload:function abortDownload(){
+return NativeCodePush.abortDownload(this);}};
+
+
+
+var local={
+apply:function apply(){var rollbackTimeout=arguments.length <= 0 || arguments[0] === undefined?0:arguments[0];
+return NativeCodePush.applyUpdate(this,rollbackTimeout);}};
+
+
+
+return {
+remote:remote,
+local:local};};
+});
 __d('react-native-button/Button.js',["react-native/Libraries/react-native/react-native.js","react-native-button/coalesceNonElementChildren.js"],function(global, require, module, exports) {  'use strict';var _extends=Object.assign || function(target){for(var i=1;i < arguments.length;i++) {var source=arguments[i];for(var key in source) {if(Object.prototype.hasOwnProperty.call(source,key)){target[key] = source[key];}}}return target;};
 
 var React=require('react-native/Libraries/react-native/react-native.js');var 
@@ -51006,7 +51033,7 @@ var coalesceNonElementChildren=require('react-native-button/coalesceNonElementCh
 
 var systemButtonOpacity=0.2;
 
-var Button=React.createClass({
+var Button=React.createClass({displayName:'Button',
 propTypes:_extends({},
 TouchableOpacity.propTypes,{
 disabled:PropTypes.bool,
