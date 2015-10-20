@@ -57,25 +57,25 @@ var FirstUpdateTest = React.createClass({
     NativeBridge.setUsingTestFolder(true);
     CodePushSdk.setUpTestDependencies(mockAcquisitionSdk, mockConfiguration, NativeBridge);
     
-    NativeBridge.removeLocalPackage(function(err){
-      if (err) {
-        throw new Error('Setup: Error removing local package');
-      } else {
-        callWhenDone();
-      }
-    });
+    CodePushSdk.getCurrentPackage = function () {
+      return Promise.resolve(null);
+    }
+    callWhenDone();
   },
   
   runTest() {
-    CodePushSdk.queryUpdate((err, update) => {
-      if (update) {
-        this.setState({done: true}, RCTTestModule.markTestCompleted);
-      } else if (err) {
+    CodePushSdk.checkForUpdate().then(
+      (update) => {
+        if (update) {
+          throw new Error('SDK should return a package when there is an update');
+        } else {
+          this.setState({done: true}, RCTTestModule.markTestCompleted);
+        }
+      },
+      (err) => {
         throw new Error(err.message);
-      } else {
-        throw new Error('SDK should return a package when there is an update');
-      }
-    });
+      },
+    );
   },
 
   render() {

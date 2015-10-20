@@ -8,6 +8,7 @@
 #import "RCTRootView.h"
 #import "RCTRedBox.h"
 #import "RCTAssert.h"
+#import "RCTLog.h"
 
 #define FB_REFERENCE_IMAGE_DIR "\"$(SOURCE_ROOT)/$(PROJECT_NAME)Tests/ReferenceImages\""
 
@@ -26,7 +27,7 @@
 
 - (void)setUp
 {
-  app = @"CodePushDemoAppTests/ApplyUpdateTests/ApplyUpdateTestApp";
+  app = @"CodePushDemoAppTests/ApplyUpdateTests/ApplyUpdateTestApp.ios";
 #if __LP64__
   RCTAssert(false, @"Tests should be run on 32-bit device simulators (e.g. iPhone 5)");
 #endif
@@ -66,16 +67,24 @@
   RCTBridge *bridge = [[RCTBridge alloc] initWithBundleURL:scriptURL
                                             moduleProvider:nil
                                              launchOptions:nil];
-  RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge moduleName:@"DownloadAndApplyUpdateTest"];
-  
+  RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge
+                                                   moduleName:@"DownloadAndApplyUpdateTest"
+                                                   initialProperties:nil];
+
   NSDate *date = [NSDate dateWithTimeIntervalSinceNow:TIMEOUT_SECONDS];
   BOOL foundElement = NO;
-  NSString *redboxError = nil;
+  
+  __block NSString *redboxError = nil;
+  RCTSetLogFunction(^(RCTLogLevel level, NSString *fileName, NSNumber *lineNumber, NSString *message) {
+    if (level >= RCTLogLevelError) {
+      redboxError = message;
+    }
+  });
   
   while ([date timeIntervalSinceNow] > 0 && !foundElement && !redboxError) {
     [[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
     [[NSRunLoop mainRunLoop] runMode:NSRunLoopCommonModes beforeDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
-    redboxError = [[RCTRedBox sharedInstance] currentErrorMessage];
+    
     UIViewController *vc = [UIApplication sharedApplication].delegate.window.rootViewController;
     foundElement = [self findSubviewInView:vc.view matching:^BOOL(UIView *view) {
       if ([NSStringFromClass([view class]) isEqualToString:@"RCTText"]){
