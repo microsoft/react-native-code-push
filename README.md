@@ -3,7 +3,7 @@ react-native-code-push
 
 React Native module for deploying script updates using the CodePush service.
 
-Installation
+Installation (iOS)
 ---
 
 ```
@@ -52,7 +52,7 @@ Methods
 ---
 
 * [checkForUpdate](#codepushcheckforupdate): Checks the service for updates
-* [notifyApplicationReady](#codepushnotifyapplicationready): Notifies the plugin that the update operation succeeded.
+* [notifyApplicationReady](#codepushnotifyapplicationready): Notifies the plugin that the update operation succeeded. **Note: currently only supported in iOS**.
 * [getCurrentPackage](#codepushgetcurrentpackage): Gets information about the currently applied package.
 
 Objects
@@ -106,7 +106,7 @@ Contains details about an update package that has been downloaded locally or alr
 - __apply(rollbackTimeout): Promise__: Applies this package to the application. The application will be reloaded with this package and on every application launch this package will be loaded.
 If the rollbackTimeout parameter is provided, the application will wait for a codePush.notifyApplicationReady() for the given number of milliseconds.
 If codePush.notifyApplicationReady() is called before the time period specified by rollbackTimeout, the apply operation is considered a success.
-Otherwise, the apply operation will be marked as failed, and the application is reverted to its previous version.
+Otherwise, the apply operation will be marked as failed, and the application is reverted to its previous version. **Note: Rollbacks are currently only supported for iOS.**
 
 ## RemotePackage
 Contains details about an update package that is available for download.
