@@ -4,7 +4,7 @@
   "main": "CodePush.ios.js",
   "keywords": "react-native",
   "dependencies": {
-    "code-push": "file:../website/sdk/bin",
+    "code-push": "^1.0.0-beta",
     "extend": "3.0.0"
   },
   "devDependencies": {
