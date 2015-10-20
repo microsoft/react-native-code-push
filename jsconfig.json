@@ -1,0 +1,13 @@
+{
+	"compilerOptions": {
+		"target": "ES6",
+		"module": "commonjs"
+	},
+	"files": [
+		"CodePush.ios.js",
+		"CodePush.android.js",
+		"package-mixins.js",
+		"Examples/CodePushDemoApp/index.ios.js",
+		"Examples/CodePushDemoApp/index.android.js"
+	]
+}

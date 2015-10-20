@@ -1,13 +1,13 @@
 {
   "name": "react-native-code-push",
   "version": "0.0.1",
-  "main": "CodePush.ios.js",
+  "main": "CodePush.js",
   "keywords": "react-native",
   "dependencies": {
-    "code-push": "file:../website/sdk/bin",
+    "code-push": "1.0.0-beta",
     "extend": "^3.0.0"
   },
   "devDependencies": {
-    "react-native": "^0.10.0"
+    "react-native": "^0.11.0"
   }
 }
