@@ -61,7 +61,7 @@ After installing the React Native CodePush plugin, open your React Native projec
 
 Next, go to ```File > Project Structure```. Click on ```app``` (or whatever your main project module is named), go to ```Dependencies```, click on the "+" sign at the bottom and add the new ```ReactNativeCodePush``` module as a Module Dependency. Click Ok. 
 
-![Add Module Dependency](https://cloud.githubusercontent.com/assets/8598682/10624328/414e2cc6-774c-11e5-9a52-d4551f01e7a1.png)
+![Add Module Dependency](https://cloud.githubusercontent.com/assets/8598682/10624898/f7f1e5b2-7751-11e5-9c60-cdefd780a964.png)
 
 After that, copy and paste this [code](/Examples/CodePushDemoApp/android/app/src/main/java/com/codepushdemoapp/MainActivity.java) into your ```MainActivity.java```.
 
