@@ -55,9 +55,9 @@ Installation (Android)
 npm install --save react-native-code-push
 ```
 
-Then, download [ReactNativeCodePush.aar](https://github.com/Microsoft/react-native-code-push/blob/first-check-in-for-android/Examples/CodePushDemoApp/android/CodePushSDK/ReactNativeCodePush.aar?raw=true)
+Then, download [ReactNativeCodePush.aar](https://github.com/Microsoft/react-native-code-push/blob/first-check-in-for-android/Examples/CodePushDemoApp/android/CodePushSDK/ReactNativeCodePush.aar?raw=true).
 
-After installing the React Native CodePush plugin, open your React Native project in Android Studio. Go to ```File > New Module > Import .JAR/.AAR Package``` and click Next. Browse to your downloaded .AAR file and click Next. This will import the library package into your Project bundle.
+After installing the React Native CodePush plugin and downloading the AAR library package, open your React Native project in Android Studio. Go to ```File > New Module > Import .JAR/.AAR Package``` and click Next. Browse to your downloaded .AAR file and click Next. This will import the library package into your Project bundle.
 
 Next, go to ```File > Project Structure```. Click on ```app``` (or whatever your main project module is named), go to ```Dependencies```, click on the "+" sign at the bottom and add the new ```ReactNativeCodePush``` module as a Module Dependency. Click Ok. 
 
