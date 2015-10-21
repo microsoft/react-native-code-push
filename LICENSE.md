@@ -1,4 +1,4 @@
-Code Push React Native Plugin ver. 1.0
+Microsoft CodePush Plugin for React Native
 
 Copyright (c) Microsoft Corporation
 
