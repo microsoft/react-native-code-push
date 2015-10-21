@@ -1,8 +1,20 @@
 {
   "name": "react-native-code-push",
-  "version": "0.0.1",
+  "version": "1.0.0-beta",
+  "description": "React Native plugin for the CodePush service",
   "main": "CodePush.ios.js",
-  "keywords": "react-native",
+  "homepage": "http://microsoft.github.io/code-push",
+  "keywords": [
+    "react-native",
+    "code",
+    "push"
+  ],
+  "author": "Microsoft Corporation",
+  "license": "Licensed under the MIT license.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Microsoft/react-native-code-push"
+  },
   "dependencies": {
     "code-push": "^1.0.0-beta",
     "extend": "3.0.0"
