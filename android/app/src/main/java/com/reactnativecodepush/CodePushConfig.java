@@ -12,67 +12,48 @@ import java.util.Properties;
 
 public class CodePushConfig {
 
-    WritableMap config;
-    Properties configProperties;
-
     public static final String APP_VERSION_KEY = "appVersion";
-    public static final String BUILD_VERSION_KEY = "buildVersion";
     public static final String DEPLOYMENT_KEY_KEY = "deploymentKey";
     public static final String SERVER_URL_KEY = "serverUrl";
 
-    public CodePushConfig(Properties configProperties) {
-        this.configProperties = configProperties;
-        config = Arguments.createMap();
-        config.putString(APP_VERSION_KEY, configProperties.getProperty(APP_VERSION_KEY));
-        config.putString(BUILD_VERSION_KEY, configProperties.getProperty(BUILD_VERSION_KEY));
-        config.putString(DEPLOYMENT_KEY_KEY, configProperties.getProperty(DEPLOYMENT_KEY_KEY));
-        config.putString(SERVER_URL_KEY,
-                configProperties.getProperty(SERVER_URL_KEY) == null
-                        ? "http://localhost:3000/"
-                        : configProperties.getProperty(SERVER_URL_KEY));
+    private static String appVersion;
+    private static String deploymentKey;
+    private static String serverUrl = "https://codepush.azurewebsites.net/";
+
+    public CodePushConfig(String appVersion, String deploymentKey) {
+        this.appVersion = appVersion;
+        this.deploymentKey = deploymentKey;
     }
 
     public void setDeploymentKey(String deploymentKey) {
-        config.putString(DEPLOYMENT_KEY_KEY, deploymentKey);
+        this.deploymentKey = deploymentKey;
     }
 
     public String getDeploymentKey() {
-        return config.getString(DEPLOYMENT_KEY_KEY);
+        return deploymentKey;
     }
 
     public void setServerUrl(String serverUrl) {
-        config.putString(SERVER_URL_KEY, serverUrl);
+        this.serverUrl = serverUrl;
     }
 
     public String getServerUrl() {
-        return config.getString(SERVER_URL_KEY);
+        return serverUrl;
     }
 
     public void setAppVersion(String appVersion) {
-        config.putString(APP_VERSION_KEY, appVersion);
+        this.appVersion = appVersion;
     }
 
     public String getAppVersion(){
-        return config.getString(APP_VERSION_KEY);
-    }
-
-    public void setBuildVersion(String buildVersion) {
-        config.putString(BUILD_VERSION_KEY, buildVersion);
-    }
-
-    public String getBuildVersion() {
-        return config.getString(BUILD_VERSION_KEY);
+        return appVersion;
     }
 
     public WritableMap getConfiguration() {
-        config = Arguments.createMap();
-        config.putString(APP_VERSION_KEY, configProperties.getProperty(APP_VERSION_KEY));
-        config.putString(BUILD_VERSION_KEY, configProperties.getProperty(BUILD_VERSION_KEY));
-        config.putString(DEPLOYMENT_KEY_KEY, configProperties.getProperty(DEPLOYMENT_KEY_KEY));
-        config.putString(SERVER_URL_KEY,
-                configProperties.getProperty(SERVER_URL_KEY) == null
-                        ? "http://localhost:3000/"
-                        : configProperties.getProperty(SERVER_URL_KEY));
+        WritableMap config = Arguments.createMap();
+        config.putString(APP_VERSION_KEY, appVersion);
+        config.putString(DEPLOYMENT_KEY_KEY, deploymentKey);
+        config.putString(SERVER_URL_KEY, serverUrl);
         return config;
     }
 

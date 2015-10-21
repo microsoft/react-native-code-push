@@ -94,8 +94,9 @@ public class CodePush extends ReactContextBaseJavaModule {
     public static class CodePushReactPackage extends MainReactPackage {
 
         private CodePush codepush;
-        Properties codePushProperties;
-        Activity mainActivity;
+        private Activity mainActivity;
+        private String appVersion;
+        private String deploymentKey;
 
         public boolean hasSavedBundle(){
             return new File(getBundleLocation()).exists();
@@ -113,9 +114,10 @@ public class CodePush extends ReactContextBaseJavaModule {
             codepush.codePushReactRootView = codePushReactRootView;
         }
 
-        public CodePushReactPackage(Properties props, Activity mainActivity){
+        public CodePushReactPackage(String appVersion, String deploymentKey, Activity mainActivity){
             super();
-            codePushProperties = props;
+            this.appVersion = appVersion;
+            this.deploymentKey = deploymentKey;
             this.mainActivity = mainActivity;
         }
 
@@ -124,7 +126,7 @@ public class CodePush extends ReactContextBaseJavaModule {
                 ReactApplicationContext reactContext) {
 
             codepush = new CodePush(reactContext, mainActivity);
-            codepush.config = new CodePushConfig(codePushProperties);
+            codepush.config = new CodePushConfig(appVersion, deploymentKey);
 
             List<NativeModule> modules = new ArrayList<>();
             modules.addAll(super.createNativeModules(reactContext));

@@ -34,24 +34,15 @@ public class MainActivity extends Activity implements DefaultHardwareBackBtnHand
         SoLoader.init(this, false);
         mReactRootView = new CodePushReactRootView(this);
 
-        try {
-            Properties codePushProperties = new Properties();
-            InputStream in = getAssets().open("CodePush.properties");
-            codePushProperties.load(in);
-            in.close();
-
-            mReactInstanceManager = CodePushReactInstanceManager.builder()
-                    .setApplication(getApplication())
-                    .setBundleAssetName("index.android.bundle")
-                    .setJSMainModuleName("index.android")
-                    .addPackage(new CodePush.CodePushReactPackage(codePushProperties, this))
-                    .setUseDeveloperSupport(BuildConfig.DEBUG)
-                    .setInitialLifecycleState(LifecycleState.RESUMED)
-                    .build();
-
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to load Code Push properties.", e);
-        }
+        mReactInstanceManager = CodePushReactInstanceManager.builder()
+                .setApplication(getApplication())
+                .setBundleAssetName("index.android.bundle")
+                .setJSMainModuleName("index.android")
+                .addPackage(new CodePush.CodePushReactPackage(BuildConfig.VERSION_NAME,
+                        "YOUR_DEPLOYMENT_KEY_HERE", this))
+                .setUseDeveloperSupport(BuildConfig.DEBUG)
+                .setInitialLifecycleState(LifecycleState.RESUMED)
+                .build();
 
         mReactRootView.startReactApplication(mReactInstanceManager, "CodePushDemoApp", null);
 
