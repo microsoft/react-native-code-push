@@ -48,6 +48,23 @@ This change allows CodePush to load the updated app location after an update has
 Before any updates are installed, CodePush will load your app from the bundled "main.jsbundle" file.
 After updates are installed, CodePush will load your app from the writable user directory, where the update has been downloaded.
 
+Installation (Android)
+---
+
+```
+npm install --save react-native-code-push
+```
+
+Then, download [ReactNativeCodePush.aar](https://github.com/Microsoft/react-native-code-push/blob/first-check-in-for-android/Examples/CodePushDemoApp/android/CodePushSDK/ReactNativeCodePush.aar?raw=true)
+
+After installing the React Native CodePush plugin, open your React Native project in Android Studio. Go to ```File > New Module > Import .JAR/.AAR Package``` and click Next. Browse to your downloaded .AAR file and click Next. This will import the library package into your Project bundle.
+
+Next, go to ```File > Project Structure```. Click on ```app``` (or whatever your main project module is named), go to ```Dependencies```, click on the "+" sign at the bottom and add the new ```ReactNativeCodePush``` module as a Module Dependency. Click Ok. 
+
+![Add Module Dependency](https://cloud.githubusercontent.com/assets/8598682/10624328/414e2cc6-774c-11e5-9a52-d4551f01e7a1.png)
+
+Finally, copy and paste this [code](/Examples/CodePushDemoApp/android/app/src/main/java/com/codepushdemoapp/MainActivity.java) into your ```MainActivity.java```.
+
 Methods
 ---
 
@@ -106,7 +123,7 @@ Contains details about an update package that has been downloaded locally or alr
 - __apply(rollbackTimeout): Promise__: Applies this package to the application. The application will be reloaded with this package and on every application launch this package will be loaded.
 If the rollbackTimeout parameter is provided, the application will wait for a codePush.notifyApplicationReady() for the given number of milliseconds.
 If codePush.notifyApplicationReady() is called before the time period specified by rollbackTimeout, the apply operation is considered a success.
-Otherwise, the apply operation will be marked as failed, and the application is reverted to its previous version. **Note: Rollbacks are currently only supported for iOS.**
+Otherwise, the apply operation will be marked as failed, and the application is reverted to its previous version. **Note: Rollbacks are currently only supported in iOS.**
 
 ## RemotePackage
 Contains details about an update package that is available for download.
