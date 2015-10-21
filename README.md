@@ -1,7 +1,7 @@
 react-native-code-push
 ===
 
-This plugin provides integration with the [CodePush service](http://microsoft.github.io/code-push), allowing you to easily update your React Native application to enable live app updates.
+This plugin provides integration with the [CodePush service](https://microsoft.github.io/code-push), allowing you to easily update your React Native application to enable live app updates.
 
 Supported platforms
 ---
