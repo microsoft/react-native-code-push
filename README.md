@@ -69,17 +69,17 @@ After that, copy and paste this code snippet into your ```onCreate()``` method o
 CodePushPackage.setHomeDrectory(getFilesDir());
 SoLoader.init(this, false);
 
-// Replace ReactRootView with CodePushReactRootView
+// 1. Replace ReactRootView with CodePushReactRootView
 mReactRootView = new CodePushReactRootView(this);
 
 try {
-    // Load CodePush properties
+    // 2. Load CodePush properties
     Properties codePushProperties = new Properties();
     InputStream in = getAssets().open("CodePush.properties");
     codePushProperties.load(in);
     in.close();
     
-    // Replace ReactInstanceManager with CodePushReactInstanceManager
+    // 3. Replace ReactInstanceManager with CodePushReactInstanceManager
     mReactInstanceManager = CodePushReactInstanceManager.builder()
             .setApplication(getApplication())
             .setBundleAssetName("index.android.bundle")
@@ -93,7 +93,7 @@ try {
     throw new RuntimeException("Unable to load Code Push properties.", e);
 }
 
-// Start the application
+// 4. Start the application
 mReactRootView.startReactApplication(mReactInstanceManager, "CodePushDemoApp", null);
 setContentView(mReactRootView);
 ```
