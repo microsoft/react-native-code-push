@@ -90,7 +90,7 @@ try {
             .build();
 
 } catch (IOException e) {
-    throw new RuntimeException("Unable to load Code Push properties.", e);
+    throw new RuntimeException("Unable to load CodePush properties.", e);
 }
 
 // 4. Start the application
