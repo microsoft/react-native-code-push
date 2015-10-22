@@ -30,14 +30,22 @@ public class MainActivity extends Activity implements DefaultHardwareBackBtnHand
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+        // Tell CodePush where to write and find new downloaded updates
         CodePushPackage.setHomeDrectory(getFilesDir());
         SoLoader.init(this, false);
+
+        // Initialize the CodePushReactRootView
         mReactRootView = new CodePushReactRootView(this);
 
         mReactInstanceManager = CodePushReactInstanceManager.builder()
                 .setApplication(getApplication())
+
+                // Load main bundle called "index.android.bundle" from the assets folder
                 .setBundleAssetName("index.android.bundle")
                 .setJSMainModuleName("index.android")
+
+                // Set app version and deployment key
                 .addPackage(new CodePush.CodePushReactPackage(BuildConfig.VERSION_NAME,
                         "YOUR_DEPLOYMENT_KEY_HERE", this))
                 .setUseDeveloperSupport(BuildConfig.DEBUG)
