@@ -7,7 +7,7 @@ Supported platforms
 ---
 
 - iOS
-- Coming soon: Android
+- Coming soon: Android (Try it out on [this branch](https://github.com/Microsoft/react-native-code-push/tree/first-check-in-for-android))
 
 How does it work?
 ---
