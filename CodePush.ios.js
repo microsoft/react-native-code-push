@@ -76,7 +76,9 @@ function checkForUpdate() {
         sdk.queryUpdateWithCurrentPackage(queryPackage, (err, update) => {
           if (err) return reject(err);
           if (update) {
-            resolve(extend({}, update, packageMixins.remote));
+            // There is an update available for a different native app version. In the current version of this plugin, we treat that as no update.
+            if (update.updateAppVersion) resolve(false);
+            else resolve(extend({}, update, packageMixins.remote));
           } else {
             resolve(update);
           }
