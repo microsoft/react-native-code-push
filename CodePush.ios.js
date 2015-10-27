@@ -10,6 +10,7 @@ var NativeCodePush = require('react-native').NativeModules.CodePush;
 var requestFetchAdapter = require("./request-fetch-adapter.js");
 var Sdk = require("code-push/script/acquisition-sdk").AcquisitionManager;
 var packageMixins = require("./package-mixins")(NativeCodePush);
+var { AlertIOS } = require("react-native");
 
 // This function is only used for tests. Replaces the default SDK, configuration and native bridge
 function setUpTestDependencies(providedTestSdk, providedTestConfig, testNativeBridge){
@@ -105,7 +106,7 @@ function sync(options = {}) {
       else {
         var dialogButtons = [
           {
-            text: options.downloadButtonText || "Download",
+            text: options.updateButtonText || "Update",
             onPress: () => { 
               remotePackage.download()
               .then((localPackage) => {
@@ -118,12 +119,12 @@ function sync(options = {}) {
         
         if (!remotePackage.isMandatory) {
           dialogButtons.push({
-            text: options.cancelButtonText || "Cancel",
+            text: options.cancelButtonText || "Ignore",
             onPress: () => resolve(CodePush.SyncStatus.USER_CANCELLED)
           });
         }
         
-        React.AlertIOS.alert(options.title || "Update available", remotePackage.description, dialogButtons);
+        AlertIOS.alert(options.title || "Update available", remotePackage.description, dialogButtons);
       }
     }, reject);
   });     
@@ -138,8 +139,8 @@ var CodePush = {
   sync: sync,
   SyncStatus: {
     NO_UPDATE_AVAILABLE: 0,
-    APPLY_SUCCESS: 1,
-    USER_CANCELLED: 2
+    USER_CANCELLED: 1,
+    APPLY_SUCCESS: 2    
   }
 };
 
