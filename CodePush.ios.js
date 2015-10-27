@@ -95,12 +95,52 @@ function notifyApplicationReady() {
   return NativeCodePush.notifyApplicationReady();
 }
 
+function sync(options = {}) {  
+  return new Promise((resolve, reject) => {
+    checkForUpdate()
+    .then((remotePackage) => {
+      if (!remotePackage) {
+        resolve(CodePush.SyncStatus.NO_UPDATE_AVAILABLE);
+      }
+      else {
+        var dialogButtons = [
+          {
+            text: options.downloadButtonText || "Download",
+            onPress: () => { 
+              remotePackage.download()
+              .then((localPackage) => {
+                resolve(CodePush.SyncStatus.APPLY_SUCCESS);
+                localPackage.apply(options.rollbackTImeout);
+              }, reject);
+            }
+          }
+        ];
+        
+        if (!remotePackage.isMandatory) {
+          dialogButtons.push({
+            text: options.cancelButtonText || "Cancel",
+            onPress: () => resolve(CodePush.SyncStatus.USER_CANCELLED)
+          });
+        }
+        
+        React.AlertIOS.alert(options.title || "Update available", remotePackage.description, dialogButtons);
+      }
+    }, reject);
+  });     
+};
+
 var CodePush = {
   getConfiguration: getConfiguration,
   checkForUpdate: checkForUpdate,
   getCurrentPackage: getCurrentPackage,
   notifyApplicationReady: notifyApplicationReady,
-  setUpTestDependencies: setUpTestDependencies
+  setUpTestDependencies: setUpTestDependencies,
+  sync: sync,
+  SyncStatus: {
+    NO_UPDATE_AVAILABLE: 0,
+    APPLY_SUCCESS: 1,
+    USER_CANCELLED: 2
+  }
 };
 
 module.exports = CodePush;
