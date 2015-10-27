@@ -99,34 +99,34 @@ function notifyApplicationReady() {
 function sync(options = {}) {  
   return new Promise((resolve, reject) => {
     checkForUpdate()
-    .then((remotePackage) => {
-      if (!remotePackage) {
-        resolve(CodePush.SyncStatus.NO_UPDATE_AVAILABLE);
-      }
-      else {
-        var dialogButtons = [
-          {
-            text: options.updateButtonText || "Update",
-            onPress: () => { 
-              remotePackage.download()
-              .then((localPackage) => {
-                resolve(CodePush.SyncStatus.APPLY_SUCCESS);
-                localPackage.apply(options.rollbackTImeout);
-              }, reject);
-            }
-          }
-        ];
-        
-        if (!remotePackage.isMandatory) {
-          dialogButtons.push({
-            text: options.ignoreButtonText || "Ignore",
-            onPress: () => resolve(CodePush.SyncStatus.UPDATE_IGNORED)
-          });
+      .then((remotePackage) => {
+        if (!remotePackage) {
+          resolve(CodePush.SyncStatus.NO_UPDATE_AVAILABLE);
         }
-        
-        AlertIOS.alert(options.updateTitle || "Update available", remotePackage.description, dialogButtons);
-      }
-    }, reject);
+        else {
+          var dialogButtons = [
+            {
+              text: options.updateButtonText || "Update",
+              onPress: () => { 
+                remotePackage.download()
+                  .then((localPackage) => {
+                    resolve(CodePush.SyncStatus.APPLY_SUCCESS);
+                    localPackage.apply(options.rollbackTimeout);
+                  }, reject);
+              }
+            }
+          ];
+          
+          if (!remotePackage.isMandatory) {
+            dialogButtons.push({
+              text: options.ignoreButtonText || "Ignore",
+              onPress: () => resolve(CodePush.SyncStatus.UPDATE_IGNORED)
+            });
+          }
+          
+          AlertIOS.alert(options.updateTitle || "Update available", remotePackage.description, dialogButtons);
+        }
+      }, reject);
   });     
 };
 
