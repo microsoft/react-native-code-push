@@ -119,12 +119,12 @@ function sync(options = {}) {
         
         if (!remotePackage.isMandatory) {
           dialogButtons.push({
-            text: options.cancelButtonText || "Ignore",
-            onPress: () => resolve(CodePush.SyncStatus.USER_CANCELLED)
+            text: options.ignoreButtonText || "Ignore",
+            onPress: () => resolve(CodePush.SyncStatus.UPDATE_IGNORED)
           });
         }
         
-        AlertIOS.alert(options.title || "Update available", remotePackage.description, dialogButtons);
+        AlertIOS.alert(options.updateTitle || "Update available", remotePackage.description, dialogButtons);
       }
     }, reject);
   });     
@@ -139,7 +139,7 @@ var CodePush = {
   sync: sync,
   SyncStatus: {
     NO_UPDATE_AVAILABLE: 0,
-    USER_CANCELLED: 1,
+    UPDATE_IGNORED: 1,
     APPLY_SUCCESS: 2    
   }
 };
