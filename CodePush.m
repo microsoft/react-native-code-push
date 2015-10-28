@@ -15,6 +15,12 @@ BOOL usingTestFolder = NO;
 
 @synthesize bridge = _bridge;
 
++ (NSString *)getDocumentsDirectory
+{
+    NSString *documentsDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSUserDomainMask, YES) objectAtIndex:0];
+    return documentsDirectory;
+}
+
 + (NSString *) getBundlePath
 {
     NSString * bundleFolderPath = [self getPackageFolderPath];
@@ -24,17 +30,17 @@ BOOL usingTestFolder = NO;
 
 + (NSString *) getPackageFolderPath
 {
-    NSString* home = NSHomeDirectory();
+    NSString* documentsDirectory = [self getDocumentsDirectory];
     NSString* pathExtension = [[@"CodePush/" stringByAppendingString: (usingTestFolder ? @"test/" : @"")] stringByAppendingString: @"currentPackage"];
-    NSString* packageFolder = [home stringByAppendingPathComponent:pathExtension];
+    NSString* packageFolder = [documentsDirectory stringByAppendingPathComponent:pathExtension];
     return packageFolder;
 }
 
 + (NSString *) getPreviousPackageFolderPath
 {
-    NSString* home = NSHomeDirectory();
+    NSString* documentsDirectory = [self getDocumentsDirectory];
     NSString* pathExtension = [[@"CodePush/" stringByAppendingString: (usingTestFolder ? @"test/" : @"")] stringByAppendingString: @"previous"];
-    NSString* packageFolder = [home stringByAppendingPathComponent:pathExtension];
+    NSString* packageFolder = [documentsDirectory stringByAppendingPathComponent:pathExtension];
     return packageFolder;
 }
 
