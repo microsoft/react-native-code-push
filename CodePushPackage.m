@@ -6,7 +6,7 @@ NSString * const StatusFile = @"codepush.json";
 
 + (NSString *)getCodePushPath
 {
-    return [NSHomeDirectory() stringByAppendingPathComponent:@"CodePush"];
+    return [[CodePush getDocumentsDirectory] stringByAppendingPathComponent:@"CodePush"];
 }
 
 + (NSString *)getStatusFilePath
