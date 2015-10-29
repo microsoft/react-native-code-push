@@ -110,14 +110,16 @@ function sync(options = {}) {
     ignoreFailedUpdates: true,
     
     mandatoryContinueButtonLabel: "Continue",
-    mandatoryUpdateMessage: "An update is available that must be installed",
+    mandatoryUpdateMessage: "An update is available that must be installed.",
     
     optionalIgnoreButtonLabel: "Ignore",
     optionalInstallButtonLabel: "Install",
     optionalUpdateMessage: "An update is available. Would you like to install it?",
     
-    updateTitle: "Update available",
     rollbackTimeout: 0,
+    
+    updateTitle: "Update available",
+    useReleaseDescription: false,
     
     ...options 
   };
@@ -136,7 +138,7 @@ function sync(options = {}) {
               onPress: () => { 
                 remotePackage.download()
                   .then((localPackage) => {
-                    resolve(CodePush.SyncStatus.APPLY_SUCCESS);
+                    resolve(CodePush.SyncStatus.UPDATE_DOWNLOADED);
                     localPackage.apply(syncOptions.rollbackTimeout);
                   }, reject);
               }
@@ -158,7 +160,13 @@ function sync(options = {}) {
             });
           }
           
-          AlertIOS.alert(syncOptions.updateTitle, message || remotePackage.description, dialogButtons);
+          // If the update has a description, and the developer
+          // explicitly chose to display it, then set that as the message
+          if (syncOptions.useReleaseDescription && remotePackage.description) {
+            message = remotePackage.description;  
+          }
+          
+          AlertIOS.alert(syncOptions.updateTitle, message, dialogButtons);
         }
       }, reject);
   });     
@@ -174,7 +182,7 @@ var CodePush = {
   SyncStatus: {
     NO_UPDATE_AVAILABLE: 0, // The running app is up-to-date
     UPDATE_IGNORED: 1, // The app had an optional update and the end-user chose to ignore it
-    APPLY_SUCCESS: 2 // The app had an optional/mandatory update that was successfully downloaded and is about to be applied
+    UPDATE_DOWNLOADED: 2 // The app had an optional/mandatory update that was successfully downloaded and is about to be applied
   }
 };
 
