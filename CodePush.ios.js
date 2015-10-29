@@ -127,7 +127,7 @@ function sync(options = {}) {
   return new Promise((resolve, reject) => {
     checkForUpdate()
       .then((remotePackage) => {
-        if (!remotePackage || (remotePackage.failedAppy && syncOptions.ignoreFailedUpdates)) {
+        if (!remotePackage || (remotePackage.failedApply && syncOptions.ignoreFailedUpdates)) {
           resolve(CodePush.SyncStatus.NO_UPDATE_AVAILABLE);
         }
         else {
