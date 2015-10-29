@@ -96,6 +96,15 @@ function notifyApplicationReady() {
   return NativeCodePush.notifyApplicationReady();
 }
 
+/**
+ * The sync method provides a simple, one-line experience for
+ * incorporating the check, download and application of an update.
+ * 
+ * It simply composes the existing API methods together and adds additional
+ * support for respecting mandatory updates, ignoring previously failed
+ * releases, and displaying a standard confirmation UI to the end-user
+ * when an update is available.
+ */
 function sync(options = {}) {  
   var syncOptions = {
     ignoreFailedUpdates: true,
@@ -139,8 +148,10 @@ function sync(options = {}) {
             dialogButtons[0].text = syncOptions.mandatoryContinueButtonLabel;
           } else {
             message = syncOptions.optionalUpdateMessage;
-
-            dialogButtons[0].text = syncOptions.optionalInstallButtonLabel;            
+            dialogButtons[0].text = syncOptions.optionalInstallButtonLabel;     
+            
+            // Since this is an optional update, add another button
+            // to allow the end-user to ignore it       
             dialogButtons.push({
               text: syncOptions.optionalIgnoreButtonLabel,
               onPress: () => resolve(CodePush.SyncStatus.UPDATE_IGNORED)
@@ -161,9 +172,9 @@ var CodePush = {
   setUpTestDependencies: setUpTestDependencies,
   sync: sync,
   SyncStatus: {
-    NO_UPDATE_AVAILABLE: 0,
-    UPDATE_IGNORED: 1,
-    APPLY_SUCCESS: 2    
+    NO_UPDATE_AVAILABLE: 0, // The running app is up-to-date
+    UPDATE_IGNORED: 1, // The app had an optional update and the end-user chose to ignore it
+    APPLY_SUCCESS: 2 // The app had an optional/mandatory update that was successfully downloaded and is about to be applied
   }
 };
 
