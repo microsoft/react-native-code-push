@@ -10,6 +10,7 @@ var NativeCodePush = require('react-native').NativeModules.CodePush;
 var requestFetchAdapter = require("./request-fetch-adapter.js");
 var Sdk = require("code-push/script/acquisition-sdk").AcquisitionManager;
 var packageMixins = require("./package-mixins")(NativeCodePush);
+var { AlertIOS } = require("react-native");
 
 // This function is only used for tests. Replaces the default SDK, configuration and native bridge
 function setUpTestDependencies(providedTestSdk, providedTestConfig, testNativeBridge){
@@ -95,12 +96,100 @@ function notifyApplicationReady() {
   return NativeCodePush.notifyApplicationReady();
 }
 
+/**
+ * The sync method provides a simple, one-line experience for
+ * incorporating the check, download and application of an update.
+ * 
+ * It simply composes the existing API methods together and adds additional
+ * support for respecting mandatory updates, ignoring previously failed
+ * releases, and displaying a standard confirmation UI to the end-user
+ * when an update is available.
+ */
+function sync(options = {}) {  
+  var syncOptions = {
+    descriptionPrefix: " Description: ",
+    appendReleaseDescription: false,
+    
+    ignoreFailedUpdates: true,
+    
+    mandatoryContinueButtonLabel: "Continue",
+    mandatoryUpdateMessage: "An update is available that must be installed.",
+    
+    optionalIgnoreButtonLabel: "Ignore",
+    optionalInstallButtonLabel: "Install",
+    optionalUpdateMessage: "An update is available. Would you like to install it?",
+    
+    rollbackTimeout: 0,
+    
+    updateTitle: "Update available",
+    
+    ...options 
+  };
+
+  return new Promise((resolve, reject) => {
+    checkForUpdate()
+      .then((remotePackage) => {
+        if (!remotePackage || (remotePackage.failedApply && syncOptions.ignoreFailedUpdates)) {
+          resolve(CodePush.SyncStatus.UP_TO_DATE);
+        }
+        else {
+          var message = null;
+          var dialogButtons = [
+            {
+              text: null,
+              onPress: () => { 
+                remotePackage.download()
+                  .then((localPackage) => {
+                    resolve(CodePush.SyncStatus.UPDATE_APPLIED)
+                    return localPackage.apply(syncOptions.rollbackTimeout);
+                   })
+                  .catch(reject)
+                  .done();
+              }
+            }
+          ];
+          
+          if (remotePackage.isMandatory) {
+            message = syncOptions.mandatoryUpdateMessage;
+            dialogButtons[0].text = syncOptions.mandatoryContinueButtonLabel;
+          } else {
+            message = syncOptions.optionalUpdateMessage;
+            dialogButtons[0].text = syncOptions.optionalInstallButtonLabel;     
+            
+            // Since this is an optional update, add another button
+            // to allow the end-user to ignore it       
+            dialogButtons.push({
+              text: syncOptions.optionalIgnoreButtonLabel,
+              onPress: () => resolve(CodePush.SyncStatus.UPDATE_IGNORED)
+            });
+          }
+          
+          // If the update has a description, and the developer
+          // explicitly chose to display it, then set that as the message
+          if (syncOptions.appendReleaseDescription && remotePackage.description) {
+            message += `${syncOptions.descriptionPrefix} ${remotePackage.description}`;  
+          }
+          
+          AlertIOS.alert(syncOptions.updateTitle, message, dialogButtons);
+        }
+      })
+      .catch(reject)
+      .done();
+  });     
+};
+
 var CodePush = {
   getConfiguration: getConfiguration,
   checkForUpdate: checkForUpdate,
   getCurrentPackage: getCurrentPackage,
   notifyApplicationReady: notifyApplicationReady,
-  setUpTestDependencies: setUpTestDependencies
+  setUpTestDependencies: setUpTestDependencies,
+  sync: sync,
+  SyncStatus: {
+    UP_TO_DATE: 0, // The running app is up-to-date
+    UPDATE_IGNORED: 1, // The app had an optional update and the end-user chose to ignore it
+    UPDATE_APPLIED: 2 // The app had an optional/mandatory update that was successfully downloaded and is about to be applied
+  }
 };
 
 module.exports = CodePush;
