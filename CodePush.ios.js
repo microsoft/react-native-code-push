@@ -1,5 +1,5 @@
 /**
- * @providesModule CodePush
+ * @providesModule CodePush-ios
  * @flow
  */
 

@@ -7,7 +7,7 @@ Supported platforms
 ---
 
 - iOS
-- Coming soon: Android (Try it out on [this branch](https://github.com/Microsoft/react-native-code-push/tree/first-check-in-for-android))
+- Android
 
 How does it work?
 ---
@@ -18,7 +18,7 @@ CodePush is here to simplify this process by allowing you to instantly update yo
 
 For an easy way to get started, please see our [demo application](/Examples/CodePushDemoApp) and our [getting started guide](#getting-started).
 
-Installation
+Installation (iOS)
 ---
 
 ```
@@ -63,11 +63,58 @@ This change allows CodePush to load the updated app location after an update has
 Before any updates are installed, CodePush will load your app from the bundled "main.jsbundle" file.
 After updates are installed, CodePush will load your app from the writable user directory, where the update has been downloaded.
 
+Installation (Android)
+---
+
+```
+npm install --save react-native-code-push
+```
+
+Edit settings.gradle
+
+```gradle
+include ':app', ':react-native-code-push'
+project(':react-native-code-push').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-code-push/android/app')
+```
+
+Edit build.gradle to include the library dependency
+
+```gradle
+dependencies {
+    compile project(':react-native-code-push')
+}
+```
+
+Next, register the library in your ```onCreate()``` method of your ```MainActivity.java```:
+
+```java
+// Tell CodePush where to write and find new downloaded updates
+CodePushPackage.setHomeDrectory(getFilesDir());
+SoLoader.init(this, false);
+
+// Initialize the CodePushReactRootView
+mReactRootView = new CodePushReactRootView(this);
+
+mReactInstanceManager = CodePushReactInstanceManager.builder()
+        .setApplication(getApplication())
+
+        // Load main bundle called "index.android.bundle" from the assets folder
+        .setBundleAssetName("index.android.bundle")
+        .setJSMainModuleName("index.android")
+
+        // Set app version and deployment key
+        .addPackage(new CodePush.CodePushReactPackage(BuildConfig.VERSION_NAME,
+                "YOUR_DEPLOYMENT_KEY_HERE", this))
+        .setUseDeveloperSupport(BuildConfig.DEBUG)
+        .setInitialLifecycleState(LifecycleState.RESUMED)
+        .build();
+```
+
 Methods
 ---
 
 * [checkForUpdate](#codepushcheckforupdate): Checks the service for updates
-* [notifyApplicationReady](#codepushnotifyapplicationready): Notifies the plugin that the update operation succeeded.
+* [notifyApplicationReady](#codepushnotifyapplicationready): Notifies the plugin that the update operation succeeded. **Note: currently only supported in iOS**.
 * [getCurrentPackage](#codepushgetcurrentpackage): Gets information about the currently applied package.
 
 Objects
@@ -121,7 +168,7 @@ Contains details about an update package that has been downloaded locally or alr
 - __apply(rollbackTimeout): Promise__: Applies this package to the application. The application will be reloaded with this package and on every application launch this package will be loaded.
 If the rollbackTimeout parameter is provided, the application will wait for a codePush.notifyApplicationReady() for the given number of milliseconds.
 If codePush.notifyApplicationReady() is called before the time period specified by rollbackTimeout, the apply operation is considered a success.
-Otherwise, the apply operation will be marked as failed, and the application is reverted to its previous version.
+Otherwise, the apply operation will be marked as failed, and the application is reverted to its previous version. **Note: Rollbacks are currently only supported in iOS.**
 
 ## RemotePackage
 Contains details about an update package that is available for download.
