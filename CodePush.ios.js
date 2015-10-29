@@ -97,34 +97,57 @@ function notifyApplicationReady() {
 }
 
 function sync(options = {}) {  
+  var syncOptions = {
+    ignoreFailedUpdates: true,
+    
+    mandatoryContinueButtonLabel: "Continue",
+    mandatoryUpdateMessage: "An update is available that must be installed",
+    
+    optionalIgnoreButtonLabel: "Ignore",
+    optionalInstallButtonLabel: "Install",
+    optionalUpdateMessage: "An update is available. Would you like to install it?",
+    
+    updateTitle: "Update available",
+    rollbackTimeout: 0,
+    
+    ...options 
+  };
+
   return new Promise((resolve, reject) => {
     checkForUpdate()
       .then((remotePackage) => {
-        if (!remotePackage) {
+        if (!remotePackage || (remotePackage.failedAppy && syncOptions.ignoreFailedUpdates)) {
           resolve(CodePush.SyncStatus.NO_UPDATE_AVAILABLE);
         }
         else {
+          var message = null;
           var dialogButtons = [
             {
-              text: options.updateButtonText || "Update",
+              text: null,
               onPress: () => { 
                 remotePackage.download()
                   .then((localPackage) => {
                     resolve(CodePush.SyncStatus.APPLY_SUCCESS);
-                    localPackage.apply(options.rollbackTimeout);
+                    localPackage.apply(syncOptions.rollbackTimeout);
                   }, reject);
               }
             }
           ];
           
-          if (!remotePackage.isMandatory) {
+          if (remotePackage.isMandatory) {
+            message = syncOptions.mandatoryUpdateMessage;
+            dialogButtons[0].text = syncOptions.mandatoryContinueButtonLabel;
+          } else {
+            message = syncOptions.optionalUpdateMessage;
+
+            dialogButtons[0].text = syncOptions.optionalInstallButtonLabel;            
             dialogButtons.push({
-              text: options.ignoreButtonText || "Ignore",
+              text: syncOptions.optionalIgnoreButtonLabel,
               onPress: () => resolve(CodePush.SyncStatus.UPDATE_IGNORED)
             });
           }
           
-          AlertIOS.alert(options.updateTitle || "Update available", remotePackage.description, dialogButtons);
+          AlertIOS.alert(syncOptions.updateTitle, message || remotePackage.description, dialogButtons);
         }
       }, reject);
   });     
