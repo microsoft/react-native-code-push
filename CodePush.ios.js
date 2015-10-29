@@ -107,6 +107,9 @@ function notifyApplicationReady() {
  */
 function sync(options = {}) {  
   var syncOptions = {
+    descriptionPrefix: " Description: ",
+    appendReleaseDescription: false,
+    
     ignoreFailedUpdates: true,
     
     mandatoryContinueButtonLabel: "Continue",
@@ -119,7 +122,6 @@ function sync(options = {}) {
     rollbackTimeout: 0,
     
     updateTitle: "Update available",
-    useReleaseDescription: false,
     
     ...options 
   };
@@ -128,7 +130,7 @@ function sync(options = {}) {
     checkForUpdate()
       .then((remotePackage) => {
         if (!remotePackage || (remotePackage.failedApply && syncOptions.ignoreFailedUpdates)) {
-          resolve(CodePush.SyncStatus.NO_UPDATE_AVAILABLE);
+          resolve(CodePush.SyncStatus.UP_TO_DATE);
         }
         else {
           var message = null;
@@ -138,9 +140,11 @@ function sync(options = {}) {
               onPress: () => { 
                 remotePackage.download()
                   .then((localPackage) => {
-                    resolve(CodePush.SyncStatus.UPDATE_DOWNLOADED);
-                    localPackage.apply(syncOptions.rollbackTimeout);
-                  }, reject);
+                    resolve(CodePush.SyncStatus.UPDATE_APPLIED)
+                    return localPackage.apply(syncOptions.rollbackTimeout);
+                   })
+                  .catch(reject)
+                  .done();
               }
             }
           ];
@@ -162,13 +166,15 @@ function sync(options = {}) {
           
           // If the update has a description, and the developer
           // explicitly chose to display it, then set that as the message
-          if (syncOptions.useReleaseDescription && remotePackage.description) {
-            message = remotePackage.description;  
+          if (syncOptions.appendReleaseDescription && remotePackage.description) {
+            message += `${syncOptions.descriptionPrefix} ${remotePackage.description}`;  
           }
           
           AlertIOS.alert(syncOptions.updateTitle, message, dialogButtons);
         }
-      }, reject);
+      })
+      .catch(reject)
+      .done();
   });     
 };
 
@@ -180,9 +186,9 @@ var CodePush = {
   setUpTestDependencies: setUpTestDependencies,
   sync: sync,
   SyncStatus: {
-    NO_UPDATE_AVAILABLE: 0, // The running app is up-to-date
+    UP_TO_DATE: 0, // The running app is up-to-date
     UPDATE_IGNORED: 1, // The app had an optional update and the end-user chose to ignore it
-    UPDATE_DOWNLOADED: 2 // The app had an optional/mandatory update that was successfully downloaded and is about to be applied
+    UPDATE_APPLIED: 2 // The app had an optional/mandatory update that was successfully downloaded and is about to be applied
   }
 };
 
