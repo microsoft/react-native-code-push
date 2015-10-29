@@ -23,7 +23,7 @@ A React Native application's assets (JavaScript code and other resources) are tr
 
 CodePush is here to simplify this process by allowing you to instantly update your application's assets without having to submit a new update to the store. We do this by allowing you to upload and manage your React Native app bundles on our CodePush server. In the application, we check for the presence of updated bundles on the server. If they are available, we will install and persist them to the internal storage of the device. If a new bundle is installed, the application will reload from the updated package location.
 
-![Update available](https://cloud.githubusercontent.com/assets/116461/10834964/15e63d60-7e5b-11e5-8780-d8f8b448e5d2.png)
+![Update available](https://cloud.githubusercontent.com/assets/116461/10835297/20b7cdf0-7e5e-11e5-8e44-ea6144839e5f.png)
 
 ## Plugin Acquisition
 
