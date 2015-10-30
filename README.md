@@ -4,8 +4,8 @@ This plugin provides client-side integration for the [CodePush service](https://
 
 The CodePush React Native API provides two primary mechanisms for discovering updates and dynamically applying them within your apps:
 
-1. **Sync mode**, which allows you to call a single method--presumably as part of mounting your app's root component or in response to a button click--that will automatically check for an update, download and apply it, while respecting the policies and metadata associated with each release (e.g. if the release is mandatory then it doesn't give the end-user the option to ignore it)
-2. **Advanced mode**, which provides a handful of "low-level" methods which give you complete control over the update experience, at the cost of added complexity.
+1. [**Sync mode**](#codePushssync), which allows you to call a single method--presumably as part of mounting your app's root component or in response to a button click--that will automatically check for an update, download and apply it, while respecting the policies and metadata associated with each release (e.g. if the release is mandatory then it doesn't give the end-user the option to ignore it)
+2. [**Advanced mode**](#codepushcheckforupdate), which provides a handful of "low-level" methods which give you complete control over the update experience, at the cost of added complexity.
 
 When getting started using CodePush, we would recommended using the sync mode until you discover that it doesn't suit your needs. That said, if you have a user scenario
 that isn't currently covered well by sync, please [let us know](mailto:codepushfeed@microsoft.com) since that would be valuable feedback.
@@ -80,7 +80,6 @@ To let the CodePush runtime know which deployment it should query for updates ag
 1. Open your app's `Info.plist` and add a new `CodePushDeploymentKey` entry, whose value is the key of the deployment you want to configure this app against (e.g. the Staging deployment for FooBar app)
 2. In your app's `Info.plist` make sure your `CFBundleShortVersionString` value is a valid [semver](http://semver.org/) version (e.g. 1.0.0 not 1.0)
 
-
 ## Plugin consumption
 
 With the CodePush plugin downloaded and linked, and your app asking CodePush where to get the right JS bundle from, the only thing left is to add the neccessary code to your app to control the following:
@@ -102,8 +101,8 @@ The simplest way to do this is to perform the following in your app's root compo
     CodePush.sync();
     ```
 
-If an update is available, a dialog will be display to the user asking them if they would like to install it. If the update was marked as mandatory, then the dialog will
-omit the option to decline installation.
+If an update is available, a dialog will be displayed to the user asking them if they would like to install it. If the update was marked as mandatory, then the dialog will
+omit the option to decline installation. The `sync` method takes a handful of options to customize this experience, so refer to its [API reference](#codePushsync) if you'd like to tweak its default behavior.
 
 ## Releasing code updates
 
@@ -128,11 +127,12 @@ When you require the `react-native-code-push` module, that object provides the f
 * [sync](#codepushsync): Allows checking for an update, downloading it and applying it, all with a single call. Unless you need custom UI and/or behavior, we recommend most developers to use this method when integrating CodePush into their apps
 
 #### codePush.checkForUpdate
-Queries the CodePush service for an update against the configured deployment. This method returns a promise which resolves to a `RemotePackage` that can be subsequently downloaded.
 
 ```javascript
 codePush.checkForUpdate(): Promise<RemotePackage>;
 ```
+
+Queries the CodePush service for an update against the configured deployment. This method returns a promise which resolves to a `RemotePackage` that can be subsequently downloaded.
 
 `checkForUpdate` returns a Promise that resolves to one of two values:
 
@@ -154,26 +154,31 @@ codePush.checkForUpdate().then((update) => {
 
 #### codePush.getCurrentPackage
 
-Gets information about the currently applied package (e.g. description, installation time).
-
 ```javascript
 codePush.getCurrentPackage(): Promise<LocalPackage>;
 ```
+
+Gets information about the currently applied package (e.g. description, installation time).
+
 This method returns a Promise that resolves with the `LocalPackage` instance that represents the running update. This API is only useful for advanced scenarios, and so many devs won't need to concern themselves with it.
 
 #### codePush.notifyApplicationReady
-
-Notifies the CodePush runtime that an update is considered successful, and therefore, a rollback isn't neccessary. Calling this function is required whenever the `rollbackTimeout` parameter is specified when calling either ```LocalPackage.apply``` or `sync`. If you specify a `rollbackTimeout`, and don't call `notifyApplicationReady`, the CodePush runtime will assume that the applied update has failed and roll back to the previous version.
-
-If the `rollbackTimeout` parameter was not specified, the CodePush runtime will not enforce any automatic rollback behavior, and therefore, calling this function is not required and will result in a no-op.
 
 ```javascript
 codePush.notifyApplicationReady(): Promise<void>;
 ```
 
+Notifies the CodePush runtime that an update is considered successful, and therefore, a rollback isn't neccessary. Calling this function is required whenever the `rollbackTimeout` parameter is specified when calling either ```LocalPackage.apply``` or `sync`. If you specify a `rollbackTimeout`, and don't call `notifyApplicationReady`, the CodePush runtime will assume that the applied update has failed and roll back to the previous version.
+
+If the `rollbackTimeout` parameter was not specified, the CodePush runtime will not enforce any automatic rollback behavior, and therefore, calling this function is not required and will result in a no-op.
+
 #### codePush.sync
 
-Provides a simple option for checking for an update, downloading it and then applying it, all while also respecting the policy that your release was published with. This method effectively composes together the "advanced mode" APIs for you, so that you don't need to handle any of the following scenarios yourself:
+```javascript
+codePush.sync(options: Object): Promise<Number>;
+```
+
+Provides a simple option for checking for an update, displaying a notification to the user, downloading it and then applying it, all while also respecting the policy that your release was published with. This method effectively composes together the "advanced mode" APIs for you, so that you don't need to handle any of the following scenarios yourself:
 
 1. Checking for an update and displaying a standard confirmation dialog asking if they would like to install it
 2. Automatically ignoring updates which have previously failed to apply (due to automatic rollback), and therefore, likely don't make sense trying to apply again (let's blacklist them!)
@@ -181,11 +186,8 @@ Provides a simple option for checking for an update, downloading it and then app
 4. Displaying the description of an update to the end-user as part of the install confirmation experience
 
 If you want to pivot whether you check and/or download an available update based on the end-user's device battery level, network conditions, etc. then simply wrap the call to `sync` in a condition that ensures you only call it when desired.
-```javascript
-codePush.sync(options: Object): Promise<Boolean>
-```
 
-The method accepts an options object that allows you to customize numerous aspects of the default behavior, all of which provide sensible defaults by default:
+The method accepts an options object that allows you to customize numerous aspects of the default behavior, all of which provide sensible values by default:
 
 * __appendReleaseDescription__ (Boolean) - Indicates whether you would like to append the description of an available release to the notification message which is displayed to the end-user. Defaults to `false`.
 * __descriptionPrefix__ (String) - Indicates the string you would like to prefix the release description with, if any, when displaying the update notification to the end-user. Defaults to `" Description: "`
@@ -198,23 +200,31 @@ The method accepts an options object that allows you to customize numerous aspec
 * __rollbackTimeout__ (String) - The number of seconds that you want the runtime to wait after an update has been applied before considering it failed and rolling it back. Defaults to `0`, which disabled rollback protection.
 * __updateTitle__ (String) - The text used as the header of an update notification that is displayed to the end-user. Defaults to `"Update available"`.
 
-The method returns a Promise that is resolved to a `SyncStatus` code, which indicates why the `sync` call succeeded. This code can be one of the following values:
+The method returns a `Promise` that is resolved to a `SyncStatus` integer code, which indicates why the `sync` call succeeded. This code can be one of the following values:
 
 * __CodePush.SyncStatus.UP_TO_DATE__ *(0)* - The app doesn't have an available update.
 * __CodePush.SyncStatus.UPDATE_IGNORED__ *(1)* - The app has an optional update, that the user chose to ignore.
 * __CodePush.SyncStatus.UPDATE_APPLIED__ *(2)* - The app had an optional or mandatory update that was successfully downloaded and is about to be applied. If your app needs to do any data persistence/migration before restarting, this is the time to do it.
 
+If the update check and/or the subseqeuent download fails for any reason, the `Promise` object returned by `sync` will be rejected with the reason.
+
 Example Usage: 
 
 ```javascript
-codePush.sync().then((status) => {
-    if (status == codePush.SyncStatus.UPDATE_APPLIED) {
-        // Do any neccessary work here before the app
-        // is restarted in order to apply the update
-    }
-});
-
+codePush.sync()
+    .then((status) => {
+        if (status == codePush.SyncStatus.UPDATE_APPLIED) {
+            // Do any neccessary work here before the app
+            // is restarted in order to apply the update
+        }
+    })
+    .catch((reason) => {
+        // Do something with the failure  
+    });
 ```
+
+The `sync` method can be called anywhere you'd like to check for an update. That could be in the `componentWillMount` lifecycle event of your root component, the onPress handler of a `<TouchableHighlight>` component, in the callback of a periodic timer, or whatever else makes sense for your needs. Just like the `checkForUpdate` method, it will perform the network request to check for an update in the background, so it won't impact your UI thread and/or JavaScript thread's responsiveness.
+
 ### Package objects
 
 The `checkForUpdate` and `getCurrentPackage` methods return promises, that when resolved, provide acces to "package" objects. The package represents your code update as well as any extra metadata (e.g. description, mandatory). The CodePush API has the distinction between the following types of packages:
