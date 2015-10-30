@@ -146,7 +146,7 @@ codePush.checkForUpdate().then((update) => {
     if (!update) {
         console.log("The app is up to date!"); 
     } else {
-        console.log("An update is available! Should we download it");
+        console.log("An update is available! Should we download it?");
     }
 });
 
