@@ -10,7 +10,7 @@ The CodePush React Native API provides two primary mechanisms for discovering up
 When getting started using CodePush, we would recommended using the sync mode until you discover that it doesn't suit your needs. That said, if you have a user scenario
 that isn't currently covered well by sync, please [let us know](mailto:codepushfeed@microsoft.com) since that would be valuable feedback.
 
-*NOTE: We don't currently have support for an "automatic mode" which provides a "code-free" experience to adding in dynamic update discovery and acquisition. If that would be valuable to you, please let us know.*
+*NOTE: We don't currently have support for an "automatic mode" which provides a "code-free" experience to adding in dynamic update discovery and acquisition. If that would be valuable to you, please [let us know](mailto:codepushfeed@microsoft.com).*
 
 ## Supported React Native platforms
 
