@@ -19,7 +19,7 @@ that isn't currently covered well by sync, please [let us know](mailto:codepushf
 
 ## How does it work?
 
-<img src="https://cloud.githubusercontent.com/assets/116461/10835297/20b7cdf0-7e5e-11e5-8e44-ea6144839e5f.png" style="float: right" />
+<img src="https://cloud.githubusercontent.com/assets/116461/10835297/20b7cdf0-7e5e-11e5-8e44-ea6144839e5f.png" align="right" />
 
 A React Native application's assets (JavaScript code and other resources) are traditionally bundled up as a ```.jsbundle``` file which is loaded from the application installation location on the target device during runtime. After you submit an update to the store, the user downloads the update, and those assets will be replaced with the new assets.
 
