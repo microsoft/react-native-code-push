@@ -40,17 +40,17 @@ Once you've acquired the CodePush plugin, you need to integrate it into the Xcod
 1. Open your app's Xcode project
 2. Find the `CodePush.xcodeproj` file witin the `node_modules/react-native-code-push` directory, and drag it into the `Libraries` node in Xcode
 
-![Add CodePush to project](https://cloud.githubusercontent.com/assets/516559/10322414/7688748e-6c32-11e5-83c1-00d3e6758df4.png)
+    ![Add CodePush to project](https://cloud.githubusercontent.com/assets/516559/10322414/7688748e-6c32-11e5-83c1-00d3e6758df4.png)
 
 3. Select the project node in Xcode and select the "Build Phases" tab of your project configuration.
 4. Drag `libCodePush.a` from `Libraries/CodePush.xcodeproj/Products` into the "Link Binary With Libraries" secton of your project's "Build Phases" configuration.
 
-![Link CodePush during build](https://cloud.githubusercontent.com/assets/516559/10322221/a75ea066-6c31-11e5-9d88-ff6f6a4d6968.png)
+    ![Link CodePush during build](https://cloud.githubusercontent.com/assets/516559/10322221/a75ea066-6c31-11e5-9d88-ff6f6a4d6968.png)
 
 5. Under the "Build Settings" tab of your project configuration, find the "Header Search Paths" section and edit the value.
 Add a new value, `$(SRCROOT)/../node_modules/react-native-code-push` and select "recursive" in the dropdown.
 
-![Add CodePush library reference](https://cloud.githubusercontent.com/assets/516559/10322038/b8157962-6c30-11e5-9264-494d65fd2626.png)
+    ![Add CodePush library reference](https://cloud.githubusercontent.com/assets/516559/10322038/b8157962-6c30-11e5-9264-494d65fd2626.png)
 
 ## Plugin Configuration
 
@@ -58,20 +58,20 @@ Once your Xcode project has been setup to build/link the CodePush plugin, you ne
 
 1. Open up the `AppDelegate.m` file, and add an import statement for the CodePush headers:
 
-```
-#import "CodePush.h"
-```
+    ```
+    #import "CodePush.h"
+    ```
 
 2. Find the following line of code, which loads your JS Bundle from the packager's dev server:
 
-```
-jsCodeLocation = [NSURL URLWithString:@"http://localhost:8081/index.ios.bundle?platform=ios&dev=true"];
-```
+    ```
+    jsCodeLocation = [NSURL URLWithString:@"http://localhost:8081/index.ios.bundle?platform=ios&dev=true"];
+    ```
 3. Replace it with this line:
 
-```
-jsCodeLocation = [CodePush getBundleUrl];
-```
+    ```
+    jsCodeLocation = [CodePush getBundleUrl];
+    ```
 
 This change configures your app to always load the most recent version of your app's JS bundle. On the initial launch, this will correspond to the file that was compiled with the app. However, after an update has been pushed via CodePush, this will return the location of the most recently applied update.
 
@@ -92,15 +92,15 @@ The simplest way to do this is to perform the following in your app's root compo
 
 1. Import the JavaScript module for CodePush:
 
-```
-var CodePush = require("react-native-code-push")
-```
+    ```
+    var CodePush = require("react-native-code-push")
+    ```
 
 2. Call the `sync` method from within the `componentDidMount` lifecycle event, to initiate a background update on each app start:
 
-```
-CodePush.sync();
-```
+    ```
+    CodePush.sync();
+    ```
 
 If an update is available, a dialog will be display to the user asking them if they would like to install it. If the update was marked as mandatory, then the dialog will
 omit the option to decline installation.
@@ -173,13 +173,14 @@ codePush.notifyApplicationReady(): Promise<void>;
 
 #### codePush.sync
 
-Provides a simple option for checking for an update, downloading it and then applying it, all while also respecting the policy that your release was published with. This method effectively composes together the "manual mode" APIs for you, so that you don't need to handle any of the following scenarios yourself:
+Provides a simple option for checking for an update, downloading it and then applying it, all while also respecting the policy that your release was published with. This method effectively composes together the "advanced mode" APIs for you, so that you don't need to handle any of the following scenarios yourself:
 
 1. Checking for an update and displaying a standard confirmation dialog asking if they would like to install it
 2. Automatically ignoring updates which have previously failed to apply (due to automatic rollback), and therefore, likely don't make sense trying to apply again (let's blacklist them!)
 3. Looking to see whether an available update is mandatory, and if so, don't give the end-user the choice to ignore it
 4. Displaying the description of an update to the end-user as part of the install confirmation experience
 
+If you want to pivot whether you check and/or download an available update based on the end-user's device battery level, network conditions, etc. then simply wrap the call to `sync` in a condition that ensures you only call it when desired.
 ```javascript
 codePush.sync(options: Object): Promise<Boolean>
 ```
@@ -254,6 +255,8 @@ The `RemotePackage` inherits all of the same properties as the `LocalPackage`, b
 ##### Methods
 - __download(): Promise<LocalPackage>__: Downloads the package update from the CodePush service. Returns a Promise that resolves with the `LocalPackage`.
 
+---
+
 ## Running the Example
 
 * Clone this repository
@@ -265,8 +268,7 @@ The `RemotePackage` inherits all of the same properties as the `LocalPackage`, b
 * Open `CodePushDemoApp.xcodeproj` in Xcode
 * Launch the project
 
-Running Tests
----
+## Running Tests
 
 * Open `CodePushDemoApp.xcodeproj` in Xcode
 * Navigate to the test explorer (small grey diamond near top left)
