@@ -4,7 +4,7 @@ This plugin provides client-side integration for the [CodePush service](https://
 
 The CodePush React Native API provides two primary mechanisms for discovering updates and dynamically applying them within your apps:
 
-1. [**Sync mode**](#codePushssync), which allows you to call a single method--presumably as part of mounting your app's root component or in response to a button click--that will automatically check for an update, download and apply it, while respecting the policies and metadata associated with each release (e.g. if the release is mandatory then it doesn't give the end-user the option to ignore it)
+1. [**Sync mode**](#codepushsync), which allows you to call a single method--presumably as part of mounting your app's root component or in response to a button click--that will automatically check for an update, download and apply it, while respecting the policies and metadata associated with each release (e.g. if the release is mandatory then it doesn't give the end-user the option to ignore it)
 2. [**Advanced mode**](#codepushcheckforupdate), which provides a handful of "low-level" methods which give you complete control over the update experience, at the cost of added complexity.
 
 When getting started using CodePush, we would recommended using the sync mode until you discover that it doesn't suit your needs. That said, if you have a user scenario
@@ -102,7 +102,7 @@ The simplest way to do this is to perform the following in your app's root compo
     ```
 
 If an update is available, a dialog will be displayed to the user asking them if they would like to install it. If the update was marked as mandatory, then the dialog will
-omit the option to decline installation. The `sync` method takes a handful of options to customize this experience, so refer to its [API reference](#codePushsync) if you'd like to tweak its default behavior.
+omit the option to decline installation. The `sync` method takes a handful of options to customize this experience, so refer to its [API reference](#codepushsync) if you'd like to tweak its default behavior.
 
 ## Releasing code updates
 
