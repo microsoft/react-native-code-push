@@ -1,8 +1,3 @@
-/**
- * @providesModule CodePush
- * @flow
- */
-
 'use strict';
 
 var extend = require("extend");
