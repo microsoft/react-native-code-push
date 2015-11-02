@@ -1,10 +1,9 @@
 #import "RCTBridgeModule.h"
 
-@interface CodePush : NSObject <RCTBridgeModule>
+@interface CodePush : NSObject<RCTBridgeModule>
 
-+ (NSString *) getDocumentsDirectory;
-
-+ (NSURL *) getBundleUrl;
++ (NSString *)getDocumentsDirectory;
++ (NSURL *)getBundleUrl;
 
 @end
 
@@ -48,4 +47,5 @@
                error:(NSError **)error;
 
 + (void)rollbackPackage;
+
 @end
