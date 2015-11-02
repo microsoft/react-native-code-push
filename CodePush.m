@@ -7,7 +7,6 @@
 
 RCT_EXPORT_MODULE()
 
-RCTBridge *_bridge;
 NSTimer *_timer;
 BOOL usingTestFolder = NO;
 
@@ -38,34 +37,28 @@ NSString * const UpdateBundleFileName = @"app.jsbundle";
 }
 
 // Internal API methods
-+ (void)cancelRollbackTimer
+- (void)cancelRollbackTimer
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         [_timer invalidate];
     });
 }
 
-+ (BOOL)isFailedHash:(NSString*)packageHash {
+- (BOOL)isFailedHash:(NSString*)packageHash {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSMutableArray *failedUpdates = [preferences objectForKey:FailedUpdatesKey];
     return (failedUpdates != nil && [failedUpdates containsObject:packageHash]);
 }
 
-+ (void)loadBundle
+- (void)loadBundle
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:[self getBundleUrl]
-                                                            moduleName:[CodePushConfig getRootComponent]
-                                                     initialProperties:nil
-                                                         launchOptions:nil];
-        
-        UIViewController *rootViewController = [[UIViewController alloc] init];
-        rootViewController.view = rootView;
-        [UIApplication sharedApplication].delegate.window.rootViewController = rootViewController;
-    });
+    // Reset the runtime's bundle to be
+    // the latest URL, and then force a refresh
+    _bridge.bundleURL = [CodePush getBundleUrl];
+    [_bridge reload];
 }
 
-+ (void)rollbackPackage
+- (void)rollbackPackage
 {
     NSError *error;
     NSString *packageHash = [CodePushPackage getCurrentPackageHash:&error];
@@ -79,7 +72,7 @@ NSString * const UpdateBundleFileName = @"app.jsbundle";
     [self loadBundle];
 }
 
-+ (void)saveFailedUpdate:(NSString *)packageHash {
+- (void)saveFailedUpdate:(NSString *)packageHash {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSMutableArray *failedUpdates = [preferences objectForKey:FailedUpdatesKey];
     if (failedUpdates == nil) {
@@ -95,7 +88,7 @@ NSString * const UpdateBundleFileName = @"app.jsbundle";
     [preferences synchronize];
 }
 
-+ (void)startRollbackTimer:(int)rollbackTimeout
+- (void)startRollbackTimer:(int)rollbackTimeout
 {
     double timeoutInSeconds = rollbackTimeout / 1000;
     _timer = [NSTimer scheduledTimerWithTimeInterval:timeoutInSeconds
@@ -121,11 +114,11 @@ RCT_EXPORT_METHOD(applyUpdate:(NSDictionary*)updatePackage
             reject(error);
         }
         
-        [CodePush loadBundle];
+        [self loadBundle];
         
         if (0 != rollbackTimeout) {
             dispatch_async(dispatch_get_main_queue(), ^{
-                [CodePush startRollbackTimer:rollbackTimeout];
+                [self startRollbackTimer:rollbackTimeout];
             });
             
         }
@@ -177,17 +170,17 @@ RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
 }
 
 RCT_EXPORT_METHOD(isFailedUpdate:(NSString *)packageHash
-                         resolve:(RCTPromiseResolveBlock)resolve
-                          reject:(RCTPromiseRejectBlock)reject)
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject)
 {
-    BOOL isFailedHash = [CodePush isFailedHash:packageHash];
+    BOOL isFailedHash = [self isFailedHash:packageHash];
     resolve(@(isFailedHash));
 }
 
 RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
-                                rejecter:(RCTPromiseRejectBlock)reject)
+                  rejecter:(RCTPromiseRejectBlock)reject)
 {
-    [CodePush cancelRollbackTimer];
+    [self cancelRollbackTimer];
     resolve([NSNull null]);
 }
 
@@ -195,5 +188,5 @@ RCT_EXPORT_METHOD(setUsingTestFolder:(BOOL)shouldUseTestFolder)
 {
     usingTestFolder = shouldUseTestFolder;
 }
-                  
+
 @end
