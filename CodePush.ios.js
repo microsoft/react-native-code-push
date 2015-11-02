@@ -100,13 +100,13 @@ function checkForUpdate() {
                     .then((isFailedHash) => {
                       update.failedApply = isFailedHash;
                       resolve(update);
-                    });
+                    })
+                    .catch(reject)
+                    .done();
                 } else {
                   resolve(update);
                 }
               })
-              .catch(reject)
-              .done();
             });
           });
 }
