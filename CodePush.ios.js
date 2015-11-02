@@ -1,10 +1,11 @@
 'use strict';
 
 var extend = require("extend");
-var NativeCodePush = require('react-native').NativeModules.CodePush;
+var NativeCodePush = require("react-native").NativeModules.CodePush;
 var requestFetchAdapter = require("./request-fetch-adapter.js");
 var Sdk = require("code-push/script/acquisition-sdk").AcquisitionManager;
 var packageMixins = require("./package-mixins")(NativeCodePush);
+
 var { AlertIOS } = require("react-native");
 
 // This function is only used for tests. Replaces the default SDK, configuration and native bridge
@@ -50,45 +51,62 @@ var getSdk = (() => {
   }
 })();
 
+function getCurrentPackage() {
+  return new Promise((resolve, reject) => {
+    var localPackage;
+    NativeCodePush.getCurrentPackage()
+      .then((currentPackage) => {
+        localPackage = currentPackage;
+        return NativeCodePush.isFailedUpdate(currentPackage.packageHash)
+      })
+      .then((failedUpdate) => {
+        localPackage.failedApply = failedUpdate;
+        resolve(localPackage);
+      })
+      .catch(reject)
+      .done();
+  });
+}
+
 function checkForUpdate() {
   var config;
   var sdk;
+  
   return getConfiguration()
-    .then((configResult) => {
-      config = configResult;
-      return getSdk();
-    })
-    .then((sdkResult) => {
-      sdk = sdkResult;
-      return getCurrentPackage();
-    })
-    .then((localPackage) => {
-      var queryPackage = {appVersion: config.appVersion};
-      if (localPackage && localPackage.appVersion === config.appVersion) {
-        queryPackage = localPackage;
-      }
+          .then((configResult) => {
+            config = configResult;
+            return getSdk();
+          })
+          .then((sdkResult) => {
+            sdk = sdkResult;
+            return getCurrentPackage();
+          })
+          .then((localPackage) => {
+            var queryPackage = { appVersion: config.appVersion };
+            if (localPackage && localPackage.appVersion === config.appVersion) {
+              queryPackage = localPackage;
+            }
 
-      return new Promise((resolve, reject) => {
-        sdk.queryUpdateWithCurrentPackage(queryPackage, (err, update) => {
-          if (err) return reject(err);
-          if (update) {
-            // There is an update available for a different native app version. In the current version of this plugin, we treat that as no update.
-            if (update.updateAppVersion) resolve(false);
-            else resolve(extend({}, update, packageMixins.remote));
-          } else {
-            resolve(update);
-          }
-        });
-      });
-    });
-}
-
-function getCurrentPackage() {
-  return NativeCodePush.getCurrentPackage();
-}
-
-function notifyApplicationReady() {
-  return NativeCodePush.notifyApplicationReady();
+            return new Promise((resolve, reject) => {
+              sdk.queryUpdateWithCurrentPackage(queryPackage, (err, update) => {
+                if (err) {
+                  reject(err);
+                }
+                
+                if (update) {
+                  update = extend(update, packageMixins.remote);
+                  
+                  NativeCodePush.isFailedUpdate(update.packageHash)
+                    .then((isFailedHash) => {
+                      update.failedApply = isFailedHash;
+                      resolve(update);
+                    });
+                } else {
+                  resolve(update);
+                }
+              });
+            });
+          });
 }
 
 /**
@@ -174,10 +192,10 @@ function sync(options = {}) {
 };
 
 var CodePush = {
-  getConfiguration: getConfiguration,
   checkForUpdate: checkForUpdate,
+  getConfiguration: getConfiguration,
   getCurrentPackage: getCurrentPackage,
-  notifyApplicationReady: notifyApplicationReady,
+  notifyApplicationReady: NativeCodePush.notifyApplicationReady,
   setUpTestDependencies: setUpTestDependencies,
   sync: sync,
   SyncStatus: {

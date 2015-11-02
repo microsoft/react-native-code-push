@@ -1,82 +1,57 @@
-#import "CodePush.h"
-
 #import "RCTBridgeModule.h"
 #import "RCTRootView.h"
 #import "RCTUtils.h"
-
+#import "CodePush.h"
 
 @implementation CodePush
 
 RCT_EXPORT_MODULE()
 
-RCTBridge * _bridge;
+RCTBridge *_bridge;
 NSTimer *_timer;
 BOOL usingTestFolder = NO;
 
+NSString * const FailedUpdatesKey = @"FAILED_UPDATES";
+NSString * const UpdateBundleFileName = @"app.jsbundle";
+
 @synthesize bridge = _bridge;
 
+// Public Obj-C API
 + (NSString *)getDocumentsDirectory
 {
-    NSString *documentsDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSUserDomainMask, YES) objectAtIndex:0];
+    NSString *documentsDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     return documentsDirectory;
 }
 
-+ (NSString *) getBundlePath
-{
-    NSString * bundleFolderPath = [self getPackageFolderPath];
-    NSString* appBundleName = @"main.jsbundle";
-    return [bundleFolderPath stringByAppendingPathComponent:appBundleName];
-}
-
-+ (NSString *) getPackageFolderPath
-{
-    NSString* documentsDirectory = [self getDocumentsDirectory];
-    NSString* pathExtension = [[@"CodePush/" stringByAppendingString: (usingTestFolder ? @"test/" : @"")] stringByAppendingString: @"currentPackage"];
-    NSString* packageFolder = [documentsDirectory stringByAppendingPathComponent:pathExtension];
-    return packageFolder;
-}
-
-+ (NSString *) getPreviousPackageFolderPath
-{
-    NSString* documentsDirectory = [self getDocumentsDirectory];
-    NSString* pathExtension = [[@"CodePush/" stringByAppendingString: (usingTestFolder ? @"test/" : @"")] stringByAppendingString: @"previous"];
-    NSString* packageFolder = [documentsDirectory stringByAppendingPathComponent:pathExtension];
-    return packageFolder;
-}
-
-+ (NSString *) getPackagePath
-{
-    NSString *packageFolderPath = [self getPackageFolderPath];
-    NSString* appPackageName = @"localpackage.json";
-    return [packageFolderPath stringByAppendingPathComponent:appPackageName];
-}
-
-+ (NSString *) getPreviousPackagePath
-{
-    NSString * packageFolderPath = [self getPreviousPackageFolderPath];
-    NSString* appPackageName = @"localpackage.json";
-    return [packageFolderPath stringByAppendingPathComponent:appPackageName];
-}
-
-+ (NSURL *) getNativeBundleURL
-{
-    return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
-}
-
-+ (NSURL *) getBundleUrl
++ (NSURL *)getBundleUrl
 {
     NSError *error;
     NSString *packageFolder = [CodePushPackage getCurrentPackageFolderPath:&error];
     
-    if (error || !packageFolder) {
-        return [self getNativeBundleURL];
+    if (error || !packageFolder)
+    {
+        return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
     }
     
-    NSString *packageFile = [packageFolder stringByAppendingPathComponent:@"app.jsbundle"];
+    NSString *packageFile = [packageFolder stringByAppendingPathComponent:UpdateBundleFileName];
     return [[NSURL alloc] initFileURLWithPath:packageFile];
 }
 
-+ (void) loadBundle
+// Internal API methods
++ (void)cancelRollbackTimer
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [_timer invalidate];
+    });
+}
+
++ (BOOL)isFailedHash:(NSString*)packageHash {
+    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+    NSMutableArray *failedUpdates = [preferences objectForKey:FailedUpdatesKey];
+    return (failedUpdates != nil && [failedUpdates containsObject:packageHash]);
+}
+
++ (void)loadBundle
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:[self getBundleUrl]
@@ -90,37 +65,71 @@ BOOL usingTestFolder = NO;
     });
 }
 
-+ (void) rollbackPackage:(NSTimer *)timer {
++ (void)rollbackPackage
+{
+    NSError *error;
+    NSString *packageHash = [CodePushPackage getCurrentPackageHash:&error];
+    
+    // Write the current package's hash to the "failed list"
+    [self saveFailedUpdate:packageHash];
+    
+    // Do the actual rollback and then
+    // refresh the app with the previous package
     [CodePushPackage rollbackPackage];
     [self loadBundle];
 }
 
-+ (void) startRollbackTimer:(int)rollbackTimeout
++ (void)saveFailedUpdate:(NSString *)packageHash {
+    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+    NSMutableArray *failedUpdates = [preferences objectForKey:FailedUpdatesKey];
+    if (failedUpdates == nil) {
+        failedUpdates = [[NSMutableArray alloc] init];
+    } else {
+        // The NSUserDefaults sytem always returns immutable
+        // objects, regardless if you stored something mutable.
+        failedUpdates = [failedUpdates mutableCopy];
+    }
+    
+    [failedUpdates addObject:packageHash];
+    [preferences setObject:failedUpdates forKey:FailedUpdatesKey];
+    [preferences synchronize];
+}
+
++ (void)startRollbackTimer:(int)rollbackTimeout
 {
     double timeoutInSeconds = rollbackTimeout / 1000;
     _timer = [NSTimer scheduledTimerWithTimeInterval:timeoutInSeconds
                                               target:self
-                                            selector:@selector(rollbackPackage:)
+                                            selector:@selector(rollbackPackage)
                                             userInfo:nil
                                              repeats:NO];
 }
 
-+ (void) cancelRollbackTimer
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [_timer invalidate];
-    });
-}
-
-RCT_EXPORT_METHOD(setUsingTestFolder:(BOOL) shouldUseTestFolder)
-{
-    usingTestFolder = shouldUseTestFolder;
-}
-
-RCT_EXPORT_METHOD(getConfiguration:(RCTPromiseResolveBlock)resolve
+// JavaScript-exported module methods
+RCT_EXPORT_METHOD(applyUpdate:(NSDictionary*)updatePackage
+                  rollbackTimeout:(int)rollbackTimeout
+                  resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
-    resolve([CodePushConfig getConfiguration]);
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        NSError *error;
+        [CodePushPackage applyPackage:updatePackage
+                                error:&error];
+        
+        if (error) {
+            reject(error);
+        }
+        
+        [CodePush loadBundle];
+        
+        if (0 != rollbackTimeout) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [CodePush startRollbackTimer:rollbackTimeout];
+            });
+            
+        }
+    });
 }
 
 RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
@@ -147,31 +156,10 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
     });
 }
 
-RCT_EXPORT_METHOD(applyUpdate:(NSDictionary*)updatePackage
-                  rollbackTimeout:(int)rollbackTimeout
-                  resolver:(RCTPromiseResolveBlock)resolve
+RCT_EXPORT_METHOD(getConfiguration:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
-    
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        NSError *error;
-        [CodePushPackage applyPackage:updatePackage
-                                error:&error];
-        
-        if (error) {
-            reject(error);
-        }
-        
-        [CodePush loadBundle];
-        
-        if (0 != rollbackTimeout) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [CodePush startRollbackTimer:rollbackTimeout];
-            });
-
-        }
-    });
-    
+    resolve([CodePushConfig getConfiguration]);
 }
 
 RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
@@ -188,12 +176,24 @@ RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
     });
 }
 
+RCT_EXPORT_METHOD(isFailedUpdate:(NSString *)packageHash
+                         resolve:(RCTPromiseResolveBlock)resolve
+                          reject:(RCTPromiseRejectBlock)reject)
+{
+    BOOL isFailedHash = [CodePush isFailedHash:packageHash];
+    resolve(@(isFailedHash));
+}
+
 RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
+                                rejecter:(RCTPromiseRejectBlock)reject)
 {
     [CodePush cancelRollbackTimer];
-    
     resolve([NSNull null]);
 }
 
+RCT_EXPORT_METHOD(setUsingTestFolder:(BOOL)shouldUseTestFolder)
+{
+    usingTestFolder = shouldUseTestFolder;
+}
+                  
 @end
