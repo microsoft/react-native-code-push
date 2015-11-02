@@ -2,8 +2,8 @@
 
 @interface CodePush : NSObject<RCTBridgeModule>
 
-+ (NSString *)getDocumentsDirectory;
 + (NSURL *)getBundleUrl;
++ (NSString *)getDocumentsDirectory;
 
 @end
 
@@ -31,20 +31,21 @@
 
 @interface CodePushPackage : NSObject
 
-+ (NSString *)getCurrentPackageFolderPath:(NSError **)error;
-
-+ (NSString *)getPackageFolderPath:(NSString *)packageHash;
++ (void)applyPackage:(NSDictionary *)updatePackage
+               error:(NSError **)error;
 
 + (NSDictionary *)getCurrentPackage:(NSError **)error;
++ (NSString *)getCurrentPackageFolderPath:(NSError **)error;
++ (NSString *)getCurrentPackageHash:(NSError **)error;
 
 + (NSDictionary *)getPackage:(NSString *)packageHash
                        error:(NSError **)error;
 
++ (NSString *)getPackageFolderPath:(NSString *)packageHash;
+
+
 + (void)downloadPackage:(NSDictionary *)updatePackage
                             error:(NSError **)error;
-
-+ (void)applyPackage:(NSDictionary *)updatePackage
-               error:(NSError **)error;
 
 + (void)rollbackPackage;
 
