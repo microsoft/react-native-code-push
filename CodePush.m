@@ -52,16 +52,10 @@ NSString * const UpdateBundleFileName = @"app.jsbundle";
 
 - (void)loadBundle
 {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:[CodePush getBundleUrl]
-                                                            moduleName:[CodePushConfig getRootComponent]
-                                                     initialProperties:nil
-                                                         launchOptions:nil];
-        
-        UIViewController *rootViewController = [[UIViewController alloc] init];
-        rootViewController.view = rootView;
-        [UIApplication sharedApplication].delegate.window.rootViewController = rootViewController;
-    });
+    // Reset the runtime's bundle to be
+    // the latest URL, and then force a refresh
+    _bridge.bundleURL = [CodePush getBundleUrl];
+    [_bridge reload];
 }
 
 - (void)rollbackPackage
