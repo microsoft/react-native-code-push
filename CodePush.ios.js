@@ -57,7 +57,7 @@ function getCurrentPackage() {
     NativeCodePush.getCurrentPackage()
       .then((currentPackage) => {
         localPackage = currentPackage;
-        return NativeCodePush.isFailedUpdate(currentPackage.packageHash)
+        return NativeCodePush.isFailedUpdate(currentPackage.packageHash);
       })
       .then((failedUpdate) => {
         localPackage.failedApply = failedUpdate;
@@ -104,7 +104,9 @@ function checkForUpdate() {
                 } else {
                   resolve(update);
                 }
-              });
+              })
+              .catch(reject)
+              .done();
             });
           });
 }
