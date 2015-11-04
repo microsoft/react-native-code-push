@@ -61,6 +61,10 @@ function getCurrentPackage() {
       })
       .then((failedUpdate) => {
         localPackage.failedApply = failedUpdate;
+        return NativeCodePush.isFirstRun(localPackage.packageHash);
+      })
+      .then((isFirstRun) => {
+        localPackage.isFirstRun = isFirstRun;
         resolve(localPackage);
       })
       .catch(reject)

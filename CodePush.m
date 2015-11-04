@@ -9,6 +9,7 @@ RCT_EXPORT_MODULE()
 
 NSTimer *_timer;
 BOOL usingTestFolder = NO;
+BOOL didUpdate = NO;
 
 NSString * const FailedUpdatesKey = @"FAILED_UPDATES";
 NSString * const UpdateBundleFileName = @"app.jsbundle";
@@ -112,15 +113,16 @@ RCT_EXPORT_METHOD(applyUpdate:(NSDictionary*)updatePackage
         
         if (error) {
             reject(error);
-        }
-        
-        [self loadBundle];
-        
-        if (0 != rollbackTimeout) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self startRollbackTimer:rollbackTimeout];
-            });
+        } else {
+            didUpdate = YES;
             
+            [self loadBundle];
+            
+            if (0 != rollbackTimeout) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    [self startRollbackTimer:rollbackTimeout];
+                });
+            }
         }
     });
 }
@@ -176,6 +178,19 @@ RCT_EXPORT_METHOD(isFailedUpdate:(NSString *)packageHash
     BOOL isFailedHash = [self isFailedHash:packageHash];
     resolve(@(isFailedHash));
 }
+
+RCT_EXPORT_METHOD(isFirstRun:(NSString *)packageHash
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+    NSError *error;
+    BOOL isFirstRun = (nil != packageHash
+                  && [packageHash length] > 0
+                  && [packageHash isEqualToString:[CodePushPackage getCurrentPackageHash:&error]]
+                  && didUpdate);
+    resolve(@(isFirstRun));
+}
+
 
 RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
