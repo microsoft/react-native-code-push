@@ -184,10 +184,11 @@ RCT_EXPORT_METHOD(isFirstRun:(NSString *)packageHash
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
     NSError *error;
-    BOOL isFirstRun = (nil != packageHash
+    BOOL isFirstRun = didUpdate
+                  && nil != packageHash
                   && [packageHash length] > 0
-                  && [packageHash isEqualToString:[CodePushPackage getCurrentPackageHash:&error]]
-                  && didUpdate);
+                  && [packageHash isEqualToString:[CodePushPackage getCurrentPackageHash:&error]];
+                  
     resolve(@(isFirstRun));
 }
 
