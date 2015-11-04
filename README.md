@@ -245,6 +245,7 @@ Contains details about an update package that has been downloaded locally or alr
 - __isMandatory__: Flag indicating if the update is mandatory. (Boolean) This is the value that you specified in the CLI when you released the update
 - __packageHash__: The hash value of the package. (String)
 - __packageSize__: The size of the package, in bytes. (Number)
+- __isFirstRun__: Flag indicating whether this is the first time the package has been run after being applied. (Boolean) This is useful for determining whether you would like to show a "What's New?" UI to the user after the app is restarted after applying an update.
 
 ##### Methods
 - __apply(rollbackTimeout): Promise__: Applies this package to the application. The application will be reloaded with this package and on every application launch this package will be loaded.
