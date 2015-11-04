@@ -75,12 +75,20 @@ NSString * const StatusFile = @"codepush.json";
 + (NSString *)getCurrentPackageHash:(NSError **)error
 {
     NSDictionary *info = [self getCurrentPackageInfo:error];
+    if (*error) {
+        return NULL;
+    }
+    
     return info[@"currentPackage"];
 }
 
 + (NSString *)getPreviousPackageHash:(NSError **)error
 {
     NSDictionary *info = [self getCurrentPackageInfo:error];
+    if (*error) {
+        return NULL;
+    }
+    
     return info[@"previousPackage"];
 }
 
