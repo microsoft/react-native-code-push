@@ -191,7 +191,6 @@ RCT_EXPORT_METHOD(isFirstRun:(NSString *)packageHash
     resolve(@(isFirstRun));
 }
 
-
 RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
