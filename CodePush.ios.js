@@ -94,22 +94,24 @@ function checkForUpdate() {
             return new Promise((resolve, reject) => {
               sdk.queryUpdateWithCurrentPackage(queryPackage, (err, update) => {
                 if (err) {
-                  reject(err);
+                  return reject(err);
                 }
                 
-                if (update) {
-                  update = extend(update, packageMixins.remote);
-                  
-                  NativeCodePush.isFailedUpdate(update.packageHash)
-                    .then((isFailedHash) => {
-                      update.failedApply = isFailedHash;
-                      resolve(update);
-                    })
-                    .catch(reject)
-                    .done();
-                } else {
-                  resolve(update);
+                // Ignore updates that require a newer app version,
+                // since the end-user couldn't reliably apply it
+                if (!update || update.updateAppVersion) {
+                  return resolve(null);
                 }
+
+                update = extend(update, packageMixins.remote);
+                
+                NativeCodePush.isFailedUpdate(update.packageHash)
+                  .then((isFailedHash) => {
+                    update.failedApply = isFailedHash;
+                    resolve(update);
+                  })
+                  .catch(reject)
+                  .done();
               })
             });
           });
