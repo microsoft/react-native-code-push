@@ -27,14 +27,26 @@ NSString * const UpdateBundleFileName = @"app.jsbundle";
 {
     NSError *error;
     NSString *packageFolder = [CodePushPackage getCurrentPackageFolderPath:&error];
+    NSURL *binaryJsBundleUrl = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
     
     if (error || !packageFolder)
     {
-        return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
+        return binaryJsBundleUrl;
     }
     
     NSString *packageFile = [packageFolder stringByAppendingPathComponent:UpdateBundleFileName];
-    return [[NSURL alloc] initFileURLWithPath:packageFile];
+    
+    NSDictionary *binaryFileAttributes = [[NSFileManager defaultManager] attributesOfItemAtPath:[binaryJsBundleUrl path] error:nil];
+    NSDictionary *appFileAttribs = [[NSFileManager defaultManager] attributesOfItemAtPath:packageFile error:nil];
+    NSDate *binaryDate = [binaryFileAttributes objectForKey:NSFileModificationDate];
+    NSDate *packageDate = [appFileAttribs objectForKey:NSFileModificationDate];
+
+    if ([binaryDate compare:packageDate] == NSOrderedAscending) {
+        // Return package file because it is newer than the app store binary's JS bundle
+        return [[NSURL alloc] initFileURLWithPath:packageFile];
+    } else {
+        return binaryJsBundleUrl;
+    }
 }
 
 // Internal API methods
