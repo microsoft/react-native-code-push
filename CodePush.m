@@ -74,7 +74,7 @@ NSString * const UpdateBundleFileName = @"app.jsbundle";
             
             // If the current hash is equivalent to the pending hash, then the app
             // restart "picked up" the new update, but we need to kick off the
-            // rollback timer and ensure that the neccessaey state is setup.
+            // rollback timer and ensure that the necessary state is setup.
             if ([pendingHash isEqualToString:currentHash]) {
                 int rollbackTimeout = [pendingUpdate[@"rollbackTimeout"] intValue];
                 [self initializeUpdateWithRollbackTimeout:rollbackTimeout needsRestart:NO];
