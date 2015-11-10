@@ -69,8 +69,8 @@ NSString * const UpdateBundleFileName = @"app.jsbundle";
         if (pendingUpdate)
         {
             NSError *error;
-            NSString * pendingHash = pendingUpdate[@"hash"];
-            NSString * currentHash = [CodePushPackage getCurrentPackageHash:&error];
+            NSString *pendingHash = pendingUpdate[@"hash"];
+            NSString *currentHash = [CodePushPackage getCurrentPackageHash:&error];
             
             // If the current hash is equivalent to the pending hash, then the app
             // restart "picked up" the new update, but we need to kick off the
