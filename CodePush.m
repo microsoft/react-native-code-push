@@ -171,7 +171,6 @@ NSString * const UpdateBundleFileName = @"app.jsbundle";
 }
 
 // JavaScript-exported module methods
-// JavaScript-exported module methods
 RCT_EXPORT_METHOD(applyUpdate:(NSDictionary*)updatePackage
               rollbackTimeout:(int)rollbackTimeout
            restartImmediately:(BOOL)restartImmediately
