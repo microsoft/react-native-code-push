@@ -11,7 +11,8 @@ NSTimer *_timer;
 BOOL usingTestFolder = NO;
 BOOL didUpdate = NO;
 
-NSString * const FailedUpdatesKey = @"FAILED_UPDATES";
+NSString * const FailedUpdatesKey = @"CODE_PUSH_FAILED_UPDATES";
+NSString * const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
 NSString * const UpdateBundleFileName = @"app.jsbundle";
 
 @synthesize bridge = _bridge;
@@ -55,6 +56,51 @@ NSString * const UpdateBundleFileName = @"app.jsbundle";
     dispatch_async(dispatch_get_main_queue(), ^{
         [_timer invalidate];
     });
+}
+
+- (CodePush *)init
+{
+    self = [super init];
+    
+    if (self) {
+        NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+        NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];
+        
+        if (pendingUpdate)
+        {
+            NSError *error;
+            NSString * pendingHash = pendingUpdate[@"hash"];
+            NSString * currentHash = [CodePushPackage getCurrentPackageHash:&error];
+            
+            // If the current hash is equivalent to the pending hash, then the app
+            // restart "picked up" the new update, but we need to kick off the
+            // rollback timer and ensure that the neccessaey state is setup.
+            if ([pendingHash isEqualToString:currentHash]) {
+                int rollbackTimeout = [pendingUpdate[@"rollbackTimeout"] intValue];
+                [self initializeUpdateWithRollbackTimeout:rollbackTimeout needsRestart:NO];
+                
+                // Clear the pending update and sync
+                [preferences removeObjectForKey:PendingUpdateKey];
+                [preferences synchronize];
+            }
+        }
+    }
+    
+    return self;
+}
+
+- (void)initializeUpdateWithRollbackTimeout:(int)rollbackTimeout needsRestart:(BOOL)needsRestart {
+    didUpdate = YES;
+    
+    if (needsRestart) {
+        [self loadBundle];
+    }
+    
+    if (0 != rollbackTimeout) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self startRollbackTimer:rollbackTimeout];
+        });
+    }
 }
 
 - (BOOL)isFailedHash:(NSString*)packageHash {
@@ -101,6 +147,19 @@ NSString * const UpdateBundleFileName = @"app.jsbundle";
     [preferences synchronize];
 }
 
+- (void)savePendingUpdate:(NSString *)packageHash
+          rollbackTimeout:(int)rollbackTimeout {
+    // Since we're not restarting, we need to store the fact that the update
+    // was applied, but hasn't yet become "active".
+    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+    NSDictionary *pendingUpdate = [[NSDictionary alloc] initWithObjectsAndKeys:
+                                   packageHash,@"hash",
+                                   rollbackTimeout,@"rollbackTimeout", nil];
+    
+    [preferences setObject:pendingUpdate forKey:PendingUpdateKey];
+    [preferences synchronize];
+}
+
 - (void)startRollbackTimer:(int)rollbackTimeout
 {
     double timeoutInSeconds = rollbackTimeout / 1000;
@@ -112,12 +171,13 @@ NSString * const UpdateBundleFileName = @"app.jsbundle";
 }
 
 // JavaScript-exported module methods
+// JavaScript-exported module methods
 RCT_EXPORT_METHOD(applyUpdate:(NSDictionary*)updatePackage
-                  rollbackTimeout:(int)rollbackTimeout
-                  resolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
+              rollbackTimeout:(int)rollbackTimeout
+           restartImmediately:(BOOL)restartImmediately
+                     resolver:(RCTPromiseResolveBlock)resolve
+                     rejecter:(RCTPromiseRejectBlock)reject)
 {
-    
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSError *error;
         [CodePushPackage applyPackage:updatePackage
@@ -126,14 +186,10 @@ RCT_EXPORT_METHOD(applyUpdate:(NSDictionary*)updatePackage
         if (error) {
             reject(error);
         } else {
-            didUpdate = YES;
-            
-            [self loadBundle];
-            
-            if (0 != rollbackTimeout) {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [self startRollbackTimer:rollbackTimeout];
-                });
+            if (restartImmediately) {
+                [self initializeUpdateWithRollbackTimeout:rollbackTimeout needsRestart:YES];
+            } else {
+                [self savePendingUpdate:updatePackage[@"packageHash"] rollbackTimeout:rollbackTimeout];
             }
         }
     });
