@@ -248,7 +248,7 @@ Contains details about an update package that has been downloaded locally or alr
 - __isFirstRun__: Flag indicating whether this is the first time the package has been run after being applied. (Boolean) This is useful for determining whether you would like to show a "What's New?" UI to the end-user after applying an update.
 
 ##### Methods
-- __apply(rollbackTimeout: Number = 0, restartImmediately: Boolean = true): Promise&lt;void&gt;__: Applies this package to the application by unzipping its contents (e.g. the JS bundle) and saving it to the location on disk where the runtime expects to find the latest version of the app. If the restartImmediately parameter is set to false, the apply will complete, but it won't take effect until the next time that the app is restarted. Otherwise, the app will be immediately restarted after performing the apply, so that the end-user sees the changes.
+- __apply(rollbackTimeout: Number = 0, restartImmediately: Boolean = true): Promise&lt;void&gt;__: Applies this package to the application by unzipping its contents (e.g. the JS bundle) and saving it to the location on disk where the runtime expects to find the latest version of the app. If the `restartImmediately` parameter is set to `false`, the apply will complete, but it won't take effect until the next time that the app is restarted. Otherwise, the app will be immediately restarted after performing the apply, so that the end-user sees the changes.
 <br /><br />
 If a value greater than zero is provided to the `rollbackTimeout` parameter, the application will wait for the `notifyApplicationReady` method to be called for the given number of milliseconds.
 <br /><br />
