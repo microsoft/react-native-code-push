@@ -248,10 +248,11 @@ Contains details about an update package that has been downloaded locally or alr
 - __isFirstRun__: Flag indicating whether this is the first time the package has been run after being applied. (Boolean) This is useful for determining whether you would like to show a "What's New?" UI to the end-user after applying an update.
 
 ##### Methods
-- __apply(rollbackTimeout): Promise__: Applies this package to the application. The application will be reloaded with this package and on every application launch this package will be loaded.
-If the rollbackTimeout parameter is provided, the application will wait for a `notifyApplicationReady` for the given number of milliseconds.
-If `notifyApplicationReady` is called before the time period specified by rollbackTimeout, the apply operation is considered a success.
-Otherwise, the apply operation will be marked as failed, and the application is reverted to its previous version.
+- __apply(rollbackTimeout: Number = 0, restartImmediately: Boolean = true): Promise&lt;void&gt;__: Applies this package to the application by unzipping its contents (e.g. the JS bundle) and saving it to the location on disk where the runtime expects to find the latest version of the app. If the `restartImmediately` parameter is set to `false`, the apply will complete, but it won't take effect until the next time that the app is restarted. Otherwise, the app will be immediately restarted after performing the apply, so that the end-user sees the changes.
+<br /><br />
+If a value greater than zero is provided to the `rollbackTimeout` parameter, the application will wait for the `notifyApplicationReady` method to be called for the given number of milliseconds.
+<br /><br />
+Note: The "rollback timer" doesn't start until the update has actually become active. If you pass a truthy value to the `restartImmediately` parameter, then the rollback timer will also start immediately. However, if you pass a falsey value, then the rollback timer will start the next time the app starts, not at the point that you called `apply`.
 
 #### RemotePackage
 
