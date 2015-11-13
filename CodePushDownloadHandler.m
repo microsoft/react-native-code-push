@@ -54,7 +54,7 @@ failCallback:(void (^)(NSError *err))failCallback {
         }
         
         bytesLeft -= bytesWritten;
-    } while (bytesLeft>0);
+    } while (bytesLeft > 0);
     
     self.progressCallback(self.expectedContentLength, self.receivedContentLength);
     
