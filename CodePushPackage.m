@@ -153,7 +153,7 @@ NSString * const StatusFile = @"codepush.json";
            doneCallback:(void (^)())doneCallback
            failCallback:(void (^)(NSError *err))failCallback
 {
-    NSString *packageFolderPath = [CodePushPackage getPackageFolderPath:updatePackage[@"packageHash"]];
+    NSString *packageFolderPath = [self getPackageFolderPath:updatePackage[@"packageHash"]];
     
     NSError *error;
     if (![[NSFileManager defaultManager] fileExistsAtPath:packageFolderPath]) {
