@@ -44,6 +44,6 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
 	<key>CodePushDeploymentKey</key>
-	<string>your-deployment-key</string>
+	<string>deployment-key-here</string>
 </dict>
 </plist>

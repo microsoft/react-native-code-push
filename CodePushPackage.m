@@ -208,7 +208,7 @@ NSString * const StatusFile = @"codepush.json";
     
     [info setValue:info[@"currentPackage"] forKey:@"previousPackage"];
     [info setValue:packageHash forKey:@"currentPackage"];
-    
+
     [self updateCurrentPackageInfo:info
                              error:error];
 }
