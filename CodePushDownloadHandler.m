@@ -61,6 +61,7 @@ failCallback:(void (^)(NSError *err))failCallback {
     if (bytesLeft) {
         self.failCallback([self.outputFileStream streamError]);
         [self.outputFileStream close];
+        [connection cancel];
     }
 }
 
