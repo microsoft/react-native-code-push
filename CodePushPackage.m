@@ -154,7 +154,7 @@ NSString * const StatusFile = @"codepush.json";
            failCallback:(void (^)(NSError *err))failCallback
 {
     NSString *packageFolderPath = [self getPackageFolderPath:updatePackage[@"packageHash"]];
-    NSError *error;
+    NSError *error = nil;
     
     if (![[NSFileManager defaultManager] fileExistsAtPath:packageFolderPath]) {
         [[NSFileManager defaultManager] createDirectoryAtPath:packageFolderPath
