@@ -4,17 +4,6 @@
 
 NSString * const StatusFile = @"codepush.json";
 
-+ (CodePushPackage*)sharedInstance {
-    static dispatch_once_t predicate = 0;
-    __strong static id sharedInstance = nil;
-    //static id sharedObject = nil;  //if you're not using ARC
-    dispatch_once(&predicate, ^{
-        sharedInstance = [[self alloc] init];
-        //sharedObject = [[[self alloc] init] retain]; // if you're not using ARC
-    });
-    return sharedInstance;
-}
-
 + (NSString *)getCodePushPath
 {
     return [[CodePush getDocumentsDirectory] stringByAppendingPathComponent:@"CodePush"];

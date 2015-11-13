@@ -196,8 +196,8 @@ RCT_EXPORT_METHOD(applyUpdate:(NSDictionary*)updatePackage
 }
 
 RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
-                        resolver:(RCTPromiseResolveBlock)resolve
-                        rejecter:(RCTPromiseRejectBlock)reject)
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     [CodePushPackage downloadPackage:updatePackage
                     progressCallback:^(long expectedContentLength, long receivedContentLength) {
