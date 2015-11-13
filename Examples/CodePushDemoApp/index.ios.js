@@ -32,14 +32,23 @@ var CodePushDemoApp = React.createClass({
     return { update: false };
   },
   handlePress: function() {
-    this.state.update.download().done((localPackage) => {
+    this.state.update.download((progress) => {
+      this.setState({
+        progress:progress
+      });
+    }).done((localPackage) => {
       localPackage.apply().done();
     });
   },
 
   render: function() {
     var updateView;
-    if (this.state.update) {
+    
+    if (this.state.progress) {
+      updateView = (
+        <Text>{this.state.progress.receivedBytes} of {this.state.progress.totalBytes} bytes received</Text>
+      );
+    } else if (this.state.update) {
       updateView = (
         <View>
           <Text>Update Available: {'\n'} {this.state.update.scriptVersion} - {this.state.update.description}</Text>
@@ -49,6 +58,7 @@ var CodePushDemoApp = React.createClass({
         </View>
       );
     };
+    
     return (
       <View style={styles.container}>
         <Text style={styles.welcome}>

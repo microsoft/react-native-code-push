@@ -1,4 +1,5 @@
 #import "RCTBridgeModule.h"
+#import "RCTEventDispatcher.h"
 #import "RCTRootView.h"
 #import "RCTUtils.h"
 #import "CodePush.h"
@@ -195,27 +196,33 @@ RCT_EXPORT_METHOD(applyUpdate:(NSDictionary*)updatePackage
 }
 
 RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
-                  resolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
+                        resolver:(RCTPromiseResolveBlock)resolve
+                        rejecter:(RCTPromiseRejectBlock)reject)
 {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        NSError *err;
-        [CodePushPackage downloadPackage:updatePackage
-                                   error:&err];
-        
-        if (err) {
-            return reject(err);
-        }
-        
-        NSDictionary *newPackage = [CodePushPackage getPackage:updatePackage[@"packageHash"]
-                                                         error:&err];
-        
-        if (err) {
-            return reject(err);
-        }
-        
-        resolve(newPackage);
-    });
+    [CodePushPackage downloadPackage:updatePackage
+                    progressCallback:^(long expectedContentLength, long receivedContentLength) {
+                        [self.bridge.eventDispatcher
+                         sendAppEventWithName:@"CodePushDownloadProgress"
+                         body:@{
+                                @"totalBytes":[NSNumber numberWithLong:expectedContentLength],
+                                @"receivedBytes":[NSNumber numberWithLong:receivedContentLength]
+                                }];
+                    }
+                        doneCallback:^{
+                            NSError *err;
+                            NSDictionary *newPackage = [CodePushPackage
+                                                        getPackage:updatePackage[@"packageHash"]
+                                                        error:&err];
+                            
+                            if (err) {
+                                return reject(err);
+                            }
+                            
+                            resolve(newPackage);
+                        }
+                        failCallback:^(NSError *err) {
+                            reject(err);
+                        }];
 }
 
 RCT_EXPORT_METHOD(getConfiguration:(RCTPromiseResolveBlock)resolve

@@ -4,6 +4,17 @@
 
 NSString * const StatusFile = @"codepush.json";
 
++ (CodePushPackage*)sharedInstance {
+    static dispatch_once_t predicate = 0;
+    __strong static id sharedInstance = nil;
+    //static id sharedObject = nil;  //if you're not using ARC
+    dispatch_once(&predicate, ^{
+        sharedInstance = [[self alloc] init];
+        //sharedObject = [[[self alloc] init] retain]; // if you're not using ARC
+    });
+    return sharedInstance;
+}
+
 + (NSString *)getCodePushPath
 {
     return [[CodePush getDocumentsDirectory] stringByAppendingPathComponent:@"CodePush"];
@@ -149,50 +160,51 @@ NSString * const StatusFile = @"codepush.json";
 }
 
 + (void)downloadPackage:(NSDictionary *)updatePackage
-                            error:(NSError **)error
+       progressCallback:(void (^)(long, long))progressCallback
+           doneCallback:(void (^)())doneCallback
+           failCallback:(void (^)(NSError *err))failCallback
 {
-    NSString *packageFolderPath = [self getPackageFolderPath:updatePackage[@"packageHash"]];
+    NSString *packageFolderPath = [CodePushPackage getPackageFolderPath:updatePackage[@"packageHash"]];
     
+    NSError *error;
     if (![[NSFileManager defaultManager] fileExistsAtPath:packageFolderPath]) {
         [[NSFileManager defaultManager] createDirectoryAtPath:packageFolderPath
                                   withIntermediateDirectories:YES
                                                    attributes:nil
-                                                        error:error];
+                                                        error:&error];
     }
     
-    if (*error) {
-        return;
+    if (error) {
+        return failCallback(error);
     }
     
-    NSURL *url = [[NSURL alloc] initWithString:updatePackage[@"downloadUrl"]];
-    NSString *updateContents = [[NSString alloc] initWithContentsOfURL:url
-                                                              encoding:NSUTF8StringEncoding
-                                                                 error:error];
-    if (*error) {
-        return;
-    }
+    NSString *downloadFilePath = [packageFolderPath stringByAppendingPathComponent:@"app.jsbundle"];
     
-    [updateContents writeToFile:[packageFolderPath stringByAppendingPathComponent:@"app.jsbundle"]
-                     atomically:YES
-                       encoding:NSUTF8StringEncoding
-                          error:error];
-    if (*error) {
-        return;
-    }
+    CodePushDownloadHandler *downloadHandler = [[CodePushDownloadHandler alloc]
+                       init:downloadFilePath
+                       progressCallback:progressCallback
+                       doneCallback:^{
+                           NSError *error;
+                           NSData *updateSerializedData = [NSJSONSerialization
+                                                           dataWithJSONObject:updatePackage
+                                                           options:0
+                                                           error:&error];
+                           NSString *packageJsonString = [[NSString alloc]
+                                                          initWithData:updateSerializedData encoding:NSUTF8StringEncoding];
+                           
+                           [packageJsonString writeToFile:[packageFolderPath stringByAppendingPathComponent:@"app.json"]
+                                               atomically:YES
+                                                 encoding:NSUTF8StringEncoding
+                                                    error:&error];
+                           if (error) {
+                               failCallback(error);
+                           } else {
+                               doneCallback();
+                           }
+                       }
+                       failCallback:failCallback];
     
-    NSData *updateSerializedData = [NSJSONSerialization dataWithJSONObject:updatePackage
-                                                                   options:0
-                                                                     error:error];
-    
-    if (*error) {
-        return;
-    }
-    
-    NSString *packageJsonString = [[NSString alloc] initWithData:updateSerializedData encoding:NSUTF8StringEncoding];
-    [packageJsonString writeToFile:[packageFolderPath stringByAppendingPathComponent:@"app.json"]
-                        atomically:YES
-                          encoding:NSUTF8StringEncoding
-                             error:error];
+    [downloadHandler download:updatePackage[@"downloadUrl"]];
 }
 
 + (void)applyPackage:(NSDictionary *)updatePackage
@@ -207,7 +219,7 @@ NSString * const StatusFile = @"codepush.json";
     
     [info setValue:info[@"currentPackage"] forKey:@"previousPackage"];
     [info setValue:packageHash forKey:@"currentPackage"];
-
+    
     [self updateCurrentPackageInfo:info
                              error:error];
 }
