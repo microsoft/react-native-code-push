@@ -10,7 +10,7 @@ module.exports = (NativeCodePush) => {
       if (!this.downloadUrl) {
         return Promise.reject(new Error("Cannot download an update without a download url"));
       }
-      
+
       var downloadProgressSubscription;
       if (progressHandler) {
         // Use event subscription to obtain download progress.   
