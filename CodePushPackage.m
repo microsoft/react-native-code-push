@@ -154,8 +154,8 @@ NSString * const StatusFile = @"codepush.json";
            failCallback:(void (^)(NSError *err))failCallback
 {
     NSString *packageFolderPath = [self getPackageFolderPath:updatePackage[@"packageHash"]];
-    
     NSError *error;
+    
     if (![[NSFileManager defaultManager] fileExistsAtPath:packageFolderPath]) {
         [[NSFileManager defaultManager] createDirectoryAtPath:packageFolderPath
                                   withIntermediateDirectories:YES
@@ -167,31 +167,31 @@ NSString * const StatusFile = @"codepush.json";
         return failCallback(error);
     }
     
-    NSString *downloadFilePath = [packageFolderPath stringByAppendingPathComponent:@"app.jsbundle"];
+    NSString *updateBundleFileName = [packageFolderPath stringByAppendingPathComponent:@"app.jsbundle"];
     
     CodePushDownloadHandler *downloadHandler = [[CodePushDownloadHandler alloc]
-                       init:downloadFilePath
-                       progressCallback:progressCallback
-                       doneCallback:^{
-                           NSError *error;
-                           NSData *updateSerializedData = [NSJSONSerialization
-                                                           dataWithJSONObject:updatePackage
-                                                           options:0
-                                                           error:&error];
-                           NSString *packageJsonString = [[NSString alloc]
-                                                          initWithData:updateSerializedData encoding:NSUTF8StringEncoding];
-                           
-                           [packageJsonString writeToFile:[packageFolderPath stringByAppendingPathComponent:@"app.json"]
-                                               atomically:YES
-                                                 encoding:NSUTF8StringEncoding
-                                                    error:&error];
-                           if (error) {
-                               failCallback(error);
-                           } else {
-                               doneCallback();
-                           }
-                       }
-                       failCallback:failCallback];
+        init:updateBundleFileName
+        progressCallback:progressCallback
+        doneCallback:^{
+            NSError *error;
+            NSData *updateSerializedData = [NSJSONSerialization
+                                           dataWithJSONObject:updatePackage
+                                           options:0
+                                           error:&error];
+            NSString *packageJsonString = [[NSString alloc]
+                                          initWithData:updateSerializedData encoding:NSUTF8StringEncoding];
+           
+            [packageJsonString writeToFile:[packageFolderPath stringByAppendingPathComponent:@"app.json"]
+                                atomically:YES
+                                  encoding:NSUTF8StringEncoding
+                                     error:&error];
+            if (error) {
+                failCallback(error);
+            } else {
+                doneCallback();
+            }
+        }
+        failCallback:failCallback];
     
     [downloadHandler download:updatePackage[@"downloadUrl"]];
 }

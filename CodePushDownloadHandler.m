@@ -44,10 +44,10 @@ failCallback:(void (^)(NSError *err))failCallback {
 -(void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
     self.receivedContentLength = self.receivedContentLength + [data length];
     
-    NSUInteger bytesLeft = [data length];
+    NSInteger bytesLeft = [data length];
     
     do {
-        NSUInteger bytesWritten = [self.outputFileStream write:[data bytes]
+        NSInteger bytesWritten = [self.outputFileStream write:[data bytes]
                                                      maxLength:bytesLeft];
         if (bytesWritten == -1) {
             break;
@@ -59,21 +59,21 @@ failCallback:(void (^)(NSError *err))failCallback {
     self.progressCallback(self.expectedContentLength, self.receivedContentLength);
     
     if (bytesLeft) {
-        self.failCallback([self.outputFileStream streamError]);
         [self.outputFileStream close];
         [connection cancel];
+        self.failCallback([self.outputFileStream streamError]);
     }
 }
 
 - (void)connection:(NSURLConnection*)connection didFailWithError:(NSError*)error
 {
-    self.failCallback(error);
     [self.outputFileStream close];
+    self.failCallback(error);
 }
 
 -(void)connectionDidFinishLoading:(NSURLConnection *)connection {
-    self.doneCallback();
     [self.outputFileStream close];
+    self.doneCallback();
 }
 
 @end
