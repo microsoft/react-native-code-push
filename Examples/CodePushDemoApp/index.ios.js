@@ -43,7 +43,6 @@ var CodePushDemoApp = React.createClass({
 
   render: function() {
     var updateView;
-    
     if (this.state.progress) {
       updateView = (
         <Text>{this.state.progress.receivedBytes} of {this.state.progress.totalBytes} bytes received</Text>
@@ -58,7 +57,6 @@ var CodePushDemoApp = React.createClass({
         </View>
       );
     };
-    
     return (
       <View style={styles.container}>
         <Text style={styles.welcome}>
