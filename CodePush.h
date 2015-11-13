@@ -54,6 +54,7 @@ failCallback:(void (^)(NSError *err))failCallback;
 
 + (NSDictionary *)getCurrentPackage:(NSError **)error;
 + (NSString *)getCurrentPackageFolderPath:(NSError **)error;
++ (NSString *)getCurrentPackageBundlePath:(NSError **)error;
 + (NSString *)getCurrentPackageHash:(NSError **)error;
 
 + (NSDictionary *)getPackage:(NSString *)packageHash

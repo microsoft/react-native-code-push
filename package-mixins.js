@@ -15,7 +15,7 @@ module.exports = (NativeCodePush) => {
       if (progressHandler) {
         // Use event subscription to obtain download progress.   
         downloadProgressSubscription = NativeAppEventEmitter.addListener(
-          'CodePushDownloadProgress',
+          "CodePushDownloadProgress",
           progressHandler
         );
       }

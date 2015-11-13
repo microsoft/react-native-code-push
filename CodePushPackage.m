@@ -3,6 +3,7 @@
 @implementation CodePushPackage
 
 NSString * const StatusFile = @"codepush.json";
+NSString * const UpdateBundleFileName = @"app.jsbundle";
 
 + (NSString *)getCodePushPath
 {
@@ -70,6 +71,17 @@ NSString * const StatusFile = @"codepush.json";
     }
     
     return [self getPackageFolderPath:packageHash];
+}
+
++ (NSString *)getCurrentPackageBundlePath:(NSError **)error
+{
+    NSString *packageFolder = [self getCurrentPackageFolderPath:error];
+    
+    if(*error) {
+        return NULL;
+    }
+    
+    return [packageFolder stringByAppendingPathComponent:UpdateBundleFileName];
 }
 
 + (NSString *)getCurrentPackageHash:(NSError **)error
@@ -167,10 +179,10 @@ NSString * const StatusFile = @"codepush.json";
         return failCallback(error);
     }
     
-    NSString *updateBundleFileName = [packageFolderPath stringByAppendingPathComponent:@"app.jsbundle"];
+    NSString *downloadFilePath = [packageFolderPath stringByAppendingPathComponent:UpdateBundleFileName];
     
     CodePushDownloadHandler *downloadHandler = [[CodePushDownloadHandler alloc]
-        init:updateBundleFileName
+        init:downloadFilePath
         progressCallback:progressCallback
         doneCallback:^{
             NSError *error;

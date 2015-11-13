@@ -14,7 +14,6 @@ BOOL didUpdate = NO;
 
 NSString * const FailedUpdatesKey = @"CODE_PUSH_FAILED_UPDATES";
 NSString * const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
-NSString * const UpdateBundleFileName = @"app.jsbundle";
 
 @synthesize bridge = _bridge;
 
@@ -28,15 +27,13 @@ NSString * const UpdateBundleFileName = @"app.jsbundle";
 + (NSURL *)getBundleUrl
 {
     NSError *error;
-    NSString *packageFolder = [CodePushPackage getCurrentPackageFolderPath:&error];
+    NSString *packageFile = [CodePushPackage getCurrentPackageBundlePath:&error];
     NSURL *binaryJsBundleUrl = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
     
-    if (error || !packageFolder)
+    if (error || !packageFile)
     {
         return binaryJsBundleUrl;
     }
-    
-    NSString *packageFile = [packageFolder stringByAppendingPathComponent:UpdateBundleFileName];
     
     NSDictionary *binaryFileAttributes = [[NSFileManager defaultManager] attributesOfItemAtPath:[binaryJsBundleUrl path] error:nil];
     NSDictionary *appFileAttribs = [[NSFileManager defaultManager] attributesOfItemAtPath:packageFile error:nil];
