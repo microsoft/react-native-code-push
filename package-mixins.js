@@ -11,21 +11,24 @@ module.exports = (NativeCodePush) => {
         return Promise.reject(new Error("Cannot download an update without a download url"));
       }
       
-      // Use event subscription to obtain download progress.   
-      var downloadProgressSubscription = NativeAppEventEmitter.addListener(
-        'CodePushDownloadProgress',
-        progressHandler
-      );
+      var downloadProgressSubscription;
+      if (progressHandler) {
+        // Use event subscription to obtain download progress.   
+        downloadProgressSubscription = NativeAppEventEmitter.addListener(
+          'CodePushDownloadProgress',
+          progressHandler
+        );
+      }
       
       // Use the downloaded package info. Native code will save the package info
       // so that the client knows what the current package version is.
       return NativeCodePush.downloadUpdate(this)
         .then((downloadedPackage) => {
-          downloadProgressSubscription.remove();
+          downloadProgressSubscription && downloadProgressSubscription.remove();
           return extend({}, downloadedPackage, local);
         })
         .catch((error) => {
-          downloadProgressSubscription.remove();
+          downloadProgressSubscription && downloadProgressSubscription.remove();
           // Rethrow the error for subsequent handlers down the promise chain.
           throw error;
         });
