@@ -61,6 +61,7 @@ failCallback:(void (^)(NSError *err))failCallback;
 
 + (NSString *)getPackageFolderPath:(NSString *)packageHash;
 
+
 + (void)downloadPackage:(NSDictionary *)updatePackage
        progressCallback:(void (^)(long, long))progressCallback
            doneCallback:(void (^)())doneCallback
