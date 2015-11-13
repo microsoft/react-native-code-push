@@ -31,12 +31,12 @@
 
 @interface CodePushDownloadHandler : NSObject<NSURLConnectionDelegate>
 
-@property (nonatomic, strong) NSOutputStream *outputFileStream;
+@property (strong) NSOutputStream *outputFileStream;
 @property long expectedContentLength;
 @property long receivedContentLength;
-@property (copy)void (^progressCallback)(long, long);
-@property (copy)void (^doneCallback)();
-@property (copy)void (^failCallback)(NSError *err);
+@property (copy) void (^progressCallback)(long, long);
+@property (copy) void (^doneCallback)();
+@property (copy) void (^failCallback)(NSError *err);
 
 - (id)init:(NSString *)downloadFilePath
 progressCallback:(void (^)(long, long))progressCallback
