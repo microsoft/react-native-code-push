@@ -60,17 +60,19 @@ failCallback:(void (^)(NSError *err))failCallback {
     
     if (bytesLeft) {
         self.failCallback([self.outputFileStream streamError]);
+        [self.outputFileStream close];
     }
 }
 
 - (void)connection:(NSURLConnection*)connection didFailWithError:(NSError*)error
 {
     self.failCallback(error);
+    [self.outputFileStream close];
 }
 
 -(void)connectionDidFinishLoading:(NSURLConnection *)connection {
-    [self.outputFileStream close];
     self.doneCallback();
+    [self.outputFileStream close];
 }
 
 @end
