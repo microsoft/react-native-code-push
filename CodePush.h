@@ -1,5 +1,12 @@
 #import "RCTBridgeModule.h"
 
+@interface CodePush : NSObject<RCTBridgeModule>
+
++ (NSURL *)getBundleUrl;
++ (NSString *)getDocumentsDirectory;
+
+@end
+
 @interface CodePushConfig : NSObject
 
 + (void)setDeploymentKey:(NSString *)deploymentKey;
@@ -37,13 +44,6 @@ doneCallback:(void (^)())doneCallback
 failCallback:(void (^)(NSError *err))failCallback;
 
 - (void)download:(NSString*)url;
-
-@end
-
-@interface CodePush : NSObject<RCTBridgeModule>
-
-+ (NSURL *)getBundleUrl;
-+ (NSString *)getDocumentsDirectory;
 
 @end
 
