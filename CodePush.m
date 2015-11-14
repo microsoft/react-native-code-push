@@ -1,4 +1,5 @@
 #import "RCTBridgeModule.h"
+#import "RCTEventDispatcher.h"
 #import "RCTRootView.h"
 #import "RCTUtils.h"
 #import "CodePush.h"
@@ -13,7 +14,6 @@ BOOL didUpdate = NO;
 
 NSString * const FailedUpdatesKey = @"CODE_PUSH_FAILED_UPDATES";
 NSString * const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
-NSString * const UpdateBundleFileName = @"app.jsbundle";
 
 @synthesize bridge = _bridge;
 
@@ -27,15 +27,13 @@ NSString * const UpdateBundleFileName = @"app.jsbundle";
 + (NSURL *)getBundleUrl
 {
     NSError *error;
-    NSString *packageFolder = [CodePushPackage getCurrentPackageFolderPath:&error];
+    NSString *packageFile = [CodePushPackage getCurrentPackageBundlePath:&error];
     NSURL *binaryJsBundleUrl = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
     
-    if (error || !packageFolder)
+    if (error || !packageFile)
     {
         return binaryJsBundleUrl;
     }
-    
-    NSString *packageFile = [packageFolder stringByAppendingPathComponent:UpdateBundleFileName];
     
     NSDictionary *binaryFileAttributes = [[NSFileManager defaultManager] attributesOfItemAtPath:[binaryJsBundleUrl path] error:nil];
     NSDictionary *appFileAttribs = [[NSFileManager defaultManager] attributesOfItemAtPath:packageFile error:nil];
@@ -198,24 +196,30 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        NSError *err;
-        [CodePushPackage downloadPackage:updatePackage
-                                   error:&err];
-        
-        if (err) {
-            return reject(err);
-        }
-        
-        NSDictionary *newPackage = [CodePushPackage getPackage:updatePackage[@"packageHash"]
-                                                         error:&err];
-        
-        if (err) {
-            return reject(err);
-        }
-        
-        resolve(newPackage);
-    });
+    [CodePushPackage downloadPackage:updatePackage
+                    progressCallback:^(long expectedContentLength, long receivedContentLength) {
+                        [self.bridge.eventDispatcher
+                         sendAppEventWithName:@"CodePushDownloadProgress"
+                         body:@{
+                                @"totalBytes":[NSNumber numberWithLong:expectedContentLength],
+                                @"receivedBytes":[NSNumber numberWithLong:receivedContentLength]
+                                }];
+                    }
+                        doneCallback:^{
+                            NSError *err;
+                            NSDictionary *newPackage = [CodePushPackage
+                                                        getPackage:updatePackage[@"packageHash"]
+                                                        error:&err];
+                            
+                            if (err) {
+                                return reject(err);
+                            }
+                            
+                            resolve(newPackage);
+                        }
+                        failCallback:^(NSError *err) {
+                            reject(err);
+                        }];
 }
 
 RCT_EXPORT_METHOD(getConfiguration:(RCTPromiseResolveBlock)resolve

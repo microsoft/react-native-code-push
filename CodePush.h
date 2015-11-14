@@ -29,6 +29,24 @@
 
 @end
 
+@interface CodePushDownloadHandler : NSObject<NSURLConnectionDelegate>
+
+@property (strong) NSOutputStream *outputFileStream;
+@property long expectedContentLength;
+@property long receivedContentLength;
+@property (copy) void (^progressCallback)(long, long);
+@property (copy) void (^doneCallback)();
+@property (copy) void (^failCallback)(NSError *err);
+
+- (id)init:(NSString *)downloadFilePath
+progressCallback:(void (^)(long, long))progressCallback
+doneCallback:(void (^)())doneCallback
+failCallback:(void (^)(NSError *err))failCallback;
+
+- (void)download:(NSString*)url;
+
+@end
+
 @interface CodePushPackage : NSObject
 
 + (void)applyPackage:(NSDictionary *)updatePackage
@@ -36,6 +54,7 @@
 
 + (NSDictionary *)getCurrentPackage:(NSError **)error;
 + (NSString *)getCurrentPackageFolderPath:(NSError **)error;
++ (NSString *)getCurrentPackageBundlePath:(NSError **)error;
 + (NSString *)getCurrentPackageHash:(NSError **)error;
 
 + (NSDictionary *)getPackage:(NSString *)packageHash
@@ -45,7 +64,9 @@
 
 
 + (void)downloadPackage:(NSDictionary *)updatePackage
-                            error:(NSError **)error;
+       progressCallback:(void (^)(long, long))progressCallback
+           doneCallback:(void (^)())doneCallback
+           failCallback:(void (^)(NSError *err))failCallback;
 
 + (void)rollbackPackage;
 
