@@ -58,6 +58,9 @@ failCallback:(void (^)(NSError *err))failCallback {
     
     self.progressCallback(self.expectedContentLength, self.receivedContentLength);
     
+    // bytesLeft should not be negative.
+    assert(bytesLeft >= 0);
+    
     if (bytesLeft) {
         [self.outputFileStream close];
         [connection cancel];
@@ -72,6 +75,9 @@ failCallback:(void (^)(NSError *err))failCallback {
 }
 
 -(void)connectionDidFinishLoading:(NSURLConnection *)connection {
+    // We should have received all of the bytes if this is called.
+    assert(self.receivedContentLength == self.expectedContentLength);
+    
     [self.outputFileStream close];
     self.doneCallback();
 }
