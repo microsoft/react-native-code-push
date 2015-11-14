@@ -265,7 +265,7 @@ The `RemotePackage` inherits all of the same properties as the `LocalPackage`, b
 - __downloadUrl__: The URL at which the package is available for download. (String). This property is only needed for advanced usage, since the `download` method will automatically handle the acquisition of updates for you.
 
 ##### Methods
-- __download(progressHandler?: Function): Promise<LocalPackage>__: Downloads the package update from the CodePush service. If a `progressHandler` is specified, it will be called periodically with an object (`{ totalBytes: Number, receivedBytes: Number }`) that reports the progress of the download until the download completes. Returns a Promise that resolves with the `LocalPackage`.
+- __download(progressHandler?: Function): Promise<LocalPackage>__: Downloads the package update from the CodePush service. If a `progressHandler` is specified, it will be called periodically with a `DownloadProgress` object (`{ totalBytes: Number, receivedBytes: Number }`) that reports the progress of the download until the download completes. Returns a Promise that resolves with the `LocalPackage`.
 
 ---
 
