@@ -1,6 +1,6 @@
-'use strict';
+"use strict";
 
-var React = require('react-native');
+var React = require("react-native");
 
 var {
   AppRegistry,
@@ -12,7 +12,7 @@ var {
 } = React;
 
 var TESTS = [
-  require('./DownloadProgressTest')
+  require("./DownloadProgressTest")
 ];
 
 TESTS.forEach(
@@ -60,7 +60,7 @@ var DownloadProgressTestApp = React.createClass({
 
 var styles = StyleSheet.create({
   container: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     marginTop: 40,
     margin: 15,
   },
@@ -68,12 +68,12 @@ var styles = StyleSheet.create({
     padding: 10,
   },
   testName: {
-    fontWeight: '500',
+    fontWeight: "500",
   },
   separator: {
     height: 1,
-    backgroundColor: '#bbbbbb',
+    backgroundColor: "#bbbbbb",
   }
 });
 
-AppRegistry.registerComponent('DownloadProgressTestApp', () => DownloadProgressTestApp);
+AppRegistry.registerComponent("DownloadProgressTestApp", () => DownloadProgressTestApp);

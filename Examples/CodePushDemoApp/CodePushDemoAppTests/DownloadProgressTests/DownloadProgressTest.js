@@ -1,9 +1,9 @@
-'use strict';
+"use strict";
 
-var RCTTestModule = require('NativeModules').TestModule;
-var React = require('react-native');
-var CodePushSdk = require('react-native-code-push');
-var NativeBridge = require('react-native').NativeModules.CodePush;
+var RCTTestModule = require("NativeModules").TestModule;
+var React = require("react-native");
+var CodePushSdk = require("react-native-code-push");
+var NativeBridge = require("react-native").NativeModules.CodePush;
 var { NativeAppEventEmitter } = require("react-native");
 
 var {
@@ -85,10 +85,10 @@ var DownloadProgressTest = React.createClass({
     } 
     
     return (
-      <View style={{backgroundColor: 'white', padding: 40}}>
+      <View style={{backgroundColor: "white", padding: 40}}>
         <Text>
-          {this.constructor.displayName + ': '}
-          {this.state.done ? 'Done' : 'Testing...'}
+          {this.constructor.displayName + ": "}
+          {this.state.done ? "Done" : "Testing..."}
         </Text>
         {progressView}
       </View>
@@ -96,6 +96,6 @@ var DownloadProgressTest = React.createClass({
   }
 });
 
-DownloadProgressTest.displayName = 'DownloadProgressTest';
+DownloadProgressTest.displayName = "DownloadProgressTest";
 
 module.exports = DownloadProgressTest;
