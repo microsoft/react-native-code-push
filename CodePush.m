@@ -1,5 +1,6 @@
 #import "RCTBridgeModule.h"
 #import "RCTEventDispatcher.h"
+#import "RCTConvert.h"
 #import "RCTRootView.h"
 #import "RCTUtils.h"
 #import "CodePush.h"
@@ -39,7 +40,7 @@ NSString * const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
     NSDictionary *appFileAttribs = [[NSFileManager defaultManager] attributesOfItemAtPath:packageFile error:nil];
     NSDate *binaryDate = [binaryFileAttributes objectForKey:NSFileModificationDate];
     NSDate *packageDate = [appFileAttribs objectForKey:NSFileModificationDate];
-
+    
     if ([binaryDate compare:packageDate] == NSOrderedAscending) {
         // Return package file because it is newer than the app store binary's JS bundle
         return [[NSURL alloc] initFileURLWithPath:packageFile];
@@ -56,26 +57,30 @@ NSString * const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
     });
 }
 
-- (CodePush *)init
-{
-    self = [super init];
+- (void)checkForPendingUpdate:(BOOL)isAppStart {
+    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+    NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];
     
-    if (self) {
-        NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
-        NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];
+    if (pendingUpdate)
+    {
+        NSError *error;
+        NSString *pendingHash = pendingUpdate[@"hash"];
+        NSString *currentHash = [CodePushPackage getCurrentPackageHash:&error];
         
-        if (pendingUpdate)
-        {
-            NSError *error;
-            NSString *pendingHash = pendingUpdate[@"hash"];
-            NSString *currentHash = [CodePushPackage getCurrentPackageHash:&error];
-            
-            // If the current hash is equivalent to the pending hash, then the app
-            // restart "picked up" the new update, but we need to kick off the
-            // rollback timer and ensure that the necessary state is setup.
-            if ([pendingHash isEqualToString:currentHash]) {
+        // If the current hash is equivalent to the pending hash, then the app
+        // restart "picked up" the new update, but we need to kick off the
+        // rollback timer and ensure that the necessary state is setup.
+        if ([pendingHash isEqualToString:currentHash]) {
+            // We only want to initialize the rollback timer in two scenarios:
+            // 1) The app has been restarted, and therefore, the pending update is already applied
+            // 2) The app has been resumed, and the pending update indicates it supports being restarted on resume
+            if (isAppStart || (!isAppStart && [pendingUpdate[@"allowRestartOnResume"] boolValue]))
+            {
                 int rollbackTimeout = [pendingUpdate[@"rollbackTimeout"] intValue];
-                [self initializeUpdateWithRollbackTimeout:rollbackTimeout needsRestart:NO];
+                
+                // If the app wasn't restarted "naturally", then we need to restart it manually
+                BOOL needsRestart = !isAppStart;
+                [self initializeUpdateWithRollbackTimeout:rollbackTimeout needsRestart:needsRestart];
                 
                 // Clear the pending update and sync
                 [preferences removeObjectForKey:PendingUpdateKey];
@@ -83,11 +88,47 @@ NSString * const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
             }
         }
     }
+}
+
+- (void)checkForPendingUpdateDuringResume {
+    [self checkForPendingUpdate:NO];
+}
+
+- (NSDictionary *)constantsToExport
+{
+    // Export the values of the CodePushRestartMode enum
+    // so that the script-side can easily stay in sync
+    return @{ @"codePushRestartModeNone": @(CodePushRestartModeNone),
+              @"codePushRestartModeImmediate": @(CodePushRestartModeImmediate),
+              @"codePushRestartModeOnNextResume": @(CodePushRestartModeOnNextResume)
+              };
+};
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (CodePush *)init
+{
+    self = [super init];
+    
+    if (self) {
+        [self checkForPendingUpdate:YES];
+        
+        // Register for app resume notifications so that we
+        // can check for pending updates which support "restart on resume"
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(checkForPendingUpdateDuringResume)
+                                                     name:UIApplicationWillEnterForegroundNotification
+                                                   object:[UIApplication sharedApplication]];
+    }
     
     return self;
 }
 
-- (void)initializeUpdateWithRollbackTimeout:(int)rollbackTimeout needsRestart:(BOOL)needsRestart {
+- (void)initializeUpdateWithRollbackTimeout:(int)rollbackTimeout
+                               needsRestart:(BOOL)needsRestart
+{
     didUpdate = YES;
     
     if (needsRestart) {
@@ -101,7 +142,8 @@ NSString * const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
     }
 }
 
-- (BOOL)isFailedHash:(NSString*)packageHash {
+- (BOOL)isFailedHash:(NSString*)packageHash
+{
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSMutableArray *failedUpdates = [preferences objectForKey:FailedUpdatesKey];
     return (failedUpdates != nil && [failedUpdates containsObject:packageHash]);
@@ -146,13 +188,17 @@ NSString * const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
 }
 
 - (void)savePendingUpdate:(NSString *)packageHash
-          rollbackTimeout:(int)rollbackTimeout {
+          rollbackTimeout:(int)rollbackTimeout
+     allowRestartOnResume:(BOOL)allowRestartOnResume
+{
     // Since we're not restarting, we need to store the fact that the update
     // was applied, but hasn't yet become "active".
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSDictionary *pendingUpdate = [[NSDictionary alloc] initWithObjectsAndKeys:
                                    packageHash,@"hash",
-                                   rollbackTimeout,@"rollbackTimeout", nil];
+                                   [NSNumber numberWithInt:rollbackTimeout],@"rollbackTimeout",
+                                   [NSNumber numberWithBool:allowRestartOnResume],@"allowRestartOnResume",
+                                   nil];
     
     [preferences setObject:pendingUpdate forKey:PendingUpdateKey];
     [preferences synchronize];
@@ -170,10 +216,10 @@ NSString * const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
 
 // JavaScript-exported module methods
 RCT_EXPORT_METHOD(applyUpdate:(NSDictionary*)updatePackage
-              rollbackTimeout:(int)rollbackTimeout
-           restartImmediately:(BOOL)restartImmediately
-                     resolver:(RCTPromiseResolveBlock)resolve
-                     rejecter:(RCTPromiseRejectBlock)reject)
+                  rollbackTimeout:(int)rollbackTimeout
+                  restartMode:(CodePushRestartMode)restartMode
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSError *error;
@@ -183,10 +229,13 @@ RCT_EXPORT_METHOD(applyUpdate:(NSDictionary*)updatePackage
         if (error) {
             reject(error);
         } else {
-            if (restartImmediately) {
+            if (restartMode == CodePushRestartModeImmediate) {
                 [self initializeUpdateWithRollbackTimeout:rollbackTimeout needsRestart:YES];
             } else {
-                [self savePendingUpdate:updatePackage[@"packageHash"] rollbackTimeout:rollbackTimeout];
+                BOOL allowsRestartOnResume = (restartMode == CodePushRestartModeOnNextResume);
+                [self savePendingUpdate:updatePackage[@"packageHash"]
+                        rollbackTimeout:rollbackTimeout
+                   allowRestartOnResume:allowsRestartOnResume];
             }
         }
     });
@@ -256,10 +305,10 @@ RCT_EXPORT_METHOD(isFirstRun:(NSString *)packageHash
 {
     NSError *error;
     BOOL isFirstRun = didUpdate
-                  && nil != packageHash
-                  && [packageHash length] > 0
-                  && [packageHash isEqualToString:[CodePushPackage getCurrentPackageHash:&error]];
-                  
+    && nil != packageHash
+    && [packageHash length] > 0
+    && [packageHash isEqualToString:[CodePushPackage getCurrentPackageHash:&error]];
+    
     resolve(@(isFirstRun));
 }
 

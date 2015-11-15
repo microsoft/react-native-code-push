@@ -71,3 +71,9 @@ failCallback:(void (^)(NSError *err))failCallback;
 + (void)rollbackPackage;
 
 @end
+
+typedef NS_ENUM(NSInteger, CodePushRestartMode) {
+    CodePushRestartModeNone,
+    CodePushRestartModeImmediate,
+    CodePushRestartModeOnNextResume
+};

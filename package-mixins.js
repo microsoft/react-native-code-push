@@ -1,5 +1,6 @@
 var extend = require("extend");
 var { NativeAppEventEmitter } = require("react-native");
+var { RestartMode } = require("react-native-code-push");
 
 module.exports = (NativeCodePush) => {
   var remote = {
@@ -36,8 +37,8 @@ module.exports = (NativeCodePush) => {
   };
 
   var local = {
-    apply: function apply(rollbackTimeout = 0, restartImmediately = true) {
-      return NativeCodePush.applyUpdate(this, rollbackTimeout, restartImmediately);
+    apply: function apply(rollbackTimeout = 0, restartMode = RestartMode.IMMEDIATE) {
+      return NativeCodePush.applyUpdate(this, rollbackTimeout, restartMode);
     }
   };
 
