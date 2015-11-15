@@ -80,7 +80,7 @@ NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
             if ([pendingHash isEqualToString:currentHash]) {
                 // We only want to initialize the rollback timer in two scenarios:
                 // 1) The app has been restarted, and therefore, the pending update is already applied
-                // 2) The app has been resumed, and the pending update indicates it supports being restarted on resume
+                // 2) The app has been resumed, and the pending update indicates it supports being restarted on resume, so we need to restart the app and the kickoff the rollback timer
                 if (isAppStart || (!isAppStart && [pendingUpdate[PendingUpdateAllowsRestartOnResumeKey] boolValue]))
                 {
                     int rollbackTimeout = [pendingUpdate[PendingUpdateRollbackTimeoutKey] intValue];
@@ -109,7 +109,7 @@ NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
     return @{ @"codePushRestartModeNone": @(CodePushRestartModeNone),
               @"codePushRestartModeImmediate": @(CodePushRestartModeImmediate),
               @"codePushRestartModeOnNextResume": @(CodePushRestartModeOnNextResume)
-              };
+            };
 };
 
 - (void)dealloc {
@@ -179,7 +179,8 @@ NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
     [self loadBundle];
 }
 
-- (void)saveFailedUpdate:(NSString *)packageHash {
+- (void)saveFailedUpdate:(NSString *)packageHash
+{
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSMutableArray *failedUpdates = [preferences objectForKey:FailedUpdatesKey];
     if (failedUpdates == nil) {
@@ -224,10 +225,10 @@ NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
 
 // JavaScript-exported module methods
 RCT_EXPORT_METHOD(applyUpdate:(NSDictionary*)updatePackage
-                  rollbackTimeout:(int)rollbackTimeout
+              rollbackTimeout:(int)rollbackTimeout
                   restartMode:(CodePushRestartMode)restartMode
-                  resolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
+                     resolver:(RCTPromiseResolveBlock)resolve
+                     rejecter:(RCTPromiseRejectBlock)reject)
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSError *error;
@@ -250,8 +251,8 @@ RCT_EXPORT_METHOD(applyUpdate:(NSDictionary*)updatePackage
 }
 
 RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
-                  resolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
+                        resolver:(RCTPromiseResolveBlock)resolve
+                        rejecter:(RCTPromiseRejectBlock)reject)
 {
     [CodePushPackage downloadPackage:updatePackage
                     progressCallback:^(long expectedContentLength, long receivedContentLength) {
@@ -280,13 +281,13 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
 }
 
 RCT_EXPORT_METHOD(getConfiguration:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
+                          rejecter:(RCTPromiseRejectBlock)reject)
 {
     resolve([CodePushConfig getConfiguration]);
 }
 
 RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
+                           rejecter:(RCTPromiseRejectBlock)reject)
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         NSError *error;
@@ -300,16 +301,16 @@ RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
 }
 
 RCT_EXPORT_METHOD(isFailedUpdate:(NSString *)packageHash
-                  resolve:(RCTPromiseResolveBlock)resolve
-                  reject:(RCTPromiseRejectBlock)reject)
+                         resolve:(RCTPromiseResolveBlock)resolve
+                          reject:(RCTPromiseRejectBlock)reject)
 {
     BOOL isFailedHash = [self isFailedHash:packageHash];
     resolve(@(isFailedHash));
 }
 
 RCT_EXPORT_METHOD(isFirstRun:(NSString *)packageHash
-                  resolve:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
+                     resolve:(RCTPromiseResolveBlock)resolve
+                    rejecter:(RCTPromiseRejectBlock)reject)
 {
     NSError *error;
     BOOL isFirstRun = didUpdate
@@ -321,7 +322,7 @@ RCT_EXPORT_METHOD(isFirstRun:(NSString *)packageHash
 }
 
 RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
+                                rejecter:(RCTPromiseRejectBlock)reject)
 {
     [self cancelRollbackTimer];
     resolve([NSNull null]);
