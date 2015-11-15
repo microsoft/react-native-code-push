@@ -16,6 +16,12 @@ BOOL didUpdate = NO;
 NSString * const FailedUpdatesKey = @"CODE_PUSH_FAILED_UPDATES";
 NSString * const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
 
+// These keys are already "namespaced" by the PendingUpdateKey, so
+// their values don't need to be obfuscated to prevent collision with app data
+NSString * const PendingUpdateAllowsRestartOnResumeKey = @"allowsRestartOnResume";
+NSString * const PendingUpdateHashKey = @"hash";
+NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
+
 @synthesize bridge = _bridge;
 
 // Public Obj-C API
@@ -65,7 +71,7 @@ NSString * const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
         if (pendingUpdate)
         {
             NSError *error;
-            NSString *pendingHash = pendingUpdate[@"hash"];
+            NSString *pendingHash = pendingUpdate[PendingUpdateHashKey];
             NSString *currentHash = [CodePushPackage getCurrentPackageHash:&error];
             
             // If the current hash is equivalent to the pending hash, then the app
@@ -75,9 +81,9 @@ NSString * const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
                 // We only want to initialize the rollback timer in two scenarios:
                 // 1) The app has been restarted, and therefore, the pending update is already applied
                 // 2) The app has been resumed, and the pending update indicates it supports being restarted on resume
-                if (isAppStart || (!isAppStart && [pendingUpdate[@"allowRestartOnResume"] boolValue]))
+                if (isAppStart || (!isAppStart && [pendingUpdate[PendingUpdateAllowsRestartOnResumeKey] boolValue]))
                 {
-                    int rollbackTimeout = [pendingUpdate[@"rollbackTimeout"] intValue];
+                    int rollbackTimeout = [pendingUpdate[PendingUpdateRollbackTimeoutKey] intValue];
                     
                     // If the app wasn't restarted "naturally", then we need to restart it manually
                     BOOL needsRestart = !isAppStart;
@@ -197,9 +203,9 @@ NSString * const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
     // was applied, but hasn't yet become "active".
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSDictionary *pendingUpdate = [[NSDictionary alloc] initWithObjectsAndKeys:
-                                   packageHash,@"hash",
-                                   [NSNumber numberWithInt:rollbackTimeout],@"rollbackTimeout",
-                                   [NSNumber numberWithBool:allowRestartOnResume],@"allowRestartOnResume",
+                                   packageHash,PendingUpdateHashKey,
+                                   [NSNumber numberWithInt:rollbackTimeout],PendingUpdateRollbackTimeoutKey,
+                                   [NSNumber numberWithBool:allowRestartOnResume],PendingUpdateAllowsRestartOnResumeKey,
                                    nil];
     
     [preferences setObject:pendingUpdate forKey:PendingUpdateKey];
