@@ -58,36 +58,38 @@ NSString * const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
 }
 
 - (void)checkForPendingUpdate:(BOOL)isAppStart {
-    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
-    NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];
-    
-    if (pendingUpdate)
-    {
-        NSError *error;
-        NSString *pendingHash = pendingUpdate[@"hash"];
-        NSString *currentHash = [CodePushPackage getCurrentPackageHash:&error];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+        NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];
         
-        // If the current hash is equivalent to the pending hash, then the app
-        // restart "picked up" the new update, but we need to kick off the
-        // rollback timer and ensure that the necessary state is setup.
-        if ([pendingHash isEqualToString:currentHash]) {
-            // We only want to initialize the rollback timer in two scenarios:
-            // 1) The app has been restarted, and therefore, the pending update is already applied
-            // 2) The app has been resumed, and the pending update indicates it supports being restarted on resume
-            if (isAppStart || (!isAppStart && [pendingUpdate[@"allowRestartOnResume"] boolValue]))
-            {
-                int rollbackTimeout = [pendingUpdate[@"rollbackTimeout"] intValue];
-                
-                // If the app wasn't restarted "naturally", then we need to restart it manually
-                BOOL needsRestart = !isAppStart;
-                [self initializeUpdateWithRollbackTimeout:rollbackTimeout needsRestart:needsRestart];
-                
-                // Clear the pending update and sync
-                [preferences removeObjectForKey:PendingUpdateKey];
-                [preferences synchronize];
+        if (pendingUpdate)
+        {
+            NSError *error;
+            NSString *pendingHash = pendingUpdate[@"hash"];
+            NSString *currentHash = [CodePushPackage getCurrentPackageHash:&error];
+            
+            // If the current hash is equivalent to the pending hash, then the app
+            // restart "picked up" the new update, but we need to kick off the
+            // rollback timer and ensure that the necessary state is setup.
+            if ([pendingHash isEqualToString:currentHash]) {
+                // We only want to initialize the rollback timer in two scenarios:
+                // 1) The app has been restarted, and therefore, the pending update is already applied
+                // 2) The app has been resumed, and the pending update indicates it supports being restarted on resume
+                if (isAppStart || (!isAppStart && [pendingUpdate[@"allowRestartOnResume"] boolValue]))
+                {
+                    int rollbackTimeout = [pendingUpdate[@"rollbackTimeout"] intValue];
+                    
+                    // If the app wasn't restarted "naturally", then we need to restart it manually
+                    BOOL needsRestart = !isAppStart;
+                    [self initializeUpdateWithRollbackTimeout:rollbackTimeout needsRestart:needsRestart];
+                    
+                    // Clear the pending update and sync
+                    [preferences removeObjectForKey:PendingUpdateKey];
+                    [preferences synchronize];
+                }
             }
         }
-    }
+    });
 }
 
 - (void)checkForPendingUpdateDuringResume {
