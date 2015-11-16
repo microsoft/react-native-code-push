@@ -206,6 +206,11 @@ var CodePush = {
   notifyApplicationReady: NativeCodePush.notifyApplicationReady,
   setUpTestDependencies: setUpTestDependencies,
   sync: sync,
+  RestartMode: {
+    NONE: NativeCodePush.codePushRestartModeNone, // Don't artificially restart the app. Allow the update to be "picked up" on the next app restart
+    IMMEDIATE: NativeCodePush.codePushRestartModeImmediate, // Restart the app immediately
+    ON_NEXT_RESUME: NativeCodePush.codePushRestartModeOnNextResume // Restart the app the next time it is resumed from the background
+  },
   SyncStatus: {
     UP_TO_DATE: 0, // The running app is up-to-date
     UPDATE_IGNORED: 1, // The app had an optional update and the end-user chose to ignore it
