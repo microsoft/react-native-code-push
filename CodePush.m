@@ -9,9 +9,9 @@
 
 RCT_EXPORT_MODULE()
 
+BOOL didUpdate = NO;
 NSTimer *_timer;
 BOOL usingTestFolder = NO;
-BOOL didUpdate = NO;
 
 NSString * const FailedUpdatesKey = @"CODE_PUSH_FAILED_UPDATES";
 NSString * const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
@@ -63,7 +63,8 @@ NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
     });
 }
 
-- (void)checkForPendingUpdate:(BOOL)isAppStart {
+- (void)checkForPendingUpdate:(BOOL)isAppStart
+{
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
         NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];
@@ -98,7 +99,8 @@ NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
     });
 }
 
-- (void)checkForPendingUpdateDuringResume {
+- (void)checkForPendingUpdateDuringResume
+{
     [self checkForPendingUpdate:NO];
 }
 
@@ -112,7 +114,8 @@ NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
             };
 };
 
-- (void)dealloc {
+- (void)dealloc
+{
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
