@@ -5,7 +5,9 @@
 #import "RCTUtils.h"
 #import "CodePush.h"
 
-@implementation CodePush
+@implementation CodePush {
+    BOOL _resumablePendingUpdateAvailable;
+}
 
 RCT_EXPORT_MODULE()
 
@@ -18,7 +20,6 @@ NSString * const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
 
 // These keys are already "namespaced" by the PendingUpdateKey, so
 // their values don't need to be obfuscated to prevent collision with app data
-NSString * const PendingUpdateAllowsRestartOnResumeKey = @"allowsRestartOnResume";
 NSString * const PendingUpdateHashKey = @"hash";
 NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
 
@@ -63,14 +64,13 @@ NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
     });
 }
 
-- (void)checkForPendingUpdate:(BOOL)isAppStart
+- (void)checkForPendingUpdate:(BOOL)needsRestart
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
         NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];
         
-        if (pendingUpdate)
-        {
+        if (pendingUpdate) {
             NSError *error;
             NSString *pendingHash = pendingUpdate[PendingUpdateHashKey];
             NSString *currentHash = [CodePushPackage getCurrentPackageHash:&error];
@@ -79,21 +79,12 @@ NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
             // restart "picked up" the new update, but we need to kick off the
             // rollback timer and ensure that the necessary state is setup.
             if ([pendingHash isEqualToString:currentHash]) {
-                // We only want to initialize the rollback timer in two scenarios:
-                // 1) The app has been restarted, and therefore, the pending update is already applied
-                // 2) The app has been resumed, and the pending update indicates it supports being restarted on resume, so we need to restart the app and the kickoff the rollback timer
-                if (isAppStart || (!isAppStart && [pendingUpdate[PendingUpdateAllowsRestartOnResumeKey] boolValue]))
-                {
-                    int rollbackTimeout = [pendingUpdate[PendingUpdateRollbackTimeoutKey] intValue];
-                    
-                    // If the app wasn't restarted "naturally", then we need to restart it manually
-                    BOOL needsRestart = !isAppStart;
-                    [self initializeUpdateWithRollbackTimeout:rollbackTimeout needsRestart:needsRestart];
-                    
-                    // Clear the pending update and sync
-                    [preferences removeObjectForKey:PendingUpdateKey];
-                    [preferences synchronize];
-                }
+                int rollbackTimeout = [pendingUpdate[PendingUpdateRollbackTimeoutKey] intValue];
+                [self initializeUpdateWithRollbackTimeout:rollbackTimeout needsRestart:needsRestart];
+                
+                // Clear the pending update and sync
+                [preferences removeObjectForKey:PendingUpdateKey];
+                [preferences synchronize];
             }
         }
     });
@@ -101,7 +92,12 @@ NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
 
 - (void)checkForPendingUpdateDuringResume
 {
-    [self checkForPendingUpdate:NO];
+    // In order to ensure that CodePush doesn't impact the app's
+    // resume experience, we're using a simple boolean check to
+    // check whether we need to restart, before reading the defaults store
+    if (_resumablePendingUpdateAvailable) {
+        [self checkForPendingUpdate:YES];
+    }
 }
 
 - (NSDictionary *)constantsToExport
@@ -111,11 +107,13 @@ NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
     return @{ @"codePushRestartModeNone": @(CodePushRestartModeNone),
               @"codePushRestartModeImmediate": @(CodePushRestartModeImmediate),
               @"codePushRestartModeOnNextResume": @(CodePushRestartModeOnNextResume)
-            };
+              };
 };
 
 - (void)dealloc
 {
+    // Ensure the global resume handler is cleared, so that
+    // this object isn't kept alive unneccesarily
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
@@ -124,7 +122,10 @@ NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
     self = [super init];
     
     if (self) {
-        [self checkForPendingUpdate:YES];
+        // Do an async check to see whether
+        // we need to start the rollback timer
+        // due to a pending update being applied at start
+        [self checkForPendingUpdate:NO];
         
         // Register for app resume notifications so that we
         // can check for pending updates which support "restart on resume"
@@ -201,16 +202,13 @@ NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
 
 - (void)savePendingUpdate:(NSString *)packageHash
           rollbackTimeout:(int)rollbackTimeout
-     allowRestartOnResume:(BOOL)allowRestartOnResume
 {
     // Since we're not restarting, we need to store the fact that the update
     // was applied, but hasn't yet become "active".
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSDictionary *pendingUpdate = [[NSDictionary alloc] initWithObjectsAndKeys:
                                    packageHash,PendingUpdateHashKey,
-                                   [NSNumber numberWithInt:rollbackTimeout],PendingUpdateRollbackTimeoutKey,
-                                   [NSNumber numberWithBool:allowRestartOnResume],PendingUpdateAllowsRestartOnResumeKey,
-                                   nil];
+                                   [NSNumber numberWithInt:rollbackTimeout],PendingUpdateRollbackTimeoutKey, nil];
     
     [preferences setObject:pendingUpdate forKey:PendingUpdateKey];
     [preferences synchronize];
@@ -228,10 +226,10 @@ NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
 
 // JavaScript-exported module methods
 RCT_EXPORT_METHOD(applyUpdate:(NSDictionary*)updatePackage
-              rollbackTimeout:(int)rollbackTimeout
+                  rollbackTimeout:(int)rollbackTimeout
                   restartMode:(CodePushRestartMode)restartMode
-                     resolver:(RCTPromiseResolveBlock)resolve
-                     rejecter:(RCTPromiseRejectBlock)reject)
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSError *error;
@@ -244,18 +242,17 @@ RCT_EXPORT_METHOD(applyUpdate:(NSDictionary*)updatePackage
             if (restartMode == CodePushRestartModeImmediate) {
                 [self initializeUpdateWithRollbackTimeout:rollbackTimeout needsRestart:YES];
             } else {
-                BOOL allowsRestartOnResume = (restartMode == CodePushRestartModeOnNextResume);
+                _resumablePendingUpdateAvailable = (restartMode == CodePushRestartModeOnNextResume);
                 [self savePendingUpdate:updatePackage[@"packageHash"]
-                        rollbackTimeout:rollbackTimeout
-                   allowRestartOnResume:allowsRestartOnResume];
+                        rollbackTimeout:rollbackTimeout];
             }
         }
     });
 }
 
 RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
-                        resolver:(RCTPromiseResolveBlock)resolve
-                        rejecter:(RCTPromiseRejectBlock)reject)
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     [CodePushPackage downloadPackage:updatePackage
                     progressCallback:^(long expectedContentLength, long receivedContentLength) {
@@ -284,13 +281,13 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
 }
 
 RCT_EXPORT_METHOD(getConfiguration:(RCTPromiseResolveBlock)resolve
-                          rejecter:(RCTPromiseRejectBlock)reject)
+                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     resolve([CodePushConfig getConfiguration]);
 }
 
 RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
-                           rejecter:(RCTPromiseRejectBlock)reject)
+                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         NSError *error;
@@ -304,16 +301,16 @@ RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
 }
 
 RCT_EXPORT_METHOD(isFailedUpdate:(NSString *)packageHash
-                         resolve:(RCTPromiseResolveBlock)resolve
-                          reject:(RCTPromiseRejectBlock)reject)
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject)
 {
     BOOL isFailedHash = [self isFailedHash:packageHash];
     resolve(@(isFailedHash));
 }
 
 RCT_EXPORT_METHOD(isFirstRun:(NSString *)packageHash
-                     resolve:(RCTPromiseResolveBlock)resolve
-                    rejecter:(RCTPromiseRejectBlock)reject)
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     NSError *error;
     BOOL isFirstRun = didUpdate
@@ -325,7 +322,7 @@ RCT_EXPORT_METHOD(isFirstRun:(NSString *)packageHash
 }
 
 RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
-                                rejecter:(RCTPromiseRejectBlock)reject)
+                  rejecter:(RCTPromiseRejectBlock)reject)
 {
     [self cancelRollbackTimer];
     resolve([NSNull null]);
