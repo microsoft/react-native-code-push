@@ -113,7 +113,7 @@ NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
 - (void)dealloc
 {
     // Ensure the global resume handler is cleared, so that
-    // this object isn't kept alive unneccesarily
+    // this object isn't kept alive unnecessarily
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
