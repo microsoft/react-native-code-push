@@ -16,7 +16,7 @@ var UpdateOnStart = React.createClass({
     CodePush.checkForUpdate().done((update) => {
       if (update && update.downloadUrl) {
         update.download().done((newPackage) => {
-          newPackage.apply();
+          newPackage.install();
         });
       }
     });

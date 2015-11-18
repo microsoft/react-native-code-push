@@ -24,7 +24,7 @@
 		544161591B8BCA81000D9E25 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		5451ACBA1B86A5B600E2A7DF /* QueryUpdateTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5451ACB81B86A5B600E2A7DF /* QueryUpdateTests.m */; };
 		5451ACEC1B86E40A00E2A7DF /* libRCTTest.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5451ACEB1B86E34300E2A7DF /* libRCTTest.a */; };
-		54D774BA1B87DAF800F2ABF8 /* ApplyUpdateTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 54D774B91B87DAF800F2ABF8 /* ApplyUpdateTests.m */; };
+		54D774BA1B87DAF800F2ABF8 /* InstallUpdateTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 54D774B91B87DAF800F2ABF8 /* InstallUpdateTests.m */; };
 		54F5F2B41BF6B45D007C3CEA /* DownloadProgressTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 54F5F2B31BF6B45D007C3CEA /* DownloadProgressTests.m */; settings = {ASSET_TAGS = (); }; };
 		81551E1B1B3B428000F5B9F1 /* libCodePush.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 81551E0F1B3B427200F5B9F1 /* libCodePush.a */; };
 /* End PBXBuildFile section */
@@ -151,7 +151,7 @@
 		146833FF1AC3E56700842450 /* React.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = React.xcodeproj; path = "node_modules/react-native/React/React.xcodeproj"; sourceTree = "<group>"; };
 		5451ACB81B86A5B600E2A7DF /* QueryUpdateTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QueryUpdateTests.m; sourceTree = "<group>"; };
 		5451ACE61B86E34300E2A7DF /* RCTTest.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTTest.xcodeproj; path = "node_modules/react-native/Libraries/RCTTest/RCTTest.xcodeproj"; sourceTree = "<group>"; };
-		54D774B91B87DAF800F2ABF8 /* ApplyUpdateTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ApplyUpdateTests.m; sourceTree = "<group>"; };
+		54D774B91B87DAF800F2ABF8 /* InstallUpdateTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InstallUpdateTests.m; sourceTree = "<group>"; };
 		54F5F2B31BF6B45D007C3CEA /* DownloadProgressTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DownloadProgressTests.m; sourceTree = "<group>"; };
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
 		81551E0A1B3B427200F5B9F1 /* CodePush.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = CodePush.xcodeproj; path = ../../CodePush.xcodeproj; sourceTree = "<group>"; };
@@ -242,7 +242,7 @@
 			children = (
 				54F5F2B31BF6B45D007C3CEA /* DownloadProgressTests.m */,
 				5451ACB81B86A5B600E2A7DF /* QueryUpdateTests.m */,
-				54D774B91B87DAF800F2ABF8 /* ApplyUpdateTests.m */,
+				54D774B91B87DAF800F2ABF8 /* InstallUpdateTests.m */,
 				00E356F01AD99517003FC87E /* Supporting Files */,
 			);
 			path = CodePushDemoAppTests;
@@ -612,7 +612,7 @@
 			files = (
 				5451ACBA1B86A5B600E2A7DF /* QueryUpdateTests.m in Sources */,
 				54F5F2B41BF6B45D007C3CEA /* DownloadProgressTests.m in Sources */,
-				54D774BA1B87DAF800F2ABF8 /* ApplyUpdateTests.m in Sources */,
+				54D774BA1B87DAF800F2ABF8 /* InstallUpdateTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

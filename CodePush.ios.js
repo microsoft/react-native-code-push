@@ -60,7 +60,7 @@ function getCurrentPackage() {
         return NativeCodePush.isFailedUpdate(currentPackage.packageHash);
       })
       .then((failedUpdate) => {
-        localPackage.failedApply = failedUpdate;
+        localPackage.failedInstall = failedUpdate;
         return NativeCodePush.isFirstRun(localPackage.packageHash);
       })
       .then((isFirstRun) => {
@@ -98,7 +98,7 @@ function checkForUpdate() {
                 }
                 
                 // Ignore updates that require a newer app version,
-                // since the end-user couldn't reliably apply it
+                // since the end-user couldn't reliably install it
                 if (!update || update.updateAppVersion) {
                   return resolve(null);
                 }
@@ -107,7 +107,7 @@ function checkForUpdate() {
                 
                 NativeCodePush.isFailedUpdate(update.packageHash)
                   .then((isFailedHash) => {
-                    update.failedApply = isFailedHash;
+                    update.failedInstall = isFailedHash;
                     resolve(update);
                   })
                   .catch(reject)
@@ -115,6 +115,11 @@ function checkForUpdate() {
               })
             });
           });
+}
+
+/* Logs messages to console with the [CodePush] prefix */
+function log(message) {
+  console.log(`[CodePush] ${message}`)
 }
 
 /**
@@ -126,75 +131,128 @@ function checkForUpdate() {
  * releases, and displaying a standard confirmation UI to the end-user
  * when an update is available.
  */
-function sync(options = {}) {  
+function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) {  
   var syncOptions = {
-    descriptionPrefix: " Description: ",
-    appendReleaseDescription: false,
     
     ignoreFailedUpdates: true,
-    
-    mandatoryContinueButtonLabel: "Continue",
-    mandatoryUpdateMessage: "An update is available that must be installed.",
-    
-    optionalIgnoreButtonLabel: "Ignore",
-    optionalInstallButtonLabel: "Install",
-    optionalUpdateMessage: "An update is available. Would you like to install it?",
-    
+    installMode: CodePush.InstallMode.ON_NEXT_RESTART,
     rollbackTimeout: 0,
-    
-    updateTitle: "Update available",
+    updateDialog: null,
     
     ...options 
   };
-
+  
+  syncStatusChangeCallback = typeof syncStatusChangeCallback == "function"
+    ? syncStatusChangeCallback
+    : function(syncStatus) {
+        switch(syncStatus) {
+          case CodePush.SyncStatus.CHECKING_FOR_UPDATE:
+            log("Checking for update.");
+            break;
+          case CodePush.SyncStatus.AWAITING_USER_ACTION:
+            log("Awaiting user action.");
+            break;
+          case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
+            log("Downloading package.");
+            break;
+          case CodePush.SyncStatus.INSTALLING_UPDATE:
+            log("Installing update.");
+            break;
+          case CodePush.SyncStatus.UP_TO_DATE:
+            log("App is up to date.");
+            break;
+          case CodePush.SyncStatus.UPDATE_IGNORED:
+            log("User cancelled the update.");
+            break;
+          case CodePush.SyncStatus.UPDATE_INSTALLED:
+            /* 
+             * If the install mode is IMMEDIATE, this will not get returned as the
+             * app will be restarted to a new Javascript context.
+             */
+            if (syncOptions.installMode == CodePush.InstallMode.ON_NEXT_RESTART) {
+              log("Update is installed and will be run on the next app restart.");
+            } else {
+              log("Update is installed and will be run when the app next resumes.");
+            }
+            break;
+          case CodePush.SyncStatus.UNKNOWN_ERROR:
+            log("An unknown error occurred.");
+            break;
+        }
+      };
+    
+  downloadProgressCallback = typeof downloadProgressCallback == "function" 
+    ? downloadProgressCallback 
+    : function(downloadProgress) {
+        log(`Expecting ${downloadProgress.totalBytes} bytes, received ${downloadProgress.receivedBytes} bytes.`);
+      };
+  
   return new Promise((resolve, reject) => {
+    syncStatusChangeCallback(CodePush.SyncStatus.CHECKING_FOR_UPDATE);
     checkForUpdate()
       .then((remotePackage) => {
-        if (!remotePackage || (remotePackage.failedApply && syncOptions.ignoreFailedUpdates)) {
+        var doDownloadAndInstall = () => {
+          syncStatusChangeCallback(CodePush.SyncStatus.DOWNLOADING_PACKAGE);
+          remotePackage.download(downloadProgressCallback)
+            .then((localPackage) => {
+              syncStatusChangeCallback(CodePush.SyncStatus.INSTALLING_UPDATE);
+              return localPackage.install(syncOptions.rollbackTimeout, syncOptions.installMode, () => {
+                syncStatusChangeCallback(CodePush.SyncStatus.UPDATE_INSTALLED);
+                resolve(CodePush.SyncStatus.UPDATE_INSTALLED);
+              });
+            })
+            .catch(reject)
+            .done();
+        }
+        
+        if (!remotePackage || (remotePackage.failedInstall && syncOptions.ignoreFailedUpdates)) {
+          syncStatusChangeCallback(CodePush.SyncStatus.UP_TO_DATE);
           resolve(CodePush.SyncStatus.UP_TO_DATE);
         }
-        else {
+        else if (syncOptions.updateDialog) {
+          syncOptions.updateDialog = Object.assign(CodePush.DEFAULT_UPDATE_DIALOG, syncOptions.updateDialog);
+          
           var message = null;
           var dialogButtons = [
             {
               text: null,
               onPress: () => { 
-                remotePackage.download()
-                  .then((localPackage) => {
-                    resolve(CodePush.SyncStatus.UPDATE_APPLIED)
-                    return localPackage.apply(syncOptions.rollbackTimeout);
-                   })
-                  .catch(reject)
-                  .done();
+                doDownloadAndInstall();
               }
             }
           ];
           
           if (remotePackage.isMandatory) {
-            message = syncOptions.mandatoryUpdateMessage;
+            message = syncOptions.updateDialog.mandatoryUpdateMessage;
             dialogButtons[0].text = syncOptions.mandatoryContinueButtonLabel;
           } else {
-            message = syncOptions.optionalUpdateMessage;
-            dialogButtons[0].text = syncOptions.optionalInstallButtonLabel;     
+            message = syncOptions.updateDialog.optionalUpdateMessage;
+            dialogButtons[0].text = syncOptions.updateDialog.optionalInstallButtonLabel;     
             
             // Since this is an optional update, add another button
             // to allow the end-user to ignore it       
             dialogButtons.push({
-              text: syncOptions.optionalIgnoreButtonLabel,
+              text: syncOptions.updateDialog.optionalIgnoreButtonLabel,
               onPress: () => resolve(CodePush.SyncStatus.UPDATE_IGNORED)
             });
           }
           
           // If the update has a description, and the developer
           // explicitly chose to display it, then set that as the message
-          if (syncOptions.appendReleaseDescription && remotePackage.description) {
-            message += `${syncOptions.descriptionPrefix} ${remotePackage.description}`;  
+          if (syncOptions.updateDialog.appendReleaseDescription && remotePackage.description) {
+            message += `${syncOptions.updateDialog.descriptionPrefix} ${remotePackage.description}`;  
           }
           
+          syncStatusChangeCallback(CodePush.SyncStatus.AWAITING_USER_ACTION);
           AlertIOS.alert(syncOptions.updateTitle, message, dialogButtons);
+        } else {
+          doDownloadAndInstall();
         }
       })
-      .catch(reject)
+      .catch((error) => {
+        syncStatusChangeCallback(CodePush.SyncStatus.UNKNOWN_ERROR);
+        reject(error);
+      })
       .done();
   });     
 };
@@ -203,18 +261,34 @@ var CodePush = {
   checkForUpdate: checkForUpdate,
   getConfiguration: getConfiguration,
   getCurrentPackage: getCurrentPackage,
+  log: log,
   notifyApplicationReady: NativeCodePush.notifyApplicationReady,
   setUpTestDependencies: setUpTestDependencies,
   sync: sync,
-  RestartMode: {
-    NONE: NativeCodePush.codePushRestartModeNone, // Don't artificially restart the app. Allow the update to be "picked up" on the next app restart
-    IMMEDIATE: NativeCodePush.codePushRestartModeImmediate, // Restart the app immediately
-    ON_NEXT_RESUME: NativeCodePush.codePushRestartModeOnNextResume // Restart the app the next time it is resumed from the background
+  InstallMode: {
+    IMMEDIATE: NativeCodePush.codePushInstallModeImmediate, // Restart the app immediately
+    ON_NEXT_RESTART: NativeCodePush.codePushInstallModeOnNextRestart, // Don't artificially restart the app. Allow the update to be "picked up" on the next app restart
+    ON_NEXT_RESUME: NativeCodePush.codePushInstallModeOnNextResume // Restart the app the next time it is resumed from the background
   },
   SyncStatus: {
-    UP_TO_DATE: 0, // The running app is up-to-date
-    UPDATE_IGNORED: 1, // The app had an optional update and the end-user chose to ignore it
-    UPDATE_APPLIED: 2 // The app had an optional/mandatory update that was successfully downloaded and is about to be applied
+    CHECKING_FOR_UPDATE: 0,
+    AWAITING_USER_ACTION: 1,
+    DOWNLOADING_PACKAGE: 2,
+    INSTALLING_UPDATE: 3,
+    UP_TO_DATE: 4, // The running app is up-to-date
+    UPDATE_IGNORED: 5, // The app had an optional update and the end-user chose to ignore it
+    UPDATE_INSTALLED: 6, // The app had an optional/mandatory update that was successfully downloaded and is about to be installed.
+    UNKNOWN_ERROR: -1
+  },
+  DEFAULT_UPDATE_DIALOG: {
+    appendReleaseDescription: false,
+    descriptionPrefix: " Description: ",
+    mandatoryContinueButtonLabel: "Continue",
+    mandatoryUpdateMessage: "An update is available that must be installed.",
+    optionalIgnoreButtonLabel: "Ignore",
+    optionalInstallButtonLabel: "Install",
+    optionalUpdateMessage: "An update is available. Would you like to install it?",
+    updateTitle: "Update available",
   }
 };
 

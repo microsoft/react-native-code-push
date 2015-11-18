@@ -49,7 +49,7 @@ failCallback:(void (^)(NSError *err))failCallback;
 
 @interface CodePushPackage : NSObject
 
-+ (void)applyPackage:(NSDictionary *)updatePackage
++ (void)installPackage:(NSDictionary *)updatePackage
                error:(NSError **)error;
 
 + (NSDictionary *)getCurrentPackage:(NSError **)error;
@@ -72,8 +72,8 @@ failCallback:(void (^)(NSError *err))failCallback;
 
 @end
 
-typedef NS_ENUM(NSInteger, CodePushRestartMode) {
-    CodePushRestartModeNone,
-    CodePushRestartModeImmediate,
-    CodePushRestartModeOnNextResume
+typedef NS_ENUM(NSInteger, CodePushInstallMode) {
+    CodePushInstallModeImmediate,
+    CodePushInstallModeOnNextRestart,
+    CodePushInstallModeOnNextResume
 };

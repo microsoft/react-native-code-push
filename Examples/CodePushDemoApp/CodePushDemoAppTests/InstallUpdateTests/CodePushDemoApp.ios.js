@@ -62,4 +62,5 @@ var styles = StyleSheet.create({
   }
 });
 
+CodePushDemoApp.displayName = 'CodePushDemoApp';
 AppRegistry.registerComponent('CodePushDemoApp', () => CodePushDemoApp);

@@ -15,11 +15,11 @@
 #define TIMEOUT_SECONDS 60
 #define TEXT_TO_LOOK_FOR @"If you see this, you have successfully installed an update!"
 
-@interface ApplyUpdateTests : XCTestCase
+@interface InstallUpdateTests : XCTestCase
 
 @end
 
-@implementation ApplyUpdateTests
+@implementation InstallUpdateTests
 {
   RCTTestRunner *_runner;
   NSString* app;
@@ -27,7 +27,7 @@
 
 - (void)setUp
 {
-  app = @"CodePushDemoAppTests/ApplyUpdateTests/ApplyUpdateTestApp.ios";
+  app = @"CodePushDemoAppTests/InstallUpdateTests/DownloadAndInstallUpdateTest";
 #if __LP64__
   RCTAssert(false, @"Tests should be run on 32-bit device simulators (e.g. iPhone 5)");
 #endif
@@ -51,7 +51,7 @@
 }
 
 #pragma mark Logic Tests
-- (void)testDownloadAndApplyUpdate
+- (void)testDownloadAndInstallUpdate
 {
   NSString *sanitizedAppName = [app stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
   sanitizedAppName = [sanitizedAppName stringByReplacingOccurrencesOfString:@"\\" withString:@"-"];
@@ -68,9 +68,12 @@
                                             moduleProvider:nil
                                              launchOptions:nil];
   RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge
-                                                   moduleName:@"DownloadAndApplyUpdateTest"
+                                                   moduleName:@"CodePushDemoApp"
                                                    initialProperties:nil];
-
+  
+  UIViewController *rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
+  rootViewController.view = rootView;
+  
   NSDate *date = [NSDate dateWithTimeIntervalSinceNow:TIMEOUT_SECONDS];
   BOOL foundElement = NO;
   
@@ -98,8 +101,9 @@
     }];
   }
   
-  XCTAssertNil(redboxError, @"RedBox error: %@", redboxError);
+  NSLog(foundElement ? @"Yes" : @"No");
   XCTAssertTrue(foundElement, @"Cound't find element with text '%@' in %d seconds", TEXT_TO_LOOK_FOR, TIMEOUT_SECONDS);
+  XCTAssertNil(redboxError, @"RedBox error: %@", redboxError);
   
 }
 
