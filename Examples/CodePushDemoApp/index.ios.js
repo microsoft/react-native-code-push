@@ -25,7 +25,7 @@ var CodePushDemoApp = React.createClass({
     var self = this;
     CodePush.sync(
       { 
-        updateNotification: true,
+        updateDialog: true,
         installMode: CodePush.InstallMode.ON_NEXT_RESUME
       }, 
       function(syncStatus) {
