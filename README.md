@@ -175,7 +175,7 @@ If the `rollbackTimeout` parameter was not specified, the CodePush runtime will 
 #### codePush.sync
 
 ```javascript
-codePush.sync(options: Object): Promise<Number>;
+codePush.sync(options: Object, onSyncStatusChange: function(syncStatus: Number), onDownloadProgress: function(progress: DownloadProgress)): Promise<Number>;
 ```
 
 Provides a simple option for checking for an update, displaying a notification to the user, downloading it and then installing it, all while also respecting the policy that your release was published with. This method effectively composes together the "advanced mode" APIs for you, so that you don't need to handle any of the following scenarios yourself:
@@ -189,16 +189,31 @@ If you want to pivot whether you check and/or download an available update based
 
 The method accepts an options object that allows you to customize numerous aspects of the default behavior, all of which provide sensible values by default:
 
-* __appendReleaseDescription__ (Boolean) - Indicates whether you would like to append the description of an available release to the notification message which is displayed to the end-user. Defaults to `false`.
-* __descriptionPrefix__ (String) - Indicates the string you would like to prefix the release description with, if any, when displaying the update notification to the end-user. Defaults to `" Description: "`
 * __ignoreFailedUpdates__ (Boolean) - Indicates whether you would like to automatically ignored updates which are available, but have been previously attemped to install, but failed. Defaults to `true`.
-* __mandatoryContinueButtonLabel__ (String) - The text to use for the button the end-user must press in order to install a mandatory update. Defaults to `"Continue"`.
-* __mandatoryUpdateMessage__ (String) - The text used as the body of an update notification, when the update is specified as mandatory. Defaults to `"An update is available that must be installed."`.
-* __optionalIgnoreButtonLabel__ (String) - The text to use for the button the end-user can press in order to ignore an optional update that is available. Defaults to `"Ignore"`.
-* __optionalInstallButtonLabel__ (String) - The text to use for the button the end-user can press in order to install an optional update. Defaults to `"Install"`.
-* __optionalUpdateMessage__ (String) - The text used as the body of an update notification, when the update is optional. Defaults to `"An update is available. Would you like to install it?"`.
-* __rollbackTimeout__ (String) - The number of seconds that you want the runtime to wait after an update has been installed before considering it failed and rolling it back. Defaults to `0`, which disabled rollback protection.
-* __updateTitle__ (String) - The text used as the header of an update notification that is displayed to the end-user. Defaults to `"Update available"`.
+* __installMode__ (CodePush.InstallMode) - Indicates whether you would like to restart the app immediately after the update has been installed, or wait until the next app resume or restart. Defaults to `CodePush.InstallMode.ON_NEXT_RESTART`
+* __rollbackTimeout__ (Number) - The number of seconds that you want the runtime to wait after an update has been installed before considering it failed and rolling it back. Defaults to `0`, which disables rollback protection.
+* __updateDialog__ (UpdateDialogOptions) - The options object used to customize the dialog displayed to the user. Defaults to `null`. A falsey value will disable the display of a dialog, in which case updates will be downloaded automatically. The list of `UpdateDialogOptions` are as follows:
+    * __appendReleaseDescription__ (Boolean) - Indicates whether you would like to append the description of an available release to the notification message which is displayed to the end-user. Defaults to `false`.
+    * __descriptionPrefix__ (String) - Indicates the string you would like to prefix the release description with, if any, when displaying the update notification to the end-user. Defaults to `" Description: "`
+    * __mandatoryContinueButtonLabel__ (String) - The text to use for the button the end-user must press in order to install a mandatory update. Defaults to `"Continue"`.
+    * __mandatoryUpdateMessage__ (String) - The text used as the body of an update notification, when the update is specified as mandatory. Defaults to `"An update is available that must be installed."`.
+    * __optionalIgnoreButtonLabel__ (String) - The text to use for the button the end-user can press in order to ignore an optional update that is available. Defaults to `"Ignore"`.
+    * __optionalInstallButtonLabel__ (String) - The text to use for the button the end-user can press in order to install an optional update. Defaults to `"Install"`.
+    * __optionalUpdateMessage__ (String) - The text used as the body of an update notification, when the update is optional. Defaults to `"An update is available. Would you like to install it?"`.
+    * __updateTitle__ (String) - The text used as the header of an update notification that is displayed to the end-user. Defaults to `"Update available"`.
+
+In addition, the method also recieves two function arguments which serve as event handlers which are called at various points in the sync process:
+
+* __onSyncStatusChange__ (function(syncStatus: Number)) - Called when the sync process moves to a different step. Below is the list of possible SyncStatus values:
+    * __CodePush.SyncStatus.CHECKING_FOR_UPDATE__ *(0)* - Querying the CodePush server for an update.
+    * __CodePush.SyncStatus.AWAITING_USER_ACTION__ *(1)* - Waiting for a response from the user (e.g. a confirmation dialog).
+    * __CodePush.SyncStatus.DOWNLOADING_PACKAGE__ *(2)* - Downloading the updated package from the CodePush server.
+    * __CodePush.SyncStatus.INSTALLING_UPDATE__ *(3)* - Installing the downloaded update package.
+    * __CodePush.SyncStatus.IDLE__ *(4)* - The sync process has exited and is now idling.
+    
+* __onDownloadProgress__ (function(progress: DownloadProgress)) - Called periodically when the update package is being downloaded from the CodePush server to report the progress of the update. `DownloadProgress` contains two fields:
+    * __totalBytes__ (Number) - The total number of bytes expected to be received for this update package
+    * __receivedBytes__ (Number) - The number of bytes downloaded thus far.
 
 The method returns a `Promise` that is resolved to a `SyncResult` integer code, which indicates why the `sync` call succeeded. This code can be one of the following values:
 
