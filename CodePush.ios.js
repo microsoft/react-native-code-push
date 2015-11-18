@@ -149,11 +149,11 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
           case CodePush.SyncStatus.CHECKING_FOR_UPDATE:
             log("Checking for update.");
             break;
-          case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
-            log("Downloading package.");
-            break;
           case CodePush.SyncStatus.AWAITING_USER_ACTION:
             log("Awaiting user action.");
+            break;
+          case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
+            log("Downloading package.");
             break;
           case CodePush.SyncStatus.INSTALLING_UPDATE:
             log("Installing update.");
