@@ -188,8 +188,8 @@ function sync(options = {}, onSyncStatusChange, onDownloadProgress) {
           onSyncStatusChange(CodePush.SyncStatus.IDLE);
           resolve(CodePush.SyncResult.UP_TO_DATE);
         }
-        else if (syncOptions.updateNotification) {
-          syncOptions.updateNotification = Object.assign(CodePush.DEFAULT_UPDATE_DIALOG, syncOptions.updateNotification);
+        else if (syncOptions.updateDialog) {
+          syncOptions.updateDialog = Object.assign(CodePush.DEFAULT_UPDATE_DIALOG, syncOptions.updateDialog);
           
           var message = null;
           var dialogButtons = [
@@ -202,24 +202,24 @@ function sync(options = {}, onSyncStatusChange, onDownloadProgress) {
           ];
           
           if (remotePackage.isMandatory) {
-            message = syncOptions.updateNotification.mandatoryUpdateMessage;
+            message = syncOptions.updateDialog.mandatoryUpdateMessage;
             dialogButtons[0].text = syncOptions.mandatoryContinueButtonLabel;
           } else {
-            message = syncOptions.updateNotification.optionalUpdateMessage;
-            dialogButtons[0].text = syncOptions.updateNotification.optionalInstallButtonLabel;     
+            message = syncOptions.updateDialog.optionalUpdateMessage;
+            dialogButtons[0].text = syncOptions.updateDialog.optionalInstallButtonLabel;     
             
             // Since this is an optional update, add another button
             // to allow the end-user to ignore it       
             dialogButtons.push({
-              text: syncOptions.updateNotification.optionalIgnoreButtonLabel,
+              text: syncOptions.updateDialog.optionalIgnoreButtonLabel,
               onPress: () => resolve(CodePush.SyncResult.UPDATE_IGNORED)
             });
           }
           
           // If the update has a description, and the developer
           // explicitly chose to display it, then set that as the message
-          if (syncOptions.updateNotification.appendReleaseDescription && remotePackage.description) {
-            message += `${syncOptions.updateNotification.descriptionPrefix} ${remotePackage.description}`;  
+          if (syncOptions.updateDialog.appendReleaseDescription && remotePackage.description) {
+            message += `${syncOptions.updateDialog.descriptionPrefix} ${remotePackage.description}`;  
           }
           
           onSyncStatusChange(CodePush.SyncStatus.AWAITING_USER_ACTION);
