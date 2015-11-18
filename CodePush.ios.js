@@ -60,7 +60,7 @@ function getCurrentPackage() {
         return NativeCodePush.isFailedUpdate(currentPackage.packageHash);
       })
       .then((failedUpdate) => {
-        localPackage.failedApply = failedUpdate;
+        localPackage.failedInstall = failedUpdate;
         return NativeCodePush.isFirstRun(localPackage.packageHash);
       })
       .then((isFirstRun) => {
@@ -98,7 +98,7 @@ function checkForUpdate() {
                 }
                 
                 // Ignore updates that require a newer app version,
-                // since the end-user couldn't reliably apply it
+                // since the end-user couldn't reliably install it
                 if (!update || update.updateAppVersion) {
                   return resolve(null);
                 }
@@ -107,7 +107,7 @@ function checkForUpdate() {
                 
                 NativeCodePush.isFailedUpdate(update.packageHash)
                   .then((isFailedHash) => {
-                    update.failedApply = isFailedHash;
+                    update.failedInstall = isFailedHash;
                     resolve(update);
                   })
                   .catch(reject)
@@ -126,72 +126,106 @@ function checkForUpdate() {
  * releases, and displaying a standard confirmation UI to the end-user
  * when an update is available.
  */
-function sync(options = {}) {  
+function sync(options = {}, onSyncStatusChange, onDownloadProgress) {  
   var syncOptions = {
-    descriptionPrefix: " Description: ",
-    appendReleaseDescription: false,
     
     ignoreFailedUpdates: true,
-    
-    mandatoryContinueButtonLabel: "Continue",
-    mandatoryUpdateMessage: "An update is available that must be installed.",
-    
-    optionalIgnoreButtonLabel: "Ignore",
-    optionalInstallButtonLabel: "Install",
-    optionalUpdateMessage: "An update is available. Would you like to install it?",
-    
+    installMode: CodePush.InstallMode.ON_NEXT_RESTART,
     rollbackTimeout: 0,
-    
-    updateTitle: "Update available",
+    updateDialog: null,
     
     ...options 
   };
-
+  
+  onSyncStatusChange = typeof onSyncStatusChange == "function"
+    ? onSyncStatusChange
+    : function(syncStatus) {
+        switch(syncStatus) {
+          case CodePush.SyncStatus.CHECKING_FOR_UPDATE:
+            console.log("Checking for update.");
+            break;
+          case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
+            console.log("Downloading package.");
+            break;
+          case CodePush.SyncStatus.AWAITING_USER_ACTION:
+            console.log("Awaiting user action.");
+            break;
+          case CodePush.SyncStatus.INSTALLING_UPDATE:
+            console.log("Installing update.");
+            break;
+          case CodePush.SyncStatus.IDLE:
+            console.log("Sync is idle.");
+            break;
+        }
+      };
+    
+  onDownloadProgress = typeof onDownloadProgress == "function" 
+    ? onDownloadProgress 
+    : function(downloadProgress) {
+        console.log(`Expecting ${downloadProgress.totalBytes} bytes, received ${downloadProgress.receivedBytes} bytes.`);
+      };
+  
   return new Promise((resolve, reject) => {
+    onSyncStatusChange(CodePush.SyncStatus.CHECKING_FOR_UPDATE);
     checkForUpdate()
       .then((remotePackage) => {
-        if (!remotePackage || (remotePackage.failedApply && syncOptions.ignoreFailedUpdates)) {
-          resolve(CodePush.SyncStatus.UP_TO_DATE);
+        var doDownloadAndInstall = () => {
+          onSyncStatusChange(CodePush.SyncStatus.DOWNLOADING_PACKAGE);
+          remotePackage.download(onDownloadProgress)
+            .then((localPackage) => {
+              onSyncStatusChange(CodePush.SyncStatus.INSTALLING_UPDATE);
+              return localPackage.install(syncOptions.rollbackTimeout, syncOptions.installMode)
+            })
+            .then(() => {
+              onSyncStatusChange(CodePush.SyncStatus.IDLE);
+              resolve(CodePush.SyncResult.UPDATE_INSTALLED)
+            })
+            .catch(reject)
+            .done();
         }
-        else {
+        
+        if (!remotePackage || (remotePackage.failedInstall && syncOptions.ignoreFailedUpdates)) {
+          onSyncStatusChange(CodePush.SyncStatus.IDLE);
+          resolve(CodePush.SyncResult.UP_TO_DATE);
+        }
+        else if (syncOptions.updateNotification) {
+          syncOptions.updateNotification = Object.assign(CodePush.DEFAULT_UPDATE_DIALOG, syncOptions.updateNotification);
+          
           var message = null;
           var dialogButtons = [
             {
               text: null,
               onPress: () => { 
-                remotePackage.download()
-                  .then((localPackage) => {
-                    resolve(CodePush.SyncStatus.UPDATE_APPLIED)
-                    return localPackage.apply(syncOptions.rollbackTimeout);
-                   })
-                  .catch(reject)
-                  .done();
+                doDownloadAndInstall();
               }
             }
           ];
           
           if (remotePackage.isMandatory) {
-            message = syncOptions.mandatoryUpdateMessage;
+            message = syncOptions.updateNotification.mandatoryUpdateMessage;
             dialogButtons[0].text = syncOptions.mandatoryContinueButtonLabel;
           } else {
-            message = syncOptions.optionalUpdateMessage;
-            dialogButtons[0].text = syncOptions.optionalInstallButtonLabel;     
+            message = syncOptions.updateNotification.optionalUpdateMessage;
+            dialogButtons[0].text = syncOptions.updateNotification.optionalInstallButtonLabel;     
             
             // Since this is an optional update, add another button
             // to allow the end-user to ignore it       
             dialogButtons.push({
-              text: syncOptions.optionalIgnoreButtonLabel,
-              onPress: () => resolve(CodePush.SyncStatus.UPDATE_IGNORED)
+              text: syncOptions.updateNotification.optionalIgnoreButtonLabel,
+              onPress: () => resolve(CodePush.SyncResult.UPDATE_IGNORED)
             });
           }
           
           // If the update has a description, and the developer
           // explicitly chose to display it, then set that as the message
-          if (syncOptions.appendReleaseDescription && remotePackage.description) {
-            message += `${syncOptions.descriptionPrefix} ${remotePackage.description}`;  
+          if (syncOptions.updateNotification.appendReleaseDescription && remotePackage.description) {
+            message += `${syncOptions.updateNotification.descriptionPrefix} ${remotePackage.description}`;  
           }
           
+          onSyncStatusChange(CodePush.SyncStatus.AWAITING_USER_ACTION);
           AlertIOS.alert(syncOptions.updateTitle, message, dialogButtons);
+        } else {
+          doDownloadAndInstall();
         }
       })
       .catch(reject)
@@ -206,15 +240,32 @@ var CodePush = {
   notifyApplicationReady: NativeCodePush.notifyApplicationReady,
   setUpTestDependencies: setUpTestDependencies,
   sync: sync,
-  RestartMode: {
-    NONE: NativeCodePush.codePushRestartModeNone, // Don't artificially restart the app. Allow the update to be "picked up" on the next app restart
-    IMMEDIATE: NativeCodePush.codePushRestartModeImmediate, // Restart the app immediately
-    ON_NEXT_RESUME: NativeCodePush.codePushRestartModeOnNextResume // Restart the app the next time it is resumed from the background
+  InstallMode: {
+    IMMEDIATE: NativeCodePush.codePushInstallModeImmediate, // Restart the app immediately
+    ON_NEXT_RESTART: NativeCodePush.codePushInstallModeOnNextRestart, // Don't artificially restart the app. Allow the update to be "picked up" on the next app restart
+    ON_NEXT_RESUME: NativeCodePush.codePushInstallModeOnNextResume // Restart the app the next time it is resumed from the background
   },
-  SyncStatus: {
+  SyncResult: {
     UP_TO_DATE: 0, // The running app is up-to-date
     UPDATE_IGNORED: 1, // The app had an optional update and the end-user chose to ignore it
-    UPDATE_APPLIED: 2 // The app had an optional/mandatory update that was successfully downloaded and is about to be applied
+    UPDATE_INSTALLED: 2 // The app had an optional/mandatory update that was successfully downloaded and is about to be installed.
+  },
+  SyncStatus: {
+    CHECKING_FOR_UPDATE: 1,
+    AWAITING_USER_ACTION: 2,
+    DOWNLOADING_PACKAGE: 3,
+    INSTALLING_UPDATE: 4,
+    IDLE: 5
+  },
+  DEFAULT_UPDATE_DIALOG: {
+    appendReleaseDescription: false,
+    descriptionPrefix: " Description: ",
+    mandatoryContinueButtonLabel: "Continue",
+    mandatoryUpdateMessage: "An update is available that must be installed.",
+    optionalIgnoreButtonLabel: "Ignore",
+    optionalInstallButtonLabel: "Install",
+    optionalUpdateMessage: "An update is available. Would you like to install it?",
+    updateTitle: "Update available",
   }
 };
 

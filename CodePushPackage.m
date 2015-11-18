@@ -208,7 +208,7 @@ NSString * const UpdateBundleFileName = @"app.jsbundle";
     [downloadHandler download:updatePackage[@"downloadUrl"]];
 }
 
-+ (void)applyPackage:(NSDictionary *)updatePackage
++ (void)installPackage:(NSDictionary *)updatePackage
                error:(NSError **)error
 {
     NSString *packageHash = updatePackage[@"packageHash" ];

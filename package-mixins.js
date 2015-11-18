@@ -36,8 +36,8 @@ module.exports = (NativeCodePush) => {
   };
 
   var local = {
-    apply: function apply(rollbackTimeout = 0, restartMode = NativeCodePush.codePushRestartModeImmediate) {
-      return NativeCodePush.applyUpdate(this, rollbackTimeout, restartMode);
+    install: function install(rollbackTimeout = 0, installMode = NativeCodePush.codePushInstallModeImmediate) {
+      return NativeCodePush.installUpdate(this, rollbackTimeout, installMode);
     }
   };
 

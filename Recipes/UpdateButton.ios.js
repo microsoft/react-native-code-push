@@ -27,7 +27,7 @@ var UpdateButton = React.createClass({
   },
   update: function() {
     this.state.update.download().done((newPackage) => {
-      newPackage.apply();
+      newPackage.install();
     });
   },
   render: function() {

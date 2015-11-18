@@ -102,11 +102,11 @@ NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
 
 - (NSDictionary *)constantsToExport
 {
-    // Export the values of the CodePushRestartMode enum
+    // Export the values of the CodePushInstallMode enum
     // so that the script-side can easily stay in sync
-    return @{ @"codePushRestartModeNone": @(CodePushRestartModeNone),
-              @"codePushRestartModeImmediate": @(CodePushRestartModeImmediate),
-              @"codePushRestartModeOnNextResume": @(CodePushRestartModeOnNextResume)
+    return @{ @"codePushInstallModeOnNextRestart": @(CodePushInstallModeOnNextRestart),
+              @"codePushInstallModeImmediate": @(CodePushInstallModeImmediate),
+              @"codePushInstallModeOnNextResume": @(CodePushInstallModeOnNextResume)
               };
 };
 
@@ -124,7 +124,7 @@ NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
     if (self) {
         // Do an async check to see whether
         // we need to start the rollback timer
-        // due to a pending update being applied at start
+        // due to a pending update being installed at start
         [self checkForPendingUpdate:NO];
         
         // Register for app resume notifications so that we
@@ -204,7 +204,7 @@ NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
           rollbackTimeout:(int)rollbackTimeout
 {
     // Since we're not restarting, we need to store the fact that the update
-    // was applied, but hasn't yet become "active".
+    // was installed, but hasn't yet become "active".
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSDictionary *pendingUpdate = [[NSDictionary alloc] initWithObjectsAndKeys:
                                    packageHash,PendingUpdateHashKey,
@@ -225,26 +225,28 @@ NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
 }
 
 // JavaScript-exported module methods
-RCT_EXPORT_METHOD(applyUpdate:(NSDictionary*)updatePackage
+RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
                   rollbackTimeout:(int)rollbackTimeout
-                  restartMode:(CodePushRestartMode)restartMode
+                  installMode:(CodePushInstallMode)installMode
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSError *error;
-        [CodePushPackage applyPackage:updatePackage
+        [CodePushPackage installPackage:updatePackage
                                 error:&error];
         
         if (error) {
             reject(error);
         } else {
-            if (restartMode == CodePushRestartModeImmediate) {
+            if (installMode == CodePushInstallModeImmediate) {
                 [self initializeUpdateWithRollbackTimeout:rollbackTimeout needsRestart:YES];
             } else {
-                _resumablePendingUpdateAvailable = (restartMode == CodePushRestartModeOnNextResume);
+                _resumablePendingUpdateAvailable = (installMode == CodePushInstallModeOnNextResume);
                 [self savePendingUpdate:updatePackage[@"packageHash"]
                         rollbackTimeout:rollbackTimeout];
+                // Signal to JS that the update has been applied.
+                resolve(nil);
             }
         }
     });

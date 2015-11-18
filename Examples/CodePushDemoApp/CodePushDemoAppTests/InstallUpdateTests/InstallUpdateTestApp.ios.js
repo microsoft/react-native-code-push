@@ -15,14 +15,14 @@ var {
 } = React;
 
 var TESTS = [
-  require('./DownloadAndApplyUpdateTest')
+  require('./DownloadAndInstallUpdateTest')
 ];
 
 TESTS.forEach(
   (test) => AppRegistry.registerComponent(test.displayName, () => test)
 );
 
-var ApplyUpdateTestApp = React.createClass({
+var InstallUpdateTestApp = React.createClass({
   getInitialState: function() {
     return {
       test: null,
@@ -79,4 +79,4 @@ var styles = StyleSheet.create({
   }
 });
 
-AppRegistry.registerComponent('ApplyUpdateTestApp', () => ApplyUpdateTestApp);
+AppRegistry.registerComponent('InstallUpdateTestApp', () => InstallUpdateTestApp);
