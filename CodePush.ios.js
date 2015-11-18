@@ -158,8 +158,25 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
           case CodePush.SyncStatus.INSTALLING_UPDATE:
             log("Installing update.");
             break;
-          case CodePush.SyncStatus.IDLE:
-            log("Sync is idle.");
+          case CodePush.SyncStatus.UP_TO_DATE:
+            log("App is up to date.");
+            break;
+          case CodePush.SyncStatus.UPDATE_IGNORED:
+            log("User cancelled the update.");
+            break;
+          case CodePush.SyncStatus.UPDATE_INSTALLED:
+            /* 
+             * If the install mode is IMMEDIATE, this will not get returned as the
+             * app will be restarted to a new Javascript context.
+             */
+            if (syncOptions.installMode == CodePush.InstallMode.ON_NEXT_RESTART) {
+              log("Update is installed and will be run on the next app restart.");
+            } else {
+              log("Update is installed and will be run when the app next resumes.");
+            }
+            break;
+          case CodePush.SyncStatus.UNKNOWN_ERROR:
+            log("An unknown error occurred.");
             break;
         }
       };
@@ -182,16 +199,16 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
               return localPackage.install(syncOptions.rollbackTimeout, syncOptions.installMode)
             })
             .then(() => {
-              syncStatusChangeCallback(CodePush.SyncStatus.IDLE);
-              resolve(CodePush.SyncResult.UPDATE_INSTALLED)
+              syncStatusChangeCallback(CodePush.SyncStatus.UPDATE_INSTALLED);
+              resolve(CodePush.SyncStatus.UPDATE_INSTALLED)
             })
             .catch(reject)
             .done();
         }
         
         if (!remotePackage || (remotePackage.failedInstall && syncOptions.ignoreFailedUpdates)) {
-          syncStatusChangeCallback(CodePush.SyncStatus.IDLE);
-          resolve(CodePush.SyncResult.UP_TO_DATE);
+          syncStatusChangeCallback(CodePush.SyncStatus.UP_TO_DATE);
+          resolve(CodePush.SyncStatus.UP_TO_DATE);
         }
         else if (syncOptions.updateDialog) {
           syncOptions.updateDialog = Object.assign(CodePush.DEFAULT_UPDATE_DIALOG, syncOptions.updateDialog);
@@ -217,7 +234,7 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
             // to allow the end-user to ignore it       
             dialogButtons.push({
               text: syncOptions.updateDialog.optionalIgnoreButtonLabel,
-              onPress: () => resolve(CodePush.SyncResult.UPDATE_IGNORED)
+              onPress: () => resolve(CodePush.SyncStatus.UPDATE_IGNORED)
             });
           }
           
@@ -233,7 +250,10 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
           doDownloadAndInstall();
         }
       })
-      .catch(reject)
+      .catch((error) => {
+        syncStatusChangeCallback(CodePush.SyncStatus.UNKNOWN_ERROR);
+        reject(error);
+      })
       .done();
   });     
 };
@@ -242,6 +262,7 @@ var CodePush = {
   checkForUpdate: checkForUpdate,
   getConfiguration: getConfiguration,
   getCurrentPackage: getCurrentPackage,
+  log: log,
   notifyApplicationReady: NativeCodePush.notifyApplicationReady,
   setUpTestDependencies: setUpTestDependencies,
   sync: sync,
@@ -250,17 +271,15 @@ var CodePush = {
     ON_NEXT_RESTART: NativeCodePush.codePushInstallModeOnNextRestart, // Don't artificially restart the app. Allow the update to be "picked up" on the next app restart
     ON_NEXT_RESUME: NativeCodePush.codePushInstallModeOnNextResume // Restart the app the next time it is resumed from the background
   },
-  SyncResult: {
-    UP_TO_DATE: 0, // The running app is up-to-date
-    UPDATE_IGNORED: 1, // The app had an optional update and the end-user chose to ignore it
-    UPDATE_INSTALLED: 2 // The app had an optional/mandatory update that was successfully downloaded and is about to be installed.
-  },
   SyncStatus: {
     CHECKING_FOR_UPDATE: 0,
     AWAITING_USER_ACTION: 1,
     DOWNLOADING_PACKAGE: 2,
     INSTALLING_UPDATE: 3,
-    IDLE: 4
+    UP_TO_DATE: 4, // The running app is up-to-date
+    UPDATE_IGNORED: 5, // The app had an optional update and the end-user chose to ignore it
+    UPDATE_INSTALLED: 6, // The app had an optional/mandatory update that was successfully downloaded and is about to be installed.
+    UNKNOWN_ERROR: -1
   },
   DEFAULT_UPDATE_DIALOG: {
     appendReleaseDescription: false,

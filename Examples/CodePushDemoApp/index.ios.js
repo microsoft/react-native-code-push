@@ -50,9 +50,27 @@ var CodePushDemoApp = React.createClass({
               syncMessage: "Installing update."
             });
             break;
-          case CodePush.SyncStatus.IDLE:
+          case CodePush.SyncStatus.UP_TO_DATE:
+            self.setState({
+              syncMessage: "App up to date.",
+              progress: false
+            });
+            break;
+          case CodePush.SyncStatus.UPDATE_IGNORED:
+            self.setState({
+              syncMessage: "Update cancelled by user.",
+              progress: false
+            });
+            break;
+          case CodePush.SyncStatus.UPDATE_INSTALLED:
             self.setState({
               syncMessage: "Update installed and will be run when the app next resumes.",
+              progress: false
+            });
+            break;
+          case CodePush.SyncStatus.UNKNOWN_ERROR:
+            self.setState({
+              syncMessage: "An unknown error occurred.",
               progress: false
             });
             break;
@@ -63,19 +81,8 @@ var CodePushDemoApp = React.createClass({
           progress: progress
         });
       }
-    ).then(function(syncResult) {
-      switch(syncResult) {
-        case CodePush.SyncResult.UP_TO_DATE: 
-          self.setState({
-            syncMessage: "App up to date."
-          });
-          break;
-        case CodePush.SyncResult.UPDATE_IGNORED: 
-          self.setState({
-            syncMessage: "Update cancelled by user."
-          });
-          break;
-      }
+    ).catch(function(error) {
+      CodePush.log(error);
     });
   },
   getInitialState: function() {

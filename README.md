@@ -175,7 +175,7 @@ If the `rollbackTimeout` parameter was not specified, the CodePush runtime will 
 #### codePush.sync
 
 ```javascript
-codePush.sync(options: Object, onSyncStatusChange: function(syncStatus: Number), onDownloadProgress: function(progress: DownloadProgress)): Promise<Number>;
+codePush.sync(options: Object, syncStatusChangeCallback: function(syncStatus: Number), downloadProgressCallback: function(progress: DownloadProgress)): Promise<Number>;
 ```
 
 Provides a simple option for checking for an update, displaying a notification to the user, downloading it and then installing it, all while also respecting the policy that your release was published with. This method effectively composes together the "advanced mode" APIs for you, so that you don't need to handle any of the following scenarios yourself:
@@ -204,22 +204,25 @@ The method accepts an options object that allows you to customize numerous aspec
 
 In addition, the method also recieves two function arguments which serve as event handlers which are called at various points in the sync process:
 
-* __onSyncStatusChange__ (function(syncStatus: Number)) - Called when the sync process moves to a different step. Below is the list of possible SyncStatus values:
+* __syncStatusChangeCallback__ (function(syncStatus: Number)) - Called when the sync process moves to a different step. Below is the list of possible SyncStatus values:
     * __CodePush.SyncStatus.CHECKING_FOR_UPDATE__ *(0)* - Querying the CodePush server for an update.
     * __CodePush.SyncStatus.AWAITING_USER_ACTION__ *(1)* - Waiting for a response from the user (e.g. a confirmation dialog).
     * __CodePush.SyncStatus.DOWNLOADING_PACKAGE__ *(2)* - Downloading the updated package from the CodePush server.
-    * __CodePush.SyncStatus.INSTALLING_UPDATE__ *(3)* - Installing the downloaded update package.
-    * __CodePush.SyncStatus.IDLE__ *(4)* - The sync process has exited and is now idling.
+    * __CodePush.SyncStatus.INSTALLING_UPDATE__ *(3)* - The app had an optional or mandatory update that was successfully downloaded and is about to be installed.
+    * __CodePush.SyncStatus.UP_TO_DATE__ *(4)* - The app does not have an available update.
+    * __CodePush.SyncStatus.UPDATE_IGNORED__ *(5)* - The app has an optional update, that the user chose to ignore.
+    * __CodePush.SyncStatus.UPDATE_INSTALLED__ *(6)* - The update has been installed and will be run the next time the app resumes/restarts, depending on the `InstallMode` specified in `SyncOptions`.
+    * __CodePush.SyncStatus.UNKNOWN_ERROR__ *(-1)* - The sync operation encountered an unknown error. 
     
-* __onDownloadProgress__ (function(progress: DownloadProgress)) - Called periodically when the update package is being downloaded from the CodePush server to report the progress of the update. `DownloadProgress` contains two fields:
+* __downloadProgressCallback__ (function(progress: DownloadProgress)) - Called periodically when the update package is being downloaded from the CodePush server to report the progress of the update. `DownloadProgress` contains two fields:
     * __totalBytes__ (Number) - The total number of bytes expected to be received for this update package
     * __receivedBytes__ (Number) - The number of bytes downloaded thus far.
 
-The method returns a `Promise` that is resolved to a `SyncResult` integer code, which indicates why the `sync` call succeeded. This code can be one of the following values:
+The method returns a `Promise` that is resolved to a `SyncStatus` integer code, which indicates why the `sync` call succeeded. This code can be one of the following values:
 
-* __CodePush.SyncResult.UP_TO_DATE__ *(0)* - The app doesn't have an available update.
-* __CodePush.SyncResult.UPDATE_IGNORED__ *(1)* - The app has an optional update, that the user chose to ignore.
-* __CodePush.SyncResult.UPDATE_INSTALLED__ *(2)* - The app had an optional or mandatory update that was successfully downloaded and is about to be installed. If your app needs to do any data persistence/migration before restarting, this is the time to do it.
+    * __CodePush.SyncStatus.UP_TO_DATE__ *(4)* - The app does not have an available update.
+    * __CodePush.SyncStatus.UPDATE_IGNORED__ *(5)* - The app has an optional update, that the user chose to ignore.
+    * __CodePush.SyncStatus.UPDATE_INSTALLED__ *(6)* - The update has been installed and will be run the next time the app resumes/restarts, depending on the `InstallMode` specified in `SyncOptions`.
 
 If the update check and/or the subseqeuent download fails for any reason, the `Promise` object returned by `sync` will be rejected with the reason.
 
