@@ -211,7 +211,7 @@ In addition, the method also recieves two function arguments which serve as even
     * __CodePush.SyncStatus.INSTALLING_UPDATE__ *(3)* - The app had an optional or mandatory update that was successfully downloaded and is about to be installed.
     * __CodePush.SyncStatus.UP_TO_DATE__ *(4)* - The app does not have an available update.
     * __CodePush.SyncStatus.UPDATE_IGNORED__ *(5)* - The app has an optional update, that the user chose to ignore.
-    * __CodePush.SyncStatus.UPDATE_INSTALLED__ *(6)* - The update has been installed and will be run the next time the app resumes/restarts, depending on the `InstallMode` specified in `SyncOptions`.
+    * __CodePush.SyncStatus.UPDATE_INSTALLED__ *(6)* - The update has been installed and will be run either immediately after the syncStatusCallback function returns or the next time the app resumes/restarts, depending on the `InstallMode` specified in `SyncOptions`.
     * __CodePush.SyncStatus.UNKNOWN_ERROR__ *(-1)* - The sync operation encountered an unknown error. 
     
 * __downloadProgressCallback__ (function(progress: DownloadProgress)) - Called periodically when the update package is being downloaded from the CodePush server to report the progress of the update. `DownloadProgress` contains two fields:
@@ -222,7 +222,7 @@ The method returns a `Promise` that is resolved to a `SyncStatus` integer code, 
 
     * __CodePush.SyncStatus.UP_TO_DATE__ *(4)* - The app does not have an available update.
     * __CodePush.SyncStatus.UPDATE_IGNORED__ *(5)* - The app has an optional update, that the user chose to ignore.
-    * __CodePush.SyncStatus.UPDATE_INSTALLED__ *(6)* - The update has been installed and will be run the next time the app resumes/restarts, depending on the `InstallMode` specified in `SyncOptions`.
+    * __CodePush.SyncStatus.UPDATE_INSTALLED__ *(6)* - The update has been installed and will be run either immediately after the syncStatusCallback function returns or the next time the app resumes/restarts, depending on the `InstallMode` specified in `SyncOptions`.
 
 If the update check and/or the subseqeuent download fails for any reason, the `Promise` object returned by `sync` will be rejected with the reason.
 
