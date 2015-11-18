@@ -263,11 +263,11 @@ Contains details about an update package that has been downloaded locally or alr
 - __isFirstRun__: Flag indicating whether this is the first time the package has been run after being installed. (Boolean) This is useful for determining whether you would like to show a "What's New?" UI to the end-user after installing an update.
 
 ##### Methods
-- __install(rollbackTimeout: Number = 0, installMode: CodePush.InstallMode = CodePush.InstallMode.UPDATE_ON_RESTART): Promise&lt;void&gt;__: Installs this package to the application by unzipping its contents (e.g. the JS bundle) and saving it to the location on disk where the runtime expects to find the latest version of the app. If the `restartImmediately` parameter is set to `false`, the install will complete, but it won't take effect until the next time that the app is restarted. Otherwise, the app will be immediately restarted after performing the install, so that the end-user sees the changes.
+- __install(rollbackTimeout: Number = 0, installMode: CodePush.InstallMode = CodePush.InstallMode.UPDATE_ON_RESTART): Promise&lt;void&gt;__: Installs this package to the application by unzipping its contents (e.g. the JS bundle) and saving it to the location on disk where the runtime expects to find the latest version of the app. If the `InstallMode` parameter is set to `UPDATE_ON_RESTART`, the install will complete, but it won't take effect until the next time that the app is restarted. If it is `UPDATE_ON_RESUME`, it will take effect when the app is next resumed after going into the background. If the parameter is set to `IMMEDIATE`, it will immediately restart after performing the install, so that the end-user sees the changes.
 <br /><br />
 If a value greater than zero is provided to the `rollbackTimeout` parameter, the application will wait for the `notifyApplicationReady` method to be called for the given number of milliseconds.
 <br /><br />
-Note: The "rollback timer" doesn't start until the update has actually become active. If you pass a truthy value to the `restartImmediately` parameter, then the rollback timer will also start immediately. However, if you pass a falsey value, then the rollback timer will start the next time the app starts, not at the point that you called `install`.
+Note: The "rollback timer" doesn't start until the update has actually become active. If the `installMode` is `IMMEDIATE`, then the rollback timer will also start immediately. However, if the `installMode` is `UPDATE_ON_RESTART` or `UPDATE_ON_RESUME`, then the rollback timer will start the next time the app starts or resumes, not at the point that you called `install`.
 
 #### RemotePackage
 
@@ -280,7 +280,7 @@ The `RemotePackage` inherits all of the same properties as the `LocalPackage`, b
 - __downloadUrl__: The URL at which the package is available for download. (String). This property is only needed for advanced usage, since the `download` method will automatically handle the acquisition of updates for you.
 
 ##### Methods
-- __download(progressHandler?: Function): Promise<LocalPackage>__: Downloads the package update from the CodePush service. If a `progressHandler` is specified, it will be called periodically with a `DownloadProgress` object (`{ totalBytes: Number, receivedBytes: Number }`) that reports the progress of the download until the download completes. Returns a Promise that resolves with the `LocalPackage`.
+- __download(downloadProgressCallback?: Function): Promise<LocalPackage>__: Downloads the package update from the CodePush service. If a `downloadProgressCallback` is specified, it will be called periodically with a `DownloadProgress` object (`{ totalBytes: Number, receivedBytes: Number }`) that reports the progress of the download until the download completes. Returns a Promise that resolves with the `LocalPackage`.
 
 ---
 

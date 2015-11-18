@@ -6,17 +6,17 @@ module.exports = (NativeCodePush) => {
     abortDownload: function abortDownload() {
       return NativeCodePush.abortDownload(this);
     },
-    download: function download(progressHandler) {
+    download: function download(downloadProgressCallback) {
       if (!this.downloadUrl) {
         return Promise.reject(new Error("Cannot download an update without a download url"));
       }
 
       var downloadProgressSubscription;
-      if (progressHandler) {
+      if (downloadProgressCallback) {
         // Use event subscription to obtain download progress.   
         downloadProgressSubscription = NativeAppEventEmitter.addListener(
           "CodePushDownloadProgress",
-          progressHandler
+          downloadProgressCallback
         );
       }
       
@@ -36,7 +36,7 @@ module.exports = (NativeCodePush) => {
   };
 
   var local = {
-    install: function install(rollbackTimeout = 0, installMode = NativeCodePush.codePushInstallModeImmediate) {
+    install: function install(rollbackTimeout = 0, installMode = NativeCodePush.codePushInstallModeOnNextRestart) {
       return NativeCodePush.installUpdate(this, rollbackTimeout, installMode);
     }
   };

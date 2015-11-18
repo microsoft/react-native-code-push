@@ -126,7 +126,7 @@ function checkForUpdate() {
  * releases, and displaying a standard confirmation UI to the end-user
  * when an update is available.
  */
-function sync(options = {}, onSyncStatusChange, onDownloadProgress) {  
+function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) {  
   var syncOptions = {
     
     ignoreFailedUpdates: true,
@@ -137,47 +137,47 @@ function sync(options = {}, onSyncStatusChange, onDownloadProgress) {
     ...options 
   };
   
-  onSyncStatusChange = typeof onSyncStatusChange == "function"
-    ? onSyncStatusChange
+  syncStatusChangeCallback = typeof syncStatusChangeCallback == "function"
+    ? syncStatusChangeCallback
     : function(syncStatus) {
         switch(syncStatus) {
           case CodePush.SyncStatus.CHECKING_FOR_UPDATE:
-            console.log("Checking for update.");
+            console.log("[CodePush] Checking for update.");
             break;
           case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
-            console.log("Downloading package.");
+            console.log("[CodePush] Downloading package.");
             break;
           case CodePush.SyncStatus.AWAITING_USER_ACTION:
-            console.log("Awaiting user action.");
+            console.log("[CodePush] Awaiting user action.");
             break;
           case CodePush.SyncStatus.INSTALLING_UPDATE:
-            console.log("Installing update.");
+            console.log("[CodePush] Installing update.");
             break;
           case CodePush.SyncStatus.IDLE:
-            console.log("Sync is idle.");
+            console.log("[CodePush] Sync is idle.");
             break;
         }
       };
     
-  onDownloadProgress = typeof onDownloadProgress == "function" 
-    ? onDownloadProgress 
+  downloadProgressCallback = typeof downloadProgressCallback == "function" 
+    ? downloadProgressCallback 
     : function(downloadProgress) {
-        console.log(`Expecting ${downloadProgress.totalBytes} bytes, received ${downloadProgress.receivedBytes} bytes.`);
+        console.log(`[CodePush] Expecting ${downloadProgress.totalBytes} bytes, received ${downloadProgress.receivedBytes} bytes.`);
       };
   
   return new Promise((resolve, reject) => {
-    onSyncStatusChange(CodePush.SyncStatus.CHECKING_FOR_UPDATE);
+    syncStatusChangeCallback(CodePush.SyncStatus.CHECKING_FOR_UPDATE);
     checkForUpdate()
       .then((remotePackage) => {
         var doDownloadAndInstall = () => {
-          onSyncStatusChange(CodePush.SyncStatus.DOWNLOADING_PACKAGE);
-          remotePackage.download(onDownloadProgress)
+          syncStatusChangeCallback(CodePush.SyncStatus.DOWNLOADING_PACKAGE);
+          remotePackage.download(downloadProgressCallback)
             .then((localPackage) => {
-              onSyncStatusChange(CodePush.SyncStatus.INSTALLING_UPDATE);
+              syncStatusChangeCallback(CodePush.SyncStatus.INSTALLING_UPDATE);
               return localPackage.install(syncOptions.rollbackTimeout, syncOptions.installMode)
             })
             .then(() => {
-              onSyncStatusChange(CodePush.SyncStatus.IDLE);
+              syncStatusChangeCallback(CodePush.SyncStatus.IDLE);
               resolve(CodePush.SyncResult.UPDATE_INSTALLED)
             })
             .catch(reject)
@@ -185,7 +185,7 @@ function sync(options = {}, onSyncStatusChange, onDownloadProgress) {
         }
         
         if (!remotePackage || (remotePackage.failedInstall && syncOptions.ignoreFailedUpdates)) {
-          onSyncStatusChange(CodePush.SyncStatus.IDLE);
+          syncStatusChangeCallback(CodePush.SyncStatus.IDLE);
           resolve(CodePush.SyncResult.UP_TO_DATE);
         }
         else if (syncOptions.updateDialog) {
@@ -222,7 +222,7 @@ function sync(options = {}, onSyncStatusChange, onDownloadProgress) {
             message += `${syncOptions.updateDialog.descriptionPrefix} ${remotePackage.description}`;  
           }
           
-          onSyncStatusChange(CodePush.SyncStatus.AWAITING_USER_ACTION);
+          syncStatusChangeCallback(CodePush.SyncStatus.AWAITING_USER_ACTION);
           AlertIOS.alert(syncOptions.updateTitle, message, dialogButtons);
         } else {
           doDownloadAndInstall();

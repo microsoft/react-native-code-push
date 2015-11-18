@@ -39,7 +39,7 @@ var DownloadAndInstallUpdateTest = React.createClass({
   runTest() {
     var update = require("./TestPackage");
     NativeBridge.downloadUpdate(update).done((downloadedPackage) => {
-      NativeBridge.installUpdate(downloadedPackage, /*rollbackTimeout*/ 1000, /*restartImmediately*/ true);
+      NativeBridge.installUpdate(downloadedPackage, /*rollbackTimeout*/ 1000, CodePushSdk.InstallMode.IMMEDIATE);
     });
   },
 
