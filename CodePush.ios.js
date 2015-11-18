@@ -251,11 +251,11 @@ var CodePush = {
     UPDATE_INSTALLED: 2 // The app had an optional/mandatory update that was successfully downloaded and is about to be installed.
   },
   SyncStatus: {
-    CHECKING_FOR_UPDATE: 1,
-    AWAITING_USER_ACTION: 2,
-    DOWNLOADING_PACKAGE: 3,
-    INSTALLING_UPDATE: 4,
-    IDLE: 5
+    CHECKING_FOR_UPDATE: 0,
+    AWAITING_USER_ACTION: 1,
+    DOWNLOADING_PACKAGE: 2,
+    INSTALLING_UPDATE: 3,
+    IDLE: 4
   },
   DEFAULT_UPDATE_DIALOG: {
     appendReleaseDescription: false,
