@@ -117,6 +117,11 @@ function checkForUpdate() {
           });
 }
 
+/* Logs messages to console with the [CodePush] prefix */
+function log(message) {
+  console.log(`[CodePush] ${message}`)
+}
+
 /**
  * The sync method provides a simple, one-line experience for
  * incorporating the check, download and application of an update.
@@ -142,19 +147,19 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
     : function(syncStatus) {
         switch(syncStatus) {
           case CodePush.SyncStatus.CHECKING_FOR_UPDATE:
-            console.log("[CodePush] Checking for update.");
+            log("Checking for update.");
             break;
           case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
-            console.log("[CodePush] Downloading package.");
+            log("Downloading package.");
             break;
           case CodePush.SyncStatus.AWAITING_USER_ACTION:
-            console.log("[CodePush] Awaiting user action.");
+            log("Awaiting user action.");
             break;
           case CodePush.SyncStatus.INSTALLING_UPDATE:
-            console.log("[CodePush] Installing update.");
+            log("Installing update.");
             break;
           case CodePush.SyncStatus.IDLE:
-            console.log("[CodePush] Sync is idle.");
+            log("Sync is idle.");
             break;
         }
       };
@@ -162,7 +167,7 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
   downloadProgressCallback = typeof downloadProgressCallback == "function" 
     ? downloadProgressCallback 
     : function(downloadProgress) {
-        console.log(`[CodePush] Expecting ${downloadProgress.totalBytes} bytes, received ${downloadProgress.receivedBytes} bytes.`);
+        log(`Expecting ${downloadProgress.totalBytes} bytes, received ${downloadProgress.receivedBytes} bytes.`);
       };
   
   return new Promise((resolve, reject) => {
