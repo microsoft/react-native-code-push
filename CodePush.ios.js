@@ -196,11 +196,10 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
           remotePackage.download(downloadProgressCallback)
             .then((localPackage) => {
               syncStatusChangeCallback(CodePush.SyncStatus.INSTALLING_UPDATE);
-              return localPackage.install(syncOptions.rollbackTimeout, syncOptions.installMode)
-            })
-            .then(() => {
-              syncStatusChangeCallback(CodePush.SyncStatus.UPDATE_INSTALLED);
-              resolve(CodePush.SyncStatus.UPDATE_INSTALLED)
+              return localPackage.install(syncOptions.rollbackTimeout, syncOptions.installMode, () => {
+                syncStatusChangeCallback(CodePush.SyncStatus.UPDATE_INSTALLED);
+                resolve(CodePush.SyncStatus.UPDATE_INSTALLED);
+              });
             })
             .catch(reject)
             .done();

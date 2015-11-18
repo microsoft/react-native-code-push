@@ -27,7 +27,7 @@
 
 - (void)setUp
 {
-  app = @"CodePushDemoAppTests/InstallUpdateTests/InstallUpdateTestApp.ios";
+  app = @"CodePushDemoAppTests/InstallUpdateTests/DownloadAndInstallUpdateTest";
 #if __LP64__
   RCTAssert(false, @"Tests should be run on 32-bit device simulators (e.g. iPhone 5)");
 #endif
@@ -68,9 +68,12 @@
                                             moduleProvider:nil
                                              launchOptions:nil];
   RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge
-                                                   moduleName:@"DownloadAndInstallUpdateTest"
+                                                   moduleName:@"CodePushDemoApp"
                                                    initialProperties:nil];
-
+  
+  UIViewController *rootViewController = [UIApplication sharedApplication].delegate.window.rootViewController;
+  rootViewController.view = rootView;
+  
   NSDate *date = [NSDate dateWithTimeIntervalSinceNow:TIMEOUT_SECONDS];
   BOOL foundElement = NO;
   
@@ -98,8 +101,9 @@
     }];
   }
   
-  XCTAssertNil(redboxError, @"RedBox error: %@", redboxError);
+  NSLog(foundElement ? @"Yes" : @"No");
   XCTAssertTrue(foundElement, @"Cound't find element with text '%@' in %d seconds", TEXT_TO_LOOK_FOR, TIMEOUT_SECONDS);
+  XCTAssertNil(redboxError, @"RedBox error: %@", redboxError);
   
 }
 

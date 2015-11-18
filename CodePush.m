@@ -239,17 +239,20 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
         if (error) {
             reject(error);
         } else {
-            if (installMode == CodePushInstallModeImmediate) {
-                [self initializeUpdateWithRollbackTimeout:rollbackTimeout needsRestart:YES];
-            } else {
+            if (installMode != CodePushInstallModeImmediate) {
                 _resumablePendingUpdateAvailable = (installMode == CodePushInstallModeOnNextResume);
                 [self savePendingUpdate:updatePackage[@"packageHash"]
                         rollbackTimeout:rollbackTimeout];
-                // Signal to JS that the update has been applied.
-                resolve(nil);
             }
+            // Signal to JS that the update has been applied.
+            resolve(nil);
         }
     });
+}
+
+// Only to be used in the case of installing updates with InstallMode.IMMEDIATE
+RCT_EXPORT_METHOD(restartApp:(int)rollbackTimeout){
+    [self initializeUpdateWithRollbackTimeout:rollbackTimeout needsRestart:YES];
 }
 
 RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage

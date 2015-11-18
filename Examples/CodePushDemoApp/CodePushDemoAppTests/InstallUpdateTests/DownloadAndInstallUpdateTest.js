@@ -5,6 +5,7 @@ var CodePushSdk = require('react-native-code-push');
 var NativeBridge = require('react-native').NativeModules.CodePush;
 
 var {
+  AppRegistry,
   Text,
   View,
 } = React;
@@ -39,7 +40,10 @@ var DownloadAndInstallUpdateTest = React.createClass({
   runTest() {
     var update = require("./TestPackage");
     NativeBridge.downloadUpdate(update).done((downloadedPackage) => {
-      NativeBridge.installUpdate(downloadedPackage, /*rollbackTimeout*/ 1000, CodePushSdk.InstallMode.IMMEDIATE);
+      NativeBridge.installUpdate(downloadedPackage, /*rollbackTimeout*/ 1000, CodePushSdk.InstallMode.IMMEDIATE)
+        .then(() => {
+          NativeBridge.restartApp(/*rollbackTimeout*/ 1000);
+        });
     });
   },
 
@@ -56,5 +60,6 @@ var DownloadAndInstallUpdateTest = React.createClass({
 });
 
 DownloadAndInstallUpdateTest.displayName = 'DownloadAndInstallUpdateTest';
+AppRegistry.registerComponent('CodePushDemoApp', () => DownloadAndInstallUpdateTest);
 
 module.exports = DownloadAndInstallUpdateTest;
