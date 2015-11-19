@@ -210,8 +210,7 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
         }
         else if (syncOptions.updateDialog) {
           // updateDialog supports any truthy value (e.g. true, "goo", 12),
-          // but when we merge it's properties with the default dialog's
-          // properties, it needs to be an object
+          // but we should treat a non-object value as just the default dialog
           if (typeof syncOptions.updateDialog !== "object") {
             syncOptions.updateDialog = CodePush.DEFAULT_UPDATE_DIALOG;
           } else {
