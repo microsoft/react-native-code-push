@@ -200,7 +200,7 @@ The method accepts an options object that allows you to customize numerous aspec
     * __optionalIgnoreButtonLabel__ (String) - The text to use for the button the end-user can press in order to ignore an optional update that is available. Defaults to `"Ignore"`.
     * __optionalInstallButtonLabel__ (String) - The text to use for the button the end-user can press in order to install an optional update. Defaults to `"Install"`.
     * __optionalUpdateMessage__ (String) - The text used as the body of an update notification, when the update is optional. Defaults to `"An update is available. Would you like to install it?"`.
-    * __updateTitle__ (String) - The text used as the header of an update notification that is displayed to the end-user. Defaults to `"Update available"`.
+    * __title__ (String) - The text used as the header of an update notification that is displayed to the end-user. Defaults to `"Update available"`.
 
 In addition, the method also recieves two function arguments which serve as event handlers which are called at various points in the sync process:
 

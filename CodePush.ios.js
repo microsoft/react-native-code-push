@@ -1,6 +1,5 @@
 'use strict';
 
-var extend = require("extend");
 var NativeCodePush = require("react-native").NativeModules.CodePush;
 var requestFetchAdapter = require("./request-fetch-adapter.js");
 var Sdk = require("code-push/script/acquisition-sdk").AcquisitionManager;
@@ -103,7 +102,7 @@ function checkForUpdate() {
                   return resolve(null);
                 }
 
-                update = extend(update, packageMixins.remote);
+                update = Object.assign(update, packageMixins.remote);
                 
                 NativeCodePush.isFailedUpdate(update.packageHash)
                   .then((isFailedHash) => {
@@ -210,7 +209,14 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
           resolve(CodePush.SyncStatus.UP_TO_DATE);
         }
         else if (syncOptions.updateDialog) {
-          syncOptions.updateDialog = Object.assign(CodePush.DEFAULT_UPDATE_DIALOG, syncOptions.updateDialog);
+          // updateDialog supports any truthy value (e.g. true, "goo", 12),
+          // but when we merge it's properties with the default dialog's
+          // properties, it needs to be an object
+          if (typeof syncOptions.updateDialog !== "object") {
+            syncOptions.updateDialog = CodePush.DEFAULT_UPDATE_DIALOG;
+          } else {
+            syncOptions.updateDialog = Object.assign(CodePush.DEFAULT_UPDATE_DIALOG, syncOptions.updateDialog);
+          }
           
           var message = null;
           var dialogButtons = [
@@ -233,7 +239,10 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
             // to allow the end-user to ignore it       
             dialogButtons.push({
               text: syncOptions.updateDialog.optionalIgnoreButtonLabel,
-              onPress: () => resolve(CodePush.SyncStatus.UPDATE_IGNORED)
+              onPress: () => {
+                syncStatusChangeCallback(CodePush.SyncStatus.UPDATE_IGNORED);
+                resolve(CodePush.SyncStatus.UPDATE_IGNORED);
+              }
             });
           }
           
@@ -244,7 +253,7 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
           }
           
           syncStatusChangeCallback(CodePush.SyncStatus.AWAITING_USER_ACTION);
-          AlertIOS.alert(syncOptions.updateTitle, message, dialogButtons);
+          AlertIOS.alert(syncOptions.updateDialog.title, message, dialogButtons);
         } else {
           doDownloadAndInstall();
         }
@@ -288,7 +297,7 @@ var CodePush = {
     optionalIgnoreButtonLabel: "Ignore",
     optionalInstallButtonLabel: "Install",
     optionalUpdateMessage: "An update is available. Would you like to install it?",
-    updateTitle: "Update available",
+    title: "Update available"
   }
 };
 
