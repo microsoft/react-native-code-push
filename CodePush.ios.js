@@ -214,7 +214,7 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
           if (typeof syncOptions.updateDialog !== "object") {
             syncOptions.updateDialog = CodePush.DEFAULT_UPDATE_DIALOG;
           } else {
-            syncOptions.updateDialog = Object.assign(CodePush.DEFAULT_UPDATE_DIALOG, syncOptions.updateDialog);
+            syncOptions.updateDialog = Object.assign({}, CodePush.DEFAULT_UPDATE_DIALOG, syncOptions.updateDialog);
           }
           
           var message = null;
