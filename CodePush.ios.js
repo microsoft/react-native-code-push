@@ -179,7 +179,7 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
             }
             break;
           case CodePush.SyncStatus.UNKNOWN_ERROR:
-            log("An unknown error occurred.);
+            log("An unknown error occurred.");
             break;
         }
       };
