@@ -27,8 +27,7 @@ static NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
 
 + (NSURL *)bundleURL
 {
-    return [self bundleURLForResourceName:@"main"
-                            withExtension:@"jsbundle"];
+    return [self bundleURLForResourceName:@"main"];
 }
 
 + (NSURL *)bundleURLForResourceName:(NSString *)resourceName
