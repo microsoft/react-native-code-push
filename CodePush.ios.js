@@ -16,6 +16,51 @@ function setUpTestDependencies(providedTestSdk, providedTestConfig, testNativeBr
 var testConfig;
 var testSdk;
 
+function checkForUpdate() {
+  var config;
+  var sdk;
+  
+  return getConfiguration()
+          .then((configResult) => {
+            config = configResult;
+            return getSdk();
+          })
+          .then((sdkResult) => {
+            sdk = sdkResult;
+            return getCurrentPackage();
+          })
+          .then((localPackage) => {
+            var queryPackage = { appVersion: config.appVersion };
+            if (localPackage && localPackage.appVersion === config.appVersion) {
+              queryPackage = localPackage;
+            }
+
+            return new Promise((resolve, reject) => {
+              sdk.queryUpdateWithCurrentPackage(queryPackage, (err, update) => {
+                if (err) {
+                  return reject(err);
+                }
+                
+                // Ignore updates that require a newer app version,
+                // since the end-user couldn't reliably install it
+                if (!update || update.updateAppVersion) {
+                  return resolve(null);
+                }
+
+                update = Object.assign(update, packageMixins.remote);
+                
+                NativeCodePush.isFailedUpdate(update.packageHash)
+                  .then((isFailedHash) => {
+                    update.failedInstall = isFailedHash;
+                    resolve(update);
+                  })
+                  .catch(reject)
+                  .done();
+              })
+            });
+          });
+}
+
 var getConfiguration = (() => {
   var config;
   return function getConfiguration() {
@@ -71,54 +116,13 @@ function getCurrentPackage() {
   });
 }
 
-function checkForUpdate() {
-  var config;
-  var sdk;
-  
-  return getConfiguration()
-          .then((configResult) => {
-            config = configResult;
-            return getSdk();
-          })
-          .then((sdkResult) => {
-            sdk = sdkResult;
-            return getCurrentPackage();
-          })
-          .then((localPackage) => {
-            var queryPackage = { appVersion: config.appVersion };
-            if (localPackage && localPackage.appVersion === config.appVersion) {
-              queryPackage = localPackage;
-            }
-
-            return new Promise((resolve, reject) => {
-              sdk.queryUpdateWithCurrentPackage(queryPackage, (err, update) => {
-                if (err) {
-                  return reject(err);
-                }
-                
-                // Ignore updates that require a newer app version,
-                // since the end-user couldn't reliably install it
-                if (!update || update.updateAppVersion) {
-                  return resolve(null);
-                }
-
-                update = Object.assign(update, packageMixins.remote);
-                
-                NativeCodePush.isFailedUpdate(update.packageHash)
-                  .then((isFailedHash) => {
-                    update.failedInstall = isFailedHash;
-                    resolve(update);
-                  })
-                  .catch(reject)
-                  .done();
-              })
-            });
-          });
-}
-
 /* Logs messages to console with the [CodePush] prefix */
 function log(message) {
   console.log(`[CodePush] ${message}`)
+}
+
+function restartApp(rollbackTimeout = 0) {
+  NativeCodePush.restartApp(rollbackTimeout);
 }
 
 /**
@@ -214,7 +218,7 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
           if (typeof syncOptions.updateDialog !== "object") {
             syncOptions.updateDialog = CodePush.DEFAULT_UPDATE_DIALOG;
           } else {
-            syncOptions.updateDialog = Object.assign({}, CodePush.DEFAULT_UPDATE_DIALOG, syncOptions.updateDialog);
+            syncOptions.updateDialog = Object.assign(CodePush.DEFAULT_UPDATE_DIALOG, syncOptions.updateDialog);
           }
           
           var message = null;
@@ -258,6 +262,7 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
         }
       })
       .catch((error) => {
+        console.log(error);
         syncStatusChangeCallback(CodePush.SyncStatus.UNKNOWN_ERROR);
         reject(error);
       })
@@ -271,6 +276,8 @@ var CodePush = {
   getCurrentPackage: getCurrentPackage,
   log: log,
   notifyApplicationReady: NativeCodePush.notifyApplicationReady,
+  restartApp: restartApp,
+  setDeploymentKey: NativeCodePush.setDeploymentKey,
   setUpTestDependencies: setUpTestDependencies,
   sync: sync,
   InstallMode: {

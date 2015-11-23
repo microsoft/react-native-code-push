@@ -11,32 +11,38 @@
 
 RCT_EXPORT_MODULE()
 
-BOOL didUpdate = NO;
-NSTimer *_timer;
-BOOL usingTestFolder = NO;
+static BOOL didUpdate = NO;
+static NSTimer *_timer;
+static BOOL usingTestFolder = NO;
 
-NSString * const FailedUpdatesKey = @"CODE_PUSH_FAILED_UPDATES";
-NSString * const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
+static NSString * const FailedUpdatesKey = @"CODE_PUSH_FAILED_UPDATES";
+static NSString * const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
 
 // These keys are already "namespaced" by the PendingUpdateKey, so
 // their values don't need to be obfuscated to prevent collision with app data
-NSString * const PendingUpdateHashKey = @"hash";
-NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
+static NSString * const PendingUpdateHashKey = @"hash";
+static NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
 
 @synthesize bridge = _bridge;
 
-// Public Obj-C API
-+ (NSString *)getDocumentsDirectory
++ (NSURL *)bundleURL
 {
-    NSString *documentsDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-    return documentsDirectory;
+    return [self bundleURLForResourceName:@"main"
+                            withExtension:@"jsbundle"];
 }
 
-+ (NSURL *)getBundleUrl
++ (NSURL *)bundleURLForResourceName:(NSString *)resourceName
+{
+    return [self bundleURLForResourceName:resourceName
+                            withExtension:@"jsbundle"];
+}
+
++ (NSURL *)bundleURLForResourceName:(NSString *)resourceName
+                      withExtension:(NSString *)resourceExtension
 {
     NSError *error;
     NSString *packageFile = [CodePushPackage getCurrentPackageBundlePath:&error];
-    NSURL *binaryJsBundleUrl = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
+    NSURL *binaryJsBundleUrl = [[NSBundle mainBundle] URLForResource:resourceName withExtension:resourceExtension];
     
     if (error || !packageFile)
     {
@@ -54,6 +60,13 @@ NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
     } else {
         return binaryJsBundleUrl;
     }
+}
+
+// Public Obj-C API
++ (NSString *)getDocumentsDirectory
+{
+    NSString *documentsDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    return documentsDirectory;
 }
 
 // Internal API methods
@@ -104,10 +117,10 @@ NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
 {
     // Export the values of the CodePushInstallMode enum
     // so that the script-side can easily stay in sync
-    return @{ @"codePushInstallModeOnNextRestart": @(CodePushInstallModeOnNextRestart),
+    return @{ @"codePushInstallModeOnNextRestart":@(CodePushInstallModeOnNextRestart),
               @"codePushInstallModeImmediate": @(CodePushInstallModeImmediate),
               @"codePushInstallModeOnNextResume": @(CodePushInstallModeOnNextResume)
-              };
+            };
 };
 
 - (void)dealloc
@@ -117,7 +130,7 @@ NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-- (CodePush *)init
+- (instancetype)init
 {
     self = [super init];
     
@@ -163,9 +176,14 @@ NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
 
 - (void)loadBundle
 {
-    // Reset the runtime's bundle to be
-    // the latest URL, and then force a refresh
-    _bridge.bundleURL = [CodePush getBundleUrl];
+    // If the current bundle URL is using http(s), then assume the dev
+    // is debugging and therefore, shouldn't be redirected to a local
+    // file (since Chrome wouldn't support it). Otherwise, update
+    // the current bundle URL to point at the latest update
+    if (![_bridge.bundleURL.scheme hasPrefix:@"http"]) {
+        _bridge.bundleURL = [CodePush bundleURL];
+    }
+    
     [_bridge reload];
 }
 
@@ -225,36 +243,6 @@ NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
 }
 
 // JavaScript-exported module methods
-RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
-                  rollbackTimeout:(int)rollbackTimeout
-                  installMode:(CodePushInstallMode)installMode
-                  resolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
-{
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        NSError *error;
-        [CodePushPackage installPackage:updatePackage
-                                error:&error];
-        
-        if (error) {
-            reject(error);
-        } else {
-            if (installMode != CodePushInstallModeImmediate) {
-                _resumablePendingUpdateAvailable = (installMode == CodePushInstallModeOnNextResume);
-                [self savePendingUpdate:updatePackage[@"packageHash"]
-                        rollbackTimeout:rollbackTimeout];
-            }
-            // Signal to JS that the update has been applied.
-            resolve(nil);
-        }
-    });
-}
-
-// Only to be used in the case of installing updates with InstallMode.IMMEDIATE
-RCT_EXPORT_METHOD(restartApp:(int)rollbackTimeout){
-    [self initializeUpdateWithRollbackTimeout:rollbackTimeout needsRestart:YES];
-}
-
 RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
@@ -288,7 +276,7 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
 RCT_EXPORT_METHOD(getConfiguration:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
-    resolve([CodePushConfig getConfiguration]);
+    resolve([[CodePushConfig current] configuration]);
 }
 
 RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
@@ -305,6 +293,31 @@ RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
     });
 }
 
+RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
+                  rollbackTimeout:(int)rollbackTimeout
+                  installMode:(CodePushInstallMode)installMode
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        NSError *error;
+        [CodePushPackage installPackage:updatePackage
+                                  error:&error];
+        
+        if (error) {
+            reject(error);
+        } else {
+            if (installMode != CodePushInstallModeImmediate) {
+                _resumablePendingUpdateAvailable = (installMode == CodePushInstallModeOnNextResume);
+                [self savePendingUpdate:updatePackage[@"packageHash"]
+                        rollbackTimeout:rollbackTimeout];
+            }
+            // Signal to JS that the update has been applied.
+            resolve(nil);
+        }
+    });
+}
+
 RCT_EXPORT_METHOD(isFailedUpdate:(NSString *)packageHash
                   resolve:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
@@ -314,8 +327,8 @@ RCT_EXPORT_METHOD(isFailedUpdate:(NSString *)packageHash
 }
 
 RCT_EXPORT_METHOD(isFirstRun:(NSString *)packageHash
-                  resolve:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
+                     resolve:(RCTPromiseResolveBlock)resolve
+                    rejecter:(RCTPromiseRejectBlock)reject)
 {
     NSError *error;
     BOOL isFirstRun = didUpdate
@@ -327,10 +340,22 @@ RCT_EXPORT_METHOD(isFirstRun:(NSString *)packageHash
 }
 
 RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
+                                rejecter:(RCTPromiseRejectBlock)reject)
 {
     [self cancelRollbackTimer];
     resolve([NSNull null]);
+}
+
+RCT_EXPORT_METHOD(restartApp:(int)rollbackTimeout){
+    [self initializeUpdateWithRollbackTimeout:rollbackTimeout needsRestart:YES];
+}
+
+RCT_EXPORT_METHOD(setDeploymentKey:(NSString *)deploymentKey
+                           resolve:(RCTPromiseResolveBlock)resolve
+                          rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [[CodePushConfig current] setDeploymentKey:deploymentKey];
+    resolve(nil);
 }
 
 RCT_EXPORT_METHOD(setUsingTestFolder:(BOOL)shouldUseTestFolder)
