@@ -1,0 +1,77 @@
+package com.microsoft.reactnativecodepush;
+
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.support.v4.app.FragmentActivity;
+
+import com.facebook.react.bridge.Callback;
+import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReactContextBaseJavaModule;
+import com.facebook.react.bridge.ReactMethod;
+
+public class CodePushDialog extends ReactContextBaseJavaModule{
+
+    Activity mainActivity;
+
+    public CodePushDialog(ReactApplicationContext reactContext, Activity mainActivity) {
+        super(reactContext);
+        this.mainActivity = mainActivity;
+    }
+
+    @ReactMethod
+    public void showDialog(String title, String message, String button1Text, String button2Text,
+                      final Callback successCallback, Callback errorCallback) {
+
+        FragmentActivity fragmentActivity = null;
+        try {
+            fragmentActivity = (FragmentActivity) mainActivity;
+        } catch (ClassCastException e) {
+            errorCallback.invoke("Unable to show dialog, main activity is not a FragmentActivity");
+            return;
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(fragmentActivity);
+
+        DialogInterface.OnClickListener clickListener = new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+                switch (which) {
+                    case DialogInterface.BUTTON_POSITIVE:
+                        successCallback.invoke(0);
+                        break;
+                    case DialogInterface.BUTTON_NEGATIVE:
+                        successCallback.invoke(1);
+                        break;
+                    default:
+                        throw new CodePushUnknownException("Unknown button ID pressed.");
+                }
+            }
+        };
+
+        if (title != null) {
+            builder.setTitle(title);
+        }
+
+        if (message != null) {
+            builder.setMessage(message);
+        }
+
+        if (button1Text != null) {
+            builder.setPositiveButton(button1Text, clickListener);
+        }
+
+        if (button2Text != null) {
+            builder.setNegativeButton(button2Text, clickListener);
+        }
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    @Override
+    public String getName() {
+        return "CodePushDialog";
+    }
+}

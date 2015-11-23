@@ -1,11 +1,8 @@
 'use strict';
 
-var NativeCodePush = require("react-native").NativeModules.CodePush;
 var requestFetchAdapter = require("./request-fetch-adapter.js");
 var Sdk = require("code-push/script/acquisition-sdk").AcquisitionManager;
-var packageMixins = require("./package-mixins")(NativeCodePush);
-
-var { AlertIOS } = require("react-native");
+var { NativeCodePush, PackageMixins, Alert } = require("./CodePushNativePlatformAdapter");
 
 // This function is only used for tests. Replaces the default SDK, configuration and native bridge
 function setUpTestDependencies(providedTestSdk, providedTestConfig, testNativeBridge){
@@ -102,7 +99,7 @@ function checkForUpdate() {
                   return resolve(null);
                 }
 
-                update = Object.assign(update, packageMixins.remote);
+                update = Object.assign(update, PackageMixins.remote);
                 
                 NativeCodePush.isFailedUpdate(update.packageHash)
                   .then((isFailedHash) => {
@@ -252,7 +249,7 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
           }
           
           syncStatusChangeCallback(CodePush.SyncStatus.AWAITING_USER_ACTION);
-          AlertIOS.alert(syncOptions.updateDialog.title, message, dialogButtons);
+          Alert.alert(syncOptions.updateDialog.title, message, dialogButtons);
         } else {
           doDownloadAndInstall();
         }
