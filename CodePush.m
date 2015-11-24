@@ -73,7 +73,7 @@ static NSString *const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
 /*
  * This method cancels the currently running rollback
  * timer, which has the effect of stopping an automatic
- * rollback from occuring. 
+ * rollback from occurring. 
  *
  * Note: This method is safe to call from any thread.
  */
@@ -85,9 +85,9 @@ static NSString *const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
 }
 
 /* 
- * This method checks to see whether a "pending udpate" has been applied
+ * This method checks to see whether a "pending update" has been applied
  * (e.g. install was called with a non-immediate mode), but the app hasn't
- * yet been restarted (either naturally or synthentically). If there is one,
+ * yet been restarted (either naturally or programmatically). If there is one,
  * it will restart the app (if specified), and start the rollback timer.
  *
  * Note: This method is safe to call from any thread.
@@ -179,8 +179,8 @@ static NSString *const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
 }
 
 /*
- * This method performs the actual initialization work for a update
- * to ensure that the neccessary state is setup, including:
+ * This method performs the actual initialization work for an update
+ * to ensure that the necessary state is setup, including:
  * --------------------------------------------------------
  * 1. Updating the current bundle URL to point at the latest update on disk
  * 2. Optionally restarting the app to load the new bundle

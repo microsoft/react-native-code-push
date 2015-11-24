@@ -3,7 +3,7 @@
 @interface CodePush : NSObject <RCTBridgeModule>
 
 /*
- * This method is used to retreive the URL for the most recent
+ * This method is used to retrieve the URL for the most recent
  * version of the JavaScript bundle. This could be either the
  * bundle that was packaged with the app binary, or the bundle
  * that was downloaded as part of a CodePush update. The value returned
@@ -11,7 +11,7 @@
  *
  * This method assumes that your JS bundle is named "main.jsbundle"
  * and therefore, if it isn't, you should use either the bundleURLForResource:
- * or bundleURLForResource:withExtension: methods to override thsat behavior.
+ * or bundleURLForResource:withExtension: methods to override that behavior.
 */
 + (NSURL *)bundleURL;
 
