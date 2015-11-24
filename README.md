@@ -56,7 +56,7 @@ To integrate CodePush into your Android project, do the following steps:
 
 1. In your `android/settings.gradle` file, make the following additions:
 ```
-include ':app'**, ':react-native-code-push'**
+include ':app', ':react-native-code-push'
 **project(':react-native-code-push').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-code-push/android')**
 ```
 
@@ -134,6 +134,7 @@ public class MainActivity extends FragmentActivity implements DefaultHardwareBac
                 // If there is no updated bundle from CodePush, the location will be the assets
                 // folder with the name of the bundle passed in, e.g. index.android.bundle
                 .setJSBundleFile(codePush.getBundleUrl("index.android.bundle"))
+                
                 // Expose the CodePush module to JavaScript
                 .addPackage(codePush.getReactPackage())
     }
