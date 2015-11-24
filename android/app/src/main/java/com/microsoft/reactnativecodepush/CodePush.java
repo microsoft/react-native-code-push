@@ -276,11 +276,6 @@ public class CodePush {
         }
 
         @ReactMethod
-        public void restartApp(int rollbackTimeout) {
-            initializeUpdateWithRollbackTimeout(rollbackTimeout, /*needsRestart*/ true);
-        }
-
-        @ReactMethod
         public void downloadUpdate(final ReadableMap updatePackage, final Callback resolve, final Callback reject) {
             try {
                 codePushPackage.downloadPackage(applicationContext, updatePackage, new DownloadProgressCallback() {
@@ -346,9 +341,13 @@ public class CodePush {
         }
 
         @ReactMethod
-        public void setDeploymentKey(String deploymentKey, Callback resolve, Callback reject) {
-            codePushConfig.setDeploymentKey(deploymentKey);
-            resolve.invoke("");
+        public void restartImmediateUpdate(int rollbackTimeout) {
+            initializeUpdateWithRollbackTimeout(rollbackTimeout, /*needsRestart*/ true);
+        }
+
+        @ReactMethod
+        public void restartPendingUpdate() {
+            checkForPendingUpdate(/*needsRestart*/ true);
         }
 
         @Override
