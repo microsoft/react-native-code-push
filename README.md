@@ -128,7 +128,7 @@ After installing the plugin and sync-ing your Android Studio project with Gradle
             mReactInstanceManager = ReactInstanceManager.builder()
                     .setApplication(getApplication())
                     ...
-                    .setBundleAssetName("index.android.bundle") // <-----  4. Delete this line
+                    // 4. DELETE THIS LINE --> .setBundleAssetName("index.android.bundle")
                     
                     // 5. Let CodePush determine which location to load the most updated bundle from.
                     // If there is no updated bundle from CodePush, the location will be the assets
