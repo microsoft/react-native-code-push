@@ -103,15 +103,11 @@ static NSString *const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
             NSString *pendingHash = pendingUpdate[PendingUpdateHashKey];
             NSString *currentHash = [CodePushPackage getCurrentPackageHash:&error];
             
-            // If the current hash is equivalent to the pending hash, then the app
-            // restart "picked up" the new update, but we need to kick off the
-            // rollback timer and ensure that the necessary state is setup.
-            if ([pendingHash isEqualToString:currentHash]) {
-                int rollbackTimeout = [pendingUpdate[PendingUpdateRollbackTimeoutKey] intValue];
-                [self initializeUpdateWithRollbackTimeout:rollbackTimeout needsRestart:needsRestart];
-            } else {
-                // NOTE: We shouldn't ever reach here
-            }
+            NSAssert([pendingHash isEqualToString:currentHash], @"There is a pending update but it's hash doesn't match that of the current package.");
+            
+            // Kick off the rollback timer and ensure that the necessary state is setup for the pending update.
+            int rollbackTimeout = [pendingUpdate[PendingUpdateRollbackTimeoutKey] intValue];
+            [self initializeUpdateWithRollbackTimeout:rollbackTimeout needsRestart:needsRestart];
                             
             // Clear the pending update and sync
             [preferences removeObjectForKey:PendingUpdateKey];
