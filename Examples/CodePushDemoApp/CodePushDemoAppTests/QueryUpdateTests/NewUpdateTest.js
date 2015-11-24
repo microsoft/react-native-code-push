@@ -3,7 +3,8 @@
 var RCTTestModule = require('NativeModules').TestModule;
 var React = require('react-native');
 var CodePushSdk = require('react-native-code-push');
-var NativeBridge = require('react-native').NativeModules.CodePush;
+var { NativeCodePush } = require("react-native-code-push/CodePushNativePlatformAdapter");
+var RCTTestModule = require('NativeModules').TestModule || {};
 
 var {
   Text,
@@ -53,7 +54,7 @@ var NewUpdateTest = React.createClass({
       }
     };
     
-    var localPackage = JSON.stringify({
+    var localPackage = {
       downloadURL: "http://www.windowsazure.com/blobs/awperoiuqpweru",
       description: "Angry flappy birds",
       appVersion: "1.5.0",
@@ -63,11 +64,11 @@ var NewUpdateTest = React.createClass({
       updateAppVersion: false,
       packageHash: "hash123",
       packageSize: 1024
-    });
+    };
     
     var mockConfiguration = { appVersion : "1.5.0" };
-    NativeBridge.setUsingTestFolder(true);
-    CodePushSdk.setUpTestDependencies(mockAcquisitionSdk, mockConfiguration, NativeBridge);
+    NativeCodePush.setUsingTestFolder(true);
+    CodePushSdk.setUpTestDependencies(mockAcquisitionSdk, mockConfiguration, NativeCodePush);
     
     CodePushSdk.getCurrentPackage = function () {
       return Promise.resolve(localPackage);
@@ -79,9 +80,9 @@ var NewUpdateTest = React.createClass({
     CodePushSdk.checkForUpdate().then(
       (update) => {
         if (update) {
-          throw new Error('SDK should return a package when there is a new update');
-        } else {
           this.setState({done: true}, RCTTestModule.markTestCompleted);
+        } else {
+          throw new Error('SDK should return a package when there is a new update');
         }
       },
       (err) => {

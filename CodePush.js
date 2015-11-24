@@ -79,7 +79,8 @@ function checkForUpdate() {
           })
           .then((sdkResult) => {
             sdk = sdkResult;
-            return getCurrentPackage();
+            // Allow dynamic overwrite of function. This is only to be used for tests.
+            return module.exports.getCurrentPackage();
           })
           .then((localPackage) => {
             var queryPackage = { appVersion: config.appVersion };

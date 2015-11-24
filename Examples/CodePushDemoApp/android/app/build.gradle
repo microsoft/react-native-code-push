@@ -15,6 +15,9 @@ android {
         }
     }
     buildTypes {
+        debug {
+            buildConfigField "String", "RUN_TEST", "\"\""
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'

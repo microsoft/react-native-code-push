@@ -2,7 +2,8 @@
 
 var React = require('react-native');
 var CodePushSdk = require('react-native-code-push');
-var NativeBridge = require('react-native').NativeModules.CodePush;
+var { NativeCodePush } = require("react-native-code-push/CodePushNativePlatformAdapter");
+var RCTTestModule = require('NativeModules').TestModule || {};
 
 var {
   AppRegistry,
@@ -33,16 +34,22 @@ var DownloadAndInstallUpdateTest = React.createClass({
   
   setUp(callWhenDone) {
     var mockConfiguration = { appVersion : "1.5.0" };
-    NativeBridge.setUsingTestFolder(true);
-    CodePushSdk.setUpTestDependencies(null, mockConfiguration, NativeBridge);
+    NativeCodePush.setUsingTestFolder(true);
+    CodePushSdk.setUpTestDependencies(null, mockConfiguration, NativeCodePush);
   },
   
   runTest() {
     var update = require("./TestPackage");
-    NativeBridge.downloadUpdate(update).done((downloadedPackage) => {
-      NativeBridge.installUpdate(downloadedPackage, /*rollbackTimeout*/ 1000, CodePushSdk.InstallMode.IMMEDIATE)
+    NativeCodePush.downloadUpdate(update).done((downloadedPackage) => {
+      NativeCodePush.installUpdate(downloadedPackage, /*rollbackTimeout*/ 1000, CodePushSdk.InstallMode.IMMEDIATE)
         .then(() => {
-          NativeBridge.restartApp(/*rollbackTimeout*/ 1000);
+          CodePushSdk.getCurrentPackage().then((localPackage) => {
+            if (localPackage.packageHash == update.packageHash) {
+              this.setState({done: true}, RCTTestModule.markTestCompleted);
+            } else {
+              throw new Error("Update was not installed");
+            }
+          });
         });
     });
   },

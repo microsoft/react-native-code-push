@@ -14,6 +14,7 @@ import com.microsoft.reactnativecodepush.CodePush;
 
 public class MainActivity extends FragmentActivity implements DefaultHardwareBackBtnHandler {
 
+    private final String TEST_FOLDER_PREFIX = "CodePushDemoAppTests/";
     private ReactInstanceManager mReactInstanceManager;
     private ReactRootView mReactRootView;
 
@@ -24,18 +25,41 @@ public class MainActivity extends FragmentActivity implements DefaultHardwareBac
         super.onCreate(savedInstanceState);
         mReactRootView = new ReactRootView(this);
 
-        codePush = new CodePush("d73bf5d8-4fbd-4e55-a837-accd328a21ba", this);
-        mReactInstanceManager = ReactInstanceManager.builder()
+        codePush = new CodePush("DEPLOYMENT_KEY_HERE", this);
+
+        ReactInstanceManager.Builder builder = ReactInstanceManager.builder()
                 .setApplication(getApplication())
-                .setJSBundleFile(codePush.getBundleUrl("index.android.bundle"))
-                .setJSMainModuleName("index.android")
-                .addPackage(new MainReactPackage())
+                .setJSBundleFile(codePush.getBundleUrl("index.android.bundle"));
+
+        String mainComponentName = null;
+
+        switch (BuildConfig.RUN_TEST) {
+            case "DOWNLOAD_PROGRESS":
+                builder = builder.setJSMainModuleName(TEST_FOLDER_PREFIX + "DownloadProgressTests/DownloadProgressTestApp");
+                mainComponentName = "DownloadProgressTestApp";
+                break;
+            case "INSTALL_UPDATE":
+                builder = builder.setJSMainModuleName(TEST_FOLDER_PREFIX + "InstallUpdateTests/InstallUpdateTestApp");
+                mainComponentName = "InstallUpdateTestApp";
+                break;
+            case "QUERY_UPDATE":
+                builder = builder.setJSMainModuleName(TEST_FOLDER_PREFIX + "QueryUpdateTests/QueryUpdateTestApp");
+                mainComponentName = "QueryUpdateTestApp";
+                break;
+            default:
+                // Run the standard demo app.
+                builder = builder.setJSMainModuleName("index.android");
+                mainComponentName = "CodePushDemoApp";
+                break;
+        }
+
+        mReactInstanceManager = builder.addPackage(new MainReactPackage())
                 .addPackage(codePush.getReactPackage())
                 .setUseDeveloperSupport(true)
                 .setInitialLifecycleState(LifecycleState.RESUMED)
                 .build();
 
-        mReactRootView.startReactApplication(mReactInstanceManager, "CodePushDemoApp", null);
+        mReactRootView.startReactApplication(mReactInstanceManager, mainComponentName, null);
 
         setContentView(mReactRootView);
     }
