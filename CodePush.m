@@ -116,10 +116,11 @@ static NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
 {
     // Export the values of the CodePushInstallMode enum
     // so that the script-side can easily stay in sync
-    return @{ @"codePushInstallModeOnNextRestart":@(CodePushInstallModeOnNextRestart),
+    return @{ 
+              @"codePushInstallModeOnNextRestart":@(CodePushInstallModeOnNextRestart),
               @"codePushInstallModeImmediate": @(CodePushInstallModeImmediate),
               @"codePushInstallModeOnNextResume": @(CodePushInstallModeOnNextResume)
-              };
+            };
 };
 
 - (void)dealloc
@@ -243,8 +244,8 @@ static NSString * const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
 
 // JavaScript-exported module methods
 RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
-                  resolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
+                        resolver:(RCTPromiseResolveBlock)resolve
+                        rejecter:(RCTPromiseRejectBlock)reject)
 {
     [CodePushPackage downloadPackage:updatePackage
                     progressCallback:^(long expectedContentLength, long receivedContentLength) {
@@ -273,13 +274,13 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
 }
 
 RCT_EXPORT_METHOD(getConfiguration:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
+                          rejecter:(RCTPromiseRejectBlock)reject)
 {
     resolve([[CodePushConfig current] configuration]);
 }
 
 RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
+                           rejecter:(RCTPromiseRejectBlock)reject)
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         NSError *error;
@@ -293,10 +294,10 @@ RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
 }
 
 RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
-                  rollbackTimeout:(int)rollbackTimeout
-                  installMode:(CodePushInstallMode)installMode
-                  resolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
+                rollbackTimeout:(int)rollbackTimeout
+                    installMode:(CodePushInstallMode)installMode
+                       resolver:(RCTPromiseResolveBlock)resolve
+                       rejecter:(RCTPromiseRejectBlock)reject)
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSError *error;
@@ -318,16 +319,16 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
 }
 
 RCT_EXPORT_METHOD(isFailedUpdate:(NSString *)packageHash
-                  resolve:(RCTPromiseResolveBlock)resolve
-                  reject:(RCTPromiseRejectBlock)reject)
+                         resolve:(RCTPromiseResolveBlock)resolve
+                          reject:(RCTPromiseRejectBlock)reject)
 {
     BOOL isFailedHash = [self isFailedHash:packageHash];
     resolve(@(isFailedHash));
 }
 
 RCT_EXPORT_METHOD(isFirstRun:(NSString *)packageHash
-                  resolve:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
+                     resolve:(RCTPromiseResolveBlock)resolve
+                    rejecter:(RCTPromiseRejectBlock)reject)
 {
     NSError *error;
     BOOL isFirstRun = didUpdate
@@ -339,7 +340,7 @@ RCT_EXPORT_METHOD(isFirstRun:(NSString *)packageHash
 }
 
 RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
+                                rejecter:(RCTPromiseRejectBlock)reject)
 {
     [self cancelRollbackTimer];
     resolve([NSNull null]);
@@ -355,14 +356,6 @@ RCT_EXPORT_METHOD(restartApp)
 RCT_EXPORT_METHOD(restartAppInternal:(int)rollbackTimeout)
 {
     [self initializeUpdateWithRollbackTimeout:rollbackTimeout needsRestart:YES];
-}
-
-RCT_EXPORT_METHOD(setDeploymentKey:(NSString *)deploymentKey
-                  resolve:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
-{
-    [[CodePushConfig current] setDeploymentKey:deploymentKey];
-    resolve(nil);
 }
 
 RCT_EXPORT_METHOD(setUsingTestFolder:(BOOL)shouldUseTestFolder)
