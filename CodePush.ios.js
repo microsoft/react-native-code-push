@@ -274,8 +274,6 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
   });     
 };
 
-codePush.installPendingUpdate();
-
 var CodePush = {
   checkForUpdate: checkForUpdate,
   getConfiguration: getConfiguration,
