@@ -125,6 +125,7 @@ When you require the `react-native-code-push` module, that object provides the f
 * [checkForUpdate](#codepushcheckforupdate): Queries the CodePush service for an update against the configured deployment. This method returns a promise which resolves to a `RemotePackage` that can be subsequently downloaded.
 * [getCurrentPackage](#codepushgetcurrentpackage): Gets information about the currently installed package (e.g. description, installation time)
 * [notifyApplicationReady](#codepushnotifyapplicationready): Notifies the CodePush runtime that an installed update is considered successful. This is an optional API, but is useful when you want to expicitly enable "rollback protection" in the event that an exception occurs in any code that you've deployed to production.
+* [restartPendingUpdate](#codepushrestartPendingUpdate): Conditionally restarts the app if a previously installed update is currently pending (e.g. it was installed using the `ON_NEXT_RESTART` or `ON_NEXT_RESUME` modes, and the user hasn't restarted or resumed the app yet).
 * [sync](#codepushsync): Allows checking for an update, downloading it and installing it, all with a single call. Unless you need custom UI and/or behavior, we recommend most developers to use this method when integrating CodePush into their apps
 
 #### codePush.checkForUpdate
@@ -172,6 +173,19 @@ codePush.notifyApplicationReady(): Promise<void>;
 Notifies the CodePush runtime that an update is considered successful, and therefore, a rollback isn't neccessary. Calling this function is required whenever the `rollbackTimeout` parameter is specified when calling either ```LocalPackage.install``` or `sync`. If you specify a `rollbackTimeout`, and don't call `notifyApplicationReady`, the CodePush runtime will assume that the installed update has failed and roll back to the previous version.
 
 If the `rollbackTimeout` parameter was not specified, the CodePush runtime will not enforce any automatic rollback behavior, and therefore, calling this function is not required and will result in a no-op.
+
+#### codePush.restartPendingUpdate		
+		
+```javascript		
+codePush.restartPendingUpdate(): void;		
+```		
+		
+Installs the pending update (if applicable) by immediately restarting the app, and optionally starting the rollback timer. This method is for advanced scenarios, and is only useful when the following conditions are true:		
+		
+1. Your app is specifying an install mode value of `ON_NEXT_RESTART` or `ON_NEXT_RESUME` when calling the `sync` or `LocalPackage.install` methods. This has the effect of not applying your update until the app has been restarted (by either the end-user or OS)	or resumed, and therefore, the update won't be immediately displayed to the end-user 	.
+2. You have an app-specific user event (e.g. the end-user navigated back to the app's home route) that allows you to apply the update in an unobtrusive way, and potentially gets the update in front of the end-user sooner then waiting until the next restart or resume.		
+		
+If you call this method, and there isn't a pending update, it will result in a no-op. Otherwise, the app will be restarted in order to display the update to the end-user.
 
 #### codePush.sync
 
