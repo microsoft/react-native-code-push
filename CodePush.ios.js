@@ -280,7 +280,6 @@ var CodePush = {
   getCurrentPackage: getCurrentPackage,
   log: log,
   notifyApplicationReady: NativeCodePush.notifyApplicationReady,
-  restartApp: NativeCodePush.restartApp,
   setUpTestDependencies: setUpTestDependencies,
   sync: sync,
   InstallMode: {
