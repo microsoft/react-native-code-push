@@ -402,7 +402,7 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
 }
 
 /*
- * This method isn't publically exposed via the "react-native-code-push"
+ * This method isn't publicly exposed via the "react-native-code-push"
  * module, and is only used internally to populate the RemotePackage.failedApply property.
  */
 RCT_EXPORT_METHOD(isFailedUpdate:(NSString *)packageHash
@@ -414,7 +414,7 @@ RCT_EXPORT_METHOD(isFailedUpdate:(NSString *)packageHash
 }
 
 /*
- * This method isn't publically exposed via the "react-native-code-push"
+ * This method isn't publicly exposed via the "react-native-code-push"
  * module, and is only used internally to populate the LocalPackage.isFirstRun property.
  */
 RCT_EXPORT_METHOD(isFirstRun:(NSString *)packageHash
@@ -441,7 +441,7 @@ RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
 }
 
 /*
- * This method isn't publically exposed via the "react-native-code-push"
+ * This method isn't publicly exposed via the "react-native-code-push"
  * module, and is only used internally to support immediately installed updates.
  */
 RCT_EXPORT_METHOD(restartImmediateUpdate:(int)rollbackTimeout)
