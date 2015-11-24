@@ -345,6 +345,12 @@ public class CodePush {
             usingTestFolder = shouldUseTestFolder;
         }
 
+        @ReactMethod
+        public void setDeploymentKey(String deploymentKey, Callback resolve, Callback reject) {
+            codePushConfig.setDeploymentKey(deploymentKey);
+            resolve.invoke("");
+        }
+
         @Override
         public Map<String, Object> getConstants() {
             final Map<String, Object> constants = new HashMap<>();

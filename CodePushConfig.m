@@ -1,85 +1,83 @@
 #import "CodePush.h"
 
-NSMutableDictionary *configuration;
+@implementation CodePushConfig {
+    NSMutableDictionary *_configDictionary;
+}
 
-@implementation CodePushConfig
+static CodePushConfig *_currentConfig;
+
+static NSString * const AppVersionConfigKey = @"appVersion";
+static NSString * const BuildVdersionConfigKey = @"buildVersion";
+static NSString * const DeploymentKeyConfigKey = @"deploymentKey";
+static NSString * const ServerURLConfigKey = @"serverUrl";
+
++ (instancetype)current
+{
+    return _currentConfig;
+}
 
 + (void)initialize
 {
+    _currentConfig = [[CodePushConfig alloc] init];
+}
+
+- (instancetype)init
+{
+    self = [super init];
     NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
     
     NSString *appVersion = [infoDictionary objectForKey:@"CFBundleShortVersionString"];
     NSString *buildVersion = [infoDictionary objectForKey:(NSString *)kCFBundleVersionKey];
     NSString *deploymentKey = [infoDictionary objectForKey:@"CodePushDeploymentKey"];
-    NSString *serverUrl = [infoDictionary objectForKey:@"CodePushServerUrl"];
-    if (!serverUrl) {
-        serverUrl = @"https://codepush.azurewebsites.net/";
-    }
-    NSString *rootComponent = [infoDictionary objectForKey:@"CFBundleName"];
+    NSString *serverURL = [infoDictionary objectForKey:@"CodePushServerURL"];
     
-    configuration = [[NSMutableDictionary alloc]
-                                   initWithObjectsAndKeys:
-                                   appVersion,@"appVersion",
-                                   buildVersion,@"buildVersion",
-                                   deploymentKey,@"deploymentKey",
-                                   serverUrl,@"serverUrl",
-                                   rootComponent,@"rootComponent",
-                                   nil];
+    if (!serverURL) {
+        serverURL = @"https://codepush.azurewebsites.net/";
+    }
+    
+    _configDictionary = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
+                            appVersion,AppVersionConfigKey,
+                            buildVersion,BuildVdersionConfigKey,
+                            serverURL,ServerURLConfigKey,
+                            deploymentKey,DeploymentKeyConfigKey,
+                            nil];
+    
+    return self;
 }
 
-+ (void)setDeploymentKey:(NSString *)deploymentKey
+- (NSString *)appVersion
 {
-    [configuration setValue:deploymentKey forKey:@"deploymentKey"];
+    return [_configDictionary objectForKey:AppVersionConfigKey];
 }
 
-+ (NSString *)getDeploymentKey
+- (NSString *)buildVersion
 {
-    return [configuration objectForKey:@"deploymentKey"];
+    return [_configDictionary objectForKey:BuildVdersionConfigKey];
 }
 
-+ (void)setServerUrl:(NSString *)serverUrl
+- (NSDictionary *)configuration
 {
-    [configuration setValue:serverUrl forKey:@"serverUrl"];
+    return _configDictionary;
 }
 
-+ (NSString *)getServerUrl
+- (NSString *)deploymentKey
 {
-    return [configuration objectForKey:@"serverUrl"];
+    return [_configDictionary objectForKey:DeploymentKeyConfigKey];
 }
 
-+ (void)setAppVersion:(NSString *)appVersion
+- (NSString *)serverURL
 {
-    [configuration setValue:appVersion forKey:@"appVersion"];
+    return [_configDictionary objectForKey:ServerURLConfigKey];
 }
 
-+ (NSString *)getAppVersion
+- (void)setDeploymentKey:(NSString *)deploymentKey
 {
-    return [configuration objectForKey:@"appVersion"];
+    [_configDictionary setValue:deploymentKey forKey:DeploymentKeyConfigKey];
 }
 
-+ (void)setBuildVersion:(NSString *)buildVersion
+- (void)setServerURL:(NSString *)serverURL
 {
-    [configuration setValue:buildVersion forKey:@"buildVersion"];
-}
-
-+ (NSString *)getBuildVersion
-{
-    return [configuration objectForKey:@"buildVersion"];
-}
-
-+ (void)setRootComponent:(NSString *)rootComponent
-{
-    [configuration setValue:rootComponent forKey:@"rootComponent"];
-}
-
-+ (NSString *)getRootComponent
-{
-    return [configuration objectForKey:@"rootComponent"];
-}
-
-+ (NSDictionary *) getConfiguration
-{
-    return configuration;
+    [_configDictionary setValue:serverURL forKey:ServerURLConfigKey];
 }
 
 @end

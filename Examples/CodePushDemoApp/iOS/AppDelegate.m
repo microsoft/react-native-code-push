@@ -45,7 +45,7 @@
    * see http://facebook.github.io/react-native/docs/runningondevice.html
    */
 
-  jsCodeLocation = [CodePush getBundleUrl];
+  jsCodeLocation = [CodePush bundleURL];
 
   RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
                                                       moduleName:@"CodePushDemoApp"

@@ -17,7 +17,8 @@ if (Platform.OS === "android") {
     "getCurrentPackage",
     "isFailedUpdate",
     "isFirstRun",
-    "notifyApplicationReady"
+    "notifyApplicationReady",
+    "setDeploymentKey"
   ];
   
   methodsToPromisify.forEach((methodName) => {
