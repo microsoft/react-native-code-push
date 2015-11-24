@@ -94,7 +94,7 @@ Once your Xcode project has been setup to build/link the CodePush plugin, you ne
 
 This change configures your app to always load the most recent version of your app's JS bundle. On the initial launch, this will correspond to the file that was compiled with the app. However, after an update has been pushed via CodePush, this will return the location of the most recently installed update.
 
-*NOTE: The `bundleURL` method assumes your app's JS bundle is named `main.jsbundle`. If you have configured your app to use a different file name, simply call the `bundleURLForResourceName:` method (which assumes you're using the `.jsbundle` extension) or `bundleURLForResourceName:withExtension:` method instead, in order to overwrite that default behavior*
+*NOTE: The `bundleURL` method assumes your app's JS bundle is named `main.jsbundle`. If you have configured your app to use a different file name, simply call the `bundleURLForResource:` method (which assumes you're using the `.jsbundle` extension) or `bundleURLForResource:withExtension:` method instead, in order to overwrite that default behavior*
 
 To let the CodePush runtime know which deployment it should query for updates against, perform the following steps:
 
@@ -198,18 +198,17 @@ When you require the `react-native-code-push` module, that object provides the f
 
 * [checkForUpdate](#codepushcheckforupdate): Queries the CodePush service for an update against the configured deployment. This method returns a promise which resolves to a `RemotePackage` that can be subsequently downloaded.
 * [getCurrentPackage](#codepushgetcurrentpackage): Gets information about the currently installed package (e.g. description, installation time)
-* [notifyApplicationReady](#codepushnotifyapplicationready): Notifies the CodePush runtime that an installed update is considered successful. This is an optional API, but is useful when you want to expicitly enable "rollback protection" in the event that an exception occurs in any code that you've deployed to production
-* [restartApp](#codepushrestartapp): Installs a pending update by immediately restarting the app.
-* [setDeploymentKey](#codepushsetdeploymentkey): Dynamically updates the deployment key that the CodePush runtime will use to query for app updates.
+* [notifyApplicationReady](#codepushnotifyapplicationready): Notifies the CodePush runtime that an installed update is considered successful. This is an optional API, but is useful when you want to expicitly enable "rollback protection" in the event that an exception occurs in any code that you've deployed to production.
+* [restartPendingUpdate](#codepushrestartPendingUpdate): Conditionally restarts the app if a previously installed update is currently pending (e.g. it was installed using the `ON_NEXT_RESTART` or `ON_NEXT_RESUME` modes, and the user hasn't restarted or resumed the app yet).
 * [sync](#codepushsync): Allows checking for an update, downloading it and installing it, all with a single call. Unless you need custom UI and/or behavior, we recommend most developers to use this method when integrating CodePush into their apps
 
 #### codePush.checkForUpdate
 
 ```javascript
-codePush.checkForUpdate(): Promise<RemotePackage>;
+codePush.checkForUpdate(deploymentKey: String = null): Promise<RemotePackage>;
 ```
 
-Queries the CodePush service for an update against the configured deployment. This method returns a promise which resolves to a `RemotePackage` that can be subsequently downloaded.
+Queries the CodePush service for an update using the deployment configured either in your `Info.plist` file or specified using the optional `deploymentKey` parameter. This method returns a promise which resolves to a `RemotePackage` that can be subsequently downloaded.
 
 `checkForUpdate` returns a Promise that resolves to one of two values:
 
@@ -249,39 +248,18 @@ Notifies the CodePush runtime that an update is considered successful, and there
 
 If the `rollbackTimeout` parameter was not specified, the CodePush runtime will not enforce any automatic rollback behavior, and therefore, calling this function is not required and will result in a no-op.
 
-#### codePush.restartApp
-
-```javascript
-codePush.restartApp(rollbackTimeout: Number = 0): void;
-```
-
-Installs the pending update (if applicable) by immediately restarting the app, and optionally starting the rollback timer. This method is for advanced scenarios, and is useful when the following conditions are true:
-
-1. Your app is specifying an install mode value of `ON_NEXT_RESTART` when calling `sync` or `LocalPackage.install`, which has the effect of not applying your update until the app has been restarted (by either the end-user or OS)
-2. You have an app-specific user event (e.g. the end-user navigated back to the app's home page) that allows you to apply the update in an unobtrusive way, and potentially gets the update in front of the end-user sooner then waiting until the next restart.
-
-The `rollbackTimeout` parameter has the same behavior as the equivalent in the `sync` and `checkForUpdate` method, and allows your app to have control over the point that an update is installed, while still benefitting from rollback production. 
-
-#### codePush.setDeploymentKey
-
-```javascript
-codePush.setDeploymentKey(deploymentKey: String): Promise<void>;
-```
-
-Dynamically updates the deployment key that the CodePush runtime will use to query for app updates. This is beneficial if your app has a default deployment key which you added to your `Info.plist` file, but you want to dynamically change it at runtime based on some app-specific policy (e.g. you want to give early access to certain users, by pointing them at your staging deployment).
-
-The method simply takes a string representing the new deployment, and returns a `Promise` that will resolve once the specified deployment key has been applied, and calls to `sync` and/or `checkForUpdate` could be successfully called.
-
-Example Usage: 
-
-```javascript
-codePush.setDeploymentKey("SOME_VALID_KEY_VALUE").then(() => {
-    // The following call to sync with query the updated
-    // app deployment for an update
-    codePush.sync();
-});
-
-```
+#### codePush.restartPendingUpdate		
+		
+```javascript		
+codePush.restartPendingUpdate(): void;		
+```		
+		
+Installs the pending update (if applicable) by immediately restarting the app, and optionally starting the rollback timer. This method is for advanced scenarios, and is only useful when the following conditions are true:		
+		
+1. Your app is specifying an install mode value of `ON_NEXT_RESTART` or `ON_NEXT_RESUME` when calling the `sync` or `LocalPackage.install` methods. This has the effect of not applying your update until the app has been restarted (by either the end-user or OS)	or resumed, and therefore, the update won't be immediately displayed to the end-user 	.
+2. You have an app-specific user event (e.g. the end-user navigated back to the app's home route) that allows you to apply the update in an unobtrusive way, and potentially gets the update in front of the end-user sooner then waiting until the next restart or resume.		
+		
+If you call this method, and there isn't a pending update, it will result in a no-op. Otherwise, the app will be restarted in order to display the update to the end-user.
 
 #### codePush.sync
 
@@ -300,6 +278,7 @@ If you want to pivot whether you check and/or download an available update based
 
 The method accepts an options object that allows you to customize numerous aspects of the default behavior, all of which provide sensible values by default:
 
+* __deploymentKey__ (String) - Specifies the deployment key you want to query for an update against. By default, this value is derived from the `Info.plist` file, but this option allows you to override it from the script-side if you need to dynamically change your app's current deployment.
 * __ignoreFailedUpdates__ (Boolean) - Indicates whether you would like to automatically ignored updates which are available, but have been previously attemped to install, but failed. Defaults to `true`.
 * __installMode__ (CodePush.InstallMode) - Indicates whether you would like to restart the app immediately after the update has been installed, or wait until the next app resume or restart. Defaults to `CodePush.InstallMode.ON_NEXT_RESTART`
 * __rollbackTimeout__ (Number) - The number of seconds that you want the runtime to wait after an update has been installed before considering it failed and rolling it back. Defaults to `0`, which disables rollback protection.

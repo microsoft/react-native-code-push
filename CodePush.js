@@ -4,13 +4,21 @@ var requestFetchAdapter = require("./request-fetch-adapter.js");
 var Sdk = require("code-push/script/acquisition-sdk").AcquisitionManager;
 var { NativeCodePush, PackageMixins, Alert } = require("./CodePushNativePlatformAdapter");
 
-function checkForUpdate() {
+function checkForUpdate(deploymentKey = null) {
   var config;
   var sdk;
   
   return getConfiguration()
           .then((configResult) => {
             config = configResult;
+            
+            // If a deployment key was explicitly provided,
+            // then let's override the one we retrieved
+            // from the native-side of the app.
+            if (deploymentKey) {
+              config.deploymentKey = deploymentKey;  
+            }
+            
             return getSdk();
           })
           .then((sdkResult) => {
@@ -49,12 +57,10 @@ function checkForUpdate() {
           });
 }
 
-var isConfigValid = true;
-
 var getConfiguration = (() => {
   var config;
   return function getConfiguration() {
-    if (config && isConfigValid) {
+    if (config) {
       return Promise.resolve(config);
     } else if (testConfig) {
       return Promise.resolve(testConfig);
@@ -62,7 +68,6 @@ var getConfiguration = (() => {
       return NativeCodePush.getConfiguration()
         .then((configuration) => {
           if (!config) config = configuration;
-          isConfigValid = true;
           return config;
         });
     }
@@ -112,20 +117,6 @@ function log(message) {
   console.log(`[CodePush] ${message}`)
 }
 
-function restartApp(rollbackTimeout = 0) {
-  NativeCodePush.restartApp(rollbackTimeout);
-}
-
-function setDeploymentKey(deploymentKey) {
-  return NativeCodePush.setDeploymentKey(deploymentKey)
-    .then(() => {
-        // Mark the local copy of the config data
-        // as invalid since we just modified it
-        // on the native end.
-        isConfigValid = false;
-    });  
-}
-
 var testConfig;
 var testSdk;
 
@@ -148,6 +139,7 @@ function setUpTestDependencies(providedTestSdk, providedTestConfig, testNativeBr
 function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) {  
   var syncOptions = {
     
+    deploymentKey: null,
     ignoreFailedUpdates: true,
     installMode: CodePush.InstallMode.ON_NEXT_RESTART,
     rollbackTimeout: 0,
@@ -203,7 +195,7 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
   
   return new Promise((resolve, reject) => {
     syncStatusChangeCallback(CodePush.SyncStatus.CHECKING_FOR_UPDATE);
-    checkForUpdate()
+    checkForUpdate(syncOptions.deploymentKey)
       .then((remotePackage) => {
         var doDownloadAndInstall = () => {
           syncStatusChangeCallback(CodePush.SyncStatus.DOWNLOADING_PACKAGE);
@@ -286,8 +278,7 @@ var CodePush = {
   getCurrentPackage: getCurrentPackage,
   log: log,
   notifyApplicationReady: NativeCodePush.notifyApplicationReady,
-  restartApp: restartApp,
-  setDeploymentKey: setDeploymentKey,
+  restartPendingUpdate: NativeCodePush.restartPendingUpdate,
   setUpTestDependencies: setUpTestDependencies,
   sync: sync,
   InstallMode: {
