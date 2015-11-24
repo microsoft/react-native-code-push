@@ -123,7 +123,7 @@ var testConfig;
 var testSdk;
 
 // This function is only used for tests. Replaces the default SDK, configuration and native bridge
-function setUpTestDependencies(providedTestSdk, providedTestConfig, testNativeBridge){
+function setUpTestDependencies(providedTestSdk, providedTestConfig, testNativeBridge) {
   if (providedTestSdk) testSdk = providedTestSdk;
   if (providedTestConfig) testConfig = providedTestConfig;
   if (testNativeBridge) NativeCodePush = testNativeBridge;
