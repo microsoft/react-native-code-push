@@ -56,13 +56,13 @@ To integrate CodePush into your Android project, do the following steps:
 
 1. In your `android/settings.gradle` file, make the following additions:
     
-    ```
+    ```gradle
     include ':app', ':react-native-code-push'
     project(':react-native-code-push').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-code-push/android/app')
     ```
 2. In your `android/app/build.gradle` file, add CodePush as one of the dependencies:
     
-    ```
+    ```gradle
     ...
     dependencies {
         ...
@@ -109,34 +109,31 @@ After installing the plugin and sync-ing your Android Studio project with Gradle
 
 1. Initialize the module in MainActivity.java:
     
-    ```
+    ```java
     ...
-    // Import the plugin class
+    // 1. Import the plugin class
     import com.microsoft.reactnativecodepush.CodePush;
     
-    // Optional: extend FragmentActivity if you intend to show a dialog prompting users about updates.
+    // 2. Optional: extend FragmentActivity if you intend to show a dialog prompting users about updates.
     public class MainActivity extends FragmentActivity implements DefaultHardwareBackBtnHandler {
         ...
-        // Declare an object level private instance of CodePush
-        private CodePush codePush;
         
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             ...
-            // Initialize CodePush with your deployment key and an instance of your MainActivity
+            // 3. Initialize CodePush with your deployment key and an instance of your MainActivity
             // You can also set the deployment key in code by assigning the key to the `[CodePushConfig current].deploymentKey` property.*
-    
-            codePush = new CodePush("d73bf5d8-4fbd-4e55-a837-accd328a21ba", this);
+            CodePush codePush = new CodePush("d73bf5d8-4fbd-4e55-a837-accd328a21ba", this);
             ...
             mReactInstanceManager = ReactInstanceManager.builder()
                     .setApplication(getApplication())
                     ...
-                    // Let CodePush determine which location to load the most updated bundle from
+                    // 4. Let CodePush determine which location to load the most updated bundle from
                     // If there is no updated bundle from CodePush, the location will be the assets
                     // folder with the name of the bundle passed in, e.g. index.android.bundle
                     .setJSBundleFile(codePush.getBundleUrl("index.android.bundle"))
                     
-                    // Expose the CodePush module to JavaScript
+                    // 5. Expose the CodePush module to JavaScript
                     .addPackage(codePush.getReactPackage())
         }
     }
@@ -144,7 +141,7 @@ After installing the plugin and sync-ing your Android Studio project with Gradle
 
 2. Let the CodePush runtime know which deployment it should query for updates against. Be sure to set the `versionName` in your `android/app/build.gradle`:
     
-    ```
+    ```gradle
     android {
         ...
         defaultConfig {
