@@ -64,6 +64,7 @@ var getConfiguration = (() => {
       return NativeCodePush.getConfiguration()
         .then((configuration) => {
           if (!config) config = configuration;
+          isConfigValid = true;
           return config;
         });
     }
