@@ -2,30 +2,26 @@
 
 @interface CodePush : NSObject<RCTBridgeModule>
 
-+ (NSURL *)getBundleUrl;
++ (NSURL *)bundleURL;
+
++ (NSURL *)bundleURLForResourceName:(NSString *)resourceName;
+
++ (NSURL *)bundleURLForResourceName:(NSString *)resourceName
+                      withExtension:(NSString *)resourceExtension;
+
 + (NSString *)getDocumentsDirectory;
 
 @end
 
 @interface CodePushConfig : NSObject
 
-+ (void)setDeploymentKey:(NSString *)deploymentKey;
-+ (NSString *)getDeploymentKey;
+@property (readonly) NSString *appVersion;
+@property (readonly) NSString *buildVersion;
+@property (readonly) NSDictionary *configuration;
+@property (copy) NSString *deploymentKey;
+@property (copy) NSString *serverURL;
 
-+ (void)setServerUrl:(NSString *)setServerUrl;
-+ (NSString *)getServerUrl;
-
-+ (void)setAppVersion:(NSString *)appVersion;
-+ (NSString *)getAppVersion;
-
-+ (void)setBuildVersion:(NSString *)buildVersion;
-+ (NSString *)getBuildVersion;
-
-+ (void)setRootComponent:(NSString *)rootComponent;
-
-+ (NSString *)getRootComponent;
-
-+ (NSDictionary *)getConfiguration;
++ (instancetype)current;
 
 @end
 

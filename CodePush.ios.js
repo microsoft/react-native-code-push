@@ -1,75 +1,10 @@
 'use strict';
 
+var { AlertIOS } = require("react-native");
 var NativeCodePush = require("react-native").NativeModules.CodePush;
+var packageMixins = require("./package-mixins")(NativeCodePush);
 var requestFetchAdapter = require("./request-fetch-adapter.js");
 var Sdk = require("code-push/script/acquisition-sdk").AcquisitionManager;
-var packageMixins = require("./package-mixins")(NativeCodePush);
-
-var { AlertIOS } = require("react-native");
-
-// This function is only used for tests. Replaces the default SDK, configuration and native bridge
-function setUpTestDependencies(providedTestSdk, providedTestConfig, testNativeBridge){
-  if (providedTestSdk) testSdk = providedTestSdk;
-  if (providedTestConfig) testConfig = providedTestConfig;
-  if (testNativeBridge) NativeCodePush = testNativeBridge;
-}
-var testConfig;
-var testSdk;
-
-var getConfiguration = (() => {
-  var config;
-  return function getConfiguration() {
-    if (config) {
-      return Promise.resolve(config);
-    } else if (testConfig) {
-      return Promise.resolve(testConfig);
-    } else {
-      return NativeCodePush.getConfiguration()
-        .then((configuration) => {
-          if (!config) config = configuration;
-          return config;
-        });
-    }
-  }
-})();
-
-var getSdk = (() => {
-  var sdk;
-  return function getSdk() {
-    if (sdk) {
-      return Promise.resolve(sdk);
-    } else if (testSdk) {
-      return Promise.resolve(testSdk);
-    } else {
-      return getConfiguration()
-        .then((configuration) => {
-          sdk = new Sdk(requestFetchAdapter, configuration);
-          return sdk;
-        });
-    }
-  }
-})();
-
-function getCurrentPackage() {
-  return new Promise((resolve, reject) => {
-    var localPackage;
-    NativeCodePush.getCurrentPackage()
-      .then((currentPackage) => {
-        localPackage = currentPackage;
-        return NativeCodePush.isFailedUpdate(currentPackage.packageHash);
-      })
-      .then((failedUpdate) => {
-        localPackage.failedInstall = failedUpdate;
-        return NativeCodePush.isFirstRun(localPackage.packageHash);
-      })
-      .then((isFirstRun) => {
-        localPackage.isFirstRun = isFirstRun;
-        resolve(localPackage);
-      })
-      .catch(reject)
-      .done();
-  });
-}
 
 function checkForUpdate() {
   var config;
@@ -116,9 +51,91 @@ function checkForUpdate() {
           });
 }
 
+var isConfigValid = true;
+
+var getConfiguration = (() => {
+  var config;
+  return function getConfiguration() {
+    if (config && isConfigValid) {
+      return Promise.resolve(config);
+    } else if (testConfig) {
+      return Promise.resolve(testConfig);
+    } else {
+      return NativeCodePush.getConfiguration()
+        .then((configuration) => {
+          if (!config) config = configuration;
+          isConfigValid = true;
+          return config;
+        });
+    }
+  }
+})();
+
+var getSdk = (() => {
+  var sdk;
+  return function getSdk() {
+    if (sdk) {
+      return Promise.resolve(sdk);
+    } else if (testSdk) {
+      return Promise.resolve(testSdk);
+    } else {
+      return getConfiguration()
+        .then((configuration) => {
+          sdk = new Sdk(requestFetchAdapter, configuration);
+          return sdk;
+        });
+    }
+  }
+})();
+
+function getCurrentPackage() {
+  return new Promise((resolve, reject) => {
+    var localPackage;
+    NativeCodePush.getCurrentPackage()
+      .then((currentPackage) => {
+        localPackage = currentPackage;
+        return NativeCodePush.isFailedUpdate(currentPackage.packageHash);
+      })
+      .then((failedUpdate) => {
+        localPackage.failedInstall = failedUpdate;
+        return NativeCodePush.isFirstRun(localPackage.packageHash);
+      })
+      .then((isFirstRun) => {
+        localPackage.isFirstRun = isFirstRun;
+        resolve(localPackage);
+      })
+      .catch(reject)
+      .done();
+  });
+}
+
 /* Logs messages to console with the [CodePush] prefix */
 function log(message) {
   console.log(`[CodePush] ${message}`)
+}
+
+function restartApp(rollbackTimeout = 0) {
+  NativeCodePush.restartApp(rollbackTimeout);
+}
+
+function setDeploymentKey(deploymentKey) {
+  return NativeCodePush.setDeploymentKey(deploymentKey)
+    .then(() => {
+        // Mark the local copy of the config data
+        // as invalid since we just modified it
+        // on the native end.
+        isConfigValid = false;
+    });  
+}
+
+var testConfig;
+var testSdk;
+
+// This function is only used for tests. Replaces the default SDK, configuration and native bridge
+function setUpTestDependencies(providedTestSdk, providedTestConfig, testNativeBridge) {
+  if (providedTestSdk) testSdk = providedTestSdk;
+  if (providedTestConfig) testConfig = providedTestConfig;
+  if (testNativeBridge) NativeCodePush = testNativeBridge;
 }
 
 /**
@@ -271,6 +288,8 @@ var CodePush = {
   getCurrentPackage: getCurrentPackage,
   log: log,
   notifyApplicationReady: NativeCodePush.notifyApplicationReady,
+  restartApp: restartApp,
+  setDeploymentKey: setDeploymentKey,
   setUpTestDependencies: setUpTestDependencies,
   sync: sync,
   InstallMode: {
