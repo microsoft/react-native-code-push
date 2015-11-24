@@ -7,24 +7,20 @@ var requestFetchAdapter = require("./request-fetch-adapter.js");
 var Sdk = require("code-push/script/acquisition-sdk").AcquisitionManager;
 
 function checkForUpdate(deploymentKey = null) {
-  var config;
-  var sdk;
+  var config, sdk;
   
   return getConfiguration()
-          .then((configResult) => {
-            config = configResult;
-            
+          .then((configResult) => {            
             // If a deployment key was explicitly provided,
             // then let's override the one we retrieved
             // from the native-side of the app.
             if (deploymentKey) {
-              config.deploymentKey = deploymentKey;  
+              config = Object.assign({}, configResult, { deploymentKey: deploymentKey });
+            } else {
+              config = configResult;
             }
             
-            return getSdk();
-          })
-          .then((sdkResult) => {
-            sdk = sdkResult;
+            sdk = getSDK(config);
             return getCurrentPackage();
           })
           .then((localPackage) => {
@@ -76,23 +72,6 @@ var getConfiguration = (() => {
   }
 })();
 
-var getSdk = (() => {
-  var sdk;
-  return function getSdk() {
-    if (sdk) {
-      return Promise.resolve(sdk);
-    } else if (testSdk) {
-      return Promise.resolve(testSdk);
-    } else {
-      return getConfiguration()
-        .then((configuration) => {
-          sdk = new Sdk(requestFetchAdapter, configuration);
-          return sdk;
-        });
-    }
-  }
-})();
-
 function getCurrentPackage() {
   return new Promise((resolve, reject) => {
     var localPackage;
@@ -112,6 +91,14 @@ function getCurrentPackage() {
       .catch(reject)
       .done();
   });
+}
+
+function getSDK(config) {
+   if (testSdk) {
+      return testSdk;
+   } else {
+      return new Sdk(requestFetchAdapter, config);
+   }
 }
 
 /* Logs messages to console with the [CodePush] prefix */
