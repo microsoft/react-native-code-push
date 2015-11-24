@@ -15,7 +15,7 @@ function checkForUpdate(deploymentKey = null) {
             // then let's override the one we retrieved
             // from the native-side of the app.
             if (deploymentKey) {
-              config = Object.assign({}, configResult, { deploymentKey: deploymentKey });
+              config = Object.assign({}, configResult, { deploymentKey });
             } else {
               config = configResult;
             }
