@@ -1,20 +1,10 @@
 'use strict';
 
+var { AlertIOS } = require("react-native");
 var NativeCodePush = require("react-native").NativeModules.CodePush;
+var packageMixins = require("./package-mixins")(NativeCodePush);
 var requestFetchAdapter = require("./request-fetch-adapter.js");
 var Sdk = require("code-push/script/acquisition-sdk").AcquisitionManager;
-var packageMixins = require("./package-mixins")(NativeCodePush);
-
-var { AlertIOS } = require("react-native");
-
-// This function is only used for tests. Replaces the default SDK, configuration and native bridge
-function setUpTestDependencies(providedTestSdk, providedTestConfig, testNativeBridge){
-  if (providedTestSdk) testSdk = providedTestSdk;
-  if (providedTestConfig) testConfig = providedTestConfig;
-  if (testNativeBridge) NativeCodePush = testNativeBridge;
-}
-var testConfig;
-var testSdk;
 
 function checkForUpdate() {
   var config;
@@ -61,10 +51,12 @@ function checkForUpdate() {
           });
 }
 
+var isConfigValid = true;
+
 var getConfiguration = (() => {
   var config;
   return function getConfiguration() {
-    if (config) {
+    if (config && isConfigValid) {
       return Promise.resolve(config);
     } else if (testConfig) {
       return Promise.resolve(testConfig);
@@ -123,6 +115,26 @@ function log(message) {
 
 function restartApp(rollbackTimeout = 0) {
   NativeCodePush.restartApp(rollbackTimeout);
+}
+
+function setDeploymentKey(deploymentKey) {
+  return NativeCodePush.setDeploymentKey(deploymentKey)
+    .then(() => {
+        // Mark the local copy of the config data
+        // as invalid since we just modified it
+        // on the native end.
+        isConfigValid = false;
+    });  
+}
+
+var testConfig;
+var testSdk;
+
+// This function is only used for tests. Replaces the default SDK, configuration and native bridge
+function setUpTestDependencies(providedTestSdk, providedTestConfig, testNativeBridge) {
+  if (providedTestSdk) testSdk = providedTestSdk;
+  if (providedTestConfig) testConfig = providedTestConfig;
+  if (testNativeBridge) NativeCodePush = testNativeBridge;
 }
 
 /**
@@ -276,7 +288,7 @@ var CodePush = {
   log: log,
   notifyApplicationReady: NativeCodePush.notifyApplicationReady,
   restartApp: restartApp,
-  setDeploymentKey: NativeCodePush.setDeploymentKey,
+  setDeploymentKey: setDeploymentKey,
   setUpTestDependencies: setUpTestDependencies,
   sync: sync,
   InstallMode: {
