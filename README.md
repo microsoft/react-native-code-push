@@ -121,19 +121,19 @@ After installing the plugin and sync-ing your Android Studio project with Gradle
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             ...
-            // 3. Initialize CodePush with your deployment key and an instance of your MainActivity
+            // 3. Initialize CodePush with your deployment key and an instance of your MainActivity.
             // You can also set the deployment key in code by assigning the key to the `[CodePushConfig current].deploymentKey` property.*
             CodePush codePush = new CodePush("d73bf5d8-4fbd-4e55-a837-accd328a21ba", this);
             ...
             mReactInstanceManager = ReactInstanceManager.builder()
                     .setApplication(getApplication())
                     ...
-                    // 4. Let CodePush determine which location to load the most updated bundle from
+                    // 4. Let CodePush determine which location to load the most updated bundle from.
                     // If there is no updated bundle from CodePush, the location will be the assets
                     // folder with the name of the bundle passed in, e.g. index.android.bundle
                     .setJSBundleFile(codePush.getBundleUrl("index.android.bundle"))
                     
-                    // 5. Expose the CodePush module to JavaScript
+                    // 5. Expose the CodePush module to JavaScript.
                     .addPackage(codePush.getReactPackage())
         }
     }
