@@ -114,16 +114,6 @@ function log(message) {
   console.log(`[CodePush] ${message}`)
 }
 
-function setDeploymentKey(deploymentKey) {		
-  return NativeCodePush.setDeploymentKey(deploymentKey)		
-    .then(() => {		
-      // Mark the local copy of the config data		
-      // as invalid since we just modified it
-      // on the native end.		
-      isConfigValid = false;		
-    });  
-}
-
 var testConfig;
 var testSdk;
 

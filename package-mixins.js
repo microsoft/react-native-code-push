@@ -1,4 +1,3 @@
-var extend = require("extend");
 var { NativeAppEventEmitter } = require("react-native");
 
 module.exports = (NativeCodePush) => {
@@ -25,7 +24,7 @@ module.exports = (NativeCodePush) => {
       return NativeCodePush.downloadUpdate(this)
         .then((downloadedPackage) => {
           downloadProgressSubscription && downloadProgressSubscription.remove();
-          return extend({}, downloadedPackage, local);
+          return Object.assign({}, downloadedPackage, local);
         })
         .catch((error) => {
           downloadProgressSubscription && downloadProgressSubscription.remove();
