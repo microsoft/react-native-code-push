@@ -6,7 +6,7 @@ var packageMixins = require("./package-mixins")(NativeCodePush);
 var requestFetchAdapter = require("./request-fetch-adapter.js");
 var Sdk = require("code-push/script/acquisition-sdk").AcquisitionManager;
 
-function checkForUpdate(deploymentKey) {
+function checkForUpdate(deploymentKey = null) {
   var config;
   var sdk;
   
@@ -274,12 +274,15 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
   });     
 };
 
+codePush.installPendingUpdate();
+
 var CodePush = {
   checkForUpdate: checkForUpdate,
   getConfiguration: getConfiguration,
   getCurrentPackage: getCurrentPackage,
   log: log,
   notifyApplicationReady: NativeCodePush.notifyApplicationReady,
+  restartPendingUpdate: NativeCodePush.restartPendingUpdate,
   setUpTestDependencies: setUpTestDependencies,
   sync: sync,
   InstallMode: {

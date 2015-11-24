@@ -40,12 +40,8 @@ module.exports = (NativeCodePush) => {
         .then(function() {
           updateInstalledCallback && updateInstalledCallback();
           if (installMode == NativeCodePush.codePushInstallModeImmediate) {
-            NativeCodePush.restartForImmedidateUpdate(rollbackTimeout);
-          } else {
-            this.restart = function () {
-              NaviteCodePush.restartForPendingUpdate();
-            }
-          }
+            NativeCodePush.restartImmedidateUpdate(rollbackTimeout);
+          };
         });
     }
   };

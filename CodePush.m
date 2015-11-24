@@ -346,14 +346,14 @@ RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
     resolve([NSNull null]);
 }
 
-// This version of restart app is exposed solely for immediately installed
+// This function is exposed solely for immediately installed
 // update support, and shouldn't be consumed directly by user code.
-RCT_EXPORT_METHOD(restartForImmedidateUpdate:(int)rollbackTimeout)
+RCT_EXPORT_METHOD(restartImmedidateUpdate:(int)rollbackTimeout)
 {
     [self initializeUpdateWithRollbackTimeout:rollbackTimeout needsRestart:YES];
 }
 
-RCT_EXPORT_METHOD(restartForPendingUpdate)
+RCT_EXPORT_METHOD(restartPendingUpdate)
 {
     [self checkForPendingUpdate:YES];
 }
