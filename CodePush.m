@@ -448,7 +448,7 @@ RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
  * This method isn't publically exposed via the "react-native-code-push"
  * module, and is only used internally to support immediately installed updates.
  */
-RCT_EXPORT_METHOD(restartImmedidateUpdate:(int)rollbackTimeout)
+RCT_EXPORT_METHOD(restartImmediateUpdate:(int)rollbackTimeout)
 {
     [self initializeUpdateWithRollbackTimeout:rollbackTimeout needsRestart:YES];
 }
