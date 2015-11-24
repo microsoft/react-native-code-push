@@ -74,7 +74,7 @@ Once your Xcode project has been setup to build/link the CodePush plugin, you ne
 
 This change configures your app to always load the most recent version of your app's JS bundle. On the initial launch, this will correspond to the file that was compiled with the app. However, after an update has been pushed via CodePush, this will return the location of the most recently installed update.
 
-*NOTE: The `bundleURL` method assumes your app's JS bundle is named `main.jsbundle`. If you have configured your app to use a different file name, simply call the `bundleURLForResourceName:` method (which assumes you're using the `.jsbundle` extension) or `bundleURLForResourceName:withExtension:` method instead, in order to overwrite that default behavior*
+*NOTE: The `bundleURL` method assumes your app's JS bundle is named `main.jsbundle`. If you have configured your app to use a different file name, simply call the `bundleURLForResource:` method (which assumes you're using the `.jsbundle` extension) or `bundleURLForResource:withExtension:` method instead, in order to overwrite that default behavior*
 
 To let the CodePush runtime know which deployment it should query for updates against, perform the following steps:
 
