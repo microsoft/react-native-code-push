@@ -25,7 +25,7 @@ public class CodePushPackage {
     public final String PACKAGE_FILE_NAME = "app.json";
     public final String PACKAGE_HASH_KEY = "packageHash";
     public final String DOWNLOAD_URL_KEY = "downloadUrl";
-    public final int DOWNLOAD_BUFFER_SIZE = 8192;
+    public final int DOWNLOAD_BUFFER_SIZE = 1024 * 256;
 
     private String documentsDirectory;
 

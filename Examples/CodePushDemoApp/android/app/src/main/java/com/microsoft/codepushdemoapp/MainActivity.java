@@ -25,7 +25,7 @@ public class MainActivity extends FragmentActivity implements DefaultHardwareBac
         super.onCreate(savedInstanceState);
         mReactRootView = new ReactRootView(this);
 
-        codePush = new CodePush("d73bf5d8-4fbd-4e55-a837-accd328a21ba", this);
+        codePush = new CodePush("DEPLOYMENT_KEY_HERE", this);
 
         ReactInstanceManager.Builder builder = ReactInstanceManager.builder()
                 .setApplication(getApplication())
