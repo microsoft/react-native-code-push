@@ -2,7 +2,7 @@
 
 var React = require('react-native');
 var CodePushSdk = require('react-native-code-push');
-var { NativeCodePush } = require("react-native-code-push/CodePushNativePlatformAdapter");
+var NativeCodePush = require("react-native").NativeModules.CodePush;
 var RCTTestModule = require('NativeModules').TestModule || {};
 
 var {

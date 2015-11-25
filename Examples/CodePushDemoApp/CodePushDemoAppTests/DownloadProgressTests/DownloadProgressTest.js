@@ -1,19 +1,11 @@
 "use strict";
 
 var React = require("react-native");
+var { DeviceEventEmitter } = require("react-native");
 var CodePushSdk = require("react-native-code-push");
-var { NativeCodePush } = require("react-native-code-push/CodePushNativePlatformAdapter");
+var NativeCodePush = require("react-native").NativeModules.CodePush;
 var RCTTestModule = require('NativeModules').TestModule || {};
-var EventEmitter;
 var Platform = require("Platform");
-
-if (Platform.OS === "android") {
-  var { DeviceEventEmitter } = require("react-native");
-  EventEmitter = DeviceEventEmitter;
-} else if (Platform.OS === "ios") {   
-  var { NativeAppEventEmitter } = require("react-native");
-  EventEmitter = NativeAppEventEmitter;
-}
 
 var {
   Text,
@@ -47,7 +39,7 @@ var DownloadProgressTest = React.createClass({
   },
   
   runTest() {
-    var downloadProgressSubscription = EventEmitter.addListener(
+    var downloadProgressSubscription = DeviceEventEmitter.addListener(
       "CodePushDownloadProgress",
       (progress) => {
         this.setState({
