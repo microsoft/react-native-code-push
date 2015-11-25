@@ -321,7 +321,7 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
         progressCallback:^(long expectedContentLength, long receivedContentLength) {
             // Notify the script-side about the progress
             [self.bridge.eventDispatcher
-                sendAppEventWithName:@"CodePushDownloadProgress"
+                sendDeviceEventWithName:@"CodePushDownloadProgress"
                 body:@{
                         @"totalBytes":[NSNumber numberWithLong:expectedContentLength],
                         @"receivedBytes":[NSNumber numberWithLong:receivedContentLength]

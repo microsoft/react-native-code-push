@@ -10,12 +10,12 @@ A React Native app is composed of a JavaScript bundle file, which is generated b
 
 The CodePush plugin helps get product improvements in front of your end-users instantly, by keeping the JavaScript bundle synchronized with updates that are released to the CodePush server. This way, your app gets the benefits of an offline mobile experience, as well as the "web-like" agility of side-loading updates as soon as they are available. It's a win-win!
 
-*Note: Any product changes which touch native code (e.g. modifying your `AppDelegate.m` file, adding a new plugin) cannot be distributed via CodePush, and therefore, must be updated via the appropriate store(s).*
+*Note: Any product changes which touch native code (e.g. modifying your `AppDelegate.m`/`MainActivity.java` file, adding a new plugin) cannot be distributed via CodePush, and therefore, must be updated via the appropriate store(s).*
 
 ## Supported React Native platforms
 
 - iOS
-- Coming soon: Android (Try it out on [this branch](https://github.com/Microsoft/react-native-code-push/tree/first-check-in-for-android))
+- Android
 
 ## Getting Started
 
@@ -25,7 +25,7 @@ Once you've followed the overall ["getting started"](http://microsoft.github.io/
 npm install --save react-native-code-push
 ```
 
-## Plugin Installation 
+## Plugin Installation - iOS
 
 Once you've acquired the CodePush plugin, you need to integrate it into the Xcode project of your React Native app. To do this, take the following steps:
 
@@ -44,7 +44,27 @@ Add a new value, `$(SRCROOT)/../node_modules/react-native-code-push` and select 
 
     ![Add CodePush library reference](https://cloud.githubusercontent.com/assets/516559/10322038/b8157962-6c30-11e5-9264-494d65fd2626.png)
 
-## Plugin Configuration
+## Plugin Installation - Android
+
+To integrate CodePush into your Android project, do the following steps:
+
+1. In your `android/settings.gradle` file, make the following additions:
+    
+    ```gradle
+    include ':app', ':react-native-code-push'
+    project(':react-native-code-push').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-code-push/android/app')
+    ```
+2. In your `android/app/build.gradle` file, add the `:react-native-code-push` project as a compile-time dependency:
+    
+    ```gradle
+    ...
+    dependencies {
+        ...
+        compile project(':react-native-code-push')
+    }
+    ```
+
+## Plugin Configuration - iOS
 
 Once your Xcode project has been setup to build/link the CodePush plugin, you need to configure your app to consult CodePush for the location of your JS bundle, since it is responsible for synchronizing it with updates that are released to the CodePush server. To do this, perform the following steps:
 
@@ -75,6 +95,58 @@ To let the CodePush runtime know which deployment it should query for updates ag
 1. Open your app's `Info.plist` and add a new `CodePushDeploymentKey` entry, whose value is the key of the deployment you want to configure this app against (e.g. the Staging deployment for FooBar app). You can retreive this value by running `code-push deployment ls <appName>` in the CodePush CLI, and copying the value of the `Deployment Key` column which corresponds to the deployment you want to use. 
 2. In your app's `Info.plist` make sure your `CFBundleShortVersionString` value is a valid [semver](http://semver.org/) version (e.g. 1.0.0 not 1.0)
 
+## Plugin Configuration - Android
+
+After installing the plugin and syncing your Android Studio project with Gradle, you need to configure your app to consult CodePush for the location of your JS bundle, since it will "take control" of managing the current and all future versions. To do this, perform the following steps:
+
+1. Update the `MainActivity.java` file to use CodePush.
+    
+    ```java
+    ...
+    // 1. Import the plugin class
+    import com.microsoft.codepush.react.CodePush;
+    
+    // 2. Optional: extend FragmentActivity if you intend to show a dialog prompting users about updates.
+    public class MainActivity extends FragmentActivity implements DefaultHardwareBackBtnHandler {
+        ...
+        
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+            ...
+            // 3. Initialize CodePush with your deployment key and an instance of your MainActivity.
+            CodePush codePush = new CodePush("d73bf5d8-4fbd-4e55-a837-accd328a21ba", this);
+            ...
+            mReactInstanceManager = ReactInstanceManager.builder()
+                    .setApplication(getApplication())
+                    ...
+                    // 4. DELETE THIS LINE --> .setBundleAssetName("index.android.bundle")
+                    
+                    // 5. Let CodePush determine which location to load the most updated bundle from.
+                    // If there is no updated bundle from CodePush, the location will be the assets
+                    // folder with the name of the bundle passed in, e.g. index.android.bundle
+                    .setJSBundleFile(codePush.getBundleUrl("index.android.bundle"))
+                    
+                    // 6. Expose the CodePush module to JavaScript.
+                    .addPackage(codePush.getReactPackage())
+                    ...
+        }
+    }
+    ```
+
+2. Ensure that the versionName property in your `android/app/build.gradle` file is set to a semver compliant value.
+    
+    ```gradle
+    android {
+        ...
+        defaultConfig {
+            ...
+            versionName "1.0.0"
+            ...
+        }
+        ...
+    }
+    ```
+
 ## Plugin consumption
 
 With the CodePush plugin downloaded and linked, and your app asking CodePush where to get the right JS bundle from, the only thing left is to add the necessary code to your app to control the following policies:
@@ -103,7 +175,7 @@ If an update is available, it will be silently downloaded, and installed the nex
 Once your app has been configured and distributed to your users, and you've made some JS changes, it's time to release it to them instantly! To do this, run the following steps:
 
 1. Execute `react-native bundle` in order to generate the updated JS bundle for your app.
-2. Execute `code-push release <appName> ./ios/main.jsbundle <appVersion> --deploymentName <deploymentName>` in order to publish the generated JS bundle to the server (assuming your CWD is the root directory of your React Native app). 
+2. Execute `code-push release <appName> <jsBundleFilePath> <appVersion> --deploymentName <deploymentName>` in order to publish the generated JS bundle to the server. Assuming your CWD is the root directory of your React Native app, `<jsBundleFilePath>` could be `iOS/main.jsbundle` for iOS, or `android/app/src/main/assets/index.android.jsbundle` for Android.
 
 And that's it! For more information regarding the CodePush API, including the various options you can pass to the `sync` method, refer to the reference section below. Additionally, for more information regarding the CLI and how the release (or promote) commands work, refer to it's [documentation](http://microsoft.github.io/code-push/docs/cli.html).
 

@@ -1,10 +1,11 @@
 "use strict";
 
-var RCTTestModule = require("NativeModules").TestModule;
 var React = require("react-native");
+var { DeviceEventEmitter } = require("react-native");
 var CodePushSdk = require("react-native-code-push");
-var NativeBridge = require("react-native").NativeModules.CodePush;
-var { NativeAppEventEmitter } = require("react-native");
+var NativeCodePush = require("react-native").NativeModules.CodePush;
+var RCTTestModule = require('NativeModules').TestModule || {};
+var Platform = require("Platform");
 
 var {
   Text,
@@ -38,7 +39,7 @@ var DownloadProgressTest = React.createClass({
   },
   
   runTest() {
-    var downloadProgressSubscription = NativeAppEventEmitter.addListener(
+    var downloadProgressSubscription = DeviceEventEmitter.addListener(
       "CodePushDownloadProgress",
       (progress) => {
         this.setState({
@@ -49,11 +50,11 @@ var DownloadProgressTest = React.createClass({
     );
     
     var updates = require("./TestPackages");
-    NativeBridge.downloadUpdate(updates.smallPackage)
+    NativeCodePush.downloadUpdate(updates.smallPackage)
       .then((smallPackage) => {
         if (smallPackage) {
           this.checkReceivedAndExpectedBytesEqual();
-          return NativeBridge.downloadUpdate(updates.mediumPackage);
+          return NativeCodePush.downloadUpdate(updates.mediumPackage);
         } else {
           throw new Error("Small package download failed.");
         }
@@ -61,7 +62,7 @@ var DownloadProgressTest = React.createClass({
       .then((mediumPackage) => {
         if (mediumPackage) {
           this.checkReceivedAndExpectedBytesEqual();
-          return NativeBridge.downloadUpdate(updates.largePackage);
+          return NativeCodePush.downloadUpdate(updates.largePackage);
         } else {
           throw new Error("Medium package download failed.");
         }
