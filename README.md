@@ -99,7 +99,7 @@ To let the CodePush runtime know which deployment it should query for updates ag
 
 After installing the plugin and syncing your Android Studio project with Gradle, you need to configure your app to consult CodePush for the location of your JS bundle, since it will "take control" of managing the current and all future versions. To do this, perform the following steps:
 
-1. Initialize the module in MainActivity.java:
+1. Update the `MainActivity.java` file to use CodePush.
     
     ```java
     ...
