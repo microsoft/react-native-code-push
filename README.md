@@ -73,7 +73,7 @@ To let the CodePush runtime know which deployment it should query for updates ag
 
 ## Plugin consumption
 
-With the CodePush plugin downloaded and linked, and your app asking CodePush where to get the right JS bundle from, the only thing left is to add the neccessary code to your app to control the following:
+With the CodePush plugin downloaded and linked, and your app asking CodePush where to get the right JS bundle from, the only thing left is to add the necessary code to your app to control the following:
 
 1. When (and how often) to check for an update? (e.g. app start, in response to clicking a button in a settings page, periodically at some fixed interval)
 2. When an update is available, how to present it to the end-user?
@@ -159,7 +159,7 @@ This method returns a Promise that resolves with the `LocalPackage` instance tha
 codePush.notifyApplicationReady(): Promise<void>;
 ```
 
-Notifies the CodePush runtime that an update is considered successful, and therefore, a rollback isn't neccessary. Calling this function is required whenever the `rollbackTimeout` parameter is specified when calling either ```LocalPackage.install``` or `sync`. If you specify a `rollbackTimeout`, and don't call `notifyApplicationReady`, the CodePush runtime will assume that the installed update has failed and roll back to the previous version.
+Notifies the CodePush runtime that an update is considered successful, and therefore, a rollback isn't necessary. Calling this function is required whenever the `rollbackTimeout` parameter is specified when calling either ```LocalPackage.install``` or `sync`. If you specify a `rollbackTimeout`, and don't call `notifyApplicationReady`, the CodePush runtime will assume that the installed update has failed and roll back to the previous version.
 
 If the `rollbackTimeout` parameter was not specified, the CodePush runtime will not enforce any automatic rollback behavior, and therefore, calling this function is not required and will result in a no-op.
 
@@ -184,7 +184,7 @@ codePush.sync(options: Object, syncStatusChangeCallback: function(syncStatus: Nu
 
 Provides a simple method for checking for an update and subsequently downloading and installing it. This method provides support for two different (but customizable) "modes" to easily enables apps with different requirements:
 
-1. **Silent mode** *(the default behavior)*, which automatically downloads available updates, and applies them the next time the app restarts. This way, the entire update experience is "silent" to the end-user, since they don't see any update prompt and/or "synthentic" app restarts.
+1. **Silent mode** *(the default behavior)*, which automatically downloads available updates, and applies them the next time the app restarts. This way, the entire update experience is "silent" to the end-user, since they don't see any update prompt and/or "synthetic" app restarts.
 
 2. **Active mode**, which when an update is available, prompts the end-user for permission before downloading it, and then immediately applies the update. If an update was released using the `mandatory` flag, the end-user would still be notified about the update, but they wouldn't have the choice to ignore it.
 
@@ -252,7 +252,7 @@ In addition to the options, the `sync` method also accepts two optional function
     * __CodePush.SyncStatus.CHECKING_FOR_UPDATE__ *(0)* -  The CodePush server is being queried for an update.
     * __CodePush.SyncStatus.AWAITING_USER_ACTION__ *(1)* - An update is available, and a confirmation dialog was shown to the end-user. (This is only applicable when the `updateDialog` is used)
     * __CodePush.SyncStatus.DOWNLOADING_PACKAGE__ *(2)* - An available update is being downloaded from the CodePush server.
-    * __CodePush.SyncStatus.INSTALLING_UPDATE__ *(3)* - An available udpate was downloaded and is about to be installed.
+    * __CodePush.SyncStatus.INSTALLING_UPDATE__ *(3)* - An available update was downloaded and is about to be installed.
     * __CodePush.SyncStatus.UP_TO_DATE__ *(4)* - The app is fully up-to-date with the configured deployment.
     * __CodePush.SyncStatus.UPDATE_IGNORED__ *(5)* - The app has an optional update, which the end-user chose to ignore. (This is only applicable when the `updateDialog` is used)
     * __CodePush.SyncStatus.UPDATE_INSTALLED__ *(6)* - An available update has been installed and will be run either immediately after the syncStatusCallback function returns or the next time the app resumes/restarts, depending on the `InstallMode` specified in `SyncOptions`.
@@ -285,7 +285,7 @@ The method returns a `Promise` that is resolved with a `SyncStatus` code that in
 * __CodePush.SyncStatus.UPDATE_IGNORED__ *(5)* - The app has an optional update, that the user chose to ignore.
 * __CodePush.SyncStatus.UPDATE_INSTALLED__ *(6)* - The update has been installed and will be run either immediately after the syncStatusCallback function returns or the next time the app resumes/restarts, depending on the `InstallMode` specified in `SyncOptions`.
 
-If the update check and/or the subseqeuent download fails for any reason, the `Promise` object returned by `sync` will be rejected with the reason.
+If the update check and/or the subsequent download fails for any reason, the `Promise` object returned by `sync` will be rejected with the reason.
 
 The `sync` method can be called anywhere you'd like to check for an update. That could be in the `componentWillMount` lifecycle event of your root component, the onPress handler of a `<TouchableHighlight>` component, in the callback of a periodic timer, or whatever else makes sense for your needs. Just like the `checkForUpdate` method, it will perform the network request to check for an update in the background, so it won't impact your UI thread and/or JavaScript thread's responsiveness.
 
