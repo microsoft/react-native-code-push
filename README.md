@@ -54,7 +54,7 @@ To integrate CodePush into your Android project, do the following steps:
     include ':app', ':react-native-code-push'
     project(':react-native-code-push').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-code-push/android/app')
     ```
-2. In your `android/app/build.gradle` file, add CodePush as one of the dependencies:
+2. In your `android/app/build.gradle` file, add the `:react-native-code-push` project as a compile-time dependency:
     
     ```gradle
     ...
@@ -97,7 +97,7 @@ To let the CodePush runtime know which deployment it should query for updates ag
 
 ## Plugin Configuration - Android
 
-After installing the plugin and sync-ing your Android Studio project with Gradle, you need to configure your app to consult CodePush for the location of your JS bundle, since it will "take control" of managing the current and all future versions. To do this, perform the following steps:
+After installing the plugin and syncing your Android Studio project with Gradle, you need to configure your app to consult CodePush for the location of your JS bundle, since it will "take control" of managing the current and all future versions. To do this, perform the following steps:
 
 1. Initialize the module in MainActivity.java:
     
@@ -133,7 +133,7 @@ After installing the plugin and sync-ing your Android Studio project with Gradle
     }
     ```
 
-2. Let the CodePush runtime know which deployment it should query for updates against. Be sure to set the `versionName` in your `android/app/build.gradle`:
+2. Ensure that the versionName property in your `android/app/build.gradle` file is set to a semver compliant value.
     
     ```gradle
     android {
