@@ -30,7 +30,7 @@ npm install --save react-native-code-push
 Once you've acquired the CodePush plugin, you need to integrate it into the Xcode project of your React Native app. To do this, take the following steps:
 
 1. Open your app's Xcode project
-2. Find the `CodePush.xcodeproj` file witin the `node_modules/react-native-code-push` directory, and drag it into the `Libraries` node in Xcode
+2. Find the `CodePush.xcodeproj` file within the `node_modules/react-native-code-push` directory, and drag it into the `Libraries` node in Xcode
 
     ![Add CodePush to project](https://cloud.githubusercontent.com/assets/516559/10322414/7688748e-6c32-11e5-83c1-00d3e6758df4.png)
 
@@ -66,7 +66,7 @@ Once your Xcode project has been setup to build/link the CodePush plugin, you ne
     jsCodeLocation = [CodePush bundleURL];
     ```
 
-This change configures your app to always load the most recent version of your app's JS bundle. On the initial launch, this will correspond to the file that was compiled with the app. However, after an update has been pushed via CodePush, this will return the location of the most recently installed update.
+This change configures your app to always load the most recent version of your app's JS bundle. On the first launch, this will correspond to the file that was compiled with the app. However, after an update has been pushed via CodePush, this will return the location of the most recently installed update.
 
 *NOTE: The `bundleURL` method assumes your app's JS bundle is named `main.jsbundle`. If you have configured your app to use a different file name, simply call the `bundleURLForResource:` method (which assumes you're using the `.jsbundle` extension) or `bundleURLForResource:withExtension:` method instead, in order to overwrite that default behavior*
 
@@ -225,7 +225,7 @@ codePush.sync();
 codePush.sync({ updateDialog: true, installMode: codePush.InstallMode.IMMEDIATE });
 ```
 
-*Note: If you want to determine whether you check and/or download an available update based on the end-user's device battery level, network conditions, etc. then simply wrap the call to `sync` in a condition that ensures you only call it when desired.*
+*Note: If you want to decide whether you check and/or download an available update based on the end-user's device battery level, network conditions, etc. then simply wrap the call to `sync` in a condition that ensures you only call it when desired.*
 
 While the `sync` method tries to make it easy to perform silent and active updates with little configuration, it accepts an "options" object that allows you to customize numerous aspects of the default behavior mentioned above:
 
