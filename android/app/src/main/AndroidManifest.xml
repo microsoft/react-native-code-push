@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.microsoft.reactnativecodepush">
+    package="com.microsoft.codepush.react">
 
     <uses-permission android:name="android.permission.INTERNET" />
 

@@ -112,7 +112,7 @@ After installing the plugin and sync-ing your Android Studio project with Gradle
     ```java
     ...
     // 1. Import the plugin class
-    import com.microsoft.reactnativecodepush.CodePush;
+    import com.microsoft.codepush.react.CodePush;
     
     // 2. Optional: extend FragmentActivity if you intend to show a dialog prompting users about updates.
     public class MainActivity extends FragmentActivity implements DefaultHardwareBackBtnHandler {
@@ -122,7 +122,6 @@ After installing the plugin and sync-ing your Android Studio project with Gradle
         protected void onCreate(Bundle savedInstanceState) {
             ...
             // 3. Initialize CodePush with your deployment key and an instance of your MainActivity.
-            // You can also set the deployment key in code by assigning the key to the `[CodePushConfig current].deploymentKey` property.*
             CodePush codePush = new CodePush("d73bf5d8-4fbd-4e55-a837-accd328a21ba", this);
             ...
             mReactInstanceManager = ReactInstanceManager.builder()

@@ -2,7 +2,9 @@
 
 var requestFetchAdapter = require("./request-fetch-adapter.js");
 var Sdk = require("code-push/script/acquisition-sdk").AcquisitionManager;
-var { NativeCodePush, PackageMixins, Alert } = require("./CodePushNativePlatformAdapter");
+var NativeCodePush = require("react-native").NativeModules.CodePush;
+var PackageMixins = require("./package-mixins")(NativeCodePush);
+var { Alert } = require("./CodePushNativePlatformAdapter");
 
 function checkForUpdate(deploymentKey = null) {
   var config, sdk;

@@ -1,13 +1,5 @@
 var Platform = require("Platform");
-var EventEmitter;
-
-if (Platform.OS === "android") {
-  var { DeviceEventEmitter } = require("react-native");
-  EventEmitter = DeviceEventEmitter;
-} else if (Platform.OS === "ios") {   
-  var { NativeAppEventEmitter } = require("react-native");
-  EventEmitter = NativeAppEventEmitter;
-}
+var { DeviceEventEmitter } = require("react-native");
 
 module.exports = (NativeCodePush) => {
   var remote = {
@@ -22,7 +14,7 @@ module.exports = (NativeCodePush) => {
       var downloadProgressSubscription;
       if (downloadProgressCallback) {
         // Use event subscription to obtain download progress.   
-        downloadProgressSubscription = EventEmitter.addListener(
+        downloadProgressSubscription = DeviceEventEmitter.addListener(
           "CodePushDownloadProgress",
           downloadProgressCallback
         );

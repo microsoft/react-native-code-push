@@ -1,13 +1,13 @@
-package com.microsoft.reactnativecodepush;
+package com.microsoft.codepush.react;
 
 import com.facebook.react.ReactPackage;
-import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
@@ -19,6 +19,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,8 +36,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class CodePush {
-
-    private String deploymentKey;
 
     private boolean resumablePendingUpdateAvailable = false;
     private boolean didUpdate = false;
@@ -55,7 +55,12 @@ public class CodePush {
     private CodePushPackage codePushPackage;
     private CodePushReactPackage codePushReactPackage;
     private CodePushNativeModule codePushNativeModule;
-    private CodePushConfig codePushConfig;
+
+    // Config properties.
+    private String deploymentKey;
+    private String appVersion;
+    private int buildVersion;
+    private final String serverUrl = "https://codepush.azurewebsites.net/";
 
     private Activity mainActivity;
     private Context applicationContext;
@@ -66,7 +71,17 @@ public class CodePush {
         this.codePushPackage = new CodePushPackage(mainActivity.getFilesDir().getAbsolutePath());
         this.mainActivity = mainActivity;
         this.applicationContext = mainActivity.getApplicationContext();
-        this.codePushConfig = new CodePushConfig(deploymentKey, this.applicationContext);
+        this.deploymentKey = deploymentKey;
+
+        PackageInfo pInfo = null;
+        try {
+            pInfo = applicationContext.getPackageManager().getPackageInfo(applicationContext.getPackageName(), 0);
+            appVersion = pInfo.versionName;
+            buildVersion = pInfo.versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new CodePushUnknownException("Unable to get package info for " + applicationContext.getPackageName(), e);
+        }
+
         checkForPendingUpdate(/*needsRestart*/ false);
     }
 
@@ -113,12 +128,14 @@ public class CodePush {
                 JSONObject pendingUpdateJSON = new JSONObject(pendingUpdateString);
                 String pendingHash = pendingUpdateJSON.getString(PENDING_UPDATE_HASH_KEY);
                 String currentHash = codePushPackage.getCurrentPackageHash();
-                if (pendingHash.equals(currentHash)) {
-                    int rollbackTimeout = pendingUpdateJSON.getInt(PENDING_UPDATE_ROLLBACK_TIMEOUT_KEY);
-                    initializeUpdateWithRollbackTimeout(rollbackTimeout, needsRestart);
-
-                    settings.edit().remove(PENDING_UPDATE_KEY).commit();
+                if (!pendingHash.equals(currentHash)) {
+                    throw new CodePushUnknownException("Pending hash " + pendingHash +
+                            " and current hash " + currentHash + " are different");
                 }
+
+                int rollbackTimeout = pendingUpdateJSON.getInt(PENDING_UPDATE_ROLLBACK_TIMEOUT_KEY);
+                initializeUpdateWithRollbackTimeout(rollbackTimeout, needsRestart);
+                settings.edit().remove(PENDING_UPDATE_KEY).commit();
             } catch (JSONException e) {
                 // Should not happen.
                 throw new CodePushUnknownException("Unable to parse pending update metadata " +
@@ -134,16 +151,6 @@ public class CodePush {
         if (resumablePendingUpdateAvailable) {
             checkForPendingUpdate(/*needsRestart*/ true);
         }
-    }
-
-    private WritableMap constantsToExport() {
-        // Export the values of the CodePushInstallMode enum
-        // so that the script-side can easily stay in sync
-        WritableMap map = new WritableNativeMap();
-        map.putInt("codePushInstallModeImmediate", CodePushInstallMode.IMMEDIATE.getValue());
-        map.putInt("codePushInstallModeOnNextRestart", CodePushInstallMode.ON_NEXT_RESTART.getValue());
-        map.putInt("codePushInstallModeOnNextResume", CodePushInstallMode.ON_NEXT_RESUME.getValue());
-        return map;
     }
 
     private void initializeUpdateWithRollbackTimeout(int rollbackTimeout, boolean needsRestart) {
@@ -248,15 +255,13 @@ public class CodePush {
     private class CodePushNativeModule extends ReactContextBaseJavaModule {
 
         private void loadBundle() {
-            String assetsBundleFileUrl = CodePush.this.getBundleUrl(CodePush.this.assetsBundleFileName);
             Intent intent = mainActivity.getIntent();
             mainActivity.finish();
             mainActivity.startActivity(intent);
         }
 
         @ReactMethod
-        public void installUpdate(ReadableMap updatePackage, int rollbackTimeout, int installMode,
-                                  Callback resolve, Callback reject) {
+        public void installUpdate(ReadableMap updatePackage, int rollbackTimeout, int installMode, Promise promise) {
             try {
                 codePushPackage.installPackage(updatePackage);
                 if (installMode != CodePushInstallMode.IMMEDIATE.getValue()) {
@@ -268,15 +273,15 @@ public class CodePush {
                         savePendingUpdate(pendingHash, rollbackTimeout);
                     }
                 }
-                resolve.invoke("");
+                promise.resolve("");
             } catch (IOException e) {
                 e.printStackTrace();
-                reject.invoke(e.getMessage());
+                promise.reject(e.getMessage());
             }
         }
 
         @ReactMethod
-        public void downloadUpdate(final ReadableMap updatePackage, final Callback resolve, final Callback reject) {
+        public void downloadUpdate(final ReadableMap updatePackage, final Promise promise) {
             try {
                 codePushPackage.downloadPackage(applicationContext, updatePackage, new DownloadProgressCallback() {
                     @Override
@@ -288,51 +293,56 @@ public class CodePush {
                 });
 
                 WritableMap newPackage = codePushPackage.getPackage(CodePushUtils.tryGetString(updatePackage, codePushPackage.PACKAGE_HASH_KEY));
-                resolve.invoke(newPackage);
+                promise.resolve(newPackage);
             } catch (IOException e) {
                 e.printStackTrace();
-                reject.invoke(e.getMessage());
+                promise.reject(e.getMessage());
             }
         }
 
         @ReactMethod
-        public void getConfiguration(Callback resolve, Callback reject) {
-            resolve.invoke(codePushConfig.getConfiguration());
+        public void getConfiguration(Promise promise) {
+            WritableNativeMap configMap = new WritableNativeMap();
+            configMap.putString("appVersion", appVersion);
+            configMap.putInt("buildVersion", buildVersion);
+            configMap.putString("deploymentKey", deploymentKey);
+            configMap.putString("serverUrl", serverUrl);
+            promise.resolve(configMap);
         }
 
         @ReactMethod
-        public void getCurrentPackage(Callback resolve, Callback reject) {
+        public void getCurrentPackage(Promise promise) {
             try {
-                resolve.invoke(codePushPackage.getCurrentPackage());
+                promise.resolve(codePushPackage.getCurrentPackage());
             } catch (IOException e) {
                 e.printStackTrace();
-                reject.invoke(e.getMessage());
+                promise.reject(e.getMessage());
             }
         }
 
         @ReactMethod
-        public void isFailedUpdate(String packageHash, Callback resolve, Callback reject) {
-            resolve.invoke(isFailedHash(packageHash));
+        public void isFailedUpdate(String packageHash, Promise promise) {
+            promise.resolve(isFailedHash(packageHash));
         }
 
         @ReactMethod
-        public void isFirstRun(String packageHash, Callback resolve, Callback reject) {
+        public void isFirstRun(String packageHash, Promise promise) {
             try {
                 boolean isFirstRun = didUpdate
                         && packageHash != null
                         && packageHash.length() > 0
                         && packageHash.equals(codePushPackage.getCurrentPackageHash());
-                resolve.invoke(isFirstRun);
+                promise.resolve(isFirstRun);
             } catch (IOException e) {
                 e.printStackTrace();
-                reject.invoke(e.getMessage());
+                promise.reject(e.getMessage());
             }
         }
 
         @ReactMethod
-        public void notifyApplicationReady(Callback resolve, Callback reject) {
+        public void notifyApplicationReady(Promise promise) {
             cancelRollbackTimer();
-            resolve.invoke("");
+            promise.resolve("");
         }
 
         @ReactMethod

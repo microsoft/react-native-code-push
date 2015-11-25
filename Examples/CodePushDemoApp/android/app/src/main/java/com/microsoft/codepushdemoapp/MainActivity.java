@@ -10,7 +10,7 @@ import com.facebook.react.ReactRootView;
 import com.facebook.react.modules.core.DefaultHardwareBackBtnHandler;
 import com.facebook.react.shell.MainReactPackage;
 import com.facebook.soloader.SoLoader;
-import com.microsoft.reactnativecodepush.CodePush;
+import com.microsoft.codepush.react.CodePush;
 
 public class MainActivity extends FragmentActivity implements DefaultHardwareBackBtnHandler {
 
@@ -25,7 +25,7 @@ public class MainActivity extends FragmentActivity implements DefaultHardwareBac
         super.onCreate(savedInstanceState);
         mReactRootView = new ReactRootView(this);
 
-        codePush = new CodePush("DEPLOYMENT_KEY_HERE", this);
+        codePush = new CodePush("d73bf5d8-4fbd-4e55-a837-accd328a21ba", this);
 
         ReactInstanceManager.Builder builder = ReactInstanceManager.builder()
                 .setApplication(getApplication())

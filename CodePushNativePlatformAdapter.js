@@ -1,38 +1,9 @@
 'use strict';
 
-var NativeCodePush = require("react-native").NativeModules.CodePush;
-
 var Platform = require("Platform");
 var Alert;
 
 if (Platform.OS === "android") {
-  /* 
-   * Promisify native methods. Assumes that every native method takes
-   * two callback functions, resolve and reject.
-   */
-  var methodsToPromisify = [
-    "installUpdate",
-    "downloadUpdate",
-    "getConfiguration",
-    "getCurrentPackage",
-    "isFailedUpdate",
-    "isFirstRun",
-    "notifyApplicationReady",
-    "setDeploymentKey"
-  ];
-  
-  methodsToPromisify.forEach((methodName) => {
-    var aMethod = NativeCodePush[methodName];
-    NativeCodePush[methodName] = function() {
-      var args = [].slice.apply(arguments);
-      return new Promise((resolve, reject) => {
-        args.push(resolve);
-        args.push(reject);
-        aMethod.apply(this, args);
-      });
-    }
-  });
-  
   var CodePushDialog = require("react-native").NativeModules.CodePushDialog;
   Alert = {
     alert: function(title, message, buttons) {
@@ -58,10 +29,6 @@ if (Platform.OS === "android") {
   Alert = AlertIOS;
 }
 
-var PackageMixins = require("./package-mixins")(NativeCodePush);
-
 module.exports = {
-  NativeCodePush: NativeCodePush,
-  PackageMixins: PackageMixins,
   Alert: Alert
 }

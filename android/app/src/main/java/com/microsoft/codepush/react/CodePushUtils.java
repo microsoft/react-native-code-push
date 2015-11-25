@@ -1,4 +1,4 @@
-package com.microsoft.reactnativecodepush;
+package com.microsoft.codepush.react;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.NoSuchKeyException;
