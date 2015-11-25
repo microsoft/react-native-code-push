@@ -19,12 +19,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -34,6 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 public class CodePush {
 
@@ -51,6 +55,7 @@ public class CodePush {
     private final String ASSETS_BUNDLE_PREFIX = "assets://";
     private final String CODE_PUSH_PREFERENCES = "CodePush";
     private final String DOWNLOAD_PROGRESS_EVENT_NAME = "CodePushDownloadProgress";
+    private final String RESOURCES_BUNDLE = "resources.arsc";
 
     private CodePushPackage codePushPackage;
     private CodePushReactPackage codePushReactPackage;
@@ -99,14 +104,34 @@ public class CodePush {
     public String getBundleUrl(String assetsBundleFileName) {
         this.assetsBundleFileName = assetsBundleFileName;
         String binaryJsBundleUrl = ASSETS_BUNDLE_PREFIX + assetsBundleFileName;
+        ZipFile applicationFile;
+        long binaryResourcesModifiedTime = -1;
+
+        ApplicationInfo ai = null;
         try {
-            String packageFile = codePushPackage.getCurrentPackageBundlePath();
-            if (packageFile == null) {
+            ai = applicationContext.getPackageManager().getApplicationInfo(applicationContext.getPackageName(), 0);
+            applicationFile = new ZipFile(ai.sourceDir);
+            ZipEntry classesDexEntry = applicationFile.getEntry(RESOURCES_BUNDLE);
+            binaryResourcesModifiedTime = classesDexEntry.getTime();
+            applicationFile.close();
+        } catch (PackageManager.NameNotFoundException | IOException e) {
+            throw new CodePushUnknownException("Error in getting file information about compiled resources", e);
+        }
+
+        try {
+            String packageFilePath = codePushPackage.getCurrentPackageBundlePath();
+            if (packageFilePath == null) {
                 // There has not been any downloaded updates.
                 return binaryJsBundleUrl;
             }
 
-            return packageFile;
+            File packageFile = new File(packageFilePath);
+            if (packageFile.lastModified() < binaryResourcesModifiedTime) {
+                // The binary version is newer.
+                return binaryJsBundleUrl;
+            }
+
+            return packageFilePath;
         } catch (IOException e) {
             throw new CodePushUnknownException("Error in getting current package bundle path", e);
         }
