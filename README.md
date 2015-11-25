@@ -10,7 +10,7 @@ A React Native app is composed of a JavaScript bundle file, which is generated b
 
 The CodePush plugin helps get product improvements in front of your end-users instantly, by keeping the JavaScript bundle synchronized with updates that are released to the CodePush server. This way, your app gets the benefits of an offline mobile experience, as well as the "web-like" agility of side-loading updates as soon as they are available. It's a win-win!
 
-*Note: Any product changes which touch native code (e.g. modifying your `AppDelegate.m` file, adding a new plugin) cannot be distributed via CodePush, and therefore, must be updated via the appropriate store(s).*
+*Note: Any product changes which touch native code (e.g. modifying your `AppDelegate.m`/`MainActivity.java` file, adding a new plugin) cannot be distributed via CodePush, and therefore, must be updated via the appropriate store(s).*
 
 ## Supported React Native platforms
 
@@ -175,7 +175,7 @@ If an update is available, it will be silently downloaded, and installed the nex
 Once your app has been configured and distributed to your users, and you've made some JS changes, it's time to release it to them instantly! To do this, run the following steps:
 
 1. Execute `react-native bundle` in order to generate the updated JS bundle for your app.
-2. Execute `code-push release <appName> ./ios/main.jsbundle <appVersion> --deploymentName <deploymentName>` in order to publish the generated JS bundle to the server (assuming your CWD is the root directory of your React Native app). 
+2. Execute `code-push release <appName> <jsBundleFilePath> <appVersion> --deploymentName <deploymentName>` in order to publish the generated JS bundle to the server. Assuming your CWD is the root directory of your React Native app, `<jsBundleFilePath>` could be `iOS/main.jsbundle` for iOS, or `android/app/src/main/assets/index.android.jsbundle` for Android.
 
 And that's it! For more information regarding the CodePush API, including the various options you can pass to the `sync` method, refer to the reference section below. Additionally, for more information regarding the CLI and how the release (or promote) commands work, refer to it's [documentation](http://microsoft.github.io/code-push/docs/cli.html).
 

@@ -41,6 +41,7 @@ import java.util.zip.ZipFile;
 
 public class CodePush {
 
+    private static int rollbackTimeout = 0;
     private boolean resumablePendingUpdateAvailable = false;
     private boolean didUpdate = false;
     private Timer timer;
@@ -88,6 +89,11 @@ public class CodePush {
         }
 
         checkForPendingUpdate(/*needsRestart*/ false);
+
+        if (0 != rollbackTimeout) {
+            startRollbackTimer(rollbackTimeout);
+            rollbackTimeout = 0;
+        }
     }
 
     public ReactPackage getReactPackage() {
@@ -185,9 +191,7 @@ public class CodePush {
             codePushNativeModule.loadBundle();
         }
 
-        if (0 != rollbackTimeout) {
-            startRollbackTimer(rollbackTimeout);
-        }
+        CodePush.rollbackTimeout = rollbackTimeout;
     }
 
     private boolean isFailedHash(String packageHash) {
@@ -282,7 +286,7 @@ public class CodePush {
         private void loadBundle() {
             Intent intent = mainActivity.getIntent();
             mainActivity.finish();
-            mainActivity.startActivity(intent);
+            applicationContext.startActivity(intent);
         }
 
         @ReactMethod
