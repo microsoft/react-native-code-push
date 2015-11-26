@@ -113,17 +113,15 @@ static NSString *const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
     self = [super init];
     
     if (self) {
-        // Do an async check to see whether
-        // we need to start the rollback timer
+        // Do a check to see whether we need to start the rollback timer
         // due to a pending update being installed at start
-        [self handleInitIfPendingUpdate];
+        [self initializeUpdateAfterRestart];
     }
     
     return self;
 }
 
-
-- (void)handleInitIfPendingUpdate
+- (void)initializeUpdateAfterRestart
 {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];

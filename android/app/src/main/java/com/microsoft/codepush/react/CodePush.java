@@ -87,7 +87,7 @@ public class CodePush {
             throw new CodePushUnknownException("Unable to get package info for " + applicationContext.getPackageName(), e);
         }
 
-        handleInitIfPendingUpdate();
+        initializeUpdateAfterRestart();
     }
 
     public ReactPackage getReactPackage() {
@@ -231,7 +231,7 @@ public class CodePush {
         }, timeout);
     }
 
-    private void handleInitIfPendingUpdate() {
+    private void initializeUpdateAfterRestart() {
         SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
         String pendingUpdateString = settings.getString(PENDING_UPDATE_KEY, null);
 
