@@ -1,6 +1,6 @@
 'use strict';
 
-var Platform = require("react-native").Platform;
+var { Platform } = require("react-native");
 var Alert;
 
 if (Platform.OS === "android") {

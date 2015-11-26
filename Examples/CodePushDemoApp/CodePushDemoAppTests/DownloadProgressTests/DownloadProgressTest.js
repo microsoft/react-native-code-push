@@ -1,11 +1,10 @@
 "use strict";
 
 var React = require("react-native");
-var { DeviceEventEmitter } = require("react-native");
+var { Platform, DeviceEventEmitter } = require("react-native");
 var CodePushSdk = require("react-native-code-push");
 var NativeCodePush = require("react-native").NativeModules.CodePush;
 var RCTTestModule = require('NativeModules').TestModule || {};
-var Platform = require("react-native").Platform;
 
 var {
   Text,

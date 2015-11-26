@@ -1,4 +1,4 @@
-var Platform = require("react-native").Platform;
+var { Platform } = require("react-native");
 
 var packages = {
   smallPackage: {

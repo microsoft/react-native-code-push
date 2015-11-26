@@ -1,5 +1,4 @@
-var Platform = require("react-native").Platform;
-var { DeviceEventEmitter } = require("react-native");
+var { Platform, DeviceEventEmitter } = require("react-native");
 
 module.exports = (NativeCodePush) => {
   var remote = {
