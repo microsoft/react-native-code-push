@@ -1,6 +1,7 @@
 package com.microsoft.codepush.react;
 
 import com.facebook.react.ReactPackage;
+import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.NativeModule;
@@ -254,6 +255,8 @@ public class CodePush {
 
     private class CodePushNativeModule extends ReactContextBaseJavaModule {
 
+        private LifecycleEventListener lifecycleEventListener = null;
+
         private void loadBundle() {
             Intent intent = mainActivity.getIntent();
             mainActivity.finish();
@@ -273,22 +276,26 @@ public class CodePush {
                 }
 
                 if (installMode != CodePushInstallMode.IMMEDIATE.getValue()) {
-                    restartPendingUpdate();
+                    loadBundle();
                 } else if (installMode == CodePushInstallMode.ON_NEXT_RESUME.getValue()) {
-                    getReactApplicationContext().addLifecycleEventListener(new LifecycleEventListener() {
-                        @Override
-                        public void onHostResume() {
-                            restartPendingUpdate();
-                        }
+                    // Ensure we do not add the listener twice.
+                    if (lifecycleEventListener == null) {
+                        lifecycleEventListener = new LifecycleEventListener() {
+                            @Override
+                            public void onHostResume() {
+                                loadBundle();
+                            }
 
-                        @Override
-                        public void onHostPause() {
-                        }
+                            @Override
+                            public void onHostPause() {
+                            }
 
-                        @Override
-                        public void onHostDestroy() {
-                        }
-                    });
+                            @Override
+                            public void onHostDestroy() {
+                            }
+                        };
+                        getReactApplicationContext().addLifecycleEventListener(lifecycleEventListener);
+                    }
                 }
 
                 promise.resolve("");
