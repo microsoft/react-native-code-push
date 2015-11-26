@@ -7,7 +7,7 @@
 #import "CodePush.h"
 
 @implementation CodePush {
-    BOOL hasRestartListener;
+    BOOL _hasResumeListener;
 }
 
 RCT_EXPORT_MODULE()
@@ -338,14 +338,14 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
                 [self loadBundle];
             } else if (installMode == CodePushInstallModeOnNextResume) {
                 // Ensure we do not add the listener twice.
-                if (!hasRestartListener) {
+                if (!_hasResumeListener) {
                     // Register for app resume notifications so that we
                     // can check for pending updates which support "restart on resume"
                     [[NSNotificationCenter defaultCenter] addObserver:self
                                                              selector:@selector(loadBundle)
                                                                  name:UIApplicationWillEnterForegroundNotification
                                                                object:[UIApplication sharedApplication]];
-                    hasRestartListener = true;
+                    _hasResumeListener = true;
                 }
             }
             // Signal to JS that the update has been applied.
