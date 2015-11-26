@@ -170,6 +170,11 @@ public class CodePushPackage {
     public void installPackage(ReadableMap updatePackage) throws IOException {
         String packageHash = CodePushUtils.tryGetString(updatePackage, PACKAGE_HASH_KEY);
         WritableMap info = getCurrentPackageInfo();
+        String previousPackageHash = getPreviousPackageHash();
+        if (previousPackageHash != null && !previousPackageHash.equals(packageHash)) {
+            CodePushUtils.deleteDirectoryAtPath(getPackageFolderPath(previousPackageHash));
+        }
+
         info.putString(PREVIOUS_PACKAGE_KEY, CodePushUtils.tryGetString(info, CURRENT_PACKAGE_KEY));
         info.putString(CURRENT_PACKAGE_KEY, packageHash);
         updateCurrentPackageInfo(info);
