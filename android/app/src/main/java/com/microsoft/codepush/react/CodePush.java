@@ -275,7 +275,7 @@ public class CodePush {
                     savePendingUpdate(pendingHash, rollbackTimeout);
                 }
 
-                if (installMode != CodePushInstallMode.IMMEDIATE.getValue()) {
+                if (installMode == CodePushInstallMode.IMMEDIATE.getValue()) {
                     loadBundle();
                 } else if (installMode == CodePushInstallMode.ON_NEXT_RESUME.getValue()) {
                     // Ensure we do not add the listener twice.

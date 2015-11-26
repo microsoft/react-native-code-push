@@ -218,6 +218,15 @@ NSString * const UpdateBundleFileName = @"app.jsbundle";
         return;
     }
     
+    NSString *previousPackageHash = [self getPreviousPackageHash:error];
+    if (!*error && previousPackageHash && ![previousPackageHash isEqualToString:packageHash]) {
+        NSString *previousPackageFolderPath = [self getPackageFolderPath:previousPackageHash];
+        [[NSFileManager defaultManager] removeItemAtPath:previousPackageFolderPath error:error];
+        if (*error) {
+            return;
+        }
+    }
+    
     [info setValue:info[@"currentPackage"] forKey:@"previousPackage"];
     [info setValue:packageHash forKey:@"currentPackage"];
 
