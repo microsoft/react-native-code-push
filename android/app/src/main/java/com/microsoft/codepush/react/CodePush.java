@@ -1,6 +1,7 @@
 package com.microsoft.codepush.react;
 
 import com.facebook.react.ReactPackage;
+import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.NativeModule;
@@ -41,7 +42,6 @@ import java.util.zip.ZipFile;
 
 public class CodePush {
 
-    private boolean resumablePendingUpdateAvailable = false;
     private boolean didUpdate = false;
     private Timer timer;
     private boolean usingTestFolder = false;
@@ -87,7 +87,7 @@ public class CodePush {
             throw new CodePushUnknownException("Unable to get package info for " + applicationContext.getPackageName(), e);
         }
 
-        checkForPendingUpdate(/*needsRestart*/ false);
+        initializeUpdateAfterRestart();
     }
 
     public ReactPackage getReactPackage() {
@@ -141,52 +141,6 @@ public class CodePush {
         if(timer != null) {
             timer.cancel();
             timer = null;
-        }
-    }
-
-    private void checkForPendingUpdate(boolean needsRestart) {
-        SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
-        String pendingUpdateString = settings.getString(PENDING_UPDATE_KEY, null);
-
-        if (pendingUpdateString != null) {
-            try {
-                JSONObject pendingUpdateJSON = new JSONObject(pendingUpdateString);
-                String pendingHash = pendingUpdateJSON.getString(PENDING_UPDATE_HASH_KEY);
-                String currentHash = codePushPackage.getCurrentPackageHash();
-                if (!pendingHash.equals(currentHash)) {
-                    throw new CodePushUnknownException("Pending hash " + pendingHash +
-                            " and current hash " + currentHash + " are different");
-                }
-
-                int rollbackTimeout = pendingUpdateJSON.getInt(PENDING_UPDATE_ROLLBACK_TIMEOUT_KEY);
-                initializeUpdateWithRollbackTimeout(rollbackTimeout, needsRestart);
-                settings.edit().remove(PENDING_UPDATE_KEY).commit();
-            } catch (JSONException e) {
-                // Should not happen.
-                throw new CodePushUnknownException("Unable to parse pending update metadata " +
-                        pendingUpdateString + " stored in SharedPreferences", e);
-            } catch (IOException e) {
-                // There is no current package hash.
-                throw new CodePushUnknownException("Should not register a pending update without a saving a current package", e);
-            }
-        }
-    }
-
-    private void checkForPendingUpdateDuringResume() {
-        if (resumablePendingUpdateAvailable) {
-            checkForPendingUpdate(/*needsRestart*/ true);
-        }
-    }
-
-    private void initializeUpdateWithRollbackTimeout(int rollbackTimeout, boolean needsRestart) {
-        didUpdate = true;
-
-        if (needsRestart) {
-            codePushNativeModule.loadBundle();
-        }
-
-        if (0 != rollbackTimeout) {
-            startRollbackTimer(rollbackTimeout);
         }
     }
 
@@ -277,7 +231,31 @@ public class CodePush {
         }, timeout);
     }
 
+    private void initializeUpdateAfterRestart() {
+        SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
+        String pendingUpdateString = settings.getString(PENDING_UPDATE_KEY, null);
+
+        if (pendingUpdateString != null) {
+            try {
+                didUpdate = true;
+                JSONObject pendingUpdateJSON = new JSONObject(pendingUpdateString);
+                int rollbackTimeout = pendingUpdateJSON.getInt(PENDING_UPDATE_ROLLBACK_TIMEOUT_KEY);
+                if (0 != rollbackTimeout) {
+                    startRollbackTimer(rollbackTimeout);
+                }
+
+                settings.edit().remove(PENDING_UPDATE_KEY).commit();
+            } catch (JSONException e) {
+                // Should not happen.
+                throw new CodePushUnknownException("Unable to parse pending update metadata " +
+                        pendingUpdateString + " stored in SharedPreferences", e);
+            }
+        }
+    }
+
     private class CodePushNativeModule extends ReactContextBaseJavaModule {
+
+        private LifecycleEventListener lifecycleEventListener = null;
 
         private void loadBundle() {
             Intent intent = mainActivity.getIntent();
@@ -289,15 +267,37 @@ public class CodePush {
         public void installUpdate(ReadableMap updatePackage, int rollbackTimeout, int installMode, Promise promise) {
             try {
                 codePushPackage.installPackage(updatePackage);
+
+                String pendingHash = CodePushUtils.tryGetString(updatePackage, codePushPackage.PACKAGE_HASH_KEY);
+                if (pendingHash == null) {
+                    throw new CodePushUnknownException("Update package to be installed has no hash.");
+                } else {
+                    savePendingUpdate(pendingHash, rollbackTimeout);
+                }
+
                 if (installMode != CodePushInstallMode.IMMEDIATE.getValue()) {
-                    resumablePendingUpdateAvailable = installMode == CodePushInstallMode.ON_NEXT_RESUME.getValue();
-                    String pendingHash = CodePushUtils.tryGetString(updatePackage, codePushPackage.PACKAGE_HASH_KEY);
-                    if (pendingHash == null) {
-                        throw new CodePushUnknownException("Update package to be installed has no hash.");
-                    } else {
-                        savePendingUpdate(pendingHash, rollbackTimeout);
+                    loadBundle();
+                } else if (installMode == CodePushInstallMode.ON_NEXT_RESUME.getValue()) {
+                    // Ensure we do not add the listener twice.
+                    if (lifecycleEventListener == null) {
+                        lifecycleEventListener = new LifecycleEventListener() {
+                            @Override
+                            public void onHostResume() {
+                                loadBundle();
+                            }
+
+                            @Override
+                            public void onHostPause() {
+                            }
+
+                            @Override
+                            public void onHostDestroy() {
+                            }
+                        };
+                        getReactApplicationContext().addLifecycleEventListener(lifecycleEventListener);
                     }
                 }
+
                 promise.resolve("");
             } catch (IOException e) {
                 e.printStackTrace();
@@ -377,12 +377,34 @@ public class CodePush {
 
         @ReactMethod
         public void restartImmediateUpdate(int rollbackTimeout) {
-            initializeUpdateWithRollbackTimeout(rollbackTimeout, /*needsRestart*/ true);
+            loadBundle();
         }
 
         @ReactMethod
         public void restartPendingUpdate() {
-            checkForPendingUpdate(/*needsRestart*/ true);
+            SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
+            String pendingUpdateString = settings.getString(PENDING_UPDATE_KEY, null);
+
+            if (pendingUpdateString != null) {
+                try {
+                    JSONObject pendingUpdateJSON = new JSONObject(pendingUpdateString);
+                    String pendingHash = pendingUpdateJSON.getString(PENDING_UPDATE_HASH_KEY);
+                    String currentHash = codePushPackage.getCurrentPackageHash();
+                    if (!pendingHash.equals(currentHash)) {
+                        throw new CodePushUnknownException("Pending hash " + pendingHash +
+                                " and current hash " + currentHash + " are different");
+                    }
+
+                    loadBundle();
+                } catch (JSONException e) {
+                    // Should not happen.
+                    throw new CodePushUnknownException("Unable to parse pending update metadata " +
+                            pendingUpdateString + " stored in SharedPreferences", e);
+                } catch (IOException e) {
+                    // There is no current package hash.
+                    throw new CodePushUnknownException("Should not register a pending update without a saving a current package", e);
+                }
+            }
         }
 
         @Override
@@ -413,21 +435,6 @@ public class CodePush {
 
             nativeModules.add(CodePush.this.codePushNativeModule);
             nativeModules.add(dialogModule);
-
-            reactApplicationContext.addLifecycleEventListener(new LifecycleEventListener() {
-                @Override
-                public void onHostResume() {
-                    CodePush.this.checkForPendingUpdateDuringResume();
-                }
-
-                @Override
-                public void onHostPause() {
-                }
-
-                @Override
-                public void onHostDestroy() {
-                }
-            });
 
             return nativeModules;
         }
