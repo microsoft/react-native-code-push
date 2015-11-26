@@ -362,6 +362,7 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
             if (installMode == CodePushInstallModeImmediate) {
                 [self loadBundle];
             } else if (installMode == CodePushInstallModeOnNextResume) {
+                // Ensure we do not add the listener twice.
                 if (!hasRestartListener) {
                     // Register for app resume notifications so that we
                     // can check for pending updates which support "restart on resume"
