@@ -354,6 +354,9 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
         if (error) {
             reject(error);
         } else {
+            [self savePendingUpdate:updatePackage[@"packageHash"]
+                    rollbackTimeout:rollbackTimeout];
+            
             if (installMode == CodePushInstallModeImmediate) {
                 [self restartPendingUpdate];
             } else if (installMode == CodePushInstallModeOnNextResume) {
