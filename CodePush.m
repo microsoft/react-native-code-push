@@ -113,14 +113,16 @@ static NSString *const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
     self = [super init];
     
     if (self) {
-        // Do a check to see whether we need to start the rollback timer
-        // due to a pending update being installed at start
         [self initializeUpdateAfterRestart];
     }
     
     return self;
 }
 
+/*
+ * This method starts the rollback protection timer
+ * and is used when a new update is initialized.
+ */
 - (void)initializeUpdateAfterRestart
 {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
@@ -138,31 +140,6 @@ static NSString *const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
         // Clear the pending update and sync
         [preferences removeObjectForKey:PendingUpdateKey];
         [preferences synchronize];
-    }
-}
-
-
-/*
- * This method performs the actual initialization work for an update
- * to ensure that the necessary state is setup, including:
- * --------------------------------------------------------
- * 1. Updating the current bundle URL to point at the latest update on disk
- * 2. Optionally restarting the app to load the new bundle
- * 3. Optionally starting the rollback protection timer
- */
-- (void)initializeUpdateWithRollbackTimeout:(int)rollbackTimeout
-                               needsRestart:(BOOL)needsRestart
-{
-    didUpdate = YES;
-    
-    if (needsRestart) {
-        [self loadBundle];
-    }
-    
-    if (0 != rollbackTimeout) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self startRollbackTimer:rollbackTimeout];
-        });
     }
 }
 
