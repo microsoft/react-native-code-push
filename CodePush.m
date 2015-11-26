@@ -396,7 +396,7 @@ RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
 /*
  * This method is the native side of the CodePush.restartApp() method.
  */
-RCT_EXPORT_METHOD(restartApp
+RCT_EXPORT_METHOD(restartApp)
 {
     [self loadBundle];
 }
