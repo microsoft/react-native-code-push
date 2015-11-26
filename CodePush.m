@@ -394,33 +394,11 @@ RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
 }
 
 /*
- * This method isn't publicly exposed via the "react-native-code-push"
- * module, and is only used internally to support immediately installed updates.
+ * This method is the native side of the CodePush.restartApp() method.
  */
-RCT_EXPORT_METHOD(restartImmediateUpdate:(int)rollbackTimeout)
+RCT_EXPORT_METHOD(restartApp
 {
     [self loadBundle];
-}
-
-/*
- * This method is the native side of the CodePush.restartPendingUpdate() method.
- */
-RCT_EXPORT_METHOD(restartPendingUpdate)
-{
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
-        NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];
-        
-        if (pendingUpdate) {
-            NSError *error;
-            NSString *pendingHash = pendingUpdate[PendingUpdateHashKey];
-            NSString *currentHash = [CodePushPackage getCurrentPackageHash:&error];
-            
-            NSAssert([pendingHash isEqualToString:currentHash], @"There is a pending update but it's hash doesn't match that of the current package.");
-            
-            [self loadBundle];
-        }
-    });
 }
 
 RCT_EXPORT_METHOD(setUsingTestFolder:(BOOL)shouldUseTestFolder)
