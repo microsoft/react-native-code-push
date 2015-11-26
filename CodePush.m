@@ -6,9 +6,7 @@
 
 #import "CodePush.h"
 
-@implementation CodePush {
-    BOOL _resumablePendingUpdateAvailable;
-}
+@implementation CodePush
 
 RCT_EXPORT_MODULE()
 
@@ -84,55 +82,6 @@ static NSString *const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
     });
 }
 
-/* 
- * This method checks to see whether a "pending update" has been applied
- * (e.g. install was called with a non-immediate mode), but the app hasn't
- * yet been restarted (either naturally or programmatically). If there is one,
- * it will restart the app (if specified), and start the rollback timer.
- *
- * Note: This method is safe to call from any thread.
- */
-- (void)checkForPendingUpdate:(BOOL)needsRestart
-{
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
-        NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];
-        
-        if (pendingUpdate) {
-            NSError *error;
-            NSString *pendingHash = pendingUpdate[PendingUpdateHashKey];
-            NSString *currentHash = [CodePushPackage getCurrentPackageHash:&error];
-            
-            NSAssert([pendingHash isEqualToString:currentHash], @"There is a pending update but it's hash doesn't match that of the current package.");
-            
-            // Kick off the rollback timer and ensure that the necessary state is setup for the pending update.
-            int rollbackTimeout = [pendingUpdate[PendingUpdateRollbackTimeoutKey] intValue];
-            [self initializeUpdateWithRollbackTimeout:rollbackTimeout needsRestart:needsRestart];
-                            
-            // Clear the pending update and sync
-            [preferences removeObjectForKey:PendingUpdateKey];
-            [preferences synchronize];
-        }
-    });
-}
-
-/*
- * This method is meant as a handler for the global app
- * resume notification, and therefore, should not be called
- * directly. It simply checks to see whether there is a pending
- * update that is meant to be installed on resume, and if so
- * it applies it and restarts the app.
- */
-- (void)checkForPendingUpdateDuringResume
-{
-    // In order to ensure that CodePush doesn't impact the app's
-    // resume experience, we're using a simple boolean check to
-    // check whether we need to restart, before reading the defaults store
-    if (_resumablePendingUpdateAvailable) {
-        [self checkForPendingUpdate:YES];
-    }
-}
-
 /*
  * This method is used by the React Native bridge to allow
  * our plugin to expose constants to the JS-side. In our case
@@ -165,18 +114,33 @@ static NSString *const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
         // Do an async check to see whether
         // we need to start the rollback timer
         // due to a pending update being installed at start
-        [self checkForPendingUpdate:NO];
-        
-        // Register for app resume notifications so that we
-        // can check for pending updates which support "restart on resume"
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(checkForPendingUpdateDuringResume)
-                                                     name:UIApplicationWillEnterForegroundNotification
-                                                   object:[UIApplication sharedApplication]];
+        [self handleInitIfPendingUpdate];
     }
     
     return self;
 }
+
+
+- (void)handleInitIfPendingUpdate
+{
+    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+    NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];
+    
+    if (pendingUpdate) {
+        didUpdate = true;
+        int rollbackTimeout = [pendingUpdate[PendingUpdateRollbackTimeoutKey] intValue];
+        if (0 != rollbackTimeout) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self startRollbackTimer:rollbackTimeout];
+            });
+        }
+        
+        // Clear the pending update and sync
+        [preferences removeObjectForKey:PendingUpdateKey];
+        [preferences synchronize];
+    }
+}
+
 
 /*
  * This method performs the actual initialization work for an update
@@ -390,10 +354,15 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
         if (error) {
             reject(error);
         } else {
-            if (installMode != CodePushInstallModeImmediate) {
-                _resumablePendingUpdateAvailable = (installMode == CodePushInstallModeOnNextResume);
-                [self savePendingUpdate:updatePackage[@"packageHash"]
-                        rollbackTimeout:rollbackTimeout];
+            if (installMode == CodePushInstallModeImmediate) {
+                [self restartPendingUpdate];
+            } else if (installMode == CodePushInstallModeOnNextResume) {
+                // Register for app resume notifications so that we
+                // can check for pending updates which support "restart on resume"
+                [[NSNotificationCenter defaultCenter] addObserver:self
+                                                         selector:@selector(restartPendingUpdate)
+                                                             name:UIApplicationWillEnterForegroundNotification
+                                                           object:[UIApplication sharedApplication]];
             }
             // Signal to JS that the update has been applied.
             resolve(nil);
@@ -446,7 +415,7 @@ RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
  */
 RCT_EXPORT_METHOD(restartImmediateUpdate:(int)rollbackTimeout)
 {
-    [self initializeUpdateWithRollbackTimeout:rollbackTimeout needsRestart:YES];
+    [self loadBundle];
 }
 
 /*
@@ -454,7 +423,20 @@ RCT_EXPORT_METHOD(restartImmediateUpdate:(int)rollbackTimeout)
  */
 RCT_EXPORT_METHOD(restartPendingUpdate)
 {
-    [self checkForPendingUpdate:YES];
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+        NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];
+        
+        if (pendingUpdate) {
+            NSError *error;
+            NSString *pendingHash = pendingUpdate[PendingUpdateHashKey];
+            NSString *currentHash = [CodePushPackage getCurrentPackageHash:&error];
+            
+            NSAssert([pendingHash isEqualToString:currentHash], @"There is a pending update but it's hash doesn't match that of the current package.");
+            
+            [self loadBundle];
+        }
+    });
 }
 
 RCT_EXPORT_METHOD(setUsingTestFolder:(BOOL)shouldUseTestFolder)
