@@ -17,6 +17,8 @@ The CodePush plugin helps get product improvements in front of your end-users in
 - iOS
 - Android
 
+*Note: CodePush now requires v0.14.0+ of React Native.*
+
 ## Getting Started
 
 Once you've followed the overall ["getting started"](http://microsoft.github.io/code-push/docs/getting-started.html) instructions for setting up your CodePush account, you can acquire the React Native CodePush plugin by running the following command from within your app's root directory:
