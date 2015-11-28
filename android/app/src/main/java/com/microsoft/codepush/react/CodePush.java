@@ -265,52 +265,61 @@ public class CodePush {
         }
 
         @ReactMethod
-        public void installUpdate(ReadableMap updatePackage, int rollbackTimeout, int installMode, Promise promise) {
-            try {
-                codePushPackage.installPackage(updatePackage);
+        public void installUpdate(final ReadableMap updatePackage, final int rollbackTimeout, final int installMode, final Promise promise) {
+            AsyncTask asyncTask = new AsyncTask() {
+                @Override
+                protected Void doInBackground(Object[] params) {
+                    try {
+                        codePushPackage.installPackage(updatePackage);
 
-                String pendingHash = CodePushUtils.tryGetString(updatePackage, codePushPackage.PACKAGE_HASH_KEY);
-                if (pendingHash == null) {
-                    throw new CodePushUnknownException("Update package to be installed has no hash.");
-                } else {
-                    savePendingUpdate(pendingHash, rollbackTimeout);
-                }
+                        String pendingHash = CodePushUtils.tryGetString(updatePackage, codePushPackage.PACKAGE_HASH_KEY);
+                        if (pendingHash == null) {
+                            throw new CodePushUnknownException("Update package to be installed has no hash.");
+                        } else {
+                            savePendingUpdate(pendingHash, rollbackTimeout);
+                        }
 
-                if (installMode == CodePushInstallMode.IMMEDIATE.getValue()) {
-                    loadBundle();
-                } else if (installMode == CodePushInstallMode.ON_NEXT_RESUME.getValue()) {
-                    // Ensure we do not add the listener twice.
-                    if (lifecycleEventListener == null) {
-                        lifecycleEventListener = new LifecycleEventListener() {
-                            @Override
-                            public void onHostResume() {
-                                loadBundle();
+                        if (installMode == CodePushInstallMode.IMMEDIATE.getValue()) {
+                            loadBundle();
+                        } else if (installMode == CodePushInstallMode.ON_NEXT_RESUME.getValue()) {
+                            // Ensure we do not add the listener twice.
+                            if (lifecycleEventListener == null) {
+                                lifecycleEventListener = new LifecycleEventListener() {
+                                    @Override
+                                    public void onHostResume() {
+                                        loadBundle();
+                                    }
+
+                                    @Override
+                                    public void onHostPause() {
+                                    }
+
+                                    @Override
+                                    public void onHostDestroy() {
+                                    }
+                                };
+                                getReactApplicationContext().addLifecycleEventListener(lifecycleEventListener);
                             }
+                        }
 
-                            @Override
-                            public void onHostPause() {
-                            }
-
-                            @Override
-                            public void onHostDestroy() {
-                            }
-                        };
-                        getReactApplicationContext().addLifecycleEventListener(lifecycleEventListener);
+                        promise.resolve("");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        promise.reject(e.getMessage());
                     }
-                }
 
-                promise.resolve("");
-            } catch (IOException e) {
-                e.printStackTrace();
-                promise.reject(e.getMessage());
-            }
+                    return null;
+                }
+            };
+
+            asyncTask.execute();
         }
 
         @ReactMethod
         public void downloadUpdate(final ReadableMap updatePackage, final Promise promise) {
             AsyncTask asyncTask = new AsyncTask() {
                 @Override
-                protected Object doInBackground(Object[] params) {
+                protected Void doInBackground(Object[] params) {
                     try {
                         codePushPackage.downloadPackage(applicationContext, updatePackage, new DownloadProgressCallback() {
                             @Override
@@ -327,9 +336,11 @@ public class CodePush {
                         e.printStackTrace();
                         promise.reject(e.getMessage());
                     }
+
                     return null;
                 }
             };
+
             asyncTask.execute();
         }
 
@@ -344,13 +355,22 @@ public class CodePush {
         }
 
         @ReactMethod
-        public void getCurrentPackage(Promise promise) {
-            try {
-                promise.resolve(codePushPackage.getCurrentPackage());
-            } catch (IOException e) {
-                e.printStackTrace();
-                promise.reject(e.getMessage());
-            }
+        public void getCurrentPackage(final Promise promise) {
+            AsyncTask asyncTask = new AsyncTask() {
+                @Override
+                protected Void doInBackground(Object[] params) {
+                    try {
+                        promise.resolve(codePushPackage.getCurrentPackage());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        promise.reject(e.getMessage());
+                    }
+
+                    return null;
+                }
+            };
+
+            asyncTask.execute();
         }
 
         @ReactMethod
