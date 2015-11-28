@@ -225,7 +225,7 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
           
           if (remotePackage.isMandatory) {
             message = syncOptions.updateDialog.mandatoryUpdateMessage;
-            dialogButtons[0].text = syncOptions.mandatoryContinueButtonLabel;
+            dialogButtons[0].text = syncOptions.updateDialog.mandatoryContinueButtonLabel;
           } else {
             message = syncOptions.updateDialog.optionalUpdateMessage;
             dialogButtons[0].text = syncOptions.updateDialog.optionalInstallButtonLabel;     
