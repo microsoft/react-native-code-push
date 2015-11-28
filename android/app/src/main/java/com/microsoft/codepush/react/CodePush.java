@@ -23,6 +23,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -307,22 +308,29 @@ public class CodePush {
 
         @ReactMethod
         public void downloadUpdate(final ReadableMap updatePackage, final Promise promise) {
-            try {
-                codePushPackage.downloadPackage(applicationContext, updatePackage, new DownloadProgressCallback() {
-                    @Override
-                    public void call(DownloadProgress downloadProgress) {
-                        getReactApplicationContext()
-                                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                                .emit(DOWNLOAD_PROGRESS_EVENT_NAME, downloadProgress.createWritableMap());
-                    }
-                });
+            AsyncTask asyncTask = new AsyncTask() {
+                @Override
+                protected Object doInBackground(Object[] params) {
+                    try {
+                        codePushPackage.downloadPackage(applicationContext, updatePackage, new DownloadProgressCallback() {
+                            @Override
+                            public void call(DownloadProgress downloadProgress) {
+                                getReactApplicationContext()
+                                        .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                                        .emit(DOWNLOAD_PROGRESS_EVENT_NAME, downloadProgress.createWritableMap());
+                            }
+                        });
 
-                WritableMap newPackage = codePushPackage.getPackage(CodePushUtils.tryGetString(updatePackage, codePushPackage.PACKAGE_HASH_KEY));
-                promise.resolve(newPackage);
-            } catch (IOException e) {
-                e.printStackTrace();
-                promise.reject(e.getMessage());
-            }
+                        WritableMap newPackage = codePushPackage.getPackage(CodePushUtils.tryGetString(updatePackage, codePushPackage.PACKAGE_HASH_KEY));
+                        promise.resolve(newPackage);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        promise.reject(e.getMessage());
+                    }
+                    return null;
+                }
+            };
+            asyncTask.execute();
         }
 
         @ReactMethod
@@ -424,4 +432,3 @@ public class CodePush {
     }
 
 }
-
