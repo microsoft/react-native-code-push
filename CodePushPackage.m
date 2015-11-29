@@ -221,9 +221,11 @@ NSString * const UpdateBundleFileName = @"app.jsbundle";
     NSString *previousPackageHash = [self getPreviousPackageHash:error];
     if (!*error && previousPackageHash && ![previousPackageHash isEqualToString:packageHash]) {
         NSString *previousPackageFolderPath = [self getPackageFolderPath:previousPackageHash];
-        [[NSFileManager defaultManager] removeItemAtPath:previousPackageFolderPath error:error];
-        if (*error) {
-            return;
+        // Error in deleting old package will not cause the entire operation to fail.
+        NSError *deleteError;
+        [[NSFileManager defaultManager] removeItemAtPath:previousPackageFolderPath error:&deleteError];
+        if (deleteError) {
+            NSLog(@"Error deleting old package: %@", deleteError);
         }
     }
     
