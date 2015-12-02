@@ -33,6 +33,8 @@ public class CodePushDialog extends ReactContextBaseJavaModule{
 
         AlertDialog.Builder builder = new AlertDialog.Builder(fragmentActivity);
 
+        builder.setCancelable(false);
+
         DialogInterface.OnClickListener clickListener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
