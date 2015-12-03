@@ -19,6 +19,6 @@
     "code-push": "^1.1.1-beta"
   },
   "devDependencies": {
-    "react-native": "0.14.2"
+    "react-native": "0.15.0"
   }
 }

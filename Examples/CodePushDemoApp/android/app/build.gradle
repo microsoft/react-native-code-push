@@ -1,5 +1,7 @@
 apply plugin: 'com.android.application'
 
+apply from: "react.gradle"
+
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.1"
@@ -15,9 +17,9 @@ android {
         }
     }
     buildTypes {
-        debug {
+        /*debug {
             buildConfigField "String", "RUN_TEST", "\"\""
-        }
+        }*/
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'

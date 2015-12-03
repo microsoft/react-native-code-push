@@ -39,15 +39,15 @@
 @interface CodePushDownloadHandler : NSObject <NSURLConnectionDelegate>
 
 @property (strong) NSOutputStream *outputFileStream;
-@property long expectedContentLength;
-@property long receivedContentLength;
-@property (copy) void (^progressCallback)(long, long);
-@property (copy) void (^doneCallback)();
+@property long long expectedContentLength;
+@property long long receivedContentLength;
+@property (copy) void (^progressCallback)(long long, long long);
+@property (copy) void (^doneCallback)(BOOL);
 @property (copy) void (^failCallback)(NSError *err);
 
 - (id)init:(NSString *)downloadFilePath
-progressCallback:(void (^)(long, long))progressCallback
-doneCallback:(void (^)())doneCallback
+progressCallback:(void (^)(long long, long long))progressCallback
+doneCallback:(void (^)(BOOL))doneCallback
 failCallback:(void (^)(NSError *err))failCallback;
 
 - (void)download:(NSString*)url;
@@ -71,7 +71,7 @@ failCallback:(void (^)(NSError *err))failCallback;
 
 
 + (void)downloadPackage:(NSDictionary *)updatePackage
-       progressCallback:(void (^)(long, long))progressCallback
+       progressCallback:(void (^)(long long, long long))progressCallback
            doneCallback:(void (^)())doneCallback
            failCallback:(void (^)(NSError *err))failCallback;
 

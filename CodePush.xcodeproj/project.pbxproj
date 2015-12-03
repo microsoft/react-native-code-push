@@ -9,6 +9,20 @@
 /* Begin PBXBuildFile section */
 		13BE3DEE1AC21097009241FE /* CodePush.m in Sources */ = {isa = PBXBuildFile; fileRef = 13BE3DED1AC21097009241FE /* CodePush.m */; };
 		1B23B9141BF9267B000BB2F0 /* RCTConvert+CodePushInstallMode.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B23B9131BF9267B000BB2F0 /* RCTConvert+CodePushInstallMode.m */; };
+		54A0026C1C0E2880004C3CEC /* aescrypt.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0024C1C0E2880004C3CEC /* aescrypt.c */; };
+		54A0026D1C0E2880004C3CEC /* aeskey.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0024D1C0E2880004C3CEC /* aeskey.c */; };
+		54A0026E1C0E2880004C3CEC /* aestab.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0024F1C0E2880004C3CEC /* aestab.c */; };
+		54A0026F1C0E2880004C3CEC /* entropy.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002531C0E2880004C3CEC /* entropy.c */; };
+		54A002701C0E2880004C3CEC /* fileenc.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002551C0E2880004C3CEC /* fileenc.c */; };
+		54A002711C0E2880004C3CEC /* hmac.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002571C0E2880004C3CEC /* hmac.c */; };
+		54A002721C0E2880004C3CEC /* prng.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002591C0E2880004C3CEC /* prng.c */; };
+		54A002731C0E2880004C3CEC /* pwd2key.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0025B1C0E2880004C3CEC /* pwd2key.c */; };
+		54A002741C0E2880004C3CEC /* sha1.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0025D1C0E2880004C3CEC /* sha1.c */; };
+		54A002751C0E2880004C3CEC /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002621C0E2880004C3CEC /* ioapi.c */; };
+		54A002761C0E2880004C3CEC /* mztools.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002641C0E2880004C3CEC /* mztools.c */; };
+		54A002771C0E2880004C3CEC /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002661C0E2880004C3CEC /* unzip.c */; };
+		54A002781C0E2880004C3CEC /* zip.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002681C0E2880004C3CEC /* zip.c */; };
+		54A002791C0E2880004C3CEC /* SSZipArchive.m in Sources */ = {isa = PBXBuildFile; fileRef = 54A0026B1C0E2880004C3CEC /* SSZipArchive.m */; };
 		54FFEDE01BF550630061DD23 /* CodePushDownloadHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 54FFEDDF1BF550630061DD23 /* CodePushDownloadHandler.m */; };
 		810D4E6D1B96935000B397E9 /* CodePushPackage.m in Sources */ = {isa = PBXBuildFile; fileRef = 810D4E6C1B96935000B397E9 /* CodePushPackage.m */; };
 		81D51F3A1B6181C2000DA084 /* CodePushConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 81D51F391B6181C2000DA084 /* CodePushConfig.m */; };
@@ -31,6 +45,39 @@
 		13BE3DEC1AC21097009241FE /* CodePush.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CodePush.h; sourceTree = "<group>"; };
 		13BE3DED1AC21097009241FE /* CodePush.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CodePush.m; sourceTree = "<group>"; };
 		1B23B9131BF9267B000BB2F0 /* RCTConvert+CodePushInstallMode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "RCTConvert+CodePushInstallMode.m"; sourceTree = "<group>"; };
+		54A0024A1C0E2880004C3CEC /* aes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aes.h; sourceTree = "<group>"; };
+		54A0024B1C0E2880004C3CEC /* aes_via_ace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aes_via_ace.h; sourceTree = "<group>"; };
+		54A0024C1C0E2880004C3CEC /* aescrypt.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = aescrypt.c; sourceTree = "<group>"; };
+		54A0024D1C0E2880004C3CEC /* aeskey.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = aeskey.c; sourceTree = "<group>"; };
+		54A0024E1C0E2880004C3CEC /* aesopt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aesopt.h; sourceTree = "<group>"; };
+		54A0024F1C0E2880004C3CEC /* aestab.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = aestab.c; sourceTree = "<group>"; };
+		54A002501C0E2880004C3CEC /* aestab.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aestab.h; sourceTree = "<group>"; };
+		54A002511C0E2880004C3CEC /* brg_endian.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = brg_endian.h; sourceTree = "<group>"; };
+		54A002521C0E2880004C3CEC /* brg_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = brg_types.h; sourceTree = "<group>"; };
+		54A002531C0E2880004C3CEC /* entropy.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = entropy.c; sourceTree = "<group>"; };
+		54A002541C0E2880004C3CEC /* entropy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = entropy.h; sourceTree = "<group>"; };
+		54A002551C0E2880004C3CEC /* fileenc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fileenc.c; sourceTree = "<group>"; };
+		54A002561C0E2880004C3CEC /* fileenc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fileenc.h; sourceTree = "<group>"; };
+		54A002571C0E2880004C3CEC /* hmac.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hmac.c; sourceTree = "<group>"; };
+		54A002581C0E2880004C3CEC /* hmac.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hmac.h; sourceTree = "<group>"; };
+		54A002591C0E2880004C3CEC /* prng.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = prng.c; sourceTree = "<group>"; };
+		54A0025A1C0E2880004C3CEC /* prng.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = prng.h; sourceTree = "<group>"; };
+		54A0025B1C0E2880004C3CEC /* pwd2key.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pwd2key.c; sourceTree = "<group>"; };
+		54A0025C1C0E2880004C3CEC /* pwd2key.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pwd2key.h; sourceTree = "<group>"; };
+		54A0025D1C0E2880004C3CEC /* sha1.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sha1.c; sourceTree = "<group>"; };
+		54A0025E1C0E2880004C3CEC /* sha1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sha1.h; sourceTree = "<group>"; };
+		54A0025F1C0E2880004C3CEC /* Common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Common.h; sourceTree = "<group>"; };
+		54A002611C0E2880004C3CEC /* crypt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = crypt.h; sourceTree = "<group>"; };
+		54A002621C0E2880004C3CEC /* ioapi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ioapi.c; sourceTree = "<group>"; };
+		54A002631C0E2880004C3CEC /* ioapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ioapi.h; sourceTree = "<group>"; };
+		54A002641C0E2880004C3CEC /* mztools.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mztools.c; sourceTree = "<group>"; };
+		54A002651C0E2880004C3CEC /* mztools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mztools.h; sourceTree = "<group>"; };
+		54A002661C0E2880004C3CEC /* unzip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = unzip.c; sourceTree = "<group>"; };
+		54A002671C0E2880004C3CEC /* unzip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = unzip.h; sourceTree = "<group>"; };
+		54A002681C0E2880004C3CEC /* zip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = zip.c; sourceTree = "<group>"; };
+		54A002691C0E2880004C3CEC /* zip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zip.h; sourceTree = "<group>"; };
+		54A0026A1C0E2880004C3CEC /* SSZipArchive.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSZipArchive.h; sourceTree = "<group>"; };
+		54A0026B1C0E2880004C3CEC /* SSZipArchive.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSZipArchive.m; sourceTree = "<group>"; };
 		54FFEDDF1BF550630061DD23 /* CodePushDownloadHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CodePushDownloadHandler.m; sourceTree = "<group>"; };
 		810D4E6C1B96935000B397E9 /* CodePushPackage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CodePushPackage.m; sourceTree = "<group>"; };
 		81D51F391B6181C2000DA084 /* CodePushConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CodePushConfig.m; sourceTree = "<group>"; };
@@ -55,9 +102,66 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		54A002481C0E2880004C3CEC /* SSZipArchive */ = {
+			isa = PBXGroup;
+			children = (
+				54A002491C0E2880004C3CEC /* aes */,
+				54A0025F1C0E2880004C3CEC /* Common.h */,
+				54A002601C0E2880004C3CEC /* minizip */,
+				54A0026A1C0E2880004C3CEC /* SSZipArchive.h */,
+				54A0026B1C0E2880004C3CEC /* SSZipArchive.m */,
+			);
+			path = SSZipArchive;
+			sourceTree = "<group>";
+		};
+		54A002491C0E2880004C3CEC /* aes */ = {
+			isa = PBXGroup;
+			children = (
+				54A0024A1C0E2880004C3CEC /* aes.h */,
+				54A0024B1C0E2880004C3CEC /* aes_via_ace.h */,
+				54A0024C1C0E2880004C3CEC /* aescrypt.c */,
+				54A0024D1C0E2880004C3CEC /* aeskey.c */,
+				54A0024E1C0E2880004C3CEC /* aesopt.h */,
+				54A0024F1C0E2880004C3CEC /* aestab.c */,
+				54A002501C0E2880004C3CEC /* aestab.h */,
+				54A002511C0E2880004C3CEC /* brg_endian.h */,
+				54A002521C0E2880004C3CEC /* brg_types.h */,
+				54A002531C0E2880004C3CEC /* entropy.c */,
+				54A002541C0E2880004C3CEC /* entropy.h */,
+				54A002551C0E2880004C3CEC /* fileenc.c */,
+				54A002561C0E2880004C3CEC /* fileenc.h */,
+				54A002571C0E2880004C3CEC /* hmac.c */,
+				54A002581C0E2880004C3CEC /* hmac.h */,
+				54A002591C0E2880004C3CEC /* prng.c */,
+				54A0025A1C0E2880004C3CEC /* prng.h */,
+				54A0025B1C0E2880004C3CEC /* pwd2key.c */,
+				54A0025C1C0E2880004C3CEC /* pwd2key.h */,
+				54A0025D1C0E2880004C3CEC /* sha1.c */,
+				54A0025E1C0E2880004C3CEC /* sha1.h */,
+			);
+			path = aes;
+			sourceTree = "<group>";
+		};
+		54A002601C0E2880004C3CEC /* minizip */ = {
+			isa = PBXGroup;
+			children = (
+				54A002611C0E2880004C3CEC /* crypt.h */,
+				54A002621C0E2880004C3CEC /* ioapi.c */,
+				54A002631C0E2880004C3CEC /* ioapi.h */,
+				54A002641C0E2880004C3CEC /* mztools.c */,
+				54A002651C0E2880004C3CEC /* mztools.h */,
+				54A002661C0E2880004C3CEC /* unzip.c */,
+				54A002671C0E2880004C3CEC /* unzip.h */,
+				54A002681C0E2880004C3CEC /* zip.c */,
+				54A002691C0E2880004C3CEC /* zip.h */,
+			);
+			path = minizip;
+			sourceTree = "<group>";
+		};
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				54A002481C0E2880004C3CEC /* SSZipArchive */,
 				1B23B9131BF9267B000BB2F0 /* RCTConvert+CodePushInstallMode.m */,
 				54FFEDDF1BF550630061DD23 /* CodePushDownloadHandler.m */,
 				810D4E6C1B96935000B397E9 /* CodePushPackage.m */,
@@ -95,7 +199,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0610;
-				ORGANIZATIONNAME = Facebook;
+				ORGANIZATIONNAME = Microsoft;
 				TargetAttributes = {
 					58B511DA1A9E6C8500147676 = {
 						CreatedOnToolsVersion = 6.1.1;
@@ -124,10 +228,24 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				54A0026D1C0E2880004C3CEC /* aeskey.c in Sources */,
+				54A0026E1C0E2880004C3CEC /* aestab.c in Sources */,
+				54A002761C0E2880004C3CEC /* mztools.c in Sources */,
+				54A002781C0E2880004C3CEC /* zip.c in Sources */,
+				54A002791C0E2880004C3CEC /* SSZipArchive.m in Sources */,
 				1B23B9141BF9267B000BB2F0 /* RCTConvert+CodePushInstallMode.m in Sources */,
 				81D51F3A1B6181C2000DA084 /* CodePushConfig.m in Sources */,
+				54A002741C0E2880004C3CEC /* sha1.c in Sources */,
 				54FFEDE01BF550630061DD23 /* CodePushDownloadHandler.m in Sources */,
+				54A002711C0E2880004C3CEC /* hmac.c in Sources */,
+				54A002721C0E2880004C3CEC /* prng.c in Sources */,
+				54A002731C0E2880004C3CEC /* pwd2key.c in Sources */,
+				54A002751C0E2880004C3CEC /* ioapi.c in Sources */,
+				54A002771C0E2880004C3CEC /* unzip.c in Sources */,
+				54A0026F1C0E2880004C3CEC /* entropy.c in Sources */,
 				13BE3DEE1AC21097009241FE /* CodePush.m in Sources */,
+				54A0026C1C0E2880004C3CEC /* aescrypt.c in Sources */,
+				54A002701C0E2880004C3CEC /* fileenc.c in Sources */,
 				810D4E6D1B96935000B397E9 /* CodePushPackage.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -220,7 +338,10 @@
 					"$(SRCROOT)/../react-native/React/**",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				OTHER_LDFLAGS = "-ObjC";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-lz",
+				);
 				PRODUCT_NAME = CodePush;
 				SKIP_INSTALL = YES;
 			};
@@ -237,7 +358,10 @@
 					"$(SRCROOT)/../react-native/React/**",
 				);
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				OTHER_LDFLAGS = "-ObjC";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-lz",
+				);
 				PRODUCT_NAME = CodePush;
 				SKIP_INSTALL = YES;
 			};

@@ -44,6 +44,8 @@
    *
    * see http://facebook.github.io/react-native/docs/runningondevice.html
    */
+  
+  NSLog(@"%@", [[CodePush bundleURL] absoluteString]);
 
   jsCodeLocation = [CodePush bundleURL];
 
