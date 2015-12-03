@@ -207,8 +207,8 @@ NSString * const UnzippedFolderName = @"unzipped";
         return failCallback(error);
     }
     
-    NSString * downloadFilePath = [self getDownloadFilePath];
-    NSString * bundleFilePath = [newPackageFolderPath stringByAppendingPathComponent:UpdateBundleFileName];
+    NSString *downloadFilePath = [self getDownloadFilePath];
+    NSString *bundleFilePath = [newPackageFolderPath stringByAppendingPathComponent:UpdateBundleFileName];
     
     CodePushDownloadHandler *downloadHandler = [[CodePushDownloadHandler alloc]
         init:downloadFilePath
@@ -229,12 +229,11 @@ NSString * const UnzippedFolderName = @"unzipped";
                     nonFailingError = nil;
                 }
                 
-                NSString * diffManifestFilePath = [unzippedFolderPath
-                                                   stringByAppendingPathComponent:DiffManifestFileName];
+                NSString *diffManifestFilePath = [unzippedFolderPath stringByAppendingPathComponent:DiffManifestFileName];
                 
                 if ([[NSFileManager defaultManager] fileExistsAtPath:diffManifestFilePath]) {
                     // Copy the current package to the new package.
-                    NSString* currentPackageFolderPath = [self getCurrentPackageFolderPath:&error];
+                    NSString *currentPackageFolderPath = [self getCurrentPackageFolderPath:&error];
                     if (error) {
                         failCallback(error);
                         return;
@@ -258,15 +257,13 @@ NSString * const UnzippedFolderName = @"unzipped";
                     }
                     
                     NSData *data = [manifestContent dataUsingEncoding:NSUTF8StringEncoding];
-                    NSDictionary* manifestJSON = [NSJSONSerialization JSONObjectWithData:data
+                    NSDictionary *manifestJSON = [NSJSONSerialization JSONObjectWithData:data
                                                                                  options:kNilOptions
                                                                                    error:&error];
                     NSArray *deletedFiles = manifestJSON[@"deletedFiles"];
                     for (NSString *deletedFileName in deletedFiles) {
-                        [[NSFileManager defaultManager]
-                         removeItemAtPath:[newPackageFolderPath
-                                           stringByAppendingPathComponent:deletedFileName]
-                         error:&nonFailingError];
+                        [[NSFileManager defaultManager] removeItemAtPath:[newPackageFolderPath stringByAppendingPathComponent:deletedFileName]
+                                                                   error:&nonFailingError];
                         
                         if (nonFailingError) {
                             NSLog(@"Error deleting file from current package: %@", nonFailingError);
@@ -286,7 +283,7 @@ NSString * const UnzippedFolderName = @"unzipped";
                 }
                 
                 NSString *relativeBundlePath = [self findMainBundleInFolder:newPackageFolderPath
-                                                                   error:&error];
+                                                                      error:&error];
                 if (error) {
                     failCallback(error);
                     return;
@@ -314,13 +311,11 @@ NSString * const UnzippedFolderName = @"unzipped";
                 }
             }
             
-            NSData *updateSerializedData = [NSJSONSerialization
-                                            dataWithJSONObject:mutableUpdatePackage
-                                            options:0
-                                            error:&error];
-            NSString *packageJsonString = [[NSString alloc]
-                                           initWithData:updateSerializedData
-                                           encoding:NSUTF8StringEncoding];
+            NSData *updateSerializedData = [NSJSONSerialization dataWithJSONObject:mutableUpdatePackage
+                                                                           options:0
+                                                                             error:&error];
+            NSString *packageJsonString = [[NSString alloc] initWithData:updateSerializedData
+                                                                encoding:NSUTF8StringEncoding];
             
             [packageJsonString writeToFile:[newPackageFolderPath stringByAppendingPathComponent:@"app.json"]
                                 atomically:YES

@@ -2,7 +2,7 @@
 
 @implementation CodePushDownloadHandler {
     // Header chars used to determine if the file is a zip.
-    char header[4];
+    char _header[4];
 }
 
 - (id)init:(NSString *)downloadFilePath
@@ -46,14 +46,14 @@ failCallback:(void (^)(NSError *err))failCallback {
 
 -(void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
     if (self.receivedContentLength < 4) {
-        const char *bytes = [data bytes];
-        for (int i=0; i<[data length]; i++) {
+        for (int i = 0; i < [data length]; i++) {
             int headerOffset = (int)self.receivedContentLength + i;
             if (headerOffset >= 4) {
                 break;
             }
             
-            header[headerOffset] = bytes[i];
+            const char *bytes = [data bytes];
+            _header[headerOffset] = bytes[i];
         }
     }
     
@@ -94,7 +94,7 @@ failCallback:(void (^)(NSError *err))failCallback {
     assert(self.receivedContentLength == self.expectedContentLength);
     
     [self.outputFileStream close];
-    BOOL isZip = header[0] == 'P' && header[1] == 'K' && header[2] == 3 && header[3] == 4;
+    BOOL isZip = _header[0] == 'P' && _header[1] == 'K' && _header[2] == 3 && _header[3] == 4;
     self.doneCallback(isZip);
 }
 
