@@ -12,7 +12,7 @@ function checkForUpdate(deploymentKey = null) {
   
   /*
    * Before we ask the server if an update exists, we
-   * need to retreive three pieces of information from the 
+   * need to retrieve three pieces of information from the 
    * native side: deployment key, app version (e.g. 1.0.1)
    * and the hash of the currently running update (if there is one).
    * This allows the client to only receive updates which are targetted
