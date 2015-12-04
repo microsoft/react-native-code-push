@@ -3,6 +3,8 @@
 var React = require('react-native');
 var {
   AppRegistry,
+  Dimensions,
+  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -115,22 +117,28 @@ var CodePushDemoApp = React.createClass({
         {syncButton}
         {syncView}
         {progressView}
+        <Image style={styles.image} resizeMode={Image.resizeMode.contain} source={require('./images/laptop_phone_howitworks.png')}/>
       </View>
     );
   }
 });
 
 var styles = StyleSheet.create({
+  image: {
+    marginTop: 50,
+    width: Dimensions.get('window').width - 100,
+    height: 365 * (Dimensions.get('window').width - 100) / 651,
+  },
   container: {
     flex: 1,
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
+    paddingTop: 50
   },
   welcome: {
     fontSize: 20,
     textAlign: 'center',
-    margin: 10,
-    marginTop: 50
+    margin: 10
   },
   messages: {
     textAlign: 'center',

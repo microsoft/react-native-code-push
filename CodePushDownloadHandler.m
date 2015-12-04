@@ -1,10 +1,13 @@
 #import "CodePush.h"
 
-@implementation CodePushDownloadHandler
+@implementation CodePushDownloadHandler {
+    // Header chars used to determine if the file is a zip.
+    char _header[4];
+}
 
 - (id)init:(NSString *)downloadFilePath
-progressCallback:(void (^)(long, long))progressCallback
-doneCallback:(void (^)())doneCallback
+progressCallback:(void (^)(long long, long long))progressCallback
+doneCallback:(void (^)(BOOL))doneCallback
 failCallback:(void (^)(NSError *err))failCallback {
     self.outputFileStream = [NSOutputStream outputStreamToFileAtPath:downloadFilePath
                                                               append:NO];
@@ -42,6 +45,18 @@ failCallback:(void (^)(NSError *err))failCallback {
 }
 
 -(void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
+    if (self.receivedContentLength < 4) {
+        for (int i = 0; i < [data length]; i++) {
+            int headerOffset = (int)self.receivedContentLength + i;
+            if (headerOffset >= 4) {
+                break;
+            }
+            
+            const char *bytes = [data bytes];
+            _header[headerOffset] = bytes[i];
+        }
+    }
+    
     self.receivedContentLength = self.receivedContentLength + [data length];
     
     NSInteger bytesLeft = [data length];
@@ -79,7 +94,8 @@ failCallback:(void (^)(NSError *err))failCallback {
     assert(self.receivedContentLength == self.expectedContentLength);
     
     [self.outputFileStream close];
-    self.doneCallback();
+    BOOL isZip = _header[0] == 'P' && _header[1] == 'K' && _header[2] == 3 && _header[3] == 4;
+    self.doneCallback(isZip);
 }
 
 @end

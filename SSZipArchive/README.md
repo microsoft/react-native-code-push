@@ -1,0 +1,1 @@
+The source code in this folder is taken from [https://github.com/ZipArchive/ZipArchive/tree/35fe9b6af48527cde0b5db52287474ed3a32d75f/SSZipArchive](https://github.com/ZipArchive/ZipArchive/tree/35fe9b6af48527cde0b5db52287474ed3a32d75f/SSZipArchive) which is [MIT licensed](https://github.com/ZipArchive/ZipArchive/blob/35fe9b6af48527cde0b5db52287474ed3a32d75f/LICENSE.txt).
