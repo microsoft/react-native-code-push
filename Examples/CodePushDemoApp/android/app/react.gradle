@@ -3,7 +3,6 @@ def config = project.hasProperty("react") ? project.react : [];
 def bundleAssetName = config.bundleAssetName ?: "index.android.bundle"
 def entryFile = config.entryFile ?: "index.android.js"
 
-// because elvis operator
 def elvisFile(thing) {
     return thing ? file(thing) : null;
 }
