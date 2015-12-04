@@ -302,6 +302,14 @@ NSString * const UnzippedFolderName = @"unzipped";
                     return;
                 }
             } else {
+                if ([[NSFileManager defaultManager] fileExistsAtPath:bundleFilePath]) {
+                    [[NSFileManager defaultManager] removeItemAtPath:bundleFilePath error:&error];
+                    if (error) {
+                        failCallback(error);
+                        return;
+                    }
+                }
+                
                 [[NSFileManager defaultManager] moveItemAtPath:downloadFilePath
                                                         toPath:bundleFilePath
                                                          error:&error];
