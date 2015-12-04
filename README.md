@@ -94,14 +94,17 @@ This change configures your app to always load the most recent version of your a
 
 To let the CodePush runtime know which deployment it should query for updates against, perform the following steps:
 
-1. Open your app's `Info.plist` and add a new `CodePushDeploymentKey` entry, whose value is the key of the deployment you want to configure this app against (e.g. the Staging deployment for FooBar app). You can retreive this value by running `code-push deployment ls <appName>` in the CodePush CLI, and copying the value of the `Deployment Key` column which corresponds to the deployment you want to use. 
+1. Open your app's `Info.plist` file and add a new entry named `CodePushDeploymentKey`, whose value is the key of the deployment you want to configure this app against (e.g. the Staging deployment for FooBar app). You can retreive this value by running `code-push deployment ls <appName>` in the CodePush CLI, and copying the value of the `Deployment Key` column which corresponds to the deployment you want to use (see below). Note that using the deployment's name (e.g. Staging) will not work. That "friendly name" is intended only for authenticated management usage from the CLI, and not for public consumption within your app.
+
+    ![Deployment list](https://cloud.githubusercontent.com/assets/116461/11601733/13011d5e-9a8a-11e5-9ce2-b100498ffb34.png)
+    
 2. In your app's `Info.plist` make sure your `CFBundleShortVersionString` value is a valid [semver](http://semver.org/) version (e.g. 1.0.0 not 1.0)
 
 ## Plugin Configuration - Android
 
 After installing the plugin and syncing your Android Studio project with Gradle, you need to configure your app to consult CodePush for the location of your JS bundle, since it will "take control" of managing the current and all future versions. To do this, perform the following steps:
 
-1. Update the `MainActivity.java` file to use CodePush.
+1. Update the `MainActivity.java` file to use CodePush via the following changes:
     
     ```java
     ...
@@ -135,7 +138,7 @@ After installing the plugin and syncing your Android Studio project with Gradle,
     }
     ```
 
-2. Ensure that the versionName property in your `android/app/build.gradle` file is set to a semver compliant value.
+2. Ensure that the `android.defaultConfig.versionName` property in your `android/app/build.gradle` file is set to a semver compliant value (i.e. "1.0.0" not "1.0")
     
     ```gradle
     android {
