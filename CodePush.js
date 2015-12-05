@@ -219,8 +219,11 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
       };
   
   return new Promise((resolve, reject) => {
-    syncStatusChangeCallback(CodePush.SyncStatus.CHECKING_FOR_UPDATE);
-    checkForUpdate(syncOptions.deploymentKey)
+    CodePush.notifyApplicationReady()
+      .then(() => {
+        syncStatusChangeCallback(CodePush.SyncStatus.CHECKING_FOR_UPDATE);
+        return checkForUpdate(syncOptions.deploymentKey);
+      })
       .then((remotePackage) => {
         var doDownloadAndInstall = () => {
           syncStatusChangeCallback(CodePush.SyncStatus.DOWNLOADING_PACKAGE);
