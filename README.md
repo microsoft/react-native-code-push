@@ -17,7 +17,7 @@ The CodePush plugin helps get product improvements in front of your end-users in
 - iOS
 - Android
 
-*Note: CodePush 1.3.0 requires v0.14.0+ of React Native, and CodePush 1.4.0 requires v0.15.0+ of React Native, so make sure you are using the right version of the CodePush plugin.*
+*Note: CodePush v1.3.0 requires v0.14.0+ of React Native, and CodePush v1.4.0 requires v0.15.0+ of React Native, so make sure you are using the right version of the CodePush plugin.*
 
 ## Getting Started
 
@@ -188,7 +188,7 @@ Once your app has been configured and distributed to your users, and you've made
 1. Execute `react-native bundle` in order to generate the updated JS bundle for your app.
 2. Execute `code-push release <appName> <jsBundleFilePath> <appVersion> --deploymentName <deploymentName>` in order to publish the generated JS bundle to the server. Assuming your CWD is the root directory of your React Native app, `<jsBundleFilePath>` could be `iOS/main.jsbundle` for iOS, or `android/app/src/main/assets/index.android.jsbundle` for Android.
 
-And that's it! For more information regarding the CodePush API, including the various options you can pass to the `sync` method, refer to the reference section below. Additionally, for more information regarding the CLI and how the release (or promote and rollback) commands work, refer to it's [documentation](http://microsoft.github.io/code-push/docs/cli.html).
+And that's it! For more information regarding the CodePush API, including the various options you can pass to the `sync` method, refer to the reference section below. Additionally, for more information regarding the CLI and how the release (or promote and rollback) commands work, refer to the [documentation](http://microsoft.github.io/code-push/docs/cli.html).
 
 ## Releasing asset updates - iOS
 
