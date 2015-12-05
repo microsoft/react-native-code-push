@@ -17,7 +17,7 @@ The CodePush plugin helps get product improvements in front of your end-users in
 - iOS
 - Android
 
-*Note: CodePush 1.3.0 requires v0.14.0+ of React Native, and CodePush 1.4.0 requires v0.15.0+ of React Native, so much sure you are using the right version of the CodePush plugin.*
+*Note: CodePush 1.3.0 requires v0.14.0+ of React Native, and CodePush 1.4.0 requires v0.15.0+ of React Native, so make sure you are using the right version of the CodePush plugin.*
 
 ## Getting Started
 
@@ -45,7 +45,7 @@ Once you've acquired the CodePush plugin, you need to integrate it into the Xcod
 
     ![Libz reference](https://cloud.githubusercontent.com/assets/116461/11605042/6f786e64-9aaa-11e5-8ca7-14b852f808b1.png)
     
-    *Note: Alternatively, you could  add the `-lz` flag to the `Other Linker Flags` field in the `Linking` section of the `Build Settings` if you would prefer.*
+    *Note: Alternatively, if you prefer, you can add the `-lz` flag to the `Other Linker Flags` field in the `Linking` section of the `Build Settings`.*
     
 6. Under the "Build Settings" tab of your project configuration, find the "Header Search Paths" section and edit the value.
 Add a new value, `$(SRCROOT)/../node_modules/react-native-code-push` and select "recursive" in the dropdown.
@@ -192,7 +192,7 @@ And that's it! For more information regarding the CodePush API, including the va
 
 ## Releasing asset updates - iOS
 
-If you are using the new React Native [assets system](https://facebook.github.io/react-native/docs/images.html#content), as opposed to loading your images from the network and/or platform-specific mechanisms (e.g. iOS asset catalogs), then you can't simply pass your jsbundle to CodePush as demonstrated above, you need to send your images as well. To do this, simply use the following workflow:
+If you are using the new React Native [assets system](https://facebook.github.io/react-native/docs/images.html#content), as opposed to loading your images from the network and/or platform-specific mechanisms (e.g. iOS asset catalogs), then you can't simply pass your jsbundle to CodePush as demonstrated above. You need to provide your images as well. To do this, simply use the following workflow:
 
 1. When calling `react-native bundle`, specify that your assets and JS bundle go into a new "release" folder (you can call this anything, but it shouldn't contain any other files). For example:
 
@@ -208,7 +208,7 @@ If you are using the new React Native [assets system](https://facebook.github.io
 
 Additionally, the CodePush client supports differential updates, so even though you are releasing your JS bundle and assets on every update, your end-users will only actually download the files they need. The service handles this automatically so that you can focus on creating awesome apps and we can worry about optimizing end-user downloads.
 
-*Note: Releasing assets via CodePush is currently only supported on iOS, and requires that you're using React Native v0.15.0*
+*Note: Releasing assets via CodePush is currently only supported on iOS, and requires that you're using React Native v0.15.0+.*
 
 ---
 
