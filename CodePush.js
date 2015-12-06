@@ -50,7 +50,7 @@ function checkForUpdate(deploymentKey = null) {
              * to send the app version to the server, since we are interested
              * in any updates for current app store version, regardless of hash.
              */
-            if (localPackage && semver.compare(localPackage.appVersion, config.appVersion) === 0) {
+            if (localPackage && localPackage.appVersion && semver.compare(localPackage.appVersion, config.appVersion) === 0) {
               queryPackage = localPackage;
             }
             
