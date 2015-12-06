@@ -14,7 +14,6 @@ This plugin provides client-side integration for the [CodePush service](https://
 * [Plugin Usage](#plugin-usage)
 * [Releasing Updates (JavaScript-only)](#releasing-updates-javascript-only)
 * [Releasing Updates (JavaScript + images)](#releasing-updates-javascript--images)
-* [Debugging](#debugging)
 * [API Reference](#api-reference)
 
 ## How does it work?
