@@ -294,6 +294,7 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
       })
       .catch((error) => {
         syncStatusChangeCallback(CodePush.SyncStatus.UNKNOWN_ERROR);
+        log(error.message);
         reject(error);
       })
       .done();
