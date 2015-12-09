@@ -20,7 +20,7 @@
 + (NSURL *)bundleURLForResource:(NSString *)resourceName
                   withExtension:(NSString *)resourceExtension;
 
-+ (NSString *)getDocumentsDirectory;
++ (NSString *)getApplicationSupportDirectory;
 
 @end
 

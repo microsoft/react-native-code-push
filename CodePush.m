@@ -62,10 +62,10 @@ static NSString *const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
     }
 }
 
-+ (NSString *)getDocumentsDirectory
++ (NSString *)getApplicationSupportDirectory
 {
-    NSString *documentsDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
-    return documentsDirectory;
+    NSString *applicationSupportDirectory = [NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    return applicationSupportDirectory;
 }
 
 // Private API methods
