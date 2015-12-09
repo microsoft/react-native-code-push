@@ -57,6 +57,7 @@ failCallback:(void (^)(NSError *err))failCallback;
 @interface CodePushPackage : NSObject
 
 + (void)installPackage:(NSDictionary *)updatePackage
+       rollbackTimeout:(int)rollbackTimeout
                error:(NSError **)error;
 
 + (NSDictionary *)getCurrentPackage:(NSError **)error;
@@ -76,6 +77,9 @@ failCallback:(void (^)(NSError *err))failCallback;
            failCallback:(void (^)(NSError *err))failCallback;
 
 + (void)rollbackPackage;
+
++ (void)confirmPackageSuccess;
++ (BOOL)shouldRollbackIfNotConfirmPackageSuccess;
 
 @end
 

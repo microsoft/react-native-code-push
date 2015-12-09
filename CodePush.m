@@ -15,6 +15,7 @@ RCT_EXPORT_MODULE()
 
 static NSTimer *_timer;
 static BOOL usingTestFolder = NO;
+static BOOL launchingApp = YES;
 
 static NSString *const FailedUpdatesKey = @"CODE_PUSH_FAILED_UPDATES";
 static NSString *const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
@@ -42,6 +43,10 @@ static NSString *const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
                   withExtension:(NSString *)resourceExtension
 {
     NSError *error;
+    if (launchingApp) {
+        launchingApp = NO;
+        [self rollbackIfNotConfirmPackageSuccess];
+    }
     NSString *packageFile = [CodePushPackage getCurrentPackageBundlePath:&error];
     NSURL *binaryJsBundleUrl = [[NSBundle mainBundle] URLForResource:resourceName withExtension:resourceExtension];
     
@@ -185,7 +190,7 @@ static NSString *const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
     NSString *packageHash = [CodePushPackage getCurrentPackageHash:&error];
     
     // Write the current package's hash to the "failed list"
-    [self saveFailedUpdate:packageHash];
+    [CodePush saveFailedUpdate:packageHash];
     
     // Do the actual rollback and then
     // refresh the app with the previous package
@@ -193,12 +198,23 @@ static NSString *const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
     [self loadBundle];
 }
 
++ (void)rollbackIfNotConfirmPackageSuccess {
+    if ([CodePushPackage shouldRollbackIfNotConfirmPackageSuccess]) {
+        NSError *error;
+        NSString *packageHash = [CodePushPackage getCurrentPackageHash:&error];
+
+        [CodePush saveFailedUpdate:packageHash];
+
+        [CodePushPackage rollbackPackage];
+    }
+}
+
 /*
  * When an update failed to apply, this method can be called
  * to store its hash so that it can be ignored on future
  * attempts to check the server for an update.
  */
-- (void)saveFailedUpdate:(NSString *)packageHash
++ (void)saveFailedUpdate:(NSString *)packageHash
 {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSMutableArray *failedUpdates = [preferences objectForKey:FailedUpdatesKey];
@@ -326,6 +342,7 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSError *error;
         [CodePushPackage installPackage:updatePackage
+                        rollbackTimeout:rollbackTimeout
                                   error:&error];
         
         if (error) {
@@ -390,6 +407,7 @@ RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
                                 rejecter:(RCTPromiseRejectBlock)reject)
 {
     [self cancelRollbackTimer];
+    [CodePushPackage confirmPackageSuccess];
     resolve([NSNull null]);
 }
 

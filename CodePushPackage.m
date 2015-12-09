@@ -11,6 +11,7 @@ NSString * const RelativeBundlePathKey = @"bundlePath";
 NSString * const StatusFile = @"codepush.json";
 NSString * const UpdateBundleFileName = @"app.jsbundle";
 NSString * const UnzippedFolderName = @"unzipped";
+NSString * const NotConfirmSuccessKey = @"NotConfirmSuccessKey";
 
 + (NSString *)getCodePushPath
 {
@@ -438,6 +439,7 @@ NSString * const UnzippedFolderName = @"unzipped";
 }
 
 + (void)installPackage:(NSDictionary *)updatePackage
+       rollbackTimeout:(int)rollbackTimeout
                error:(NSError **)error
 {
     NSString *packageHash = updatePackage[@"packageHash"];
@@ -461,6 +463,9 @@ NSString * const UnzippedFolderName = @"unzipped";
     
     [info setValue:info[@"currentPackage"] forKey:@"previousPackage"];
     [info setValue:packageHash forKey:@"currentPackage"];
+    if (rollbackTimeout != 0) {
+        [info setValue:@(YES) forKey:NotConfirmSuccessKey];
+    }
 
     [self updateCurrentPackageInfo:info
                              error:error];
@@ -477,8 +482,36 @@ NSString * const UnzippedFolderName = @"unzipped";
     
     [info setValue:info[@"previousPackage"] forKey:@"currentPackage"];
     [info removeObjectForKey:@"previousPackage"];
+    [info removeObjectForKey:NotConfirmSuccessKey];
     
     [self updateCurrentPackageInfo:info error:&error];
+}
+
++ (void)confirmPackageSuccess
+{
+    NSError *error;
+    NSMutableDictionary *info = [self getCurrentPackageInfo:&error];
+
+    if (error) {
+        return;
+    }
+    [info removeObjectForKey:NotConfirmSuccessKey];
+
+    [self updateCurrentPackageInfo:info error:&error];
+}
+
++ (BOOL)shouldRollbackIfNotConfirmPackageSuccess
+{
+    NSError *error;
+    NSMutableDictionary *info = [self getCurrentPackageInfo:&error];
+
+    if (error) {
+        return NO;
+    }
+    if ([info objectForKey:NotConfirmSuccessKey] && [[info objectForKey:NotConfirmSuccessKey] boolValue]) {
+        return YES;
+    }
+    return NO;
 }
 
 @end
