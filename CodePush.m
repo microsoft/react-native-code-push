@@ -356,7 +356,7 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
 
 /*
  * This method isn't publicly exposed via the "react-native-code-push"
- * module, and is only used internally to populate the RemotePackage.failedApply property.
+ * module, and is only used internally to populate the RemotePackage.failedInstall property.
  */
 RCT_EXPORT_METHOD(isFailedUpdate:(NSString *)packageHash
                          resolve:(RCTPromiseResolveBlock)resolve
