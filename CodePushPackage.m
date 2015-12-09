@@ -14,7 +14,7 @@ NSString * const UnzippedFolderName = @"unzipped";
 
 + (NSString *)getCodePushPath
 {
-    return [[CodePush getDocumentsDirectory] stringByAppendingPathComponent:@"CodePush"];
+    return [[CodePush getApplicationSupportDirectory] stringByAppendingPathComponent:@"CodePush"];
 }
 
 + (NSString *)getDownloadFilePath
@@ -290,6 +290,22 @@ NSString * const UnzippedFolderName = @"unzipped";
                 }
                 
                 if (relativeBundlePath) {
+                    NSString *absoluteBundlePath = [newPackageFolderPath stringByAppendingPathComponent:relativeBundlePath];
+                    NSDictionary *bundleFileAttributes = [[[NSFileManager defaultManager] attributesOfItemAtPath:absoluteBundlePath error:&error] mutableCopy];
+                    if (error) {
+                        failCallback(error);
+                        return;
+                    }
+                    
+                    [bundleFileAttributes setValue:[NSDate date] forKey:NSFileModificationDate];
+                    [[NSFileManager defaultManager] setAttributes:bundleFileAttributes
+                                                     ofItemAtPath:absoluteBundlePath
+                                                            error:&error];
+                    if (error) {
+                        failCallback(error);
+                        return;
+                    }
+                    
                     [mutableUpdatePackage setValue:relativeBundlePath forKey:RelativeBundlePathKey];
                 } else {
                     error = [[NSError alloc] initWithDomain:CodePushErrorDomain
