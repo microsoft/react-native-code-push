@@ -119,7 +119,7 @@ static NSString *const PendingUpdateWasInitializedKey = @"wasInitialized";
         _isFirstRunAfterUpdate = YES;
         BOOL wasInitialized = [pendingUpdate[PendingUpdateWasInitializedKey] boolValue];
         if (wasInitialized) {
-            // Pending update was initialized, but notifiyApplicationReady was not called.
+            // Pending update was initialized, but notifyApplicationReady was not called.
             // Therefore, deduce that it is a broken update and rollback.
             [self rollbackPackage];
         } else {

@@ -232,7 +232,7 @@ public class CodePush {
             try {
                 boolean wasInitialized = pendingUpdate.getBoolean(PENDING_UPDATE_WAS_INITIALIZED_KEY);
                 if (wasInitialized) {
-                    // Pending update was initialized, but notifiyApplicationReady was not called.
+                    // Pending update was initialized, but notifyApplicationReady was not called.
                     // Therefore, deduce that it is a broken update and rollback.
                     rollbackPackage();
                 } else {
