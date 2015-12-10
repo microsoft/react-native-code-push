@@ -22,7 +22,7 @@ static NSString *const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
 // These keys are already "namespaced" by the PendingUpdateKey, so
 // their values don't need to be obfuscated to prevent collision with app data
 static NSString *const PendingUpdateHashKey = @"hash";
-static NSString *const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
+static NSString *const PendingUpdateWasInitializedKey = @"wasInitialized";
 
 @synthesize bridge = _bridge;
 
@@ -71,20 +71,6 @@ static NSString *const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
 // Private API methods
 
 /*
- * This method cancels the currently running rollback
- * timer, which has the effect of stopping an automatic
- * rollback from occurring. 
- *
- * Note: This method is safe to call from any thread.
- */
-- (void)cancelRollbackTimer
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [_timer invalidate];
-    });
-}
-
-/*
  * This method is used by the React Native bridge to allow
  * our plugin to expose constants to the JS-side. In our case
  * we're simply exporting enum values so that the JS and Native
@@ -130,16 +116,17 @@ static NSString *const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
     
     if (pendingUpdate) {
         _isFirstRunAfterUpdate = YES;
-        int rollbackTimeout = [pendingUpdate[PendingUpdateRollbackTimeoutKey] intValue];
-        if (0 != rollbackTimeout) {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self startRollbackTimer:rollbackTimeout];
-            });
+        BOOL wasInitialized = [pendingUpdate[PendingUpdateWasInitializedKey] boolValue];
+        if (wasInitialized) {
+            // Pending update was initialized, but notifiyApplicationReady was not called.
+            // Therefore, deduce that it is a broken update and rollback.
+            [self rollbackPackage];
+        } else {
+            // Mark that we tried to initiazlie the new update, so that if it crashes,
+            // we will know that we need to rollback when the app next starts.
+            [self savePendingUpdate:pendingUpdate[PendingUpdateHashKey]
+                     wasInitialized:YES];
         }
-        
-        // Clear the pending update and sync
-        [preferences removeObjectForKey:PendingUpdateKey];
-        [preferences synchronize];
     }
 }
 
@@ -189,7 +176,7 @@ static NSString *const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
     
     // Do the actual rollback and then
     // refresh the app with the previous package
-    [CodePushPackage rollbackPackage];
+    [self removePendingUpdate];
     [self loadBundle];
 }
 
@@ -216,36 +203,33 @@ static NSString *const PendingUpdateRollbackTimeoutKey = @"rollbackTimeout";
 }
 
 /*
+ * This method is called in notifyApplicationReady to register the fact that
+ * the pending update succeeded and therefore can be removed.
+ */
+- (void)removePendingUpdate
+{
+    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+    [preferences removeObjectForKey:PendingUpdateKey];
+    [preferences synchronize];
+}
+
+/*
  * When an update is installed whose mode isn't IMMEDIATE, this method
- * can be called to store the pending update's metadata (e.g. rollbackTimeout)
+ * can be called to store the pending update's metadata (e.g. packageHash)
  * so that it can be used when the actual update application occurs at a later point.
  */
 - (void)savePendingUpdate:(NSString *)packageHash
-          rollbackTimeout:(int)rollbackTimeout
+           wasInitialized:(BOOL)wasInitialized
 {
     // Since we're not restarting, we need to store the fact that the update
     // was installed, but hasn't yet become "active".
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSDictionary *pendingUpdate = [[NSDictionary alloc] initWithObjectsAndKeys:
                                    packageHash,PendingUpdateHashKey,
-                                   [NSNumber numberWithInt:rollbackTimeout],PendingUpdateRollbackTimeoutKey, nil];
+                                   [NSNumber numberWithBool:wasInitialized],PendingUpdateWasInitializedKey, nil];
     
     [preferences setObject:pendingUpdate forKey:PendingUpdateKey];
     [preferences synchronize];
-}
-
-/*
- * This method handles starting the actual rollback timer
- * after an update has been installed.
- */
-- (void)startRollbackTimer:(int)rollbackTimeout
-{
-    double timeoutInSeconds = rollbackTimeout / 1000;
-    _timer = [NSTimer scheduledTimerWithTimeInterval:timeoutInSeconds
-                                              target:self
-                                            selector:@selector(rollbackPackage)
-                                            userInfo:nil
-                                             repeats:NO];
 }
 
 // JavaScript-exported module methods
@@ -318,7 +302,6 @@ RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
  * This method is the native side of the LocalPackage.install method.
  */
 RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
-                rollbackTimeout:(int)rollbackTimeout
                     installMode:(CodePushInstallMode)installMode
                        resolver:(RCTPromiseResolveBlock)resolve
                        rejecter:(RCTPromiseRejectBlock)reject)
@@ -332,7 +315,7 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
             reject(error);
         } else {
             [self savePendingUpdate:updatePackage[@"packageHash"]
-                    rollbackTimeout:rollbackTimeout];
+                     wasInitialized:NO];
             
             if (installMode == CodePushInstallModeImmediate) {
                 [self loadBundle];
@@ -389,7 +372,7 @@ RCT_EXPORT_METHOD(isFirstRun:(NSString *)packageHash
 RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
                                 rejecter:(RCTPromiseRejectBlock)reject)
 {
-    [self cancelRollbackTimer];
+    [self removePendingUpdate];
     resolve([NSNull null]);
 }
 

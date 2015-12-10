@@ -1,7 +1,6 @@
 package com.microsoft.codepush.react;
 
 import com.facebook.react.ReactPackage;
-import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.NativeModule;
@@ -31,20 +30,15 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class CodePush {
 
     private boolean didUpdate = false;
-    private Timer timer;
     private boolean usingTestFolder = false;
 
     private String assetsBundleFileName;
@@ -52,7 +46,7 @@ public class CodePush {
     private final String FAILED_UPDATES_KEY = "CODE_PUSH_FAILED_UPDATES";
     private final String PENDING_UPDATE_KEY = "CODE_PUSH_PENDING_UPDATE";
     private final String PENDING_UPDATE_HASH_KEY = "hash";
-    private final String PENDING_UPDATE_ROLLBACK_TIMEOUT_KEY = "rollbackTimeout";
+    private final String PENDING_UPDATE_WAS_INITIALIZED_KEY = "wasInitialized";
     private final String ASSETS_BUNDLE_PREFIX = "assets://";
     private final String CODE_PUSH_PREFERENCES = "CodePush";
     private final String DOWNLOAD_PROGRESS_EVENT_NAME = "CodePushDownloadProgress";
@@ -98,10 +92,6 @@ public class CodePush {
         return codePushReactPackage;
     }
 
-    public String getDocumentsDirectory() {
-        return codePushPackage.getDocumentsDirectory();
-    }
-
     public String getBundleUrl(String assetsBundleFileName) {
         this.assetsBundleFileName = assetsBundleFileName;
         String binaryJsBundleUrl = ASSETS_BUNDLE_PREFIX + assetsBundleFileName;
@@ -138,13 +128,6 @@ public class CodePush {
         }
     }
 
-    private void cancelRollbackTimer() {
-        if(timer != null) {
-            timer.cancel();
-            timer = null;
-        }
-    }
-
     private boolean isFailedHash(String packageHash) {
         SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
         String failedUpdatesString = settings.getString(FAILED_UPDATES_KEY, null);
@@ -176,7 +159,10 @@ public class CodePush {
             throw new CodePushUnknownException("Error in rolling back package", e);
         }
 
-        codePushNativeModule.loadBundle();
+        removePendingUpdate();
+        if (codePushNativeModule != null) {
+            codePushNativeModule.loadBundle();
+        }
     }
 
     private void saveFailedUpdate(String packageHash) {
@@ -204,52 +190,60 @@ public class CodePush {
         }
     }
 
-    private void savePendingUpdate(String packageHash, int rollbackTimeout) {
+    private void removePendingUpdate() {
+        SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
+        settings.edit().remove(PENDING_UPDATE_KEY).commit();
+    }
+
+    private void savePendingUpdate(String packageHash, boolean wasInitialized) {
         SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
         JSONObject pendingUpdate = new JSONObject();
         try {
             pendingUpdate.put(PENDING_UPDATE_HASH_KEY, packageHash);
-            pendingUpdate.put(PENDING_UPDATE_ROLLBACK_TIMEOUT_KEY, rollbackTimeout);
+            pendingUpdate.put(PENDING_UPDATE_WAS_INITIALIZED_KEY, wasInitialized);
             settings.edit().putString(PENDING_UPDATE_KEY, pendingUpdate.toString()).commit();
         } catch (JSONException e) {
             // Should not happen.
             throw new CodePushUnknownException("Unable to save pending update.", e);
         }
-
     }
 
-    private void startRollbackTimer(int rollbackTimeout) {
-        timer = new Timer();
-        Calendar c = Calendar.getInstance();
-        c.setTime(new Date());
-        c.add(Calendar.MILLISECOND, rollbackTimeout);
-        Date timeout = c.getTime();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                rollbackPackage();
-            }
-        }, timeout);
+    private JSONObject getPendingUpdate() {
+        SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
+        String pendingUpdateString = settings.getString(PENDING_UPDATE_KEY, null);
+        if (pendingUpdateString == null) {
+            return null;
+        }
+
+        try {
+            JSONObject pendingUpdate = new JSONObject(pendingUpdateString);
+            return pendingUpdate;
+        } catch (JSONException e) {
+            // Should not happen.
+            throw new CodePushUnknownException("Unable to parse pending update metadata " +
+                    pendingUpdateString + " stored in SharedPreferences", e);
+        }
     }
 
     private void initializeUpdateAfterRestart() {
-        SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
-        String pendingUpdateString = settings.getString(PENDING_UPDATE_KEY, null);
-
-        if (pendingUpdateString != null) {
+        JSONObject pendingUpdate = getPendingUpdate();
+        if (pendingUpdate != null) {
+            didUpdate = true;
             try {
-                didUpdate = true;
-                JSONObject pendingUpdateJSON = new JSONObject(pendingUpdateString);
-                int rollbackTimeout = pendingUpdateJSON.getInt(PENDING_UPDATE_ROLLBACK_TIMEOUT_KEY);
-                if (0 != rollbackTimeout) {
-                    startRollbackTimer(rollbackTimeout);
+                boolean wasInitialized = pendingUpdate.getBoolean(PENDING_UPDATE_WAS_INITIALIZED_KEY);
+                if (wasInitialized) {
+                    // Pending update was initialized, but notifiyApplicationReady was not called.
+                    // Therefore, deduce that it is a broken update and rollback.
+                    rollbackPackage();
+                } else {
+                    // Mark that we tried to initiazlie the new update, so that if it crashes,
+                    // we will know that we need to rollback when the app next starts.
+                    savePendingUpdate(pendingUpdate.getString(PENDING_UPDATE_HASH_KEY),
+                            /* wasInitialized */true);
                 }
-
-                settings.edit().remove(PENDING_UPDATE_KEY).commit();
             } catch (JSONException e) {
                 // Should not happen.
-                throw new CodePushUnknownException("Unable to parse pending update metadata " +
-                        pendingUpdateString + " stored in SharedPreferences", e);
+                throw new CodePushUnknownException("Unable to read pending update metadata stored in SharedPreferences", e);
             }
         }
     }
@@ -257,15 +251,24 @@ public class CodePush {
     private class CodePushNativeModule extends ReactContextBaseJavaModule {
 
         private LifecycleEventListener lifecycleEventListener = null;
+        private static final String JS_BUNDLE_FILE_NAME = "ReactNativeDevBundle.js";
+
+        private void clearReactDevBundleCache() {
+            File cachedDevBundle = new File(getReactApplicationContext().getFilesDir(), JS_BUNDLE_FILE_NAME);
+            if (cachedDevBundle.exists()) {
+                cachedDevBundle.delete();
+            }
+        }
 
         private void loadBundle() {
+            clearReactDevBundleCache();
             Intent intent = mainActivity.getIntent();
             mainActivity.finish();
             mainActivity.startActivity(intent);
         }
 
         @ReactMethod
-        public void installUpdate(final ReadableMap updatePackage, final int rollbackTimeout, final int installMode, final Promise promise) {
+        public void installUpdate(final ReadableMap updatePackage, final int installMode, final Promise promise) {
             AsyncTask asyncTask = new AsyncTask() {
                 @Override
                 protected Void doInBackground(Object[] params) {
@@ -276,7 +279,7 @@ public class CodePush {
                         if (pendingHash == null) {
                             throw new CodePushUnknownException("Update package to be installed has no hash.");
                         } else {
-                            savePendingUpdate(pendingHash, rollbackTimeout);
+                            savePendingUpdate(pendingHash, /* wasInitialized */false);
                         }
 
                         if (installMode == CodePushInstallMode.IMMEDIATE.getValue()) {
@@ -394,7 +397,7 @@ public class CodePush {
 
         @ReactMethod
         public void notifyApplicationReady(Promise promise) {
-            cancelRollbackTimer();
+            removePendingUpdate();
             promise.resolve("");
         }
 
