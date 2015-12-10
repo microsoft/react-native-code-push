@@ -167,7 +167,6 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
     deploymentKey: null,
     ignoreFailedUpdates: true,
     installMode: CodePush.InstallMode.ON_NEXT_RESTART,
-    rollbackTimeout: 0,
     updateDialog: null,
     
     ...options 
@@ -236,7 +235,7 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
           remotePackage.download(downloadProgressCallback)
             .then((localPackage) => {
               syncStatusChangeCallback(CodePush.SyncStatus.INSTALLING_UPDATE);
-              return localPackage.install(syncOptions.rollbackTimeout, syncOptions.installMode, () => {
+              return localPackage.install(syncOptions.installMode, () => {
                 syncStatusChangeCallback(CodePush.SyncStatus.UPDATE_INSTALLED);
                 resolve(CodePush.SyncStatus.UPDATE_INSTALLED);
               });
