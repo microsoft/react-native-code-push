@@ -22,7 +22,7 @@ static NSString *const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
 // These keys are already "namespaced" by the PendingUpdateKey, so
 // their values don't need to be obfuscated to prevent collision with app data
 static NSString *const PendingUpdateHashKey = @"hash";
-static NSString *const PendingUpdateWasInitializedKey = @"wasInitialized";
+static NSString *const PendingUpdateIsLoadingKey = @"isLoading";
 
 @synthesize bridge = _bridge;
 
@@ -114,11 +114,10 @@ static NSString *const PendingUpdateWasInitializedKey = @"wasInitialized";
 {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];
-    
     if (pendingUpdate) {
         _isFirstRunAfterUpdate = YES;
-        BOOL wasInitialized = [pendingUpdate[PendingUpdateWasInitializedKey] boolValue];
-        if (wasInitialized) {
+        BOOL updateIsLoading = [pendingUpdate[PendingUpdateIsLoadingKey] boolValue];
+        if (updateIsLoading) {
             // Pending update was initialized, but notifyApplicationReady was not called.
             // Therefore, deduce that it is a broken update and rollback.
             [self rollbackPackage];
@@ -126,7 +125,7 @@ static NSString *const PendingUpdateWasInitializedKey = @"wasInitialized";
             // Mark that we tried to initialize the new update, so that if it crashes,
             // we will know that we need to rollback when the app next starts.
             [self savePendingUpdate:pendingUpdate[PendingUpdateHashKey]
-                     wasInitialized:YES];
+                          isLoading:YES];
         }
     }
 }
@@ -149,15 +148,19 @@ static NSString *const PendingUpdateWasInitializedKey = @"wasInitialized";
  */
 - (void)loadBundle
 {
-    // If the current bundle URL is using http(s), then assume the dev
-    // is debugging and therefore, shouldn't be redirected to a local
-    // file (since Chrome wouldn't support it). Otherwise, update
-    // the current bundle URL to point at the latest update
-    if (![_bridge.bundleURL.scheme hasPrefix:@"http"]) {
-        _bridge.bundleURL = [CodePush bundleURL];
-    }
-    
-    [_bridge reload];
+    // This needs to be async dispatched because the _bridge is not set on init
+    // when the app first starts, therefore rollbacks will not take effect.
+    dispatch_async(dispatch_get_main_queue(), ^{
+        // If the current bundle URL is using http(s), then assume the dev
+        // is debugging and therefore, shouldn't be redirected to a local
+        // file (since Chrome wouldn't support it). Otherwise, update
+        // the current bundle URL to point at the latest update
+        if (![_bridge.bundleURL.scheme hasPrefix:@"http"]) {
+            _bridge.bundleURL = [CodePush bundleURL];
+        }
+        
+        [_bridge reload];
+    });
 }
 
 /*
@@ -178,6 +181,7 @@ static NSString *const PendingUpdateWasInitializedKey = @"wasInitialized";
     // Rollback to the previous version and de-register the new update
     [CodePushPackage rollbackPackage];
     [self removePendingUpdate];
+    [self loadBundle];
 }
 
 /*
@@ -203,8 +207,8 @@ static NSString *const PendingUpdateWasInitializedKey = @"wasInitialized";
 }
 
 /*
- * This method is called in notifyApplicationReady to register the fact that
- * the pending update succeeded and therefore can be removed.
+ * This method  is used to register the fact that a pending
+ * update succeeded and therefore can be removed.
  */
 - (void)removePendingUpdate
 {
@@ -219,14 +223,14 @@ static NSString *const PendingUpdateWasInitializedKey = @"wasInitialized";
  * so that it can be used when the actual update application occurs at a later point.
  */
 - (void)savePendingUpdate:(NSString *)packageHash
-           wasInitialized:(BOOL)wasInitialized
+                isLoading:(BOOL)isLoading
 {
     // Since we're not restarting, we need to store the fact that the update
     // was installed, but hasn't yet become "active".
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSDictionary *pendingUpdate = [[NSDictionary alloc] initWithObjectsAndKeys:
                                    packageHash,PendingUpdateHashKey,
-                                   [NSNumber numberWithBool:wasInitialized],PendingUpdateWasInitializedKey, nil];
+                                   [NSNumber numberWithBool:isLoading],PendingUpdateIsLoadingKey, nil];
     
     [preferences setObject:pendingUpdate forKey:PendingUpdateKey];
     [preferences synchronize];
@@ -315,7 +319,7 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
             reject(error);
         } else {
             [self savePendingUpdate:updatePackage[@"packageHash"]
-                     wasInitialized:NO];
+                          isLoading:NO];
             
             if (installMode == CodePushInstallModeImmediate) {
                 [self loadBundle];

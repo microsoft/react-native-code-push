@@ -47,7 +47,7 @@ public class CodePush {
     private final String FAILED_UPDATES_KEY = "CODE_PUSH_FAILED_UPDATES";
     private final String PENDING_UPDATE_KEY = "CODE_PUSH_PENDING_UPDATE";
     private final String PENDING_UPDATE_HASH_KEY = "hash";
-    private final String PENDING_UPDATE_WAS_INITIALIZED_KEY = "wasInitialized";
+    private final String PENDING_UPDATE_IS_LOADING_KEY = "isLoading";
     private final String ASSETS_BUNDLE_PREFIX = "assets://";
     private final String CODE_PUSH_PREFERENCES = "CodePush";
     private final String CODE_PUSH_TAG = "CodePush";
@@ -194,12 +194,12 @@ public class CodePush {
         settings.edit().remove(PENDING_UPDATE_KEY).commit();
     }
 
-    private void savePendingUpdate(String packageHash, boolean wasInitialized) {
+    private void savePendingUpdate(String packageHash, boolean isLoading) {
         SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
         JSONObject pendingUpdate = new JSONObject();
         try {
             pendingUpdate.put(PENDING_UPDATE_HASH_KEY, packageHash);
-            pendingUpdate.put(PENDING_UPDATE_WAS_INITIALIZED_KEY, wasInitialized);
+            pendingUpdate.put(PENDING_UPDATE_IS_LOADING_KEY, isLoading);
             settings.edit().putString(PENDING_UPDATE_KEY, pendingUpdate.toString()).commit();
         } catch (JSONException e) {
             // Should not happen.
@@ -230,8 +230,8 @@ public class CodePush {
         if (pendingUpdate != null) {
             didUpdate = true;
             try {
-                boolean wasInitialized = pendingUpdate.getBoolean(PENDING_UPDATE_WAS_INITIALIZED_KEY);
-                if (wasInitialized) {
+                boolean updateIsLoading = pendingUpdate.getBoolean(PENDING_UPDATE_IS_LOADING_KEY);
+                if (updateIsLoading) {
                     // Pending update was initialized, but notifyApplicationReady was not called.
                     // Therefore, deduce that it is a broken update and rollback.
                     rollbackPackage();
@@ -239,7 +239,7 @@ public class CodePush {
                     // Mark that we tried to initialize the new update, so that if it crashes,
                     // we will know that we need to rollback when the app next starts.
                     savePendingUpdate(pendingUpdate.getString(PENDING_UPDATE_HASH_KEY),
-                            /* wasInitialized */true);
+                            /* isLoading */true);
                 }
             } catch (JSONException e) {
                 // Should not happen.
@@ -279,7 +279,7 @@ public class CodePush {
                         if (pendingHash == null) {
                             throw new CodePushUnknownException("Update package to be installed has no hash.");
                         } else {
-                            savePendingUpdate(pendingHash, /* wasInitialized */false);
+                            savePendingUpdate(pendingHash, /* isLoading */false);
                         }
 
                         if (installMode == CodePushInstallMode.IMMEDIATE.getValue()) {
