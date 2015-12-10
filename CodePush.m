@@ -106,8 +106,9 @@ static NSString *const PendingUpdateWasInitializedKey = @"wasInitialized";
 }
 
 /*
- * This method starts the rollback protection timer
- * and is used when a new update is initialized.
+ * This method is used when the app is started to either
+ * initialize a pending update or rollback a faulty update
+ * to the previous version.
  */
 - (void)initializeUpdateAfterRestart
 {
@@ -122,7 +123,7 @@ static NSString *const PendingUpdateWasInitializedKey = @"wasInitialized";
             // Therefore, deduce that it is a broken update and rollback.
             [self rollbackPackage];
         } else {
-            // Mark that we tried to initiazlie the new update, so that if it crashes,
+            // Mark that we tried to initialize the new update, so that if it crashes,
             // we will know that we need to rollback when the app next starts.
             [self savePendingUpdate:pendingUpdate[PendingUpdateHashKey]
                      wasInitialized:YES];
@@ -174,10 +175,9 @@ static NSString *const PendingUpdateWasInitializedKey = @"wasInitialized";
     // Write the current package's hash to the "failed list"
     [self saveFailedUpdate:packageHash];
     
-    // Do the actual rollback and then
-    // refresh the app with the previous package
+    // Rollback to the previous version and de-register the new update
+    [CodePushPackage rollbackPackage];
     [self removePendingUpdate];
-    [self loadBundle];
 }
 
 /*

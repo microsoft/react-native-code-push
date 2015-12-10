@@ -160,9 +160,6 @@ public class CodePush {
         }
 
         removePendingUpdate();
-        if (codePushNativeModule != null) {
-            codePushNativeModule.loadBundle();
-        }
     }
 
     private void saveFailedUpdate(String packageHash) {
@@ -236,7 +233,7 @@ public class CodePush {
                     // Therefore, deduce that it is a broken update and rollback.
                     rollbackPackage();
                 } else {
-                    // Mark that we tried to initiazlie the new update, so that if it crashes,
+                    // Mark that we tried to initialize the new update, so that if it crashes,
                     // we will know that we need to rollback when the app next starts.
                     savePendingUpdate(pendingUpdate.getString(PENDING_UPDATE_HASH_KEY),
                             /* wasInitialized */true);
