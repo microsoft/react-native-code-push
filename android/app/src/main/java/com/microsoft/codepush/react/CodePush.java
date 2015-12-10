@@ -23,6 +23,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -49,6 +50,7 @@ public class CodePush {
     private final String PENDING_UPDATE_WAS_INITIALIZED_KEY = "wasInitialized";
     private final String ASSETS_BUNDLE_PREFIX = "assets://";
     private final String CODE_PUSH_PREFERENCES = "CodePush";
+    private final String CODE_PUSH_TAG = "CodePush";
     private final String DOWNLOAD_PROGRESS_EVENT_NAME = "CodePushDownloadProgress";
     private final String RESOURCES_BUNDLE = "resources.arsc";
 
@@ -217,8 +219,9 @@ public class CodePush {
             return pendingUpdate;
         } catch (JSONException e) {
             // Should not happen.
-            throw new CodePushUnknownException("Unable to parse pending update metadata " +
+            Log.e(CODE_PUSH_TAG, "Unable to parse pending update metadata " +
                     pendingUpdateString + " stored in SharedPreferences", e);
+            return null;
         }
     }
 
