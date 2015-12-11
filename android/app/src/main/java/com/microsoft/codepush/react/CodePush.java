@@ -53,6 +53,7 @@ public class CodePush {
     private final String CODE_PUSH_TAG = "CodePush";
     private final String DOWNLOAD_PROGRESS_EVENT_NAME = "CodePushDownloadProgress";
     private final String RESOURCES_BUNDLE = "resources.arsc";
+    private final String REACT_DEV_BUNDLE_CACHE_FILE_NAME = "ReactNativeDevBundle.js";
 
     private CodePushPackage codePushPackage;
     private CodePushReactPackage codePushReactPackage;
@@ -236,6 +237,8 @@ public class CodePush {
                     // Therefore, deduce that it is a broken update and rollback.
                     rollbackPackage();
                 } else {
+                    // Clear the React dev bundle cache so that new updates can be loaded.
+                    clearReactDevBundleCache();
                     // Mark that we tried to initialize the new update, so that if it crashes,
                     // we will know that we need to rollback when the app next starts.
                     savePendingUpdate(pendingUpdate.getString(PENDING_UPDATE_HASH_KEY),
@@ -248,20 +251,18 @@ public class CodePush {
         }
     }
 
+    private void clearReactDevBundleCache() {
+        File cachedDevBundle = new File(this.applicationContext.getFilesDir(), REACT_DEV_BUNDLE_CACHE_FILE_NAME);
+        if (cachedDevBundle.exists()) {
+            cachedDevBundle.delete();
+        }
+    }
+
     private class CodePushNativeModule extends ReactContextBaseJavaModule {
 
         private LifecycleEventListener lifecycleEventListener = null;
-        private static final String JS_BUNDLE_FILE_NAME = "ReactNativeDevBundle.js";
-
-        private void clearReactDevBundleCache() {
-            File cachedDevBundle = new File(getReactApplicationContext().getFilesDir(), JS_BUNDLE_FILE_NAME);
-            if (cachedDevBundle.exists()) {
-                cachedDevBundle.delete();
-            }
-        }
 
         private void loadBundle() {
-            clearReactDevBundleCache();
             Intent intent = mainActivity.getIntent();
             mainActivity.finish();
             mainActivity.startActivity(intent);
