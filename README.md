@@ -139,7 +139,7 @@ After installing the plugin and syncing your Android Studio project with Gradle,
     import com.microsoft.codepush.react.CodePush;
     
     // 2. Optional: extend FragmentActivity if you intend to show a dialog prompting users about updates.
-    //    If you do this, make sure to also add `import android.support.v4.app.FragmentActivity` to the file.
+    //    If you do this, make sure to also add "import android.support.v4.app.FragmentActivity" below #1.
     public class MainActivity extends FragmentActivity implements DefaultHardwareBackBtnHandler {
         ...
         
