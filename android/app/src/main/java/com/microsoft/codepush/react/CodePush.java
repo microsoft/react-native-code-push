@@ -1,6 +1,6 @@
 package com.microsoft.codepush.react;
 
-import com.facebook.react.*;
+import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.NativeModule;
