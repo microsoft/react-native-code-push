@@ -1,6 +1,6 @@
 package com.microsoft.codepush.react;
 
-import com.facebook.react.ReactPackage;
+import com.facebook.react.*;
 import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.NativeModule;
@@ -54,6 +54,7 @@ public class CodePush {
     private final String DOWNLOAD_PROGRESS_EVENT_NAME = "CodePushDownloadProgress";
     private final String RESOURCES_BUNDLE = "resources.arsc";
     private final String REACT_DEV_BUNDLE_CACHE_FILE_NAME = "ReactNativeDevBundle.js";
+    private final String BINARY_MODIFIED_TIME_KEY = "binaryModifiedTime";
 
     private CodePushPackage codePushPackage;
     private CodePushReactPackage codePushReactPackage;
@@ -95,22 +96,31 @@ public class CodePush {
         return codePushReactPackage;
     }
 
-    public String getBundleUrl(String assetsBundleFileName) {
-        this.assetsBundleFileName = assetsBundleFileName;
-        String binaryJsBundleUrl = ASSETS_BUNDLE_PREFIX + assetsBundleFileName;
-        ZipFile applicationFile;
-        long binaryResourcesModifiedTime = -1;
-
+    public long getBinaryResourcesModifiedTime() {
         ApplicationInfo ai = null;
+        ZipFile applicationFile = null;
         try {
             ai = applicationContext.getPackageManager().getApplicationInfo(applicationContext.getPackageName(), 0);
             applicationFile = new ZipFile(ai.sourceDir);
             ZipEntry classesDexEntry = applicationFile.getEntry(RESOURCES_BUNDLE);
-            binaryResourcesModifiedTime = classesDexEntry.getTime();
-            applicationFile.close();
+            return classesDexEntry.getTime();
         } catch (PackageManager.NameNotFoundException | IOException e) {
             throw new CodePushUnknownException("Error in getting file information about compiled resources", e);
+        } finally {
+            if (applicationFile != null) {
+                try {
+                    applicationFile.close();
+                } catch (IOException e) {
+                    throw new CodePushUnknownException("Error in closing application file.", e);
+                }
+            }
         }
+    }
+
+    public String getBundleUrl(String assetsBundleFileName) {
+        this.assetsBundleFileName = assetsBundleFileName;
+        String binaryJsBundleUrl = ASSETS_BUNDLE_PREFIX + assetsBundleFileName;
+        long binaryResourcesModifiedTime = getBinaryResourcesModifiedTime();
 
         try {
             String packageFilePath = codePushPackage.getCurrentPackageBundlePath();
@@ -119,15 +129,22 @@ public class CodePush {
                 return binaryJsBundleUrl;
             }
 
-            File packageFile = new File(packageFilePath);
-            if (packageFile.lastModified() < binaryResourcesModifiedTime) {
+            ReadableMap packageMetadata = codePushPackage.getCurrentPackage();
+            // May throw NumberFormatException.
+            Long binaryModifiedDateDuringPackageInstall = Long.parseLong(CodePushUtils.tryGetString(packageMetadata, BINARY_MODIFIED_TIME_KEY));
+            if (binaryModifiedDateDuringPackageInstall == binaryResourcesModifiedTime) {
+                return packageFilePath;
+            } else {
                 // The binary version is newer.
+                Log.d(CODE_PUSH_TAG, "Found a package installed via CodePush that was " +
+                        "installed under a different binary version, so the JS bundle packaged " +
+                        "in the binary will be used as the most current package.");
                 return binaryJsBundleUrl;
             }
-
-            return packageFilePath;
         } catch (IOException e) {
             throw new CodePushUnknownException("Error in getting current package bundle path", e);
+        } catch (NumberFormatException e) {
+            throw new CodePushUnknownException("Error in reading binary modified date from package metadata", e);
         }
     }
 
@@ -235,9 +252,11 @@ public class CodePush {
                 if (updateIsLoading) {
                     // Pending update was initialized, but notifyApplicationReady was not called.
                     // Therefore, deduce that it is a broken update and rollback.
+                    Log.d(CODE_PUSH_TAG, "Update did not finish loading the last time, rolling back to a previous version.");
                     rollbackPackage();
                 } else {
                     // Clear the React dev bundle cache so that new updates can be loaded.
+                    if (com.facebook.react.BuildConfig.DEBUG)
                     clearReactDevBundleCache();
                     // Mark that we tried to initialize the new update, so that if it crashes,
                     // we will know that we need to rollback when the app next starts.
@@ -325,7 +344,9 @@ public class CodePush {
                 @Override
                 protected Void doInBackground(Object[] params) {
                     try {
-                        codePushPackage.downloadPackage(applicationContext, updatePackage, new DownloadProgressCallback() {
+                        WritableMap mutableUpdatePackage = CodePushUtils.convertReadableMapToWritableMap(updatePackage);
+                        mutableUpdatePackage.putString(BINARY_MODIFIED_TIME_KEY, "" + getBinaryResourcesModifiedTime());
+                        codePushPackage.downloadPackage(applicationContext, mutableUpdatePackage, new DownloadProgressCallback() {
                             @Override
                             public void call(DownloadProgress downloadProgress) {
                                 getReactApplicationContext()

@@ -248,6 +248,11 @@ public class CodePushUtils {
         return jsonArr;
     }
 
+    public static WritableMap convertReadableMapToWritableMap(ReadableMap map) {
+        JSONObject mapJSON = convertReadableToJsonObject(map);
+        return convertJsonObjectToWriteable(mapJSON);
+    }
+
     public static String tryGetString(ReadableMap map, String key) {
         try {
             return map.getString(key);
