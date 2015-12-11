@@ -15,6 +15,9 @@ This plugin provides client-side integration for the [CodePush service](https://
 * [Releasing Updates (JavaScript-only)](#releasing-updates-javascript-only)
 * [Releasing Updates (JavaScript + images)](#releasing-updates-javascript--images)
 * [API Reference](#api-reference)
+    * [JavaScript API](#javascript-api-reference)
+    * [Objective-C API Reference (iOS)](#objective-c-api-reference-ios)
+    * [Java API Reference (Android)](#java-api-reference-android)
 
 ## How does it work?
 
@@ -27,7 +30,7 @@ The CodePush plugin helps get product improvements in front of your end users in
 ## Supported React Native platforms
 
 - iOS
-- Android
+- Android (asset support coming soon!)
 
 *Note: CodePush v1.3.0 requires v0.14.0+ of React Native, and CodePush v1.4.0 requires v0.15.0+ of React Native, so make sure you are using the right version of the CodePush plugin.*
 
@@ -236,11 +239,21 @@ If you are using the new React Native [assets system](https://facebook.github.io
 
 Additionally, the CodePush client supports differential updates, so even though you are releasing your JS bundle and assets on every update, your end users will only actually download the files they need. The service handles this automatically so that you can focus on creating awesome apps and we can worry about optimizing end user downloads.
 
-*Note: Releasing assets via CodePush is currently only supported on iOS, and requires that you're using React Native v0.15.0+.*
+*Note: Releasing assets via CodePush is currently only supported on iOS, and requires that you're using React Native v0.15.0+ and CodePush 1.4.0+. If you are using assets and an older version of the CodePush plugin, you should not release updates via CodePush, because it will break your app's ability to load images from the binary. Please test and release appropriately!*
 
 ---
 
 ## API Reference
+
+The CodePush plugin is made up of two components:
+
+1. A JavaScript module, which can be imported/required, and allows the app to interact with the service during runtime (e.g. check for updates, inspect the metadata about the currently running app update).
+
+2. A native API (Objective-C and Java) which allows the React Native app host to bootstrap itself with the right JS bundle location.
+
+The following sections describe the shape and behavior of these APIs in detail:
+
+### JavaScript API Reference
 
 When you require `react-native-code-push`, the module object provides the following top-level methods:
 
@@ -254,7 +267,7 @@ When you require `react-native-code-push`, the module object provides the follow
 
 * [sync](#codepushsync): Allows checking for an update, downloading it and installing it, all with a single call. Unless you need custom UI and/or behavior, we recommend most developers to use this method when integrating CodePush into their apps
 
-### codePush.checkForUpdate
+#### codePush.checkForUpdate
 
 ```javascript
 codePush.checkForUpdate(deploymentKey: String = null): Promise<RemotePackage>;
@@ -280,7 +293,7 @@ codePush.checkForUpdate()
 });
 ```
 
-### codePush.getCurrentPackage
+#### codePush.getCurrentPackage
 
 ```javascript
 codePush.getCurrentPackage(): Promise<LocalPackage>;
@@ -304,7 +317,7 @@ codePush.getCurrentPackage()
 });
 ```
 
-### codePush.notifyApplicationReady
+#### codePush.notifyApplicationReady
 
 ```javascript
 codePush.notifyApplicationReady(): Promise<void>;
@@ -314,7 +327,7 @@ Notifies the CodePush runtime that a freshly installed update should be consider
 
 If you are using the `sync` function, and doing your update check on app start, then you don't need to manually call `notifyApplicationReady` since `sync` will call it for you. This behavior exists due to the assumption that the point at which `sync` is called in your app represents a good approximation of a successful startup.
 
-### codePush.restartApp		
+#### codePush.restartApp		
 		
 ```javascript		
 codePush.restartApp(): void;		
@@ -325,7 +338,7 @@ Immediately restarts the app. If there is an update pending, it will be presente
 1. Your app is specifying an install mode value of `ON_NEXT_RESTART` or `ON_NEXT_RESUME` when calling the `sync` or `LocalPackage.install` methods. This has the effect of not applying your update until the app has been restarted (by either the end user or OS)	or resumed, and therefore, the update won't be immediately displayed to the end user 	.
 2. You have an app-specific user event (e.g. the end user navigated back to the app's home route) that allows you to apply the update in an unobtrusive way, and potentially gets the update in front of the end user sooner then waiting until the next restart or resume.		
 
-### codePush.sync
+#### codePush.sync
 
 ```javascript
 codePush.sync(options: Object, syncStatusChangeCallback: function(syncStatus: Number), downloadProgressCallback: function(progress: DownloadProgress)): Promise<Number>;
@@ -432,18 +445,18 @@ If the update check and/or the subsequent download fails for any reason, the `Pr
 
 The `sync` method can be called anywhere you'd like to check for an update. That could be in the `componentWillMount` lifecycle event of your root component, the onPress handler of a `<TouchableHighlight>` component, in the callback of a periodic timer, or whatever else makes sense for your needs. Just like the `checkForUpdate` method, it will perform the network request to check for an update in the background, so it won't impact your UI thread and/or JavaScript thread's responsiveness.
 
-### Package objects
+#### Package objects
 
 The `checkForUpdate` and `getCurrentPackage` methods return promises, that when resolved, provide acces to "package" objects. The package represents your code update as well as any extra metadata (e.g. description, mandatory?). The CodePush API has the distinction between the following types of packages:
 
 * [LocalPackage](#localpackage): Represents a downloaded update package that is either already running, or has been installed and is pending an app restart.
 * [RemotePackage](#remotepackage): Represents an available update on the CodePush server that hasn't been downloaded yet.
 
-#### LocalPackage
+##### LocalPackage
 
 Contains details about an update that has been downloaded locally or already installed. You can get a reference to an instance of this object either by calling the module-level `getCurrentPackage` method, or as the value of the promise returned by the `RemotePackage.download` method.
 
-##### Properties
+###### Properties
 - __appVersion__: The app binary version that this update is dependent on. This is the value that was specified via the `appStoreVersion` parameter when calling the CLI's `release` command. *(String)*
 - __deploymentKey__: The deployment key that was used to originally download this update. *(String)*
 - __description__: The description of the update. This is the same value that you specified in the CLI when you released the update. *(String)*
@@ -454,27 +467,27 @@ Contains details about an update that has been downloaded locally or already ins
 - __packageHash__: The SHA hash value of the update. *(String)*
 - __packageSize__: The size of the code contained within the update, in bytes. *(Number)*
 
-##### Methods
+###### Methods
 - __install(installMode: CodePush.InstallMode = CodePush.InstallMode.ON_NEXT_RESTART): Promise&lt;void&gt;__: Installs the update by saving it to the location on disk where the runtime expects to find the latest version of the app. The `installMode` parameter controls when the changes are actually presented to the end user. The default value is to wait until the next app restart to display the changes, but you can refer to the [`InstallMode`](#installmode) enum reference for a description of the available options and what they do.
 
-#### RemotePackage
+##### RemotePackage
 
 Contains details about an update that is available for download from the CodePush server. You get a reference to an instance of this object by calling the `checkForUpdate` method when an update is available. If you are using the `sync` API, you don't need to worry about the `RemotePackage`, since it will handle the download and installation process automatically for you.
 
-##### Properties
+###### Properties
 
 The `RemotePackage` inherits all of the same properties as the `LocalPackage`, but includes one additional one:
 
 - __downloadUrl__: The URL at which the package is available for download. This property is only needed for advanced usage, since the `download` method will automatically handle the acquisition of updates for you. *(String)*
 
-##### Methods
+###### Methods
 - __download(downloadProgressCallback?: Function): Promise&lt;LocalPackage&gt;__: Downloads the available update from the CodePush service. If a `downloadProgressCallback` is specified, it will be called periodically with a `DownloadProgress` object (`{ totalBytes: Number, receivedBytes: Number }`) that reports the progress of the download until it completes. Returns a Promise that resolves with the `LocalPackage`.
 
-### Enums
+#### Enums
 
 The CodePush API includes the following enums which can be used to customize the update experience:
 
-#### InstallMode
+##### InstallMode
 
 This enum specified when you would like an installed update to actually be applied, and can be passed to either the `sync` or `LocalPackage.install` methods. It includes the following values:
 * __CodePush.InstallMode.IMMEDIATE__ *(0)* - Indicates that you want to install the update and restart the app immediately. This value is appropriate for debugging scenarios as well as when displaying an update prompt to the user, since they would expect to see the changes immediately after accepting the installation.
@@ -483,7 +496,7 @@ This enum specified when you would like an installed update to actually be appli
  
 * __CodePush.InstallMode.ON_NEXT_RESUME__ *(2)* - Indicates that you want to install the update, but don't want to restart the app until the next time the end user resumes it from the background. This way, you don't disrupt their current session, but you can get the update in front of them sooner then having to wait for the next natural restart. This value is appropriate for silent installs that can be applied on resume in a non-invasive way.
 
-#### SyncStatus
+##### SyncStatus
 
 This enum is provided to the `syncStatusChangedCallback` function that can be passed to the `sync` method, in order to hook into the overall update process. It includes the following values:
 
@@ -495,3 +508,49 @@ This enum is provided to the `syncStatusChangedCallback` function that can be pa
 * __CodePush.SyncStatus.UPDATE_IGNORED__ *(5)* - The app has an optional update, which the end user chose to ignore. (This is only applicable when the `updateDialog` is used)
 * __CodePush.SyncStatus.UPDATE_INSTALLED__ *(6)* - An available update has been installed and will be run either immediately after the `syncStatusChangedCallback` function returns or the next time the app resumes/restarts, depending on the `InstallMode` specified in `SyncOptions`.
 * __CodePush.SyncStatus.UNKNOWN_ERROR__ *(-1)* - The sync operation encountered an unknown error. 
+
+### Objective-C API Reference (iOS)
+
+The Objective-C API is made available by importing the `CodePush.h` header into your `AppDelegate.m` file, and consists of a single public class named `CodePush`.
+
+#### CodePush
+
+Contains static methods for retreiving the `NSURL` that represents the most recent JavaScript bundle file, and can be passed to the `RCTRootView`'s `initWithBundleURL` method when bootstrapping your app in the `AppDelegate.m` file. 
+
+The `CodePush` class' methods can be thought of as composite resolvers which always load the appropriate bundle, in order to accomodate the following scenarios:
+
+1. When an end-user installs your app from the store (e.g. `1.0.0`), they will get the JS bundle that is contained within the binary. This is the behavior you would get without using CodePush, but we make sure it doesn't break :)
+
+2. As soon as you begin releasing CodePush updates, your end-users will get the JS bundle that represents the latest release for the configured deployment. This is the behavior that allows you to iterate beyond what you shipped to the store.
+
+3. As soon as you release an update to the app store (e.g. `1.1.0`), and your end-users update it, they will once again get the JS bundle that is contained within the binary. This behavior ensures that CodePush updates that targetted a previous app store version aren't used (since we don't know it they would work), and your end-users always have a working version of your app.
+
+4. Repeat #2 and #3 as the CodePush releases and app store releases continue on into infinity (and beyond?)
+
+Because of this behavior, you can safely deploy updates to both the app store(s) and CodePush as neccesary, and rest assured that your end-users will always get the most recent version.  
+
+##### Methods
+
+- __(NSURL \*)bundleURL__ - Returns the most recent JS bundle `NSURL` as described above. This method assumes that the name of the JS bundle contained within your app binary is `main.jsbundle`.
+
+- __(NSURL \*)bundleURLForResource:(NSString \*)resourceName__ - Equivalent to the `bundleURL` method, but also allows customizing the name of the JS bundle that is looked for within the app binary. This is useful if you aren't naming this file `main` (which is the default convention). This method assumes that the JS bundle's extension is `*.jsbundle`.
+
+- __(NSURL \*)bundleURLForResource:(NSString \*)resourceName withExtension:(NSString \*)resourceExtension__: Equivalent to the `bundleURLForResource:` method, but also allows customizing the extension used by the JS bundle that is looked for within the app binary. This is useful if you aren't naming this file `*.jsbundle` (which is the default convention).
+
+### Java API Reference (Android)
+
+The Java API is made available by importing the `com.microsoft.codepush.react.CodePush` class into your `MainActivity.java` file, and consists of a single public class named `CodePush`.
+
+#### CodePush
+
+Constructs the CodePush client runtime and includes methods for integrating CodePush into your app's `ReactInstanceManager`.
+
+##### Constructors
+
+- __CodePush(String deploymentKey, Activity mainActivity)__ - Creates a new instance of the CodePush runtime, that will be used to query the service for updates via the provided deployment key. The `mainActivity` parameter should always be set to `this` when configuring your `ReactInstanceManager` inside the `MainActivity` class.
+
+##### Methods
+
+- __getBundleUrl(String bundleName)__ - Returns the path to the most recent version of your app's JS bundle file, using the specified resource name (e.g. `index.android.bundle`). This method has the same resolution behavior as the Objective-C equivalent described above.
+
+- __getReactPackage()__ - Returns a `ReactPackage` object that should be added to your `ReactInstanceManager` via its `addPackage` method. Without this, the `react-native-code-push` JS module won't be available to your script.
