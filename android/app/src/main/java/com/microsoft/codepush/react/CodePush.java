@@ -50,11 +50,11 @@ public class CodePush {
     private final String PENDING_UPDATE_IS_LOADING_KEY = "isLoading";
     private final String ASSETS_BUNDLE_PREFIX = "assets://";
     private final String CODE_PUSH_PREFERENCES = "CodePush";
-    private final String CODE_PUSH_TAG = "CodePush";
     private final String DOWNLOAD_PROGRESS_EVENT_NAME = "CodePushDownloadProgress";
     private final String RESOURCES_BUNDLE = "resources.arsc";
     // This needs to be kept in sync with https://github.com/facebook/react-native/blob/master/ReactAndroid/src/main/java/com/facebook/react/devsupport/DevSupportManager.java#L78
     private final String REACT_DEV_BUNDLE_CACHE_FILE_NAME = "ReactNativeDevBundle.js";
+    private final String BINARY_MODIFIED_TIME_KEY = "binaryModifiedTime";
 
     private CodePushPackage codePushPackage;
     private CodePushReactPackage codePushReactPackage;
@@ -96,39 +96,55 @@ public class CodePush {
         return codePushReactPackage;
     }
 
-    public String getBundleUrl(String assetsBundleFileName) {
-        this.assetsBundleFileName = assetsBundleFileName;
-        String binaryJsBundleUrl = ASSETS_BUNDLE_PREFIX + assetsBundleFileName;
-        ZipFile applicationFile;
-        long binaryResourcesModifiedTime = -1;
-
+    public long getBinaryResourcesModifiedTime() {
         ApplicationInfo ai = null;
+        ZipFile applicationFile = null;
         try {
             ai = applicationContext.getPackageManager().getApplicationInfo(applicationContext.getPackageName(), 0);
             applicationFile = new ZipFile(ai.sourceDir);
             ZipEntry classesDexEntry = applicationFile.getEntry(RESOURCES_BUNDLE);
-            binaryResourcesModifiedTime = classesDexEntry.getTime();
-            applicationFile.close();
+            return classesDexEntry.getTime();
         } catch (PackageManager.NameNotFoundException | IOException e) {
             throw new CodePushUnknownException("Error in getting file information about compiled resources", e);
+        } finally {
+            if (applicationFile != null) {
+                try {
+                    applicationFile.close();
+                } catch (IOException e) {
+                    throw new CodePushUnknownException("Error in closing application file.", e);
+                }
+            }
         }
+    }
+
+    public String getBundleUrl(String assetsBundleFileName) {
+        this.assetsBundleFileName = assetsBundleFileName;
+        String binaryJsBundleUrl = ASSETS_BUNDLE_PREFIX + assetsBundleFileName;
+        long binaryResourcesModifiedTime = getBinaryResourcesModifiedTime();
 
         try {
             String packageFilePath = codePushPackage.getCurrentPackageBundlePath();
             if (packageFilePath == null) {
                 // There has not been any downloaded updates.
+                CodePushUtils.logBundleUrl(binaryJsBundleUrl);
                 return binaryJsBundleUrl;
             }
 
-            File packageFile = new File(packageFilePath);
-            if (packageFile.lastModified() < binaryResourcesModifiedTime) {
+            ReadableMap packageMetadata = codePushPackage.getCurrentPackage();
+            // May throw NumberFormatException.
+            Long binaryModifiedDateDuringPackageInstall = Long.parseLong(CodePushUtils.tryGetString(packageMetadata, BINARY_MODIFIED_TIME_KEY));
+            if (binaryModifiedDateDuringPackageInstall == binaryResourcesModifiedTime) {
+                CodePushUtils.logBundleUrl(packageFilePath);
+                return packageFilePath;
+            } else {
                 // The binary version is newer.
+                CodePushUtils.logBundleUrl(binaryJsBundleUrl);
                 return binaryJsBundleUrl;
             }
-
-            return packageFilePath;
         } catch (IOException e) {
             throw new CodePushUnknownException("Error in getting current package bundle path", e);
+        } catch (NumberFormatException e) {
+            throw new CodePushUnknownException("Error in reading binary modified date from package metadata", e);
         }
     }
 
@@ -221,8 +237,8 @@ public class CodePush {
             return pendingUpdate;
         } catch (JSONException e) {
             // Should not happen.
-            Log.e(CODE_PUSH_TAG, "Unable to parse pending update metadata " +
-                    pendingUpdateString + " stored in SharedPreferences", e);
+            CodePushUtils.log("Unable to parse pending update metadata " + pendingUpdateString +
+                     " stored in SharedPreferences");
             return null;
         }
     }
@@ -236,6 +252,7 @@ public class CodePush {
                 if (updateIsLoading) {
                     // Pending update was initialized, but notifyApplicationReady was not called.
                     // Therefore, deduce that it is a broken update and rollback.
+                    CodePushUtils.log("Update did not finish loading the last time, rolling back to a previous version.");
                     rollbackPackage();
                 } else {
                     // Clear the React dev bundle cache so that new updates can be loaded.
@@ -326,7 +343,9 @@ public class CodePush {
                 @Override
                 protected Void doInBackground(Object[] params) {
                     try {
-                        codePushPackage.downloadPackage(applicationContext, updatePackage, new DownloadProgressCallback() {
+                        WritableMap mutableUpdatePackage = CodePushUtils.convertReadableMapToWritableMap(updatePackage);
+                        mutableUpdatePackage.putString(BINARY_MODIFIED_TIME_KEY, "" + getBinaryResourcesModifiedTime());
+                        codePushPackage.downloadPackage(applicationContext, mutableUpdatePackage, new DownloadProgressCallback() {
                             @Override
                             public void call(DownloadProgress downloadProgress) {
                                 getReactApplicationContext()

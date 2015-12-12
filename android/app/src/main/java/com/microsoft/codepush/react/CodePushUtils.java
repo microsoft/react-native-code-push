@@ -1,5 +1,7 @@
 package com.microsoft.codepush.react;
 
+import android.util.Log;
+
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.NoSuchKeyException;
 import com.facebook.react.bridge.ReadableArray;
@@ -22,6 +24,8 @@ import java.io.PrintWriter;
 import java.util.Iterator;
 
 public class CodePushUtils {
+
+    public static final String REACT_NATIVE_LOG_TAG = "ReactNative";
 
     public static String appendPathComponent(String basePath, String appendPathComponent) {
         return new File(basePath, appendPathComponent).getAbsolutePath();
@@ -248,11 +252,24 @@ public class CodePushUtils {
         return jsonArr;
     }
 
+    public static WritableMap convertReadableMapToWritableMap(ReadableMap map) {
+        JSONObject mapJSON = convertReadableToJsonObject(map);
+        return convertJsonObjectToWriteable(mapJSON);
+    }
+
     public static String tryGetString(ReadableMap map, String key) {
         try {
             return map.getString(key);
         } catch (NoSuchKeyException e) {
             return null;
         }
+    }
+
+    public static void log(String message) {
+        Log.d(REACT_NATIVE_LOG_TAG, "[CodePush] " + message);
+    }
+
+    public static void logBundleUrl(String path) {
+        log("Loading JS bundle from \"" + path + "\"");
     }
 }
