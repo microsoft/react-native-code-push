@@ -50,7 +50,6 @@ public class CodePush {
     private final String PENDING_UPDATE_IS_LOADING_KEY = "isLoading";
     private final String ASSETS_BUNDLE_PREFIX = "assets://";
     private final String CODE_PUSH_PREFERENCES = "CodePush";
-    private final String CODE_PUSH_TAG = "CodePush";
     private final String DOWNLOAD_PROGRESS_EVENT_NAME = "CodePushDownloadProgress";
     private final String RESOURCES_BUNDLE = "resources.arsc";
     private final String REACT_DEV_BUNDLE_CACHE_FILE_NAME = "ReactNativeDevBundle.js";
@@ -136,9 +135,9 @@ public class CodePush {
                 return packageFilePath;
             } else {
                 // The binary version is newer.
-                Log.d(CODE_PUSH_TAG, "Found a package installed via CodePush that was " +
-                        "installed under a different binary version, so the JS bundle packaged " +
-                        "in the binary will be used as the most current package.");
+                CodePushUtils.log("Found a package installed via CodePush that was installed " +
+                        "under a different binary version, so the JS bundle packaged in the " +
+                        "binary will be used as the most current package.");
                 return binaryJsBundleUrl;
             }
         } catch (IOException e) {
@@ -237,8 +236,8 @@ public class CodePush {
             return pendingUpdate;
         } catch (JSONException e) {
             // Should not happen.
-            Log.e(CODE_PUSH_TAG, "Unable to parse pending update metadata " +
-                    pendingUpdateString + " stored in SharedPreferences", e);
+            CodePushUtils.log("Unable to parse pending update metadata " + pendingUpdateString +
+                     " stored in SharedPreferences");
             return null;
         }
     }
@@ -252,7 +251,7 @@ public class CodePush {
                 if (updateIsLoading) {
                     // Pending update was initialized, but notifyApplicationReady was not called.
                     // Therefore, deduce that it is a broken update and rollback.
-                    Log.d(CODE_PUSH_TAG, "Update did not finish loading the last time, rolling back to a previous version.");
+                    CodePushUtils.log("Update did not finish loading the last time, rolling back to a previous version.");
                     rollbackPackage();
                 } else {
                     // Clear the React dev bundle cache so that new updates can be loaded.
