@@ -268,4 +268,8 @@ public class CodePushUtils {
     public static void log(String message) {
         Log.d(REACT_NATIVE_LOG_TAG, "[CodePush] " + message);
     }
+
+    public static void logBundleUrl(String path) {
+        log("Loading JS bundle from \"" + path + "\"");
+    }
 }

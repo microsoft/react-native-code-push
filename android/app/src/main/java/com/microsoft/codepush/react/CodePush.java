@@ -125,6 +125,7 @@ public class CodePush {
             String packageFilePath = codePushPackage.getCurrentPackageBundlePath();
             if (packageFilePath == null) {
                 // There has not been any downloaded updates.
+                CodePushUtils.logBundleUrl(binaryJsBundleUrl);
                 return binaryJsBundleUrl;
             }
 
@@ -132,12 +133,11 @@ public class CodePush {
             // May throw NumberFormatException.
             Long binaryModifiedDateDuringPackageInstall = Long.parseLong(CodePushUtils.tryGetString(packageMetadata, BINARY_MODIFIED_TIME_KEY));
             if (binaryModifiedDateDuringPackageInstall == binaryResourcesModifiedTime) {
+                CodePushUtils.logBundleUrl(packageFilePath);
                 return packageFilePath;
             } else {
                 // The binary version is newer.
-                CodePushUtils.log("Found a package installed via CodePush that was installed " +
-                        "under a different binary version, so the JS bundle packaged in the " +
-                        "binary will be used as the most current package.");
+                CodePushUtils.logBundleUrl(binaryJsBundleUrl);
                 return binaryJsBundleUrl;
             }
         } catch (IOException e) {
@@ -255,7 +255,6 @@ public class CodePush {
                     rollbackPackage();
                 } else {
                     // Clear the React dev bundle cache so that new updates can be loaded.
-                    if (com.facebook.react.BuildConfig.DEBUG)
                     clearReactDevBundleCache();
                     // Mark that we tried to initialize the new update, so that if it crashes,
                     // we will know that we need to rollback when the app next starts.
