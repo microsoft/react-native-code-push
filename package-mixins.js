@@ -3,7 +3,7 @@ import { DeviceEventEmitter } from "react-native";
 // This function is used to augment remote and local
 // package objects with additional functionality/properties
 // beyond what is included in the metadata sent by the server.
-module.exports = function PackageMixinFactory(NativeCodePush) {
+module.exports = (NativeCodePush) => {
   const remote = {
     abortDownload() {
       return NativeCodePush.abortDownload(this);
