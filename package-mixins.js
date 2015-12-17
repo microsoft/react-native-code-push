@@ -1,11 +1,15 @@
-var { Platform, DeviceEventEmitter } = require("react-native");
+import { DeviceEventEmitter } from "react-native";
 
-module.exports = (NativeCodePush) => {
-  var remote = {
-    abortDownload: function abortDownload() {
+// This function is used to augment remote and local
+// package objects with additional functionality/properties
+// beyond what is included in the metadata sent by the server.
+module.exports = function PackageMixinFactory(NativeCodePush) {
+  const remote = {
+    abortDownload() {
       return NativeCodePush.abortDownload(this);
     },
-    download: function download(downloadProgressCallback) {
+    
+    download(downloadProgressCallback) {
       if (!this.downloadUrl) {
         return Promise.reject(new Error("Cannot download an update without a download url"));
       }
@@ -31,23 +35,27 @@ module.exports = (NativeCodePush) => {
           // Rethrow the error for subsequent handlers down the promise chain.
           throw error;
         });
-    }
+    },
+    
+    isPending: false // A remote package could never be in a pending state
   };
 
-  var local = {
-    install: function install(installMode = NativeCodePush.codePushInstallModeOnNextRestart, updateInstalledCallback) {
+  const local = {
+    install(installMode = NativeCodePush.codePushInstallModeOnNextRestart, updateInstalledCallback) {
+      let localPackage = this;
       return NativeCodePush.installUpdate(this, installMode)
-        .then(function() {
+        .then(() => {
           updateInstalledCallback && updateInstalledCallback();
           if (installMode == NativeCodePush.codePushInstallModeImmediate) {
             NativeCodePush.restartApp();
-          };
+          } else {
+            localPackage.isPending = true; // Mark the package as pending since it hasn't been applied yet
+          }
         });
-    }
+    },
+    
+    isPending: false // A local package wouldn't be pending until it was installed
   };
 
-  return {
-    remote: remote,
-    local: local
-  };
+  return { local, remote };
 };
