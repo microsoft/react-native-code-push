@@ -15,7 +15,7 @@ RCT_EXPORT_MODULE()
 
 static BOOL usingTestFolder = NO;
 
-// These keys represent the names we use to store data in NSUserDdefaults
+// These keys represent the names we use to store data in NSUserDefaults
 static NSString *const FailedUpdatesKey = @"CODE_PUSH_FAILED_UPDATES";
 static NSString *const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
 
@@ -24,7 +24,7 @@ static NSString *const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
 static NSString *const PendingUpdateHashKey = @"hash";
 static NSString *const PendingUpdateIsLoadingKey = @"isLoading";
 
-// These keys are used to inspect/augment the metada
+// These keys are used to inspect/augment the metadata
 // that is associated with an update's package.
 static NSString *const PackageHashKey = @"packageHash";
 static NSString *const PackageIsPendingKey = @"isPending";
