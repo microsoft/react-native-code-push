@@ -38,7 +38,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class CodePush {
-
     private boolean didUpdate = false;
     private boolean usingTestFolder = false;
 
@@ -52,6 +51,7 @@ public class CodePush {
     private final String CODE_PUSH_PREFERENCES = "CodePush";
     private final String DOWNLOAD_PROGRESS_EVENT_NAME = "CodePushDownloadProgress";
     private final String RESOURCES_BUNDLE = "resources.arsc";
+    // This needs to be kept in sync with https://github.com/facebook/react-native/blob/master/ReactAndroid/src/main/java/com/facebook/react/devsupport/DevSupportManager.java#L78
     private final String REACT_DEV_BUNDLE_CACHE_FILE_NAME = "ReactNativeDevBundle.js";
     private final String BINARY_MODIFIED_TIME_KEY = "binaryModifiedTime";
 
@@ -88,13 +88,13 @@ public class CodePush {
         initializeUpdateAfterRestart();
     }
 
-    public ReactPackage getReactPackage() {
-        if (codePushReactPackage == null) {
-            codePushReactPackage = new CodePushReactPackage();
+    private void clearReactDevBundleCache() {
+        File cachedDevBundle = new File(this.applicationContext.getFilesDir(), REACT_DEV_BUNDLE_CACHE_FILE_NAME);
+        if (cachedDevBundle.exists()) {
+            cachedDevBundle.delete();
         }
-        return codePushReactPackage;
     }
-
+    
     public long getBinaryResourcesModifiedTime() {
         ApplicationInfo ai = null;
         ZipFile applicationFile = null;
@@ -147,6 +147,57 @@ public class CodePush {
         }
     }
 
+    private JSONObject getPendingUpdate() {
+        SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
+        String pendingUpdateString = settings.getString(PENDING_UPDATE_KEY, null);
+        if (pendingUpdateString == null) {
+            return null;
+        }
+
+        try {
+            JSONObject pendingUpdate = new JSONObject(pendingUpdateString);
+            return pendingUpdate;
+        } catch (JSONException e) {
+            // Should not happen.
+            CodePushUtils.log("Unable to parse pending update metadata " + pendingUpdateString +
+                    " stored in SharedPreferences");
+            return null;
+        }
+    }
+
+    public ReactPackage getReactPackage() {
+        if (codePushReactPackage == null) {
+            codePushReactPackage = new CodePushReactPackage();
+        }
+        return codePushReactPackage;
+    }
+    
+    private void initializeUpdateAfterRestart() {
+        JSONObject pendingUpdate = getPendingUpdate();
+        if (pendingUpdate != null) {
+            didUpdate = true;
+            try {
+                boolean updateIsLoading = pendingUpdate.getBoolean(PENDING_UPDATE_IS_LOADING_KEY);
+                if (updateIsLoading) {
+                    // Pending update was initialized, but notifyApplicationReady was not called.
+                    // Therefore, deduce that it is a broken update and rollback.
+                    CodePushUtils.log("Update did not finish loading the last time, rolling back to a previous version.");
+                    rollbackPackage();
+                } else {
+                    // Clear the React dev bundle cache so that new updates can be loaded.
+                    clearReactDevBundleCache();
+                    // Mark that we tried to initialize the new update, so that if it crashes,
+                    // we will know that we need to rollback when the app next starts.
+                    savePendingUpdate(pendingUpdate.getString(PENDING_UPDATE_HASH_KEY),
+                            /* isLoading */true);
+                }
+            } catch (JSONException e) {
+                // Should not happen.
+                throw new CodePushUnknownException("Unable to read pending update metadata stored in SharedPreferences", e);
+            }
+        }
+    }
+    
     private boolean isFailedHash(String packageHash) {
         SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
         String failedUpdatesString = settings.getString(FAILED_UPDATES_KEY, null);
@@ -164,6 +215,26 @@ public class CodePush {
         }
     }
 
+    private boolean isPendingUpdate(String packageHash) {
+        JSONObject pendingUpdate = getPendingUpdate();
+        
+        try {
+            boolean updateIsPending = pendingUpdate != null &&
+                                      pendingUpdate.getBoolean(PENDING_UPDATE_IS_LOADING_KEY) == false &&
+                                      pendingUpdate.getString(PENDING_UPDATE_HASH_KEY).equals(packageHash);
+                                 
+            return updateIsPending;
+        }
+        catch (JSONException e) {
+            throw new CodePushUnknownException("Unable to read pending update metadata in isPendingUpdate.", e);
+        }
+    }
+
+    private void removePendingUpdate() {
+        SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
+        settings.edit().remove(PENDING_UPDATE_KEY).commit();
+    }
+    
     private void rollbackPackage() {
         try {
             String packageHash = codePushPackage.getCurrentPackageHash();
@@ -206,11 +277,6 @@ public class CodePush {
         }
     }
 
-    private void removePendingUpdate() {
-        SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
-        settings.edit().remove(PENDING_UPDATE_KEY).commit();
-    }
-
     private void savePendingUpdate(String packageHash, boolean isLoading) {
         SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
         JSONObject pendingUpdate = new JSONObject();
@@ -221,57 +287,6 @@ public class CodePush {
         } catch (JSONException e) {
             // Should not happen.
             throw new CodePushUnknownException("Unable to save pending update.", e);
-        }
-    }
-
-    private JSONObject getPendingUpdate() {
-        SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
-        String pendingUpdateString = settings.getString(PENDING_UPDATE_KEY, null);
-        if (pendingUpdateString == null) {
-            return null;
-        }
-
-        try {
-            JSONObject pendingUpdate = new JSONObject(pendingUpdateString);
-            return pendingUpdate;
-        } catch (JSONException e) {
-            // Should not happen.
-            CodePushUtils.log("Unable to parse pending update metadata " + pendingUpdateString +
-                     " stored in SharedPreferences");
-            return null;
-        }
-    }
-
-    private void initializeUpdateAfterRestart() {
-        JSONObject pendingUpdate = getPendingUpdate();
-        if (pendingUpdate != null) {
-            didUpdate = true;
-            try {
-                boolean updateIsLoading = pendingUpdate.getBoolean(PENDING_UPDATE_IS_LOADING_KEY);
-                if (updateIsLoading) {
-                    // Pending update was initialized, but notifyApplicationReady was not called.
-                    // Therefore, deduce that it is a broken update and rollback.
-                    CodePushUtils.log("Update did not finish loading the last time, rolling back to a previous version.");
-                    rollbackPackage();
-                } else {
-                    // Clear the React dev bundle cache so that new updates can be loaded.
-                    clearReactDevBundleCache();
-                    // Mark that we tried to initialize the new update, so that if it crashes,
-                    // we will know that we need to rollback when the app next starts.
-                    savePendingUpdate(pendingUpdate.getString(PENDING_UPDATE_HASH_KEY),
-                            /* isLoading */true);
-                }
-            } catch (JSONException e) {
-                // Should not happen.
-                throw new CodePushUnknownException("Unable to read pending update metadata stored in SharedPreferences", e);
-            }
-        }
-    }
-
-    private void clearReactDevBundleCache() {
-        File cachedDevBundle = new File(this.applicationContext.getFilesDir(), REACT_DEV_BUNDLE_CACHE_FILE_NAME);
-        if (cachedDevBundle.exists()) {
-            cachedDevBundle.delete();
         }
     }
 
@@ -286,10 +301,80 @@ public class CodePush {
         }
 
         @ReactMethod
+        public void downloadUpdate(final ReadableMap updatePackage, final Promise promise) {
+            AsyncTask asyncTask = new AsyncTask() {
+                @Override
+                protected Void doInBackground(Object... params) {
+                    try {
+                        WritableMap mutableUpdatePackage = CodePushUtils.convertReadableMapToWritableMap(updatePackage);
+                        mutableUpdatePackage.putString(BINARY_MODIFIED_TIME_KEY, "" + getBinaryResourcesModifiedTime());
+                        codePushPackage.downloadPackage(applicationContext, mutableUpdatePackage, new DownloadProgressCallback() {
+                            @Override
+                            public void call(DownloadProgress downloadProgress) {
+                                getReactApplicationContext()
+                                        .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                                        .emit(DOWNLOAD_PROGRESS_EVENT_NAME, downloadProgress.createWritableMap());
+                            }
+                        });
+
+                        WritableMap newPackage = codePushPackage.getPackage(CodePushUtils.tryGetString(updatePackage, codePushPackage.PACKAGE_HASH_KEY));
+                        promise.resolve(newPackage);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        promise.reject(e.getMessage());
+                    }
+
+                    return null;
+                }
+            };
+
+            asyncTask.execute();
+        }
+
+        @ReactMethod
+        public void getConfiguration(Promise promise) {
+            WritableNativeMap configMap = new WritableNativeMap();
+            configMap.putString("appVersion", appVersion);
+            configMap.putInt("buildVersion", buildVersion);
+            configMap.putString("deploymentKey", deploymentKey);
+            configMap.putString("serverUrl", serverUrl);
+            promise.resolve(configMap);
+        }
+
+        @ReactMethod
+        public void getCurrentPackage(final Promise promise) {
+            AsyncTask asyncTask = new AsyncTask() {
+                @Override
+                protected Void doInBackground(Object... params) {
+                    try {
+                        WritableMap currentPackage = codePushPackage.getCurrentPackage();
+
+                        Boolean isPendingUpdate = false;
+
+                        if (currentPackage.hasKey(codePushPackage.PACKAGE_HASH_KEY)) {
+                            String currentHash = currentPackage.getString(codePushPackage.PACKAGE_HASH_KEY);
+                            isPendingUpdate = CodePush.this.isPendingUpdate(currentHash);
+                        }
+
+                        currentPackage.putBoolean("isPending", isPendingUpdate);
+                        promise.resolve(currentPackage);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        promise.reject(e.getMessage());
+                    }
+                    
+                    return null;
+                }
+            };
+
+            asyncTask.execute();
+        }
+        
+        @ReactMethod
         public void installUpdate(final ReadableMap updatePackage, final int installMode, final Promise promise) {
             AsyncTask asyncTask = new AsyncTask() {
                 @Override
-                protected Void doInBackground(Object[] params) {
+                protected Void doInBackground(Object... params) {
                     try {
                         codePushPackage.installPackage(updatePackage);
 
@@ -335,67 +420,7 @@ public class CodePush {
 
             asyncTask.execute();
         }
-
-        @ReactMethod
-        public void downloadUpdate(final ReadableMap updatePackage, final Promise promise) {
-            AsyncTask asyncTask = new AsyncTask() {
-                @Override
-                protected Void doInBackground(Object[] params) {
-                    try {
-                        WritableMap mutableUpdatePackage = CodePushUtils.convertReadableMapToWritableMap(updatePackage);
-                        mutableUpdatePackage.putString(BINARY_MODIFIED_TIME_KEY, "" + getBinaryResourcesModifiedTime());
-                        codePushPackage.downloadPackage(applicationContext, mutableUpdatePackage, new DownloadProgressCallback() {
-                            @Override
-                            public void call(DownloadProgress downloadProgress) {
-                                getReactApplicationContext()
-                                        .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                                        .emit(DOWNLOAD_PROGRESS_EVENT_NAME, downloadProgress.createWritableMap());
-                            }
-                        });
-
-                        WritableMap newPackage = codePushPackage.getPackage(CodePushUtils.tryGetString(updatePackage, codePushPackage.PACKAGE_HASH_KEY));
-                        promise.resolve(newPackage);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        promise.reject(e.getMessage());
-                    }
-
-                    return null;
-                }
-            };
-
-            asyncTask.execute();
-        }
-
-        @ReactMethod
-        public void getConfiguration(Promise promise) {
-            WritableNativeMap configMap = new WritableNativeMap();
-            configMap.putString("appVersion", appVersion);
-            configMap.putInt("buildVersion", buildVersion);
-            configMap.putString("deploymentKey", deploymentKey);
-            configMap.putString("serverUrl", serverUrl);
-            promise.resolve(configMap);
-        }
-
-        @ReactMethod
-        public void getCurrentPackage(final Promise promise) {
-            AsyncTask asyncTask = new AsyncTask() {
-                @Override
-                protected Void doInBackground(Object[] params) {
-                    try {
-                        promise.resolve(codePushPackage.getCurrentPackage());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        promise.reject(e.getMessage());
-                    }
-
-                    return null;
-                }
-            };
-
-            asyncTask.execute();
-        }
-
+        
         @ReactMethod
         public void isFailedUpdate(String packageHash, Promise promise) {
             promise.resolve(isFailedHash(packageHash));
@@ -420,15 +445,15 @@ public class CodePush {
             removePendingUpdate();
             promise.resolve("");
         }
+        
+        @ReactMethod
+        public void restartApp() {
+            loadBundle();
+        }
 
         @ReactMethod
         public void setUsingTestFolder(boolean shouldUseTestFolder) {
             usingTestFolder = shouldUseTestFolder;
-        }
-
-        @ReactMethod
-        public void restartApp() {
-            loadBundle();
         }
 
         @Override
@@ -473,5 +498,4 @@ public class CodePush {
             return new ArrayList();
         }
     }
-
 }

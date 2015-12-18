@@ -214,6 +214,12 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
       };
   
   return new Promise((resolve, reject) => {
+    var rejectPromise = (error) => {
+      syncStatusChangeCallback(CodePush.SyncStatus.UNKNOWN_ERROR);
+      log(error.message); 
+      reject(error);
+    };
+    
     CodePush.notifyApplicationReady()
       .then(() => {
         syncStatusChangeCallback(CodePush.SyncStatus.CHECKING_FOR_UPDATE);
@@ -230,7 +236,7 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
                 resolve(CodePush.SyncStatus.UPDATE_INSTALLED);
               });
             })
-            .catch(reject)
+            .catch(rejectPromise)
             .done();
         }
         
@@ -287,10 +293,7 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
           doDownloadAndInstall();
         }
       })
-      .catch((error) => {
-        syncStatusChangeCallback(CodePush.SyncStatus.UNKNOWN_ERROR);
-        reject(error);
-      })
+      .catch(rejectPromise)
       .done();
   });     
 };

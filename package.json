@@ -1,6 +1,6 @@
 {
   "name": "react-native-code-push",
-  "version": "1.4.1-beta",
+  "version": "1.5.0-beta",
   "description": "React Native plugin for the CodePush service",
   "main": "CodePush.js",
   "homepage": "https://microsoft.github.io/code-push",

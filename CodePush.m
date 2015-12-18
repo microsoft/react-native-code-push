@@ -15,6 +15,7 @@ RCT_EXPORT_MODULE()
 
 static BOOL testConfigurationFlag = NO;
 
+// These keys represent the names we use to store data in NSUserDefaults
 static NSString *const FailedUpdatesKey = @"CODE_PUSH_FAILED_UPDATES";
 static NSString *const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
 
@@ -23,7 +24,10 @@ static NSString *const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
 static NSString *const PendingUpdateHashKey = @"hash";
 static NSString *const PendingUpdateIsLoadingKey = @"isLoading";
 
-id saveTestModule = nil;
+// These keys are used to inspect/augment the metadata
+// that is associated with an update's package.
+static NSString *const PackageHashKey = @"packageHash";
+static NSString *const PackageIsPendingKey = @"isPending";
 
 @synthesize bridge = _bridge;
 
@@ -177,6 +181,25 @@ id saveTestModule = nil;
 }
 
 /*
+ * This method checks to see whether a specific package hash
+ * represents a downloaded and installed update, that hasn't
+ * been applied yet via an app restart.
+ */
+- (BOOL)isPendingUpdate:(NSString*)packageHash
+{
+    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+    NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];
+
+    // If there is a pending update, whose hash is equal to the one
+    // specified, and its "state" isn't loading, then we consider it "pending".
+    BOOL updateIsPending = pendingUpdate &&
+                           [pendingUpdate[PendingUpdateIsLoadingKey] boolValue] == NO &&
+                           [pendingUpdate[PendingUpdateHashKey] isEqualToString:packageHash];
+    
+    return updateIsPending;
+}
+
+/*
  * This method updates the React Native bridge's bundle URL
  * to point at the latest CodePush update, and then restarts
  * the bridge. This isn't meant to be called directly.
@@ -195,7 +218,6 @@ id saveTestModule = nil;
             _bridge.bundleURL = url;
         }
         
-        saveTestModule = _bridge.modules[@"RCTTestModule"];
         [_bridge reload];
     });
 }
@@ -296,7 +318,7 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
         // The download completed
         doneCallback:^{
             NSError *err;
-            NSDictionary *newPackage = [CodePushPackage getPackage:updatePackage[@"packageHash"] error:&err];
+            NSDictionary *newPackage = [CodePushPackage getPackage:updatePackage[PackageHashKey] error:&err];
                 
             if (err) {
                 return reject(err);
@@ -330,12 +352,18 @@ RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         NSError *error;
-        NSDictionary *package = [CodePushPackage getCurrentPackage:&error];
+        NSMutableDictionary *package = [[CodePushPackage getCurrentPackage:&error] mutableCopy];
+        
         if (error) {
             reject(error);
-        } else {
-            resolve(package);
         }
+        
+        // Add the "isPending" virtual property to the package at this point, so that
+        // the script-side doesn't need to immediately call back into native to populate it.
+        BOOL isPendingUpdate = [self isPendingUpdate:[package objectForKey:PackageHashKey]];
+        [package setObject:@(isPendingUpdate) forKey:PackageIsPendingKey];
+
+        resolve(package);
     });
 }
 
@@ -355,7 +383,7 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
         if (error) {
             reject(error);
         } else {
-            [self savePendingUpdate:updatePackage[@"packageHash"]
+            [self savePendingUpdate:updatePackage[PackageHashKey]
                           isLoading:NO];
             
             if (installMode == CodePushInstallModeOnNextResume) {
@@ -378,7 +406,7 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
 
 /*
  * This method isn't publicly exposed via the "react-native-code-push"
- * module, and is only used internally to populate the RemotePackage.failedApply property.
+ * module, and is only used internally to populate the RemotePackage.failedInstall property.
  */
 RCT_EXPORT_METHOD(isFailedUpdate:(NSString *)packageHash
                          resolve:(RCTPromiseResolveBlock)resolve
