@@ -40,7 +40,7 @@ function createTestCaseComponent(displayName, description, setUp, runTest, passA
       return (
         <View style={{backgroundColor: "white", padding: 40}}>
           <Text>
-            {this.state.done ? "Done" : "Testing..."}
+            {this.state.done ? "Test Passed!" : "Testing..."}
           </Text>
         </View>
       );

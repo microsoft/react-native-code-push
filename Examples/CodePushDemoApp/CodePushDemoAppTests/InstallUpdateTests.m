@@ -65,6 +65,11 @@
   [self runTest:@"IsFailedUpdateTest"];
 }
 
+- (void)testIsPending
+{
+  [self runTest:@"IsPendingTest"];
+}
+
 - (void)runTest:(NSString *)testName
 {
     [CodePush clearTestUpdates];
