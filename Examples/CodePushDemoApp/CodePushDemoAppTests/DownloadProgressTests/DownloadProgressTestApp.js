@@ -12,7 +12,7 @@ var {
 } = React;
 
 var TESTS = [
-  require("./DownloadProgressTest")
+  require("./testcases/DownloadProgressTest")
 ];
 
 TESTS.forEach(
@@ -20,12 +20,12 @@ TESTS.forEach(
 );
 
 var DownloadProgressTestApp = React.createClass({
-  getInitialState: function() {
+  getInitialState() {
     return {
       test: null,
     };
   },
-  render: function() {
+  render() {
     if (this.state.test) {
       return (
         <ScrollView>
@@ -36,9 +36,7 @@ var DownloadProgressTestApp = React.createClass({
     return (
       <View style={styles.container}>
         <Text style={styles.row}>
-          Click on a test to run it in this shell for easier debugging and
-          development.  Run all tests in the testing environment with cmd+U in
-          Xcode.
+          DownloadProgress Tests
         </Text>
         <View style={styles.separator} />
         <ScrollView>
@@ -48,6 +46,9 @@ var DownloadProgressTestApp = React.createClass({
               style={styles.row}>
               <Text style={styles.testName}>
                 {test.displayName}
+              </Text>
+              <Text style={styles.testDescription}>
+                {test.description}
               </Text>
             </TouchableOpacity>,
             <View style={styles.separator} />

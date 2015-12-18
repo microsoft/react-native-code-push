@@ -14,7 +14,12 @@ NSString * const UnzippedFolderName = @"unzipped";
 
 + (NSString *)getCodePushPath
 {
-    return [[CodePush getApplicationSupportDirectory] stringByAppendingPathComponent:@"CodePush"];
+    NSString* codePushPath = [[CodePush getApplicationSupportDirectory] stringByAppendingPathComponent:@"CodePush"];
+    if ([CodePush isUsingTestConfiguration]) {
+        codePushPath = [codePushPath stringByAppendingPathComponent:@"TestPackages"];
+    }
+    
+    return codePushPath;
 }
 
 + (NSString *)getDownloadFilePath
@@ -479,6 +484,33 @@ NSString * const UnzippedFolderName = @"unzipped";
     [info removeObjectForKey:@"previousPackage"];
     
     [self updateCurrentPackageInfo:info error:&error];
+}
+
++ (void)downloadAndReplaceCurrentBundle:(NSString *)remoteBundleUrl
+{
+    NSURL *urlRequest = [NSURL URLWithString:remoteBundleUrl];
+    NSError *error = nil;
+    NSString *downloadedBundle = [NSString stringWithContentsOfURL:urlRequest
+                                                encoding:NSUTF8StringEncoding
+                                                   error:&error];
+    
+    if (error) {
+        NSLog(@"Error downloading from URL %@", remoteBundleUrl);
+    } else {
+        NSString *currentPackageBundlePath = [self getCurrentPackageBundlePath:&error];
+        [downloadedBundle writeToFile:currentPackageBundlePath
+                           atomically:YES
+                             encoding:NSUTF8StringEncoding
+                                error:&error];
+    }
+}
+
++ (void)clearTestUpdates
+{
+    if ([CodePush isUsingTestConfiguration]) {
+        [[NSFileManager defaultManager] removeItemAtPath:[self getCodePushPath] error:nil];
+        [[NSFileManager defaultManager] removeItemAtPath:[self getStatusFilePath] error:nil];
+    }
 }
 
 @end

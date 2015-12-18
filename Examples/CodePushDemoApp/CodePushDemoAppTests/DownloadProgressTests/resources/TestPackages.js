@@ -1,7 +1,7 @@
 var { Platform } = require("react-native");
 
-var packages = {
-  smallPackage: {
+var packages = [
+  {
     downloadUrl: "smallFile",
     description: "Angry flappy birds",
     appVersion: "1.5.0",
@@ -12,7 +12,7 @@ var packages = {
     packageHash: "hash240",
     packageSize: 1024
   },
-  mediumPackage: {
+  {
     downloadUrl: "mediumFile",
     description: "Angry flappy birds",
     appVersion: "1.5.0",
@@ -23,7 +23,7 @@ var packages = {
     packageHash: "hash240",
     packageSize: 1024
   },
-  largePackage: {
+  {
     downloadUrl: "largeFile",
     description: "Angry flappy birds",
     appVersion: "1.5.0",
@@ -34,15 +34,14 @@ var packages = {
     packageHash: "hash240",
     packageSize: 1024
   }
-};
+];
 
-for (var aPackage in packages) {
+packages.forEach((aPackage) => {
   if (Platform.OS === "android") {
-    // Genymotion forwards 10.0.3.2 to host machine's localhost
-    packages[aPackage].downloadUrl = "http://10.0.3.2:8081/CodePushDemoAppTests/DownloadProgressTests/" + packages[aPackage].downloadUrl;
+    aPackage.downloadUrl = "http://10.0.3.2:8081/CodePushDemoAppTests/DownloadProgressTests/resources/" + aPackage.downloadUrl;
   } else if (Platform.OS === "ios") {
-    packages[aPackage].downloadUrl = "http://localhost:8081/CodePushDemoAppTests/DownloadProgressTests/" + packages[aPackage].downloadUrl;
+    aPackage.downloadUrl = "http://localhost:8081/CodePushDemoAppTests/DownloadProgressTests/resources/" + aPackage.downloadUrl;
   }
-}
+});
 
 module.exports = packages;

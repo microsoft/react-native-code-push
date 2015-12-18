@@ -13,8 +13,7 @@
 
 RCT_EXPORT_MODULE()
 
-static NSTimer *_timer;
-static BOOL usingTestFolder = NO;
+static BOOL testConfigurationFlag = NO;
 
 static NSString *const FailedUpdatesKey = @"CODE_PUSH_FAILED_UPDATES";
 static NSString *const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
@@ -23,6 +22,8 @@ static NSString *const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
 // their values don't need to be obfuscated to prevent collision with app data
 static NSString *const PendingUpdateHashKey = @"hash";
 static NSString *const PendingUpdateIsLoadingKey = @"isLoading";
+
+id saveTestModule = nil;
 
 @synthesize bridge = _bridge;
 
@@ -67,6 +68,40 @@ static NSString *const PendingUpdateIsLoadingKey = @"isLoading";
     NSString *applicationSupportDirectory = [NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     return applicationSupportDirectory;
 }
+
+/*
+ * This returns a boolean value indicating whether CodePush has
+ * been set to run under a test configuration.
+ */
++ (BOOL)isUsingTestConfiguration
+{
+    return testConfigurationFlag;
+}
+
+/* 
+ * This is used to enable an environment in which tests can be run.
+ * Specifically, it flips a boolean flag that causes bundles to be
+ * saved to a test folder and enables the ability to modify
+ * installed bundles on the fly from JavaScript.
+ */
++ (void)setUsingTestConfiguration:(BOOL)shouldUseTestConfiguration
+{
+    testConfigurationFlag = shouldUseTestConfiguration;
+}
+
+/*
+ * This is used to clean up all test updates. It can only be used
+ * when the testConfigurationFlag is set to YES, otherwise it will
+ * simply no-op.
+ */
++ (void)clearTestUpdates
+{
+    if ([CodePush isUsingTestConfiguration]) {
+        [CodePushPackage clearTestUpdates];
+        [self removePendingUpdate];
+    }
+}
+
 
 // Private API methods
 
@@ -155,10 +190,12 @@ static NSString *const PendingUpdateIsLoadingKey = @"isLoading";
         // is debugging and therefore, shouldn't be redirected to a local
         // file (since Chrome wouldn't support it). Otherwise, update
         // the current bundle URL to point at the latest update
-        if (![_bridge.bundleURL.scheme hasPrefix:@"http"]) {
-            _bridge.bundleURL = [CodePush bundleURL];
+        if ([CodePush isUsingTestConfiguration] || ![_bridge.bundleURL.scheme hasPrefix:@"http"]) {
+            NSURL *url = [CodePush bundleURL];
+            _bridge.bundleURL = url;
         }
         
+        saveTestModule = _bridge.modules[@"RCTTestModule"];
         [_bridge reload];
     });
 }
@@ -180,7 +217,7 @@ static NSString *const PendingUpdateIsLoadingKey = @"isLoading";
     
     // Rollback to the previous version and de-register the new update
     [CodePushPackage rollbackPackage];
-    [self removePendingUpdate];
+    [CodePush removePendingUpdate];
     [self loadBundle];
 }
 
@@ -207,10 +244,10 @@ static NSString *const PendingUpdateIsLoadingKey = @"isLoading";
 }
 
 /*
- * This method  is used to register the fact that a pending
+ * This method is used to register the fact that a pending
  * update succeeded and therefore can be removed.
  */
-- (void)removePendingUpdate
++ (void)removePendingUpdate
 {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     [preferences removeObjectForKey:PendingUpdateKey];
@@ -321,9 +358,7 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
             [self savePendingUpdate:updatePackage[@"packageHash"]
                           isLoading:NO];
             
-            if (installMode == CodePushInstallModeImmediate) {
-                [self loadBundle];
-            } else if (installMode == CodePushInstallModeOnNextResume) {
+            if (installMode == CodePushInstallModeOnNextResume) {
                 // Ensure we do not add the listener twice.
                 if (!_hasResumeListener) {
                     // Register for app resume notifications so that we
@@ -376,7 +411,7 @@ RCT_EXPORT_METHOD(isFirstRun:(NSString *)packageHash
 RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
                                 rejecter:(RCTPromiseRejectBlock)reject)
 {
-    [self removePendingUpdate];
+    [CodePush removePendingUpdate];
     resolve([NSNull null]);
 }
 
@@ -388,9 +423,16 @@ RCT_EXPORT_METHOD(restartApp)
     [self loadBundle];
 }
 
-RCT_EXPORT_METHOD(setUsingTestFolder:(BOOL)shouldUseTestFolder)
+/*
+ * This method is the native side of the CodePush.downloadAndReplaceCurrentBundle()
+ * method, which is only to be used during tests and no-ops if the test configuration
+ * flag is not set.
+ */
+RCT_EXPORT_METHOD(downloadAndReplaceCurrentBundle:(NSString *)remoteBundleUrl)
 {
-    usingTestFolder = shouldUseTestFolder;
+    if ([CodePush isUsingTestConfiguration]) {
+        [CodePushPackage downloadAndReplaceCurrentBundle:remoteBundleUrl];
+    }
 }
 
 @end

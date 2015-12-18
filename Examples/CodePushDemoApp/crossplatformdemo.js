@@ -16,10 +16,7 @@ var Button = require("react-native-button");
 var CodePush = require('react-native-code-push');
 
 var CodePushDemoApp = React.createClass({
-
-  componentDidMount: function() {
-  },
-  sync: function() {
+  sync() {
     var self = this;
     CodePush.sync(
       { 
@@ -83,10 +80,10 @@ var CodePushDemoApp = React.createClass({
       CodePush.log(error);
     });
   },
-  getInitialState: function() {
+  getInitialState() {
     return { };
   },
-  render: function() {
+  render() {
     var syncView;
     var syncButton;
     var progressView;
