@@ -491,8 +491,8 @@ NSString * const UnzippedFolderName = @"unzipped";
     NSURL *urlRequest = [NSURL URLWithString:remoteBundleUrl];
     NSError *error = nil;
     NSString *downloadedBundle = [NSString stringWithContentsOfURL:urlRequest
-                                                encoding:NSUTF8StringEncoding
-                                                   error:&error];
+                                                          encoding:NSUTF8StringEncoding
+                                                             error:&error];
     
     if (error) {
         NSLog(@"Error downloading from URL %@", remoteBundleUrl);
