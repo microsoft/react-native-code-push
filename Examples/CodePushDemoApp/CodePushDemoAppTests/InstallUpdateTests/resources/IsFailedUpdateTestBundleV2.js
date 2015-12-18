@@ -1,15 +1,15 @@
 "use strict";
 
-var React = require("react-native");
-var CodePush = require("react-native-code-push");
+import React from "react-native";
+import CodePush from "react-native-code-push";
 
-var {
+let {
   AppRegistry,
   Text,
   View,
 } = React;
 
-var IsFailedUpdateTest = React.createClass({
+let IsFailedUpdateTest = React.createClass({
   componentDidMount() {
     CodePush.restartApp();
   },

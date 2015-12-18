@@ -1,21 +1,21 @@
 "use strict";
 
-var React = require("react-native");
-var CodePush = require("react-native-code-push");
-var RCTTestModule = React.NativeModules.TestModule;
-var NativeCodePush = React.NativeModules.CodePush;
-var PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
+import React from "react-native";
+import CodePush from "react-native-code-push";
+let RCTTestModule = React.NativeModules.TestModule;
+let NativeCodePush = React.NativeModules.CodePush;
+let PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
 
-var {
+let {
   AppRegistry,
   Platform,
   Text,
   View,
 } = React;
 
-var RollbackTest = React.createClass({
+let RollbackTest = React.createClass({
   componentDidMount() {
-    var remotePackage = {
+    let remotePackage = {
       description: "Angry flappy birds",
       appVersion: "1.5.0",
       label: "2.4.0",

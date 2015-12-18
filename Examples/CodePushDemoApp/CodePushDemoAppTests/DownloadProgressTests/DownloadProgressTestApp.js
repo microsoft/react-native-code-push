@@ -1,8 +1,8 @@
 "use strict";
 
-var React = require("react-native");
+import React from "react-native";
 
-var {
+let {
   AppRegistry,
   ScrollView,
   StyleSheet,
@@ -11,7 +11,7 @@ var {
   View,
 } = React;
 
-var TESTS = [
+let TESTS = [
   require("./testcases/DownloadProgressTest")
 ];
 
@@ -19,7 +19,7 @@ TESTS.forEach(
   (test) => AppRegistry.registerComponent(test.displayName, () => test)
 );
 
-var DownloadProgressTestApp = React.createClass({
+let DownloadProgressTestApp = React.createClass({
   getInitialState() {
     return {
       test: null,
@@ -59,7 +59,7 @@ var DownloadProgressTestApp = React.createClass({
   }
 });
 
-var styles = StyleSheet.create({
+let styles = StyleSheet.create({
   container: {
     backgroundColor: "white",
     marginTop: 40,

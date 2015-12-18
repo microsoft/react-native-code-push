@@ -1,14 +1,14 @@
 "use strict";
 
-var React = require("react-native");
-var { DeviceEventEmitter, Platform, AppRegistry } = require("react-native");
-var CodePush = require("react-native-code-push");
-var NativeCodePush = React.NativeModules.CodePush;
-var createTestCaseComponent = require("../../utils/createTestCaseComponent");
-var PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
-var assert = require("assert");
+import React from "react-native";
+let { DeviceEventEmitter, Platform, AppRegistry } = require("react-native");
+import CodePush from "react-native-code-push";
+let NativeCodePush = React.NativeModules.CodePush;
+import createTestCaseComponent from "../../utils/createTestCaseComponent";
+let PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
+import assert from "assert";
 
-var remotePackage = {
+let remotePackage = {
   description: "Angry flappy birds",
   appVersion: "1.5.0",
   label: "2.4.0",
@@ -19,7 +19,7 @@ var remotePackage = {
   packageSize: 1024
 };
 
-var RollbackTest = createTestCaseComponent(
+let RollbackTest = createTestCaseComponent(
   "RollbackTest",
   "should successfully rollback if \"notifyApplicationReady\" is not called in the installed package.",
   () => {

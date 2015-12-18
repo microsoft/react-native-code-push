@@ -1,15 +1,15 @@
 "use strict";
 
-var React = require("react-native");
-var CodePush = require("react-native-code-push");
+import React from "react-native";
+import CodePush from "react-native-code-push";
 
-var {
+let {
   AppRegistry,
   Text,
   View,
 } = React;
 
-var IsFirstRunTest = React.createClass({
+let IsFirstRunTest = React.createClass({
   getInitialState() {
     return {};
   },
@@ -24,7 +24,7 @@ var IsFirstRunTest = React.createClass({
       });
   },
   render() {
-    var text = "Testing...";
+    let text = "Testing...";
     if (this.state.passed !== undefined) {
       text = this.state.passed ? "Test Passed!" : "Test Failed!";
     }

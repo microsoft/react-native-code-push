@@ -1,14 +1,14 @@
 "use strict";
 
-var React = require("react-native");
-var CodePush = require("react-native-code-push");
-var NativeCodePush = React.NativeModules.CodePush;
-var createTestCaseComponent = require("../../utils/createTestCaseComponent");
-var PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
-var assert = require("assert");
-var createMockAcquisitionSdk = require("../../utils/mockAcquisitionSdk");
+import React from "react-native";
+import CodePush from "react-native-code-push";
+let NativeCodePush = React.NativeModules.CodePush;
+import createTestCaseComponent from "../../utils/createTestCaseComponent";
+let PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
+import assert from "assert";
+import createMockAcquisitionSdk from "../../utils/mockAcquisitionSdk";
 
-var serverPackage = {
+let serverPackage = {
   appVersion: "1.5.0",
   description: "",
   downloadUrl: "",
@@ -18,17 +18,17 @@ var serverPackage = {
   updateAppVersion: true
 };
 
-var localPackage = {};
+let localPackage = {};
 
-var RemotePackageAppVersionNewerTest = createTestCaseComponent(
+let RemotePackageAppVersionNewerTest = createTestCaseComponent(
   "RemotePackageAppVersionNewerTest",
   "should drop the update when the server reports one with a newer binary version",
   () => {
     return new Promise((resolve, reject) => { 
-      var mockAcquisitionSdk = createMockAcquisitionSdk(serverPackage, localPackage);       
-      var mockConfiguration = { appVersion : "1.0.0" };
+      let mockAcquisitionSdk = createMockAcquisitionSdk(serverPackage, localPackage);       
+      let mockConfiguration = { appVersion : "1.0.0" };
       CodePush.setUpTestDependencies(mockAcquisitionSdk, mockConfiguration, NativeCodePush);
-      CodePush.getCurrentPackage = function () {
+      CodePush.getCurrentPackage = () => {
         return Promise.resolve(localPackage);
       }
       resolve();

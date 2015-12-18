@@ -1,18 +1,18 @@
 "use strict";
 
-var React = require("react-native");
-var { Platform } = require("react-native");
-var CodePush = require("react-native-code-push");
-var NativeCodePush = React.NativeModules.CodePush;
-var RCTTestModule = React.NativeModules.TestModule;
+import React from "react-native";
+let { Platform } = require("react-native");
+import CodePush from "react-native-code-push";
+let NativeCodePush = React.NativeModules.CodePush;
+let RCTTestModule = React.NativeModules.TestModule;
 
-var {
+let {
   AppRegistry,
   Text,
   View,
 } = React;
 
-var NotifyApplicationReadyTest = React.createClass({
+let NotifyApplicationReadyTest = React.createClass({
   getInitialState() {
     return {};
   },

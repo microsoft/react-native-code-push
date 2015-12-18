@@ -1,15 +1,15 @@
 "use strict";
 
-var React = require("react-native");
-var CodePush = require("react-native-code-push");
+import React from "react-native";
+import CodePush from "react-native-code-push";
 
-var {
+let {
   AppRegistry,
   Text,
   View,
 } = React;
 
-var RollbackTest = React.createClass({
+let RollbackTest = React.createClass({
   componentDidMount() {
     CodePush.restartApp();
   },

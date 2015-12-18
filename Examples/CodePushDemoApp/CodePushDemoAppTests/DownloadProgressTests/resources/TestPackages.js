@@ -1,6 +1,6 @@
-var { Platform } = require("react-native");
+let { Platform } = require("react-native");
 
-var packages = [
+let packages = [
   {
     downloadUrl: "smallFile",
     description: "Angry flappy birds",

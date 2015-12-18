@@ -1,15 +1,15 @@
 "use strict";
 
-var React = require("react-native");
-var CodePush = require("react-native-code-push");
-var NativeCodePush = React.NativeModules.CodePush;
-var createTestCaseComponent = require("../../utils/createTestCaseComponent");
-var PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
-var assert = require("assert");
+import React from "react-native";
+import CodePush from "react-native-code-push";
+let NativeCodePush = React.NativeModules.CodePush;
+import createTestCaseComponent from "../../utils/createTestCaseComponent";
+let PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
+import assert from "assert";
 
-var testPackages = require("../resources/TestPackages");
-var localPackage = {};
-var saveProgress;
+import testPackages from "../resources/TestPackages";
+let localPackage = {};
+let saveProgress;
 
 function checkReceivedAndExpectedBytesEqual() {
   assert(saveProgress, "Download progress was not reported.");
@@ -22,7 +22,7 @@ function checkReceivedAndExpectedBytesEqual() {
   saveProgress = null;
 }
 
-var DownloadProgressTest = createTestCaseComponent(
+let DownloadProgressTest = createTestCaseComponent(
   "DownloadProgressTest",
   "should successfully download all the bytes contained in the test packages",
   () => {
@@ -32,7 +32,7 @@ var DownloadProgressTest = createTestCaseComponent(
     return Promise.resolve();
   },
   () => {
-    var downloadProgressCallback = (downloadProgress) => {
+    let downloadProgressCallback = (downloadProgress) => {
       console.log(`Expecting ${downloadProgress.totalBytes} bytes, received ${downloadProgress.receivedBytes} bytes.`);
       saveProgress = downloadProgress;
     };

@@ -1,14 +1,14 @@
 "use strict";
 
-var React = require("react-native");
-var CodePush = require("react-native-code-push");
-var NativeCodePush = React.NativeModules.CodePush;
-var createTestCaseComponent = require("../../utils/createTestCaseComponent");
-var PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
-var assert = require("assert");
-var createMockAcquisitionSdk = require("../../utils/mockAcquisitionSdk");
+import React from "react-native";
+import CodePush from "react-native-code-push";
+let NativeCodePush = React.NativeModules.CodePush;
+import createTestCaseComponent from "../../utils/createTestCaseComponent";
+let PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
+import assert from "assert";
+import createMockAcquisitionSdk from "../../utils/mockAcquisitionSdk";
 
-var serverPackage = {
+let serverPackage = {
   appVersion: "1.5.0",
   description: "Angry flappy birds",
   downloadUrl: "http://www.windowsazure.com/blobs/awperoiuqpweru",
@@ -19,16 +19,16 @@ var serverPackage = {
   updateAppVersion: false
 };
 
-var localPackage = serverPackage;
+let localPackage = serverPackage;
 
-var SamePackageTest = createTestCaseComponent(
+let SamePackageTest = createTestCaseComponent(
   "SamePackageTest",
   "should not return an update when the server's version is the same as the local version",
   () => {
-    var mockAcquisitionSdk = createMockAcquisitionSdk(serverPackage, localPackage);       
-    var mockConfiguration = { appVersion : "1.5.0" };
+    let mockAcquisitionSdk = createMockAcquisitionSdk(serverPackage, localPackage);       
+    let mockConfiguration = { appVersion : "1.5.0" };
     CodePush.setUpTestDependencies(mockAcquisitionSdk, mockConfiguration, NativeCodePush);
-    CodePush.getCurrentPackage = function () {
+    CodePush.getCurrentPackage = () => {
       return Promise.resolve(localPackage);
     }
     return Promise.resolve();

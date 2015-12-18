@@ -1,24 +1,24 @@
 "use strict";
 
-var React = require("react-native");
-var CodePush = require("react-native-code-push");
-var NativeCodePush = React.NativeModules.CodePush;
-var createTestCaseComponent = require("../../utils/createTestCaseComponent");
-var PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
-var assert = require("assert");
-var createMockAcquisitionSdk = require("../../utils/mockAcquisitionSdk");
+import React from "react-native";
+import CodePush from "react-native-code-push";
+let NativeCodePush = React.NativeModules.CodePush;
+import createTestCaseComponent from "../../utils/createTestCaseComponent";
+let PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
+import assert from "assert";
+import createMockAcquisitionSdk from "../../utils/mockAcquisitionSdk";
 
-var serverPackage = null;
-var localPackage =  {};
+let serverPackage = null;
+let localPackage =  {};
 
-var NoRemotePackageTest = createTestCaseComponent(
+let NoRemotePackageTest = createTestCaseComponent(
   "NoRemotePackageTest",
   "should not return an update when the server has none",
   () => {
-    var mockAcquisitionSdk = createMockAcquisitionSdk(serverPackage, localPackage);       
-    var mockConfiguration = { appVersion : "1.5.0" };
+    let mockAcquisitionSdk = createMockAcquisitionSdk(serverPackage, localPackage);       
+    let mockConfiguration = { appVersion : "1.5.0" };
     CodePush.setUpTestDependencies(mockAcquisitionSdk, mockConfiguration, NativeCodePush);
-    CodePush.getCurrentPackage = function () {
+    CodePush.getCurrentPackage = () => {
       return Promise.resolve(localPackage);
     }
     return Promise.resolve();

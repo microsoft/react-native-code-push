@@ -1,14 +1,14 @@
 "use strict";
 
-var React = require("react-native");
+import React from "react-native";
 
-var {
+let {
   AppRegistry,
   Text,
   View,
 } = React;
 
-var RollbackTest = React.createClass({
+let RollbackTest = React.createClass({
   render() {
     return (
       <View style={{backgroundColor: "white", padding: 40}}>
