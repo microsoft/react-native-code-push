@@ -1,16 +1,10 @@
 "use strict";
 
 import React from "react-native";
-let { Platform } = require("react-native");
+import { Platform, AppRegistry, Text, View } from "react-native";
 import CodePush from "react-native-code-push";
 let NativeCodePush = React.NativeModules.CodePush;
 let RCTTestModule = React.NativeModules.TestModule;
-
-let {
-  AppRegistry,
-  Text,
-  View,
-} = React;
 
 let NotifyApplicationReadyTest = React.createClass({
   getInitialState() {

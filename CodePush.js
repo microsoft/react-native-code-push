@@ -34,7 +34,7 @@ function checkForUpdate(deploymentKey = null) {
         config = configResult;
       }
       
-      sdk = getSDK(config);
+      sdk = new module.exports.AcquisitionSdk(requestFetchAdapter, config);
       
       // Allow dynamic overwrite of function. This is only to be used for tests.
       return module.exports.getCurrentPackage();
@@ -127,11 +127,6 @@ function getCurrentPackage() {
       .catch(reject)
       .done();
   });
-}
-
-function getSDK(config) {
-  // Allow dynamic overwrite of acquisition SDK. This is only to be used for tests.
-  return new module.exports.AcquisitionSdk(requestFetchAdapter, config);
 }
 
 /* Logs messages to console with the [CodePush] prefix */

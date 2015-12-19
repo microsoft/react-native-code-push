@@ -50,7 +50,10 @@ static NSString *const PackageIsPendingKey = @"isPending";
     NSString *packageFile = [CodePushPackage getCurrentPackageBundlePath:&error];
     NSURL *binaryJsBundleUrl = [[NSBundle mainBundle] URLForResource:resourceName withExtension:resourceExtension];
     
+    NSString *logMessageFormat = @"Loading JS bundle from %@";
+    
     if (error || !packageFile) {
+        NSLog(logMessageFormat, binaryJsBundleUrl);
         return binaryJsBundleUrl;
     }
     
@@ -61,8 +64,11 @@ static NSString *const PackageIsPendingKey = @"isPending";
     
     if ([binaryDate compare:packageDate] == NSOrderedAscending) {
         // Return package file because it is newer than the app store binary's JS bundle
-        return [[NSURL alloc] initFileURLWithPath:packageFile];
+        NSURL *packageUrl = [[NSURL alloc] initFileURLWithPath:packageFile];
+        NSLog(logMessageFormat, packageUrl);
+        return packageUrl;
     } else {
+        NSLog(logMessageFormat, binaryJsBundleUrl);
         return binaryJsBundleUrl;
     }
 }
@@ -159,6 +165,7 @@ static NSString *const PackageIsPendingKey = @"isPending";
         if (updateIsLoading) {
             // Pending update was initialized, but notifyApplicationReady was not called.
             // Therefore, deduce that it is a broken update and rollback.
+            NSLog(@"Update did not finish loading the last time, rolling back to a previous version.");
             [self rollbackPackage];
         } else {
             // Mark that we tried to initialize the new update, so that if it crashes,
@@ -214,8 +221,7 @@ static NSString *const PackageIsPendingKey = @"isPending";
         // file (since Chrome wouldn't support it). Otherwise, update
         // the current bundle URL to point at the latest update
         if ([CodePush isUsingTestConfiguration] || ![_bridge.bundleURL.scheme hasPrefix:@"http"]) {
-            NSURL *url = [CodePush bundleURL];
-            _bridge.bundleURL = url;
+            _bridge.bundleURL = [CodePush bundleURL];
         }
         
         [_bridge reload];
@@ -386,17 +392,15 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
             [self savePendingUpdate:updatePackage[PackageHashKey]
                           isLoading:NO];
             
-            if (installMode == CodePushInstallModeOnNextResume) {
+            if (installMode == CodePushInstallModeOnNextResume && !_hasResumeListener) {
                 // Ensure we do not add the listener twice.
-                if (!_hasResumeListener) {
-                    // Register for app resume notifications so that we
-                    // can check for pending updates which support "restart on resume"
-                    [[NSNotificationCenter defaultCenter] addObserver:self
-                                                             selector:@selector(loadBundle)
-                                                                 name:UIApplicationWillEnterForegroundNotification
-                                                               object:[UIApplication sharedApplication]];
-                    _hasResumeListener = YES;
-                }
+                // Register for app resume notifications so that we
+                // can check for pending updates which support "restart on resume"
+                [[NSNotificationCenter defaultCenter] addObserver:self
+                                                         selector:@selector(loadBundle)
+                                                             name:UIApplicationWillEnterForegroundNotification
+                                                           object:[UIApplication sharedApplication]];
+                _hasResumeListener = YES;
             }
             // Signal to JS that the update has been applied.
             resolve(nil);
@@ -453,8 +457,9 @@ RCT_EXPORT_METHOD(restartApp)
 
 /*
  * This method is the native side of the CodePush.downloadAndReplaceCurrentBundle()
- * method, which is only to be used during tests and no-ops if the test configuration
- * flag is not set.
+ * method, which replaces the current bundle with the one downloaded from
+ * removeBundleUrl. It is only to be used during tests and no-ops if the test 
+ * configuration flag is not set.
  */
 RCT_EXPORT_METHOD(downloadAndReplaceCurrentBundle:(NSString *)remoteBundleUrl)
 {

@@ -8,18 +8,9 @@ let PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCo
 import assert from "assert";
 import createMockAcquisitionSdk from "../../utils/mockAcquisitionSdk";
 
-let serverPackage = {
-  appVersion: "1.5.0",
-  description: "Angry flappy birds",
-  downloadUrl: "http://www.windowsazure.com/blobs/awperoiuqpweru",
-  isAvailable: true,
-  isMandatory: false,
-  packageHash: "hash240",
-  packageSize: 1024,
-  updateAppVersion: false
-};
+import { serverPackage } from "../resources/testPackages";
+const localPackage = {};
 
-let localPackage = {};
 let deploymentKey = "myKey123";
 
 let SwitchDeploymentKeyTest = createTestCaseComponent(

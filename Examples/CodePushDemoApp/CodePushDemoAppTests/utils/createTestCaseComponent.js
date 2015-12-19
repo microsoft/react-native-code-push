@@ -1,19 +1,14 @@
 "use strict";
 
-var React = require("react-native");
-var { DeviceEventEmitter } = require("react-native");
-var NativeCodePush = React.NativeModules.CodePush;
+import React from "react-native";
+import { DeviceEventEmitter, Text, View } from "react-native";
+let NativeCodePush = React.NativeModules.CodePush;
 
 // RCTTestModule is not implemented yet for RN Android.
-var RCTTestModule = React.NativeModules.TestModule || {};
-
-var {
-  Text,
-  View,
-} = React;
+let RCTTestModule = React.NativeModules.TestModule || {};
 
 function createTestCaseComponent(displayName, description, setUp, runTest, passAfterRun = true) {     
-  var TestCaseComponent = React.createClass({
+  let TestCaseComponent = React.createClass({
     propTypes: {
       shouldThrow: React.PropTypes.bool,
       waitOneFrame: React.PropTypes.bool,
@@ -53,4 +48,4 @@ function createTestCaseComponent(displayName, description, setUp, runTest, passA
   return TestCaseComponent;
 }
 
-module.exports = createTestCaseComponent;
+export default createTestCaseComponent;

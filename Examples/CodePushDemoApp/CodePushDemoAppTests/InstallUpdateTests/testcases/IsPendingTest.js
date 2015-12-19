@@ -1,23 +1,14 @@
 "use strict";
 
 import React from "react-native";
-let { DeviceEventEmitter, Platform, AppRegistry } = require("react-native");
+import { DeviceEventEmitter, Platform, AppRegistry } from "react-native";
 import CodePush from "react-native-code-push";
 let NativeCodePush = React.NativeModules.CodePush;
 import createTestCaseComponent from "../../utils/createTestCaseComponent";
 let PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
 import assert from "assert";
 
-let remotePackage = {
-  description: "Angry flappy birds",
-  appVersion: "1.5.0",
-  label: "2.4.0",
-  isMandatory: false,
-  isAvailable: true,
-  updateAppVersion: false,
-  packageHash: "hash240",
-  packageSize: 1024
-};
+let remotePackage = require("../resources/remotePackage");
 
 let IsPendingTest = createTestCaseComponent(
   "IsPendingTest",
@@ -36,6 +27,10 @@ let IsPendingTest = createTestCaseComponent(
     remotePackage.download()
       .then((localPackage) => {
         return localPackage.install(NativeCodePush.codePushInstallModeOnNextRestart);
+      })
+      .then((localPackage) => {
+        assert(localPackage.isPending, "isPending should be set to \"true\" after an install");
+        return CodePush.getCurrentPackage();
       })
       .then((localPackage) => {
         assert(localPackage.isPending, "isPending should be set to \"true\" after an install");

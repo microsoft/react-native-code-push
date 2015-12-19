@@ -8,16 +8,7 @@ let PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCo
 import assert from "assert";
 import createMockAcquisitionSdk from "../../utils/mockAcquisitionSdk";
 
-let serverPackage = {
-  appVersion: "1.5.0",
-  description: "",
-  downloadUrl: "",
-  isAvailable: false,
-  isMandatory: false,
-  packageHash: "",
-  updateAppVersion: true
-};
-
+import { updateAppVersionPackage as serverPackage } from "../resources/testPackages";
 let localPackage = {};
 
 let RemotePackageAppVersionNewerTest = createTestCaseComponent(
