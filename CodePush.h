@@ -22,6 +22,11 @@
 
 + (NSString *)getApplicationSupportDirectory;
 
+// The below methods are only used during tests.
++ (BOOL)isUsingTestConfiguration;
++ (void)setUsingTestConfiguration:(BOOL)shouldUseTestConfiguration;
++ (void)clearTestUpdates;
+
 @end
 
 @interface CodePushConfig : NSObject
@@ -76,6 +81,10 @@ failCallback:(void (^)(NSError *err))failCallback;
            failCallback:(void (^)(NSError *err))failCallback;
 
 + (void)rollbackPackage;
+
+// The below methods are only used during tests.
++ (void)downloadAndReplaceCurrentBundle:(NSString *)remoteBundleUrl;
++ (void)clearTestUpdates;
 
 @end
 

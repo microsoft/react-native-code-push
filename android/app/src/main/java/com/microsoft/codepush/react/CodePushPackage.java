@@ -38,7 +38,12 @@ public class CodePushPackage {
     }
 
     public String getCodePushPath() {
-        return CodePushUtils.appendPathComponent(getDocumentsDirectory(), CODE_PUSH_FOLDER_PREFIX);
+        String codePushPath = CodePushUtils.appendPathComponent(getDocumentsDirectory(), CODE_PUSH_FOLDER_PREFIX);
+        if (CodePush.isUsingTestConfiguration()) {
+            codePushPath = CodePushUtils.appendPathComponent(codePushPath, "TestPackages");
+        }
+
+        return codePushPath;
     }
 
     public String getStatusFilePath() {
@@ -185,5 +190,46 @@ public class CodePushPackage {
         info.putString(CURRENT_PACKAGE_KEY, CodePushUtils.tryGetString(info, PREVIOUS_PACKAGE_KEY));
         info.putNull(PREVIOUS_PACKAGE_KEY);
         updateCurrentPackageInfo(info);
+    }
+
+    public void downloadAndReplaceCurrentBundle(String remoteBundleUrl) throws IOException {
+        URL downloadUrl;
+        HttpURLConnection connection = null;
+        BufferedInputStream bin = null;
+        FileOutputStream fos = null;
+        BufferedOutputStream bout = null;
+        try {
+            downloadUrl = new URL(remoteBundleUrl);
+            connection = (HttpURLConnection) (downloadUrl.openConnection());
+            bin = new BufferedInputStream(connection.getInputStream());
+            File downloadFile = new File(getCurrentPackageBundlePath());
+            downloadFile.delete();
+            fos = new FileOutputStream(downloadFile);
+            bout = new BufferedOutputStream(fos, DOWNLOAD_BUFFER_SIZE);
+            byte[] data = new byte[DOWNLOAD_BUFFER_SIZE];
+            int numBytesRead = 0;
+            while ((numBytesRead = bin.read(data, 0, DOWNLOAD_BUFFER_SIZE)) >= 0) {
+                bout.write(data, 0, numBytesRead);
+            }
+        } catch (MalformedURLException e) {
+            throw new CodePushMalformedDataException(remoteBundleUrl, e);
+        } finally {
+            try {
+                if (bout != null) bout.close();
+                if (fos != null) fos.close();
+                if (bin != null) bin.close();
+                if (connection != null) connection.disconnect();
+            } catch (IOException e) {
+                throw new CodePushUnknownException("Error closing IO resources.", e);
+            }
+        }
+    }
+
+    public void clearTestUpdates() {
+        if (CodePush.isUsingTestConfiguration()) {
+            File statusFile = new File(getStatusFilePath());
+            statusFile.delete();
+            CodePushUtils.deleteDirectoryAtPath(getCodePushPath());
+        }
     }
 }

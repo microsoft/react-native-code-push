@@ -23,7 +23,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -38,8 +37,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class CodePush {
+
+    private static boolean testConfigurationFlag = false;
     private boolean didUpdate = false;
-    private boolean usingTestFolder = false;
 
     private String assetsBundleFileName;
 
@@ -290,6 +290,22 @@ public class CodePush {
         }
     }
 
+    /* The below 3 methods are used for running tests.*/
+    public static boolean isUsingTestConfiguration() {
+        return testConfigurationFlag;
+    }
+
+    public static void setUsingTestConfiguration(boolean shouldUseTestConfiguration) {
+        testConfigurationFlag = shouldUseTestConfiguration;
+    }
+
+    public void clearTestUpdates() {
+        if (isUsingTestConfiguration()) {
+            codePushPackage.clearTestUpdates();
+            removePendingUpdate();
+        }
+    }
+
     private class CodePushNativeModule extends ReactContextBaseJavaModule {
 
         private LifecycleEventListener lifecycleEventListener = null;
@@ -385,27 +401,24 @@ public class CodePush {
                             savePendingUpdate(pendingHash, /* isLoading */false);
                         }
 
-                        if (installMode == CodePushInstallMode.IMMEDIATE.getValue()) {
-                            loadBundle();
-                        } else if (installMode == CodePushInstallMode.ON_NEXT_RESUME.getValue()) {
+                        if (installMode == CodePushInstallMode.ON_NEXT_RESUME.getValue() &&
+                                lifecycleEventListener == null) {
                             // Ensure we do not add the listener twice.
-                            if (lifecycleEventListener == null) {
-                                lifecycleEventListener = new LifecycleEventListener() {
-                                    @Override
-                                    public void onHostResume() {
-                                        loadBundle();
-                                    }
+                            lifecycleEventListener = new LifecycleEventListener() {
+                                @Override
+                                public void onHostResume() {
+                                    loadBundle();
+                                }
 
-                                    @Override
-                                    public void onHostPause() {
-                                    }
+                                @Override
+                                public void onHostPause() {
+                                }
 
-                                    @Override
-                                    public void onHostDestroy() {
-                                    }
-                                };
-                                getReactApplicationContext().addLifecycleEventListener(lifecycleEventListener);
-                            }
+                                @Override
+                                public void onHostDestroy() {
+                                }
+                            };
+                            getReactApplicationContext().addLifecycleEventListener(lifecycleEventListener);
                         }
 
                         promise.resolve("");
@@ -452,8 +465,16 @@ public class CodePush {
         }
 
         @ReactMethod
-        public void setUsingTestFolder(boolean shouldUseTestFolder) {
-            usingTestFolder = shouldUseTestFolder;
+        // Replaces the current bundle with the one downloaded from removeBundleUrl.
+        // It is only to be used during tests. No-ops if the test configuration flag is not set.
+        public void downloadAndReplaceCurrentBundle(String remoteBundleUrl) {
+            if (isUsingTestConfiguration()) {
+                try {
+                    codePushPackage.downloadAndReplaceCurrentBundle(remoteBundleUrl);
+                } catch (IOException e) {
+                    throw new CodePushUnknownException("Unable to replace current bundle", e);
+                }
+            }
         }
 
         @Override

@@ -1,8 +1,8 @@
 "use strict";
 
-var React = require("react-native");
+import React from "react-native";
 
-var {
+let {
   AppRegistry,
   ScrollView,
   StyleSheet,
@@ -11,21 +11,21 @@ var {
   View,
 } = React;
 
-var TESTS = [
-  require("./DownloadProgressTest")
+let TESTS = [
+  require("./testcases/DownloadProgressTest")
 ];
 
 TESTS.forEach(
   (test) => AppRegistry.registerComponent(test.displayName, () => test)
 );
 
-var DownloadProgressTestApp = React.createClass({
-  getInitialState: function() {
+let DownloadProgressTestApp = React.createClass({
+  getInitialState() {
     return {
       test: null,
     };
   },
-  render: function() {
+  render() {
     if (this.state.test) {
       return (
         <ScrollView>
@@ -36,9 +36,7 @@ var DownloadProgressTestApp = React.createClass({
     return (
       <View style={styles.container}>
         <Text style={styles.row}>
-          Click on a test to run it in this shell for easier debugging and
-          development.  Run all tests in the testing environment with cmd+U in
-          Xcode.
+          DownloadProgress Tests
         </Text>
         <View style={styles.separator} />
         <ScrollView>
@@ -49,6 +47,9 @@ var DownloadProgressTestApp = React.createClass({
               <Text style={styles.testName}>
                 {test.displayName}
               </Text>
+              <Text style={styles.testDescription}>
+                {test.description}
+              </Text>
             </TouchableOpacity>,
             <View style={styles.separator} />
           ])}
@@ -58,7 +59,7 @@ var DownloadProgressTestApp = React.createClass({
   }
 });
 
-var styles = StyleSheet.create({
+let styles = StyleSheet.create({
   container: {
     backgroundColor: "white",
     marginTop: 40,

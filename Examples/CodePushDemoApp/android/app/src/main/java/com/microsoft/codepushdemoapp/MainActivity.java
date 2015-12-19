@@ -29,29 +29,10 @@ public class MainActivity extends FragmentActivity implements DefaultHardwareBac
 
         ReactInstanceManager.Builder builder = ReactInstanceManager.builder()
                 .setApplication(getApplication())
-                .setJSBundleFile(codePush.getBundleUrl("index.android.bundle"));
+                .setJSBundleFile(codePush.getBundleUrl("index.android.bundle"))
+                .setJSMainModuleName("index.android");
 
-        String mainComponentName = null;
-
-        switch (BuildConfig.RUN_TEST) {
-            case "DOWNLOAD_PROGRESS":
-                builder = builder.setJSMainModuleName(TEST_FOLDER_PREFIX + "DownloadProgressTests/DownloadProgressTestApp");
-                mainComponentName = "DownloadProgressTestApp";
-                break;
-            case "INSTALL_UPDATE":
-                builder = builder.setJSMainModuleName(TEST_FOLDER_PREFIX + "InstallUpdateTests/InstallUpdateTestApp");
-                mainComponentName = "InstallUpdateTestApp";
-                break;
-            case "QUERY_UPDATE":
-                builder = builder.setJSMainModuleName(TEST_FOLDER_PREFIX + "QueryUpdateTests/QueryUpdateTestApp");
-                mainComponentName = "QueryUpdateTestApp";
-                break;
-            default:
-                // Run the standard demo app.
-                builder = builder.setJSMainModuleName("index.android");
-                mainComponentName = "CodePushDemoApp";
-                break;
-        }
+        String mainComponentName = "CodePushDemoApp";
 
         mReactInstanceManager = builder.addPackage(new MainReactPackage())
                 .addPackage(codePush.getReactPackage())

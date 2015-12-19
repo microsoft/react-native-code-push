@@ -20,75 +20,75 @@ function checkForUpdate(deploymentKey = null) {
    * different from the CodePush update they have already installed.
    */
   return getConfiguration()
-          .then((configResult) => {            
-            /*
-             * If a deployment key was explicitly provided,
-             * then let's override the one we retrieved
-             * from the native-side of the app. This allows
-             * dynamically "redirecting" end-users at different
-             * deployments (e.g. an early access deployment for insiders).
-             */
-            if (deploymentKey) {
-              config = Object.assign({}, configResult, { deploymentKey });
-            } else {
-              config = configResult;
-            }
-            
-            sdk = getSDK(config);
-            
-            // Allow dynamic overwrite of function. This is only to be used for tests.
-            return module.exports.getCurrentPackage();
-          })
-          .then((localPackage) => {
-            var queryPackage = { appVersion: config.appVersion };
-            
-            /*
-             * If the app has a previously installed update, and that update
-             * was targetted at the same app version that is currently running,
-             * then we want to use its package hash to determine whether a new
-             * release has been made on the server. Otherwise, we only need
-             * to send the app version to the server, since we are interested
-             * in any updates for current app store version, regardless of hash.
-             */
-            if (localPackage && localPackage.appVersion && semver.compare(localPackage.appVersion, config.appVersion) === 0) {
-              queryPackage = localPackage;
-            }
-            
-            return new Promise((resolve, reject) => {
-              sdk.queryUpdateWithCurrentPackage(queryPackage, (err, update) => {
-                if (err) {
-                  return reject(err);
-                }
-                
-                /*
-                 * There are three cases where checkForUpdate will resolve to null:
-                 * ----------------------------------------------------------------
-                 * 1) The server said there isn't an update. This is the most common case.
-                 * 2) The server said there is an update but it requires a newer binary version.
-                 *    This would occur when end-users are running an older app store version than
-                 *    is available, and CodePush is making sure they don't get an update that
-                 *    potentially wouldn't be compatible with what they are running.
-                 * 3) The server said there is an update, but the update's hash is the same as
-                 *    the currently running update. This should _never_ happen, unless there is a
-                 *    bug in the server, but we're adding this check just to double-check that the
-                 *    client app is resilient to a potential issue with the update check.
-                 */
-                if (!update || update.updateAppVersion || (update.packageHash === localPackage.packageHash)) {
-                  return resolve(null);
-                } 
+    .then((configResult) => {            
+      /*
+       * If a deployment key was explicitly provided,
+       * then let's override the one we retrieved
+       * from the native-side of the app. This allows
+       * dynamically "redirecting" end-users at different
+       * deployments (e.g. an early access deployment for insiders).
+       */
+      if (deploymentKey) {
+        config = Object.assign({}, configResult, { deploymentKey });
+      } else {
+        config = configResult;
+      }
+      
+      sdk = new module.exports.AcquisitionSdk(requestFetchAdapter, config);
+      
+      // Allow dynamic overwrite of function. This is only to be used for tests.
+      return module.exports.getCurrentPackage();
+    })
+    .then((localPackage) => {
+      var queryPackage = { appVersion: config.appVersion };
+      
+      /*
+       * If the app has a previously installed update, and that update
+       * was targetted at the same app version that is currently running,
+       * then we want to use its package hash to determine whether a new
+       * release has been made on the server. Otherwise, we only need
+       * to send the app version to the server, since we are interested
+       * in any updates for current app store version, regardless of hash.
+       */
+      if (localPackage && localPackage.appVersion && semver.compare(localPackage.appVersion, config.appVersion) === 0) {
+        queryPackage = localPackage;
+      }
+      
+      return new Promise((resolve, reject) => {
+        sdk.queryUpdateWithCurrentPackage(queryPackage, (err, update) => {
+          if (err) {
+            return reject(err);
+          }
+          
+          /*
+           * There are three cases where checkForUpdate will resolve to null:
+           * ----------------------------------------------------------------
+           * 1) The server said there isn't an update. This is the most common case.
+           * 2) The server said there is an update but it requires a newer binary version.
+           *    This would occur when end-users are running an older app store version than
+           *    is available, and CodePush is making sure they don't get an update that
+           *    potentially wouldn't be compatible with what they are running.
+           * 3) The server said there is an update, but the update's hash is the same as
+           *    the currently running update. This should _never_ happen, unless there is a
+           *    bug in the server, but we're adding this check just to double-check that the
+           *    client app is resilient to a potential issue with the update check.
+           */
+          if (!update || update.updateAppVersion || (update.packageHash === localPackage.packageHash)) {
+            return resolve(null);
+          } 
 
-                update = Object.assign(update, PackageMixins.remote);
-                
-                NativeCodePush.isFailedUpdate(update.packageHash)
-                  .then((isFailedHash) => {
-                    update.failedInstall = isFailedHash;
-                    resolve(update);
-                  })
-                  .catch(reject)
-                  .done();
-              })
-            });
-          });
+          update = Object.assign(update, PackageMixins.remote);
+          
+          NativeCodePush.isFailedUpdate(update.packageHash)
+            .then((isFailedHash) => {
+              update.failedInstall = isFailedHash;
+              resolve(update);
+            })
+            .catch(reject)
+            .done();
+        })
+      });
+    });
 }
 
 var getConfiguration = (() => {
@@ -129,30 +129,21 @@ function getCurrentPackage() {
   });
 }
 
-function getSDK(config) {
-   if (testSdk) {
-      return testSdk;
-   } else {
-      return new Sdk(requestFetchAdapter, config);
-   }
-}
-
 /* Logs messages to console with the [CodePush] prefix */
 function log(message) {
   console.log(`[CodePush] ${message}`)
 }
 
 var testConfig;
-var testSdk;
 
 // This function is only used for tests. Replaces the default SDK, configuration and native bridge
-function setUpTestDependencies(providedTestSdk, providedTestConfig, testNativeBridge) {
-  if (providedTestSdk) testSdk = providedTestSdk;
+function setUpTestDependencies(testSdk, providedTestConfig, testNativeBridge) {
+  if (testSdk) module.exports.AcquisitionSdk = testSdk;
   if (providedTestConfig) testConfig = providedTestConfig;
   if (testNativeBridge) NativeCodePush = testNativeBridge;
 }
 
-/**
+/*
  * The sync method provides a simple, one-line experience for
  * incorporating the check, download and application of an update.
  * 
@@ -303,6 +294,7 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
 };
 
 var CodePush = {
+  AcquisitionSdk: Sdk,
   checkForUpdate: checkForUpdate,
   getConfiguration: getConfiguration,
   getCurrentPackage: getCurrentPackage,
