@@ -434,7 +434,7 @@ NSString * const UnzippedFolderName = @"unzipped";
                 }
             }
             
-            [[NSFileManager defaultManager] moveItemAtPath:fullFilePath toPath:destFileName error:error];
+            [[NSFileManager defaultManager] copyItemAtPath:fullFilePath toPath:destFileName error:error];
             if (*error) {
                 return;
             }
