@@ -207,14 +207,14 @@ If an update is available, it will be silently downloaded, and installed the nex
 
 Once your app has been configured and distributed to your users, and you've made some JS changes, it's time to release it to them instantly! If you're not using React Native to bundle images (via `require('./foo.png')`), then perform the following steps. Otherwise, skip to the next section instead:
 
-1. Execute `react-native bundle` (passing the appropriate parameters) in order to generate the updated JS bundle for your app. You can place this file wherever you want via the `--bundle-output` flag, since the exact location isn't relevant for CodePush purposes.
+1. Execute `react-native bundle` (passing the appropriate parameters, see example below) in order to generate the updated JS bundle for your app. You can place this file wherever you want via the `--bundle-output` flag, since the exact location isn't relevant for CodePush purposes. It's important, however, that you set `--dev false` so that your JS code is optimized appropriately and any "yellow box" warnings won't be displayed.
 
 2. Execute `code-push release <appName> <jsBundleFilePath> <appStoreVersion> --deploymentName <deploymentName>` in order to publish the generated JS bundle to the server. The `<jsBundleFilePath>` parameter should equal the value you provided to the `--bundle-output` flag in step #1. Additionally, the `<appStoreVersion>` parameter should equal the exact app store version (i.e. the semver version end users would see when installing it) you want this CodePush update to target.
 
 Example Usage:
 
 ```
-react-native bundle --platform ios --entry-file index.ios.js --bundle-output codepush.js
+react-native bundle --platform ios --entry-file index.ios.js --bundle-output codepush.js --dev false
 code-push release MyApp codepush.js 1.0.2
 ```
     
@@ -224,9 +224,13 @@ And that's it! for more information regarding the CLI and how the release (or pr
 
 ## Releasing Updates (JavaScript + images)
 
-If you are using the new React Native [assets system](https://facebook.github.io/react-native/docs/images.html#content), as opposed to loading your images from the network and/or platform-specific mechanisms (e.g. iOS asset catalogs), then you can't simply pass your jsbundle to CodePush as demonstrated above. You need to provide your images as well. To do this, simply use the following workflow:
+*Note: Android doesn't currently support deploying assets, so you must use the previous release strategy instead.*
 
-1. When calling `react-native bundle`, specify that your assets and JS bundle go into a new "release" folder (you can call this anything, but it shouldn't contain any other files). For example:
+If you are using the new React Native [assets system](https://facebook.github.io/react-native/docs/images.html#content), as opposed to loading your images from the network and/or platform-specific mechanisms (e.g. iOS asset catalogs), then you can't simply pass your jsbundle to CodePush as demonstrated above. You **MUST** provide your images as well. To do this, simply use the following workflow:
+
+1. Create a new directory that can be used to organize your app's release assets (i.e. the JS bundle and your images). We recommend calling this directory "release" but it can be named anything. If you create this directory within your project's directory, make sure to add it to your `.gitignore` file, since you don't want it checked into source control.
+
+2. When calling `react-native bundle`, specify that your assets and JS bundle go into the directory you created in #1, and that you want a non-dev build for your respective platform and entry file. For example, assuming you called this directory "release", you could run the following command:
 
     ```
     react-native bundle \
@@ -234,9 +238,10 @@ If you are using the new React Native [assets system](https://facebook.github.io
     --entry-file index.ios.js \
     --bundle-output ./release/main.jsbundle \
     --assets-dest ./release
+    --dev false
     ```
 
-2. Execute `code-push release`, passing the path to the directory you used in #1 as the "package" parameter (e.g. `code-push release Foo ./release 1.0.0`). The code-push CLI will automatically handle zipping up the contents for you, so don't worry about handling that yourself.
+3. Execute `code-push release`, passing the path to the directory you created in #1 as the "package" parameter (e.g. `code-push release Foo ./release 1.0.0`). The code-push CLI will automatically handle zipping up the contents for you, so don't worry about handling that yourself.
 
 Additionally, the CodePush client supports differential updates, so even though you are releasing your JS bundle and assets on every update, your end users will only actually download the files they need. The service handles this automatically so that you can focus on creating awesome apps and we can worry about optimizing end user downloads.
 
