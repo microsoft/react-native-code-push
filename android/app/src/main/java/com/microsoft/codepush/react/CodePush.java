@@ -144,7 +144,7 @@ public class CodePush {
                 return packageFilePath;
             } else {
                 // The binary version is newer.
-
+                didUpdate = false;
                 CodePushUtils.logBundleUrl(binaryJsBundleUrl);
                 return binaryJsBundleUrl;
             }
@@ -230,7 +230,6 @@ public class CodePush {
             boolean updateIsPending = pendingUpdate != null &&
                                       pendingUpdate.getBoolean(PENDING_UPDATE_IS_LOADING_KEY) == false &&
                                       pendingUpdate.getString(PENDING_UPDATE_HASH_KEY).equals(packageHash);
-                                 
             return updateIsPending;
         }
         catch (JSONException e) {
