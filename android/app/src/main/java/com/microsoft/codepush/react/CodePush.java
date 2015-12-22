@@ -130,13 +130,21 @@ public class CodePush {
             }
 
             ReadableMap packageMetadata = codePushPackage.getCurrentPackage();
-            // May throw NumberFormatException.
-            Long binaryModifiedDateDuringPackageInstall = Long.parseLong(CodePushUtils.tryGetString(packageMetadata, BINARY_MODIFIED_TIME_KEY));
-            if (binaryModifiedDateDuringPackageInstall == binaryResourcesModifiedTime) {
+            Long binaryModifiedDateDuringPackageInstall = null;
+            String binaryModifiedDateDuringPackageInstallString = CodePushUtils.tryGetString(packageMetadata, BINARY_MODIFIED_TIME_KEY);
+            if (binaryModifiedDateDuringPackageInstallString != null) {
+                binaryModifiedDateDuringPackageInstall = Long.parseLong(binaryModifiedDateDuringPackageInstallString);
+            }
+
+            String pacakgeAppVersion = CodePushUtils.tryGetString(packageMetadata, "appVersion");
+            if (binaryModifiedDateDuringPackageInstall != null &&
+                    binaryModifiedDateDuringPackageInstall == binaryResourcesModifiedTime &&
+                    this.appVersion.equals(pacakgeAppVersion)) {
                 CodePushUtils.logBundleUrl(packageFilePath);
                 return packageFilePath;
             } else {
                 // The binary version is newer.
+
                 CodePushUtils.logBundleUrl(binaryJsBundleUrl);
                 return binaryJsBundleUrl;
             }
@@ -299,11 +307,9 @@ public class CodePush {
         testConfigurationFlag = shouldUseTestConfiguration;
     }
 
-    public void clearTestUpdates() {
-        if (isUsingTestConfiguration()) {
-            codePushPackage.clearTestUpdates();
-            removePendingUpdate();
-        }
+    public void clearUpdates() {
+        codePushPackage.clearUpdates();
+        removePendingUpdate();
     }
 
     private class CodePushNativeModule extends ReactContextBaseJavaModule {

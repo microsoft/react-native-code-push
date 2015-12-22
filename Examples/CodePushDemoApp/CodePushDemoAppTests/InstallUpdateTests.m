@@ -72,7 +72,7 @@
 
 - (void)runTest:(NSString *)testName
 {
-    [CodePush clearTestUpdates];
+    [CodePush clearUpdates];
     RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:[NSURL URLWithString:[NSString stringWithFormat:@"http://localhost:8081/CodePushDemoAppTests/InstallUpdateTests/testcases/%@.bundle?platform=ios&dev=true", testName]]
                                                         moduleName:testName
                                                  initialProperties:nil

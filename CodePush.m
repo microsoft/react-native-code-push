@@ -61,13 +61,16 @@ static NSString *const PackageIsPendingKey = @"isPending";
     NSDictionary *appFileAttribs = [[NSFileManager defaultManager] attributesOfItemAtPath:packageFile error:nil];
     NSDate *binaryDate = [binaryFileAttributes objectForKey:NSFileModificationDate];
     NSDate *packageDate = [appFileAttribs objectForKey:NSFileModificationDate];
+    NSString *binaryAppVersion = [[CodePushConfig current] appVersion];
+    NSString *packageAppVersion = [appFileAttribs objectForKey:@"appVersion"];
     
-    if ([binaryDate compare:packageDate] == NSOrderedAscending) {
+    if ([binaryDate compare:packageDate] == NSOrderedAscending && [binaryAppVersion isEqualToString:packageAppVersion]) {
         // Return package file because it is newer than the app store binary's JS bundle
         NSURL *packageUrl = [[NSURL alloc] initFileURLWithPath:packageFile];
         NSLog(logMessageFormat, packageUrl);
         return packageUrl;
     } else {
+        [CodePush clearUpdates];
         NSLog(logMessageFormat, binaryJsBundleUrl);
         return binaryJsBundleUrl;
     }
@@ -100,16 +103,12 @@ static NSString *const PackageIsPendingKey = @"isPending";
 }
 
 /*
- * This is used to clean up all test updates. It can only be used
- * when the testConfigurationFlag is set to YES, otherwise it will
- * simply no-op.
+ * WARNING: This cleans up all downloaded and pending updates.
  */
-+ (void)clearTestUpdates
++ (void)clearUpdates
 {
-    if ([CodePush isUsingTestConfiguration]) {
-        [CodePushPackage clearTestUpdates];
-        [self removePendingUpdate];
-    }
+    [CodePushPackage clearUpdates];
+    [self removePendingUpdate];
 }
 
 

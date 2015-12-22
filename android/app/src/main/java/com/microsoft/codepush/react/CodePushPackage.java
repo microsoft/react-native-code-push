@@ -225,11 +225,9 @@ public class CodePushPackage {
         }
     }
 
-    public void clearTestUpdates() {
-        if (CodePush.isUsingTestConfiguration()) {
-            File statusFile = new File(getStatusFilePath());
-            statusFile.delete();
-            CodePushUtils.deleteDirectoryAtPath(getCodePushPath());
-        }
+    public void clearUpdates() {
+        File statusFile = new File(getStatusFilePath());
+        statusFile.delete();
+        CodePushUtils.deleteDirectoryAtPath(getCodePushPath());
     }
 }
