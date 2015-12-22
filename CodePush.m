@@ -109,6 +109,7 @@ static NSString *const PackageIsPendingKey = @"isPending";
 {
     [CodePushPackage clearUpdates];
     [self removePendingUpdate];
+    [self removeFailedUpdates];
 }
 
 
@@ -267,6 +268,17 @@ static NSString *const PackageIsPendingKey = @"isPending";
     
     [failedUpdates addObject:packageHash];
     [preferences setObject:failedUpdates forKey:FailedUpdatesKey];
+    [preferences synchronize];
+}
+
+/*
+ * This method is used to clear away failed updates in the event that
+ * a new app store binary is installed.
+ */
++ (void)removeFailedUpdates
+{
+    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+    [preferences removeObjectForKey:FailedUpdatesKey];
     [preferences synchronize];
 }
 

@@ -238,6 +238,11 @@ public class CodePush {
         }
     }
 
+    private void removeFailedUpdates() {
+        SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
+        settings.edit().remove(FAILED_UPDATES_KEY).commit();
+    }
+
     private void removePendingUpdate() {
         SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
         settings.edit().remove(PENDING_UPDATE_KEY).commit();
@@ -310,6 +315,7 @@ public class CodePush {
     public void clearUpdates() {
         codePushPackage.clearUpdates();
         removePendingUpdate();
+        removeFailedUpdates();
     }
 
     private class CodePushNativeModule extends ReactContextBaseJavaModule {
