@@ -145,6 +145,7 @@ public class CodePush {
             } else {
                 // The binary version is newer.
                 didUpdate = false;
+                this.clearUpdates();
                 CodePushUtils.logBundleUrl(binaryJsBundleUrl);
                 return binaryJsBundleUrl;
             }
