@@ -62,7 +62,13 @@ static NSString *const PackageIsPendingKey = @"isPending";
     NSDate *binaryDate = [binaryFileAttributes objectForKey:NSFileModificationDate];
     NSDate *packageDate = [appFileAttribs objectForKey:NSFileModificationDate];
     NSString *binaryAppVersion = [[CodePushConfig current] appVersion];
-    NSString *packageAppVersion = [appFileAttribs objectForKey:@"appVersion"];
+    NSDictionary *currentPackageMetadata = [CodePushPackage getCurrentPackage:&error];
+    if (error || !currentPackageMetadata) {
+        NSLog(logMessageFormat, binaryJsBundleUrl);
+        return binaryJsBundleUrl;
+    }
+    
+    NSString *packageAppVersion = [currentPackageMetadata objectForKey:@"appVersion"];
     
     if ([binaryDate compare:packageDate] == NSOrderedAscending && [binaryAppVersion isEqualToString:packageAppVersion]) {
         // Return package file because it is newer than the app store binary's JS bundle
