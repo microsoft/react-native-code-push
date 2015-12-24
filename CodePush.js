@@ -209,7 +209,7 @@ async function sync(options = {}, syncStatusChangeCallback, downloadProgressCall
       if (typeof syncOptions.updateDialog !== "object") {
         syncOptions.updateDialog = CodePush.DEFAULT_UPDATE_DIALOG;
       } else {
-        syncOptions.updateDialog = Object.assign({}, CodePush.DEFAULT_UPDATE_DIALOG, syncOptions.updateDialog);
+        syncOptions.updateDialog = { ...CodePush.DEFAULT_UPDATE_DIALOG, ...syncOptions.updateDialog };
       }
         
       return await new Promise((resolve, reject) => {  
