@@ -23,7 +23,7 @@ let RemotePackageAppVersionNewerTest = createTestCaseComponent(
     };
   },
   async () => {
-    let update = await CodePush.checkForUpdate()
+    let update = await CodePush.checkForUpdate();
     assert(!update, "checkForUpdate should not return an update if remote package is of a different binary version");
   }
 );

@@ -2,10 +2,10 @@
 
 import { AcquisitionManager as Sdk } from "code-push/script/acquisition-sdk";
 import { Alert } from "./AlertAdapter";
-import requestFetchAdapter from "./request-fetch-adapter.js";
+import requestFetchAdapter from "./request-fetch-adapter";
 import semver from "semver";
 
-const NativeCodePush = require("react-native").NativeModules.CodePush;
+let NativeCodePush = require("react-native").NativeModules.CodePush;
 const PackageMixins = require("./package-mixins")(NativeCodePush);
 
 async function checkForUpdate(deploymentKey = null) {
@@ -258,7 +258,7 @@ async function sync(options = {}, syncStatusChangeCallback, downloadProgressCall
   } 
 };
 
-export default {
+const CodePush = {
   AcquisitionSdk: Sdk,
   checkForUpdate,
   getConfiguration,
@@ -294,3 +294,5 @@ export default {
     title: "Update available"
   }
 };
+
+export default CodePush;
