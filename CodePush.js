@@ -201,9 +201,9 @@ async function sync(options = {}, syncStatusChangeCallback, downloadProgressCall
       return CodePush.SyncStatus.UPDATE_INSTALLED;
     };
     
-    if (!remotePackage || remotePackage.failedInstall && syncOptions.ignoreFailedUpdates) {
+    if (!remotePackage || (remotePackage.failedInstall && syncOptions.ignoreFailedUpdates)) {
       syncStatusChangeCallback(CodePush.SyncStatus.UP_TO_DATE);
-      return (CodePush.SyncStatus.UP_TO_DATE);
+      return CodePush.SyncStatus.UP_TO_DATE;
     } else if (syncOptions.updateDialog) {
       // updateDialog supports any truthy value (e.g. true, "goo", 12),
       // but we should treat a non-object value as just the default dialog
