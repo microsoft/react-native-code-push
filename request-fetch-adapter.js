@@ -13,8 +13,7 @@ let request = async (verb, url, body, callback) => {
         body = JSON.stringify(body);
     }
 
-    try {      
-        var statusCode;
+    try {
         let response = await fetch(url, {
             method: verb,
             headers: headers,
@@ -23,7 +22,7 @@ let request = async (verb, url, body, callback) => {
         
         let statusCode = response.status;
         let body = await response.text();
-        callback(null, {statusCode: statusCode, body: body});
+        callback(null, { statusCode, body });
     } catch (err) {
         callback(err);
     }

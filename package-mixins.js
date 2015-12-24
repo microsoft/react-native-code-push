@@ -22,7 +22,7 @@ export default (NativeCodePush) => {
       // Use the downloaded package info. Native code will save the package info
       // so that the client knows what the current package version is.
       try {  
-        let downloadedPackage = await NativeCodePush.downloadUpdate(this);
+        const downloadedPackage = await NativeCodePush.downloadUpdate(this);
         return { ...downloadedPackage, ...local };
       } finally {
         downloadProgressSubscription && downloadProgressSubscription.remove();
