@@ -1,11 +1,12 @@
-'use strict';
+"use strict";
 
+import { AcquisitionManager as Sdk } from "code-push/script/acquisition-sdk";
 import { Alert } from "./AlertAdapter";
+import requestFetchAdapter from "./request-fetch-adapter.js";
+import semver from "semver";
+
 const NativeCodePush = require("react-native").NativeModules.CodePush;
 const PackageMixins = require("./package-mixins")(NativeCodePush);
-import requestFetchAdapter from "./request-fetch-adapter.js";
-import { AcquisitionManager as Sdk } from "code-push/script/acquisition-sdk";
-import semver from "semver";
 
 async function checkForUpdate(deploymentKey = null) {
   /*
