@@ -505,12 +505,10 @@ NSString * const UnzippedFolderName = @"unzipped";
     }
 }
 
-+ (void)clearTestUpdates
++ (void)clearUpdates
 {
-    if ([CodePush isUsingTestConfiguration]) {
-        [[NSFileManager defaultManager] removeItemAtPath:[self getCodePushPath] error:nil];
-        [[NSFileManager defaultManager] removeItemAtPath:[self getStatusFilePath] error:nil];
-    }
+    [[NSFileManager defaultManager] removeItemAtPath:[self getCodePushPath] error:nil];
+    [[NSFileManager defaultManager] removeItemAtPath:[self getStatusFilePath] error:nil];
 }
 
 @end
