@@ -1,15 +1,14 @@
-'use strict';
+"use strict";
 
-var { Alert } = require("./AlertAdapter");
-var NativeCodePush = require("react-native").NativeModules.CodePush;
-var PackageMixins = require("./package-mixins")(NativeCodePush);
-var requestFetchAdapter = require("./request-fetch-adapter.js");
-var Sdk = require("code-push/script/acquisition-sdk").AcquisitionManager;
-var semver = require("semver");
+import { AcquisitionManager as Sdk } from "code-push/script/acquisition-sdk";
+import { Alert } from "./AlertAdapter";
+import requestFetchAdapter from "./request-fetch-adapter";
+import semver from "semver";
 
-function checkForUpdate(deploymentKey = null) {
-  var config, sdk;
-  
+let NativeCodePush = require("react-native").NativeModules.CodePush;
+const PackageMixins = require("./package-mixins")(NativeCodePush);
+
+async function checkForUpdate(deploymentKey = null) {
   /*
    * Before we ask the server if an update exists, we
    * need to retrieve three pieces of information from the 
@@ -19,114 +18,90 @@ function checkForUpdate(deploymentKey = null) {
    * for their specific deployment and version and which are actually
    * different from the CodePush update they have already installed.
    */
-  return getConfiguration()
-    .then((configResult) => {            
-      /*
-       * If a deployment key was explicitly provided,
-       * then let's override the one we retrieved
-       * from the native-side of the app. This allows
-       * dynamically "redirecting" end-users at different
-       * deployments (e.g. an early access deployment for insiders).
-       */
-      if (deploymentKey) {
-        config = Object.assign({}, configResult, { deploymentKey });
-      } else {
-        config = configResult;
-      }
-      
-      sdk = new module.exports.AcquisitionSdk(requestFetchAdapter, config);
-      
-      // Allow dynamic overwrite of function. This is only to be used for tests.
-      return module.exports.getCurrentPackage();
-    })
-    .then((localPackage) => {
-      var queryPackage = { appVersion: config.appVersion };
-      
-      /*
-       * If the app has a previously installed update, and that update
-       * was targetted at the same app version that is currently running,
-       * then we want to use its package hash to determine whether a new
-       * release has been made on the server. Otherwise, we only need
-       * to send the app version to the server, since we are interested
-       * in any updates for current app store version, regardless of hash.
-       */
-      if (localPackage && localPackage.appVersion && semver.compare(localPackage.appVersion, config.appVersion) === 0) {
-        queryPackage = localPackage;
-      }
-      
-      return new Promise((resolve, reject) => {
-        sdk.queryUpdateWithCurrentPackage(queryPackage, (err, update) => {
-          if (err) {
-            return reject(err);
-          }
-          
-          /*
-           * There are three cases where checkForUpdate will resolve to null:
-           * ----------------------------------------------------------------
-           * 1) The server said there isn't an update. This is the most common case.
-           * 2) The server said there is an update but it requires a newer binary version.
-           *    This would occur when end-users are running an older app store version than
-           *    is available, and CodePush is making sure they don't get an update that
-           *    potentially wouldn't be compatible with what they are running.
-           * 3) The server said there is an update, but the update's hash is the same as
-           *    the currently running update. This should _never_ happen, unless there is a
-           *    bug in the server, but we're adding this check just to double-check that the
-           *    client app is resilient to a potential issue with the update check.
-           */
-          if (!update || update.updateAppVersion || (update.packageHash === localPackage.packageHash)) {
-            return resolve(null);
-          } 
-
-          update = Object.assign(update, PackageMixins.remote);
-          
-          NativeCodePush.isFailedUpdate(update.packageHash)
-            .then((isFailedHash) => {
-              update.failedInstall = isFailedHash;
-              resolve(update);
-            })
-            .catch(reject)
-            .done();
-        })
-      });
-    });
+  const nativeConfig = await getConfiguration();
+  /*
+   * If a deployment key was explicitly provided,
+   * then let's override the one we retrieved
+   * from the native-side of the app. This allows
+   * dynamically "redirecting" end-users at different
+   * deployments (e.g. an early access deployment for insiders).
+   */
+  const config = deploymentKey ? { ...nativeConfig, ...{ deploymentKey } }
+                             : nativeConfig;
+  const sdk = getPromisifiedSdk(requestFetchAdapter, config);
+  // Use dynamically overridden getCurrentPackage() during tests.
+  const localPackage = await module.exports.getCurrentPackage();
+  /*
+   * If the app has a previously installed update, and that update
+   * was targetted at the same app version that is currently running,
+   * then we want to use its package hash to determine whether a new
+   * release has been made on the server. Otherwise, we only need
+   * to send the app version to the server, since we are interested
+   * in any updates for current app store version, regardless of hash.
+   */
+  const queryPackage = localPackage && localPackage.appVersion && semver.compare(localPackage.appVersion, config.appVersion) === 0 
+                       ? localPackage
+                       : { appVersion: config.appVersion };
+  const update = await sdk.queryUpdateWithCurrentPackage(queryPackage);
+  /*
+   * There are three cases where checkForUpdate will resolve to null:
+   * ----------------------------------------------------------------
+   * 1) The server said there isn't an update. This is the most common case.
+   * 2) The server said there is an update but it requires a newer binary version.
+   *    This would occur when end-users are running an older app store version than
+   *    is available, and CodePush is making sure they don't get an update that
+   *    potentially wouldn't be compatible with what they are running.
+   * 3) The server said there is an update, but the update's hash is the same as
+   *    the currently running update. This should _never_ happen, unless there is a
+   *    bug in the server, but we're adding this check just to double-check that the
+   *    client app is resilient to a potential issue with the update check.
+   */
+  if (!update || update.updateAppVersion || (update.packageHash === localPackage.packageHash)) {
+    return null;
+  } else {     
+    const remotePackage = { ...update, ...PackageMixins.remote };
+    remotePackage.failedInstall = await NativeCodePush.isFailedUpdate(remotePackage.packageHash);
+    return remotePackage;
+  }
 }
 
-var getConfiguration = (() => {
-  var config;
-  return function getConfiguration() {
+const getConfiguration = (() => {
+  let config;
+  return async function getConfiguration() {
     if (config) {
-      return Promise.resolve(config);
+      return config;
     } else if (testConfig) {
-      return Promise.resolve(testConfig);
+      return testConfig;
     } else {
-      return NativeCodePush.getConfiguration()
-        .then((configuration) => {
-          if (!config) config = configuration;
-          return config;
-        });
+      config = await NativeCodePush.getConfiguration(); 
+      return config;
     }
   }
 })();
 
-function getCurrentPackage() {
-  return new Promise((resolve, reject) => {
-    var localPackage;
-    NativeCodePush.getCurrentPackage()
-      .then((currentPackage) => {
-        localPackage = currentPackage;
-        return NativeCodePush.isFailedUpdate(currentPackage.packageHash);
-      })
-      .then((failedUpdate) => {
-        localPackage.failedInstall = failedUpdate;
-        return NativeCodePush.isFirstRun(localPackage.packageHash);
-      })
-      .then((isFirstRun) => {
-        localPackage.isFirstRun = isFirstRun;
-        resolve(localPackage);
-      })
-      .catch(reject)
-      .done();
-  });
+async function getCurrentPackage() {
+  const localPackage = await NativeCodePush.getCurrentPackage();
+  localPackage.failedInstall = await NativeCodePush.isFailedUpdate(localPackage.packageHash);
+  localPackage.isFirstRun = await NativeCodePush.isFirstRun(localPackage.packageHash);
+  return localPackage;
+}
+
+function getPromisifiedSdk(requestFetchAdapter, config) {
+  // Use dynamically overridden AcquisitionSdk during tests.
+  const sdk = new module.exports.AcquisitionSdk(requestFetchAdapter, config);
+  sdk.queryUpdateWithCurrentPackage = (queryPackage) => {
+    return new Promise((resolve, reject) => {
+      module.exports.AcquisitionSdk.prototype.queryUpdateWithCurrentPackage.call(sdk, queryPackage, (err, update) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(update);
+        }
+      }); 
+    });
+  };
+  
+  return sdk;
 }
 
 /* Logs messages to console with the [CodePush] prefix */
@@ -152,8 +127,8 @@ function setUpTestDependencies(testSdk, providedTestConfig, testNativeBridge) {
  * releases, and displaying a standard confirmation UI to the end-user
  * when an update is available.
  */
-function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) {  
-  var syncOptions = {
+async function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) {  
+  const syncOptions = {
     
     deploymentKey: null,
     ignoreFailedUpdates: true,
@@ -165,7 +140,7 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
   
   syncStatusChangeCallback = typeof syncStatusChangeCallback == "function"
     ? syncStatusChangeCallback
-    : function(syncStatus) {
+    : (syncStatus) => {
         switch(syncStatus) {
           case CodePush.SyncStatus.CHECKING_FOR_UPDATE:
             log("Checking for update.");
@@ -204,105 +179,95 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
     
   downloadProgressCallback = typeof downloadProgressCallback == "function" 
     ? downloadProgressCallback 
-    : function(downloadProgress) {
+    : (downloadProgress) => {
         log(`Expecting ${downloadProgress.totalBytes} bytes, received ${downloadProgress.receivedBytes} bytes.`);
       };
   
-  return new Promise((resolve, reject) => {
-    var rejectPromise = (error) => {
-      syncStatusChangeCallback(CodePush.SyncStatus.UNKNOWN_ERROR);
-      log(error.message); 
-      reject(error);
+  try {
+    await CodePush.notifyApplicationReady();
+    
+    syncStatusChangeCallback(CodePush.SyncStatus.CHECKING_FOR_UPDATE);
+    const remotePackage = await checkForUpdate(syncOptions.deploymentKey);
+    
+    const doDownloadAndInstall = async () => {
+      syncStatusChangeCallback(CodePush.SyncStatus.DOWNLOADING_PACKAGE);
+      const localPackage = await remotePackage.download(downloadProgressCallback);
+      
+      syncStatusChangeCallback(CodePush.SyncStatus.INSTALLING_UPDATE);
+      await localPackage.install(syncOptions.installMode, () => {
+        syncStatusChangeCallback(CodePush.SyncStatus.UPDATE_INSTALLED);
+      });
+      
+      return CodePush.SyncStatus.UPDATE_INSTALLED;
     };
     
-    CodePush.notifyApplicationReady()
-      .then(() => {
-        syncStatusChangeCallback(CodePush.SyncStatus.CHECKING_FOR_UPDATE);
-        return checkForUpdate(syncOptions.deploymentKey);
-      })
-      .then((remotePackage) => {
-        var doDownloadAndInstall = () => {
-          syncStatusChangeCallback(CodePush.SyncStatus.DOWNLOADING_PACKAGE);
-          remotePackage.download(downloadProgressCallback)
-            .then((localPackage) => {
-              syncStatusChangeCallback(CodePush.SyncStatus.INSTALLING_UPDATE);
-              return localPackage.install(syncOptions.installMode, () => {
-                syncStatusChangeCallback(CodePush.SyncStatus.UPDATE_INSTALLED);
-                resolve(CodePush.SyncStatus.UPDATE_INSTALLED);
-              });
-            })
-            .catch(rejectPromise)
-            .done();
+    if (!remotePackage || (remotePackage.failedInstall && syncOptions.ignoreFailedUpdates)) {
+      syncStatusChangeCallback(CodePush.SyncStatus.UP_TO_DATE);
+      return CodePush.SyncStatus.UP_TO_DATE;
+    } else if (syncOptions.updateDialog) {
+      // updateDialog supports any truthy value (e.g. true, "goo", 12),
+      // but we should treat a non-object value as just the default dialog
+      if (typeof syncOptions.updateDialog !== "object") {
+        syncOptions.updateDialog = CodePush.DEFAULT_UPDATE_DIALOG;
+      } else {
+        syncOptions.updateDialog = { ...CodePush.DEFAULT_UPDATE_DIALOG, ...syncOptions.updateDialog };
+      }
+        
+      return await new Promise((resolve, reject) => {  
+        let message = null;
+        const dialogButtons = [{
+          text: null,
+          onPress: async () => { 
+            resolve(await doDownloadAndInstall());
+          }
+        }];
+        
+        if (remotePackage.isMandatory) {
+          message = syncOptions.updateDialog.mandatoryUpdateMessage;
+          dialogButtons[0].text = syncOptions.updateDialog.mandatoryContinueButtonLabel;
+        } else {
+          message = syncOptions.updateDialog.optionalUpdateMessage;
+          dialogButtons[0].text = syncOptions.updateDialog.optionalInstallButtonLabel;        
+          // Since this is an optional update, add another button
+          // to allow the end-user to ignore it       
+          dialogButtons.push({
+            text: syncOptions.updateDialog.optionalIgnoreButtonLabel,
+            onPress: () => {
+              syncStatusChangeCallback(CodePush.SyncStatus.UPDATE_IGNORED);
+              resolve(CodePush.SyncStatus.UPDATE_IGNORED);
+            }
+          });
         }
         
-        if (!remotePackage || (remotePackage.failedInstall && syncOptions.ignoreFailedUpdates)) {
-          syncStatusChangeCallback(CodePush.SyncStatus.UP_TO_DATE);
-          resolve(CodePush.SyncStatus.UP_TO_DATE);
+        // If the update has a description, and the developer
+        // explicitly chose to display it, then set that as the message
+        if (syncOptions.updateDialog.appendReleaseDescription && remotePackage.description) {
+          message += `${syncOptions.updateDialog.descriptionPrefix} ${remotePackage.description}`;  
         }
-        else if (syncOptions.updateDialog) {
-          // updateDialog supports any truthy value (e.g. true, "goo", 12),
-          // but we should treat a non-object value as just the default dialog
-          if (typeof syncOptions.updateDialog !== "object") {
-            syncOptions.updateDialog = CodePush.DEFAULT_UPDATE_DIALOG;
-          } else {
-            syncOptions.updateDialog = Object.assign({}, CodePush.DEFAULT_UPDATE_DIALOG, syncOptions.updateDialog);
-          }
-          
-          var message = null;
-          var dialogButtons = [
-            {
-              text: null,
-              onPress: () => { 
-                doDownloadAndInstall();
-              }
-            }
-          ];
-          
-          if (remotePackage.isMandatory) {
-            message = syncOptions.updateDialog.mandatoryUpdateMessage;
-            dialogButtons[0].text = syncOptions.updateDialog.mandatoryContinueButtonLabel;
-          } else {
-            message = syncOptions.updateDialog.optionalUpdateMessage;
-            dialogButtons[0].text = syncOptions.updateDialog.optionalInstallButtonLabel;     
-            
-            // Since this is an optional update, add another button
-            // to allow the end-user to ignore it       
-            dialogButtons.push({
-              text: syncOptions.updateDialog.optionalIgnoreButtonLabel,
-              onPress: () => {
-                syncStatusChangeCallback(CodePush.SyncStatus.UPDATE_IGNORED);
-                resolve(CodePush.SyncStatus.UPDATE_IGNORED);
-              }
-            });
-          }
-          
-          // If the update has a description, and the developer
-          // explicitly chose to display it, then set that as the message
-          if (syncOptions.updateDialog.appendReleaseDescription && remotePackage.description) {
-            message += `${syncOptions.updateDialog.descriptionPrefix} ${remotePackage.description}`;  
-          }
-          
-          syncStatusChangeCallback(CodePush.SyncStatus.AWAITING_USER_ACTION);
-          Alert.alert(syncOptions.updateDialog.title, message, dialogButtons);
-        } else {
-          doDownloadAndInstall();
-        }
-      })
-      .catch(rejectPromise)
-      .done();
-  });     
+         
+        syncStatusChangeCallback(CodePush.SyncStatus.AWAITING_USER_ACTION);
+        Alert.alert(syncOptions.updateDialog.title, message, dialogButtons);
+      });
+    } else {
+      return await doDownloadAndInstall();
+    }
+  } catch (error) {
+    syncStatusChangeCallback(CodePush.SyncStatus.UNKNOWN_ERROR);
+    log(error.message); 
+    throw error;
+  } 
 };
 
-var CodePush = {
+const CodePush = {
   AcquisitionSdk: Sdk,
-  checkForUpdate: checkForUpdate,
-  getConfiguration: getConfiguration,
-  getCurrentPackage: getCurrentPackage,
-  log: log,
+  checkForUpdate,
+  getConfiguration,
+  getCurrentPackage,
+  log,
   notifyApplicationReady: NativeCodePush.notifyApplicationReady,
   restartApp: NativeCodePush.restartApp,
-  setUpTestDependencies: setUpTestDependencies,
-  sync: sync,
+  setUpTestDependencies,
+  sync,
   InstallMode: {
     IMMEDIATE: NativeCodePush.codePushInstallModeImmediate, // Restart the app immediately
     ON_NEXT_RESTART: NativeCodePush.codePushInstallModeOnNextRestart, // Don't artificially restart the app. Allow the update to be "picked up" on the next app restart
@@ -330,4 +295,4 @@ var CodePush = {
   }
 };
 
-module.exports = CodePush;
+export default CodePush;

@@ -2,13 +2,13 @@
 
 import React from "react-native";
 import CodePush from "react-native-code-push";
-let NativeCodePush = React.NativeModules.CodePush;
 import createTestCaseComponent from "../../utils/createTestCaseComponent";
-let PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
 import assert from "assert";
 import createMockAcquisitionSdk from "../../utils/mockAcquisitionSdk";
-
 import { serverPackage, localPackage } from "../resources/testPackages";
+
+const NativeCodePush = React.NativeModules.CodePush;
+const PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
 
 let NewUpdateTest = createTestCaseComponent(
   "NewUpdateTest",
@@ -17,21 +17,14 @@ let NewUpdateTest = createTestCaseComponent(
     let mockAcquisitionSdk = createMockAcquisitionSdk(serverPackage, localPackage);       
     let mockConfiguration = { appVersion : "1.5.0" };
     CodePush.setUpTestDependencies(mockAcquisitionSdk, mockConfiguration, NativeCodePush);
-    CodePush.getCurrentPackage = () => {
-      return Promise.resolve(localPackage);
-    }
-    return Promise.resolve();
+    CodePush.getCurrentPackage = async () => {
+      return localPackage;
+    };
   },
-  () => {
-    return CodePush.checkForUpdate()
-      .then((update) => {
-        if (update) {
-          assert.deepEqual(update, Object.assign(serverPackage, PackageMixins.remote));
-        } else {
-          throw new Error("checkForUpdate did not return the update from the server");
-        }
-      });
+  async () => {
+    let update = await CodePush.checkForUpdate();
+    assert.equal(JSON.stringify(update), JSON.stringify({ ...serverPackage, ...PackageMixins.remote, failedInstall: false }), "checkForUpdate did not return the update from the server");
   }
 );
 
-module.exports = NewUpdateTest;
+export default NewUpdateTest;

@@ -1,6 +1,6 @@
-let { Platform } = require("react-native");
+import { Platform } from "react-native";
 
-let packages = [
+const packages = [
   {
     downloadUrl: "smallFile",
     description: "Angry flappy birds",

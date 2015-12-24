@@ -1,17 +1,15 @@
 "use strict";
 
-import React from "react-native";
-
-let {
+import React, {
   AppRegistry,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-} = React;
+} from "react-native";
 
-let TESTS = [
+const TESTS = [
   require("./testcases/FirstUpdateTest"),
   require("./testcases/NewUpdateTest"),
   require("./testcases/NoRemotePackageTest"),
@@ -38,6 +36,7 @@ let CheckForUpdateTestApp = React.createClass({
         </ScrollView>
       );
     }
+    
     return (
       <View style={styles.container}>
         <Text style={styles.row}>
@@ -64,7 +63,7 @@ let CheckForUpdateTestApp = React.createClass({
   }
 });
 
-let styles = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     backgroundColor: "white",
     marginTop: 40,

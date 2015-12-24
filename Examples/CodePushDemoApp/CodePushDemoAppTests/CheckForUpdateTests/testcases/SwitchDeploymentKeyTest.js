@@ -2,16 +2,15 @@
 
 import React from "react-native";
 import CodePush from "react-native-code-push";
-let NativeCodePush = React.NativeModules.CodePush;
 import createTestCaseComponent from "../../utils/createTestCaseComponent";
-let PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
 import assert from "assert";
 import createMockAcquisitionSdk from "../../utils/mockAcquisitionSdk";
-
 import { serverPackage } from "../resources/testPackages";
-const localPackage = {};
 
-let deploymentKey = "myKey123";
+const NativeCodePush = React.NativeModules.CodePush;
+const PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
+const localPackage = {};
+const deploymentKey = "myKey123";
 
 let SwitchDeploymentKeyTest = createTestCaseComponent(
   "SwitchDeploymentKeyTest",
@@ -20,21 +19,14 @@ let SwitchDeploymentKeyTest = createTestCaseComponent(
     let mockAcquisitionSdk = createMockAcquisitionSdk(serverPackage, localPackage, deploymentKey);       
     let mockConfiguration = { appVersion : "1.5.0" };
     CodePush.setUpTestDependencies(mockAcquisitionSdk, mockConfiguration, NativeCodePush);
-    CodePush.getCurrentPackage = () => {
-      return Promise.resolve(localPackage);
-    }
-    return Promise.resolve();
+    CodePush.getCurrentPackage = async () => {
+      return localPackage;
+    };
   },
-  () => {
-    return CodePush.checkForUpdate(deploymentKey)
-      .then((update) => {
-        if (update) {
-          assert.deepEqual(update, Object.assign(serverPackage, PackageMixins.remote));
-        } else {
-          throw new Error("checkForUpdate did not return the update from the server");
-        }
-      });
+  async () => {
+    let update = await CodePush.checkForUpdate(deploymentKey);
+    assert.equal(JSON.stringify(update), JSON.stringify({ ...serverPackage, ...PackageMixins.remote, failedInstall: false }), "checkForUpdate did not return the update from the server");
   }
 );
 
-module.exports = SwitchDeploymentKeyTest;
+export default SwitchDeploymentKeyTest;

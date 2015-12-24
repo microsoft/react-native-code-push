@@ -2,14 +2,14 @@
 
 import React from "react-native";
 import CodePush from "react-native-code-push";
-let NativeCodePush = React.NativeModules.CodePush;
 import createTestCaseComponent from "../../utils/createTestCaseComponent";
-let PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
 import assert from "assert";
 import createMockAcquisitionSdk from "../../utils/mockAcquisitionSdk";
 
-let serverPackage = null;
-let localPackage =  {};
+const NativeCodePush = React.NativeModules.CodePush;
+const PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
+const serverPackage = null;
+const localPackage =  {};
 
 let NoRemotePackageTest = createTestCaseComponent(
   "NoRemotePackageTest",
@@ -18,19 +18,14 @@ let NoRemotePackageTest = createTestCaseComponent(
     let mockAcquisitionSdk = createMockAcquisitionSdk(serverPackage, localPackage);       
     let mockConfiguration = { appVersion : "1.5.0" };
     CodePush.setUpTestDependencies(mockAcquisitionSdk, mockConfiguration, NativeCodePush);
-    CodePush.getCurrentPackage = () => {
-      return Promise.resolve(localPackage);
-    }
-    return Promise.resolve();
+    CodePush.getCurrentPackage = async () => {
+      return localPackage;
+    };
   },
-  () => {
-    return CodePush.checkForUpdate()
-      .then((update) => {
-        if (update) {
-          throw new Error("checkForUpdate should not return an update if there is none on the server");
-        }
-      });
+  async () => {
+    let update = await CodePush.checkForUpdate();
+    assert(!update, "checkForUpdate should not return an update if there is none on the server");
   }
 );
 
-module.exports = NoRemotePackageTest;
+export default NoRemotePackageTest;

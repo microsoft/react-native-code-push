@@ -1,13 +1,11 @@
 "use strict";
 
-import React from "react-native";
-import CodePush from "react-native-code-push";
-
-let {
+import React, {
   AppRegistry,
   Text,
   View,
-} = React;
+} from "react-native";
+import CodePush from "react-native-code-push";
 
 let RollbackTest = React.createClass({
   componentDidMount() {

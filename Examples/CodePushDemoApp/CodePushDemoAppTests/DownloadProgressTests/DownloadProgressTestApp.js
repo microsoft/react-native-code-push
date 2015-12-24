@@ -1,15 +1,13 @@
 "use strict";
 
-import React from "react-native";
-
-let {
+import React, {
   AppRegistry,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-} = React;
+} from "react-native";
 
 let TESTS = [
   require("./testcases/DownloadProgressTest")

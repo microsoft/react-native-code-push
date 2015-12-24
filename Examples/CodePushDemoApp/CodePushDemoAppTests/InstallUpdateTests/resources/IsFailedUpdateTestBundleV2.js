@@ -1,16 +1,15 @@
 "use strict";
 
-import React from "react-native";
-import CodePush from "react-native-code-push";
-
-let {
+import React, {
   AppRegistry,
   Text,
   View,
-} = React;
+} from "react-native";
+import CodePush from "react-native-code-push";
 
 let IsFailedUpdateTest = React.createClass({
   componentDidMount() {
+    // Should trigger a rollback.
     CodePush.restartApp();
   },
   render() {

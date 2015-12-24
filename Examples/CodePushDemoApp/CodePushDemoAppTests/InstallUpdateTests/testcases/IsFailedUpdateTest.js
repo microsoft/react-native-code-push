@@ -3,10 +3,11 @@
 import React from "react-native";
 import { DeviceEventEmitter, Platform, AppRegistry } from "react-native";
 import CodePush from "react-native-code-push";
-let NativeCodePush = React.NativeModules.CodePush;
 import createTestCaseComponent from "../../utils/createTestCaseComponent";
-let PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
 import assert from "assert";
+
+const NativeCodePush = React.NativeModules.CodePush;
+const PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
 
 let remotePackage = require("../resources/remotePackage");
 
@@ -21,13 +22,10 @@ let IsFailedUpdateTest = createTestCaseComponent(
     }
     
     remotePackage = Object.assign(remotePackage, PackageMixins.remote);
-    return Promise.resolve();
   },
-  () => {
-    remotePackage.download()
-      .then((localPackage) => {
-        return localPackage.install(NativeCodePush.codePushInstallModeImmediate);
-      });
+  async () => {
+    let localPackage = await remotePackage.download();
+    return await localPackage.install(NativeCodePush.codePushInstallModeImmediate);
   },
   /*passAfterRun*/ false
 );
