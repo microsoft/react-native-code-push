@@ -17,7 +17,7 @@ async function checkForUpdate(deploymentKey = null) {
    * for their specific deployment and version and which are actually
    * different from the CodePush update they have already installed.
    */
-  let nativeConfig = await getConfiguration();
+  const nativeConfig = await getConfiguration();
   /*
    * If a deployment key was explicitly provided,
    * then let's override the one we retrieved
@@ -25,11 +25,11 @@ async function checkForUpdate(deploymentKey = null) {
    * dynamically "redirecting" end-users at different
    * deployments (e.g. an early access deployment for insiders).
    */
-  let config = deploymentKey ? { ...nativeConfig, ...{ deploymentKey } }
+  const config = deploymentKey ? { ...nativeConfig, ...{ deploymentKey } }
                              : nativeConfig;
-  let sdk = getPromisifiedSdk(requestFetchAdapter, config);
+  const sdk = getPromisifiedSdk(requestFetchAdapter, config);
   // Use dynamically overridden getCurrentPackage() during tests.
-  let localPackage = await module.exports.getCurrentPackage();
+  const localPackage = await module.exports.getCurrentPackage();
   /*
    * If the app has a previously installed update, and that update
    * was targetted at the same app version that is currently running,
@@ -38,10 +38,10 @@ async function checkForUpdate(deploymentKey = null) {
    * to send the app version to the server, since we are interested
    * in any updates for current app store version, regardless of hash.
    */
-  let queryPackage = localPackage && localPackage.appVersion && semver.compare(localPackage.appVersion, config.appVersion) === 0 
+  const queryPackage = localPackage && localPackage.appVersion && semver.compare(localPackage.appVersion, config.appVersion) === 0 
                        ? localPackage
                        : { appVersion: config.appVersion };
-  let update = await sdk.queryUpdateWithCurrentPackage(queryPackage);
+  const update = await sdk.queryUpdateWithCurrentPackage(queryPackage);
   /*
    * There are three cases where checkForUpdate will resolve to null:
    * ----------------------------------------------------------------
@@ -257,16 +257,16 @@ async function sync(options = {}, syncStatusChangeCallback, downloadProgressCall
   } 
 };
 
-var CodePush = {
+export default {
   AcquisitionSdk: Sdk,
-  checkForUpdate: checkForUpdate,
-  getConfiguration: getConfiguration,
-  getCurrentPackage: getCurrentPackage,
-  log: log,
+  checkForUpdate,
+  getConfiguration,
+  getCurrentPackage,
+  log,
   notifyApplicationReady: NativeCodePush.notifyApplicationReady,
   restartApp: NativeCodePush.restartApp,
-  setUpTestDependencies: setUpTestDependencies,
-  sync: sync,
+  setUpTestDependencies,
+  sync,
   InstallMode: {
     IMMEDIATE: NativeCodePush.codePushInstallModeImmediate, // Restart the app immediately
     ON_NEXT_RESTART: NativeCodePush.codePushInstallModeOnNextRestart, // Don't artificially restart the app. Allow the update to be "picked up" on the next app restart
@@ -293,5 +293,3 @@ var CodePush = {
     title: "Update available"
   }
 };
-
-export default CodePush;
