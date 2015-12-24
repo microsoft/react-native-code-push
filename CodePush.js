@@ -59,13 +59,13 @@ async function checkForUpdate(deploymentKey = null) {
   if (!update || update.updateAppVersion || (update.packageHash === localPackage.packageHash)) {
     return null;
   } else {     
-    let remotePackage = { ...update, ...PackageMixins.remote };
+    const remotePackage = { ...update, ...PackageMixins.remote };
     remotePackage.failedInstall = await NativeCodePush.isFailedUpdate(remotePackage.packageHash);
     return remotePackage;
   }
 }
 
-let getConfiguration = (() => {
+const getConfiguration = (() => {
   let config;
   return async function getConfiguration() {
     if (config) {
@@ -80,7 +80,7 @@ let getConfiguration = (() => {
 })();
 
 async function getCurrentPackage() {
-  let localPackage = await NativeCodePush.getCurrentPackage();
+  const localPackage = await NativeCodePush.getCurrentPackage();
   localPackage.failedInstall = await NativeCodePush.isFailedUpdate(localPackage.packageHash);
   localPackage.isFirstRun = await NativeCodePush.isFirstRun(localPackage.packageHash);
   return localPackage;
@@ -88,7 +88,7 @@ async function getCurrentPackage() {
 
 function getPromisifiedSdk(requestFetchAdapter, config) {
   // Use dynamically overridden AcquisitionSdk during tests.
-  let sdk = new module.exports.AcquisitionSdk(requestFetchAdapter, config);
+  const sdk = new module.exports.AcquisitionSdk(requestFetchAdapter, config);
   sdk.queryUpdateWithCurrentPackage = (queryPackage) => {
     return new Promise((resolve, reject) => {
       module.exports.AcquisitionSdk.prototype.queryUpdateWithCurrentPackage.call(sdk, queryPackage, (err, update) => {
@@ -128,7 +128,7 @@ function setUpTestDependencies(testSdk, providedTestConfig, testNativeBridge) {
  * when an update is available.
  */
 async function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) {  
-  let syncOptions = {
+  const syncOptions = {
     
     deploymentKey: null,
     ignoreFailedUpdates: true,
@@ -191,7 +191,7 @@ async function sync(options = {}, syncStatusChangeCallback, downloadProgressCall
     
     const doDownloadAndInstall = async () => {
       syncStatusChangeCallback(CodePush.SyncStatus.DOWNLOADING_PACKAGE);
-      let localPackage = await remotePackage.download(downloadProgressCallback);
+      const localPackage = await remotePackage.download(downloadProgressCallback);
       
       syncStatusChangeCallback(CodePush.SyncStatus.INSTALLING_UPDATE);
       await localPackage.install(syncOptions.installMode, () => {
@@ -215,7 +215,7 @@ async function sync(options = {}, syncStatusChangeCallback, downloadProgressCall
         
       return await new Promise((resolve, reject) => {  
         let message = null;
-        let dialogButtons = [{
+        const dialogButtons = [{
           text: null,
           onPress: async () => { 
             resolve(await doDownloadAndInstall());

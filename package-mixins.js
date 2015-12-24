@@ -1,3 +1,5 @@
+"use strict";
+
 import { DeviceEventEmitter } from "react-native";
 
 // This function is used to augment remote and local
@@ -34,7 +36,7 @@ export default (NativeCodePush) => {
 
   const local = {
     async install(installMode = NativeCodePush.codePushInstallModeOnNextRestart, updateInstalledCallback) {
-      let localPackage = this;
+      const localPackage = this;
       await NativeCodePush.installUpdate(this, installMode);
       updateInstalledCallback && updateInstalledCallback();
       if (installMode == NativeCodePush.codePushInstallModeImmediate) {
