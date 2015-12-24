@@ -64,6 +64,27 @@ async function checkForUpdate(deploymentKey = null) {
   }
 }
 
+let getConfiguration = (() => {
+  let config;
+  return async function getConfiguration() {
+    if (config) {
+      return config;
+    } else if (testConfig) {
+      return testConfig;
+    } else {
+      config = await NativeCodePush.getConfiguration(); 
+      return config;
+    }
+  }
+})();
+
+async function getCurrentPackage() {
+  let localPackage = await NativeCodePush.getCurrentPackage();
+  localPackage.failedInstall = await NativeCodePush.isFailedUpdate(localPackage.packageHash);
+  localPackage.isFirstRun = await NativeCodePush.isFirstRun(localPackage.packageHash);
+  return localPackage;
+}
+
 function getPromisifiedSdk(requestFetchAdapter, config) {
   // Use dynamically overridden AcquisitionSdk during tests.
   let sdk = new module.exports.AcquisitionSdk(requestFetchAdapter, config);
@@ -80,44 +101,6 @@ function getPromisifiedSdk(requestFetchAdapter, config) {
   };
   
   return sdk;
-}
-
-let getConfiguration = (() => {
-  let config;
-  return () => {
-    if (config) {
-      return Promise.resolve(config);
-    } else if (testConfig) {
-      return Promise.resolve(testConfig);
-    } else {
-      return NativeCodePush.getConfiguration()
-        .then((configuration) => {
-          if (!config) config = configuration;
-          return config;
-        });
-    }
-  };
-})();
-
-function getCurrentPackage() {
-  return new Promise((resolve, reject) => {
-    var localPackage;
-    NativeCodePush.getCurrentPackage()
-      .then((currentPackage) => {
-        localPackage = currentPackage;
-        return NativeCodePush.isFailedUpdate(currentPackage.packageHash);
-      })
-      .then((failedUpdate) => {
-        localPackage.failedInstall = failedUpdate;
-        return NativeCodePush.isFirstRun(localPackage.packageHash);
-      })
-      .then((isFirstRun) => {
-        localPackage.isFirstRun = isFirstRun;
-        resolve(localPackage);
-      })
-      .catch(reject)
-      .done();
-  });
 }
 
 /* Logs messages to console with the [CodePush] prefix */
