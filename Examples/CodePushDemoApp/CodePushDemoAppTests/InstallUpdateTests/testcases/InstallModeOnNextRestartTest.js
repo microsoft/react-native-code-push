@@ -22,16 +22,11 @@ let InstallModeOnNextRestartTest = createTestCaseComponent(
     }
     
     remotePackage = Object.assign(remotePackage, PackageMixins.remote);
-    return Promise.resolve();
   },
-  () => {
-    remotePackage.download()
-      .then((localPackage) => {
-        return localPackage.install(NativeCodePush.codePushInstallModeOnNextRestart);
-      })
-      .then(() => {
-        CodePush.restartApp();
-      });
+  async () => {
+    let localPackage = await remotePackage.download();
+    await localPackage.install(NativeCodePush.codePushInstallModeOnNextRestart);
+    CodePush.restartApp();
   },
   /*passAfterRun*/ false
 );

@@ -15,24 +15,17 @@ let RemotePackageAppVersionNewerTest = createTestCaseComponent(
   "RemotePackageAppVersionNewerTest",
   "should drop the update when the server reports one with a newer binary version",
   () => {
-    return new Promise((resolve, reject) => { 
-      let mockAcquisitionSdk = createMockAcquisitionSdk(serverPackage, localPackage);       
-      let mockConfiguration = { appVersion : "1.0.0" };
-      CodePush.setUpTestDependencies(mockAcquisitionSdk, mockConfiguration, NativeCodePush);
-      CodePush.getCurrentPackage = () => {
-        return Promise.resolve(localPackage);
-      }
-      resolve();
-    });
+    let mockAcquisitionSdk = createMockAcquisitionSdk(serverPackage, localPackage);       
+    let mockConfiguration = { appVersion : "1.0.0" };
+    CodePush.setUpTestDependencies(mockAcquisitionSdk, mockConfiguration, NativeCodePush);
+    CodePush.getCurrentPackage = async () => {
+      return localPackage;
+    };
   },
-  () => {
-    return CodePush.checkForUpdate()
-      .then((update) => {
-        if (update) {
-          throw new Error("checkForUpdate should not return an update if remote package is of a different binary version");
-        }
-      });
+  async () => {
+    let update = await CodePush.checkForUpdate()
+    assert(!update, "checkForUpdate should not return an update if remote package is of a different binary version");
   }
 );
 
-module.exports = RemotePackageAppVersionNewerTest;
+export default RemotePackageAppVersionNewerTest;

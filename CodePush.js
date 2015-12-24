@@ -90,7 +90,7 @@ function getPromisifiedSdk(requestFetchAdapter, config) {
   let sdk = new module.exports.AcquisitionSdk(requestFetchAdapter, config);
   sdk.queryUpdateWithCurrentPackage = (queryPackage) => {
     return new Promise((resolve, reject) => {
-      sdk.queryUpdateWithCurrentPackage(queryPackage, (err, update) => {
+      module.exports.AcquisitionSdk.prototype.queryUpdateWithCurrentPackage.call(sdk, queryPackage, (err, update) => {
         if (err) {
           reject(err);
         } else {
@@ -126,8 +126,8 @@ function setUpTestDependencies(testSdk, providedTestConfig, testNativeBridge) {
  * releases, and displaying a standard confirmation UI to the end-user
  * when an update is available.
  */
-function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) {  
-  var syncOptions = {
+async function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) {  
+  let syncOptions = {
     
     deploymentKey: null,
     ignoreFailedUpdates: true,
@@ -139,7 +139,7 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
   
   syncStatusChangeCallback = typeof syncStatusChangeCallback == "function"
     ? syncStatusChangeCallback
-    : function(syncStatus) {
+    : (syncStatus) => {
         switch(syncStatus) {
           case CodePush.SyncStatus.CHECKING_FOR_UPDATE:
             log("Checking for update.");
@@ -178,93 +178,83 @@ function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) 
     
   downloadProgressCallback = typeof downloadProgressCallback == "function" 
     ? downloadProgressCallback 
-    : function(downloadProgress) {
+    : (downloadProgress) => {
         log(`Expecting ${downloadProgress.totalBytes} bytes, received ${downloadProgress.receivedBytes} bytes.`);
       };
   
-  return new Promise((resolve, reject) => {
-    var rejectPromise = (error) => {
-      syncStatusChangeCallback(CodePush.SyncStatus.UNKNOWN_ERROR);
-      log(error.message); 
-      reject(error);
+  try {
+    await CodePush.notifyApplicationReady();
+    
+    syncStatusChangeCallback(CodePush.SyncStatus.CHECKING_FOR_UPDATE);
+    let remotePackage = await checkForUpdate(syncOptions.deploymentKey);
+    
+    let doDownloadAndInstall = async () => {
+      syncStatusChangeCallback(CodePush.SyncStatus.DOWNLOADING_PACKAGE);
+      let localPackage = await remotePackage.download(downloadProgressCallback);
+      
+      syncStatusChangeCallback(CodePush.SyncStatus.INSTALLING_UPDATE);
+      await localPackage.install(syncOptions.installMode, () => {
+        syncStatusChangeCallback(CodePush.SyncStatus.UPDATE_INSTALLED);
+      });
+      
+      return CodePush.SyncStatus.UPDATE_INSTALLED;
     };
     
-    CodePush.notifyApplicationReady()
-      .then(() => {
-        syncStatusChangeCallback(CodePush.SyncStatus.CHECKING_FOR_UPDATE);
-        return checkForUpdate(syncOptions.deploymentKey);
-      })
-      .then((remotePackage) => {
-        var doDownloadAndInstall = () => {
-          syncStatusChangeCallback(CodePush.SyncStatus.DOWNLOADING_PACKAGE);
-          remotePackage.download(downloadProgressCallback)
-            .then((localPackage) => {
-              syncStatusChangeCallback(CodePush.SyncStatus.INSTALLING_UPDATE);
-              return localPackage.install(syncOptions.installMode, () => {
-                syncStatusChangeCallback(CodePush.SyncStatus.UPDATE_INSTALLED);
-                resolve(CodePush.SyncStatus.UPDATE_INSTALLED);
-              });
-            })
-            .catch(rejectPromise)
-            .done();
+    if (!remotePackage || (remotePackage.failedInstall && syncOptions.ignoreFailedUpdates)) {
+      syncStatusChangeCallback(CodePush.SyncStatus.UP_TO_DATE);
+      return (CodePush.SyncStatus.UP_TO_DATE);
+    } else if (syncOptions.updateDialog) {
+      // updateDialog supports any truthy value (e.g. true, "goo", 12),
+      // but we should treat a non-object value as just the default dialog
+      if (typeof syncOptions.updateDialog !== "object") {
+        syncOptions.updateDialog = CodePush.DEFAULT_UPDATE_DIALOG;
+      } else {
+        syncOptions.updateDialog = Object.assign({}, CodePush.DEFAULT_UPDATE_DIALOG, syncOptions.updateDialog);
+      }
+        
+      return await new Promise((resolve, reject) => {  
+        let message = null;
+        let dialogButtons = [{
+          text: null,
+          onPress: async () => { 
+            resolve(await doDownloadAndInstall());
+          }
+        }];
+        
+        if (remotePackage.isMandatory) {
+          message = syncOptions.updateDialog.mandatoryUpdateMessage;
+          dialogButtons[0].text = syncOptions.updateDialog.mandatoryContinueButtonLabel;
+        } else {
+          message = syncOptions.updateDialog.optionalUpdateMessage;
+          dialogButtons[0].text = syncOptions.updateDialog.optionalInstallButtonLabel;        
+          // Since this is an optional update, add another button
+          // to allow the end-user to ignore it       
+          dialogButtons.push({
+            text: syncOptions.updateDialog.optionalIgnoreButtonLabel,
+            onPress: () => {
+              syncStatusChangeCallback(CodePush.SyncStatus.UPDATE_IGNORED);
+              resolve(CodePush.SyncStatus.UPDATE_IGNORED);
+            }
+          });
         }
         
-        if (!remotePackage || (remotePackage.failedInstall && syncOptions.ignoreFailedUpdates)) {
-          syncStatusChangeCallback(CodePush.SyncStatus.UP_TO_DATE);
-          resolve(CodePush.SyncStatus.UP_TO_DATE);
+        // If the update has a description, and the developer
+        // explicitly chose to display it, then set that as the message
+        if (syncOptions.updateDialog.appendReleaseDescription && remotePackage.description) {
+          message += `${syncOptions.updateDialog.descriptionPrefix} ${remotePackage.description}`;  
         }
-        else if (syncOptions.updateDialog) {
-          // updateDialog supports any truthy value (e.g. true, "goo", 12),
-          // but we should treat a non-object value as just the default dialog
-          if (typeof syncOptions.updateDialog !== "object") {
-            syncOptions.updateDialog = CodePush.DEFAULT_UPDATE_DIALOG;
-          } else {
-            syncOptions.updateDialog = Object.assign({}, CodePush.DEFAULT_UPDATE_DIALOG, syncOptions.updateDialog);
-          }
-          
-          var message = null;
-          var dialogButtons = [
-            {
-              text: null,
-              onPress: () => { 
-                doDownloadAndInstall();
-              }
-            }
-          ];
-          
-          if (remotePackage.isMandatory) {
-            message = syncOptions.updateDialog.mandatoryUpdateMessage;
-            dialogButtons[0].text = syncOptions.updateDialog.mandatoryContinueButtonLabel;
-          } else {
-            message = syncOptions.updateDialog.optionalUpdateMessage;
-            dialogButtons[0].text = syncOptions.updateDialog.optionalInstallButtonLabel;     
-            
-            // Since this is an optional update, add another button
-            // to allow the end-user to ignore it       
-            dialogButtons.push({
-              text: syncOptions.updateDialog.optionalIgnoreButtonLabel,
-              onPress: () => {
-                syncStatusChangeCallback(CodePush.SyncStatus.UPDATE_IGNORED);
-                resolve(CodePush.SyncStatus.UPDATE_IGNORED);
-              }
-            });
-          }
-          
-          // If the update has a description, and the developer
-          // explicitly chose to display it, then set that as the message
-          if (syncOptions.updateDialog.appendReleaseDescription && remotePackage.description) {
-            message += `${syncOptions.updateDialog.descriptionPrefix} ${remotePackage.description}`;  
-          }
-          
-          syncStatusChangeCallback(CodePush.SyncStatus.AWAITING_USER_ACTION);
-          Alert.alert(syncOptions.updateDialog.title, message, dialogButtons);
-        } else {
-          doDownloadAndInstall();
-        }
-      })
-      .catch(rejectPromise)
-      .done();
-  });     
+         
+        syncStatusChangeCallback(CodePush.SyncStatus.AWAITING_USER_ACTION);
+        Alert.alert(syncOptions.updateDialog.title, message, dialogButtons);
+      });
+    } else {
+      return await doDownloadAndInstall();
+    }
+  } catch (error) {
+    syncStatusChangeCallback(CodePush.SyncStatus.UNKNOWN_ERROR);
+    log(error.message); 
+    throw error;
+  } 
 };
 
 var CodePush = {
@@ -304,4 +294,4 @@ var CodePush = {
   }
 };
 
-module.exports = CodePush;
+export default CodePush;

@@ -11,6 +11,7 @@ let {
 
 let IsFailedUpdateTest = React.createClass({
   componentDidMount() {
+    // Should trigger a rollback.
     CodePush.restartApp();
   },
   render() {

@@ -1,27 +1,24 @@
 "use strict";
 
-import React from "react-native";
-import CodePush from "react-native-code-push";
-
-let {
+import React, {
   AppRegistry,
   Text,
   View,
-} = React;
+} from "react-native";
+
+import CodePush from "react-native-code-push";
 
 let IsFirstRunTest = React.createClass({
   getInitialState() {
     return {};
   },
-  componentDidMount() {
-    CodePush.getCurrentPackage()
-      .then((localPackage) => {
-        if (localPackage.isFirstRun) {
-          this.setState({ passed: true });
-        } else {
-          this.setState({ passed: false });
-        }
-      });
+  async componentDidMount() {
+    let localPackage = await CodePush.getCurrentPackage();
+    if (localPackage.isFirstRun) {
+      this.setState({ passed: true });
+    } else {
+      this.setState({ passed: false });
+    }
   },
   render() {
     let text = "Testing...";

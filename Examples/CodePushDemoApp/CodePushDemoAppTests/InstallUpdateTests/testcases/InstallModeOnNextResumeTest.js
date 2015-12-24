@@ -21,16 +21,11 @@ let InstallModeOnNextResumeTest = createTestCaseComponent(
     }
     
     remotePackage = Object.assign(remotePackage, PackageMixins.remote);
-    return Promise.resolve();
   },
-  () => {
-    remotePackage.download()
-      .then((localPackage) => {
-        return localPackage.install(NativeCodePush.codePushInstallModeOnNextResume);
-      })
-      .then(() => {
-        CodePush.restartApp();
-      });
+  async () => {
+    let localPackage = await remotePackage.download()
+    await localPackage.install(NativeCodePush.codePushInstallModeOnNextResume);
+    CodePush.restartApp();
   },
   /*passAfterRun*/ false
 );

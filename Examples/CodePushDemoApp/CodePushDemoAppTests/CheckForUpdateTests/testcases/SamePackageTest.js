@@ -18,19 +18,14 @@ let SamePackageTest = createTestCaseComponent(
     let mockAcquisitionSdk = createMockAcquisitionSdk(serverPackage, localPackage);       
     let mockConfiguration = { appVersion : "1.5.0" };
     CodePush.setUpTestDependencies(mockAcquisitionSdk, mockConfiguration, NativeCodePush);
-    CodePush.getCurrentPackage = () => {
-      return Promise.resolve(localPackage);
-    }
-    return Promise.resolve();
+    CodePush.getCurrentPackage = async () => {
+      return localPackage;
+    };
   },
-  () => {
-    return CodePush.checkForUpdate()
-      .then((update) => {
-        if (update) {
-          throw new Error("checkForUpdate should not return a package when local package is identical");
-        }
-      });
+  async () => {
+    let update = await CodePush.checkForUpdate();
+    assert(!update, "checkForUpdate should not return a package when local package is identical");
   }
 );
 
-module.exports = SamePackageTest;
+export default SamePackageTest;

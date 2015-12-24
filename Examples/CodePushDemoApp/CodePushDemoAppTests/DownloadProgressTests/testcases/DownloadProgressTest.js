@@ -49,4 +49,4 @@ let DownloadProgressTest = createTestCaseComponent(
   }
 );
 
-module.exports = DownloadProgressTest;
+export default DownloadProgressTest;

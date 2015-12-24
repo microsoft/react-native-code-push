@@ -18,19 +18,14 @@ let NoRemotePackageTest = createTestCaseComponent(
     let mockAcquisitionSdk = createMockAcquisitionSdk(serverPackage, localPackage);       
     let mockConfiguration = { appVersion : "1.5.0" };
     CodePush.setUpTestDependencies(mockAcquisitionSdk, mockConfiguration, NativeCodePush);
-    CodePush.getCurrentPackage = () => {
-      return Promise.resolve(localPackage);
-    }
-    return Promise.resolve();
+    CodePush.getCurrentPackage = async () => {
+      return localPackage;
+    };
   },
-  () => {
-    return CodePush.checkForUpdate()
-      .then((update) => {
-        if (update) {
-          throw new Error("checkForUpdate should not return an update if there is none on the server");
-        }
-      });
+  async () => {
+    let update = await CodePush.checkForUpdate();
+    assert(!update, "checkForUpdate should not return an update if there is none on the server");
   }
 );
 
-module.exports = NoRemotePackageTest;
+export default NoRemotePackageTest;

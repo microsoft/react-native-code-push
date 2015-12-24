@@ -18,18 +18,17 @@ function createTestCaseComponent(displayName, description, setUp, runTest, passA
         done: false,
       };
     },
-    componentDidMount() {
-      setUp()
-        .then(runTest)
-        .then(() => {
-          if (passAfterRun) {
-            this.setState({done: true}, RCTTestModule.markTestCompleted);
-          }
-        })
-        .catch((err) => {
-          console.error(err);
-          throw err;
-        });
+    async componentDidMount() {
+      try {
+        await setUp();
+        await runTest();
+        if (passAfterRun) {
+          this.setState({done: true}, RCTTestModule.markTestCompleted);
+        }
+      } catch (err) {
+        console.error(err);
+        throw err;
+      }
     },
     render() {
       return (

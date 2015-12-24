@@ -33,7 +33,7 @@
    * on the same Wi-Fi network.
    */
 
-  jsCodeLocation = [NSURL URLWithString:@"http://localhost:8081/index.ios.includeRequire.runModule.bundle?dev=true&platform=ios"];
+  //jsCodeLocation = [NSURL URLWithString:@"http://localhost:8081/index.ios.includeRequire.runModule.bundle?dev=true&platform=ios"];
 
   /**
    * OPTION 2
@@ -45,7 +45,7 @@
    * see http://facebook.github.io/react-native/docs/runningondevice.html
    */
 
-  //jsCodeLocation = [CodePush bundleURL];
+  jsCodeLocation = [CodePush bundleURL];
 
   RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
                                                       moduleName:@"CodePushDemoApp"

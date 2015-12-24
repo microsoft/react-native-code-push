@@ -1,7 +1,6 @@
 'use strict';
 
-var React = require('react-native');
-var {
+import React, {
   AppRegistry,
   Dimensions,
   Image,
@@ -9,84 +8,85 @@ var {
   Text,
   TouchableOpacity,
   View,
-} = React;
+} from "react-native";
 
-var Button = require("react-native-button");
+import Button from "react-native-button";
+import CodePush from "react-native-code-push";
 
-var CodePush = require('react-native-code-push');
-
-var CodePushDemoApp = React.createClass({
-  sync() {
-    var self = this;
-    CodePush.sync(
-      { 
-        updateDialog: true,
-        installMode: CodePush.InstallMode.ON_NEXT_RESUME
-      }, 
-      function(syncStatus) {
-        switch(syncStatus) {
-          case CodePush.SyncStatus.CHECKING_FOR_UPDATE: 
-            self.setState({
-              syncMessage: "Checking for update."
-            });
-            break;
-          case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
-            self.setState({
-              syncMessage: "Downloading package."
-            });
-            break;
-          case CodePush.SyncStatus.AWAITING_USER_ACTION:
-            self.setState({
-              syncMessage: "Awaiting user action."
-            });
-            break;
-          case CodePush.SyncStatus.INSTALLING_UPDATE:
-            self.setState({
-              syncMessage: "Installing update."
-            });
-            break;
-          case CodePush.SyncStatus.UP_TO_DATE:
-            self.setState({
-              syncMessage: "App up to date.",
-              progress: false
-            });
-            break;
-          case CodePush.SyncStatus.UPDATE_IGNORED:
-            self.setState({
-              syncMessage: "Update cancelled by user.",
-              progress: false
-            });
-            break;
-          case CodePush.SyncStatus.UPDATE_INSTALLED:
-            self.setState({
-              syncMessage: "Update installed and will be run when the app next resumes.",
-              progress: false
-            });
-            break;
-          case CodePush.SyncStatus.UNKNOWN_ERROR:
-            self.setState({
-              syncMessage: "An unknown error occurred.",
-              progress: false
-            });
-            break;
+let CodePushDemoApp = React.createClass({
+  async sync() {
+    let self = this;
+    try {
+      return await CodePush.sync(
+        { 
+          updateDialog: true,
+          installMode: CodePush.InstallMode.ON_NEXT_RESUME
+        }, 
+        (syncStatus) => {
+          switch(syncStatus) {
+            case CodePush.SyncStatus.CHECKING_FOR_UPDATE: 
+              self.setState({
+                syncMessage: "Checking for update."
+              });
+              break;
+            case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
+              self.setState({
+                syncMessage: "Downloading package."
+              });
+              break;
+            case CodePush.SyncStatus.AWAITING_USER_ACTION:
+              self.setState({
+                syncMessage: "Awaiting user action."
+              });
+              break;
+            case CodePush.SyncStatus.INSTALLING_UPDATE:
+              self.setState({
+                syncMessage: "Installing update."
+              });
+              break;
+            case CodePush.SyncStatus.UP_TO_DATE:
+              self.setState({
+                syncMessage: "App up to date.",
+                progress: false
+              });
+              break;
+            case CodePush.SyncStatus.UPDATE_IGNORED:
+              self.setState({
+                syncMessage: "Update cancelled by user.",
+                progress: false
+              });
+              break;
+            case CodePush.SyncStatus.UPDATE_INSTALLED:
+              self.setState({
+                syncMessage: "Update installed and will be run when the app next resumes.",
+                progress: false
+              });
+              break;
+            case CodePush.SyncStatus.UNKNOWN_ERROR:
+              self.setState({
+                syncMessage: "An unknown error occurred.",
+                progress: false
+              });
+              break;
+          }
+        },
+        (progress) => {
+          self.setState({
+            progress: progress
+          });
         }
-      },
-      function(progress) {
-        self.setState({
-          progress: progress
-        });
-      }
-    ).catch(function(error) {
+      );
+    } catch (error) {
       CodePush.log(error);
-    });
+    }
   },
+  
   getInitialState() {
     return { };
   },
+  
   render() {
-    var syncView;
-    var syncButton;
-    var progressView;
+    let syncView, syncButton, progressView;
     
     if (this.state.syncMessage) {
       syncView = (
@@ -120,7 +120,7 @@ var CodePushDemoApp = React.createClass({
   }
 });
 
-var styles = StyleSheet.create({
+let styles = StyleSheet.create({
   image: {
     marginTop: 50,
     width: Dimensions.get('window').width - 100,

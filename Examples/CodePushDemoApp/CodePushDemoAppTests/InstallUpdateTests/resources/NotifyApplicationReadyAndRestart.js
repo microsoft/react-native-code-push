@@ -10,18 +10,15 @@ let NotifyApplicationReadyTest = React.createClass({
   getInitialState() {
     return {};
   },
-  componentDidMount() {
-    CodePush.notifyApplicationReady()
-      .then(() => { 
-        if (Platform.OS === "android") {
-          return NativeCodePush.downloadAndReplaceCurrentBundle("http://10.0.3.2:8081/CodePushDemoAppTests/InstallUpdateTests/resources/PassNotifyApplicationReadyTest.includeRequire.runModule.bundle?platform=android&dev=true");
-        } else if (Platform.OS === "ios") {
-          return NativeCodePush.downloadAndReplaceCurrentBundle("http://localhost:8081/CodePushDemoAppTests/InstallUpdateTests/resources/PassNotifyApplicationReadyTest.includeRequire.runModule.bundle?platform=ios&dev=true");
-        }
-      })
-      .then(() => {
-        CodePush.restartApp();
-      });
+  async componentDidMount() {
+    await CodePush.notifyApplicationReady();
+    if (Platform.OS === "android") {
+      await NativeCodePush.downloadAndReplaceCurrentBundle("http://10.0.3.2:8081/CodePushDemoAppTests/InstallUpdateTests/resources/PassNotifyApplicationReadyTest.includeRequire.runModule.bundle?platform=android&dev=true");
+    } else if (Platform.OS === "ios") {
+      await NativeCodePush.downloadAndReplaceCurrentBundle("http://localhost:8081/CodePushDemoAppTests/InstallUpdateTests/resources/PassNotifyApplicationReadyTest.includeRequire.runModule.bundle?platform=ios&dev=true");
+    }
+    
+    CodePush.restartApp();
   },
   render() {
     return (

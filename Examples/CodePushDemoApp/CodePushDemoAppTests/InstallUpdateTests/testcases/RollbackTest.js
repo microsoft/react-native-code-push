@@ -21,13 +21,10 @@ let RollbackTest = createTestCaseComponent(
     }
     
     remotePackage = Object.assign(remotePackage, PackageMixins.remote);
-    return Promise.resolve();
   },
-  () => {
-    remotePackage.download()
-      .then((localPackage) => {
-        return localPackage.install(NativeCodePush.codePushInstallModeImmediate);
-      });
+  async () => {
+    let localPackage = await remotePackage.download()
+    return await localPackage.install(NativeCodePush.codePushInstallModeImmediate);
   },
   /*passAfterRun*/ false
 );

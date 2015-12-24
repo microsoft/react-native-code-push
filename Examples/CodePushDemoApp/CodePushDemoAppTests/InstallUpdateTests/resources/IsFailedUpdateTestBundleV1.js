@@ -1,23 +1,22 @@
 "use strict";
 
-import React from "react-native";
+import React, {
+  AppRegistry,
+  Platform,
+  Text,
+  View,
+} from "react-native";
+
 import CodePush from "react-native-code-push";
 let NativeCodePush = React.NativeModules.CodePush;
 let PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
 import createMockAcquisitionSdk from "../../utils/mockAcquisitionSdk";
 
-let {
-  AppRegistry,
-  Platform,
-  Text,
-  View,
-} = React;
-
 let IsFailedUpdateTest = React.createClass({
   getInitialState() {
     return {};
   },
-  componentDidMount() {
+  async componentDidMount() {
     let serverPackage = {
       description: "Angry flappy birds",
       appVersion: "1.5.0",
@@ -39,20 +38,14 @@ let IsFailedUpdateTest = React.createClass({
     let mockConfiguration = { appVersion : "1.5.0" };
     CodePush.setUpTestDependencies(mockAcquisitionSdk, mockConfiguration, NativeCodePush);
     
-    CodePush.notifyApplicationReady()
-      .then(() => {
-        return CodePush.checkForUpdate();
-      })
-      .then((remotePackage) => {
-        if (remotePackage.failedInstall) {
-          this.setState({ passed: true });
-        } else {
-          return remotePackage.download();
-        }
-      })
-      .then((localPackage) => {
-        return localPackage && localPackage.install(NativeCodePush.codePushInstallModeImmediate);
-      });
+    await CodePush.notifyApplicationReady()
+    let remotePackage = await CodePush.checkForUpdate();
+    if (remotePackage.failedInstall) {
+      this.setState({ passed: true });
+    } else {
+      let localPackage = await remotePackage.download();
+      return localPackage && await localPackage.install(NativeCodePush.codePushInstallModeImmediate);
+    }
   },
   render() {
     let text = "Testing...";

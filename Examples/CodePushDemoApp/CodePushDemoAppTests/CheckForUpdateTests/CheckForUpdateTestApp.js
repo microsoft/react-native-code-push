@@ -38,6 +38,7 @@ let CheckForUpdateTestApp = React.createClass({
         </ScrollView>
       );
     }
+    
     return (
       <View style={styles.container}>
         <Text style={styles.row}>

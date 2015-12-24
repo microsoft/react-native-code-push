@@ -18,20 +18,13 @@ let FirstUpdateTest = createTestCaseComponent(
     let mockAcquisitionSdk = createMockAcquisitionSdk(serverPackage, localPackage);
     let mockConfiguration = { appVersion : "1.5.0" };
     CodePush.setUpTestDependencies(mockAcquisitionSdk, mockConfiguration, NativeCodePush);
-    CodePush.getCurrentPackage = () => {
-      return Promise.resolve(localPackage);
-    }
-    return Promise.resolve();
+    CodePush.getCurrentPackage = async () => {
+      return localPackage;
+    };
   },
-  () => {
-    return CodePush.checkForUpdate()
-      .then((update) => {
-        if (update) {
-          assert.deepEqual(update, Object.assign(serverPackage, PackageMixins.remote));
-        } else {
-          throw new Error("checkForUpdate did not return the update from the server");
-        }
-      });
+  async () => {
+    let update = await CodePush.checkForUpdate()
+    assert.deepEqual(update, Object.assign(serverPackage, PackageMixins.remote), "checkForUpdate did not return the update from the server");
   }
 );
 

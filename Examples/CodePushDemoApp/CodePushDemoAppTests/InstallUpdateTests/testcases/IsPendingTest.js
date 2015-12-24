@@ -21,20 +21,13 @@ let IsPendingTest = createTestCaseComponent(
     }
     
     remotePackage = Object.assign(remotePackage, PackageMixins.remote);
-    return Promise.resolve();
   },
-  () => {
-    remotePackage.download()
-      .then((localPackage) => {
-        return localPackage.install(NativeCodePush.codePushInstallModeOnNextRestart);
-      })
-      .then((localPackage) => {
-        assert(localPackage.isPending, "isPending should be set to \"true\" after an install");
-        return CodePush.getCurrentPackage();
-      })
-      .then((localPackage) => {
-        assert(localPackage.isPending, "isPending should be set to \"true\" after an install");
-      });
+  async () => {
+    let localPackage = await remotePackage.download();
+    await localPackage.install(NativeCodePush.codePushInstallModeOnNextRestart);
+    assert(localPackage.isPending, "isPending should be set to \"true\" after an install");
+    localPackage = await CodePush.getCurrentPackage();
+    assert(localPackage.isPending, "isPending should be set to \"true\" after an install");
   }
 );
 
