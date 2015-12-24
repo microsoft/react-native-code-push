@@ -14,13 +14,13 @@ let request = async (verb, url, body, callback) => {
     }
 
     try {
-        let response = await fetch(url, {
+        const response = await fetch(url, {
             method: verb,
             headers: headers,
             body: body
         });
         
-        let statusCode = response.status;
+        const statusCode = response.status;
         let body = await response.text();
         callback(null, { statusCode, body });
     } catch (err) {
