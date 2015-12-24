@@ -2,8 +2,8 @@
 
 import React from "react-native";
 import { DeviceEventEmitter, Text, View } from "react-native";
-const NativeCodePush = React.NativeModules.CodePush;
 
+const NativeCodePush = React.NativeModules.CodePush;
 // RCTTestModule is not implemented yet for RN Android.
 const RCTTestModule = React.NativeModules.TestModule || {};
 

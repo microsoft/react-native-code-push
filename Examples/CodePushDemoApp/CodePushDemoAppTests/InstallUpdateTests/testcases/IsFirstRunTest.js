@@ -3,11 +3,11 @@
 import React from "react-native";
 import { DeviceEventEmitter, Platform, AppRegistry } from "react-native";
 import CodePush from "react-native-code-push";
-const NativeCodePush = React.NativeModules.CodePush;
 import createTestCaseComponent from "../../utils/createTestCaseComponent";
-const PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
 import assert from "assert";
 
+const NativeCodePush = React.NativeModules.CodePush;
+const PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
 let remotePackage = require("../resources/remotePackage");
 
 let IsFirstRunTest = createTestCaseComponent(

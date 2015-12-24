@@ -6,8 +6,8 @@ import React, {
   Text,
   View,
 } from "react-native";
-
 import CodePush from "react-native-code-push";
+
 const RCTTestModule = React.NativeModules.TestModule;
 const NativeCodePush = React.NativeModules.CodePush;
 const PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);

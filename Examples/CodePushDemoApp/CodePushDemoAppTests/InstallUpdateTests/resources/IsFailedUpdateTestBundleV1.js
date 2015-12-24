@@ -6,11 +6,11 @@ import React, {
   Text,
   View,
 } from "react-native";
-
 import CodePush from "react-native-code-push";
+import createMockAcquisitionSdk from "../../utils/mockAcquisitionSdk";
+
 const NativeCodePush = React.NativeModules.CodePush;
 const PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
-import createMockAcquisitionSdk from "../../utils/mockAcquisitionSdk";
 
 let IsFailedUpdateTest = React.createClass({
   getInitialState() {

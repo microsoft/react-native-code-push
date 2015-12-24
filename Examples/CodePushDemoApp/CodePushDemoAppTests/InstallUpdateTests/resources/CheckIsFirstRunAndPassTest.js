@@ -5,7 +5,6 @@ import React, {
   Text,
   View,
 } from "react-native";
-
 import CodePush from "react-native-code-push";
 
 let IsFirstRunTest = React.createClass({

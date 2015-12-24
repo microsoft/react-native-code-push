@@ -3,6 +3,7 @@
 import React from "react-native";
 import { Platform, AppRegistry, Text, View } from "react-native";
 import CodePush from "react-native-code-push";
+
 const NativeCodePush = React.NativeModules.CodePush;
 const RCTTestModule = React.NativeModules.TestModule;
 
