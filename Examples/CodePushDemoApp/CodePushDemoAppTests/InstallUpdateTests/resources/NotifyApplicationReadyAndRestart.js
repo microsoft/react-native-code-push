@@ -3,8 +3,8 @@
 import React from "react-native";
 import { Platform, AppRegistry, Text, View } from "react-native";
 import CodePush from "react-native-code-push";
-let NativeCodePush = React.NativeModules.CodePush;
-let RCTTestModule = React.NativeModules.TestModule;
+const NativeCodePush = React.NativeModules.CodePush;
+const RCTTestModule = React.NativeModules.TestModule;
 
 let NotifyApplicationReadyTest = React.createClass({
   getInitialState() {

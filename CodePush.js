@@ -1,8 +1,8 @@
 'use strict';
 
 import { Alert } from "./AlertAdapter";
-let NativeCodePush = require("react-native").NativeModules.CodePush;
-let PackageMixins = require("./package-mixins")(NativeCodePush);
+const NativeCodePush = require("react-native").NativeModules.CodePush;
+const PackageMixins = require("./package-mixins")(NativeCodePush);
 import requestFetchAdapter from "./request-fetch-adapter.js";
 import { AcquisitionManager as Sdk } from "code-push/script/acquisition-sdk";
 import semver from "semver";
@@ -25,7 +25,7 @@ async function checkForUpdate(deploymentKey = null) {
    * dynamically "redirecting" end-users at different
    * deployments (e.g. an early access deployment for insiders).
    */
-  let config = deploymentKey ? Object.assign({}, nativeConfig, { deploymentKey })
+  let config = deploymentKey ? { ...nativeConfig, ...{ deploymentKey } }
                              : nativeConfig;
   let sdk = getPromisifiedSdk(requestFetchAdapter, config);
   // Use dynamically overridden getCurrentPackage() during tests.
@@ -58,7 +58,7 @@ async function checkForUpdate(deploymentKey = null) {
   if (!update || update.updateAppVersion || (update.packageHash === localPackage.packageHash)) {
     return null;
   } else {     
-    let remotePackage = Object.assign(update, PackageMixins.remote);
+    let remotePackage = { ...update, ...PackageMixins.remote };
     remotePackage.failedInstall = await NativeCodePush.isFailedUpdate(remotePackage.packageHash);
     return remotePackage;
   }

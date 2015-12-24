@@ -2,10 +2,10 @@
 
 import React from "react-native";
 import { DeviceEventEmitter, Text, View } from "react-native";
-let NativeCodePush = React.NativeModules.CodePush;
+const NativeCodePush = React.NativeModules.CodePush;
 
 // RCTTestModule is not implemented yet for RN Android.
-let RCTTestModule = React.NativeModules.TestModule || {};
+const RCTTestModule = React.NativeModules.TestModule || {};
 
 function createTestCaseComponent(displayName, description, setUp, runTest, passAfterRun = true) {     
   let TestCaseComponent = React.createClass({

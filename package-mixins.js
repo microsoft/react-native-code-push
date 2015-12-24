@@ -23,8 +23,7 @@ export default (NativeCodePush) => {
       // so that the client knows what the current package version is.
       try {  
         let downloadedPackage = await NativeCodePush.downloadUpdate(this);
-        downloadProgressSubscription && downloadProgressSubscription.remove();
-        return Object.assign({}, downloadedPackage, local);
+        return { ...downloadedPackage, ...local };
       } finally {
         downloadProgressSubscription && downloadProgressSubscription.remove();
       }

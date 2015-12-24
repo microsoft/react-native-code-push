@@ -8,9 +8,9 @@ import React, {
 } from "react-native";
 
 import CodePush from "react-native-code-push";
-let RCTTestModule = React.NativeModules.TestModule;
-let NativeCodePush = React.NativeModules.CodePush;
-let PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
+const RCTTestModule = React.NativeModules.TestModule;
+const NativeCodePush = React.NativeModules.CodePush;
+const PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
 
 let RollbackTest = React.createClass({
   async componentDidMount() {

@@ -2,13 +2,13 @@
 
 import React from "react-native";
 import CodePush from "react-native-code-push";
-let NativeCodePush = React.NativeModules.CodePush;
+const NativeCodePush = React.NativeModules.CodePush;
 import createTestCaseComponent from "../../utils/createTestCaseComponent";
-let PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
+const PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
 import assert from "assert";
 
 import testPackages from "../resources/TestPackages";
-let localPackage = {};
+const localPackage = {};
 let saveProgress;
 
 function checkReceivedAndExpectedBytesEqual() {

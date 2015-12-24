@@ -8,8 +8,8 @@ import React, {
 } from "react-native";
 
 import CodePush from "react-native-code-push";
-let NativeCodePush = React.NativeModules.CodePush;
-let PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
+const NativeCodePush = React.NativeModules.CodePush;
+const PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
 import createMockAcquisitionSdk from "../../utils/mockAcquisitionSdk";
 
 let IsFailedUpdateTest = React.createClass({

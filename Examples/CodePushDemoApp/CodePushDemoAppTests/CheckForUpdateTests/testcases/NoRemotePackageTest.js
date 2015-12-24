@@ -2,14 +2,14 @@
 
 import React from "react-native";
 import CodePush from "react-native-code-push";
-let NativeCodePush = React.NativeModules.CodePush;
+const NativeCodePush = React.NativeModules.CodePush;
 import createTestCaseComponent from "../../utils/createTestCaseComponent";
-let PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
+const PackageMixins = require("react-native-code-push/package-mixins.js")(NativeCodePush);
 import assert from "assert";
 import createMockAcquisitionSdk from "../../utils/mockAcquisitionSdk";
 
-let serverPackage = null;
-let localPackage =  {};
+const serverPackage = null;
+const localPackage =  {};
 
 let NoRemotePackageTest = createTestCaseComponent(
   "NoRemotePackageTest",

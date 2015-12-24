@@ -1,12 +1,10 @@
 "use strict";
 
-import React from "react-native";
-
-let {
+import React, {
   AppRegistry,
   Text,
   View,
-} = React;
+} from "react-native";
 
 let RollbackTest = React.createClass({
   render() {
