@@ -1,6 +1,6 @@
 'use strict';
 
-var { Alert } = require("./AlertAdapter");
+var { Alert } = require("react-native");
 var NativeCodePush = require("react-native").NativeModules.CodePush;
 var PackageMixins = require("./package-mixins")(NativeCodePush);
 var requestFetchAdapter = require("./request-fetch-adapter.js");

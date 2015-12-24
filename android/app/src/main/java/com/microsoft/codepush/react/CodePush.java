@@ -524,11 +524,7 @@ public class CodePush {
         public List<NativeModule> createNativeModules(ReactApplicationContext reactApplicationContext) {
             List<NativeModule> nativeModules = new ArrayList<>();
             CodePush.this.codePushNativeModule = new CodePushNativeModule(reactApplicationContext);
-            CodePushDialog dialogModule = new CodePushDialog(reactApplicationContext, mainActivity);
-
             nativeModules.add(CodePush.this.codePushNativeModule);
-            nativeModules.add(dialogModule);
-
             return nativeModules;
         }
 

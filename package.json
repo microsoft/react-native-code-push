@@ -20,6 +20,6 @@
     "semver": "^5.1.0"
   },
   "devDependencies": {
-    "react-native": "0.15.0"
+    "react-native": "0.17.0"
   }
 }
