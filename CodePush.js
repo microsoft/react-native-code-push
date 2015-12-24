@@ -187,9 +187,9 @@ async function sync(options = {}, syncStatusChangeCallback, downloadProgressCall
     await CodePush.notifyApplicationReady();
     
     syncStatusChangeCallback(CodePush.SyncStatus.CHECKING_FOR_UPDATE);
-    let remotePackage = await checkForUpdate(syncOptions.deploymentKey);
+    const remotePackage = await checkForUpdate(syncOptions.deploymentKey);
     
-    let doDownloadAndInstall = async () => {
+    const doDownloadAndInstall = async () => {
       syncStatusChangeCallback(CodePush.SyncStatus.DOWNLOADING_PACKAGE);
       let localPackage = await remotePackage.download(downloadProgressCallback);
       

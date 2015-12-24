@@ -21,7 +21,7 @@ let request = async (verb, url, body, callback) => {
         });
         
         const statusCode = response.status;
-        let body = await response.text();
+        const body = await response.text();
         callback(null, { statusCode, body });
     } catch (err) {
         callback(err);
