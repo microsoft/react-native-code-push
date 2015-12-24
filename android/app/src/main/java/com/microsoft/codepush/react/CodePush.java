@@ -203,7 +203,7 @@ public class CodePush {
                     rollbackPackage();
                 } else {
                     // Clear the React dev bundle cache so that new updates can be loaded.
-                    if (!this.isDebugMode) {
+                    if (this.isDebugMode) {
                         clearReactDevBundleCache();
                     }
                     // Mark that we tried to initialize the new update, so that if it crashes,
