@@ -336,12 +336,15 @@ If you are using the `sync` function, and doing your update check on app start, 
 #### codePush.restartApp		
 		
 ```javascript		
-codePush.restartApp(): void;		
+codePush.restartApp(onlyIfUpdateIsPending: Boolean = false): void;		
 ```		
 		
-Immediately restarts the app. If there is an update pending, it will be presented to the end user and the rollback timer (if specified when installing the update) will begin. Otherwise, calling this method simply has the same behavior as the end user killing and restarting the process. This method is for advanced scenarios, and is primarily useful when the following conditions are true:		
+Immediately restarts the app. If there is an update pending, it will be presented to the end user and the rollback timer (if specified when installing the update) will begin. Otherwise, calling this method simply has the same behavior as the end user killing and restarting the process. If a truthy value is passed to the `onlyIfUpdateIsPending` parameter, then the app will only be restarted if there is actually a pending update waiting to be applied. Otherwise, this method call will no-op.
+
+This method is for advanced scenarios, and is primarily useful when the following conditions are true:		
 		
-1. Your app is specifying an install mode value of `ON_NEXT_RESTART` or `ON_NEXT_RESUME` when calling the `sync` or `LocalPackage.install` methods. This has the effect of not applying your update until the app has been restarted (by either the end user or OS)	or resumed, and therefore, the update won't be immediately displayed to the end user 	.
+1. Your app is specifying an install mode value of `ON_NEXT_RESTART` or `ON_NEXT_RESUME` when calling the `sync` or `LocalPackage.install` methods. This has the effect of not applying your update until the app has been restarted (by either the end user or OS)	or resumed, and therefore, the update won't be immediately displayed to the end user.
+
 2. You have an app-specific user event (e.g. the end user navigated back to the app's home route) that allows you to apply the update in an unobtrusive way, and potentially gets the update in front of the end user sooner then waiting until the next restart or resume.		
 
 #### codePush.sync
