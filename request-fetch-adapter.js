@@ -1,6 +1,6 @@
 "use strict";
 
-export default {
+module.exports = {
   async request(verb, url, body, callback) {
     if (typeof body === "function") {
       callback = body;

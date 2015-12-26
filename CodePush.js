@@ -295,4 +295,4 @@ const CodePush = {
   }
 };
 
-export default CodePush;
+module.exports = CodePush;
