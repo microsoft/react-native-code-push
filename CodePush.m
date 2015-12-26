@@ -203,11 +203,11 @@ static NSString *const PackageIsPendingKey = @"isPending";
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];
 
-    // If there is a pending update, whose hash is equal to the one
-    // specified, and its "state" isn't loading, then we consider it "pending".
+    // If there is a pending update whose "state" isn't loading, then we consider it "pending".
+    // Additionally, if a specific hash was provided, we ensure it matches that of the pending update.
     BOOL updateIsPending = pendingUpdate &&
                            [pendingUpdate[PendingUpdateIsLoadingKey] boolValue] == NO &&
-                           [pendingUpdate[PendingUpdateHashKey] isEqualToString:packageHash];
+                           (!packageHash || [pendingUpdate[PendingUpdateHashKey] isEqualToString:packageHash]);
     
     return updateIsPending;
 }
@@ -467,9 +467,13 @@ RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
 /*
  * This method is the native side of the CodePush.restartApp() method.
  */
-RCT_EXPORT_METHOD(restartApp)
+RCT_EXPORT_METHOD(restartApp:(BOOL)onlyIfUpdateIsPending)
 {
-    [self loadBundle];
+    // If this is an unconditional restart request, or there
+    // is current pending update, then reload the app.
+    if (!onlyIfUpdateIsPending || [self isPendingUpdate:nil]) {
+        [self loadBundle];
+    }
 }
 
 /*
