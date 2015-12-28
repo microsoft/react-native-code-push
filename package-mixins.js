@@ -1,5 +1,3 @@
-"use strict";
-
 import { DeviceEventEmitter } from "react-native";
 
 // This function is used to augment remote and local
@@ -40,7 +38,7 @@ module.exports = (NativeCodePush) => {
       await NativeCodePush.installUpdate(this, installMode);
       updateInstalledCallback && updateInstalledCallback();
       if (installMode == NativeCodePush.codePushInstallModeImmediate) {
-        NativeCodePush.restartApp();
+        NativeCodePush.restartApp(false);
       } else {
         localPackage.isPending = true; // Mark the package as pending since it hasn't been applied yet
       }
