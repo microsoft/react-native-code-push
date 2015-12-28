@@ -76,7 +76,10 @@ static NSString *const PackageIsPendingKey = @"isPending";
         NSLog(logMessageFormat, packageUrl);
         return packageUrl;
     } else {
+#ifndef DEBUG
         [CodePush clearUpdates];
+#endif
+
         NSLog(logMessageFormat, binaryJsBundleUrl);
         return binaryJsBundleUrl;
     }
