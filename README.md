@@ -339,7 +339,7 @@ If you are using the `sync` function, and doing your update check on app start, 
 codePush.restartApp(onlyIfUpdateIsPending: Boolean = false): void;		
 ```		
 		
-Immediately restarts the app. If there is an update pending, it will be presented to the end user and the "rollback protection" feature will ensure it succeeds. Otherwise, calling this method simply has the same behavior as the end user killing and restarting the process. If a truthy value is passed to the `onlyIfUpdateIsPending` parameter, then the app will only be restarted if there is actually a pending update waiting to be applied. Otherwise, this method call will no-op.
+Immediately restarts the app. If a truthy value is provided to the `onlyIfUpdateIsPending` parameter, then the app will only restart if there is actually a pending update waiting to be applied.
 
 This method is for advanced scenarios, and is primarily useful when the following conditions are true:		
 		
