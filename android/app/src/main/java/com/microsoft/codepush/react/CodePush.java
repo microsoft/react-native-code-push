@@ -241,7 +241,7 @@ public class CodePush {
         try {
             boolean updateIsPending = pendingUpdate != null &&
                                       pendingUpdate.getBoolean(PENDING_UPDATE_IS_LOADING_KEY) == false &&
-                                      pendingUpdate.getString(PENDING_UPDATE_HASH_KEY).equals(packageHash);
+                                      (packageHash == null || pendingUpdate.getString(PENDING_UPDATE_HASH_KEY).equals(packageHash));
             return updateIsPending;
         }
         catch (JSONException e) {
@@ -483,8 +483,12 @@ public class CodePush {
         }
         
         @ReactMethod
-        public void restartApp() {
-            loadBundle();
+        public void restartApp(boolean onlyIfUpdateIsPending) {
+            // If this is an unconditional restart request, or there
+            // is current pending update, then reload the app.
+            if (!onlyIfUpdateIsPending || CodePush.this.isPendingUpdate(null)) {
+                loadBundle();
+            }
         }
 
         @ReactMethod
