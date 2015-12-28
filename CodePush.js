@@ -1,5 +1,3 @@
-"use strict";
-
 import { AcquisitionManager as Sdk } from "code-push/script/acquisition-sdk";
 import { Alert } from "./AlertAdapter";
 import requestFetchAdapter from "./request-fetch-adapter";
@@ -19,6 +17,7 @@ async function checkForUpdate(deploymentKey = null) {
    * different from the CodePush update they have already installed.
    */
   const nativeConfig = await getConfiguration();
+  
   /*
    * If a deployment key was explicitly provided,
    * then let's override the one we retrieved
@@ -26,11 +25,12 @@ async function checkForUpdate(deploymentKey = null) {
    * dynamically "redirecting" end-users at different
    * deployments (e.g. an early access deployment for insiders).
    */
-  const config = deploymentKey ? { ...nativeConfig, ...{ deploymentKey } }
-                             : nativeConfig;
+  const config = deploymentKey ? { ...nativeConfig, ...{ deploymentKey } } : nativeConfig;
   const sdk = getPromisifiedSdk(requestFetchAdapter, config);
+  
   // Use dynamically overridden getCurrentPackage() during tests.
   const localPackage = await module.exports.getCurrentPackage();
+  
   /*
    * If the app has a previously installed update, and that update
    * was targetted at the same app version that is currently running,
@@ -43,6 +43,7 @@ async function checkForUpdate(deploymentKey = null) {
                        ? localPackage
                        : { appVersion: config.appVersion };
   const update = await sdk.queryUpdateWithCurrentPackage(queryPackage);
+  
   /*
    * There are three cases where checkForUpdate will resolve to null:
    * ----------------------------------------------------------------
