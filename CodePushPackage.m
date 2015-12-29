@@ -475,9 +475,20 @@ NSString * const UnzippedFolderName = @"unzipped";
 {
     NSError *error;
     NSMutableDictionary *info = [self getCurrentPackageInfo:&error];
-    
     if (error) {
         return;
+    }
+    
+    NSString *currentPackageFolderPath = [self getCurrentPackageFolderPath:&error];
+    if (error) {
+        return;
+    }
+    
+    NSError *deleteError;
+    [[NSFileManager defaultManager] removeItemAtPath:currentPackageFolderPath
+                                               error:&deleteError];
+    if (deleteError) {
+        NSLog(@"Error deleting current package contents at %@", currentPackageFolderPath);
     }
     
     [info setValue:info[@"previousPackage"] forKey:@"currentPackage"];

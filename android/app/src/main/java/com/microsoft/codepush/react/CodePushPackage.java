@@ -187,6 +187,8 @@ public class CodePushPackage {
 
     public void rollbackPackage() throws IOException {
         WritableMap info = getCurrentPackageInfo();
+        String currentPackageFolderPath = getCurrentPackageFolderPath();
+        CodePushUtils.deleteDirectoryAtPath(currentPackageFolderPath);
         info.putString(CURRENT_PACKAGE_KEY, CodePushUtils.tryGetString(info, PREVIOUS_PACKAGE_KEY));
         info.putNull(PREVIOUS_PACKAGE_KEY);
         updateCurrentPackageInfo(info);
