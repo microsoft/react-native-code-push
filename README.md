@@ -25,6 +25,8 @@ A React Native app is composed of JavaScript files and any accompanying [images]
 
 The CodePush plugin helps get product improvements in front of your end users instantly, by keeping your JavaScript and images synchronized with updates you release to the CodePush server. This way, your app gets the benefits of an offline mobile experience, as well as the "web-like" agility of side-loading updates as soon as they are available. It's a win-win!
 
+In order to ensure that your end users always have a functioning version of your app, the CodePush plugin maintains a copy of the previous update, so that in the event that you accidentally push an update which includes a crash, it can automatically roll back to the "last known good". This way, you can rest assured that your newfound release agility can't result in any users becoming blocked by a bad update, before you have a chance to [roll it back](http://microsoft.github.io/code-push/docs/cli.html#link-8) on the server. It's a win-win-win! 
+
 *Note: Any product changes which touch native code (e.g. modifying your `AppDelegate.m`/`MainActivity.java` file, adding a new plugin) cannot be distributed via CodePush, and therefore, must be updated via the appropriate store(s).*
 
 ## Supported React Native platforms
@@ -192,7 +194,7 @@ The simplest way to do this is to perform the following in your app's root compo
 1. Import the JavaScript module for CodePush:
 
     ```
-    var CodePush = require("react-native-code-push")
+    import CodePush from "react-native-code-push";
     ```
 
 2. Call the `sync` method from within the `componentDidMount` lifecycle event, to initiate a background update on each app start:
@@ -283,8 +285,13 @@ Queries the CodePush service to see whether the configured app deployment has an
 
 This method returns a `Promise` which resolves to one of two possible values:
 
-* `null` if there is no update available.
-* A `RemotePackage` instance which represents an available update that can be inspected and/or subsequently downloaded.
+1. `null` if there is no update available. This occurs in the following scenarios:
+
+    1. The configured deployment doesn't contain any releases, and therefore, nothing to update.
+    2. The latest release within the configured deployment is targeting a different binary version than what you're currently running (either older or newer).
+    3. The currently running app already has the latest release from the configured deployment, and therefore, doesn't need it again.
+    
+2. A [`RemotePackage`](#remotepackage) instance which represents an available update that can be inspected and/or subsequently downloaded.
 
 Example Usage: 
 
@@ -305,9 +312,9 @@ codePush.checkForUpdate()
 codePush.getCurrentPackage(): Promise<LocalPackage>;
 ```
 
-Retrieves the metadata about the currently installed "package" (e.g. description, installation time). This can be useful for scenarios such as displaying a "what's new?" dialog after an update has been applied.
+Retrieves the metadata about the currently installed "package" (e.g. description, installation time). This can be useful for scenarios such as displaying a "what's new?" dialog after an update has been applied or checking whether there is a pending update that is waiting to be applied via a resume or restart.
 
-This method returns a `Promise` which resolves to the `LocalPackage` instance that represents the currently running update. 
+This method returns a `Promise` which resolves to the [`LocalPackage`](#localpackage) instance that represents the currently running update. 
 
 Example Usage: 
 
@@ -353,11 +360,11 @@ This method is for advanced scenarios, and is primarily useful when the followin
 codePush.sync(options: Object, syncStatusChangeCallback: function(syncStatus: Number), downloadProgressCallback: function(progress: DownloadProgress)): Promise<Number>;
 ```
 
-Synchronizes your app's JavaScript bundle and image assets with the latest release to the configured deployment. Unlike the `checkForUpdate` method, which simply checks for the presence of an update, and let's you control what to do next, `sync` handles the update check, download and installation experience for you.
+Synchronizes your app's JavaScript bundle and image assets with the latest release to the configured deployment. Unlike the [checkForUpdate](#codepushcheckforupdate) method, which simply checks for the presence of an update, and let's you control what to do next, `sync` handles the update check, download and installation experience for you.
 
 This method provides support for two different (but customizable) "modes" to easily enable apps with different requirements:
 
-1. **Silent mode** *(the default behavior)*, which automatically downloads available updates, and applies them the next time the app restarts. This way, the entire update experience is "silent" to the end user, since they don't see any update prompt and/or "synthetic" app restarts.
+1. **Silent mode** *(the default behavior)*, which automatically downloads available updates, and applies them the next time the app restarts (e.g. the OS or end user killed it, or the device was restarted). This way, the entire update experience is "silent" to the end user, since they don't see any update prompt and/or "synthetic" app restarts.
 
 2. **Active mode**, which when an update is available, prompts the end user for permission before downloading it, and then immediately applies the update. If an update was released using the `mandatory` flag, the end user would still be notified about the update, but they wouldn't have the choice to ignore it.
 
@@ -417,6 +424,18 @@ codePush.sync({ installMode: codePush.InstallMode.ON_NEXT_RESUME });
 // Changing the title displayed in the
 // confirmation dialog of an "active" update
 codePush.sync({ updateDialog: { title: "An update is available!" } });
+
+// Displaying an update prompt which includes the
+// description associated with the CodePush release
+codePush.sync({
+   updateDialog: {
+    appendReleaseDescription: true,
+    descriptionPrefix: "\n\nChange log:\n"   
+   },
+   installMode: codePush.InstallMode.IMMEDIATE
+});
+
+
 ```
 
 In addition to the options, the `sync` method also accepts two optional function parameters which allow you to subscribe to the lifecycle of the `sync` "pipeline" in order to display additional UI as needed (e.g. a "checking for update modal or a download progress modal):
@@ -447,7 +466,9 @@ codePush.sync({ updateDialog: true }, (status) => {
 This method returns a `Promise` which is resolved to a `SyncStatus` code that indicates why the `sync` call succeeded. This code can be one of the following `SyncStatus` values:
 
 * __CodePush.SyncStatus.UP_TO_DATE__ *(4)* - The app is up-to-date with the CodePush server.
+
 * __CodePush.SyncStatus.UPDATE_IGNORED__ *(5)* - The app had an optional update which the end user chose to ignore. (This is only applicable when the `updateDialog` is used)
+
 * __CodePush.SyncStatus.UPDATE_INSTALLED__ *(6)* - The update has been installed and will be run either immediately after the `syncStatusChangedCallback` function returns or the next time the app resumes/restarts, depending on the `InstallMode` specified in `SyncOptions`.
 
 If the update check and/or the subsequent download fails for any reason, the `Promise` object returned by `sync` will be rejected with the reason.
@@ -458,7 +479,8 @@ The `sync` method can be called anywhere you'd like to check for an update. That
 
 The `checkForUpdate` and `getCurrentPackage` methods return promises, that when resolved, provide acces to "package" objects. The package represents your code update as well as any extra metadata (e.g. description, mandatory?). The CodePush API has the distinction between the following types of packages:
 
-* [LocalPackage](#localpackage): Represents a downloaded update package that is either already running, or has been installed and is pending an app restart.
+* [LocalPackage](#localpackage): Represents a downloaded update that is either already running, or has been installed and is pending an app restart.
+
 * [RemotePackage](#remotepackage): Represents an available update on the CodePush server that hasn't been downloaded yet.
 
 ##### LocalPackage
@@ -557,8 +579,14 @@ Constructs the CodePush client runtime and includes methods for integrating Code
 
 ##### Constructors
 
-- __CodePush(String deploymentKey, Activity mainActivity)__ - Creates a new instance of the CodePush runtime, that will be used to query the service for updates via the provided deployment key. The `mainActivity` parameter should always be set to `this` when configuring your `ReactInstanceManager` inside the `MainActivity` class.
+- __CodePush(String deploymentKey, Activity mainActivity)__ - Creates a new instance of the CodePush runtime, that will be used to query the service for updates via the provided deployment key. The `mainActivity` parameter should always be set to `this` when configuring your `ReactInstanceManager` inside the `MainActivity` class. This constructor puts the CodePush runtime into "release mode", so if you want to enable debugging behavior, use the following constructor instead.
 
+- __CodePush(String deploymentKey, Activity mainActivity, bool isDebugMode)__ - Equivalent to the previous constructor, but allows you to specify whether you want the CodePush runtime to be in debug mode or not. When using this constructor, the `isDebugMode` parameter should always be set to `BuildConfig.DEBUG` in order to stay synchronized with your build type. When putting CodePush into debug mode, the following behaviors are enabled:
+
+    1. Old CodePush updates aren't deleted from storage whenever a new binary is deployed to the emulator/device. This behavior enables you to deploy new binaries, without bumping the version during development, and without continuously getting the same update every time your app calls `sync`.
+    
+    2. The local cache that the React Native runtime maintains in debug mode is deleted whenever a CodePush update is installed. This ensures that when the app is restarted after an update is applied, you will see the expected changes. As soon as [this PR](https://github.com/facebook/react-native/pull/4738) is merged, we won't need to do this anymore.
+    
 ##### Methods
 
 - __getBundleUrl(String bundleName)__ - Returns the path to the most recent version of your app's JS bundle file, using the specified resource name (e.g. `index.android.bundle`). This method has the same resolution behavior as the Objective-C equivalent described above.
