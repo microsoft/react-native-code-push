@@ -192,7 +192,7 @@ The simplest way to do this is to perform the following in your app's root compo
 1. Import the JavaScript module for CodePush:
 
     ```
-    var CodePush = require("react-native-code-push")
+    import CodePush from "react-native-code-push";
     ```
 
 2. Call the `sync` method from within the `componentDidMount` lifecycle event, to initiate a background update on each app start:
@@ -559,6 +559,12 @@ Constructs the CodePush client runtime and includes methods for integrating Code
 
 - __CodePush(String deploymentKey, Activity mainActivity)__ - Creates a new instance of the CodePush runtime, that will be used to query the service for updates via the provided deployment key. The `mainActivity` parameter should always be set to `this` when configuring your `ReactInstanceManager` inside the `MainActivity` class.
 
+- __CodePush(String deploymentKey, Activity mainActivity, bool isDebugMode)__ - Equivalent to the other constructor, but allows you to specify whether you want the CodePush runtime to be in debug mode or not. When using this constructor, the `isDebugMode` parameter should always be set to `BuildConfig.DEBUG` in order to stay synchronized with your build type. When putting CodePush into debug mode, the following behaviors are enabled:
+
+    1. Old CodePush updates aren't deleted from storage whenever a new binary is deployed to the emulator/device. This behavior enables you to deploy new binaries, without bumping the version during development, and without continuously getting the same update every time your app calls `sync`.
+    
+    2. The local cache that the React Native runtime maintains in debug mode is deleted whenever a CodePush update is installed. This ensures that when the app is restarted after an update is applied, you will see the expected changes. As soon as [this PR](https://github.com/facebook/react-native/pull/4738) is merged, we won't need to do this anymore.
+    
 ##### Methods
 
 - __getBundleUrl(String bundleName)__ - Returns the path to the most recent version of your app's JS bundle file, using the specified resource name (e.g. `index.android.bundle`). This method has the same resolution behavior as the Objective-C equivalent described above.
