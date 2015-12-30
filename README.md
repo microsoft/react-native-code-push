@@ -207,14 +207,14 @@ If an update is available, it will be silently downloaded, and installed the nex
 
 Once your app has been configured and distributed to your users, and you've made some JS changes, it's time to release it to them instantly! If you're not using React Native to bundle images (via `require('./foo.png')`), then perform the following steps. Otherwise, skip to the next section instead:
 
-1. Execute `react-native bundle` (passing the appropriate parameters, see example below) in order to generate the updated JS bundle for your app. You can place this file wherever you want via the `--bundle-output` flag, since the exact location isn't relevant for CodePush purposes. It's important, however, that you set `--dev false` so that your JS code is optimized appropriately and any "yellow box" warnings won't be displayed.
+1. Execute `react-native bundle` (passing the appropriate parameters, see example below) in order to generate the updated JS bundle for your app. You can place this file wherever you want via the `--out` flag, since the exact location isn't relevant for CodePush purposes. It's important, however, that you set `--dev false` so that your JS code is optimized appropriately and any "yellow box" warnings won't be displayed.
 
-2. Execute `code-push release <appName> <jsBundleFilePath> <appStoreVersion> --deploymentName <deploymentName>` in order to publish the generated JS bundle to the server. The `<jsBundleFilePath>` parameter should equal the value you provided to the `--bundle-output` flag in step #1. Additionally, the `<appStoreVersion>` parameter should equal the exact app store version (i.e. the semver version end users would see when installing it) you want this CodePush update to target.
+2. Execute `code-push release <appName> <jsBundleFilePath> <appStoreVersion> --deploymentName <deploymentName>` in order to publish the generated JS bundle to the server. The `<jsBundleFilePath>` parameter should equal the value you provided to the `--out` flag in step #1. Additionally, the `<appStoreVersion>` parameter should equal the exact app store version (i.e. the semver version end users would see when installing it) you want this CodePush update to target.
 
 Example Usage:
 
 ```
-react-native bundle --platform ios --entry-file index.ios.js --bundle-output codepush.js --dev false
+react-native bundle --platform ios --entry-file index.ios.js --out codepush.js --dev false
 code-push release MyApp codepush.js 1.0.2
 ```
     
@@ -236,7 +236,7 @@ If you are using the new React Native [assets system](https://facebook.github.io
     react-native bundle \
     --platform ios \
     --entry-file index.ios.js \
-    --bundle-output ./release/main.jsbundle \
+    --out ./release/main.jsbundle \
     --assets-dest ./release
     --dev false
     ```
