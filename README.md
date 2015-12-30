@@ -283,8 +283,13 @@ Queries the CodePush service to see whether the configured app deployment has an
 
 This method returns a `Promise` which resolves to one of two possible values:
 
-* `null` if there is no update available.
-* A `RemotePackage` instance which represents an available update that can be inspected and/or subsequently downloaded.
+1. `null` if there is no update available. This occurs in the following scenarios:
+
+    1. The configured deployment doesn't contain any releases, and therefore, nothing to update.
+    2. The latest release within the configured deployment is targeting a different binary version than what you're currently running (either older or newer).
+    3. The currently running app already has the latest release from the configured deployment, and therefore, doesn't need it again.
+    
+2. A [`RemotePackage`](#remotepackage) instance which represents an available update that can be inspected and/or subsequently downloaded.
 
 Example Usage: 
 
@@ -305,9 +310,9 @@ codePush.checkForUpdate()
 codePush.getCurrentPackage(): Promise<LocalPackage>;
 ```
 
-Retrieves the metadata about the currently installed "package" (e.g. description, installation time). This can be useful for scenarios such as displaying a "what's new?" dialog after an update has been applied.
+Retrieves the metadata about the currently installed "package" (e.g. description, installation time). This can be useful for scenarios such as displaying a "what's new?" dialog after an update has been applied, and checking whether there is a pending update that is waiting to be applied via a resume or restart.
 
-This method returns a `Promise` which resolves to the `LocalPackage` instance that represents the currently running update. 
+This method returns a `Promise` which resolves to the [`LocalPackage`](#localpackage) instance that represents the currently running update. 
 
 Example Usage: 
 
@@ -353,11 +358,11 @@ This method is for advanced scenarios, and is primarily useful when the followin
 codePush.sync(options: Object, syncStatusChangeCallback: function(syncStatus: Number), downloadProgressCallback: function(progress: DownloadProgress)): Promise<Number>;
 ```
 
-Synchronizes your app's JavaScript bundle and image assets with the latest release to the configured deployment. Unlike the `checkForUpdate` method, which simply checks for the presence of an update, and let's you control what to do next, `sync` handles the update check, download and installation experience for you.
+Synchronizes your app's JavaScript bundle and image assets with the latest release to the configured deployment. Unlike the [checkForUpdate](#codepushcheckforupdate) method, which simply checks for the presence of an update, and let's you control what to do next, `sync` handles the update check, download and installation experience for you.
 
 This method provides support for two different (but customizable) "modes" to easily enable apps with different requirements:
 
-1. **Silent mode** *(the default behavior)*, which automatically downloads available updates, and applies them the next time the app restarts. This way, the entire update experience is "silent" to the end user, since they don't see any update prompt and/or "synthetic" app restarts.
+1. **Silent mode** *(the default behavior)*, which automatically downloads available updates, and applies them the next time the app restarts (e.g. the OS or end user killed it, or the device was restarted). This way, the entire update experience is "silent" to the end user, since they don't see any update prompt and/or "synthetic" app restarts.
 
 2. **Active mode**, which when an update is available, prompts the end user for permission before downloading it, and then immediately applies the update. If an update was released using the `mandatory` flag, the end user would still be notified about the update, but they wouldn't have the choice to ignore it.
 
@@ -417,6 +422,18 @@ codePush.sync({ installMode: codePush.InstallMode.ON_NEXT_RESUME });
 // Changing the title displayed in the
 // confirmation dialog of an "active" update
 codePush.sync({ updateDialog: { title: "An update is available!" } });
+
+// Displaying an update prompt which includes the
+// description associated with the CodePush release
+codePush.sync({
+   updateDialog: {
+    appendReleaseDescription: true,
+    descriptionPrefix: "\n\nChange log:\n"   
+   },
+   installMode: codePush.InstallMode.IMMEDIATE
+});
+
+
 ```
 
 In addition to the options, the `sync` method also accepts two optional function parameters which allow you to subscribe to the lifecycle of the `sync` "pipeline" in order to display additional UI as needed (e.g. a "checking for update modal or a download progress modal):
@@ -447,7 +464,9 @@ codePush.sync({ updateDialog: true }, (status) => {
 This method returns a `Promise` which is resolved to a `SyncStatus` code that indicates why the `sync` call succeeded. This code can be one of the following `SyncStatus` values:
 
 * __CodePush.SyncStatus.UP_TO_DATE__ *(4)* - The app is up-to-date with the CodePush server.
+
 * __CodePush.SyncStatus.UPDATE_IGNORED__ *(5)* - The app had an optional update which the end user chose to ignore. (This is only applicable when the `updateDialog` is used)
+
 * __CodePush.SyncStatus.UPDATE_INSTALLED__ *(6)* - The update has been installed and will be run either immediately after the `syncStatusChangedCallback` function returns or the next time the app resumes/restarts, depending on the `InstallMode` specified in `SyncOptions`.
 
 If the update check and/or the subsequent download fails for any reason, the `Promise` object returned by `sync` will be rejected with the reason.
@@ -458,7 +477,8 @@ The `sync` method can be called anywhere you'd like to check for an update. That
 
 The `checkForUpdate` and `getCurrentPackage` methods return promises, that when resolved, provide acces to "package" objects. The package represents your code update as well as any extra metadata (e.g. description, mandatory?). The CodePush API has the distinction between the following types of packages:
 
-* [LocalPackage](#localpackage): Represents a downloaded update package that is either already running, or has been installed and is pending an app restart.
+* [LocalPackage](#localpackage): Represents a downloaded update that is either already running, or has been installed and is pending an app restart.
+
 * [RemotePackage](#remotepackage): Represents an available update on the CodePush server that hasn't been downloaded yet.
 
 ##### LocalPackage
