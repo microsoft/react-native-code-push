@@ -310,7 +310,7 @@ codePush.checkForUpdate()
 codePush.getCurrentPackage(): Promise<LocalPackage>;
 ```
 
-Retrieves the metadata about the currently installed "package" (e.g. description, installation time). This can be useful for scenarios such as displaying a "what's new?" dialog after an update has been applied, and checking whether there is a pending update that is waiting to be applied via a resume or restart.
+Retrieves the metadata about the currently installed "package" (e.g. description, installation time). This can be useful for scenarios such as displaying a "what's new?" dialog after an update has been applied or checking whether there is a pending update that is waiting to be applied via a resume or restart.
 
 This method returns a `Promise` which resolves to the [`LocalPackage`](#localpackage) instance that represents the currently running update. 
 
