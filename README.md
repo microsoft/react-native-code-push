@@ -434,8 +434,6 @@ codePush.sync({
    },
    installMode: codePush.InstallMode.IMMEDIATE
 });
-
-
 ```
 
 In addition to the options, the `sync` method also accepts two optional function parameters which allow you to subscribe to the lifecycle of the `sync` "pipeline" in order to display additional UI as needed (e.g. a "checking for update modal or a download progress modal):
