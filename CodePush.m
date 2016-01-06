@@ -1,4 +1,5 @@
 #import "RCTBridgeModule.h"
+#import "RCTBridge+Private.h"
 #import "RCTConvert.h"
 #import "RCTEventDispatcher.h"
 #import "RCTRootView.h"
