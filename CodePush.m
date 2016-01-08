@@ -4,6 +4,10 @@
 #import "RCTRootView.h"
 #import "RCTUtils.h"
 
+@interface RCTBridge ()
+@property (nonatomic, strong, readwrite) NSURL *bundleURL;
+@end
+
 #import "CodePush.h"
 
 @implementation CodePush {
