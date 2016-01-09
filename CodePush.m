@@ -230,7 +230,7 @@ static NSString *const PackageIsPendingKey = @"isPending";
         // file (since Chrome wouldn't support it). Otherwise, update
         // the current bundle URL to point at the latest update
         if ([CodePush isUsingTestConfiguration] || ![_bridge.bundleURL.scheme hasPrefix:@"http"]) {
-            _bridge.bundleURL = [CodePush bundleURL];
+            [_bridge setValue:[CodePush bundleURL] forKey:@"bundleURL"];
         }
         
         [_bridge reload];
