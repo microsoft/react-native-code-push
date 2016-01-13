@@ -1,6 +1,6 @@
 # React Native Plugin for CodePush
 
-This plugin provides client-side integration for the [CodePush service](https://microsoft.github.io/code-push), allowing you to easily add a dynamic update experience to your React Native app(s).
+This plugin provides client-side integration for the [CodePush service](http://codepush.tools), allowing you to easily add a dynamic update experience to your React Native app(s).
 
 * [How does it work?](#how-does-it-work)
 * [Supported React Native Platforms](#supported-react-native-platforms)
@@ -38,7 +38,7 @@ In order to ensure that your end users always have a functioning version of your
 
 ## Getting Started
 
-Once you've followed the general-purpose ["getting started"](http://microsoft.github.io/code-push/docs/getting-started.html) instructions for setting up your CodePush account, you can start CodePush-ifying your React Native app by running the following command from within your app's root directory:
+Once you've followed the general-purpose ["getting started"](http://codepush.tools/docs/getting-started.html) instructions for setting up your CodePush account, you can start CodePush-ifying your React Native app by running the following command from within your app's root directory:
 
 ```
 npm install --save react-native-code-push
@@ -105,8 +105,10 @@ To let the CodePush runtime know which deployment it should query for updates ag
 
     ![Deployment list](https://cloud.githubusercontent.com/assets/116461/11601733/13011d5e-9a8a-11e5-9ce2-b100498ffb34.png)
     
-2. In your app's `Info.plist` make sure your `CFBundleShortVersionString` value is a valid [semver](http://semver.org/) version (e.g. 1.0.0 not 1.0)
+2. In your app's `Info.plist` make sure your `Bundle versions string, short` (aka `CFBundleShortVersionString`) value is a valid [semver](http://semver.org/) version (e.g. 1.0.0 not 1.0)
 
+    ![Bundle version](https://cloud.githubusercontent.com/assets/116461/12307416/f9b82688-b9f3-11e5-839a-f1c6b4acd093.png)
+    
 ## Android Setup
 
 In order to integrate CodePush into your Android project, perform the following steps:
@@ -211,8 +213,10 @@ Once your app has been configured and distributed to your users, and you've made
 
 1. Execute `react-native bundle` (passing the appropriate parameters, see example below) in order to generate the updated JS bundle for your app. You can place this file wherever you want via the `--bundle-output` flag, since the exact location isn't relevant for CodePush purposes. It's important, however, that you set `--dev false` so that your JS code is optimized appropriately and any "yellow box" warnings won't be displayed.
 
-2. Execute `code-push release <appName> <jsBundleFilePath> <appStoreVersion> --deploymentName <deploymentName>` in order to publish the generated JS bundle to the server. The `<jsBundleFilePath>` parameter should equal the value you provided to the `--bundle-output` flag in step #1. Additionally, the `<appStoreVersion>` parameter should equal the exact app store version (i.e. the semver version end users would see when installing it) you want this CodePush update to target.
+2. Execute `code-push release <appName> <jsBundleFilePath> <appStoreVersion> --deploymentName <deploymentName>` in order to publish the generated JS bundle to the server. The `<jsBundleFilePath>` parameter should equal the value you provided to the `--bundle-output` flag in step #1. Additionally, the `<appStoreVersion>` parameter should equal the [**exact app store version**](http://microsoft.github.io/code-push/docs/cli.html#app-store-version-parameter) (i.e. the semver version end users would see when installing it) you want this CodePush update to target.
 
+    For more info regarding the `release` command and its parameters, refer to the [CLI documentation](http://codepush.tools/docs/cli.html).
+    
 Example Usage:
 
 ```
@@ -243,8 +247,10 @@ If you are using the new React Native [assets system](https://facebook.github.io
     --dev false
     ```
 
-3. Execute `code-push release`, passing the path to the directory you created in #1 as the "package" parameter (e.g. `code-push release Foo ./release 1.0.0`). The code-push CLI will automatically handle zipping up the contents for you, so don't worry about handling that yourself.
+3. Execute `code-push release`, passing the path to the directory you created in #1 as the ["package"](http://codepush.tools/docs/cli.html#package-parameter) parameter, and the [**exact app version**](http://microsoft.github.io/code-push/docs/cli.html#app-store-version-parameter) that this update is targetting as the ["appStoreVersion"]((http://microsoft.github.io/code-push/docs/cli.html#app-store-version-parameter) parameter (e.g. `code-push release Foo ./release 1.0.0`). The code-push CLI will automatically handle zipping up the contents for you, so don't worry about handling that yourself.
 
+    For more info regarding the `release` command and its parameters, refer to the [CLI documentation](http://codepush.tools/docs/cli.html).
+    
 Additionally, the CodePush client supports differential updates, so even though you are releasing your JS bundle and assets on every update, your end users will only actually download the files they need. The service handles this automatically so that you can focus on creating awesome apps and we can worry about optimizing end user downloads.
 
 *Note: Releasing assets via CodePush is currently only supported on iOS, and requires that you're using React Native v0.15.0+ and CodePush 1.4.0+. If you are using assets and an older version of the CodePush plugin, you should not release updates via CodePush, because it will break your app's ability to load images from the binary. Please test and release appropriately!*
