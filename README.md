@@ -243,7 +243,7 @@ If you are using the new React Native [assets system](https://facebook.github.io
     --platform ios \
     --entry-file index.ios.js \
     --bundle-output ./release/main.jsbundle \
-    --assets-dest ./release
+    --assets-dest ./release \
     --dev false
     ```
 
