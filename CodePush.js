@@ -62,6 +62,7 @@ async function checkForUpdate(deploymentKey = null) {
   } else {     
     const remotePackage = { ...update, ...PackageMixins.remote };
     remotePackage.failedInstall = await NativeCodePush.isFailedUpdate(remotePackage.packageHash);
+    remotePackage.deploymentKey = deploymentKey || nativeConfig.deploymentKey;
     return remotePackage;
   }
 }
@@ -102,12 +103,41 @@ function getPromisifiedSdk(requestFetchAdapter, config) {
     });
   };
   
+  sdk.reportStatus = (package, status) => {
+    return new Promise((resolve, reject) => {
+      module.exports.AcquisitionSdk.prototype.reportStatusDeploy.call(sdk, package, status, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      }); 
+    });
+  };
+  
   return sdk;
 }
 
 /* Logs messages to console with the [CodePush] prefix */
 function log(message) {
   console.log(`[CodePush] ${message}`)
+}
+
+async function notifyApplicationReady() {
+  await NativeCodePush.notifyApplicationReady();
+  const statusReport = await NativeCodePush.getNewStatusReport();
+  if (statusReport) {
+    const config = await getConfiguration();
+    if (statusReport.appVersion) {
+      config.appVersion = statusReport.appVersion;
+      const sdk = getPromisifiedSdk(requestFetchAdapter, config);
+      sdk.reportStatus();
+    } else {
+      config.deploymentKey = statusReport.package.deploymentKey;
+      const sdk = getPromisifiedSdk(requestFetchAdapter, config);
+      sdk.reportStatus(statusReport.package, statusReport.status);
+    }
+  }
 }
 
 function restartApp(onlyIfUpdateIsPending = false) {
@@ -269,7 +299,7 @@ const CodePush = {
   getConfiguration,
   getCurrentPackage,
   log,
-  notifyApplicationReady: NativeCodePush.notifyApplicationReady,
+  notifyApplicationReady,
   restartApp,
   setUpTestDependencies,
   sync,

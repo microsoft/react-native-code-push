@@ -13,6 +13,11 @@ function createMockAcquisitionSdk(serverPackage, localPackage, expectedDeploymen
     callback(/*err:*/ null, serverPackage);
   };
   
+  AcquisitionManager.prototype.reportStatus = (status, message, callback) => {
+    // No-op and return success.
+    callback(null, null);
+  };
+  
   return AcquisitionManager;
 }
 
