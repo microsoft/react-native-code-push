@@ -40,7 +40,7 @@ In order to ensure that your end users always have a functioning version of your
 
 Once you've followed the general-purpose ["getting started"](http://codepush.tools/docs/getting-started.html) instructions for setting up your CodePush account, you can start CodePush-ifying your React Native app by running the following command from within your app's root directory:
 
-```
+```shell
 npm install --save react-native-code-push
 ```
 
@@ -79,19 +79,19 @@ Once your Xcode project has been setup to build/link the CodePush plugin, you ne
 
 1. Open up the `AppDelegate.m` file, and add an import statement for the CodePush headers:
 
-    ```
+    ```objective-c
     #import "CodePush.h"
     ```
 
 2. Find the following line of code, which loads your JS Bundle from the app binary for production releases:
 
-    ```
+    ```objective-c
     jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
     ```
     
 3. Replace it with this line:
 
-    ```
+    ```objective-c
     jsCodeLocation = [CodePush bundleURL];
     ```
 
@@ -101,7 +101,7 @@ This change configures your app to always load the most recent version of your a
 
 Typically, you're only going to want to use CodePush to resolve your JS bundle location within release builds, and therefore, we recommend using the `DEBUG` pre-processor macro to dynamically switch between using the packager server and CodePush, depending on whether you are debugging or not. This will make it much simpler to ensure you get the right behavior you want in production, while still being able to use the Chrome Dev Tools, live reload, etc. at debug-time. 
 
-```
+```objective-c
 NSURL *jsCodeLocation;
 
 #ifdef DEBUG
@@ -207,13 +207,13 @@ The simplest way to do this is to perform the following in your app's root compo
 
 1. Import the JavaScript module for CodePush:
 
-    ```
+    ```javascript
     import CodePush from "react-native-code-push";
     ```
 
 2. Call the `sync` method from within the `componentDidMount` lifecycle event, to initiate a background update on each app start:
 
-    ```
+    ```javascript
     CodePush.sync();
     ```
 
@@ -231,7 +231,7 @@ Once your app has been configured and distributed to your users, and you've made
     
 Example Usage:
 
-```
+```shell
 react-native bundle --platform ios --entry-file index.ios.js --bundle-output codepush.js --dev false
 code-push release MyApp codepush.js 1.0.2
 ```
@@ -250,7 +250,7 @@ If you are using the new React Native [assets system](https://facebook.github.io
 
 2. When calling `react-native bundle`, specify that your assets and JS bundle go into the directory you created in #1, and that you want a non-dev build for your respective platform and entry file. For example, assuming you called this directory "release", you could run the following command:
 
-    ```
+    ```shell
     react-native bundle \
     --platform ios \
     --entry-file index.ios.js \
