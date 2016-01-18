@@ -163,7 +163,7 @@ After installing the plugin and syncing your Android Studio project with Gradle,
         protected void onCreate(Bundle savedInstanceState) {
             ...
             // 3. Initialize CodePush with your deployment key and an instance of your MainActivity.
-            CodePush codePush = new CodePush("d73bf5d8-4fbd-4e55-a837-accd328a21ba", this);
+            CodePush codePush = new CodePush("d73bf5d8-4fbd-4e55-a837-accd328a21ba", this, BuildConfig.DEBUG);
             ...
             mReactInstanceManager = ReactInstanceManager.builder()
                     .setApplication(getApplication())
