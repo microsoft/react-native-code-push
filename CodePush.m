@@ -13,6 +13,7 @@
 
 RCT_EXPORT_MODULE()
 
+static BOOL didRollback = NO;
 static BOOL testConfigurationFlag = NO;
 
 // These constants represent valid deployment statuses
@@ -189,6 +190,7 @@ static NSString *const PackageIsPendingKey = @"isPending";
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];
     if (pendingUpdate) {
+        didRollback = NO;
         _isFirstRunAfterUpdate = YES;
         BOOL updateIsLoading = [pendingUpdate[PendingUpdateIsLoadingKey] boolValue];
         if (updateIsLoading) {
@@ -196,6 +198,7 @@ static NSString *const PackageIsPendingKey = @"isPending";
             // Therefore, deduce that it is a broken update and rollback.
             NSLog(@"Update did not finish loading the last time, rolling back to a previous version.");
             [self rollbackPackage];
+            didRollback = YES;
         } else {
             // Mark that we tried to initialize the new update, so that if it crashes,
             // we will know that we need to rollback when the app next starts.
@@ -220,7 +223,7 @@ static NSString *const PackageIsPendingKey = @"isPending";
 {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSMutableArray *failedUpdates = [preferences objectForKey:FailedUpdatesKey];
-    if (failedUpdates == nil) {
+    if (failedUpdates == nil || packageHash == nil) {
         return NO;
     } else {
         for (NSDictionary *failedPackage in failedUpdates)
@@ -535,6 +538,39 @@ RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
 RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
                             rejecter:(RCTPromiseRejectBlock)reject)
 {
+    if (didRollback) {
+        // Check if there was a rollback that was not yet reported
+        NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+        NSMutableArray *failedUpdates = [preferences objectForKey:FailedUpdatesKey];
+        if (failedUpdates) {
+            NSDictionary* lastFailedPackage = [failedUpdates lastObject];
+            if (lastFailedPackage) {
+                NSString* lastFailedPackageIdentifier = [self getPackageStatusReportIdentifier:lastFailedPackage];
+                if (lastFailedPackageIdentifier && [self isDeploymentStatusNotYetReported:lastFailedPackageIdentifier]) {
+                    [self recordDeploymentStatusReported:lastFailedPackageIdentifier
+                                                  status:DeploymentFailed];
+                    resolve(@{ @"package": lastFailedPackage, @"status": DeploymentFailed });
+                    return;
+                }
+            }
+        }
+    }
+    
+    if (_isFirstRunAfterUpdate) {
+        // Check if the current CodePush package has been reported
+        NSError *error;
+        NSDictionary* currentPackage = [CodePushPackage getCurrentPackage:&error];
+        if (currentPackage) {
+            NSString* currentPackageIdentifier = [self getPackageStatusReportIdentifier:currentPackage];
+            if (currentPackageIdentifier && [self isDeploymentStatusNotYetReported:currentPackageIdentifier]) {
+                [self recordDeploymentStatusReported:currentPackageIdentifier
+                                              status:DeploymentSucceeded];
+                resolve(@{ @"package": currentPackage, @"status": DeploymentSucceeded });
+                return;
+            }
+        }
+    }
+    
     // Check if the current appVersion has been reported.
     NSString *appVersion = [[CodePushConfig current] appVersion];
     if ([self isDeploymentStatusNotYetReported:appVersion]) {
@@ -542,35 +578,6 @@ RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
                                       status:DeploymentSucceeded];
         resolve(@{ @"appVersion": appVersion });
         return;
-    }
-    
-    // Check if there was a rollback that was not yet reported
-    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
-    NSMutableArray *failedUpdates = [preferences objectForKey:FailedUpdatesKey];
-    if (failedUpdates) {
-        NSDictionary* lastFailedPackage = [failedUpdates lastObject];
-        if (lastFailedPackage) {
-            NSString* lastFailedPackageIdentifier = [self getPackageStatusReportIdentifier:lastFailedPackage];
-            if (lastFailedPackageIdentifier && [self isDeploymentStatusNotYetReported:lastFailedPackageIdentifier]) {
-                [self recordDeploymentStatusReported:lastFailedPackageIdentifier
-                                              status:DeploymentFailed];
-                resolve(@{ @"package": lastFailedPackage, @"status": DeploymentFailed });
-                return;
-            }
-        }
-    }
-    
-    // Check if the current CodePush package has been reported
-    NSError *error;
-    NSDictionary* currentPackage = [CodePushPackage getCurrentPackage:&error];
-    if (currentPackage) {
-        NSString* currentPackageIdentifier = [self getPackageStatusReportIdentifier:currentPackage];
-        if (currentPackageIdentifier && [self isDeploymentStatusNotYetReported:currentPackageIdentifier]) {
-            [self recordDeploymentStatusReported:currentPackageIdentifier
-                                          status:DeploymentSucceeded];
-            resolve(@{ @"package": currentPackage, @"status": DeploymentSucceeded });
-            return;
-        }
     }
     
     resolve([NSNull null]);

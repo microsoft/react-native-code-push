@@ -21,7 +21,7 @@ let IsFailedUpdateTest = createTestCaseComponent(
       remotePackage.downloadUrl = "http://localhost:8081/CodePushDemoAppTests/InstallUpdateTests/resources/IsFailedUpdateTestBundleV1.includeRequire.runModule.bundle?platform=ios&dev=true"
     }
     
-    remotePackage = Object.assign(remotePackage, PackageMixins.remote);
+    remotePackage = Object.assign(remotePackage, PackageMixins.remote());
   },
   async () => {
     let localPackage = await remotePackage.download();

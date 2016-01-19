@@ -41,6 +41,8 @@ import java.util.zip.ZipFile;
 public class CodePush {
 
     private static boolean testConfigurationFlag = false;
+    private static boolean didRollback = false;
+
     private boolean didUpdate = false;
 
     private String assetsBundleFileName;
@@ -233,6 +235,7 @@ public class CodePush {
         JSONObject pendingUpdate = getPendingUpdate();
         if (pendingUpdate != null) {
             didUpdate = true;
+            didRollback = false;
             try {
                 boolean updateIsLoading = pendingUpdate.getBoolean(PENDING_UPDATE_IS_LOADING_KEY);
                 if (updateIsLoading) {
@@ -240,6 +243,7 @@ public class CodePush {
                     // Therefore, deduce that it is a broken update and rollback.
                     CodePushUtils.log("Update did not finish loading the last time, rolling back to a previous version.");
                     rollbackPackage();
+                    didRollback = true;
                 } else {
                     // Clear the React dev bundle cache so that new updates can be loaded.
                     if (this.isDebugMode) {
@@ -275,16 +279,18 @@ public class CodePush {
 
     private boolean isFailedHash(String packageHash) {
         JSONArray failedUpdates = getFailedUpdates();
-        for (int i = 0; i < failedUpdates.length(); i++) {
-            JSONObject failedPackage = null;
-            try {
-                failedPackage = failedUpdates.getJSONObject(i);
-                String failedPackageHash = failedPackage.getString(PACKAGE_HASH_KEY);
-                if (packageHash.equals(failedPackageHash)) {
-                    return true;
+        if (packageHash != null) {
+            for (int i = 0; i < failedUpdates.length(); i++) {
+                JSONObject failedPackage = null;
+                try {
+                    failedPackage = failedUpdates.getJSONObject(i);
+                    String failedPackageHash = failedPackage.getString(PACKAGE_HASH_KEY);
+                    if (packageHash.equals(failedPackageHash)) {
+                        return true;
+                    }
+                } catch (JSONException e) {
+                    throw new CodePushUnknownException("Unable to read failedUpdates data stored in SharedPreferences.", e);
                 }
-            } catch (JSONException e) {
-                throw new CodePushUnknownException("Unable to read failedUpdates data stored in SharedPreferences.", e);
             }
         }
 
@@ -484,6 +490,49 @@ public class CodePush {
 
         @ReactMethod
         public void getNewStatusReport(Promise promise) {
+            // Check if there was a rollback that was not yet reported
+            if (didRollback) {
+                JSONArray failedUpdates = getFailedUpdates();
+                if (failedUpdates != null && failedUpdates.length() > 0) {
+                    try {
+                        JSONObject lastFailedPackageJSON = failedUpdates.getJSONObject(failedUpdates.length() - 1);
+                        WritableMap lastFailedPackage = CodePushUtils.convertJsonObjectToWriteable(lastFailedPackageJSON);
+                        String lastFailedPackageIdentifier = getPackageStatusReportIdentifier(lastFailedPackage);
+                        if (lastFailedPackage != null && isDeploymentStatusNotYetReported(lastFailedPackageIdentifier)) {
+                            recordDeploymentStatusReported(lastFailedPackageIdentifier, DEPLOYMENT_FAILED_STATUS);
+                            WritableNativeMap reportMap = new WritableNativeMap();
+                            reportMap.putMap("package", lastFailedPackage);
+                            reportMap.putString("status", DEPLOYMENT_FAILED_STATUS);
+                            promise.resolve(reportMap);
+                            return;
+                        }
+                    } catch (JSONException e) {
+                        throw new CodePushUnknownException("Unable to read failed updates information stored in SharedPreferences.", e);
+                    }
+                }
+            }
+
+            // Check if the current CodePush package has been reported
+            if (didUpdate) {
+                try {
+                    WritableMap currentPackage = codePushPackage.getCurrentPackage();
+                    if (currentPackage != null) {
+                        String currentPackageIdentifier = getPackageStatusReportIdentifier(currentPackage);
+                        if (currentPackageIdentifier != null && isDeploymentStatusNotYetReported(currentPackageIdentifier)) {
+                            recordDeploymentStatusReported(currentPackageIdentifier, DEPLOYMENT_SUCCEEDED_STATUS);
+                            WritableNativeMap reportMap = new WritableNativeMap();
+                            reportMap.putMap("package", currentPackage);
+                            reportMap.putString("status", DEPLOYMENT_SUCCEEDED_STATUS);
+                            promise.resolve(reportMap);
+                            return;
+                        }
+                    }
+                } catch (IOException e) {
+                    // If didUpdate is true, there should be a current package, so this should not happen.
+                    throw new CodePushUnknownException("Error getting current package after an update.", e);
+                }
+            }
+
             // Check if the current appVersion has been reported.
             if (isDeploymentStatusNotYetReported(appVersion)) {
                 recordDeploymentStatusReported(appVersion, DEPLOYMENT_SUCCEEDED_STATUS);
@@ -491,45 +540,6 @@ public class CodePush {
                 reportMap.putString("appVersion", appVersion);
                 promise.resolve(reportMap);
                 return;
-            }
-
-            // Check if there was a rollback that was not yet reported
-            JSONArray failedUpdates = getFailedUpdates();
-            if (failedUpdates != null && failedUpdates.length() > 0) {
-                try {
-                    JSONObject lastFailedPackageJSON = failedUpdates.getJSONObject(failedUpdates.length() - 1);
-                    WritableMap lastFailedPackage = CodePushUtils.convertJsonObjectToWriteable(lastFailedPackageJSON);
-                    String lastFailedPackageIdentifier = getPackageStatusReportIdentifier(lastFailedPackage);
-                    if (lastFailedPackage != null && isDeploymentStatusNotYetReported(lastFailedPackageIdentifier)) {
-                        recordDeploymentStatusReported(lastFailedPackageIdentifier, DEPLOYMENT_FAILED_STATUS);
-                        WritableNativeMap reportMap = new WritableNativeMap();
-                        reportMap.putMap("package", lastFailedPackage);
-                        reportMap.putString("status", DEPLOYMENT_FAILED_STATUS);
-                        promise.resolve(reportMap);
-                        return;
-                    }
-                } catch (JSONException e) {
-                    throw new CodePushUnknownException("Unable to read failed updates information stored in SharedPreferences.", e);
-                }
-            }
-
-            // Check if the current CodePush package has been reported
-            try {
-                WritableMap currentPackage = codePushPackage.getCurrentPackage();
-                if (currentPackage != null) {
-                    String currentPackageIdentifier = getPackageStatusReportIdentifier(currentPackage);
-                    if (currentPackageIdentifier != null && isDeploymentStatusNotYetReported(currentPackageIdentifier)) {
-                        recordDeploymentStatusReported(currentPackageIdentifier, DEPLOYMENT_SUCCEEDED_STATUS);
-                        WritableNativeMap reportMap = new WritableNativeMap();
-                        reportMap.putMap("package", currentPackage);
-                        reportMap.putString("status", DEPLOYMENT_SUCCEEDED_STATUS);
-                        promise.resolve(reportMap);
-                        return;
-                    }
-                }
-            } catch (IOException e) {
-                // No current package, resolve no report.
-                promise.resolve("");
             }
 
             promise.resolve("");

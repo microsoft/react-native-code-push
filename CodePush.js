@@ -60,7 +60,7 @@ async function checkForUpdate(deploymentKey = null) {
   if (!update || update.updateAppVersion || (update.packageHash === localPackage.packageHash)) {
     return null;
   } else {     
-    const remotePackage = { ...update, ...PackageMixins.remote };
+    const remotePackage = { ...update, ...PackageMixins.remote(sdk.reportStatusDownload) };
     remotePackage.failedInstall = await NativeCodePush.isFailedUpdate(remotePackage.packageHash);
     remotePackage.deploymentKey = deploymentKey || nativeConfig.deploymentKey;
     return remotePackage;
@@ -102,8 +102,8 @@ function getPromisifiedSdk(requestFetchAdapter, config) {
       }); 
     });
   };
-  
-  sdk.reportStatus = (package, status) => {
+
+  sdk.reportStatusDeploy = (package, status) => {
     return new Promise((resolve, reject) => {
       module.exports.AcquisitionSdk.prototype.reportStatusDeploy.call(sdk, package, status, (err) => {
         if (err) {
@@ -114,7 +114,19 @@ function getPromisifiedSdk(requestFetchAdapter, config) {
       }); 
     });
   };
-  
+
+  sdk.reportStatusDownload = (package, status) => {
+    return new Promise((resolve, reject) => {
+      module.exports.AcquisitionSdk.prototype.reportStatusDownload.call(sdk, package, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      }); 
+    });
+  };
+
   return sdk;
 }
 
@@ -129,13 +141,12 @@ async function notifyApplicationReady() {
   if (statusReport) {
     const config = await getConfiguration();
     if (statusReport.appVersion) {
-      config.appVersion = statusReport.appVersion;
       const sdk = getPromisifiedSdk(requestFetchAdapter, config);
-      sdk.reportStatus();
+      sdk.reportStatusDeploy();
     } else {
       config.deploymentKey = statusReport.package.deploymentKey;
       const sdk = getPromisifiedSdk(requestFetchAdapter, config);
-      sdk.reportStatus(statusReport.package, statusReport.status);
+      sdk.reportStatusDeploy(statusReport.package, statusReport.status);
     }
   }
 }

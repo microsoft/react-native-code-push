@@ -27,7 +27,7 @@ let RollbackTest = React.createClass({
       await NativeCodePush.downloadAndReplaceCurrentBundle("http://localhost:8081/CodePushDemoAppTests/InstallUpdateTests/resources/RollbackTestBundleV1Pass.includeRequire.runModule.bundle?platform=ios&dev=true");
     }
     
-    remotePackage = Object.assign(remotePackage, PackageMixins.remote);
+    remotePackage = Object.assign(remotePackage, PackageMixins.remote());
 
     let localPackage = await remotePackage.download();
     return await localPackage.install(NativeCodePush.codePushInstallModeImmediate);

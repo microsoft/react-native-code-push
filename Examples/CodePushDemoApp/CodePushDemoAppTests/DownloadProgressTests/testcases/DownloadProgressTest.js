@@ -28,7 +28,7 @@ let DownloadProgressTest = createTestCaseComponent(
   "should successfully download all the bytes contained in the test packages",
   () => {
     testPackages.forEach((aPackage, index) => {
-      testPackages[index] = Object.assign(aPackage, PackageMixins.remote);
+      testPackages[index] = Object.assign(aPackage, PackageMixins.remote());
     });
     return Promise.resolve();
   },
