@@ -1,6 +1,6 @@
 # React Native Plugin for CodePush
 
-This plugin provides client-side integration for the [CodePush service](https://microsoft.github.io/code-push), allowing you to easily add a dynamic update experience to your React Native app(s).
+This plugin provides client-side integration for the [CodePush service](http://codepush.tools), allowing you to easily add a dynamic update experience to your React Native app(s).
 
 * [How does it work?](#how-does-it-work)
 * [Supported React Native Platforms](#supported-react-native-platforms)
@@ -38,9 +38,9 @@ In order to ensure that your end users always have a functioning version of your
 
 ## Getting Started
 
-Once you've followed the general-purpose ["getting started"](http://microsoft.github.io/code-push/docs/getting-started.html) instructions for setting up your CodePush account, you can start CodePush-ifying your React Native app by running the following command from within your app's root directory:
+Once you've followed the general-purpose ["getting started"](http://codepush.tools/docs/getting-started.html) instructions for setting up your CodePush account, you can start CodePush-ifying your React Native app by running the following command from within your app's root directory:
 
-```
+```shell
 npm install --save react-native-code-push
 ```
 
@@ -58,7 +58,7 @@ Once you've acquired the CodePush plugin, you need to integrate it into the Xcod
     ![Add CodePush to project](https://cloud.githubusercontent.com/assets/516559/10322414/7688748e-6c32-11e5-83c1-00d3e6758df4.png)
 
 3. Select the project node in Xcode and select the "Build Phases" tab of your project configuration.
-4. Drag `libCodePush.a` from `Libraries/CodePush.xcodeproj/Products` into the "Link Binary With Libraries" secton of your project's "Build Phases" configuration.
+4. Drag `libCodePush.a` from `Libraries/CodePush.xcodeproj/Products` into the "Link Binary With Libraries" section of your project's "Build Phases" configuration.
 
     ![Link CodePush during build](https://cloud.githubusercontent.com/assets/516559/10322221/a75ea066-6c31-11e5-9d88-ff6f6a4d6968.png)
 
@@ -79,19 +79,19 @@ Once your Xcode project has been setup to build/link the CodePush plugin, you ne
 
 1. Open up the `AppDelegate.m` file, and add an import statement for the CodePush headers:
 
-    ```
+    ```objective-c
     #import "CodePush.h"
     ```
 
 2. Find the following line of code, which loads your JS Bundle from the app binary for production releases:
 
-    ```
+    ```objective-c
     jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
     ```
     
 3. Replace it with this line:
 
-    ```
+    ```objective-c
     jsCodeLocation = [CodePush bundleURL];
     ```
 
@@ -99,14 +99,28 @@ This change configures your app to always load the most recent version of your a
 
 *NOTE: The `bundleURL` method assumes your app's JS bundle is named `main.jsbundle`. If you have configured your app to use a different file name, simply call the `bundleURLForResource:` method (which assumes you're using the `.jsbundle` extension) or `bundleURLForResource:withExtension:` method instead, in order to overwrite that default behavior*
 
+Typically, you're only going to want to use CodePush to resolve your JS bundle location within release builds, and therefore, we recommend using the `DEBUG` pre-processor macro to dynamically switch between using the packager server and CodePush, depending on whether you are debugging or not. This will make it much simpler to ensure you get the right behavior you want in production, while still being able to use the Chrome Dev Tools, live reload, etc. at debug-time. 
+
+```objective-c
+NSURL *jsCodeLocation;
+
+#ifdef DEBUG
+    jsCodeLocation = [NSURL URLWithString:@"http://localhost:8081/index.ios.bundle?platform=ios&dev=true"];
+#else
+    jsCodeLocation = [CodePush bundleURL];
+#endif
+```
+    
 To let the CodePush runtime know which deployment it should query for updates against, perform the following steps:
 
 1. Open your app's `Info.plist` file and add a new entry named `CodePushDeploymentKey`, whose value is the key of the deployment you want to configure this app against (e.g. the key for the `Staging` deployment for the `FooBar` app). You can retrieve this value by running `code-push deployment ls <appName>` in the CodePush CLI, and copying the value of the `Deployment Key` column which corresponds to the deployment you want to use (see below). Note that using the deployment's name (e.g. Staging) will not work. That "friendly name" is intended only for authenticated management usage from the CLI, and not for public consumption within your app.
 
     ![Deployment list](https://cloud.githubusercontent.com/assets/116461/11601733/13011d5e-9a8a-11e5-9ce2-b100498ffb34.png)
     
-2. In your app's `Info.plist` make sure your `CFBundleShortVersionString` value is a valid [semver](http://semver.org/) version (e.g. 1.0.0 not 1.0)
+2. In your app's `Info.plist` make sure your `Bundle versions string, short` (aka `CFBundleShortVersionString`) value is a valid [semver](http://semver.org/) version (e.g. 1.0.0 not 1.0)
 
+    ![Bundle version](https://cloud.githubusercontent.com/assets/116461/12307416/f9b82688-b9f3-11e5-839a-f1c6b4acd093.png)
+    
 ## Android Setup
 
 In order to integrate CodePush into your Android project, perform the following steps:
@@ -149,7 +163,7 @@ After installing the plugin and syncing your Android Studio project with Gradle,
         protected void onCreate(Bundle savedInstanceState) {
             ...
             // 3. Initialize CodePush with your deployment key and an instance of your MainActivity.
-            CodePush codePush = new CodePush("d73bf5d8-4fbd-4e55-a837-accd328a21ba", this);
+            CodePush codePush = new CodePush("d73bf5d8-4fbd-4e55-a837-accd328a21ba", this, BuildConfig.DEBUG);
             ...
             mReactInstanceManager = ReactInstanceManager.builder()
                     .setApplication(getApplication())
@@ -193,13 +207,13 @@ The simplest way to do this is to perform the following in your app's root compo
 
 1. Import the JavaScript module for CodePush:
 
-    ```
+    ```javascript
     import CodePush from "react-native-code-push";
     ```
 
 2. Call the `sync` method from within the `componentDidMount` lifecycle event, to initiate a background update on each app start:
 
-    ```
+    ```javascript
     CodePush.sync();
     ```
 
@@ -211,11 +225,13 @@ Once your app has been configured and distributed to your users, and you've made
 
 1. Execute `react-native bundle` (passing the appropriate parameters, see example below) in order to generate the updated JS bundle for your app. You can place this file wherever you want via the `--bundle-output` flag, since the exact location isn't relevant for CodePush purposes. It's important, however, that you set `--dev false` so that your JS code is optimized appropriately and any "yellow box" warnings won't be displayed.
 
-2. Execute `code-push release <appName> <jsBundleFilePath> <appStoreVersion> --deploymentName <deploymentName>` in order to publish the generated JS bundle to the server. The `<jsBundleFilePath>` parameter should equal the value you provided to the `--bundle-output` flag in step #1. Additionally, the `<appStoreVersion>` parameter should equal the exact app store version (i.e. the semver version end users would see when installing it) you want this CodePush update to target.
+2. Execute `code-push release <appName> <jsBundleFilePath> <appStoreVersion> --deploymentName <deploymentName>` in order to publish the generated JS bundle to the server. The `<jsBundleFilePath>` parameter should equal the value you provided to the `--bundle-output` flag in step #1. Additionally, the `<appStoreVersion>` parameter should equal the [**exact app store version**](http://codepush.tools/docs/cli.html#app-store-version-parameter) (i.e. the semver version end users would see when installing it) you want this CodePush update to target.
 
+    For more info regarding the `release` command and its parameters, refer to the [CLI documentation](http://codepush.tools/docs/cli.html#releasing-app-updates).
+    
 Example Usage:
 
-```
+```shell
 react-native bundle --platform ios --entry-file index.ios.js --bundle-output codepush.js --dev false
 code-push release MyApp codepush.js 1.0.2
 ```
@@ -234,17 +250,19 @@ If you are using the new React Native [assets system](https://facebook.github.io
 
 2. When calling `react-native bundle`, specify that your assets and JS bundle go into the directory you created in #1, and that you want a non-dev build for your respective platform and entry file. For example, assuming you called this directory "release", you could run the following command:
 
-    ```
+    ```shell
     react-native bundle \
     --platform ios \
     --entry-file index.ios.js \
     --bundle-output ./release/main.jsbundle \
-    --assets-dest ./release
+    --assets-dest ./release \
     --dev false
     ```
 
-3. Execute `code-push release`, passing the path to the directory you created in #1 as the "package" parameter (e.g. `code-push release Foo ./release 1.0.0`). The code-push CLI will automatically handle zipping up the contents for you, so don't worry about handling that yourself.
+3. Execute `code-push release`, passing the path to the directory you created in #1 as the ["package"](http://codepush.tools/docs/cli.html#package-parameter) parameter, and the [**exact app version**](http://codepush.tools/docs/cli.html#app-store-version-parameter) that this update is targetting as the ["appStoreVersion"](http://codepush.tools/docs/cli.html#app-store-version-parameter) parameter (e.g. `code-push release Foo ./release 1.0.0`). The code-push CLI will automatically handle zipping up the contents for you, so don't worry about handling that yourself.
 
+    For more info regarding the `release` command and its parameters, refer to the [CLI documentation](http://codepush.tools/docs/cli.html#releasing-app-updates).
+    
 Additionally, the CodePush client supports differential updates, so even though you are releasing your JS bundle and assets on every update, your end users will only actually download the files they need. The service handles this automatically so that you can focus on creating awesome apps and we can worry about optimizing end user downloads.
 
 *Note: Releasing assets via CodePush is currently only supported on iOS, and requires that you're using React Native v0.15.0+ and CodePush 1.4.0+. If you are using assets and an older version of the CodePush plugin, you should not release updates via CodePush, because it will break your app's ability to load images from the binary. Please test and release appropriately!*
