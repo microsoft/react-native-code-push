@@ -34,7 +34,12 @@ static NSString * const ServerURLConfigKey = @"serverUrl";
     NSString *serverURL = [infoDictionary objectForKey:@"CodePushServerURL"];
     
     NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
-    NSString* clientUniqueId = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
+    NSString* clientUniqueId = [userDefaults stringForKey:ClientUniqueIDConfigKey];
+    if (clientUniqueId == nil) {
+        clientUniqueId = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
+        [userDefaults setObject:clientUniqueId forKey:ClientUniqueIDConfigKey];
+        [userDefaults synchronize];
+    }
     
     if (!serverURL) {
         serverURL = @"https://codepush.azurewebsites.net/";

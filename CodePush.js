@@ -103,9 +103,9 @@ function getPromisifiedSdk(requestFetchAdapter, config) {
     });
   };
 
-  sdk.reportStatusDeploy = (package, status) => {
+  sdk.reportStatusDeploy = (deployedPackage, status) => {
     return new Promise((resolve, reject) => {
-      module.exports.AcquisitionSdk.prototype.reportStatusDeploy.call(sdk, package, status, (err) => {
+      module.exports.AcquisitionSdk.prototype.reportStatusDeploy.call(sdk, deployedPackage, status, (err) => {
         if (err) {
           reject(err);
         } else {
@@ -115,9 +115,9 @@ function getPromisifiedSdk(requestFetchAdapter, config) {
     });
   };
 
-  sdk.reportStatusDownload = (package, status) => {
+  sdk.reportStatusDownload = (downloadedPackage, status) => {
     return new Promise((resolve, reject) => {
-      module.exports.AcquisitionSdk.prototype.reportStatusDownload.call(sdk, package, (err) => {
+      module.exports.AcquisitionSdk.prototype.reportStatusDownload.call(sdk, downloadedPackage, (err) => {
         if (err) {
           reject(err);
         } else {
