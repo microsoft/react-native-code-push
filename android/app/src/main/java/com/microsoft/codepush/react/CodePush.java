@@ -61,7 +61,7 @@ public class CodePush {
     private final String PENDING_UPDATE_IS_LOADING_KEY = "isLoading";
     private final String PENDING_UPDATE_KEY = "CODE_PUSH_PENDING_UPDATE";
     private final String RESOURCES_BUNDLE = "resources.arsc";
-    private final String STATUS_REPORTS_KEY = "CODE_PUSH_STATUS_REPORTS";
+    private final String LAST_DEPLOYMENT_REPORT_KEY = "CODE_PUSH_LAST_DEPLOYMENT_REPORT";
 
     // This needs to be kept in sync with https://github.com/facebook/react-native/blob/master/ReactAndroid/src/main/java/com/facebook/react/devsupport/DevSupportManager.java#L78
     private final String REACT_DEV_BUNDLE_CACHE_FILE_NAME = "ReactNativeDevBundle.js";
@@ -153,10 +153,10 @@ public class CodePush {
                 binaryModifiedDateDuringPackageInstall = Long.parseLong(binaryModifiedDateDuringPackageInstallString);
             }
 
-            String pacakgeAppVersion = CodePushUtils.tryGetString(packageMetadata, "appVersion");
+            String packageAppVersion = CodePushUtils.tryGetString(packageMetadata, "appVersion");
             if (binaryModifiedDateDuringPackageInstall != null &&
                     binaryModifiedDateDuringPackageInstall == binaryResourcesModifiedTime &&
-                    (this.isUsingTestConfiguration() || this.appVersion.equals(pacakgeAppVersion))) {
+                    (this.isUsingTestConfiguration() || this.appVersion.equals(packageAppVersion))) {
                 CodePushUtils.logBundleUrl(packageFilePath);
                 return packageFilePath;
             } else {
@@ -169,8 +169,6 @@ public class CodePush {
                 CodePushUtils.logBundleUrl(binaryJsBundleUrl);
                 return binaryJsBundleUrl;
             }
-        } catch (IOException e) {
-            throw new CodePushUnknownException("Error in getting current package bundle path", e);
         } catch (NumberFormatException e) {
             throw new CodePushUnknownException("Error in reading binary modified date from package metadata", e);
         }
@@ -263,17 +261,11 @@ public class CodePush {
 
     private boolean isDeploymentStatusNotYetReported(String appVersionOrPackageIdentifier) {
         SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
-        String sentStatusReportsString = settings.getString(STATUS_REPORTS_KEY, null);
-        if (sentStatusReportsString == null) {
+        String lastDeploymentReportIdentifier = settings.getString(LAST_DEPLOYMENT_REPORT_KEY, null);
+        if (lastDeploymentReportIdentifier == null) {
             return true;
         } else {
-            try {
-                JSONObject sentStatusReports = new JSONObject(sentStatusReportsString);
-                return !sentStatusReports.has(appVersionOrPackageIdentifier);
-            } catch (JSONException e) {
-                throw new CodePushUnknownException("Unable to parse sent status reports information " +
-                        sentStatusReportsString + " stored in SharedPreferences.", e);
-            }
+            return !lastDeploymentReportIdentifier.equals(appVersionOrPackageIdentifier);
         }
     }
 
@@ -311,22 +303,9 @@ public class CodePush {
         }
     }
 
-    private void recordDeploymentStatusReported(String appVersionOrPackageIdentifier, String status) {
+    private void recordDeploymentStatusReported(String appVersionOrPackageIdentifier) {
         SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
-        String sentStatusReportsString = settings.getString(STATUS_REPORTS_KEY, null);
-        JSONObject sentStatusReports;
-        try {
-            if (sentStatusReportsString == null) {
-                sentStatusReports = new JSONObject();
-            } else {
-                sentStatusReports = new JSONObject(sentStatusReportsString);
-            }
-
-            sentStatusReports.put(appVersionOrPackageIdentifier, status);
-            settings.edit().putString(STATUS_REPORTS_KEY, sentStatusReports.toString()).commit();
-        } catch (JSONException e) {
-            throw new CodePushUnknownException("Unable to save new entry in SharedPreferences under " + STATUS_REPORTS_KEY + ".", e);
-        }
+        settings.edit().putString(LAST_DEPLOYMENT_REPORT_KEY, appVersionOrPackageIdentifier).commit();
     }
 
     private void removeFailedUpdates() {
@@ -340,19 +319,9 @@ public class CodePush {
     }
     
     private void rollbackPackage() {
-        try {
-            WritableMap failedPackage = codePushPackage.getCurrentPackage();
-            saveFailedUpdate(failedPackage);
-        } catch (IOException e) {
-            throw new CodePushUnknownException("Attempted a rollback without having a current downloaded package", e);
-        }
-
-        try {
-            codePushPackage.rollbackPackage();
-        } catch (IOException e) {
-            throw new CodePushUnknownException("Error in rolling back package", e);
-        }
-
+        WritableMap failedPackage = codePushPackage.getCurrentPackage();
+        saveFailedUpdate(failedPackage);
+        codePushPackage.rollbackPackage();
         removePendingUpdate();
     }
 
@@ -464,23 +433,17 @@ public class CodePush {
             AsyncTask asyncTask = new AsyncTask() {
                 @Override
                 protected Void doInBackground(Object... params) {
-                    try {
-                        WritableMap currentPackage = codePushPackage.getCurrentPackage();
+                    WritableMap currentPackage = codePushPackage.getCurrentPackage();
 
-                        Boolean isPendingUpdate = false;
+                    Boolean isPendingUpdate = false;
 
-                        if (currentPackage.hasKey(codePushPackage.PACKAGE_HASH_KEY)) {
-                            String currentHash = currentPackage.getString(codePushPackage.PACKAGE_HASH_KEY);
-                            isPendingUpdate = CodePush.this.isPendingUpdate(currentHash);
-                        }
-
-                        currentPackage.putBoolean("isPending", isPendingUpdate);
-                        promise.resolve(currentPackage);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        promise.reject(e.getMessage());
+                    if (currentPackage.hasKey(codePushPackage.PACKAGE_HASH_KEY)) {
+                        String currentHash = currentPackage.getString(codePushPackage.PACKAGE_HASH_KEY);
+                        isPendingUpdate = CodePush.this.isPendingUpdate(currentHash);
                     }
-                    
+
+                    currentPackage.putBoolean("isPending", isPendingUpdate);
+                    promise.resolve(currentPackage);
                     return null;
                 }
             };
@@ -490,8 +453,8 @@ public class CodePush {
 
         @ReactMethod
         public void getNewStatusReport(Promise promise) {
-            // Check if there was a rollback that was not yet reported
             if (didRollback) {
+                // Check if there was a rollback that was not yet reported
                 JSONArray failedUpdates = getFailedUpdates();
                 if (failedUpdates != null && failedUpdates.length() > 0) {
                     try {
@@ -499,7 +462,7 @@ public class CodePush {
                         WritableMap lastFailedPackage = CodePushUtils.convertJsonObjectToWriteable(lastFailedPackageJSON);
                         String lastFailedPackageIdentifier = getPackageStatusReportIdentifier(lastFailedPackage);
                         if (lastFailedPackage != null && isDeploymentStatusNotYetReported(lastFailedPackageIdentifier)) {
-                            recordDeploymentStatusReported(lastFailedPackageIdentifier, DEPLOYMENT_FAILED_STATUS);
+                            recordDeploymentStatusReported(lastFailedPackageIdentifier);
                             WritableNativeMap reportMap = new WritableNativeMap();
                             reportMap.putMap("package", lastFailedPackage);
                             reportMap.putString("status", DEPLOYMENT_FAILED_STATUS);
@@ -510,36 +473,34 @@ public class CodePush {
                         throw new CodePushUnknownException("Unable to read failed updates information stored in SharedPreferences.", e);
                     }
                 }
-            }
-
-            // Check if the current CodePush package has been reported
-            if (didUpdate) {
-                try {
-                    WritableMap currentPackage = codePushPackage.getCurrentPackage();
-                    if (currentPackage != null) {
-                        String currentPackageIdentifier = getPackageStatusReportIdentifier(currentPackage);
-                        if (currentPackageIdentifier != null && isDeploymentStatusNotYetReported(currentPackageIdentifier)) {
-                            recordDeploymentStatusReported(currentPackageIdentifier, DEPLOYMENT_SUCCEEDED_STATUS);
-                            WritableNativeMap reportMap = new WritableNativeMap();
-                            reportMap.putMap("package", currentPackage);
-                            reportMap.putString("status", DEPLOYMENT_SUCCEEDED_STATUS);
-                            promise.resolve(reportMap);
-                            return;
-                        }
+            } else if (didUpdate) {
+                // Check if the current CodePush package has been reported
+                WritableMap currentPackage = codePushPackage.getCurrentPackage();
+                if (currentPackage != null) {
+                    String currentPackageIdentifier = getPackageStatusReportIdentifier(currentPackage);
+                    if (currentPackageIdentifier != null && isDeploymentStatusNotYetReported(currentPackageIdentifier)) {
+                        recordDeploymentStatusReported(currentPackageIdentifier);
+                        WritableNativeMap reportMap = new WritableNativeMap();
+                        reportMap.putMap("package", currentPackage);
+                        reportMap.putString("status", DEPLOYMENT_SUCCEEDED_STATUS);
+                        promise.resolve(reportMap);
+                        return;
                     }
-                } catch (IOException e) {
-                    // If didUpdate is true, there should be a current package, so this should not happen.
-                    throw new CodePushUnknownException("Error getting current package after an update.", e);
                 }
-            }
-
-            // Check if the current appVersion has been reported.
-            if (isDeploymentStatusNotYetReported(appVersion)) {
-                recordDeploymentStatusReported(appVersion, DEPLOYMENT_SUCCEEDED_STATUS);
-                WritableNativeMap reportMap = new WritableNativeMap();
-                reportMap.putString("appVersion", appVersion);
-                promise.resolve(reportMap);
-                return;
+            } else {
+                String currentPackageHash = null;
+                currentPackageHash = codePushPackage.getCurrentPackageHash();
+                if (currentPackageHash == null) {
+                    // Check if the current appVersion has been reported.
+                    String binaryIdentifier = "" + getBinaryResourcesModifiedTime();
+                    if (isDeploymentStatusNotYetReported(binaryIdentifier)) {
+                        recordDeploymentStatusReported(binaryIdentifier);
+                        WritableNativeMap reportMap = new WritableNativeMap();
+                        reportMap.putString("appVersion", appVersion);
+                        promise.resolve(reportMap);
+                        return;
+                    }
+                }
             }
 
             promise.resolve("");
@@ -600,16 +561,11 @@ public class CodePush {
 
         @ReactMethod
         public void isFirstRun(String packageHash, Promise promise) {
-            try {
-                boolean isFirstRun = didUpdate
-                        && packageHash != null
-                        && packageHash.length() > 0
-                        && packageHash.equals(codePushPackage.getCurrentPackageHash());
-                promise.resolve(isFirstRun);
-            } catch (IOException e) {
-                e.printStackTrace();
-                promise.reject(e.getMessage());
-            }
+            boolean isFirstRun = didUpdate
+                    && packageHash != null
+                    && packageHash.length() > 0
+                    && packageHash.equals(codePushPackage.getCurrentPackageHash());
+            promise.resolve(isFirstRun);
         }
 
         @ReactMethod

@@ -23,7 +23,7 @@ static NSString *const DeploymentFailed = @"DeploymentFailed";
 // These keys represent the names we use to store data in NSUserDefaults
 static NSString *const FailedUpdatesKey = @"CODE_PUSH_FAILED_UPDATES";
 static NSString *const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
-static NSString *const StatusReportsKey = @"CODE_PUSH_STATUS_REPORTS";
+static NSString *const LastDeploymentReportKey = @"CODE_PUSH_LAST_DEPLOYMENT_REPORT";
 
 // These keys are already "namespaced" by the PendingUpdateKey, so
 // their values don't need to be obfuscated to prevent collision with app data
@@ -211,8 +211,8 @@ static NSString *const PackageIsPendingKey = @"isPending";
 - (BOOL)isDeploymentStatusNotYetReported:(NSString *)appVersionOrPackageIdentifier
 {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
-    NSDictionary *sentStatusReports = [preferences objectForKey:StatusReportsKey];
-    return sentStatusReports == nil || [sentStatusReports objectForKey:appVersionOrPackageIdentifier] == nil;
+    NSString *sentStatusReportIdentifier = [preferences objectForKey:LastDeploymentReportKey];
+    return sentStatusReportIdentifier == nil || ![sentStatusReportIdentifier isEqualToString:appVersionOrPackageIdentifier];
 }
 
 /*
@@ -286,18 +286,9 @@ static NSString *const PackageIsPendingKey = @"isPending";
 }
 
 - (void)recordDeploymentStatusReported:(NSString *)appVersionOrPackageIdentifier
-                                status:(NSString *)status
 {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
-    NSMutableDictionary *sentStatusReports = [preferences objectForKey:StatusReportsKey];
-    if (sentStatusReports == nil) {
-        sentStatusReports = [NSMutableDictionary dictionary];
-    } else {
-        sentStatusReports = [sentStatusReports mutableCopy];
-    }
-    
-    [sentStatusReports setValue:status forKey:appVersionOrPackageIdentifier];
-    [preferences setValue:sentStatusReports forKey:StatusReportsKey];
+    [preferences setValue:LastDeploymentReportKey forKey:appVersionOrPackageIdentifier];
     [preferences synchronize];
 }
 
@@ -543,45 +534,48 @@ RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
         NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
         NSMutableArray *failedUpdates = [preferences objectForKey:FailedUpdatesKey];
         if (failedUpdates) {
-            NSDictionary* lastFailedPackage = [failedUpdates lastObject];
+            NSDictionary *lastFailedPackage = [failedUpdates lastObject];
             if (lastFailedPackage) {
-                NSString* lastFailedPackageIdentifier = [self getPackageStatusReportIdentifier:lastFailedPackage];
+                NSString *lastFailedPackageIdentifier = [self getPackageStatusReportIdentifier:lastFailedPackage];
                 if (lastFailedPackageIdentifier && [self isDeploymentStatusNotYetReported:lastFailedPackageIdentifier]) {
-                    [self recordDeploymentStatusReported:lastFailedPackageIdentifier
-                                                  status:DeploymentFailed];
+                    [self recordDeploymentStatusReported:lastFailedPackageIdentifier];
                     resolve(@{ @"package": lastFailedPackage, @"status": DeploymentFailed });
                     return;
                 }
             }
         }
-    }
-    
-    if (_isFirstRunAfterUpdate) {
+    } else if (_isFirstRunAfterUpdate) {
         // Check if the current CodePush package has been reported
         NSError *error;
         NSDictionary* currentPackage = [CodePushPackage getCurrentPackage:&error];
         if (currentPackage) {
             NSString* currentPackageIdentifier = [self getPackageStatusReportIdentifier:currentPackage];
             if (currentPackageIdentifier && [self isDeploymentStatusNotYetReported:currentPackageIdentifier]) {
-                [self recordDeploymentStatusReported:currentPackageIdentifier
-                                              status:DeploymentSucceeded];
+                [self recordDeploymentStatusReported:currentPackageIdentifier];
                 resolve(@{ @"package": currentPackage, @"status": DeploymentSucceeded });
+                return;
+            }
+        }
+    } else {
+        NSError *error;
+        NSString *currentPackageHash = [CodePushPackage getCurrentPackageHash:&error];
+        if (error || currentPackageHash == nil) {
+            // Check if the current appVersion has been reported. Use date as the binary identifier to
+            // handle binary releases that do not modify the appVersion.
+            NSURL *binaryJsBundleUrl = [CodePush bundleURL];
+            NSDictionary *binaryFileAttributes = [[NSFileManager defaultManager] attributesOfItemAtPath:[binaryJsBundleUrl path] error:nil];
+            NSTimeInterval binaryDate = [[binaryFileAttributes objectForKey:NSFileModificationDate] timeIntervalSince1970];
+            NSString* binaryIdentifier = [NSString stringWithFormat:@"%f", binaryDate];
+            
+            if ([self isDeploymentStatusNotYetReported:binaryIdentifier]) {
+                [self recordDeploymentStatusReported:binaryIdentifier];
+                resolve(@{ @"appVersion": [[CodePushConfig current] appVersion] });
                 return;
             }
         }
     }
     
-    // Check if the current appVersion has been reported.
-    NSString *appVersion = [[CodePushConfig current] appVersion];
-    if ([self isDeploymentStatusNotYetReported:appVersion]) {
-        [self recordDeploymentStatusReported:appVersion
-                                      status:DeploymentSucceeded];
-        resolve(@{ @"appVersion": appVersion });
-        return;
-    }
-    
     resolve([NSNull null]);
-    return;
 }
 
 /*
