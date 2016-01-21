@@ -33,8 +33,8 @@ static NSString * const ServerURLConfigKey = @"serverUrl";
     NSString *deploymentKey = [infoDictionary objectForKey:@"CodePushDeploymentKey"];
     NSString *serverURL = [infoDictionary objectForKey:@"CodePushServerURL"];
     
-    NSUserDefaults* userDefaults = [NSUserDefaults standardUserDefaults];
-    NSString* clientUniqueId = [userDefaults stringForKey:ClientUniqueIDConfigKey];
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSString *clientUniqueId = [userDefaults stringForKey:ClientUniqueIDConfigKey];
     if (clientUniqueId == nil) {
         clientUniqueId = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
         [userDefaults setObject:clientUniqueId forKey:ClientUniqueIDConfigKey];

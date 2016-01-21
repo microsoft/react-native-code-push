@@ -491,17 +491,15 @@ public class CodePush {
                         return;
                     }
                 }
-            } else {
-                if (isRunningBinaryVersion) {
-                    // Check if the current appVersion has been reported.
-                    String binaryIdentifier = "" + getBinaryResourcesModifiedTime();
-                    if (isDeploymentStatusNotYetReported(binaryIdentifier)) {
-                        recordDeploymentStatusReported(binaryIdentifier);
-                        WritableNativeMap reportMap = new WritableNativeMap();
-                        reportMap.putString("appVersion", appVersion);
-                        promise.resolve(reportMap);
-                        return;
-                    }
+            } else if (isRunningBinaryVersion) {
+                // Check if the current appVersion has been reported.
+                String binaryIdentifier = "" + getBinaryResourcesModifiedTime();
+                if (isDeploymentStatusNotYetReported(binaryIdentifier)) {
+                    recordDeploymentStatusReported(binaryIdentifier);
+                    WritableNativeMap reportMap = new WritableNativeMap();
+                    reportMap.putString("appVersion", appVersion);
+                    promise.resolve(reportMap);
+                    return;
                 }
             }
 

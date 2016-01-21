@@ -18,13 +18,13 @@ static BOOL isRunningBinaryVersion = NO;
 static BOOL testConfigurationFlag = NO;
 
 // These constants represent valid deployment statuses
-static NSString *const DeploymentSucceeded = @"DeploymentSucceeded";
 static NSString *const DeploymentFailed = @"DeploymentFailed";
+static NSString *const DeploymentSucceeded = @"DeploymentSucceeded";
 
 // These keys represent the names we use to store data in NSUserDefaults
 static NSString *const FailedUpdatesKey = @"CODE_PUSH_FAILED_UPDATES";
-static NSString *const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
 static NSString *const LastDeploymentReportKey = @"CODE_PUSH_LAST_DEPLOYMENT_REPORT";
+static NSString *const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
 
 // These keys are already "namespaced" by the PendingUpdateKey, so
 // their values don't need to be obfuscated to prevent collision with app data
@@ -552,29 +552,22 @@ RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
     } else if (_isFirstRunAfterUpdate) {
         // Check if the current CodePush package has been reported
         NSError *error;
-        NSDictionary* currentPackage = [CodePushPackage getCurrentPackage:&error];
-        if (currentPackage) {
-            NSString* currentPackageIdentifier = [self getPackageStatusReportIdentifier:currentPackage];
+        NSDictionary *currentPackage = [CodePushPackage getCurrentPackage:&error];
+        if (!error && currentPackage) {
+            NSString *currentPackageIdentifier = [self getPackageStatusReportIdentifier:currentPackage];
             if (currentPackageIdentifier && [self isDeploymentStatusNotYetReported:currentPackageIdentifier]) {
                 [self recordDeploymentStatusReported:currentPackageIdentifier];
                 resolve(@{ @"package": currentPackage, @"status": DeploymentSucceeded });
                 return;
             }
         }
-    } else {
-        if (isRunningBinaryVersion) {
-            // Check if the current appVersion has been reported. Use date as the binary identifier to
-            // handle binary releases that do not modify the appVersion.
-            NSURL *binaryJsBundleUrl = [CodePush bundleURL];
-            NSDictionary *binaryFileAttributes = [[NSFileManager defaultManager] attributesOfItemAtPath:[binaryJsBundleUrl path] error:nil];
-            NSTimeInterval binaryDate = [[binaryFileAttributes objectForKey:NSFileModificationDate] timeIntervalSince1970];
-            NSString* binaryIdentifier = [NSString stringWithFormat:@"%f", binaryDate];
-            
-            if ([self isDeploymentStatusNotYetReported:binaryIdentifier]) {
-                [self recordDeploymentStatusReported:binaryIdentifier];
-                resolve(@{ @"appVersion": [[CodePushConfig current] appVersion] });
-                return;
-            }
+    } else if (isRunningBinaryVersion || [_bridge.bundleURL.scheme hasPrefix:@"http"]) {
+        // Check if the current appVersion has been reported.
+        NSString *appVersion = [[CodePushConfig current] appVersion];
+        if ([self isDeploymentStatusNotYetReported:appVersion]) {
+            [self recordDeploymentStatusReported:appVersion];
+            resolve(@{ @"appVersion": appVersion });
+            return;
         }
     }
     

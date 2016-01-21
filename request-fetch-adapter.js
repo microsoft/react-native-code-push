@@ -1,8 +1,8 @@
 module.exports = {
-  async request(verb, url, body, callback) {
-    if (typeof body === "function") {
-      callback = body;
-      body = null;
+  async request(verb, url, requestBody, callback) {
+    if (typeof requestBody === "function") {
+      callback = requestBody;
+      requestBody = null;
     }
 
     var headers = {
@@ -10,15 +10,15 @@ module.exports = {
       "Content-Type": "application/json"
     };
 
-    if (body && typeof body === "object") {
-      body = JSON.stringify(body);
+    if (requestBody && typeof requestBody === "object") {
+      requestBody = JSON.stringify(requestBody);
     }
 
     try {
       const response = await fetch(url, {
         method: getHttpMethodName(verb),
         headers: headers,
-        body: body
+        body: requestBody
       });
         
       const statusCode = response.status;
