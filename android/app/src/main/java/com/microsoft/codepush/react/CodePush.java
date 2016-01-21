@@ -40,8 +40,9 @@ import java.util.zip.ZipFile;
 
 public class CodePush {
 
-    private static boolean testConfigurationFlag = false;
     private static boolean didRollback = false;
+    private static boolean isRunningBinaryVersion = false;
+    private static boolean testConfigurationFlag = false;
 
     private boolean didUpdate = false;
 
@@ -143,6 +144,7 @@ public class CodePush {
             if (packageFilePath == null) {
                 // There has not been any downloaded updates.
                 CodePushUtils.logBundleUrl(binaryJsBundleUrl);
+                isRunningBinaryVersion = true;
                 return binaryJsBundleUrl;
             }
 
@@ -158,6 +160,7 @@ public class CodePush {
                     binaryModifiedDateDuringPackageInstall == binaryResourcesModifiedTime &&
                     (this.isUsingTestConfiguration() || this.appVersion.equals(packageAppVersion))) {
                 CodePushUtils.logBundleUrl(packageFilePath);
+                isRunningBinaryVersion = false;
                 return packageFilePath;
             } else {
                 // The binary version is newer.
@@ -167,6 +170,7 @@ public class CodePush {
                 }
 
                 CodePushUtils.logBundleUrl(binaryJsBundleUrl);
+                isRunningBinaryVersion = true;
                 return binaryJsBundleUrl;
             }
         } catch (NumberFormatException e) {
@@ -488,9 +492,7 @@ public class CodePush {
                     }
                 }
             } else {
-                String currentPackageHash = null;
-                currentPackageHash = codePushPackage.getCurrentPackageHash();
-                if (currentPackageHash == null) {
+                if (isRunningBinaryVersion) {
                     // Check if the current appVersion has been reported.
                     String binaryIdentifier = "" + getBinaryResourcesModifiedTime();
                     if (isDeploymentStatusNotYetReported(binaryIdentifier)) {

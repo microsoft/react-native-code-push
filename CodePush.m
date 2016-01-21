@@ -14,6 +14,7 @@
 RCT_EXPORT_MODULE()
 
 static BOOL didRollback = NO;
+static BOOL isRunningBinaryVersion = NO;
 static BOOL testConfigurationFlag = NO;
 
 // These constants represent valid deployment statuses
@@ -62,6 +63,7 @@ static NSString *const PackageIsPendingKey = @"isPending";
     
     if (error || !packageFile) {
         NSLog(logMessageFormat, binaryJsBundleUrl);
+        isRunningBinaryVersion = YES;
         return binaryJsBundleUrl;
     }
     
@@ -73,6 +75,7 @@ static NSString *const PackageIsPendingKey = @"isPending";
     NSDictionary *currentPackageMetadata = [CodePushPackage getCurrentPackage:&error];
     if (error || !currentPackageMetadata) {
         NSLog(logMessageFormat, binaryJsBundleUrl);
+        isRunningBinaryVersion = YES;
         return binaryJsBundleUrl;
     }
     
@@ -82,6 +85,7 @@ static NSString *const PackageIsPendingKey = @"isPending";
         // Return package file because it is newer than the app store binary's JS bundle
         NSURL *packageUrl = [[NSURL alloc] initFileURLWithPath:packageFile];
         NSLog(logMessageFormat, packageUrl);
+        isRunningBinaryVersion = NO;
         return packageUrl;
     } else {
 #ifndef DEBUG
@@ -89,6 +93,7 @@ static NSString *const PackageIsPendingKey = @"isPending";
 #endif
 
         NSLog(logMessageFormat, binaryJsBundleUrl);
+        isRunningBinaryVersion = YES;
         return binaryJsBundleUrl;
     }
 }
@@ -557,9 +562,7 @@ RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
             }
         }
     } else {
-        NSError *error;
-        NSString *currentPackageHash = [CodePushPackage getCurrentPackageHash:&error];
-        if (error || currentPackageHash == nil) {
+        if (isRunningBinaryVersion) {
             // Check if the current appVersion has been reported. Use date as the binary identifier to
             // handle binary releases that do not modify the appVersion.
             NSURL *binaryJsBundleUrl = [CodePush bundleURL];
