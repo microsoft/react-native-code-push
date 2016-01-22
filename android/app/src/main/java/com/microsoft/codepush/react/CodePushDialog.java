@@ -22,16 +22,7 @@ public class CodePushDialog extends ReactContextBaseJavaModule{
     @ReactMethod
     public void showDialog(String title, String message, String button1Text, String button2Text,
                       final Callback successCallback, Callback errorCallback) {
-
-        FragmentActivity fragmentActivity = null;
-        try {
-            fragmentActivity = (FragmentActivity) mainActivity;
-        } catch (ClassCastException e) {
-            errorCallback.invoke("Unable to show dialog, main activity is not a FragmentActivity");
-            return;
-        }
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(fragmentActivity);
+        AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
 
         builder.setCancelable(false);
 
