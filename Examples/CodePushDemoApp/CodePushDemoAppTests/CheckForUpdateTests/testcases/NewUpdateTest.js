@@ -23,7 +23,7 @@ let NewUpdateTest = createTestCaseComponent(
   },
   async () => {
     let update = await CodePush.checkForUpdate();
-    assert.equal(JSON.stringify(update), JSON.stringify({ ...serverPackage, ...PackageMixins.remote, failedInstall: false }), "checkForUpdate did not return the update from the server");
+    assert.equal(JSON.stringify(update), JSON.stringify({ ...serverPackage, ...PackageMixins.remote(), failedInstall: false }), "checkForUpdate did not return the update from the server");
   }
 );
 

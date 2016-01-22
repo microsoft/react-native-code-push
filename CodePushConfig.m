@@ -1,4 +1,5 @@
 #import "CodePush.h"
+#import <UIKit/UIKit.h>
 
 @implementation CodePushConfig {
     NSMutableDictionary *_configDictionary;
@@ -8,6 +9,7 @@ static CodePushConfig *_currentConfig;
 
 static NSString * const AppVersionConfigKey = @"appVersion";
 static NSString * const BuildVdersionConfigKey = @"buildVersion";
+static NSString * const ClientUniqueIDConfigKey = @"clientUniqueId";
 static NSString * const DeploymentKeyConfigKey = @"deploymentKey";
 static NSString * const ServerURLConfigKey = @"serverUrl";
 
@@ -31,6 +33,14 @@ static NSString * const ServerURLConfigKey = @"serverUrl";
     NSString *deploymentKey = [infoDictionary objectForKey:@"CodePushDeploymentKey"];
     NSString *serverURL = [infoDictionary objectForKey:@"CodePushServerURL"];
     
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    NSString *clientUniqueId = [userDefaults stringForKey:ClientUniqueIDConfigKey];
+    if (clientUniqueId == nil) {
+        clientUniqueId = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
+        [userDefaults setObject:clientUniqueId forKey:ClientUniqueIDConfigKey];
+        [userDefaults synchronize];
+    }
+    
     if (!serverURL) {
         serverURL = @"https://codepush.azurewebsites.net/";
     }
@@ -39,6 +49,7 @@ static NSString * const ServerURLConfigKey = @"serverUrl";
                             appVersion,AppVersionConfigKey,
                             buildVersion,BuildVdersionConfigKey,
                             serverURL,ServerURLConfigKey,
+                            clientUniqueId,ClientUniqueIDConfigKey,
                             deploymentKey,DeploymentKeyConfigKey,
                             nil];
     
@@ -68,6 +79,11 @@ static NSString * const ServerURLConfigKey = @"serverUrl";
 - (NSString *)serverURL
 {
     return [_configDictionary objectForKey:ServerURLConfigKey];
+}
+
+- (NSString *)clientUniqueId
+{
+    return [_configDictionary objectForKey:ClientUniqueIDConfigKey];
 }
 
 - (void)setDeploymentKey:(NSString *)deploymentKey

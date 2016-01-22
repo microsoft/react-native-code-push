@@ -60,8 +60,9 @@ async function checkForUpdate(deploymentKey = null) {
   if (!update || update.updateAppVersion || (update.packageHash === localPackage.packageHash)) {
     return null;
   } else {     
-    const remotePackage = { ...update, ...PackageMixins.remote };
+    const remotePackage = { ...update, ...PackageMixins.remote(sdk.reportStatusDownload) };
     remotePackage.failedInstall = await NativeCodePush.isFailedUpdate(remotePackage.packageHash);
+    remotePackage.deploymentKey = deploymentKey || nativeConfig.deploymentKey;
     return remotePackage;
   }
 }
@@ -101,13 +102,53 @@ function getPromisifiedSdk(requestFetchAdapter, config) {
       }); 
     });
   };
-  
+
+  sdk.reportStatusDeploy = (deployedPackage, status) => {
+    return new Promise((resolve, reject) => {
+      module.exports.AcquisitionSdk.prototype.reportStatusDeploy.call(sdk, deployedPackage, status, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      }); 
+    });
+  };
+
+  sdk.reportStatusDownload = (downloadedPackage) => {
+    return new Promise((resolve, reject) => {
+      module.exports.AcquisitionSdk.prototype.reportStatusDownload.call(sdk, downloadedPackage, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      }); 
+    });
+  };
+
   return sdk;
 }
 
 /* Logs messages to console with the [CodePush] prefix */
 function log(message) {
   console.log(`[CodePush] ${message}`)
+}
+
+async function notifyApplicationReady() {
+  await NativeCodePush.notifyApplicationReady();
+  const statusReport = await NativeCodePush.getNewStatusReport();
+  if (statusReport) {
+    const config = await getConfiguration();
+    if (statusReport.appVersion) {
+      const sdk = getPromisifiedSdk(requestFetchAdapter, config);
+      sdk.reportStatusDeploy();
+    } else {
+      config.deploymentKey = statusReport.package.deploymentKey;
+      const sdk = getPromisifiedSdk(requestFetchAdapter, config);
+      sdk.reportStatusDeploy(statusReport.package, statusReport.status);
+    }
+  }
 }
 
 function restartApp(onlyIfUpdateIsPending = false) {
@@ -269,7 +310,7 @@ const CodePush = {
   getConfiguration,
   getCurrentPackage,
   log,
-  notifyApplicationReady: NativeCodePush.notifyApplicationReady,
+  notifyApplicationReady,
   restartApp,
   setUpTestDependencies,
   sync,

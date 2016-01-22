@@ -25,7 +25,7 @@ let SwitchDeploymentKeyTest = createTestCaseComponent(
   },
   async () => {
     let update = await CodePush.checkForUpdate(deploymentKey);
-    assert.equal(JSON.stringify(update), JSON.stringify({ ...serverPackage, ...PackageMixins.remote, failedInstall: false }), "checkForUpdate did not return the update from the server");
+    assert.equal(JSON.stringify(update), JSON.stringify({ ...serverPackage, ...PackageMixins.remote(), failedInstall: false, deploymentKey }), "checkForUpdate did not return the update from the server");
   }
 );
 
