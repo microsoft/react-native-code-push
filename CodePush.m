@@ -13,7 +13,7 @@
 
 RCT_EXPORT_MODULE()
 
-static BOOL didRollback = NO;
+static BOOL needToReportRollback = NO;
 static BOOL isRunningBinaryVersion = NO;
 static BOOL testConfigurationFlag = NO;
 
@@ -195,15 +195,14 @@ static NSString *const PackageIsPendingKey = @"isPending";
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];
     if (pendingUpdate) {
-        didRollback = NO;
         _isFirstRunAfterUpdate = YES;
         BOOL updateIsLoading = [pendingUpdate[PendingUpdateIsLoadingKey] boolValue];
         if (updateIsLoading) {
             // Pending update was initialized, but notifyApplicationReady was not called.
             // Therefore, deduce that it is a broken update and rollback.
             NSLog(@"Update did not finish loading the last time, rolling back to a previous version.");
+            needToReportRollback = YES;
             [self rollbackPackage];
-            didRollback = YES;
         } else {
             // Mark that we tried to initialize the new update, so that if it crashes,
             // we will know that we need to rollback when the app next starts.
@@ -293,7 +292,7 @@ static NSString *const PackageIsPendingKey = @"isPending";
 - (void)recordDeploymentStatusReported:(NSString *)appVersionOrPackageIdentifier
 {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
-    [preferences setValue:LastDeploymentReportKey forKey:appVersionOrPackageIdentifier];
+    [preferences setValue:appVersionOrPackageIdentifier forKey:LastDeploymentReportKey];
     [preferences synchronize];
 }
 
@@ -534,8 +533,9 @@ RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
 RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
                             rejecter:(RCTPromiseRejectBlock)reject)
 {
-    if (didRollback) {
+    if (needToReportRollback) {
         // Check if there was a rollback that was not yet reported
+        needToReportRollback = NO;
         NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
         NSMutableArray *failedUpdates = [preferences objectForKey:FailedUpdatesKey];
         if (failedUpdates) {

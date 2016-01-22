@@ -40,7 +40,7 @@ import java.util.zip.ZipFile;
 
 public class CodePush {
 
-    private static boolean didRollback = false;
+    private static boolean needToReportRollback = false;
     private static boolean isRunningBinaryVersion = false;
     private static boolean testConfigurationFlag = false;
 
@@ -237,15 +237,14 @@ public class CodePush {
         JSONObject pendingUpdate = getPendingUpdate();
         if (pendingUpdate != null) {
             didUpdate = true;
-            didRollback = false;
             try {
                 boolean updateIsLoading = pendingUpdate.getBoolean(PENDING_UPDATE_IS_LOADING_KEY);
                 if (updateIsLoading) {
                     // Pending update was initialized, but notifyApplicationReady was not called.
                     // Therefore, deduce that it is a broken update and rollback.
                     CodePushUtils.log("Update did not finish loading the last time, rolling back to a previous version.");
+                    needToReportRollback = true;
                     rollbackPackage();
-                    didRollback = true;
                 } else {
                     // Clear the React dev bundle cache so that new updates can be loaded.
                     if (this.isDebugMode) {
@@ -457,8 +456,9 @@ public class CodePush {
 
         @ReactMethod
         public void getNewStatusReport(Promise promise) {
-            if (didRollback) {
+            if (needToReportRollback) {
                 // Check if there was a rollback that was not yet reported
+                needToReportRollback = false;
                 JSONArray failedUpdates = getFailedUpdates();
                 if (failedUpdates != null && failedUpdates.length() > 0) {
                     try {

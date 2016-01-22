@@ -115,7 +115,7 @@ function getPromisifiedSdk(requestFetchAdapter, config) {
     });
   };
 
-  sdk.reportStatusDownload = (downloadedPackage, status) => {
+  sdk.reportStatusDownload = (downloadedPackage) => {
     return new Promise((resolve, reject) => {
       module.exports.AcquisitionSdk.prototype.reportStatusDownload.call(sdk, downloadedPackage, (err) => {
         if (err) {
