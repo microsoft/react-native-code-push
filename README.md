@@ -300,7 +300,7 @@ And that's it! for more information regarding the CLI and how the release (or pr
 
 ## Releasing Updates (JavaScript + images)
 
-*Note: Android doesn't currently support deploying assets, so you must use the previous release strategy instead.*
+*Note: Android doesn't currently support deploying assets, so you must use the previous release strategy instead for that platform. We will release Android support as soon as React Native 0.19.0 is released.*
 
 If you are using the new React Native [assets system](https://facebook.github.io/react-native/docs/images.html#content), as opposed to loading your images from the network and/or platform-specific mechanisms (e.g. iOS asset catalogs), then you can't simply pass your jsbundle to CodePush as demonstrated above. You **MUST** provide your images as well. To do this, simply use the following workflow:
 
@@ -317,6 +317,8 @@ If you are using the new React Native [assets system](https://facebook.github.io
     --dev false
     ```
 
+    *NOTE: The file name that you specify as the value for the `--bundle-output` parameter must have one of the following extensions in order to be detected by the plugin: `.js`, `.jsbundle`, `.bundle` (e.g. `main.jsbundle`, `ios.js`). The name of the file isn't relevant, but the extension is used for detectining the bundle within the update contents, and therefore, using any other extension will result in the update failing.*
+    
 3. Execute `code-push release`, passing the path to the directory you created in #1 as the ["package"](http://codepush.tools/docs/cli.html#package-parameter) parameter, and the [**exact app version**](http://codepush.tools/docs/cli.html#app-store-version-parameter) that this update is targetting as the ["appStoreVersion"](http://codepush.tools/docs/cli.html#app-store-version-parameter) parameter (e.g. `code-push release Foo ./release 1.0.0`). The code-push CLI will automatically handle zipping up the contents for you, so don't worry about handling that yourself.
 
     For more info regarding the `release` command and its parameters, refer to the [CLI documentation](http://codepush.tools/docs/cli.html#releasing-app-updates).

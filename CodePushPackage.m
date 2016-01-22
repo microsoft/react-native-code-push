@@ -386,7 +386,8 @@ NSString * const UnzippedFolderName = @"unzipped";
                 return [fileName stringByAppendingPathComponent:mainBundlePathInFolder];
             }
         } else if ([[fileName pathExtension] isEqualToString:@"bundle"] ||
-            [[fileName pathExtension] isEqualToString:@"jsbundle"]) {
+            [[fileName pathExtension] isEqualToString:@"jsbundle"] ||
+            [[fileName pathExtension] isEqualToString:@"js"]) {
             return fileName;
         }
     }
