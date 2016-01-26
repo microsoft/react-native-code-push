@@ -12,7 +12,7 @@
  * This method assumes that your JS bundle is named "main.jsbundle"
  * and therefore, if it isn't, you should use either the bundleURLForResource:
  * or bundleURLForResource:withExtension: methods to override that behavior.
-*/
+ */
 + (NSURL *)bundleURL;
 
 + (NSURL *)bundleURLForResource:(NSString *)resourceName;
@@ -21,6 +21,13 @@
                   withExtension:(NSString *)resourceExtension;
 
 + (NSString *)getApplicationSupportDirectory;
+
+/*
+ * This methods allows dynamically setting the app's
+ * deployment key, in addition to setting it via
+ * the Info.plist file's CodePushDeploymentKey setting.
+ */
++ (void)setDeploymentKey:(NSString *)deploymentKey;
 
 // The below methods are only used during tests.
 + (BOOL)isUsingTestConfiguration;
@@ -62,7 +69,7 @@ failCallback:(void (^)(NSError *err))failCallback;
 @interface CodePushPackage : NSObject
 
 + (void)installPackage:(NSDictionary *)updatePackage
-               error:(NSError **)error;
+                 error:(NSError **)error;
 
 + (NSDictionary *)getCurrentPackage:(NSError **)error;
 + (NSString *)getCurrentPackageFolderPath:(NSError **)error;
