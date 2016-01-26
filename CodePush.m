@@ -406,14 +406,14 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
             NSDictionary *newPackage = [CodePushPackage getPackage:updatePackage[PackageHashKey] error:&err];
                 
             if (err) {
-                return reject(err);
+                return reject([NSString stringWithFormat: @"%lu", (long)err.code], err.localizedDescription, err);
             }
                 
             resolve(newPackage);
         }
         // The download failed
         failCallback:^(NSError *err) {
-            reject(err);
+            reject([NSString stringWithFormat: @"%lu", (long)err.code], err.localizedDescription, err);
         }];
 }
 
@@ -440,7 +440,7 @@ RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
         NSMutableDictionary *package = [[CodePushPackage getCurrentPackage:&error] mutableCopy];
         
         if (error) {
-            reject(error);
+            reject([NSString stringWithFormat: @"%lu", (long)error.code], error.localizedDescription, error);
         }
         
         // Add the "isPending" virtual property to the package at this point, so that
@@ -466,7 +466,7 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
                                   error:&error];
         
         if (error) {
-            reject(error);
+            reject([NSString stringWithFormat: @"%lu", (long)error.code], error.localizedDescription, error);
         } else {
             [self savePendingUpdate:updatePackage[PackageHashKey]
                           isLoading:NO];
