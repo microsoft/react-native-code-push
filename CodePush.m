@@ -403,9 +403,9 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
             [self.bridge.eventDispatcher
                 sendDeviceEventWithName:@"CodePushDownloadProgress"
                 body:@{
-                    @"totalBytes":[NSNumber numberWithLongLong:expectedContentLength],
-                    @"receivedBytes":[NSNumber numberWithLongLong:receivedContentLength]
-                    }];
+                        @"totalBytes":[NSNumber numberWithLongLong:expectedContentLength],
+                        @"receivedBytes":[NSNumber numberWithLongLong:receivedContentLength]
+                      }];
         }
         // The download completed
         doneCallback:^{
@@ -516,9 +516,9 @@ RCT_EXPORT_METHOD(isFirstRun:(NSString *)packageHash
 {
     NSError *error;
     BOOL isFirstRun = _isFirstRunAfterUpdate
-    && nil != packageHash
-    && [packageHash length] > 0
-    && [packageHash isEqualToString:[CodePushPackage getCurrentPackageHash:&error]];
+                        && nil != packageHash
+                        && [packageHash length] > 0
+                        && [packageHash isEqualToString:[CodePushPackage getCurrentPackageHash:&error]];
     
     resolve(@(isFirstRun));
 }
