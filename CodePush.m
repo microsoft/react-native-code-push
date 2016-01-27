@@ -158,7 +158,7 @@ static NSString *const PackageIsPendingKey = @"isPending";
              @"codePushInstallModeOnNextRestart":@(CodePushInstallModeOnNextRestart),
              @"codePushInstallModeImmediate": @(CodePushInstallModeImmediate),
              @"codePushInstallModeOnNextResume": @(CodePushInstallModeOnNextResume)
-             };
+            };
 };
 
 - (void)dealloc
@@ -268,8 +268,8 @@ static NSString *const PackageIsPendingKey = @"isPending";
     // If there is a pending update whose "state" isn't loading, then we consider it "pending".
     // Additionally, if a specific hash was provided, we ensure it matches that of the pending update.
     BOOL updateIsPending = pendingUpdate &&
-    [pendingUpdate[PendingUpdateIsLoadingKey] boolValue] == NO &&
-    (!packageHash || [pendingUpdate[PendingUpdateHashKey] isEqualToString:packageHash]);
+                           [pendingUpdate[PendingUpdateIsLoadingKey] boolValue] == NO &&
+                           (!packageHash || [pendingUpdate[PendingUpdateHashKey] isEqualToString:packageHash]);
     
     return updateIsPending;
 }
@@ -393,8 +393,8 @@ static NSString *const PackageIsPendingKey = @"isPending";
  * This is native-side of the RemotePackage.download method
  */
 RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
-                  resolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
+                        resolver:(RCTPromiseResolveBlock)resolve
+                        rejecter:(RCTPromiseRejectBlock)reject)
 {
     [CodePushPackage downloadPackage:updatePackage
      // The download is progressing forward
@@ -431,7 +431,7 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
  * app version, as well as the deployment key that was configured in the Info.plist file.
  */
 RCT_EXPORT_METHOD(getConfiguration:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
+                          rejecter:(RCTPromiseRejectBlock)reject)
 {
     resolve([[CodePushConfig current] configuration]);
 }
@@ -440,7 +440,7 @@ RCT_EXPORT_METHOD(getConfiguration:(RCTPromiseResolveBlock)resolve
  * This method is the native side of the CodePush.getCurrentPackage method.
  */
 RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
+                           rejecter:(RCTPromiseRejectBlock)reject)
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         NSError *error;
@@ -463,9 +463,9 @@ RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
  * This method is the native side of the LocalPackage.install method.
  */
 RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
-                  installMode:(CodePushInstallMode)installMode
-                  resolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
+                    installMode:(CodePushInstallMode)installMode
+                       resolver:(RCTPromiseResolveBlock)resolve
+                       rejecter:(RCTPromiseRejectBlock)reject)
 {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSError *error;
@@ -499,8 +499,8 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
  * module, and is only used internally to populate the RemotePackage.failedInstall property.
  */
 RCT_EXPORT_METHOD(isFailedUpdate:(NSString *)packageHash
-                  resolve:(RCTPromiseResolveBlock)resolve
-                  reject:(RCTPromiseRejectBlock)reject)
+                         resolve:(RCTPromiseResolveBlock)resolve
+                          reject:(RCTPromiseRejectBlock)reject)
 {
     BOOL isFailedHash = [self isFailedHash:packageHash];
     resolve(@(isFailedHash));
@@ -511,8 +511,8 @@ RCT_EXPORT_METHOD(isFailedUpdate:(NSString *)packageHash
  * module, and is only used internally to populate the LocalPackage.isFirstRun property.
  */
 RCT_EXPORT_METHOD(isFirstRun:(NSString *)packageHash
-                  resolve:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
+                     resolve:(RCTPromiseResolveBlock)resolve
+                    rejecter:(RCTPromiseRejectBlock)reject)
 {
     NSError *error;
     BOOL isFirstRun = _isFirstRunAfterUpdate
@@ -527,7 +527,7 @@ RCT_EXPORT_METHOD(isFirstRun:(NSString *)packageHash
  * This method is the native side of the CodePush.notifyApplicationReady() method.
  */
 RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
+                                rejecter:(RCTPromiseRejectBlock)reject)
 {
     [CodePush removePendingUpdate];
     resolve([NSNull null]);
@@ -538,7 +538,7 @@ RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
  * or an update failed) and return its details (version label, status).
  */
 RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
+                            rejecter:(RCTPromiseRejectBlock)reject)
 {
     if (needToReportRollback) {
         // Check if there was a rollback that was not yet reported
