@@ -103,9 +103,9 @@ function getPromisifiedSdk(requestFetchAdapter, config) {
     });
   };
 
-  sdk.reportStatusDeploy = (deployedPackage, status) => {
+  sdk.reportStatusDeploy = (deployedPackage, status, fromLabelOrAppVersion, fromDeploymentKey) => {
     return new Promise((resolve, reject) => {
-      module.exports.AcquisitionSdk.prototype.reportStatusDeploy.call(sdk, deployedPackage, status, (err) => {
+      module.exports.AcquisitionSdk.prototype.reportStatusDeploy.call(sdk, deployedPackage, status, fromLabelOrAppVersion, fromDeploymentKey, (err) => {
         if (err) {
           reject(err);
         } else {
@@ -140,13 +140,15 @@ async function notifyApplicationReady() {
   const statusReport = await NativeCodePush.getNewStatusReport();
   if (statusReport) {
     const config = await getConfiguration();
+    const fromLabelOrAppVersion = statusReport.fromLabelOrAppVersion;
+    const fromDeploymentKey = statusReport.fromDeploymentKey || config.deploymentKey;
     if (statusReport.appVersion) {
       const sdk = getPromisifiedSdk(requestFetchAdapter, config);
-      sdk.reportStatusDeploy();
+      sdk.reportStatusDeploy(/* deployedPackage */ null, /* status */ null, fromLabelOrAppVersion, fromDeploymentKey);
     } else {
       config.deploymentKey = statusReport.package.deploymentKey;
       const sdk = getPromisifiedSdk(requestFetchAdapter, config);
-      sdk.reportStatusDeploy(statusReport.package, statusReport.status);
+      sdk.reportStatusDeploy(statusReport.package, statusReport.status, fromLabelOrAppVersion, fromDeploymentKey);
     }
   }
 }

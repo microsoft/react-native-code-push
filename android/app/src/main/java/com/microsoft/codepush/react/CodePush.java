@@ -178,13 +178,10 @@ public class CodePush {
         }
     }
 
-    private String getPackageStatusReportIdentifier(WritableMap updatePackage) {
-        // Because deploymentKeys can be dynamically switched, we use a
-        // combination of the deploymentKey and label as the packageIdentifier.
-        String deploymentKey = CodePushUtils.tryGetString(updatePackage, DEPLOYMENT_KEY_KEY);
-        String label = CodePushUtils.tryGetString(updatePackage, LABEL_KEY);
-        if (deploymentKey != null && label != null) {
-            return deploymentKey + ":" + label;
+    private String getDeploymentKeyFromStatusReportIdentifier(String statusReportIdentifier) {
+        String[] parsedIdentifier = statusReportIdentifier.split(":");
+        if (parsedIdentifier.length > 0) {
+            return parsedIdentifier[0];
         } else {
             return null;
         }
@@ -208,6 +205,18 @@ public class CodePush {
         }
     }
 
+    private String getPackageStatusReportIdentifier(WritableMap updatePackage) {
+        // Because deploymentKeys can be dynamically switched, we use a
+        // combination of the deploymentKey and label as the packageIdentifier.
+        String deploymentKey = CodePushUtils.tryGetString(updatePackage, DEPLOYMENT_KEY_KEY);
+        String label = CodePushUtils.tryGetString(updatePackage, LABEL_KEY);
+        if (deploymentKey != null && label != null) {
+            return deploymentKey + ":" + label;
+        } else {
+            return null;
+        }
+    }
+
     private JSONObject getPendingUpdate() {
         SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
         String pendingUpdateString = settings.getString(PENDING_UPDATE_KEY, null);
@@ -222,6 +231,20 @@ public class CodePush {
             // Should not happen.
             CodePushUtils.log("Unable to parse pending update metadata " + pendingUpdateString +
                     " stored in SharedPreferences");
+            return null;
+        }
+    }
+
+    private String getPreviousStatusReportIdentifier() {
+        SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
+        return settings.getString(LAST_DEPLOYMENT_REPORT_KEY, null);
+    }
+
+    private String getVersionLabelFromStatusReportIdentifier(String statusReportIdentifier) {
+        String[] parsedIdentifier = statusReportIdentifier.split(":");
+        if (parsedIdentifier.length > 1) {
+            return parsedIdentifier[1];
+        } else {
             return null;
         }
     }
@@ -262,16 +285,6 @@ public class CodePush {
         }
     }
 
-    private boolean isDeploymentStatusNotYetReported(String appVersionOrPackageIdentifier) {
-        SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
-        String lastDeploymentReportIdentifier = settings.getString(LAST_DEPLOYMENT_REPORT_KEY, null);
-        if (lastDeploymentReportIdentifier == null) {
-            return true;
-        } else {
-            return !lastDeploymentReportIdentifier.equals(appVersionOrPackageIdentifier);
-        }
-    }
-
     private boolean isFailedHash(String packageHash) {
         JSONArray failedUpdates = getFailedUpdates();
         if (packageHash != null) {
@@ -304,6 +317,10 @@ public class CodePush {
         catch (JSONException e) {
             throw new CodePushUnknownException("Unable to read pending update metadata in isPendingUpdate.", e);
         }
+    }
+
+    private boolean isStatusReportIdentifierCodePushLabel(String statusReportIdentifier) {
+        return statusReportIdentifier != null && statusReportIdentifier.contains(":");
     }
 
     private void recordDeploymentStatusReported(String appVersionOrPackageIdentifier) {
@@ -465,7 +482,8 @@ public class CodePush {
                         JSONObject lastFailedPackageJSON = failedUpdates.getJSONObject(failedUpdates.length() - 1);
                         WritableMap lastFailedPackage = CodePushUtils.convertJsonObjectToWriteable(lastFailedPackageJSON);
                         String lastFailedPackageIdentifier = getPackageStatusReportIdentifier(lastFailedPackage);
-                        if (lastFailedPackage != null && isDeploymentStatusNotYetReported(lastFailedPackageIdentifier)) {
+                        String previousStatusReportIdentifier = getPreviousStatusReportIdentifier();
+                        if (lastFailedPackage != null && (previousStatusReportIdentifier == null || !previousStatusReportIdentifier.equals(lastFailedPackageIdentifier))) {
                             recordDeploymentStatusReported(lastFailedPackageIdentifier);
                             WritableNativeMap reportMap = new WritableNativeMap();
                             reportMap.putMap("package", lastFailedPackage);
@@ -482,23 +500,64 @@ public class CodePush {
                 WritableMap currentPackage = codePushPackage.getCurrentPackage();
                 if (currentPackage != null) {
                     String currentPackageIdentifier = getPackageStatusReportIdentifier(currentPackage);
-                    if (currentPackageIdentifier != null && isDeploymentStatusNotYetReported(currentPackageIdentifier)) {
-                        recordDeploymentStatusReported(currentPackageIdentifier);
-                        WritableNativeMap reportMap = new WritableNativeMap();
-                        reportMap.putMap("package", currentPackage);
-                        reportMap.putString("status", DEPLOYMENT_SUCCEEDED_STATUS);
-                        promise.resolve(reportMap);
-                        return;
+                    String previousStatusReportIdentifier = getPreviousStatusReportIdentifier();
+                    if (currentPackageIdentifier != null) {
+                        if (previousStatusReportIdentifier == null) {
+                            recordDeploymentStatusReported(currentPackageIdentifier);
+                            WritableNativeMap reportMap = new WritableNativeMap();
+                            reportMap.putMap("package", currentPackage);
+                            reportMap.putString("status", DEPLOYMENT_SUCCEEDED_STATUS);
+                            promise.resolve(reportMap);
+                            return;
+                        } else if (!previousStatusReportIdentifier.equals(currentPackageIdentifier)) {
+                            recordDeploymentStatusReported(currentPackageIdentifier);
+                            if (isStatusReportIdentifierCodePushLabel(previousStatusReportIdentifier)) {
+                                String fromDeploymentKey = getDeploymentKeyFromStatusReportIdentifier(previousStatusReportIdentifier);
+                                String fromLabel = getVersionLabelFromStatusReportIdentifier(previousStatusReportIdentifier);
+                                WritableNativeMap reportMap = new WritableNativeMap();
+                                reportMap.putMap("package", currentPackage);
+                                reportMap.putString("status", DEPLOYMENT_SUCCEEDED_STATUS);
+                                reportMap.putString("fromDeploymentKey", fromDeploymentKey);
+                                reportMap.putString("fromLabelOrAppVersion", fromLabel);
+                                promise.resolve(reportMap);
+                            } else {
+                                // Previous status report was with a binary app version.
+                                WritableNativeMap reportMap = new WritableNativeMap();
+                                reportMap.putMap("package", currentPackage);
+                                reportMap.putString("status", DEPLOYMENT_SUCCEEDED_STATUS);
+                                reportMap.putString("fromLabelOrAppVersion", previousStatusReportIdentifier);
+                                promise.resolve(reportMap);
+                            }
+                            return;
+                        }
                     }
                 }
             } else if (isRunningBinaryVersion) {
                 // Check if the current appVersion has been reported.
-                String binaryIdentifier = "" + getBinaryResourcesModifiedTime();
-                if (isDeploymentStatusNotYetReported(binaryIdentifier)) {
-                    recordDeploymentStatusReported(binaryIdentifier);
+                String previousStatusReportIdentifier = getPreviousStatusReportIdentifier();
+                if (previousStatusReportIdentifier == null) {
+                    recordDeploymentStatusReported(appVersion);
                     WritableNativeMap reportMap = new WritableNativeMap();
                     reportMap.putString("appVersion", appVersion);
                     promise.resolve(reportMap);
+                    return;
+                } else if (!previousStatusReportIdentifier.equals(appVersion)) {
+                    recordDeploymentStatusReported(appVersion);
+                    if (isStatusReportIdentifierCodePushLabel(previousStatusReportIdentifier)) {
+                        String fromDeploymentKey = getDeploymentKeyFromStatusReportIdentifier(previousStatusReportIdentifier);
+                        String fromLabel = getVersionLabelFromStatusReportIdentifier(previousStatusReportIdentifier);
+                        WritableNativeMap reportMap = new WritableNativeMap();
+                        reportMap.putString("appVersion", appVersion);
+                        reportMap.putString("fromDeploymentKey", fromDeploymentKey);
+                        reportMap.putString("fromLabelOrAppVersion", fromLabel);
+                        promise.resolve(reportMap);
+                    } else {
+                        // Previous status report was with a binary app version.
+                        WritableNativeMap reportMap = new WritableNativeMap();
+                        reportMap.putString("appVersion", appVersion);
+                        reportMap.putString("fromLabelOrAppVersion", previousStatusReportIdentifier);
+                        promise.resolve(reportMap);
+                    }
                     return;
                 }
             }
