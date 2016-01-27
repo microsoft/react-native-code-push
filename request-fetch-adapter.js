@@ -8,7 +8,7 @@ module.exports = {
     const headers = {
       "Accept": "application/json",
       "Content-Type": "application/json",
-      "X-SDK-Version": getSDKVersion()
+      "X-CodePush-SDK-Version": getSDKVersion()
     };
 
     if (requestBody && typeof requestBody === "object") {
