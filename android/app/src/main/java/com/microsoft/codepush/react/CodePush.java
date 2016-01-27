@@ -512,20 +512,20 @@ public class CodePush {
                         } else if (!previousStatusReportIdentifier.equals(currentPackageIdentifier)) {
                             recordDeploymentStatusReported(currentPackageIdentifier);
                             if (isStatusReportIdentifierCodePushLabel(previousStatusReportIdentifier)) {
-                                String fromDeploymentKey = getDeploymentKeyFromStatusReportIdentifier(previousStatusReportIdentifier);
-                                String fromLabel = getVersionLabelFromStatusReportIdentifier(previousStatusReportIdentifier);
+                                String previousDeploymentKey = getDeploymentKeyFromStatusReportIdentifier(previousStatusReportIdentifier);
+                                String previousLabel = getVersionLabelFromStatusReportIdentifier(previousStatusReportIdentifier);
                                 WritableNativeMap reportMap = new WritableNativeMap();
                                 reportMap.putMap("package", currentPackage);
                                 reportMap.putString("status", DEPLOYMENT_SUCCEEDED_STATUS);
-                                reportMap.putString("fromDeploymentKey", fromDeploymentKey);
-                                reportMap.putString("fromLabelOrAppVersion", fromLabel);
+                                reportMap.putString("previousDeploymentKey", previousDeploymentKey);
+                                reportMap.putString("previousLabelOrAppVersion", previousLabel);
                                 promise.resolve(reportMap);
                             } else {
                                 // Previous status report was with a binary app version.
                                 WritableNativeMap reportMap = new WritableNativeMap();
                                 reportMap.putMap("package", currentPackage);
                                 reportMap.putString("status", DEPLOYMENT_SUCCEEDED_STATUS);
-                                reportMap.putString("fromLabelOrAppVersion", previousStatusReportIdentifier);
+                                reportMap.putString("previousLabelOrAppVersion", previousStatusReportIdentifier);
                                 promise.resolve(reportMap);
                             }
                             return;
@@ -544,18 +544,18 @@ public class CodePush {
                 } else if (!previousStatusReportIdentifier.equals(appVersion)) {
                     recordDeploymentStatusReported(appVersion);
                     if (isStatusReportIdentifierCodePushLabel(previousStatusReportIdentifier)) {
-                        String fromDeploymentKey = getDeploymentKeyFromStatusReportIdentifier(previousStatusReportIdentifier);
-                        String fromLabel = getVersionLabelFromStatusReportIdentifier(previousStatusReportIdentifier);
+                        String previousDeploymentKey = getDeploymentKeyFromStatusReportIdentifier(previousStatusReportIdentifier);
+                        String previousLabel = getVersionLabelFromStatusReportIdentifier(previousStatusReportIdentifier);
                         WritableNativeMap reportMap = new WritableNativeMap();
                         reportMap.putString("appVersion", appVersion);
-                        reportMap.putString("fromDeploymentKey", fromDeploymentKey);
-                        reportMap.putString("fromLabelOrAppVersion", fromLabel);
+                        reportMap.putString("previousDeploymentKey", previousDeploymentKey);
+                        reportMap.putString("previousLabelOrAppVersion", previousLabel);
                         promise.resolve(reportMap);
                     } else {
                         // Previous status report was with a binary app version.
                         WritableNativeMap reportMap = new WritableNativeMap();
                         reportMap.putString("appVersion", appVersion);
-                        reportMap.putString("fromLabelOrAppVersion", previousStatusReportIdentifier);
+                        reportMap.putString("previousLabelOrAppVersion", previousStatusReportIdentifier);
                         promise.resolve(reportMap);
                     }
                     return;

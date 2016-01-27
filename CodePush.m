@@ -586,20 +586,20 @@ RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
                 } else if (![previousStatusReportIdentifier isEqualToString:currentPackageIdentifier]) {
                     [self recordDeploymentStatusReported:currentPackageIdentifier];
                     if ([self isStatusReportIdentifierCodePushLabel:previousStatusReportIdentifier]) {
-                        NSString *fromDeploymentKey = [self getDeploymentKeyFromStatusReportIdentifier:previousStatusReportIdentifier];
-                        NSString *fromLabel = [self getVersionLabelFromStatusReportIdentifier:previousStatusReportIdentifier];
+                        NSString *previousDeploymentKey = [self getDeploymentKeyFromStatusReportIdentifier:previousStatusReportIdentifier];
+                        NSString *previousLabel = [self getVersionLabelFromStatusReportIdentifier:previousStatusReportIdentifier];
                         resolve(@{
                                   @"package": currentPackage,
                                   @"status": DeploymentSucceeded,
-                                  @"fromDeploymentKey": fromDeploymentKey,
-                                  @"fromLabelOrAppVersion": fromLabel
+                                  @"previousDeploymentKey": previousDeploymentKey,
+                                  @"previousLabelOrAppVersion": previousLabel
                                   });
                     } else {
                         // Previous status report was with a binary app version.
                         resolve(@{
                                   @"package": currentPackage,
                                   @"status": DeploymentSucceeded,
-                                  @"fromLabelOrAppVersion": previousStatusReportIdentifier
+                                  @"previousLabelOrAppVersion": previousStatusReportIdentifier
                                   });
                     }
                     return;
@@ -617,18 +617,18 @@ RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
         } else if (![previousStatusReportIdentifier isEqualToString:appVersion]) {
             [self recordDeploymentStatusReported:appVersion];
             if ([self isStatusReportIdentifierCodePushLabel:previousStatusReportIdentifier]) {
-                NSString *fromDeploymentKey = [self getDeploymentKeyFromStatusReportIdentifier:previousStatusReportIdentifier];
-                NSString *fromLabel = [self getVersionLabelFromStatusReportIdentifier:previousStatusReportIdentifier];
+                NSString *previousDeploymentKey = [self getDeploymentKeyFromStatusReportIdentifier:previousStatusReportIdentifier];
+                NSString *previousLabel = [self getVersionLabelFromStatusReportIdentifier:previousStatusReportIdentifier];
                 resolve(@{
                           @"appVersion": appVersion,
-                          @"fromDeploymentKey": fromDeploymentKey,
-                          @"fromLabelOrAppVersion": fromLabel
+                          @"previousDeploymentKey": previousDeploymentKey,
+                          @"previousLabelOrAppVersion": previousLabel
                           });
             } else {
                 // Previous status report was with a binary app version.
                 resolve(@{
                           @"appVersion": appVersion,
-                          @"fromLabelOrAppVersion": previousStatusReportIdentifier
+                          @"previousLabelOrAppVersion": previousStatusReportIdentifier
                           });
             }
             return;

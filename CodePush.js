@@ -103,9 +103,9 @@ function getPromisifiedSdk(requestFetchAdapter, config) {
     });
   };
 
-  sdk.reportStatusDeploy = (deployedPackage, status, fromLabelOrAppVersion, fromDeploymentKey) => {
+  sdk.reportStatusDeploy = (deployedPackage, status, previousLabelOrAppVersion, previousDeploymentKey) => {
     return new Promise((resolve, reject) => {
-      module.exports.AcquisitionSdk.prototype.reportStatusDeploy.call(sdk, deployedPackage, status, fromLabelOrAppVersion, fromDeploymentKey, (err) => {
+      module.exports.AcquisitionSdk.prototype.reportStatusDeploy.call(sdk, deployedPackage, status, previousLabelOrAppVersion, previousDeploymentKey, (err) => {
         if (err) {
           reject(err);
         } else {
@@ -140,15 +140,15 @@ async function notifyApplicationReady() {
   const statusReport = await NativeCodePush.getNewStatusReport();
   if (statusReport) {
     const config = await getConfiguration();
-    const fromLabelOrAppVersion = statusReport.fromLabelOrAppVersion;
-    const fromDeploymentKey = statusReport.fromDeploymentKey || config.deploymentKey;
+    const previousLabelOrAppVersion = statusReport.previousLabelOrAppVersion;
+    const previousDeploymentKey = statusReport.previousDeploymentKey || config.deploymentKey;
     if (statusReport.appVersion) {
       const sdk = getPromisifiedSdk(requestFetchAdapter, config);
-      sdk.reportStatusDeploy(/* deployedPackage */ null, /* status */ null, fromLabelOrAppVersion, fromDeploymentKey);
+      sdk.reportStatusDeploy(/* deployedPackage */ null, /* status */ null, previousLabelOrAppVersion, previousDeploymentKey);
     } else {
       config.deploymentKey = statusReport.package.deploymentKey;
       const sdk = getPromisifiedSdk(requestFetchAdapter, config);
-      sdk.reportStatusDeploy(statusReport.package, statusReport.status, fromLabelOrAppVersion, fromDeploymentKey);
+      sdk.reportStatusDeploy(statusReport.package, statusReport.status, previousLabelOrAppVersion, previousDeploymentKey);
     }
   }
 }
