@@ -88,6 +88,17 @@ failCallback:(void (^)(NSError *err))failCallback;
 
 @end
 
+@interface CodePushStatusReport : NSObject
+
++ (NSString *)getDeploymentKeyFromStatusReportIdentifier:(NSString *)statusReportIdentifier;
++ (NSString *)getPackageStatusReportIdentifier:(NSDictionary *)package;
++ (NSString *)getPreviousStatusReportIdentifier;
++ (NSString *)getVersionLabelFromStatusReportIdentifier:(NSString *)statusReportIdentifier;
++ (BOOL)isStatusReportIdentifierCodePushLabel:(NSString *)statusReportIdentifier;
++ (void)recordDeploymentStatusReported:(NSString *)appVersionOrPackageIdentifier;
+
+@end
+
 typedef NS_ENUM(NSInteger, CodePushInstallMode) {
     CodePushInstallModeImmediate,
     CodePushInstallModeOnNextRestart,

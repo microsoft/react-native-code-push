@@ -23,7 +23,6 @@ static NSString *const DeploymentSucceeded = @"DeploymentSucceeded";
 
 // These keys represent the names we use to store data in NSUserDefaults
 static NSString *const FailedUpdatesKey = @"CODE_PUSH_FAILED_UPDATES";
-static NSString *const LastDeploymentReportKey = @"CODE_PUSH_LAST_DEPLOYMENT_REPORT";
 static NSString *const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
 
 // These keys are already "namespaced" by the PendingUpdateKey, so
@@ -33,8 +32,6 @@ static NSString *const PendingUpdateIsLoadingKey = @"isLoading";
 
 // These keys are used to inspect/augment the metadata
 // that is associated with an update's package.
-static NSString *const DeploymentKeyKey = @"deploymentKey";
-static NSString *const LabelKey = @"label";
 static NSString *const PackageHashKey = @"packageHash";
 static NSString *const PackageIsPendingKey = @"isPending";
 
@@ -161,36 +158,6 @@ static NSString *const PackageIsPendingKey = @"isPending";
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-- (NSString *)getDeploymentKeyFromStatusReportIdentifier:(NSString *)statusReportIdentifier
-{
-    return [[statusReportIdentifier componentsSeparatedByString:@":"] firstObject];
-}
-
-- (NSString *)getPackageStatusReportIdentifier:(NSDictionary *)package
-{
-    // Because deploymentKeys can be dynamically switched, we use a
-    // combination of the deploymentKey and label as the packageIdentifier.
-    NSString *deploymentKey = [package objectForKey:DeploymentKeyKey];
-    NSString *label = [package objectForKey:LabelKey];
-    if (deploymentKey && label) {
-        return [[deploymentKey stringByAppendingString:@":"] stringByAppendingString:label];
-    } else {
-        return nil;
-    }
-}
-
-- (NSString *)getPreviousStatusReportIdentifier
-{
-    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
-    NSString *sentStatusReportIdentifier = [preferences objectForKey:LastDeploymentReportKey];
-    return sentStatusReportIdentifier;
-}
-
-- (NSString *)getVersionLabelFromStatusReportIdentifier:(NSString *)statusReportIdentifier
-{
-    return [[statusReportIdentifier componentsSeparatedByString:@":"] lastObject];
-}
-
 - (instancetype)init
 {
     self = [super init];
@@ -277,11 +244,6 @@ static NSString *const PackageIsPendingKey = @"isPending";
     return updateIsPending;
 }
 
-- (BOOL)isStatusReportIdentifierCodePushLabel:(NSString *)statusReportIdentifier
-{
-    return statusReportIdentifier != nil && [statusReportIdentifier containsString:@":"];
-}
-
 /*
  * This method updates the React Native bridge's bundle URL
  * to point at the latest CodePush update, and then restarts
@@ -302,13 +264,6 @@ static NSString *const PackageIsPendingKey = @"isPending";
         
         [_bridge reload];
     });
-}
-
-- (void)recordDeploymentStatusReported:(NSString *)appVersionOrPackageIdentifier
-{
-    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
-    [preferences setValue:appVersionOrPackageIdentifier forKey:LastDeploymentReportKey];
-    [preferences synchronize];
 }
 
 /*
@@ -556,16 +511,11 @@ RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
         if (failedUpdates) {
             NSDictionary *lastFailedPackage = [failedUpdates lastObject];
             if (lastFailedPackage) {
-                NSString *lastFailedPackageIdentifier = [self getPackageStatusReportIdentifier:lastFailedPackage];
-                NSString *previousStatusReportIdentifier = [self getPreviousStatusReportIdentifier];
-                if (lastFailedPackageIdentifier && (previousStatusReportIdentifier == nil || ![previousStatusReportIdentifier isEqualToString:lastFailedPackageIdentifier])) {
-                    [self recordDeploymentStatusReported:lastFailedPackageIdentifier];
-                    resolve(@{
-                              @"package": lastFailedPackage,
-                              @"status": DeploymentFailed
-                              });
-                    return;
-                }
+                resolve(@{
+                          @"package": lastFailedPackage,
+                          @"status": DeploymentFailed
+                          });
+                return;
             }
         }
     } else if (_isFirstRunAfterUpdate) {
@@ -573,21 +523,21 @@ RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
         NSError *error;
         NSDictionary *currentPackage = [CodePushPackage getCurrentPackage:&error];
         if (!error && currentPackage) {
-            NSString *currentPackageIdentifier = [self getPackageStatusReportIdentifier:currentPackage];
-            NSString *previousStatusReportIdentifier = [self getPreviousStatusReportIdentifier];
+            NSString *currentPackageIdentifier = [CodePushStatusReport getPackageStatusReportIdentifier:currentPackage];
+            NSString *previousStatusReportIdentifier = [CodePushStatusReport getPreviousStatusReportIdentifier];
             if (currentPackageIdentifier) {
                 if (previousStatusReportIdentifier == nil) {
-                    [self recordDeploymentStatusReported:currentPackageIdentifier];
+                    [CodePushStatusReport recordDeploymentStatusReported:currentPackageIdentifier];
                     resolve(@{
                               @"package": currentPackage,
                               @"status": DeploymentSucceeded
                               });
                     return;
                 } else if (![previousStatusReportIdentifier isEqualToString:currentPackageIdentifier]) {
-                    [self recordDeploymentStatusReported:currentPackageIdentifier];
-                    if ([self isStatusReportIdentifierCodePushLabel:previousStatusReportIdentifier]) {
-                        NSString *previousDeploymentKey = [self getDeploymentKeyFromStatusReportIdentifier:previousStatusReportIdentifier];
-                        NSString *previousLabel = [self getVersionLabelFromStatusReportIdentifier:previousStatusReportIdentifier];
+                    [CodePushStatusReport recordDeploymentStatusReported:currentPackageIdentifier];
+                    if ([CodePushStatusReport isStatusReportIdentifierCodePushLabel:previousStatusReportIdentifier]) {
+                        NSString *previousDeploymentKey = [CodePushStatusReport getDeploymentKeyFromStatusReportIdentifier:previousStatusReportIdentifier];
+                        NSString *previousLabel = [CodePushStatusReport getVersionLabelFromStatusReportIdentifier:previousStatusReportIdentifier];
                         resolve(@{
                                   @"package": currentPackage,
                                   @"status": DeploymentSucceeded,
@@ -609,16 +559,16 @@ RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
     } else if (isRunningBinaryVersion || [_bridge.bundleURL.scheme hasPrefix:@"http"]) {
         // Check if the current appVersion has been reported.
         NSString *appVersion = [[CodePushConfig current] appVersion];
-        NSString *previousStatusReportIdentifier = [self getPreviousStatusReportIdentifier];
+        NSString *previousStatusReportIdentifier = [CodePushStatusReport getPreviousStatusReportIdentifier];
         if (previousStatusReportIdentifier == nil) {
-            [self recordDeploymentStatusReported:appVersion];
+            [CodePushStatusReport recordDeploymentStatusReported:appVersion];
             resolve(@{ @"appVersion": appVersion });
             return;
         } else if (![previousStatusReportIdentifier isEqualToString:appVersion]) {
-            [self recordDeploymentStatusReported:appVersion];
-            if ([self isStatusReportIdentifierCodePushLabel:previousStatusReportIdentifier]) {
-                NSString *previousDeploymentKey = [self getDeploymentKeyFromStatusReportIdentifier:previousStatusReportIdentifier];
-                NSString *previousLabel = [self getVersionLabelFromStatusReportIdentifier:previousStatusReportIdentifier];
+            [CodePushStatusReport recordDeploymentStatusReported:appVersion];
+            if ([CodePushStatusReport isStatusReportIdentifierCodePushLabel:previousStatusReportIdentifier]) {
+                NSString *previousDeploymentKey = [CodePushStatusReport getDeploymentKeyFromStatusReportIdentifier:previousStatusReportIdentifier];
+                NSString *previousLabel = [CodePushStatusReport getVersionLabelFromStatusReportIdentifier:previousStatusReportIdentifier];
                 resolve(@{
                           @"appVersion": appVersion,
                           @"previousDeploymentKey": previousDeploymentKey,

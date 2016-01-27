@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		13BE3DEE1AC21097009241FE /* CodePush.m in Sources */ = {isa = PBXBuildFile; fileRef = 13BE3DED1AC21097009241FE /* CodePush.m */; };
 		1B23B9141BF9267B000BB2F0 /* RCTConvert+CodePushInstallMode.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B23B9131BF9267B000BB2F0 /* RCTConvert+CodePushInstallMode.m */; };
+		5421FE311C58AD5A00986A55 /* CodePushStatusReport.m in Sources */ = {isa = PBXBuildFile; fileRef = 5421FE301C58AD5A00986A55 /* CodePushStatusReport.m */; };
 		54A0026C1C0E2880004C3CEC /* aescrypt.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0024C1C0E2880004C3CEC /* aescrypt.c */; };
 		54A0026D1C0E2880004C3CEC /* aeskey.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0024D1C0E2880004C3CEC /* aeskey.c */; };
 		54A0026E1C0E2880004C3CEC /* aestab.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0024F1C0E2880004C3CEC /* aestab.c */; };
@@ -45,6 +46,7 @@
 		13BE3DEC1AC21097009241FE /* CodePush.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CodePush.h; sourceTree = "<group>"; };
 		13BE3DED1AC21097009241FE /* CodePush.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CodePush.m; sourceTree = "<group>"; };
 		1B23B9131BF9267B000BB2F0 /* RCTConvert+CodePushInstallMode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "RCTConvert+CodePushInstallMode.m"; sourceTree = "<group>"; };
+		5421FE301C58AD5A00986A55 /* CodePushStatusReport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CodePushStatusReport.m; sourceTree = "<group>"; };
 		54A0024A1C0E2880004C3CEC /* aes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aes.h; sourceTree = "<group>"; };
 		54A0024B1C0E2880004C3CEC /* aes_via_ace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aes_via_ace.h; sourceTree = "<group>"; };
 		54A0024C1C0E2880004C3CEC /* aescrypt.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = aescrypt.c; sourceTree = "<group>"; };
@@ -165,6 +167,7 @@
 				1B23B9131BF9267B000BB2F0 /* RCTConvert+CodePushInstallMode.m */,
 				54FFEDDF1BF550630061DD23 /* CodePushDownloadHandler.m */,
 				810D4E6C1B96935000B397E9 /* CodePushPackage.m */,
+				5421FE301C58AD5A00986A55 /* CodePushStatusReport.m */,
 				81D51F391B6181C2000DA084 /* CodePushConfig.m */,
 				13BE3DEC1AC21097009241FE /* CodePush.h */,
 				13BE3DED1AC21097009241FE /* CodePush.m */,
@@ -239,6 +242,7 @@
 				54FFEDE01BF550630061DD23 /* CodePushDownloadHandler.m in Sources */,
 				54A002711C0E2880004C3CEC /* hmac.c in Sources */,
 				54A002721C0E2880004C3CEC /* prng.c in Sources */,
+				5421FE311C58AD5A00986A55 /* CodePushStatusReport.m in Sources */,
 				54A002731C0E2880004C3CEC /* pwd2key.c in Sources */,
 				54A002751C0E2880004C3CEC /* ioapi.c in Sources */,
 				54A002771C0E2880004C3CEC /* unzip.c in Sources */,
