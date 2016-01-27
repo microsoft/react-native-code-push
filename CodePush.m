@@ -397,31 +397,31 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
                         rejecter:(RCTPromiseRejectBlock)reject)
 {
     [CodePushPackage downloadPackage:updatePackage
-     // The download is progressing forward
-                    progressCallback:^(long long expectedContentLength, long long receivedContentLength) {
-                        // Notify the script-side about the progress
-                        [self.bridge.eventDispatcher
-                         sendDeviceEventWithName:@"CodePushDownloadProgress"
-                         body:@{
-                                @"totalBytes":[NSNumber numberWithLongLong:expectedContentLength],
-                                @"receivedBytes":[NSNumber numberWithLongLong:receivedContentLength]
-                                }];
-                    }
-     // The download completed
-                        doneCallback:^{
-                            NSError *err;
-                            NSDictionary *newPackage = [CodePushPackage getPackage:updatePackage[PackageHashKey] error:&err];
-                            
-                            if (err) {
-                                return reject(@"",@"",err);
-                            }
-                            
-                            resolve(newPackage);
-                        }
-     // The download failed
-                        failCallback:^(NSError *err) {
-                            reject(@"",@"",err);
-                        }];
+        // The download is progressing forward
+        progressCallback:^(long long expectedContentLength, long long receivedContentLength) {
+            // Notify the script-side about the progress
+            [self.bridge.eventDispatcher
+                sendDeviceEventWithName:@"CodePushDownloadProgress"
+                body:@{
+                    @"totalBytes":[NSNumber numberWithLongLong:expectedContentLength],
+                    @"receivedBytes":[NSNumber numberWithLongLong:receivedContentLength]
+                    }];
+        }
+        // The download completed
+        doneCallback:^{
+            NSError *err;
+            NSDictionary *newPackage = [CodePushPackage getPackage:updatePackage[PackageHashKey] error:&err];
+            
+            if (err) {
+                return reject(err);
+            }
+            
+            resolve(newPackage);
+        }
+        // The download failed
+        failCallback:^(NSError *err) {
+            reject(err);
+        }];
 }
 
 /*
@@ -447,7 +447,7 @@ RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
         NSMutableDictionary *package = [[CodePushPackage getCurrentPackage:&error] mutableCopy];
         
         if (error) {
-            reject(@"",@"",error);
+            reject(error);
         }
         
         // Add the "isPending" virtual property to the package at this point, so that
@@ -473,7 +473,7 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
                                   error:&error];
         
         if (error) {
-            reject(@"",@"",error);
+            reject(error);
         } else {
             [self savePendingUpdate:updatePackage[PackageHashKey]
                           isLoading:NO];
