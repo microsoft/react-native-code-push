@@ -63,10 +63,10 @@ public class CodePush {
     private final String REACT_DEV_BUNDLE_CACHE_FILE_NAME = "ReactNativeDevBundle.js";
 
     // Helper classes.
+    private CodePushNativeModule codePushNativeModule;
     private CodePushPackage codePushPackage;
     private CodePushReactPackage codePushReactPackage;
     private CodePushTelemetryManager codePushTelemetryManager;
-    private CodePushNativeModule codePushNativeModule;
 
     // Config properties.
     private String deploymentKey;

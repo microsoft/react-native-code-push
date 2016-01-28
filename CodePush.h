@@ -91,8 +91,8 @@ failCallback:(void (^)(NSError *err))failCallback;
 @interface CodePushTelemetryManager : NSObject
 
 + (NSDictionary *)getBinaryUpdateReport:(NSString *)appVersion;
-+ (NSDictionary *)getUpdateReport:(NSDictionary *)currentPackage;
 + (NSDictionary *)getRollbackReport:(NSDictionary *)lastFailedPackage;
++ (NSDictionary *)getUpdateReport:(NSDictionary *)currentPackage;
 
 @end
 

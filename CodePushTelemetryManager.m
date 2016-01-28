@@ -20,16 +20,16 @@ static NSString *const LastDeploymentReportKey = @"CODE_PUSH_LAST_DEPLOYMENT_REP
             NSString *previousDeploymentKey = [self getDeploymentKeyFromStatusReportIdentifier:previousStatusReportIdentifier];
             NSString *previousLabel = [self getVersionLabelFromStatusReportIdentifier:previousStatusReportIdentifier];
             return @{
-                     @"appVersion": appVersion,
-                     @"previousDeploymentKey": previousDeploymentKey,
-                     @"previousLabelOrAppVersion": previousLabel
-                     };
+                      @"appVersion": appVersion,
+                      @"previousDeploymentKey": previousDeploymentKey,
+                      @"previousLabelOrAppVersion": previousLabel
+                    };
         } else {
             // Previous status report was with a binary app version.
             return @{
-                     @"appVersion": appVersion,
-                     @"previousLabelOrAppVersion": previousStatusReportIdentifier
-                     };
+                      @"appVersion": appVersion,
+                      @"previousLabelOrAppVersion": previousStatusReportIdentifier
+                    };
         }
     }
     
@@ -52,33 +52,35 @@ static NSString *const LastDeploymentReportKey = @"CODE_PUSH_LAST_DEPLOYMENT_REP
         if (previousStatusReportIdentifier == nil) {
             [self recordDeploymentStatusReported:currentPackageIdentifier];
             return @{
-                     @"package": currentPackage,
-                     @"status": DeploymentSucceeded
-                     };
+                      @"package": currentPackage,
+                      @"status": DeploymentSucceeded
+                    };
         } else if (![previousStatusReportIdentifier isEqualToString:currentPackageIdentifier]) {
             [self recordDeploymentStatusReported:currentPackageIdentifier];
             if ([self isStatusReportIdentifierCodePushLabel:previousStatusReportIdentifier]) {
                 NSString *previousDeploymentKey = [self getDeploymentKeyFromStatusReportIdentifier:previousStatusReportIdentifier];
                 NSString *previousLabel = [self getVersionLabelFromStatusReportIdentifier:previousStatusReportIdentifier];
                 return @{
-                         @"package": currentPackage,
-                         @"status": DeploymentSucceeded,
-                         @"previousDeploymentKey": previousDeploymentKey,
-                         @"previousLabelOrAppVersion": previousLabel
-                         };
+                          @"package": currentPackage,
+                          @"status": DeploymentSucceeded,
+                          @"previousDeploymentKey": previousDeploymentKey,
+                          @"previousLabelOrAppVersion": previousLabel
+                        };
             } else {
                 // Previous status report was with a binary app version.
                 return @{
-                         @"package": currentPackage,
-                         @"status": DeploymentSucceeded,
-                         @"previousLabelOrAppVersion": previousStatusReportIdentifier
-                         };
+                          @"package": currentPackage,
+                          @"status": DeploymentSucceeded,
+                          @"previousLabelOrAppVersion": previousStatusReportIdentifier
+                        };
             }
         }
     }
     
     return nil;
 }
+
+#pragma mark - private methods
 
 + (NSString *)getDeploymentKeyFromStatusReportIdentifier:(NSString *)statusReportIdentifier
 {

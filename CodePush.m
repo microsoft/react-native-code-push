@@ -503,32 +503,35 @@ RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
 RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
                             rejecter:(RCTPromiseRejectBlock)reject)
 {
-    if (needToReportRollback) {
-        needToReportRollback = NO;
-        NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
-        NSMutableArray *failedUpdates = [preferences objectForKey:FailedUpdatesKey];
-        if (failedUpdates) {
-            NSDictionary *lastFailedPackage = [failedUpdates lastObject];
-            if (lastFailedPackage) {
-                resolve([CodePushTelemetryManager getRollbackReport:lastFailedPackage]);
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        if (needToReportRollback) {
+            needToReportRollback = NO;
+            NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+            NSMutableArray *failedUpdates = [preferences objectForKey:FailedUpdatesKey];
+            if (failedUpdates) {
+                NSDictionary *lastFailedPackage = [failedUpdates lastObject];
+                if (lastFailedPackage) {
+                    resolve([CodePushTelemetryManager getRollbackReport:lastFailedPackage]);
+                    return;
+                }
+            }
+        } else if (_isFirstRunAfterUpdate) {
+            NSError *error;
+            NSDictionary *currentPackage = [CodePushPackage getCurrentPackage:&error];
+            if (!error && currentPackage) {
+                resolve([CodePushTelemetryManager getUpdateReport:currentPackage]);
                 return;
             }
-        }
-    } else if (_isFirstRunAfterUpdate) {
-        NSError *error;
-        NSDictionary *currentPackage = [CodePushPackage getCurrentPackage:&error];
-        if (!error && currentPackage) {
-            resolve([CodePushTelemetryManager getUpdateReport:currentPackage]);
+        } else if (isRunningBinaryVersion || [_bridge.bundleURL.scheme hasPrefix:@"http"]) {
+            // Check if the current appVersion has been reported.
+            NSString *appVersion = [[CodePushConfig current] appVersion];
+            resolve([CodePushTelemetryManager getBinaryUpdateReport:appVersion]);
             return;
         }
-    } else if (isRunningBinaryVersion || [_bridge.bundleURL.scheme hasPrefix:@"http"]) {
-        // Check if the current appVersion has been reported.
-        NSString *appVersion = [[CodePushConfig current] appVersion];
-        resolve([CodePushTelemetryManager getBinaryUpdateReport:appVersion]);
-        return;
-    }
-    
-    resolve(nil);
+        
+        resolve(nil);
+    });
 }
 
 /*
