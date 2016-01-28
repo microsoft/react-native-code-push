@@ -4,7 +4,7 @@ module.exports = {
       callback = requestBody;
       requestBody = null;
     }
-    
+
     const headers = {
       "Accept": "application/json",
       "Content-Type": "application/json",
