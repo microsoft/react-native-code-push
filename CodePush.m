@@ -493,11 +493,11 @@ RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
                                 rejecter:(RCTPromiseRejectBlock)reject)
 {
     [CodePush removePendingUpdate];
-    resolve([NSNull null]);
+    resolve(nil);
 }
 
 /*
- * This method is checks if a new status update exists (new version was installed, 
+ * This method is checks if a new status update exists (new version was installed,
  * or an update failed) and return its details (version label, status).
  */
 RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
@@ -511,10 +511,7 @@ RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
         if (failedUpdates) {
             NSDictionary *lastFailedPackage = [failedUpdates lastObject];
             if (lastFailedPackage) {
-                resolve(@{
-                          @"package": lastFailedPackage,
-                          @"status": DeploymentFailed
-                          });
+                resolve([CodePushStatusReport getFailedUpdateStatusReport:lastFailedPackage]);
                 return;
             }
         }
@@ -523,69 +520,17 @@ RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
         NSError *error;
         NSDictionary *currentPackage = [CodePushPackage getCurrentPackage:&error];
         if (!error && currentPackage) {
-            NSString *currentPackageIdentifier = [CodePushStatusReport getPackageStatusReportIdentifier:currentPackage];
-            NSString *previousStatusReportIdentifier = [CodePushStatusReport getPreviousStatusReportIdentifier];
-            if (currentPackageIdentifier) {
-                if (previousStatusReportIdentifier == nil) {
-                    [CodePushStatusReport recordDeploymentStatusReported:currentPackageIdentifier];
-                    resolve(@{
-                              @"package": currentPackage,
-                              @"status": DeploymentSucceeded
-                              });
-                    return;
-                } else if (![previousStatusReportIdentifier isEqualToString:currentPackageIdentifier]) {
-                    [CodePushStatusReport recordDeploymentStatusReported:currentPackageIdentifier];
-                    if ([CodePushStatusReport isStatusReportIdentifierCodePushLabel:previousStatusReportIdentifier]) {
-                        NSString *previousDeploymentKey = [CodePushStatusReport getDeploymentKeyFromStatusReportIdentifier:previousStatusReportIdentifier];
-                        NSString *previousLabel = [CodePushStatusReport getVersionLabelFromStatusReportIdentifier:previousStatusReportIdentifier];
-                        resolve(@{
-                                  @"package": currentPackage,
-                                  @"status": DeploymentSucceeded,
-                                  @"previousDeploymentKey": previousDeploymentKey,
-                                  @"previousLabelOrAppVersion": previousLabel
-                                  });
-                    } else {
-                        // Previous status report was with a binary app version.
-                        resolve(@{
-                                  @"package": currentPackage,
-                                  @"status": DeploymentSucceeded,
-                                  @"previousLabelOrAppVersion": previousStatusReportIdentifier
-                                  });
-                    }
-                    return;
-                }
-            }
+            resolve([CodePushStatusReport getNewPackageStatusReport:currentPackage]);
+            return;
         }
     } else if (isRunningBinaryVersion || [_bridge.bundleURL.scheme hasPrefix:@"http"]) {
         // Check if the current appVersion has been reported.
         NSString *appVersion = [[CodePushConfig current] appVersion];
-        NSString *previousStatusReportIdentifier = [CodePushStatusReport getPreviousStatusReportIdentifier];
-        if (previousStatusReportIdentifier == nil) {
-            [CodePushStatusReport recordDeploymentStatusReported:appVersion];
-            resolve(@{ @"appVersion": appVersion });
-            return;
-        } else if (![previousStatusReportIdentifier isEqualToString:appVersion]) {
-            [CodePushStatusReport recordDeploymentStatusReported:appVersion];
-            if ([CodePushStatusReport isStatusReportIdentifierCodePushLabel:previousStatusReportIdentifier]) {
-                NSString *previousDeploymentKey = [CodePushStatusReport getDeploymentKeyFromStatusReportIdentifier:previousStatusReportIdentifier];
-                NSString *previousLabel = [CodePushStatusReport getVersionLabelFromStatusReportIdentifier:previousStatusReportIdentifier];
-                resolve(@{
-                          @"appVersion": appVersion,
-                          @"previousDeploymentKey": previousDeploymentKey,
-                          @"previousLabelOrAppVersion": previousLabel
-                          });
-            } else {
-                // Previous status report was with a binary app version.
-                resolve(@{
-                          @"appVersion": appVersion,
-                          @"previousLabelOrAppVersion": previousStatusReportIdentifier
-                          });
-            }
-            return;
-        }
+        resolve([CodePushStatusReport getNewAppVersionStatusReport:appVersion]);
+        return;
     }
     
-    resolve([NSNull null]);
+    resolve(nil);
 }
 
 /*

@@ -4,12 +4,15 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.WritableNativeMap;
 
 public class CodePushStatusReport {
 
     private Context applicationContext;
     private final String CODE_PUSH_PREFERENCES;
+    private final String DEPLOYMENT_FAILED_STATUS = "DeploymentFailed";
     private final String DEPLOYMENT_KEY_KEY = "deploymentKey";
+    private final String DEPLOYMENT_SUCCEEDED_STATUS = "DeploymentSucceeded";
     private final String LABEL_KEY = "label";
     private final String LAST_DEPLOYMENT_REPORT_KEY = "CODE_PUSH_LAST_DEPLOYMENT_REPORT";
 
@@ -25,6 +28,75 @@ public class CodePushStatusReport {
         } else {
             return null;
         }
+    }
+
+    public WritableMap getFailedUpdateStatusReport(WritableMap lastFailedPackage) {
+        WritableNativeMap reportMap = new WritableNativeMap();
+        reportMap.putMap("package", lastFailedPackage);
+        reportMap.putString("status", DEPLOYMENT_FAILED_STATUS);
+        return reportMap;
+    }
+
+    public WritableMap getNewPackageStatusReport(WritableMap currentPackage) {
+        String currentPackageIdentifier = this.getPackageStatusReportIdentifier(currentPackage);
+        String previousStatusReportIdentifier = this.getPreviousStatusReportIdentifier();
+        if (currentPackageIdentifier != null) {
+            if (previousStatusReportIdentifier == null) {
+                this.recordDeploymentStatusReported(currentPackageIdentifier);
+                WritableNativeMap reportMap = new WritableNativeMap();
+                reportMap.putMap("package", currentPackage);
+                reportMap.putString("status", DEPLOYMENT_SUCCEEDED_STATUS);
+                return reportMap;
+            } else if (!previousStatusReportIdentifier.equals(currentPackageIdentifier)) {
+                this.recordDeploymentStatusReported(currentPackageIdentifier);
+                if (this.isStatusReportIdentifierCodePushLabel(previousStatusReportIdentifier)) {
+                    String previousDeploymentKey = this.getDeploymentKeyFromStatusReportIdentifier(previousStatusReportIdentifier);
+                    String previousLabel = this.getVersionLabelFromStatusReportIdentifier(previousStatusReportIdentifier);
+                    WritableNativeMap reportMap = new WritableNativeMap();
+                    reportMap.putMap("package", currentPackage);
+                    reportMap.putString("status", DEPLOYMENT_SUCCEEDED_STATUS);
+                    reportMap.putString("previousDeploymentKey", previousDeploymentKey);
+                    reportMap.putString("previousLabelOrAppVersion", previousLabel);
+                    return reportMap;
+                } else {
+                    // Previous status report was with a binary app version.
+                    WritableNativeMap reportMap = new WritableNativeMap();
+                    reportMap.putMap("package", currentPackage);
+                    reportMap.putString("status", DEPLOYMENT_SUCCEEDED_STATUS);
+                    reportMap.putString("previousLabelOrAppVersion", previousStatusReportIdentifier);
+                    return reportMap;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public WritableMap getNewAppVersionStatusReport(String appVersion) {
+        String previousStatusReportIdentifier = this.getPreviousStatusReportIdentifier();
+        if (previousStatusReportIdentifier == null) {
+            this.recordDeploymentStatusReported(appVersion);
+            WritableNativeMap reportMap = new WritableNativeMap();
+            reportMap.putString("appVersion", appVersion);
+            return reportMap;
+        } else if (!previousStatusReportIdentifier.equals(appVersion)) {
+            this.recordDeploymentStatusReported(appVersion);
+            WritableNativeMap reportMap = new WritableNativeMap();
+            if (this.isStatusReportIdentifierCodePushLabel(previousStatusReportIdentifier)) {
+                String previousDeploymentKey = this.getDeploymentKeyFromStatusReportIdentifier(previousStatusReportIdentifier);
+                String previousLabel = this.getVersionLabelFromStatusReportIdentifier(previousStatusReportIdentifier);
+                reportMap.putString("appVersion", appVersion);
+                reportMap.putString("previousDeploymentKey", previousDeploymentKey);
+                reportMap.putString("previousLabelOrAppVersion", previousLabel);
+            } else {
+                // Previous status report was with a binary app version.
+                reportMap.putString("appVersion", appVersion);
+                reportMap.putString("previousLabelOrAppVersion", previousStatusReportIdentifier);
+            }
+            return reportMap;
+        }
+
+        return null;
     }
 
     public String getPackageStatusReportIdentifier(WritableMap updatePackage) {

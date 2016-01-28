@@ -51,8 +51,6 @@ public class CodePush {
     private final String ASSETS_BUNDLE_PREFIX = "assets://";
     private final String BINARY_MODIFIED_TIME_KEY = "binaryModifiedTime";
     private final String CODE_PUSH_PREFERENCES = "CodePush";
-    private final String DEPLOYMENT_FAILED_STATUS = "DeploymentFailed";
-    private final String DEPLOYMENT_SUCCEEDED_STATUS = "DeploymentSucceeded";
     private final String DOWNLOAD_PROGRESS_EVENT_NAME = "CodePushDownloadProgress";
     private final String FAILED_UPDATES_KEY = "CODE_PUSH_FAILED_UPDATES";
     private final String PACKAGE_HASH_KEY = "packageHash";
@@ -429,85 +427,34 @@ public class CodePush {
         @ReactMethod
         public void getNewStatusReport(Promise promise) {
             if (needToReportRollback) {
-                // Check if there was a rollback that was not yet reported
                 needToReportRollback = false;
                 JSONArray failedUpdates = getFailedUpdates();
                 if (failedUpdates != null && failedUpdates.length() > 0) {
                     try {
                         JSONObject lastFailedPackageJSON = failedUpdates.getJSONObject(failedUpdates.length() - 1);
                         WritableMap lastFailedPackage = CodePushUtils.convertJsonObjectToWriteable(lastFailedPackageJSON);
-                        WritableNativeMap reportMap = new WritableNativeMap();
-                        reportMap.putMap("package", lastFailedPackage);
-                        reportMap.putString("status", DEPLOYMENT_FAILED_STATUS);
-                        promise.resolve(reportMap);
-                        return;
+                        WritableMap failedStatusReport = codePushStatusReport.getFailedUpdateStatusReport(lastFailedPackage);
+                        if (failedStatusReport != null) {
+                            promise.resolve(failedStatusReport);
+                            return;
+                        }
                     } catch (JSONException e) {
                         throw new CodePushUnknownException("Unable to read failed updates information stored in SharedPreferences.", e);
                     }
                 }
             } else if (didUpdate) {
-                // Check if the current CodePush package has been reported
                 WritableMap currentPackage = codePushPackage.getCurrentPackage();
                 if (currentPackage != null) {
-                    String currentPackageIdentifier = codePushStatusReport.getPackageStatusReportIdentifier(currentPackage);
-                    String previousStatusReportIdentifier = codePushStatusReport.getPreviousStatusReportIdentifier();
-                    if (currentPackageIdentifier != null) {
-                        if (previousStatusReportIdentifier == null) {
-                            codePushStatusReport.recordDeploymentStatusReported(currentPackageIdentifier);
-                            WritableNativeMap reportMap = new WritableNativeMap();
-                            reportMap.putMap("package", currentPackage);
-                            reportMap.putString("status", DEPLOYMENT_SUCCEEDED_STATUS);
-                            promise.resolve(reportMap);
-                            return;
-                        } else if (!previousStatusReportIdentifier.equals(currentPackageIdentifier)) {
-                            codePushStatusReport.recordDeploymentStatusReported(currentPackageIdentifier);
-                            if (codePushStatusReport.isStatusReportIdentifierCodePushLabel(previousStatusReportIdentifier)) {
-                                String previousDeploymentKey = codePushStatusReport.getDeploymentKeyFromStatusReportIdentifier(previousStatusReportIdentifier);
-                                String previousLabel = codePushStatusReport.getVersionLabelFromStatusReportIdentifier(previousStatusReportIdentifier);
-                                WritableNativeMap reportMap = new WritableNativeMap();
-                                reportMap.putMap("package", currentPackage);
-                                reportMap.putString("status", DEPLOYMENT_SUCCEEDED_STATUS);
-                                reportMap.putString("previousDeploymentKey", previousDeploymentKey);
-                                reportMap.putString("previousLabelOrAppVersion", previousLabel);
-                                promise.resolve(reportMap);
-                            } else {
-                                // Previous status report was with a binary app version.
-                                WritableNativeMap reportMap = new WritableNativeMap();
-                                reportMap.putMap("package", currentPackage);
-                                reportMap.putString("status", DEPLOYMENT_SUCCEEDED_STATUS);
-                                reportMap.putString("previousLabelOrAppVersion", previousStatusReportIdentifier);
-                                promise.resolve(reportMap);
-                            }
-                            return;
-                        }
+                    WritableMap newPackageStatusReport = codePushStatusReport.getNewPackageStatusReport(currentPackage);
+                    if (newPackageStatusReport != null) {
+                        promise.resolve(newPackageStatusReport);
+                        return;
                     }
                 }
             } else if (isRunningBinaryVersion) {
-                // Check if the current appVersion has been reported.
-                String previousStatusReportIdentifier = codePushStatusReport.getPreviousStatusReportIdentifier();
-                if (previousStatusReportIdentifier == null) {
-                    codePushStatusReport.recordDeploymentStatusReported(appVersion);
-                    WritableNativeMap reportMap = new WritableNativeMap();
-                    reportMap.putString("appVersion", appVersion);
-                    promise.resolve(reportMap);
-                    return;
-                } else if (!previousStatusReportIdentifier.equals(appVersion)) {
-                    codePushStatusReport.recordDeploymentStatusReported(appVersion);
-                    if (codePushStatusReport.isStatusReportIdentifierCodePushLabel(previousStatusReportIdentifier)) {
-                        String previousDeploymentKey = codePushStatusReport.getDeploymentKeyFromStatusReportIdentifier(previousStatusReportIdentifier);
-                        String previousLabel = codePushStatusReport.getVersionLabelFromStatusReportIdentifier(previousStatusReportIdentifier);
-                        WritableNativeMap reportMap = new WritableNativeMap();
-                        reportMap.putString("appVersion", appVersion);
-                        reportMap.putString("previousDeploymentKey", previousDeploymentKey);
-                        reportMap.putString("previousLabelOrAppVersion", previousLabel);
-                        promise.resolve(reportMap);
-                    } else {
-                        // Previous status report was with a binary app version.
-                        WritableNativeMap reportMap = new WritableNativeMap();
-                        reportMap.putString("appVersion", appVersion);
-                        reportMap.putString("previousLabelOrAppVersion", previousStatusReportIdentifier);
-                        promise.resolve(reportMap);
-                    }
+                WritableMap newAppVersionStatusReport = codePushStatusReport.getNewAppVersionStatusReport(appVersion);
+                if (newAppVersionStatusReport != null) {
+                    promise.resolve(newAppVersionStatusReport);
                     return;
                 }
             }

@@ -91,6 +91,9 @@ failCallback:(void (^)(NSError *err))failCallback;
 @interface CodePushStatusReport : NSObject
 
 + (NSString *)getDeploymentKeyFromStatusReportIdentifier:(NSString *)statusReportIdentifier;
++ (NSDictionary *)getFailedUpdateStatusReport:(NSDictionary *)lastFailedPackage;
++ (NSDictionary *)getNewPackageStatusReport:(NSDictionary *)currentPackage;
++ (NSDictionary *)getNewAppVersionStatusReport:(NSString *)appVersion;
 + (NSString *)getPackageStatusReportIdentifier:(NSDictionary *)package;
 + (NSString *)getPreviousStatusReportIdentifier;
 + (NSString *)getVersionLabelFromStatusReportIdentifier:(NSString *)statusReportIdentifier;
