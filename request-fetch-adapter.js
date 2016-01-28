@@ -32,7 +32,7 @@ module.exports = {
 };
 
 function getSDKVersion() {
-    return require("./package.json").dependencies["code-push"];
+  return require("./package.json").dependencies["code-push"];
 }
 
 function getHttpMethodName(verb) {

@@ -6,14 +6,37 @@ static NSString *const DeploymentSucceeded = @"DeploymentSucceeded";
 static NSString *const LabelKey = @"label";
 static NSString *const LastDeploymentReportKey = @"CODE_PUSH_LAST_DEPLOYMENT_REPORT";
 
-@implementation CodePushStatusReport
+@implementation CodePushTelemetryManager
 
-+ (NSString *)getDeploymentKeyFromStatusReportIdentifier:(NSString *)statusReportIdentifier
++ (NSDictionary *)getBinaryUpdateReport:(NSString *)appVersion
 {
-    return [[statusReportIdentifier componentsSeparatedByString:@":"] firstObject];
+    NSString *previousStatusReportIdentifier = [self getPreviousStatusReportIdentifier];
+    if (previousStatusReportIdentifier == nil) {
+        [self recordDeploymentStatusReported:appVersion];
+        return @{ @"appVersion": appVersion };
+    } else if (![previousStatusReportIdentifier isEqualToString:appVersion]) {
+        [self recordDeploymentStatusReported:appVersion];
+        if ([self isStatusReportIdentifierCodePushLabel:previousStatusReportIdentifier]) {
+            NSString *previousDeploymentKey = [self getDeploymentKeyFromStatusReportIdentifier:previousStatusReportIdentifier];
+            NSString *previousLabel = [self getVersionLabelFromStatusReportIdentifier:previousStatusReportIdentifier];
+            return @{
+                     @"appVersion": appVersion,
+                     @"previousDeploymentKey": previousDeploymentKey,
+                     @"previousLabelOrAppVersion": previousLabel
+                     };
+        } else {
+            // Previous status report was with a binary app version.
+            return @{
+                     @"appVersion": appVersion,
+                     @"previousLabelOrAppVersion": previousStatusReportIdentifier
+                     };
+        }
+    }
+    
+    return nil;
 }
 
-+ (NSDictionary *)getFailedUpdateStatusReport:(NSDictionary *)lastFailedPackage
++ (NSDictionary *)getRollbackReport:(NSDictionary *)lastFailedPackage
 {
     return @{
               @"package": lastFailedPackage,
@@ -21,7 +44,7 @@ static NSString *const LastDeploymentReportKey = @"CODE_PUSH_LAST_DEPLOYMENT_REP
             };
 }
 
-+ (NSDictionary *)getNewPackageStatusReport:(NSDictionary *)currentPackage
++ (NSDictionary *)getUpdateReport:(NSDictionary *)currentPackage
 {
     NSString *currentPackageIdentifier = [self getPackageStatusReportIdentifier:currentPackage];
     NSString *previousStatusReportIdentifier = [self getPreviousStatusReportIdentifier];
@@ -57,32 +80,9 @@ static NSString *const LastDeploymentReportKey = @"CODE_PUSH_LAST_DEPLOYMENT_REP
     return nil;
 }
 
-+ (NSDictionary *)getNewAppVersionStatusReport:(NSString *)appVersion
++ (NSString *)getDeploymentKeyFromStatusReportIdentifier:(NSString *)statusReportIdentifier
 {
-    NSString *previousStatusReportIdentifier = [self getPreviousStatusReportIdentifier];
-    if (previousStatusReportIdentifier == nil) {
-        [self recordDeploymentStatusReported:appVersion];
-        return @{ @"appVersion": appVersion };
-    } else if (![previousStatusReportIdentifier isEqualToString:appVersion]) {
-        [self recordDeploymentStatusReported:appVersion];
-        if ([self isStatusReportIdentifierCodePushLabel:previousStatusReportIdentifier]) {
-            NSString *previousDeploymentKey = [self getDeploymentKeyFromStatusReportIdentifier:previousStatusReportIdentifier];
-            NSString *previousLabel = [self getVersionLabelFromStatusReportIdentifier:previousStatusReportIdentifier];
-            return @{
-                     @"appVersion": appVersion,
-                     @"previousDeploymentKey": previousDeploymentKey,
-                     @"previousLabelOrAppVersion": previousLabel
-                     };
-        } else {
-            // Previous status report was with a binary app version.
-            return @{
-                     @"appVersion": appVersion,
-                     @"previousLabelOrAppVersion": previousStatusReportIdentifier
-                     };
-        }
-    }
-    
-    return nil;
+    return [[statusReportIdentifier componentsSeparatedByString:@":"] firstObject];
 }
 
 + (NSString *)getPackageStatusReportIdentifier:(NSDictionary *)package

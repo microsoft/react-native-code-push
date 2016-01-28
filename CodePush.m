@@ -504,29 +504,27 @@ RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
                             rejecter:(RCTPromiseRejectBlock)reject)
 {
     if (needToReportRollback) {
-        // Check if there was a rollback that was not yet reported
         needToReportRollback = NO;
         NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
         NSMutableArray *failedUpdates = [preferences objectForKey:FailedUpdatesKey];
         if (failedUpdates) {
             NSDictionary *lastFailedPackage = [failedUpdates lastObject];
             if (lastFailedPackage) {
-                resolve([CodePushStatusReport getFailedUpdateStatusReport:lastFailedPackage]);
+                resolve([CodePushTelemetryManager getRollbackReport:lastFailedPackage]);
                 return;
             }
         }
     } else if (_isFirstRunAfterUpdate) {
-        // Check if the current CodePush package has been reported
         NSError *error;
         NSDictionary *currentPackage = [CodePushPackage getCurrentPackage:&error];
         if (!error && currentPackage) {
-            resolve([CodePushStatusReport getNewPackageStatusReport:currentPackage]);
+            resolve([CodePushTelemetryManager getUpdateReport:currentPackage]);
             return;
         }
     } else if (isRunningBinaryVersion || [_bridge.bundleURL.scheme hasPrefix:@"http"]) {
         // Check if the current appVersion has been reported.
         NSString *appVersion = [[CodePushConfig current] appVersion];
-        resolve([CodePushStatusReport getNewAppVersionStatusReport:appVersion]);
+        resolve([CodePushTelemetryManager getBinaryUpdateReport:appVersion]);
         return;
     }
     

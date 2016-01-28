@@ -65,7 +65,7 @@ public class CodePush {
     // Helper classes.
     private CodePushPackage codePushPackage;
     private CodePushReactPackage codePushReactPackage;
-    private CodePushStatusReport codePushStatusReport;
+    private CodePushTelemetryManager codePushTelemetryManager;
     private CodePushNativeModule codePushNativeModule;
 
     // Config properties.
@@ -86,7 +86,7 @@ public class CodePush {
         SoLoader.init(mainActivity, false);
         this.applicationContext = mainActivity.getApplicationContext();
         this.codePushPackage = new CodePushPackage(mainActivity.getFilesDir().getAbsolutePath());
-        this.codePushStatusReport = new CodePushStatusReport(this.applicationContext, CODE_PUSH_PREFERENCES);
+        this.codePushTelemetryManager = new CodePushTelemetryManager(this.applicationContext, CODE_PUSH_PREFERENCES);
         this.deploymentKey = deploymentKey;
         this.isDebugMode = isDebugMode;
         this.mainActivity = mainActivity;
@@ -433,7 +433,7 @@ public class CodePush {
                     try {
                         JSONObject lastFailedPackageJSON = failedUpdates.getJSONObject(failedUpdates.length() - 1);
                         WritableMap lastFailedPackage = CodePushUtils.convertJsonObjectToWriteable(lastFailedPackageJSON);
-                        WritableMap failedStatusReport = codePushStatusReport.getFailedUpdateStatusReport(lastFailedPackage);
+                        WritableMap failedStatusReport = codePushTelemetryManager.getRollbackReport(lastFailedPackage);
                         if (failedStatusReport != null) {
                             promise.resolve(failedStatusReport);
                             return;
@@ -445,14 +445,14 @@ public class CodePush {
             } else if (didUpdate) {
                 WritableMap currentPackage = codePushPackage.getCurrentPackage();
                 if (currentPackage != null) {
-                    WritableMap newPackageStatusReport = codePushStatusReport.getNewPackageStatusReport(currentPackage);
+                    WritableMap newPackageStatusReport = codePushTelemetryManager.getUpdateReport(currentPackage);
                     if (newPackageStatusReport != null) {
                         promise.resolve(newPackageStatusReport);
                         return;
                     }
                 }
             } else if (isRunningBinaryVersion) {
-                WritableMap newAppVersionStatusReport = codePushStatusReport.getNewAppVersionStatusReport(appVersion);
+                WritableMap newAppVersionStatusReport = codePushTelemetryManager.getBinaryUpdateReport(appVersion);
                 if (newAppVersionStatusReport != null) {
                     promise.resolve(newAppVersionStatusReport);
                     return;

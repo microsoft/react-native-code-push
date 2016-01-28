@@ -88,17 +88,11 @@ failCallback:(void (^)(NSError *err))failCallback;
 
 @end
 
-@interface CodePushStatusReport : NSObject
+@interface CodePushTelemetryManager : NSObject
 
-+ (NSString *)getDeploymentKeyFromStatusReportIdentifier:(NSString *)statusReportIdentifier;
-+ (NSDictionary *)getFailedUpdateStatusReport:(NSDictionary *)lastFailedPackage;
-+ (NSDictionary *)getNewPackageStatusReport:(NSDictionary *)currentPackage;
-+ (NSDictionary *)getNewAppVersionStatusReport:(NSString *)appVersion;
-+ (NSString *)getPackageStatusReportIdentifier:(NSDictionary *)package;
-+ (NSString *)getPreviousStatusReportIdentifier;
-+ (NSString *)getVersionLabelFromStatusReportIdentifier:(NSString *)statusReportIdentifier;
-+ (BOOL)isStatusReportIdentifierCodePushLabel:(NSString *)statusReportIdentifier;
-+ (void)recordDeploymentStatusReported:(NSString *)appVersionOrPackageIdentifier;
++ (NSDictionary *)getBinaryUpdateReport:(NSString *)appVersion;
++ (NSDictionary *)getUpdateReport:(NSDictionary *)currentPackage;
++ (NSDictionary *)getRollbackReport:(NSDictionary *)lastFailedPackage;
 
 @end
 
