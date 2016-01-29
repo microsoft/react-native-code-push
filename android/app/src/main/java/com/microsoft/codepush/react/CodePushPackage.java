@@ -69,7 +69,7 @@ public class CodePushPackage {
 
     public WritableMap getCurrentPackageInfo() {
         String statusFilePath = getStatusFilePath();
-        if (!CodePushUtils.fileAtPathExists(statusFilePath)) {
+        if (!FileUtils.fileAtPathExists(statusFilePath)) {
             return new WritableNativeMap();
         }
 
@@ -166,6 +166,7 @@ public class CodePushPackage {
         File downloadFile = null;
         boolean isZip = false;
 
+        // Download the file while checking if it is a zip and notifying client of progress.
         try {
             downloadUrl = new URL(downloadUrlString);
             connection = (HttpURLConnection) (downloadUrl.openConnection());
@@ -216,27 +217,34 @@ public class CodePushPackage {
         }
 
         if (isZip) {
+            // Unzip the downloaded file and then delete the zip
             String unzippedFolderPath = getUnzippedFolderPath();
-            CodePushUtils.unzipFile(downloadFile, unzippedFolderPath);
-            CodePushUtils.deleteFileSilently(downloadFile);
+            FileUtils.unzipFile(downloadFile, unzippedFolderPath);
+            FileUtils.deleteFileSilently(downloadFile);
+
+            // Merge contents with current update based on the manifest
             String diffManifestFilePath = CodePushUtils.appendPathComponent(unzippedFolderPath,
                     DIFF_MANIFEST_FILE_NAME);
             File diffManifestFile = new File(unzippedFolderPath, DIFF_MANIFEST_FILE_NAME);
             if (diffManifestFile.exists()) {
                 String currentPackageFolderPath = getCurrentPackageFolderPath();
-                CodePushUtils.mergeEntriesInFolder(currentPackageFolderPath, newPackageFolderPath);
+                FileUtils.copyDirectoryContents(currentPackageFolderPath, newPackageFolderPath);
                 WritableMap diffManifest = CodePushUtils.getWritableMapFromFile(diffManifestFilePath);
                 ReadableArray deletedFiles = diffManifest.getArray("deletedFiles");
                 for (int i = 0; i < deletedFiles.size(); i++) {
                     String fileNameToDelete = deletedFiles.getString(i);
                     File fileToDelete = new File(newPackageFolderPath, fileNameToDelete);
-                    CodePushUtils.deleteFileSilently(fileToDelete);
+                    FileUtils.deleteFileSilently(fileToDelete);
                 }
             }
 
-            CodePushUtils.mergeEntriesInFolder(unzippedFolderPath, newPackageFolderPath);
-            CodePushUtils.deleteFileAtPathSilently(unzippedFolderPath);
-            String relativeBundlePath = findMainBundleInFolder(newPackageFolderPath);
+            // Move merged update contents to a folder with the packageHash as its name
+            FileUtils.copyDirectoryContents(unzippedFolderPath, newPackageFolderPath);
+            FileUtils.deleteFileAtPathSilently(unzippedFolderPath);
+
+            // For zip updates, we need to find the relative path to the jsBundle and save it in the
+            // metadata so that we can find and run it easily the next time.
+            String relativeBundlePath = CodePushUtils.findJSBundleInUpdateContents(newPackageFolderPath);
 
             if (relativeBundlePath == null) {
                 throw new CodePushInvalidPackageException();
@@ -252,38 +260,14 @@ public class CodePushPackage {
                 updatePackage = CodePushUtils.convertJsonObjectToWriteable(updatePackageJSON);
             }
         } else {
-            // File is not a zip.
+            // File is a jsBundle, move it to a folder with the packageHash as its name
             File updateBundleFile = new File(newPackageFolderPath, UPDATE_BUNDLE_FILE_NAME);
             downloadFile.renameTo(updateBundleFile);
         }
 
+        // Save metadata to the folder.
         String bundlePath = CodePushUtils.appendPathComponent(newPackageFolderPath, PACKAGE_FILE_NAME);
         CodePushUtils.writeReadableMapToFile(updatePackage, bundlePath);
-    }
-
-    public String findMainBundleInFolder(String folderPath) {
-        File folder = new File(folderPath);
-        File[] folderFiles = folder.listFiles();
-        for (File file : folderFiles) {
-            String fullFilePath = CodePushUtils.appendPathComponent(folderPath, file.getName());
-            if (file.isDirectory()) {
-                String mainBundlePathInSubFolder = findMainBundleInFolder(fullFilePath);
-                if (mainBundlePathInSubFolder != null) {
-                    return CodePushUtils.appendPathComponent(file.getName(), mainBundlePathInSubFolder);
-                }
-            } else {
-                String fileName = file.getName();
-                int dotIndex = fileName.lastIndexOf(".");
-                if (dotIndex >= 0) {
-                    String fileExtension = fileName.substring(dotIndex + 1);
-                    if (fileExtension.equals("bundle") || fileExtension.equals("js") || fileExtension.equals("jsbundle")) {
-                        return fileName;
-                    }
-                }
-            }
-        }
-
-        return null;
     }
 
     public void installPackage(ReadableMap updatePackage) throws IOException {
@@ -291,7 +275,7 @@ public class CodePushPackage {
         WritableMap info = getCurrentPackageInfo();
         String previousPackageHash = getPreviousPackageHash();
         if (previousPackageHash != null && !previousPackageHash.equals(packageHash)) {
-            CodePushUtils.deleteDirectoryAtPath(getPackageFolderPath(previousPackageHash));
+            FileUtils.deleteDirectoryAtPath(getPackageFolderPath(previousPackageHash));
         }
 
         info.putString(PREVIOUS_PACKAGE_KEY, CodePushUtils.tryGetString(info, CURRENT_PACKAGE_KEY));
@@ -302,7 +286,7 @@ public class CodePushPackage {
     public void rollbackPackage() {
         WritableMap info = getCurrentPackageInfo();
         String currentPackageFolderPath = getCurrentPackageFolderPath();
-        CodePushUtils.deleteDirectoryAtPath(currentPackageFolderPath);
+        FileUtils.deleteDirectoryAtPath(currentPackageFolderPath);
         info.putString(CURRENT_PACKAGE_KEY, CodePushUtils.tryGetString(info, PREVIOUS_PACKAGE_KEY));
         info.putNull(PREVIOUS_PACKAGE_KEY);
         updateCurrentPackageInfo(info);
@@ -344,6 +328,6 @@ public class CodePushPackage {
     public void clearUpdates() {
         File statusFile = new File(getStatusFilePath());
         statusFile.delete();
-        CodePushUtils.deleteDirectoryAtPath(getCodePushPath());
+        FileUtils.deleteDirectoryAtPath(getCodePushPath());
     }
 }
