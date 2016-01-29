@@ -247,7 +247,7 @@ public class CodePushPackage {
             String relativeBundlePath = CodePushUtils.findJSBundleInUpdateContents(newPackageFolderPath);
 
             if (relativeBundlePath == null) {
-                throw new CodePushInvalidPackageException();
+                throw new CodePushInvalidUpdateException();
             } else {
                 JSONObject updatePackageJSON = CodePushUtils.convertReadableToJsonObject(updatePackage);
                 try {
