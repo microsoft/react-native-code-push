@@ -216,7 +216,6 @@ public class CodePushPackage {
         }
 
         if (isZip) {
-            System.err.println("THIS IS A ZIP!");
             String unzippedFolderPath = getUnzippedFolderPath();
             CodePushUtils.unzipFile(downloadFile, unzippedFolderPath);
             CodePushUtils.deleteFileSilently(downloadFile);
@@ -253,7 +252,6 @@ public class CodePushPackage {
                 updatePackage = CodePushUtils.convertJsonObjectToWriteable(updatePackageJSON);
             }
         } else {
-            System.err.println("THIS IS NOT A ZIP!");
             // File is not a zip.
             File updateBundleFile = new File(newPackageFolderPath, UPDATE_BUNDLE_FILE_NAME);
             downloadFile.renameTo(updateBundleFile);
