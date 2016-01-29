@@ -366,32 +366,34 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
                         resolver:(RCTPromiseResolveBlock)resolve
                         rejecter:(RCTPromiseRejectBlock)reject)
 {
-    [CodePushPackage downloadPackage:updatePackage
-        // The download is progressing forward
-        progressCallback:^(long long expectedContentLength, long long receivedContentLength) {
-            // Notify the script-side about the progress
-            [self.bridge.eventDispatcher
-                sendDeviceEventWithName:@"CodePushDownloadProgress"
-                body:@{
-                        @"totalBytes":[NSNumber numberWithLongLong:expectedContentLength],
-                        @"receivedBytes":[NSNumber numberWithLongLong:receivedContentLength]
-                      }];
-        }
-        // The download completed
-        doneCallback:^{
-            NSError *err;
-            NSDictionary *newPackage = [CodePushPackage getPackage:updatePackage[PackageHashKey] error:&err];
-            
-            if (err) {
-                return reject(err);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [CodePushPackage downloadPackage:updatePackage
+            // The download is progressing forward
+            progressCallback:^(long long expectedContentLength, long long receivedContentLength) {
+                // Notify the script-side about the progress
+                [self.bridge.eventDispatcher
+                    sendDeviceEventWithName:@"CodePushDownloadProgress"
+                    body:@{
+                            @"totalBytes":[NSNumber numberWithLongLong:expectedContentLength],
+                            @"receivedBytes":[NSNumber numberWithLongLong:receivedContentLength]
+                          }];
             }
-            
-            resolve(newPackage);
-        }
-        // The download failed
-        failCallback:^(NSError *err) {
-            reject(err);
-        }];
+            // The download completed
+            doneCallback:^{
+                NSError *err;
+                NSDictionary *newPackage = [CodePushPackage getPackage:updatePackage[PackageHashKey] error:&err];
+                    
+                if (err) {
+                    return reject(err);
+                }
+                    
+                resolve(newPackage);
+            }
+            // The download failed
+            failCallback:^(NSError *err) {
+                reject(err);
+            }];
+    });
 }
 
 /*
