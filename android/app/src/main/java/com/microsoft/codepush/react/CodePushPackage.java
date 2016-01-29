@@ -225,26 +225,17 @@ public class CodePushPackage {
             // Merge contents with current update based on the manifest
             String diffManifestFilePath = CodePushUtils.appendPathComponent(unzippedFolderPath,
                     DIFF_MANIFEST_FILE_NAME);
-            File diffManifestFile = new File(unzippedFolderPath, DIFF_MANIFEST_FILE_NAME);
-            if (diffManifestFile.exists()) {
+            if (FileUtils.fileAtPathExists(diffManifestFilePath)) {
                 String currentPackageFolderPath = getCurrentPackageFolderPath();
-                FileUtils.copyDirectoryContents(currentPackageFolderPath, newPackageFolderPath);
-                WritableMap diffManifest = CodePushUtils.getWritableMapFromFile(diffManifestFilePath);
-                ReadableArray deletedFiles = diffManifest.getArray("deletedFiles");
-                for (int i = 0; i < deletedFiles.size(); i++) {
-                    String fileNameToDelete = deletedFiles.getString(i);
-                    File fileToDelete = new File(newPackageFolderPath, fileNameToDelete);
-                    FileUtils.deleteFileSilently(fileToDelete);
-                }
+                CodePushUpdateUtils.copyNecessaryFilesFromCurrentPackage(diffManifestFilePath, currentPackageFolderPath, newPackageFolderPath);
             }
 
-            // Move merged update contents to a folder with the packageHash as its name
             FileUtils.copyDirectoryContents(unzippedFolderPath, newPackageFolderPath);
             FileUtils.deleteFileAtPathSilently(unzippedFolderPath);
 
             // For zip updates, we need to find the relative path to the jsBundle and save it in the
             // metadata so that we can find and run it easily the next time.
-            String relativeBundlePath = CodePushUtils.findJSBundleInUpdateContents(newPackageFolderPath);
+            String relativeBundlePath = CodePushUpdateUtils.findJSBundleInUpdateContents(newPackageFolderPath);
 
             if (relativeBundlePath == null) {
                 throw new CodePushInvalidUpdateException();
@@ -257,6 +248,7 @@ public class CodePushPackage {
                             RELATIVE_BUNDLE_PATH_KEY + " to value " + relativeBundlePath +
                             " in update package.", e);
                 }
+                
                 updatePackage = CodePushUtils.convertJsonObjectToWriteable(updatePackageJSON);
             }
         } else {
