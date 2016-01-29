@@ -15,17 +15,23 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.Iterator;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class CodePushUtils {
 
+    public static final String CODE_PUSH_TAG = "CodePush";
     public static final String REACT_NATIVE_LOG_TAG = "ReactNative";
+    public static final int WRITE_BUFFER_SIZE = 1024 * 8;
 
     public static String appendPathComponent(String basePath, String appendPathComponent) {
         return new File(basePath, appendPathComponent).getAbsolutePath();
@@ -262,6 +268,108 @@ public class CodePushUtils {
             return map.getString(key);
         } catch (NoSuchKeyException e) {
             return null;
+        }
+    }
+
+    public static void unzipFile(File zipFile, String destination) throws IOException {
+        FileInputStream fis = null;
+        BufferedInputStream bis = null;
+        ZipInputStream zis = null;
+        try {
+            fis = new FileInputStream(zipFile);
+            bis = new BufferedInputStream(fis);
+            zis = new ZipInputStream(bis);
+            ZipEntry entry;
+
+            File destinationFolder = new File(destination);
+            if (!destinationFolder.exists()) {
+                destinationFolder.mkdirs();
+            }
+
+            byte[] buffer = new byte[WRITE_BUFFER_SIZE];
+            while ((entry = zis.getNextEntry()) != null) {
+                String fileName = entry.getName();
+                File file = new File(destinationFolder, fileName);
+                if (entry.isDirectory()) {
+                    file.mkdirs();
+                } else {
+                    File parent = file.getParentFile();
+                    if (!parent.exists()) {
+                        parent.mkdirs();
+                    }
+
+                    FileOutputStream fout = new FileOutputStream(file);
+                    try {
+                        int numBytesRead;
+                        while ((numBytesRead = zis.read(buffer)) != -1) {
+                            fout.write(buffer, 0, numBytesRead);
+                        }
+                    } finally {
+                        fout.close();
+                    }
+                }
+                long time = entry.getTime();
+                if (time > 0) {
+                    file.setLastModified(time);
+                }
+            }
+        } finally {
+            try {
+                if (zis != null) zis.close();
+                if (bis != null) bis.close();
+                if (fis != null) fis.close();
+            } catch (IOException e) {
+                throw new CodePushUnknownException("Error closing IO resources.", e);
+            }
+        }
+    }
+
+    public static void mergeEntriesInFolder(String fromPath, String destinationPath) throws IOException {
+        File fromDir = new File(fromPath);
+        File destDir = new File(destinationPath);
+        if (!destDir.exists()) {
+            destDir.mkdir();
+        }
+
+        for (File fromFile : fromDir.listFiles()) {
+            if (fromFile.isDirectory()) {
+                mergeEntriesInFolder(
+                        CodePushUtils.appendPathComponent(fromPath, fromFile.getName()),
+                        CodePushUtils.appendPathComponent(destinationPath, fromFile.getName()));
+            } else {
+                File destFile = new File(destDir, fromFile.getName());
+                FileInputStream fromFileStream = null;
+                BufferedInputStream fromBufferedStream = null;
+                FileOutputStream destStream = null;
+                byte[] buffer = new byte[WRITE_BUFFER_SIZE];
+                try {
+                    fromFileStream = new FileInputStream(fromFile);
+                    fromBufferedStream = new BufferedInputStream(fromFileStream);
+                    destStream = new FileOutputStream(destFile);
+                    int bytesRead;
+                    while ((bytesRead = fromBufferedStream.read(buffer)) > 0) {
+                        destStream.write(buffer, 0, bytesRead);
+                    }
+                } finally {
+                    try {
+                        if (fromFileStream != null) fromFileStream.close();
+                        if (fromBufferedStream != null) fromBufferedStream.close();
+                        if (destStream != null) destStream.close();
+                    } catch (IOException e) {
+                        throw new CodePushUnknownException("Error closing IO resources.", e);
+                    }
+                }
+            }
+        }
+    }
+
+    public static void deleteFileAtPathSilently(String path) {
+        deleteFileSilently(new File(path));
+    }
+
+    public static void deleteFileSilently(File file) {
+        if (!file.delete()) {
+            Log.e(CODE_PUSH_TAG, "Error deleting file " + file.getName());
         }
     }
 
