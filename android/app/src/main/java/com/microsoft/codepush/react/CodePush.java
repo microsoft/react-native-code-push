@@ -51,25 +51,22 @@ public class CodePush {
     private final String ASSETS_BUNDLE_PREFIX = "assets://";
     private final String BINARY_MODIFIED_TIME_KEY = "binaryModifiedTime";
     private final String CODE_PUSH_PREFERENCES = "CodePush";
-    private final String DEPLOYMENT_FAILED_STATUS = "DeploymentFailed";
-    private final String DEPLOYMENT_KEY_KEY = "deploymentKey";
-    private final String DEPLOYMENT_SUCCEEDED_STATUS = "DeploymentSucceeded";
     private final String DOWNLOAD_PROGRESS_EVENT_NAME = "CodePushDownloadProgress";
     private final String FAILED_UPDATES_KEY = "CODE_PUSH_FAILED_UPDATES";
-    private final String LABEL_KEY = "label";
     private final String PACKAGE_HASH_KEY = "packageHash";
     private final String PENDING_UPDATE_HASH_KEY = "hash";
     private final String PENDING_UPDATE_IS_LOADING_KEY = "isLoading";
     private final String PENDING_UPDATE_KEY = "CODE_PUSH_PENDING_UPDATE";
     private final String RESOURCES_BUNDLE = "resources.arsc";
-    private final String LAST_DEPLOYMENT_REPORT_KEY = "CODE_PUSH_LAST_DEPLOYMENT_REPORT";
 
     // This needs to be kept in sync with https://github.com/facebook/react-native/blob/master/ReactAndroid/src/main/java/com/facebook/react/devsupport/DevSupportManager.java#L78
     private final String REACT_DEV_BUNDLE_CACHE_FILE_NAME = "ReactNativeDevBundle.js";
 
+    // Helper classes.
+    private CodePushNativeModule codePushNativeModule;
     private CodePushPackage codePushPackage;
     private CodePushReactPackage codePushReactPackage;
-    private CodePushNativeModule codePushNativeModule;
+    private CodePushTelemetryManager codePushTelemetryManager;
 
     // Config properties.
     private String deploymentKey;
@@ -87,12 +84,12 @@ public class CodePush {
 
     public CodePush(String deploymentKey, Activity mainActivity, boolean isDebugMode) {
         SoLoader.init(mainActivity, false);
-        this.deploymentKey = deploymentKey;
-        this.codePushPackage = new CodePushPackage(mainActivity.getFilesDir().getAbsolutePath());
-        this.mainActivity = mainActivity;
         this.applicationContext = mainActivity.getApplicationContext();
+        this.codePushPackage = new CodePushPackage(mainActivity.getFilesDir().getAbsolutePath());
+        this.codePushTelemetryManager = new CodePushTelemetryManager(this.applicationContext, CODE_PUSH_PREFERENCES);
         this.deploymentKey = deploymentKey;
         this.isDebugMode = isDebugMode;
+        this.mainActivity = mainActivity;
 
         PackageInfo pInfo = null;
         try {
@@ -178,18 +175,6 @@ public class CodePush {
         }
     }
 
-    private String getPackageStatusReportIdentifier(WritableMap updatePackage) {
-        // Because deploymentKeys can be dynamically switched, we use a
-        // combination of the deploymentKey and label as the packageIdentifier.
-        String deploymentKey = CodePushUtils.tryGetString(updatePackage, DEPLOYMENT_KEY_KEY);
-        String label = CodePushUtils.tryGetString(updatePackage, LABEL_KEY);
-        if (deploymentKey != null && label != null) {
-            return deploymentKey + ":" + label;
-        } else {
-            return null;
-        }
-    }
-
     private JSONArray getFailedUpdates() {
         SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
         String failedUpdatesString = settings.getString(FAILED_UPDATES_KEY, null);
@@ -262,16 +247,6 @@ public class CodePush {
         }
     }
 
-    private boolean isDeploymentStatusNotYetReported(String appVersionOrPackageIdentifier) {
-        SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
-        String lastDeploymentReportIdentifier = settings.getString(LAST_DEPLOYMENT_REPORT_KEY, null);
-        if (lastDeploymentReportIdentifier == null) {
-            return true;
-        } else {
-            return !lastDeploymentReportIdentifier.equals(appVersionOrPackageIdentifier);
-        }
-    }
-
     private boolean isFailedHash(String packageHash) {
         JSONArray failedUpdates = getFailedUpdates();
         if (packageHash != null) {
@@ -304,11 +279,6 @@ public class CodePush {
         catch (JSONException e) {
             throw new CodePushUnknownException("Unable to read pending update metadata in isPendingUpdate.", e);
         }
-    }
-
-    private void recordDeploymentStatusReported(String appVersionOrPackageIdentifier) {
-        SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
-        settings.edit().putString(LAST_DEPLOYMENT_REPORT_KEY, appVersionOrPackageIdentifier).commit();
     }
 
     private void removeFailedUpdates() {
@@ -457,20 +427,15 @@ public class CodePush {
         @ReactMethod
         public void getNewStatusReport(Promise promise) {
             if (needToReportRollback) {
-                // Check if there was a rollback that was not yet reported
                 needToReportRollback = false;
                 JSONArray failedUpdates = getFailedUpdates();
                 if (failedUpdates != null && failedUpdates.length() > 0) {
                     try {
                         JSONObject lastFailedPackageJSON = failedUpdates.getJSONObject(failedUpdates.length() - 1);
                         WritableMap lastFailedPackage = CodePushUtils.convertJsonObjectToWriteable(lastFailedPackageJSON);
-                        String lastFailedPackageIdentifier = getPackageStatusReportIdentifier(lastFailedPackage);
-                        if (lastFailedPackage != null && isDeploymentStatusNotYetReported(lastFailedPackageIdentifier)) {
-                            recordDeploymentStatusReported(lastFailedPackageIdentifier);
-                            WritableNativeMap reportMap = new WritableNativeMap();
-                            reportMap.putMap("package", lastFailedPackage);
-                            reportMap.putString("status", DEPLOYMENT_FAILED_STATUS);
-                            promise.resolve(reportMap);
+                        WritableMap failedStatusReport = codePushTelemetryManager.getRollbackReport(lastFailedPackage);
+                        if (failedStatusReport != null) {
+                            promise.resolve(failedStatusReport);
                             return;
                         }
                     } catch (JSONException e) {
@@ -478,27 +443,18 @@ public class CodePush {
                     }
                 }
             } else if (didUpdate) {
-                // Check if the current CodePush package has been reported
                 WritableMap currentPackage = codePushPackage.getCurrentPackage();
                 if (currentPackage != null) {
-                    String currentPackageIdentifier = getPackageStatusReportIdentifier(currentPackage);
-                    if (currentPackageIdentifier != null && isDeploymentStatusNotYetReported(currentPackageIdentifier)) {
-                        recordDeploymentStatusReported(currentPackageIdentifier);
-                        WritableNativeMap reportMap = new WritableNativeMap();
-                        reportMap.putMap("package", currentPackage);
-                        reportMap.putString("status", DEPLOYMENT_SUCCEEDED_STATUS);
-                        promise.resolve(reportMap);
+                    WritableMap newPackageStatusReport = codePushTelemetryManager.getUpdateReport(currentPackage);
+                    if (newPackageStatusReport != null) {
+                        promise.resolve(newPackageStatusReport);
                         return;
                     }
                 }
             } else if (isRunningBinaryVersion) {
-                // Check if the current appVersion has been reported.
-                String binaryIdentifier = "" + getBinaryResourcesModifiedTime();
-                if (isDeploymentStatusNotYetReported(binaryIdentifier)) {
-                    recordDeploymentStatusReported(binaryIdentifier);
-                    WritableNativeMap reportMap = new WritableNativeMap();
-                    reportMap.putString("appVersion", appVersion);
-                    promise.resolve(reportMap);
+                WritableMap newAppVersionStatusReport = codePushTelemetryManager.getBinaryUpdateReport(appVersion);
+                if (newAppVersionStatusReport != null) {
+                    promise.resolve(newAppVersionStatusReport);
                     return;
                 }
             }

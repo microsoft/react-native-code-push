@@ -95,6 +95,14 @@ failCallback:(void (^)(NSError *err))failCallback;
 
 @end
 
+@interface CodePushTelemetryManager : NSObject
+
++ (NSDictionary *)getBinaryUpdateReport:(NSString *)appVersion;
++ (NSDictionary *)getRollbackReport:(NSDictionary *)lastFailedPackage;
++ (NSDictionary *)getUpdateReport:(NSDictionary *)currentPackage;
+
+@end
+
 typedef NS_ENUM(NSInteger, CodePushInstallMode) {
     CodePushInstallModeImmediate,
     CodePushInstallModeOnNextRestart,

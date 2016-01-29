@@ -5,9 +5,10 @@ module.exports = {
       requestBody = null;
     }
 
-    var headers = {
+    const headers = {
       "Accept": "application/json",
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      "X-CodePush-SDK-Version": getSDKVersion()
     };
 
     if (requestBody && typeof requestBody === "object") {
@@ -29,6 +30,10 @@ module.exports = {
     }
   }
 };
+
+function getSDKVersion() {
+  return require("./package.json").dependencies["code-push"];
+}
 
 function getHttpMethodName(verb) {
   // Note: This should stay in sync with the enum definition in
