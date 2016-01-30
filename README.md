@@ -220,7 +220,7 @@ After installing the plugin and syncing your Android Studio project with Gradle,
         // Activity lifecycle event using the right deployment key
         @Override
         protected void onCreate(Bundle savedInstanceState) {
-            codePush = new CodePush("0dsIDongIcoH0mqAmoR0CYb5FhBZNy1w4Bf-l", this, BuildConfig.DEBUG);
+            this._codePush = new CodePush("0dsIDongIcoH0mqAmoR0CYb5FhBZNy1w4Bf-l", this, BuildConfig.DEBUG);
             super.onCreate(savedInstanceState);
         }
         ...
