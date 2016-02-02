@@ -513,6 +513,7 @@ RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
                             rejecter:(RCTPromiseRejectBlock)reject)
 {
     if ([_bridge.bundleURL.scheme hasPrefix:@"http"]) {
+        // Do not report metrics if running bundle from packager.
         resolve(nil);
         return;
     }
