@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 public class FileUtils {
@@ -81,10 +82,23 @@ public class FileUtils {
     }
 
     public static void deleteFileAtPathSilently(String path) {
-        deleteFileSilently(new File(path));
+        deleteFileOrFolderSilently(new File(path));
     }
 
-    public static void deleteFileSilently(File file) {
+    public static void deleteFileOrFolderSilently(File file) {
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            for (int i = 0; i < files.length; i++) {
+                if (files[i].isDirectory()) {
+                    deleteFileOrFolderSilently(files[i]);
+                } else {
+                    if (!file.delete()) {
+                        files[i].delete();
+                    }
+                }
+            }
+        }
+
         if (!file.delete()) {
             CodePushUtils.log("Error deleting file " + file.getName());
         }
@@ -92,6 +106,19 @@ public class FileUtils {
 
     public static boolean fileAtPathExists(String filePath) {
         return new File(filePath).exists();
+    }
+
+    public static void moveFile(File fileToMove, String newFolderPath, String newFileName) {
+        File newFolder = new File(newFolderPath);
+        if (!newFolder.exists()) {
+            newFolder.mkdirs();
+        }
+
+        File newFilePath = new File(newFolderPath, newFileName);
+        if (!fileToMove.renameTo(newFilePath)) {
+            throw new CodePushUnknownException("Unable to move file from " +
+                    fileToMove.getAbsolutePath() + " to " + newFilePath.getAbsolutePath() + ".");
+        }
     }
 
     public static String readFileToString(String filePath) throws IOException {
