@@ -426,6 +426,11 @@ public class CodePush {
 
         @ReactMethod
         public void getNewStatusReport(final Promise promise) {
+            if (isDebugMode) {
+                // Do not report metrics if running in debug mode.
+                promise.resolve("");
+                return;
+            }
 
             AsyncTask asyncTask = new AsyncTask() {
                 @Override
