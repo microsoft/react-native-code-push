@@ -137,6 +137,11 @@ function log(message) {
 
 async function notifyApplicationReady() {
   await NativeCodePush.notifyApplicationReady();
+  if (__DEV__) {
+    // Don't report metrics if in DEV mode.
+    return;
+  }
+  
   const statusReport = await NativeCodePush.getNewStatusReport();
   if (statusReport) {
     const config = await getConfiguration();
