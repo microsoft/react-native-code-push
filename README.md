@@ -33,9 +33,16 @@ In order to ensure that your end users always have a functioning version of your
 ## Supported React Native platforms
 
 - iOS
-- Android (asset support coming soon!)
+- Android
 
-*Note: CodePush v1.3.0 requires v0.14.0+ of React Native, and CodePush v1.4.0 requires v0.15.0+ of React Native, so make sure you are using the right version of the CodePush plugin.*
+We try our best to maintain backwards compatability of our plugin with previous versions of React Native, but due to the nature of the platform, and the existence of breaking changes between releases, it is possible that you need to use a specific version of the CodePush plugin in order to support the exact version of React Native you are using. The following table outlines which CodePush plugin versions officially support the respect React Native versions:
+
+| React Native version(s) | Supporting CodePush version                    |
+|-------------------------|------------------------------------------------|
+| <0.13.0                 | **Unsupported**                                |
+| v0.14.0                 | v1.3.0 *(introduced Android support)*          |
+| v0.15.0-v0.18.0         | v1.4.0-v1.6.0 *(introduced iOS asset support)* |
+| v0.19.0                 | v1.7.0 *(introduced Android asset support)*    |
 
 ## Getting Started
 
@@ -283,7 +290,7 @@ Once your app has been configured and distributed to your users, and you've made
 
 1. Execute `react-native bundle` (passing the appropriate parameters, see example below) in order to generate the updated JS bundle for your app. You can place this file wherever you want via the `--bundle-output` flag, since the exact location isn't relevant for CodePush purposes. It's important, however, that you set `--dev false` so that your JS code is optimized appropriately and any "yellow box" warnings won't be displayed.
 
-2. Execute `code-push release <appName> <jsBundleFilePath> <appStoreVersion> --deploymentName <deploymentName>` in order to publish the generated JS bundle to the server. The `<jsBundleFilePath>` parameter should equal the value you provided to the `--bundle-output` flag in step #1. Additionally, the `<appStoreVersion>` parameter should equal the [**exact app store version**](http://codepush.tools/docs/cli.html#app-store-version-parameter) (i.e. the semver version end users would see when installing it) you want this CodePush update to target.
+2. Execute `code-push release <appName> <jsBundleFilePath> <targetBinaryVersion> --deploymentName <deploymentName>` in order to publish the generated JS bundle to the server. The `<jsBundleFilePath>` parameter should equal the value you provided to the `--bundle-output` flag in step #1. Additionally, the `<targetBinaryVersion>` parameter should equal the [**exact app store version**](http://codepush.tools/docs/cli.html#app-store-version-parameter) (i.e. the semver version end users would see when installing it) you want this CodePush update to target.
 
     For more info regarding the `release` command and its parameters, refer to the [CLI documentation](http://codepush.tools/docs/cli.html#releasing-app-updates).
     
@@ -291,7 +298,7 @@ Example Usage:
 
 ```shell
 react-native bundle --platform ios --entry-file index.ios.js --bundle-output codepush.js --dev false
-code-push release MyApp codepush.js 1.0.2
+code-push release MyApp codepush.js 1.0.0
 ```
     
 And that's it! for more information regarding the CLI and how the release (or promote and rollback) commands work, refer to the [documentation](http://microsoft.github.io/code-push/docs/cli.html).
@@ -300,7 +307,7 @@ And that's it! for more information regarding the CLI and how the release (or pr
 
 ## Releasing Updates (JavaScript + images)
 
-*Note: Android doesn't currently support deploying assets, so you must use the previous release strategy instead for that platform. We will release Android support as soon as React Native 0.19.0 is released.*
+*Note: Android support for updating assets was added to React Native v0.19.0, and requires you to use CodePush v1.7.0. If you are using an older version of RN, you can't update assets via CodePush, and therefore, need to either upgrade or use the previous workflow for simply updating your JS bundle*
 
 If you are using the new React Native [assets system](https://facebook.github.io/react-native/docs/images.html#content), as opposed to loading your images from the network and/or platform-specific mechanisms (e.g. iOS asset catalogs), then you can't simply pass your jsbundle to CodePush as demonstrated above. You **MUST** provide your images as well. To do this, simply use the following workflow:
 
@@ -319,13 +326,13 @@ If you are using the new React Native [assets system](https://facebook.github.io
 
     *NOTE: The file name that you specify as the value for the `--bundle-output` parameter must have one of the following extensions in order to be detected by the plugin: `.js`, `.jsbundle`, `.bundle` (e.g. `main.jsbundle`, `ios.js`). The name of the file isn't relevant, but the extension is used for detectining the bundle within the update contents, and therefore, using any other extension will result in the update failing.*
     
-3. Execute `code-push release`, passing the path to the directory you created in #1 as the ["package"](http://codepush.tools/docs/cli.html#package-parameter) parameter, and the [**exact app version**](http://codepush.tools/docs/cli.html#app-store-version-parameter) that this update is targetting as the ["appStoreVersion"](http://codepush.tools/docs/cli.html#app-store-version-parameter) parameter (e.g. `code-push release Foo ./release 1.0.0`). The code-push CLI will automatically handle zipping up the contents for you, so don't worry about handling that yourself.
+3. Execute `code-push release`, passing the path to the directory you created in #1 as the ["updateContents"](http://codepush.tools/docs/cli.html#package-parameter) parameter, and the [**exact app version**](http://codepush.tools/docs/cli.html#app-store-version-parameter) that this update is targetting as the ["targetBinaryVersion"](http://codepush.tools/docs/cli.html#app-store-version-parameter) parameter (e.g. `code-push release Foo ./release 1.0.0`). The code-push CLI will automatically handle zipping up the contents for you, so don't worry about handling that yourself.
 
     For more info regarding the `release` command and its parameters, refer to the [CLI documentation](http://codepush.tools/docs/cli.html#releasing-app-updates).
     
 Additionally, the CodePush client supports differential updates, so even though you are releasing your JS bundle and assets on every update, your end users will only actually download the files they need. The service handles this automatically so that you can focus on creating awesome apps and we can worry about optimizing end user downloads.
 
-*Note: Releasing assets via CodePush is currently only supported on iOS, and requires that you're using React Native v0.15.0+ and CodePush 1.4.0+. If you are using assets and an older version of the CodePush plugin, you should not release updates via CodePush, because it will break your app's ability to load images from the binary. Please test and release appropriately!*
+*Note: Releasing assets via CodePush requires that you're using React Native v0.15.0+ and CodePush v1.4.0+ (for iOS) and React Native v0.19.0+ and CodePush v1.7.0+ (Android). If you are using assets and an older version of the CodePush plugin, you should not release updates via CodePush, because it will break your app's ability to load images from the binary. Please test and release appropriately!*
 
 ---
 
@@ -644,6 +651,8 @@ Because of this behavior, you can safely deploy updates to both the app store(s)
 - __(NSURL \*)bundleURLForResource:(NSString \*)resourceName__ - Equivalent to the `bundleURL` method, but also allows customizing the name of the JS bundle that is looked for within the app binary. This is useful if you aren't naming this file `main` (which is the default convention). This method assumes that the JS bundle's extension is `*.jsbundle`.
 
 - __(NSURL \*)bundleURLForResource:(NSString \*)resourceName withExtension:(NSString \*)resourceExtension__: Equivalent to the `bundleURLForResource:` method, but also allows customizing the extension used by the JS bundle that is looked for within the app binary. This is useful if you aren't naming this file `*.jsbundle` (which is the default convention).
+
+- __(void)setDeploymentKey:(NSString \*)deploymentKey__ - Sets the deployment key that the app should use when querying for updates. This is a dynamic alternative to setting the deployment key in your `Info.plist` and/or specifying a deployment in JS when calling `checkForUpdate` or `sync`.
 
 ### Java API Reference (Android)
 
