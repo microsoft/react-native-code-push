@@ -538,7 +538,6 @@ RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
                 return;
             }
         } else if (isRunningBinaryVersion) {
-            // Check if the current appVersion has been reported.
             NSString *appVersion = [[CodePushConfig current] appVersion];
             resolve([CodePushTelemetryManager getBinaryUpdateReport:appVersion]);
             return;
