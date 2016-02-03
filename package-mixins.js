@@ -26,7 +26,7 @@ module.exports = (NativeCodePush) => {
         try {  
           const downloadedPackage = await NativeCodePush.downloadUpdate(this);
           // Don't report metrics if in DEV mode.
-          !__DEV__ && reportStatusDownload && reportStatusDownload(this);
+          reportStatusDownload && reportStatusDownload(this);
           return { ...downloadedPackage, ...local };
         } finally {
           downloadProgressSubscription && downloadProgressSubscription.remove();

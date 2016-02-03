@@ -511,13 +511,7 @@ RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
  */
 RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
                             rejecter:(RCTPromiseRejectBlock)reject)
-{
-    if ([_bridge.bundleURL.scheme hasPrefix:@"http"]) {
-        // Do not report metrics if running bundle from packager.
-        resolve(nil);
-        return;
-    }
-    
+{    
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         if (needToReportRollback) {
             needToReportRollback = NO;
