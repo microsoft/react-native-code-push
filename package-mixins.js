@@ -25,7 +25,6 @@ module.exports = (NativeCodePush) => {
         // so that the client knows what the current package version is.
         try {  
           const downloadedPackage = await NativeCodePush.downloadUpdate(this);
-          // Don't report metrics if in DEV mode.
           reportStatusDownload && reportStatusDownload(this);
           return { ...downloadedPackage, ...local };
         } finally {
