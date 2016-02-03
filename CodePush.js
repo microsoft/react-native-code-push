@@ -59,7 +59,7 @@ async function checkForUpdate(deploymentKey = null) {
    */
   if (!update || update.updateAppVersion || (update.packageHash === localPackage.packageHash)) {
     if (update.updateAppVersion) {
-      log("An update is available but it is targetting a newer binary version than you are currently running.");
+      log("An update is available but it is targeting a newer binary version than you are currently running.");
     }
     
     return null;
