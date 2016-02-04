@@ -215,10 +215,11 @@ After installing the plugin and syncing your Android Studio project with Gradle,
             // 4. Instantiate an instance of the CodePush runtime, using the right deployment key
             this._codePush = new CodePush("0dsIDongIcoH0mqAmoR0CYb5FhBZNy1w4Bf-l", this, BuildConfig.DEBUG);
 
-            // 5. Add the CodePush package to the list of existing packages
+            // 5. Add the CodePush package to the list of existing packages,
             // replacing the `new CodePushReactPackage()` added by RNPM
             return Arrays.<ReactPackage>asList(
-                new MainReactPackage(), /* REMOVE THIS -> new CodePushReactPackage() */ this._codePush.getReactPackage());
+                new MainReactPackage(), /* REMOVE THIS -> new CodePushReactPackage() */
+                this._codePush.getReactPackage());
         }
 
         ...
