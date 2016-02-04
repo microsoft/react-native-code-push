@@ -52,38 +52,33 @@ Once you've followed the general-purpose ["getting started"](http://codepush.too
 npm install --save react-native-code-push
 ```
 
-As with all other React Native plugins, the integration experience is different for iOS and Android, so perform the following setup steps depending on which platform(s) you are targetting.
+The React Native plugin for CodePush is configured to be linked with your project automatically using [RNPM](https://github.com/rnpm/rnpm) upon installation via NPM. To verify that the linking has succeeded, you should see the following lines in the terminal:
+```
+rnpm info Linking react-native-code-push android dependency 
+rnpm info Android module react-native-code-push has been successfully linked 
+rnpm info Linking react-native-code-push ios dependency 
+rnpm info iOS module react-native-code-push has been successfully linked 
+```
+
+After installing the plugin via NPM, as with all other React Native plugins, the integration experience is different for iOS and Android, so perform the following setup steps depending on which platform(s) you are targetting.
 
 ## iOS Setup
 
 Once you've acquired the CodePush plugin, you need to integrate it into the Xcode project of your React Native app. To do this, take the following steps:
 
-### Plugin Installation (iOS)
+### Plugin Configuration (iOS)
+
+CodePush requires the `libz` library in order to install zipped updates. To link the library, take the following steps:
 
 1. Open your app's Xcode project
-2. Find the `CodePush.xcodeproj` file within the `node_modules/react-native-code-push` directory, and drag it into the `Libraries` node in Xcode
-
-    ![Add CodePush to project](https://cloud.githubusercontent.com/assets/516559/10322414/7688748e-6c32-11e5-83c1-00d3e6758df4.png)
-
-3. Select the project node in Xcode and select the "Build Phases" tab of your project configuration.
-4. Drag `libCodePush.a` from `Libraries/CodePush.xcodeproj/Products` into the "Link Binary With Libraries" section of your project's "Build Phases" configuration.
-
-    ![Link CodePush during build](https://cloud.githubusercontent.com/assets/516559/10322221/a75ea066-6c31-11e5-9d88-ff6f6a4d6968.png)
-
-5. Click the plus sign underneath the "Link Binary With Libraries" list and select the `libz.tbd` library underneath the `iOS 9.1` node. 
+2. Select the project node in Xcode and select the "Build Phases" tab of your project configuration.
+3. Click the plus sign underneath the "Link Binary With Libraries" list and select the `libz.tbd` library underneath the `iOS 9.1` node. 
 
     ![Libz reference](https://cloud.githubusercontent.com/assets/116461/11605042/6f786e64-9aaa-11e5-8ca7-14b852f808b1.png)
     
     *Note: Alternatively, if you prefer, you can add the `-lz` flag to the `Other Linker Flags` field in the `Linking` section of the `Build Settings`.*
-    
-6. Under the "Build Settings" tab of your project configuration, find the "Header Search Paths" section and edit the value.
-Add a new value, `$(SRCROOT)/../node_modules/react-native-code-push` and select "recursive" in the dropdown.
 
-    ![Add CodePush library reference](https://cloud.githubusercontent.com/assets/516559/10322038/b8157962-6c30-11e5-9264-494d65fd2626.png)
-
-### Plugin Configuration (iOS)
-
-Once your Xcode project has been setup to build/link the CodePush plugin, you need to configure your app to consult CodePush for the location of your JS bundle, since it is responsible for synchronizing it with updates that are released to the CodePush server. To do this, perform the following steps:
+Once your Xcode project has been setup to link the libz library, you need to configure your app to consult CodePush for the location of your JS bundle, since it is responsible for synchronizing it with updates that are released to the CodePush server. To do this, perform the following steps:
 
 1. Open up the `AppDelegate.m` file, and add an import statement for the CodePush headers:
 
@@ -132,24 +127,6 @@ To let the CodePush runtime know which deployment it should query for updates ag
 ## Android Setup
 
 In order to integrate CodePush into your Android project, perform the following steps:
-
-### Plugin Installation (Android)
-
-1. In your `android/settings.gradle` file, make the following additions:
-    
-    ```gradle
-    include ':app', ':react-native-code-push'
-    project(':react-native-code-push').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-code-push/android/app')
-    ```
-2. In your `android/app/build.gradle` file, add the `:react-native-code-push` project as a compile-time dependency:
-    
-    ```gradle
-    ...
-    dependencies {
-        ...
-        compile project(':react-native-code-push')
-    }
-    ```
     
 ### Plugin Configuration (Android - React Native < v0.18.0)
 
@@ -185,7 +162,9 @@ After installing the plugin and syncing your Android Studio project with Gradle,
                     // folder with the name of the bundle passed in, e.g. index.android.bundle
                     .setJSBundleFile(codePush.getBundleUrl("index.android.bundle"))
                     
-                    // 6. Expose the CodePush module to JavaScript.
+                    // 6. DELETE THIS LINE --> .addPackage(new CodePushReactPackage())
+                    
+                    // 7. Expose the CodePush module to JavaScript.
                     .addPackage(codePush.getReactPackage())
                     ...
         }
@@ -239,8 +218,9 @@ After installing the plugin and syncing your Android Studio project with Gradle,
             this._codePush = new CodePush("0dsIDongIcoH0mqAmoR0CYb5FhBZNy1w4Bf-l", this, BuildConfig.DEBUG);
 
             // 5. Add the CodePush package to the list of existing packages
+            // replacing the `new CodePushReactPackage()` added by RNPM
             return Arrays.<ReactPackage>asList(
-                new MainReactPackage(), this._codePush.getReactPackage());
+                new MainReactPackage(), /* REMOVE THIS -> new CodePushReactPackage() */ this._codePush.getReactPackage());
         }
 
         ...
