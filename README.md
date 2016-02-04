@@ -7,8 +7,6 @@ This plugin provides client-side integration for the [CodePush service](http://c
 * [Getting Started](#getting-started)
 * [iOS Setup](#ios-setup)
 * [Android Setup](#android-setup)
-    * [Plugin Configuration (React Native < v0.18.0)](#plugin-configuration-android---react-native--v0180)
-    * [Plugin Configuration (React Native 0.18.0+)](#plugin-configuration-android---react-native-v0180)
 * [Plugin Usage](#plugin-usage)
 * [Releasing Updates (JavaScript-only)](#releasing-updates-javascript-only)
 * [Releasing Updates (JavaScript + images)](#releasing-updates-javascript--images)
@@ -124,12 +122,6 @@ To let the CodePush runtime know which deployment it should query for updates ag
 ## Android Setup
 
 *NOTE: these instructions only apply to version 1.7.2-beta and above of the plugin. For setup instructions pertaining to older versions, please refer to [this version of the docs](https://github.com/Microsoft/react-native-code-push/blob/28c4f2dd03448c393445800a5e0d828b69a614e3/README.md).*
-
-In order to integrate CodePush into your Android project, perform the following steps:
-
-### Plugin Configuration (Android - React Native v0.18.0+)
-
-*NOTE: These instructions are specific to apps that are using React Native v0.18.0+. If you are using v0.15.0-v0.17.0, then refer to the previous section.*
 
 After installing the plugin and syncing your Android Studio project with Gradle, you need to configure your app to consult CodePush for the location of your JS bundle, since it will "take control" of managing the current and all future versions. To do this, perform the following steps:
 
