@@ -298,7 +298,7 @@ public class CodePush {
         removePendingUpdate();
     }
 
-    private void saveFailedUpdate(WritableMap failedPackage) {
+    private void saveFailedUpdate(ReadableMap failedPackage) {
         SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
         String failedUpdatesString = settings.getString(FAILED_UPDATES_KEY, null);
         JSONArray failedUpdates;
@@ -378,6 +378,10 @@ public class CodePush {
                         promise.resolve(newPackage);
                     } catch (IOException e) {
                         e.printStackTrace();
+                        promise.reject(e.getMessage());
+                    } catch (CodePushInvalidUpdateException e) {
+                        e.printStackTrace();
+                        saveFailedUpdate(updatePackage);
                         promise.reject(e.getMessage());
                     }
 

@@ -391,6 +391,10 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
             }
             // The download failed
             failCallback:^(NSError *err) {
+                if ([CodePushPackage isCodePushError:err]) {
+                    [self saveFailedUpdate:updatePackage];
+                }
+                
                 reject([NSString stringWithFormat: @"%lu", (long)err.code], err.localizedDescription, err);
             }];
     });

@@ -80,7 +80,7 @@ failCallback:(void (^)(NSError *err))failCallback;
                        error:(NSError **)error;
 
 + (NSString *)getPackageFolderPath:(NSString *)packageHash;
-
++ (BOOL)isCodePushError:(NSError *)err;
 
 + (void)downloadPackage:(NSDictionary *)updatePackage
        progressCallback:(void (^)(long long, long long))progressCallback
