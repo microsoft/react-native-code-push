@@ -20,10 +20,10 @@
     "semver": "^5.1.0",
     "rnpm": "1.4.1"
   },
-  "scripts": { 
-    "postinstall": "cd ../../ && rnpm link react-native-code-push"
-  },
   "peerDependencies": {
     "react-native": "0.19.0"
+  },
+  "scripts": { 
+    "postinstall": "cd ../../ && rnpm link react-native-code-push"
   }
 }

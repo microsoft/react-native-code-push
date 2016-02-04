@@ -6,7 +6,6 @@ This plugin provides client-side integration for the [CodePush service](http://c
 * [Supported React Native Platforms](#supported-react-native-platforms)
 * [Getting Started](#getting-started)
 * [iOS Setup](#ios-setup)
-    * [Plugin Configuration](#plugin-configuration-ios)
 * [Android Setup](#android-setup)
     * [Plugin Configuration (React Native < v0.18.0)](#plugin-configuration-android---react-native--v0180)
     * [Plugin Configuration (React Native 0.18.0+)](#plugin-configuration-android---react-native-v0180)
@@ -62,11 +61,9 @@ Next, as with all other React Native plugins, the integration experience is diff
 
 ## iOS Setup
 
-Once you've acquired the CodePush plugin, you need to integrate it into the Xcode project of your React Native app. To do this, take the following steps:
+Once you've acquired the CodePush plugin, you need to integrate it into the Xcode project of your React Native app.
 
-### Plugin Configuration (iOS)
-
-CodePush requires the `libz` library in order to install zipped updates. To link the library, take the following steps:
+First, CodePush requires the `libz` library in order to install zipped updates. To link the library, take the following steps:
 
 1. Open your app's Xcode project
 2. Select the project node in Xcode and select the "Build Phases" tab of your project configuration.
