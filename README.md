@@ -49,7 +49,7 @@ Once you've followed the general-purpose ["getting started"](http://codepush.too
 npm install --save react-native-code-push
 ```
 
-The React Native plugin for CodePush is configured to be linked with your project automatically using [RNPM](https://github.com/rnpm/rnpm) upon installation via NPM. To verify that the linking has succeeded, you should see the following lines in the terminal:
+The React Native plugin for CodePush is configured to be linked with your project automatically by [RNPM](https://github.com/rnpm/rnpm) upon installation via an NPM postinstall hook. To verify that the linking has succeeded, you should see the following lines in the terminal after installation:
 ```
 rnpm info Linking react-native-code-push android dependency 
 rnpm info Android module react-native-code-push has been successfully linked 
