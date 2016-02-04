@@ -49,7 +49,7 @@ Once you've followed the general-purpose ["getting started"](http://codepush.too
 npm install --save react-native-code-push
 ```
 
-The React Native plugin for CodePush is configured to be linked with your project automatically by [RNPM](https://github.com/rnpm/rnpm) upon installation via an NPM postinstall hook. To verify that the linking has succeeded, you should see the following lines in the terminal after installation:
+The React Native plugin for CodePush is configured to be linked with your project automatically by [RNPM](https://github.com/rnpm/rnpm) upon installation via an NPM postinstall hook. To verify that the linking has succeeded, you should see the following output in your terminal after installation:
 ```
 rnpm info Linking react-native-code-push android dependency 
 rnpm info Android module react-native-code-push has been successfully linked 
@@ -60,6 +60,8 @@ rnpm info iOS module react-native-code-push has been successfully linked
 Next, as with all other React Native plugins, the integration experience is different for iOS and Android, so perform the following setup steps depending on which platform(s) you are targetting.
 
 ## iOS Setup
+
+*NOTE: these instructions only apply to version 1.7.2-beta and above of the plugin. For setup instructions pertaining to older versions, please refer to [this version of the docs](https://github.com/Microsoft/react-native-code-push/blob/28c4f2dd03448c393445800a5e0d828b69a614e3/README.md).*
 
 Once you've acquired the CodePush plugin, you need to integrate it into the Xcode project of your React Native app.
 
@@ -121,64 +123,9 @@ To let the CodePush runtime know which deployment it should query for updates ag
     
 ## Android Setup
 
+*NOTE: these instructions only apply to version 1.7.2-beta and above of the plugin. For setup instructions pertaining to older versions, please refer to [this version of the docs](https://github.com/Microsoft/react-native-code-push/blob/28c4f2dd03448c393445800a5e0d828b69a614e3/README.md).*
+
 In order to integrate CodePush into your Android project, perform the following steps:
-    
-### Plugin Configuration (Android - React Native < v0.18.0)
-
-*NOTE: These instructions are specific to apps that are using React Native v0.15.0-v0.17.0. If you are using v0.18.0+, then skip ahead to the next section.*
-
-After installing the plugin and syncing your Android Studio project with Gradle, you need to configure your app to consult CodePush for the location of your JS bundle, since it will "take control" of managing the current and all future versions. To do this, perform the following steps:
-
-1. Update the `MainActivity.java` file to use CodePush via the following changes:
-    
-    ```java
-    ...
-    // 1. Import the plugin class
-    import com.microsoft.codepush.react.CodePush;
-    
-    // 2. Optional: extend FragmentActivity if you intend to show a dialog prompting users about updates.
-    //    If you do this, make sure to also add "import android.support.v4.app.FragmentActivity" below #1.
-    public class MainActivity extends FragmentActivity implements DefaultHardwareBackBtnHandler {
-        ...
-        
-        @Override
-        protected void onCreate(Bundle savedInstanceState) {
-            ...
-            // 3. Initialize CodePush with your deployment key and an instance of your MainActivity.
-            CodePush codePush = new CodePush("d73bf5d8-4fbd-4e55-a837-accd328a21ba", this, BuildConfig.DEBUG);
-            ...
-            mReactInstanceManager = ReactInstanceManager.builder()
-                    .setApplication(getApplication())
-                    ...
-                    // 4. DELETE THIS LINE --> .setBundleAssetName("index.android.bundle")
-                    
-                    // 5. Let CodePush determine which location to load the most updated bundle from.
-                    // If there is no updated bundle from CodePush, the location will be the assets
-                    // folder with the name of the bundle passed in, e.g. index.android.bundle
-                    .setJSBundleFile(codePush.getBundleUrl("index.android.bundle"))
-                    
-                    // 6. DELETE THIS LINE --> .addPackage(new CodePushReactPackage())
-                    
-                    // 7. Expose the CodePush module to JavaScript.
-                    .addPackage(codePush.getReactPackage())
-                    ...
-        }
-    }
-    ```
-
-2. Ensure that the `android.defaultConfig.versionName` property in your `android/app/build.gradle` file is set to a semver compliant value (i.e. "1.0.0" not "1.0")
-    
-    ```gradle
-    android {
-        ...
-        defaultConfig {
-            ...
-            versionName "1.0.0"
-            ...
-        }
-        ...
-    }
-    ```
 
 ### Plugin Configuration (Android - React Native v0.18.0+)
 
