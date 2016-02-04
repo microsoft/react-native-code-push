@@ -6,10 +6,8 @@ This plugin provides client-side integration for the [CodePush service](http://c
 * [Supported React Native Platforms](#supported-react-native-platforms)
 * [Getting Started](#getting-started)
 * [iOS Setup](#ios-setup)
-    * [Plugin Installation](#plugin-installation-ios)
     * [Plugin Configuration](#plugin-configuration-ios)
 * [Android Setup](#android-setup)
-    * [Plugin Installation](#plugin-installation-android)
     * [Plugin Configuration (React Native < v0.18.0)](#plugin-configuration-android---react-native--v0180)
     * [Plugin Configuration (React Native 0.18.0+)](#plugin-configuration-android---react-native-v0180)
 * [Plugin Usage](#plugin-usage)
@@ -60,7 +58,7 @@ rnpm info Linking react-native-code-push ios dependency
 rnpm info iOS module react-native-code-push has been successfully linked 
 ```
 
-After installing the plugin via NPM, as with all other React Native plugins, the integration experience is different for iOS and Android, so perform the following setup steps depending on which platform(s) you are targetting.
+Next, as with all other React Native plugins, the integration experience is different for iOS and Android, so perform the following setup steps depending on which platform(s) you are targetting.
 
 ## iOS Setup
 
