@@ -449,7 +449,7 @@ NSString * const UnzippedFolderName = @"unzipped";
 }
 
 + (void)installPackage:(NSDictionary *)updatePackage
-               error:(NSError **)error
+                 error:(NSError **)error
 {
     NSString *packageHash = updatePackage[@"packageHash"];
     NSMutableDictionary *info = [self getCurrentPackageInfo:error];

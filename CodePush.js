@@ -170,8 +170,20 @@ function setUpTestDependencies(testSdk, providedTestConfig, testNativeBridge) {
   if (testNativeBridge) NativeCodePush = testNativeBridge;
 }
 
+// This function allows sync operations to be chained on to each other so that they do not
+// interleave in the event that sync() is called multiple times.
+const sync = (() => {
+  let syncPromiseChain = Promise.resolve();
+  return (options = {}, syncStatusChangeCallback, downloadProgressCallback) => {
+    syncPromiseChain = syncPromiseChain
+      .catch(() => {})
+      .then(() => syncOperation(options, syncStatusChangeCallback, downloadProgressCallback));
+    return syncPromiseChain;
+  };
+})();
+
 /*
- * The sync method provides a simple, one-line experience for
+ * The syncOperation method provides a simple, one-line experience for
  * incorporating the check, download and application of an update.
  * 
  * It simply composes the existing API methods together and adds additional
@@ -179,7 +191,7 @@ function setUpTestDependencies(testSdk, providedTestConfig, testNativeBridge) {
  * releases, and displaying a standard confirmation UI to the end-user
  * when an update is available.
  */
-async function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) {  
+async function syncOperation(options = {}, syncStatusChangeCallback, downloadProgressCallback) {  
   const syncOptions = {
     
     deploymentKey: null,

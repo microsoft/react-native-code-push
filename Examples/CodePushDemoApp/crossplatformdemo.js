@@ -92,16 +92,22 @@ let CodePushDemoApp = React.createClass({
   render() {
     let syncView, syncButton, progressView;
     
-    if (this.state.syncMessage) {
-      syncView = (
-        <Text style={styles.messages}>{this.state.syncMessage}</Text>
-      );
-    } else {
       syncButton = ( 
         <Button style={{color: 'green'}} onPress={this.sync}>
           Start Sync!
         </Button>
       );
+      
+    if (this.state.syncMessage) {
+      syncView = (
+        <Text style={styles.messages}>{this.state.syncMessage}</Text>
+      );
+    } else {
+      /*syncButton = ( 
+        <Button style={{color: 'green'}} onPress={this.sync}>
+          Start Sync!
+        </Button>
+      );*/
     }
     
     if (this.state.progress) {
