@@ -18,6 +18,7 @@ RCT_EXPORT_MODULE()
 static BOOL needToReportRollback = NO;
 static BOOL isRunningBinaryVersion = NO;
 static BOOL testConfigurationFlag = NO;
+static NSString *binaryBundleDate = nil;
 
 // These constants represent valid deployment statuses
 static NSString *const DeploymentFailed = @"DeploymentFailed";
@@ -57,7 +58,7 @@ static NSString *const PackageIsPendingKey = @"isPending";
     NSError *error;
     NSString *packageFile = [CodePushPackage getCurrentPackageBundlePath:&error];
     NSURL *binaryJsBundleUrl = [[NSBundle mainBundle] URLForResource:resourceName withExtension:resourceExtension];
-    [self saveBinaryBundleDate:binaryJsBundleUrl];
+    [self setBinaryBundleDate:binaryJsBundleUrl];
     
     NSString *logMessageFormat = @"Loading JS bundle from %@";
     
@@ -76,10 +77,9 @@ static NSString *const PackageIsPendingKey = @"isPending";
     }
     
     NSString *packageDate = [currentPackageMetadata objectForKey:BinaryBundleDateKey];
-    NSString *binaryDateString = [self getBinaryBundleDateString];
     NSString *packageAppVersion = [currentPackageMetadata objectForKey:@"appVersion"];
     
-    if ([binaryDateString isEqualToString:packageDate] && ([CodePush isUsingTestConfiguration] ||[binaryAppVersion isEqualToString:packageAppVersion])) {
+    if ([binaryBundleDate isEqualToString:packageDate] && ([CodePush isUsingTestConfiguration] ||[binaryAppVersion isEqualToString:packageAppVersion])) {
         // Return package file because it is newer than the app store binary's JS bundle
         NSURL *packageUrl = [[NSURL alloc] initFileURLWithPath:packageFile];
         NSLog(logMessageFormat, packageUrl);
@@ -102,17 +102,6 @@ static NSString *const PackageIsPendingKey = @"isPending";
     return applicationSupportDirectory;
 }
 
-+ (NSString *)getBinaryBundleDateString
-{
-    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
-    NSDate *binaryBundleDate = [preferences objectForKey:BinaryBundleDateKey];
-    if (binaryBundleDate == nil) {
-        return nil;
-    } else {
-        return [NSString stringWithFormat:@"%f", [binaryBundleDate timeIntervalSince1970]];
-    }
-}
-
 /*
  * This returns a boolean value indicating whether CodePush has
  * been set to run under a test configuration.
@@ -122,13 +111,14 @@ static NSString *const PackageIsPendingKey = @"isPending";
     return testConfigurationFlag;
 }
 
-+ (void)saveBinaryBundleDate:(NSURL *)binaryJsBundleUrl
+/*
+ * This caches the binary's jsbundle modified date in memory as a string.
+ */
++ (void)setBinaryBundleDate:(NSURL *)binaryJsBundleUrl
 {
     NSDictionary *binaryFileAttributes = [[NSFileManager defaultManager] attributesOfItemAtPath:[binaryJsBundleUrl path] error:nil];
     NSDate *binaryDate = [binaryFileAttributes objectForKey:NSFileModificationDate];
-    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
-    [preferences setObject:binaryDate forKey:BinaryBundleDateKey];
-    [preferences synchronize];
+    binaryBundleDate = [NSString stringWithFormat:@"%f", [binaryDate timeIntervalSince1970]];
 }
 
 + (void)setDeploymentKey:(NSString *)deploymentKey
@@ -388,7 +378,6 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
 {
     dispatch_async(dispatch_get_main_queue(), ^{
         NSDictionary* mutableUpdatePackage = [updatePackage mutableCopy];
-        NSString *binaryBundleDate = [CodePush getBinaryBundleDateString];
         if (binaryBundleDate != nil) {
             [mutableUpdatePackage setValue:binaryBundleDate
                                     forKey:BinaryBundleDateKey];
