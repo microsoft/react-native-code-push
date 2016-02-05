@@ -57,9 +57,7 @@ static NSString *const PackageIsPendingKey = @"isPending";
     NSError *error;
     NSString *packageFile = [CodePushPackage getCurrentPackageBundlePath:&error];
     NSURL *binaryJsBundleUrl = [[NSBundle mainBundle] URLForResource:resourceName withExtension:resourceExtension];
-    NSDictionary *binaryFileAttributes = [[NSFileManager defaultManager] attributesOfItemAtPath:[binaryJsBundleUrl path] error:nil];
-    NSDate *binaryDate = [binaryFileAttributes objectForKey:NSFileModificationDate];
-    [self saveBinaryBundleDate:binaryDate];
+    [self saveBinaryBundleDate:binaryJsBundleUrl];
     
     NSString *logMessageFormat = @"Loading JS bundle from %@";
     
@@ -124,10 +122,12 @@ static NSString *const PackageIsPendingKey = @"isPending";
     return testConfigurationFlag;
 }
 
-+ (void)saveBinaryBundleDate:(NSDate *)binaryBundleDate
++ (void)saveBinaryBundleDate:(NSURL *)binaryJsBundleUrl
 {
+    NSDictionary *binaryFileAttributes = [[NSFileManager defaultManager] attributesOfItemAtPath:[binaryJsBundleUrl path] error:nil];
+    NSDate *binaryDate = [binaryFileAttributes objectForKey:NSFileModificationDate];
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
-    [preferences setObject:binaryBundleDate forKey:BinaryBundleDateKey];
+    [preferences setObject:binaryDate forKey:BinaryBundleDateKey];
     [preferences synchronize];
 }
 
