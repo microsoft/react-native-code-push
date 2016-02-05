@@ -193,6 +193,11 @@ NSString * const UnzippedFolderName = @"unzipped";
     return [[self getCodePushPath] stringByAppendingPathComponent:packageHash];
 }
 
++ (BOOL)isCodePushError:(NSError *)err
+{
+    return err != nil && [CodePushErrorDomain isEqualToString:err.domain];
+}
+
 + (void)downloadPackage:(NSDictionary *)updatePackage
        progressCallback:(void (^)(long long, long long))progressCallback
            doneCallback:(void (^)())doneCallback
