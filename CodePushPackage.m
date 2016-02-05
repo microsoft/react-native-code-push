@@ -228,8 +228,16 @@ NSString * const UnzippedFolderName = @"unzipped";
             NSString * unzippedFolderPath = [CodePushPackage getUnzippedFolderPath];
             NSMutableDictionary * mutableUpdatePackage = [updatePackage mutableCopy];
             if (isZip) {
-                NSError *nonFailingError = nil;
+                if ([[NSFileManager defaultManager] fileExistsAtPath:unzippedFolderPath]) {
+                    [[NSFileManager defaultManager] removeItemAtPath:unzippedFolderPath
+                                                               error:&error];
+                    if (error) {
+                        failCallback(error);
+                        return;
+                    }
+                }
                 
+                NSError *nonFailingError = nil;
                 [SSZipArchive unzipFileAtPath:downloadFilePath
                                 toDestination:unzippedFolderPath];
                 [[NSFileManager defaultManager] removeItemAtPath:downloadFilePath
