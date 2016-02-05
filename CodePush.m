@@ -59,9 +59,7 @@ static NSString *const PackageIsPendingKey = @"isPending";
     NSURL *binaryJsBundleUrl = [[NSBundle mainBundle] URLForResource:resourceName withExtension:resourceExtension];
     NSDictionary *binaryFileAttributes = [[NSFileManager defaultManager] attributesOfItemAtPath:[binaryJsBundleUrl path] error:nil];
     NSDate *binaryDate = [binaryFileAttributes objectForKey:NSFileModificationDate];
-    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
-    [preferences setObject:binaryDate forKey:FailedUpdatesKey];
-    [preferences synchronize];
+    [self saveBinaryBundleDate:binaryDate];
     
     NSString *logMessageFormat = @"Loading JS bundle from %@";
     
@@ -80,7 +78,7 @@ static NSString *const PackageIsPendingKey = @"isPending";
     }
     
     NSString *packageDate = [currentPackageMetadata objectForKey:BinaryBundleDateKey];
-    NSString *binaryDateString = [NSString stringWithFormat:@"%f", [binaryDate timeIntervalSince1970]];
+    NSString *binaryDateString = [self getBinaryBundleDateString];
     NSString *packageAppVersion = [currentPackageMetadata objectForKey:@"appVersion"];
     
     if ([binaryDateString isEqualToString:packageDate] && ([CodePush isUsingTestConfiguration] ||[binaryAppVersion isEqualToString:packageAppVersion])) {
@@ -106,6 +104,17 @@ static NSString *const PackageIsPendingKey = @"isPending";
     return applicationSupportDirectory;
 }
 
++ (NSString *)getBinaryBundleDateString
+{
+    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+    NSDate *binaryBundleDate = [preferences objectForKey:BinaryBundleDateKey];
+    if (binaryBundleDate == nil) {
+        return nil;
+    } else {
+        return [NSString stringWithFormat:@"%f", [binaryBundleDate timeIntervalSince1970]];
+    }
+}
+
 /*
  * This returns a boolean value indicating whether CodePush has
  * been set to run under a test configuration.
@@ -113,6 +122,13 @@ static NSString *const PackageIsPendingKey = @"isPending";
 + (BOOL)isUsingTestConfiguration
 {
     return testConfigurationFlag;
+}
+
++ (void)saveBinaryBundleDate:(NSDate *)binaryBundleDate
+{
+    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+    [preferences setObject:binaryBundleDate forKey:BinaryBundleDateKey];
+    [preferences synchronize];
 }
 
 + (void)setDeploymentKey:(NSString *)deploymentKey
@@ -366,20 +382,19 @@ static NSString *const PackageIsPendingKey = @"isPending";
 /*
  * This is native-side of the RemotePackage.download method
  */
-RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)immutableUpdatePackage
+RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
                         resolver:(RCTPromiseResolveBlock)resolve
                         rejecter:(RCTPromiseRejectBlock)reject)
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSDictionary* updatePackage = [immutableUpdatePackage mutableCopy];
-        NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
-        NSDate *binaryBundleDate = [preferences objectForKey:BinaryBundleDateKey];
+        NSDictionary* mutableUpdatePackage = [updatePackage mutableCopy];
+        NSString *binaryBundleDate = [CodePush getBinaryBundleDateString];
         if (binaryBundleDate != nil) {
-            [updatePackage setValue:[NSString stringWithFormat:@"%f", [binaryBundleDate timeIntervalSince1970]]
-                             forKey:BinaryBundleDateKey];
+            [mutableUpdatePackage setValue:binaryBundleDate
+                                    forKey:BinaryBundleDateKey];
         }
         
-        [CodePushPackage downloadPackage:updatePackage
+        [CodePushPackage downloadPackage:mutableUpdatePackage
             // The download is progressing forward
             progressCallback:^(long long expectedContentLength, long long receivedContentLength) {
                 // Notify the script-side about the progress
@@ -393,7 +408,7 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)immutableUpdatePackage
             // The download completed
             doneCallback:^{
                 NSError *err;
-                NSDictionary *newPackage = [CodePushPackage getPackage:updatePackage[PackageHashKey] error:&err];
+                NSDictionary *newPackage = [CodePushPackage getPackage:mutableUpdatePackage[PackageHashKey] error:&err];
                     
                 if (err) {
                     return reject([NSString stringWithFormat: @"%lu", (long)err.code], err.localizedDescription, err);
@@ -404,7 +419,7 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)immutableUpdatePackage
             // The download failed
             failCallback:^(NSError *err) {
                 if ([CodePushPackage isCodePushError:err]) {
-                    [self saveFailedUpdate:updatePackage];
+                    [self saveFailedUpdate:mutableUpdatePackage];
                 }
                 
                 reject([NSString stringWithFormat: @"%lu", (long)err.code], err.localizedDescription, err);
