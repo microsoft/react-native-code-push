@@ -285,6 +285,11 @@ NSString * const UnzippedFolderName = @"unzipped";
                 [CodePushPackage copyEntriesInFolder:unzippedFolderPath
                                           destFolder:newPackageFolderPath
                                                error:&error];
+                if (error) {
+                    failCallback(error);
+                    return;
+                }
+                
                 [[NSFileManager defaultManager] removeItemAtPath:unzippedFolderPath
                                                            error:&nonFailingError];
                 if (nonFailingError) {
