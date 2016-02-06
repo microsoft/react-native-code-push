@@ -481,7 +481,7 @@ public class CodePush {
                 @Override
                 protected Void doInBackground(Object... params) {
                     try {
-                        codePushPackage.installPackage(updatePackage);
+                        codePushPackage.installPackage(updatePackage, isPendingUpdate(null));
 
                         String pendingHash = CodePushUtils.tryGetString(updatePackage, codePushPackage.PACKAGE_HASH_KEY);
                         if (pendingHash == null) {
