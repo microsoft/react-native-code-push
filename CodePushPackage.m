@@ -449,6 +449,7 @@ NSString * const UnzippedFolderName = @"unzipped";
 }
 
 + (void)installPackage:(NSDictionary *)updatePackage
+   removePendingUpdate:(BOOL)removePendingUpdate
                  error:(NSError **)error
 {
     NSString *packageHash = updatePackage[@"packageHash"];
@@ -458,19 +459,32 @@ NSString * const UnzippedFolderName = @"unzipped";
         return;
     }
     
-    NSString *previousPackageHash = [self getPreviousPackageHash:error];
-    if (!*error && previousPackageHash && ![previousPackageHash isEqualToString:packageHash]) {
-        NSString *previousPackageFolderPath = [self getPackageFolderPath:previousPackageHash];
-        // Error in deleting old package will not cause the entire operation to fail.
-        NSError *deleteError;
-        [[NSFileManager defaultManager] removeItemAtPath:previousPackageFolderPath
-                                                   error:&deleteError];
-        if (deleteError) {
-            NSLog(@"Error deleting old package: %@", deleteError);
+    if (!removePendingUpdate) {
+        NSString *currentPackageFolderPath = [self getCurrentPackageFolderPath:error];
+        if (!*error && currentPackageFolderPath) {
+            // Error in deleting pending package will not cause the entire operation to fail.
+            NSError *deleteError;
+            [[NSFileManager defaultManager] removeItemAtPath:currentPackageFolderPath
+                                                       error:&deleteError];
+            if (deleteError) {
+                NSLog(@"Error deleting pending package: %@", deleteError);
+            }
         }
+    } else {
+        NSString *previousPackageHash = [self getPreviousPackageHash:error];
+        if (!*error && previousPackageHash && ![previousPackageHash isEqualToString:packageHash]) {
+            NSString *previousPackageFolderPath = [self getPackageFolderPath:previousPackageHash];
+            // Error in deleting old package will not cause the entire operation to fail.
+            NSError *deleteError;
+            [[NSFileManager defaultManager] removeItemAtPath:previousPackageFolderPath
+                                                       error:&deleteError];
+            if (deleteError) {
+                NSLog(@"Error deleting old package: %@", deleteError);
+            }
+        }
+        [info setValue:info[@"currentPackage"] forKey:@"previousPackage"];
     }
     
-    [info setValue:info[@"currentPackage"] forKey:@"previousPackage"];
     [info setValue:packageHash forKey:@"currentPackage"];
 
     [self updateCurrentPackageInfo:info
