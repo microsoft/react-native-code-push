@@ -539,8 +539,8 @@ public class CodePush {
 
         @ReactMethod
         public void notifyApplicationReady(Promise promise) {
-            // We only mark a pending update as succeeded only if it update has been booted up,
-            // during which `didUpdate` is true.
+            // We only mark a pending update as succeeded only if it has been booted up
+            // successfully, during which `didUpdate` is set to true.
             if (didUpdate) {
                 removePendingUpdate();
             }
