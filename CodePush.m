@@ -507,7 +507,7 @@ RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
                                 rejecter:(RCTPromiseRejectBlock)reject)
 {
     // We only mark a pending update as succeeded only if it has been booted up
-    // successfully, during which `didUpdate` is set to true.
+    // successfully, during which `_isFirstRunAfterUpdate` is set to true.
     if (_isFirstRunAfterUpdate) {
         [CodePush removePendingUpdate];
     }

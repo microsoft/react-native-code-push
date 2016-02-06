@@ -459,7 +459,7 @@ NSString * const UnzippedFolderName = @"unzipped";
         return;
     }
     
-    if (!removePendingUpdate) {
+    if (removePendingUpdate) {
         NSString *currentPackageFolderPath = [self getCurrentPackageFolderPath:error];
         if (!*error && currentPackageFolderPath) {
             // Error in deleting pending package will not cause the entire operation to fail.
