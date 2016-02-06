@@ -40,9 +40,8 @@ static NSString *const PackageIsPendingKey = @"isPending";
 
 // These values are used to save the bundleURL and extension for the JS bundle
 // in the binary.
-static NSString *bundleResourceName = @"main";
 static NSString *bundleResourceExtension = @"jsbundle";
-
+static NSString *bundleResourceName = @"main";
 
 #pragma mark - Public Obj-C API
 
