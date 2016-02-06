@@ -36,8 +36,8 @@ static NSString *const PackageIsPendingKey = @"isPending";
 
 #pragma mark - Static variables
 
-static BOOL needToReportRollback = NO;
 static BOOL isRunningBinaryVersion = NO;
+static BOOL needToReportRollback = NO;
 static BOOL testConfigurationFlag = NO;
 
 // These values are used to save the bundleURL and extension for the JS bundle
