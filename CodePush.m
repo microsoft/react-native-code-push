@@ -506,6 +506,8 @@ RCT_EXPORT_METHOD(isFirstRun:(NSString *)packageHash
 RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
                                 rejecter:(RCTPromiseRejectBlock)reject)
 {
+    // We only mark a pending update as succeeded only if it update has been booted up,
+    // during which `_isFirstRunAfterUpdate` is true.
     if (_isFirstRunAfterUpdate) {
         [CodePush removePendingUpdate];
     }
