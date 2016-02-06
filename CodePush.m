@@ -24,7 +24,6 @@ static NSString *const DeploymentFailed = @"DeploymentFailed";
 static NSString *const DeploymentSucceeded = @"DeploymentSucceeded";
 
 // These keys represent the names we use to store data in NSUserDefaults
-static NSString *const BinaryBundleDateKey = @"CODE_PUSH_BINARY_DATE";
 static NSString *const FailedUpdatesKey = @"CODE_PUSH_FAILED_UPDATES";
 static NSString *const PendingUpdateKey = @"CODE_PUSH_PENDING_UPDATE";
 
@@ -37,6 +36,7 @@ static NSString *const PendingUpdateIsLoadingKey = @"isLoading";
 // that is associated with an update's package.
 static NSString *const PackageHashKey = @"packageHash";
 static NSString *const PackageIsPendingKey = @"isPending";
+static NSString *const BinaryBundleDateKey = @"binaryDate";
 
 // These values are used to save the bundleURL and extension for the JS bundle
 // in the binary.
