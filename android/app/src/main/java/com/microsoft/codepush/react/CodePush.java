@@ -539,7 +539,10 @@ public class CodePush {
 
         @ReactMethod
         public void notifyApplicationReady(Promise promise) {
-            removePendingUpdate();
+            if (didUpdate) {
+                removePendingUpdate();
+            }
+            
             promise.resolve("");
         }
         

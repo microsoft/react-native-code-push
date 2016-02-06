@@ -506,7 +506,10 @@ RCT_EXPORT_METHOD(isFirstRun:(NSString *)packageHash
 RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
                                 rejecter:(RCTPromiseRejectBlock)reject)
 {
-    [CodePush removePendingUpdate];
+    if (_isFirstRunAfterUpdate) {
+        [CodePush removePendingUpdate];
+    }
+    
     resolve(nil);
 }
 
