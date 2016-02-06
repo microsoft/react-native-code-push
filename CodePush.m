@@ -119,20 +119,6 @@ static NSString *bundleResourceName = @"main";
     return testConfigurationFlag;
 }
 
-/*
- * This returns the modified date as a string for a given file URL.
- */
-+ (NSString *)modifiedDateStringOfFileAtUrl:(NSURL *)fileUrl
-{
-    if (fileUrl != nil) {
-        NSDictionary *fileAttributes = [[NSFileManager defaultManager] attributesOfItemAtPath:[fileUrl path] error:nil];
-        NSDate *modifiedDate = [fileAttributes objectForKey:NSFileModificationDate];
-        return [NSString stringWithFormat:@"%f", [modifiedDate timeIntervalSince1970]];
-    } else {
-        return nil;
-    }
-}
-
 + (void)setDeploymentKey:(NSString *)deploymentKey
 {
     [CodePushConfig current].deploymentKey = deploymentKey;
@@ -298,6 +284,20 @@ static NSString *bundleResourceName = @"main";
         
         [_bridge reload];
     });
+}
+
+/*
+ * This returns the modified date as a string for a given file URL.
+ */
++ (NSString *)modifiedDateStringOfFileAtURL:(NSURL *)fileURL
+{
+    if (fileURL != nil) {
+        NSDictionary *fileAttributes = [[NSFileManager defaultManager] attributesOfItemAtPath:[fileURL path] error:nil];
+        NSDate *modifiedDate = [fileAttributes objectForKey:NSFileModificationDate];
+        return [NSString stringWithFormat:@"%f", [modifiedDate timeIntervalSince1970]];
+    } else {
+        return nil;
+    }
 }
 
 /*
