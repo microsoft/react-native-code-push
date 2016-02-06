@@ -18,7 +18,6 @@ RCT_EXPORT_MODULE()
 static BOOL needToReportRollback = NO;
 static BOOL isRunningBinaryVersion = NO;
 static BOOL testConfigurationFlag = NO;
-static NSString *binaryBundleDate = nil;
 
 // These constants represent valid deployment statuses
 static NSString *const DeploymentFailed = @"DeploymentFailed";
@@ -39,26 +38,39 @@ static NSString *const PendingUpdateIsLoadingKey = @"isLoading";
 static NSString *const PackageHashKey = @"packageHash";
 static NSString *const PackageIsPendingKey = @"isPending";
 
+// These values are used to save the bundleURL and extension for the JS bundle
+// in the binary.
+static NSString *binaryJsName = @"main";
+static NSString *binaryJsExtension = @"jsbundle";
+
+
 #pragma mark - Public Obj-C API
+
++ (NSURL *)binaryJsBundleUrl
+{
+    return [[NSBundle mainBundle] URLForResource:binaryJsName withExtension:binaryJsExtension];
+}
 
 + (NSURL *)bundleURL
 {
-    return [self bundleURLForResource:@"main"];
+    return [self bundleURLForResource:binaryJsName];
 }
 
 + (NSURL *)bundleURLForResource:(NSString *)resourceName
 {
+    binaryJsName = resourceName;
     return [self bundleURLForResource:resourceName
-                        withExtension:@"jsbundle"];
+                        withExtension:binaryJsExtension];
 }
 
 + (NSURL *)bundleURLForResource:(NSString *)resourceName
                   withExtension:(NSString *)resourceExtension
 {
+    binaryJsName = resourceName;
+    binaryJsExtension = resourceExtension;
     NSError *error;
     NSString *packageFile = [CodePushPackage getCurrentPackageBundlePath:&error];
-    NSURL *binaryJsBundleUrl = [[NSBundle mainBundle] URLForResource:resourceName withExtension:resourceExtension];
-    [self setBinaryBundleDate:binaryJsBundleUrl];
+    NSURL *binaryJsBundleUrl = [self binaryJsBundleUrl];
     
     NSString *logMessageFormat = @"Loading JS bundle from %@";
     
@@ -79,7 +91,7 @@ static NSString *const PackageIsPendingKey = @"isPending";
     NSString *packageDate = [currentPackageMetadata objectForKey:BinaryBundleDateKey];
     NSString *packageAppVersion = [currentPackageMetadata objectForKey:@"appVersion"];
     
-    if ([binaryBundleDate isEqualToString:packageDate] && ([CodePush isUsingTestConfiguration] ||[binaryAppVersion isEqualToString:packageAppVersion])) {
+    if ([[self modifiedDateStringFromFileUrl:binaryJsBundleUrl] isEqualToString:packageDate] && ([CodePush isUsingTestConfiguration] ||[binaryAppVersion isEqualToString:packageAppVersion])) {
         // Return package file because it is newer than the app store binary's JS bundle
         NSURL *packageUrl = [[NSURL alloc] initFileURLWithPath:packageFile];
         NSLog(logMessageFormat, packageUrl);
@@ -112,13 +124,17 @@ static NSString *const PackageIsPendingKey = @"isPending";
 }
 
 /*
- * This caches the binary's jsbundle modified date in memory as a string.
+ * This returns the modified date as a string for a given file URL.
  */
-+ (void)setBinaryBundleDate:(NSURL *)binaryJsBundleUrl
++ (NSString *)modifiedDateStringFromFileUrl:(NSURL *)fileUrl
 {
-    NSDictionary *binaryFileAttributes = [[NSFileManager defaultManager] attributesOfItemAtPath:[binaryJsBundleUrl path] error:nil];
-    NSDate *binaryDate = [binaryFileAttributes objectForKey:NSFileModificationDate];
-    binaryBundleDate = [NSString stringWithFormat:@"%f", [binaryDate timeIntervalSince1970]];
+    if (fileUrl != nil) {
+        NSDictionary *fileAttributes = [[NSFileManager defaultManager] attributesOfItemAtPath:[fileUrl path] error:nil];
+        NSDate *modifiedDate = [fileAttributes objectForKey:NSFileModificationDate];
+        return [NSString stringWithFormat:@"%f", [modifiedDate timeIntervalSince1970]];
+    } else {
+        return nil;
+    }
 }
 
 + (void)setDeploymentKey:(NSString *)deploymentKey
@@ -377,9 +393,10 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
                         rejecter:(RCTPromiseRejectBlock)reject)
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSDictionary* mutableUpdatePackage = [updatePackage mutableCopy];
-        if (binaryBundleDate != nil) {
-            [mutableUpdatePackage setValue:binaryBundleDate
+        NSDictionary *mutableUpdatePackage = [updatePackage mutableCopy];
+        NSURL *binaryJsBundleUrl = [CodePush binaryJsBundleUrl];
+        if (binaryJsBundleUrl != nil) {
+            [mutableUpdatePackage setValue:[CodePush modifiedDateStringFromFileUrl:binaryJsBundleUrl]
                                     forKey:BinaryBundleDateKey];
         }
         
