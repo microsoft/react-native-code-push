@@ -229,6 +229,8 @@ NSString * const UnzippedFolderName = @"unzipped";
             NSMutableDictionary * mutableUpdatePackage = [updatePackage mutableCopy];
             if (isZip) {
                 if ([[NSFileManager defaultManager] fileExistsAtPath:unzippedFolderPath]) {
+                    // This removes any unzipped download data that could have been left
+                    // uncleared due to a crash or error during the download process.
                     [[NSFileManager defaultManager] removeItemAtPath:unzippedFolderPath
                                                                error:&error];
                     if (error) {

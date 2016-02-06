@@ -87,7 +87,7 @@ static NSString *bundleResourceName = @"main";
     NSString *packageDate = [currentPackageMetadata objectForKey:BinaryBundleDateKey];
     NSString *packageAppVersion = [currentPackageMetadata objectForKey:@"appVersion"];
     
-    if ([[self modifiedDateStringOfFileAtUrl:binaryBundleURL] isEqualToString:packageDate] && ([CodePush isUsingTestConfiguration] ||[binaryAppVersion isEqualToString:packageAppVersion])) {
+    if ([[self modifiedDateStringOfFileAtURL:binaryBundleURL] isEqualToString:packageDate] && ([CodePush isUsingTestConfiguration] ||[binaryAppVersion isEqualToString:packageAppVersion])) {
         // Return package file because it is newer than the app store binary's JS bundle
         NSURL *packageUrl = [[NSURL alloc] initFileURLWithPath:packageFile];
         NSLog(logMessageFormat, packageUrl);
@@ -397,7 +397,7 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
         NSDictionary *mutableUpdatePackage = [updatePackage mutableCopy];
         NSURL *binaryBundleURL = [CodePush binaryBundleURL];
         if (binaryBundleURL != nil) {
-            [mutableUpdatePackage setValue:[CodePush modifiedDateStringOfFileAtUrl:binaryBundleURL]
+            [mutableUpdatePackage setValue:[CodePush modifiedDateStringOfFileAtURL:binaryBundleURL]
                                     forKey:BinaryBundleDateKey];
         }
         
