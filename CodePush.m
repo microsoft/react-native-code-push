@@ -15,10 +15,6 @@ RCT_EXPORT_MODULE()
 
 #pragma mark - Private constants
 
-static BOOL needToReportRollback = NO;
-static BOOL isRunningBinaryVersion = NO;
-static BOOL testConfigurationFlag = NO;
-
 // These constants represent valid deployment statuses
 static NSString *const DeploymentFailed = @"DeploymentFailed";
 static NSString *const DeploymentSucceeded = @"DeploymentSucceeded";
@@ -37,6 +33,12 @@ static NSString *const PendingUpdateIsLoadingKey = @"isLoading";
 static NSString *const BinaryBundleDateKey = @"binaryDate";
 static NSString *const PackageHashKey = @"packageHash";
 static NSString *const PackageIsPendingKey = @"isPending";
+
+#pragma mark - Static variables
+
+static BOOL needToReportRollback = NO;
+static BOOL isRunningBinaryVersion = NO;
+static BOOL testConfigurationFlag = NO;
 
 // These values are used to save the bundleURL and extension for the JS bundle
 // in the binary.
