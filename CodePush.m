@@ -46,11 +46,6 @@ static NSString *bundleResourceExtension = @"jsbundle";
 
 #pragma mark - Public Obj-C API
 
-+ (NSURL *)binaryBundleURL
-{
-    return [[NSBundle mainBundle] URLForResource:bundleResourceName withExtension:bundleResourceExtension];
-}
-
 + (NSURL *)bundleURL
 {
     return [self bundleURLForResource:bundleResourceName];
@@ -166,6 +161,11 @@ static NSString *bundleResourceExtension = @"jsbundle";
 #pragma mark - Private API methods
 
 @synthesize bridge = _bridge;
+
++ (NSURL *)binaryBundleURL
+{
+    return [[NSBundle mainBundle] URLForResource:bundleResourceName withExtension:bundleResourceExtension];
+}
 
 /*
  * This method is used by the React Native bridge to allow
