@@ -196,13 +196,13 @@ const sync = (() => {
     } 
     
     syncInProgress = true;
-    const syncInternalPromise = syncInternal(options, syncStatusChangeCallback, downloadProgressCallback);
-    syncInternalPromise
+    const syncPromise = syncInternal(options, syncStatusChangeCallback, downloadProgressCallback);
+    syncPromise
       .then(setSyncCompleted)
       .catch(setSyncCompleted)
       .done();
 
-    return syncInternalPromise;
+    return syncPromise;
   };
 })();
 
