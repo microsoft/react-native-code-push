@@ -139,7 +139,20 @@ function log(message) {
   console.log(`[CodePush] ${message}`)
 }
 
-async function notifyApplicationReady() {
+// This ensures that notifyApplicationReadyInternal is only called once 
+// in the lifetime of this module instance.
+const notifyApplicationReady = (() => {
+  let notifyApplicationReadyPromise;
+  return () => {
+    if (!notifyApplicationReadyPromise) {
+      notifyApplicationReadyPromise = notifyApplicationReadyInternal();
+    }
+    
+    return notifyApplicationReadyPromise;
+  };
+})();
+
+async function notifyApplicationReadyInternal() {
   await NativeCodePush.notifyApplicationReady();  
   const statusReport = await NativeCodePush.getNewStatusReport();
   if (statusReport) {
@@ -170,15 +183,26 @@ function setUpTestDependencies(testSdk, providedTestConfig, testNativeBridge) {
   if (testNativeBridge) NativeCodePush = testNativeBridge;
 }
 
-// This function allows calls to syncInternal to be chained on to each other so that they do not
-// interleave in the event that sync() is called multiple times.
+// This function allows only one syncInternal operation to proceed at any given time.
+// Parallel calls to sync() while one is ongoing yields CodePush.SyncStatus.SYNC_IN_PROGRESS.
 const sync = (() => {
-  let syncPromiseChain = Promise.resolve();
+  let syncInProgress = false;
+  const setSyncCompleted = () => { syncInProgress = false; };
+  
   return (options = {}, syncStatusChangeCallback, downloadProgressCallback) => {
-    syncPromiseChain = syncPromiseChain
-      .catch(() => {})
-      .then(() => syncInternal(options, syncStatusChangeCallback, downloadProgressCallback));
-    return syncPromiseChain;
+    if (syncInProgress) {
+      syncStatusChangeCallback(CodePush.SyncStatus.SYNC_IN_PROGRESS);
+      return Promise.resolve(CodePush.SyncStatus.SYNC_IN_PROGRESS);
+    } 
+    
+    syncInProgress = true;
+    const syncInternalPromise = syncInternal(options, syncStatusChangeCallback, downloadProgressCallback);
+    syncInternalPromise
+      .then(setSyncCompleted)
+      .catch(setSyncCompleted)
+      .done();
+
+    return syncInternalPromise;
   };
 })();
 
@@ -350,6 +374,7 @@ const CodePush = {
     UP_TO_DATE: 4, // The running app is up-to-date
     UPDATE_IGNORED: 5, // The app had an optional update and the end-user chose to ignore it
     UPDATE_INSTALLED: 6, // The app had an optional/mandatory update that was successfully downloaded and is about to be installed.
+    SYNC_IN_PROGRESS: 7, // There is an ongoing "sync" operation in progress.
     UNKNOWN_ERROR: -1
   },
   DEFAULT_UPDATE_DIALOG: {
