@@ -191,7 +191,9 @@ const sync = (() => {
   
   return (options = {}, syncStatusChangeCallback, downloadProgressCallback) => {
     if (syncInProgress) {
-      syncStatusChangeCallback(CodePush.SyncStatus.SYNC_IN_PROGRESS);
+      typeof syncStatusChangeCallback == "function"
+        ? syncStatusChangeCallback(CodePush.SyncStatus.SYNC_IN_PROGRESS)
+        : log("Sync already in progress.");
       return Promise.resolve(CodePush.SyncStatus.SYNC_IN_PROGRESS);
     } 
     
