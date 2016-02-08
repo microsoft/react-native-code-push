@@ -191,7 +191,7 @@ const sync = (() => {
   
   return (options = {}, syncStatusChangeCallback, downloadProgressCallback) => {
     if (syncInProgress) {
-      typeof syncStatusChangeCallback == "function"
+      typeof syncStatusChangeCallback === "function"
         ? syncStatusChangeCallback(CodePush.SyncStatus.SYNC_IN_PROGRESS)
         : log("Sync already in progress.");
       return Promise.resolve(CodePush.SyncStatus.SYNC_IN_PROGRESS);
@@ -228,7 +228,7 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
     ...options 
   };
   
-  syncStatusChangeCallback = typeof syncStatusChangeCallback == "function"
+  syncStatusChangeCallback = typeof syncStatusChangeCallback === "function"
     ? syncStatusChangeCallback
     : (syncStatus) => {
         switch(syncStatus) {
@@ -267,7 +267,7 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
         }
       };
     
-  downloadProgressCallback = typeof downloadProgressCallback == "function" 
+  downloadProgressCallback = typeof downloadProgressCallback === "function" 
     ? downloadProgressCallback 
     : (downloadProgress) => {
         log(`Expecting ${downloadProgress.totalBytes} bytes, received ${downloadProgress.receivedBytes} bytes.`);
