@@ -59,7 +59,7 @@ Next, as with all other React Native plugins, the integration experience is diff
 
 ## iOS Setup
 
-*NOTE: these instructions only apply to version 1.7.2-beta and above of the plugin. For setup instructions pertaining to older versions, please refer to [this version of the docs](https://github.com/Microsoft/react-native-code-push/blob/28c4f2dd03448c393445800a5e0d828b69a614e3/README.md).*
+*NOTE: these instructions only apply to version 1.7.2-beta and above of the plugin. For setup instructions pertaining to older versions, please refer to [this version of the docs](https://github.com/Microsoft/react-native-code-push/blob/28c4f2dd03448c393445800a5e0d828b69a614e3/README.md#ios-setup).*
 
 Once you've acquired the CodePush plugin, you need to integrate it into the Xcode project of your React Native app.
 
@@ -121,7 +121,7 @@ To let the CodePush runtime know which deployment it should query for updates ag
     
 ## Android Setup
 
-*NOTE: these instructions only apply to version 1.7.2-beta and above of the plugin. For setup instructions pertaining to older versions, please refer to [this version of the docs](https://github.com/Microsoft/react-native-code-push/blob/28c4f2dd03448c393445800a5e0d828b69a614e3/README.md).*
+*NOTE: these instructions only apply to version 1.7.2-beta and above of the plugin. For setup instructions pertaining to older versions, please refer to [this version of the docs](https://github.com/Microsoft/react-native-code-push/blob/28c4f2dd03448c393445800a5e0d828b69a614e3/README.md#android-setup).*
 
 After installing the plugin and syncing your Android Studio project with Gradle, you need to configure your app to consult CodePush for the location of your JS bundle, since it will "take control" of managing the current and all future versions. To do this, perform the following steps:
 
