@@ -259,15 +259,23 @@ public class CodePushPackage {
         CodePushUtils.writeReadableMapToFile(updatePackage, bundlePath);
     }
 
-    public void installPackage(ReadableMap updatePackage) throws IOException {
+    public void installPackage(ReadableMap updatePackage, boolean removePendingUpdate) throws IOException {
         String packageHash = CodePushUtils.tryGetString(updatePackage, PACKAGE_HASH_KEY);
         WritableMap info = getCurrentPackageInfo();
-        String previousPackageHash = getPreviousPackageHash();
-        if (previousPackageHash != null && !previousPackageHash.equals(packageHash)) {
-            FileUtils.deleteDirectoryAtPath(getPackageFolderPath(previousPackageHash));
+        if (removePendingUpdate) {
+            String currentPackageFolderPath = getCurrentPackageFolderPath();
+            if (currentPackageFolderPath != null) {
+                FileUtils.deleteDirectoryAtPath(currentPackageFolderPath);
+            }
+        } else {
+            String previousPackageHash = getPreviousPackageHash();
+            if (previousPackageHash != null && !previousPackageHash.equals(packageHash)) {
+                FileUtils.deleteDirectoryAtPath(getPackageFolderPath(previousPackageHash));
+            }
+
+            info.putString(PREVIOUS_PACKAGE_KEY, CodePushUtils.tryGetString(info, CURRENT_PACKAGE_KEY));
         }
 
-        info.putString(PREVIOUS_PACKAGE_KEY, CodePushUtils.tryGetString(info, CURRENT_PACKAGE_KEY));
         info.putString(CURRENT_PACKAGE_KEY, packageHash);
         updateCurrentPackageInfo(info);
     }

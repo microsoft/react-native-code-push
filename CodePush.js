@@ -139,7 +139,20 @@ function log(message) {
   console.log(`[CodePush] ${message}`)
 }
 
-async function notifyApplicationReady() {
+// This ensures that notifyApplicationReadyInternal is only called once 
+// in the lifetime of this module instance.
+const notifyApplicationReady = (() => {
+  let notifyApplicationReadyPromise;
+  return () => {
+    if (!notifyApplicationReadyPromise) {
+      notifyApplicationReadyPromise = notifyApplicationReadyInternal();
+    }
+    
+    return notifyApplicationReadyPromise;
+  };
+})();
+
+async function notifyApplicationReadyInternal() {
   await NativeCodePush.notifyApplicationReady();  
   const statusReport = await NativeCodePush.getNewStatusReport();
   if (statusReport) {
@@ -170,8 +183,33 @@ function setUpTestDependencies(testSdk, providedTestConfig, testNativeBridge) {
   if (testNativeBridge) NativeCodePush = testNativeBridge;
 }
 
+// This function allows only one syncInternal operation to proceed at any given time.
+// Parallel calls to sync() while one is ongoing yields CodePush.SyncStatus.SYNC_IN_PROGRESS.
+const sync = (() => {
+  let syncInProgress = false;
+  const setSyncCompleted = () => { syncInProgress = false; };
+  
+  return (options = {}, syncStatusChangeCallback, downloadProgressCallback) => {
+    if (syncInProgress) {
+      typeof syncStatusChangeCallback === "function"
+        ? syncStatusChangeCallback(CodePush.SyncStatus.SYNC_IN_PROGRESS)
+        : log("Sync already in progress.");
+      return Promise.resolve(CodePush.SyncStatus.SYNC_IN_PROGRESS);
+    } 
+    
+    syncInProgress = true;
+    const syncPromise = syncInternal(options, syncStatusChangeCallback, downloadProgressCallback);
+    syncPromise
+      .then(setSyncCompleted)
+      .catch(setSyncCompleted)
+      .done();
+
+    return syncPromise;
+  };
+})();
+
 /*
- * The sync method provides a simple, one-line experience for
+ * The syncInternal method provides a simple, one-line experience for
  * incorporating the check, download and application of an update.
  * 
  * It simply composes the existing API methods together and adds additional
@@ -179,7 +217,7 @@ function setUpTestDependencies(testSdk, providedTestConfig, testNativeBridge) {
  * releases, and displaying a standard confirmation UI to the end-user
  * when an update is available.
  */
-async function sync(options = {}, syncStatusChangeCallback, downloadProgressCallback) {  
+async function syncInternal(options = {}, syncStatusChangeCallback, downloadProgressCallback) {  
   const syncOptions = {
     
     deploymentKey: null,
@@ -190,7 +228,7 @@ async function sync(options = {}, syncStatusChangeCallback, downloadProgressCall
     ...options 
   };
   
-  syncStatusChangeCallback = typeof syncStatusChangeCallback == "function"
+  syncStatusChangeCallback = typeof syncStatusChangeCallback === "function"
     ? syncStatusChangeCallback
     : (syncStatus) => {
         switch(syncStatus) {
@@ -229,7 +267,7 @@ async function sync(options = {}, syncStatusChangeCallback, downloadProgressCall
         }
       };
     
-  downloadProgressCallback = typeof downloadProgressCallback == "function" 
+  downloadProgressCallback = typeof downloadProgressCallback === "function" 
     ? downloadProgressCallback 
     : (downloadProgress) => {
         log(`Expecting ${downloadProgress.totalBytes} bytes, received ${downloadProgress.receivedBytes} bytes.`);
@@ -338,6 +376,7 @@ const CodePush = {
     UP_TO_DATE: 4, // The running app is up-to-date
     UPDATE_IGNORED: 5, // The app had an optional update and the end-user chose to ignore it
     UPDATE_INSTALLED: 6, // The app had an optional/mandatory update that was successfully downloaded and is about to be installed.
+    SYNC_IN_PROGRESS: 7, // There is an ongoing "sync" operation in progress.
     UNKNOWN_ERROR: -1
   },
   DEFAULT_UPDATE_DIALOG: {
