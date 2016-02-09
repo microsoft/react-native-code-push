@@ -1,5 +1,3 @@
-"use strict";
-
 import React from "react-native";
 import CodePush from "react-native-code-push";
 import createTestCaseComponent from "../../utils/createTestCaseComponent";
@@ -27,4 +25,4 @@ let NewUpdateTest = createTestCaseComponent(
   }
 );
 
-export default NewUpdateTest;
+module.exports = NewUpdateTest;

@@ -1,4 +1,4 @@
-export default {
+module.exports = {
   deploymentKey: "myKey123",
   description: "Angry flappy birds",
   appVersion: "1.5.0",

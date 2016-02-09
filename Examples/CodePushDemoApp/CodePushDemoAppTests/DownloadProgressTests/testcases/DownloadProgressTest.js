@@ -50,4 +50,4 @@ let DownloadProgressTest = createTestCaseComponent(
   }
 );
 
-export default DownloadProgressTest;
+module.exports = DownloadProgressTest;
