@@ -27,4 +27,4 @@ let NewUpdateTest = createTestCaseComponent(
   }
 );
 
-export default NewUpdateTest;
+module.exports = NewUpdateTest;

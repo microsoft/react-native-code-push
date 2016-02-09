@@ -28,4 +28,4 @@ let NoRemotePackageTest = createTestCaseComponent(
   }
 );
 
-export default NoRemotePackageTest;
+module.exports = NoRemotePackageTest;

@@ -28,4 +28,4 @@ let RemotePackageAppVersionNewerTest = createTestCaseComponent(
   }
 );
 
-export default RemotePackageAppVersionNewerTest;
+module.exports = RemotePackageAppVersionNewerTest;

@@ -13,12 +13,12 @@ function createMockAcquisitionSdk(serverPackage, localPackage, expectedDeploymen
     callback(/*err:*/ null, serverPackage);
   };
   
-  AcquisitionManager.prototype.reportStatusDeploy = (package, status, callback) => {
+  AcquisitionManager.prototype.reportStatusDeploy = (deployedPackage, status, callback) => {
     // No-op and return success.
     callback(null, null);
   };
   
-  AcquisitionManager.prototype.reportStatusDownload = (package, callback) => {
+  AcquisitionManager.prototype.reportStatusDownload = (downloadedPackage, callback) => {
     // No-op and return success.
     callback(null, null);
   };

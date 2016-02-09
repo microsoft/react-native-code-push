@@ -44,4 +44,4 @@ packages.forEach((aPackage) => {
   }
 });
 
-export default packages;
+module.exports = packages;

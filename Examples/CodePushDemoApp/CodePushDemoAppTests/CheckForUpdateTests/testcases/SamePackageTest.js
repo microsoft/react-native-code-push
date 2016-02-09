@@ -28,4 +28,4 @@ let SamePackageTest = createTestCaseComponent(
   }
 );
 
-export default SamePackageTest;
+module.exports = SamePackageTest;

@@ -29,4 +29,4 @@ let SwitchDeploymentKeyTest = createTestCaseComponent(
   }
 );
 
-export default SwitchDeploymentKeyTest;
+module.exports = SwitchDeploymentKeyTest;
