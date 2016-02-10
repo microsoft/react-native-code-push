@@ -17,9 +17,13 @@
   },
   "dependencies": {
     "code-push": "1.5.2-beta",
-    "semver": "^5.1.0"
+    "semver": "^5.1.0",
+    "rnpm": "1.4.1"
   },
-  "devDependencies": {
-    "react-native": "0.19.0"
+  "peerDependencies": {
+    "react-native": "^0.19.0"
+  },
+  "scripts": { 
+    "postinstall": "cd ../../ && rnpm link react-native-code-push"
   }
 }
