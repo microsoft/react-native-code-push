@@ -399,7 +399,14 @@ codePush.getCurrentPackage(): Promise<LocalPackage>;
 
 Retrieves the metadata about the currently installed "package" (e.g. description, installation time). This can be useful for scenarios such as displaying a "what's new?" dialog after an update has been applied or checking whether there is a pending update that is waiting to be applied via a resume or restart.
 
-This method returns a `Promise` which resolves to the [`LocalPackage`](#localpackage) instance that represents the currently running update. 
+This method returns a `Promise` which resolves to one of two possible values:
+
+1. `null` if the app is currently running the JS bundle from the binary and not a CodePush update. This occurs in the following scenarios:
+
+    1. The end-user installed the app binary and has yet to install a CodePush update
+    1. The end-user installed an update of the binary (e.g. from the store), which cleared away the old CodePush updates, and gave precedence back to the JS binary in the binary.
+
+2. A [`LocalPackage`](#localpackage) instance which represents the metadata for the currently running CodePush update.
 
 Example Usage: 
 
