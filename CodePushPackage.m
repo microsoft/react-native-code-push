@@ -206,16 +206,16 @@ NSString * const UnzippedFolderName = @"unzipped";
     NSString *newPackageFolderPath = [self getPackageFolderPath:updatePackage[@"packageHash"]];
     NSError *error;
     
-    if (![[NSFileManager defaultManager] fileExistsAtPath:[self getCodePushPath]]) {
-        [[NSFileManager defaultManager] createDirectoryAtPath:[self getCodePushPath]
-                                  withIntermediateDirectories:YES
-                                                   attributes:nil
-                                                        error:&error];
-    } else if ([[NSFileManager defaultManager] fileExistsAtPath:newPackageFolderPath]) {
+    if ([[NSFileManager defaultManager] fileExistsAtPath:newPackageFolderPath]) {
         // This removes any stale data in newPackageFolderPath that could have been left
         // uncleared due to a crash or error during the download or install process.
         [[NSFileManager defaultManager] removeItemAtPath:newPackageFolderPath
                                                    error:&error];
+    } else if (![[NSFileManager defaultManager] fileExistsAtPath:[self getCodePushPath]]) {
+        [[NSFileManager defaultManager] createDirectoryAtPath:[self getCodePushPath]
+                                  withIntermediateDirectories:YES
+                                                   attributes:nil
+                                                        error:&error];
     }
     
     if (error) {
