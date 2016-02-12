@@ -411,6 +411,10 @@ public class CodePush {
                 @Override
                 protected Void doInBackground(Object... params) {
                     WritableMap currentPackage = codePushPackage.getCurrentPackage();
+                    if (currentPackage == null) {
+                        promise.resolve("");
+                        return null;
+                    }
 
                     Boolean isPendingUpdate = false;
 

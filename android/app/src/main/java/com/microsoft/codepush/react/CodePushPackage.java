@@ -129,14 +129,14 @@ public class CodePushPackage {
     public WritableMap getCurrentPackage() {
         String folderPath = getCurrentPackageFolderPath();
         if (folderPath == null) {
-            return new WritableNativeMap();
+            return null;
         }
 
         String packagePath = CodePushUtils.appendPathComponent(folderPath, PACKAGE_FILE_NAME);
         try {
             return CodePushUtils.getWritableMapFromFile(packagePath);
         } catch (IOException e) {
-            // There is no current package.
+            // Should not happen unless the update metadata was somehow deleted.
             return null;
         }
     }
@@ -155,6 +155,12 @@ public class CodePushPackage {
                                 DownloadProgressCallback progressCallback) throws IOException {
 
         String newPackageFolderPath = getPackageFolderPath(CodePushUtils.tryGetString(updatePackage, PACKAGE_HASH_KEY));
+        if (FileUtils.fileAtPathExists(newPackageFolderPath)) {
+            // This removes any stale data in newPackageFolderPath that could have been left
+            // uncleared due to a crash or error during the download or install process.
+            FileUtils.deleteDirectoryAtPath(newPackageFolderPath);
+        }
+
         String downloadUrlString = CodePushUtils.tryGetString(updatePackage, DOWNLOAD_URL_KEY);
         URL downloadUrl = null;
         HttpURLConnection connection = null;
