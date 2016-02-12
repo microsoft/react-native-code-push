@@ -211,9 +211,7 @@ NSString * const UnzippedFolderName = @"unzipped";
                                   withIntermediateDirectories:YES
                                                    attributes:nil
                                                         error:&error];
-    }
-    
-    if ([[NSFileManager defaultManager] fileExistsAtPath:newPackageFolderPath]) {
+    } else if ([[NSFileManager defaultManager] fileExistsAtPath:newPackageFolderPath]) {
         // This removes any stale data in newPackageFolderPath that could have been left
         // uncleared due to a crash or error during the download or install process.
         [[NSFileManager defaultManager] removeItemAtPath:newPackageFolderPath
