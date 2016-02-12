@@ -462,6 +462,7 @@ RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
     
     if (error) {
         reject([NSString stringWithFormat: @"%lu", (long)error.code], error.localizedDescription, error);
+        return;
     }
     
     // Add the "isPending" virtual property to the package at this point, so that

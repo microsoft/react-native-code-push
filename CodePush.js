@@ -27,7 +27,7 @@ async function checkForUpdate(deploymentKey = null) {
    */
   const config = deploymentKey ? { ...nativeConfig, ...{ deploymentKey } } : nativeConfig;
   const sdk = getPromisifiedSdk(requestFetchAdapter, config);
-  
+
   // Use dynamically overridden getCurrentPackage() during tests.
   const localPackage = await module.exports.getCurrentPackage();
   
@@ -57,7 +57,7 @@ async function checkForUpdate(deploymentKey = null) {
    *    bug in the server, but we're adding this check just to double-check that the
    *    client app is resilient to a potential issue with the update check.
    */
-  if (!update || update.updateAppVersion || (update.packageHash === localPackage.packageHash)) {
+  if (!update || update.updateAppVersion || localPackage && (update.packageHash === localPackage.packageHash)) {
     if (update && update.updateAppVersion) {
       log("An update is available but it is targeting a newer binary version than you are currently running.");
     }
@@ -87,8 +87,10 @@ const getConfiguration = (() => {
 
 async function getCurrentPackage() {
   const localPackage = await NativeCodePush.getCurrentPackage();
-  localPackage.failedInstall = await NativeCodePush.isFailedUpdate(localPackage.packageHash);
-  localPackage.isFirstRun = await NativeCodePush.isFirstRun(localPackage.packageHash);
+  if (localPackage) {
+      localPackage.failedInstall = await NativeCodePush.isFailedUpdate(localPackage.packageHash);
+      localPackage.isFirstRun = await NativeCodePush.isFirstRun(localPackage.packageHash);
+  }
   return localPackage;
 }
 

@@ -142,7 +142,7 @@ NSString * const UnzippedFolderName = @"unzipped";
     NSString *folderPath = [CodePushPackage getCurrentPackageFolderPath:error];
     if (!*error) {
         if (!folderPath) {
-            return [NSDictionary dictionary];
+            return nil;
         }
         
         NSString *packagePath = [folderPath stringByAppendingPathComponent:@"app.json"];
@@ -159,7 +159,7 @@ NSString * const UnzippedFolderName = @"unzipped";
         }
     }
     
-    return NULL;
+    return nil;
 }
 
 + (NSDictionary *)getPackage:(NSString *)packageHash
@@ -204,13 +204,20 @@ NSString * const UnzippedFolderName = @"unzipped";
            failCallback:(void (^)(NSError *err))failCallback
 {
     NSString *newPackageFolderPath = [self getPackageFolderPath:updatePackage[@"packageHash"]];
-    NSError *error = nil;
+    NSError *error;
     
-    if (![[NSFileManager defaultManager] fileExistsAtPath:newPackageFolderPath]) {
-        [[NSFileManager defaultManager] createDirectoryAtPath:newPackageFolderPath
+    if (![[NSFileManager defaultManager] fileExistsAtPath:[self getCodePushPath]]) {
+        [[NSFileManager defaultManager] createDirectoryAtPath:[self getCodePushPath]
                                   withIntermediateDirectories:YES
                                                    attributes:nil
                                                         error:&error];
+    }
+    
+    if ([[NSFileManager defaultManager] fileExistsAtPath:newPackageFolderPath]) {
+        // This removes any stale data in newPackageFolderPath that could have been left
+        // uncleared due to a crash or error during the download or install process.
+        [[NSFileManager defaultManager] removeItemAtPath:newPackageFolderPath
+                                                   error:&error];
     }
     
     if (error) {
@@ -259,9 +266,9 @@ NSString * const UnzippedFolderName = @"unzipped";
                         return;
                     }
                     
-                    [CodePushPackage copyEntriesInFolder:currentPackageFolderPath
-                                              destFolder:newPackageFolderPath
-                                                   error:&error];
+                    [[NSFileManager defaultManager] copyItemAtPath:currentPackageFolderPath
+                                                            toPath:newPackageFolderPath
+                                                             error:&error];
                     if (error) {
                         failCallback(error);
                         return;
