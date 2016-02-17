@@ -23,6 +23,8 @@ interface DownloadProgress {
 interface LocalPackage extends Package {
     /**
      * Installs the update by saving it to the location on disk where the runtime expects to find the latest version of the app.
+     * 
+     * @param installMode Indicates when you would like the update changes to take affect for the end-user.
      */
     install(installMode: CodePush.InstallMode): ReactNativePromise<void>;
 }
@@ -84,8 +86,10 @@ interface Package {
 interface RemotePackage extends Package {
     /**
      * Downloads the available update from the CodePush service. 
+     * 
+     * @param downloadProgressCallback An optional callback that allows tracking the progress of the update while it is being downloaded.
      */
-    download(downloadProgressCallback?: (progress: DownloadProgress) => void): ReactNativePromise<LocalPackage>;
+    download(downloadProgressCallback?: DowloadProgressCallback): ReactNativePromise<LocalPackage>;
     
     /**
      * The URL at which the package is available for download.
