@@ -44,7 +44,7 @@ We try our best to maintain backwards compatability of our plugin with previous 
 | v0.14.0                 | v1.3.0 *(introduced Android support)*          |
 | v0.15.0-v0.18.0         | v1.4.0-v1.6.0 *(introduced iOS asset support)* |
 | v0.19.0-v0.20.0         | v1.7.0+ *(introduced Android asset support)*   |
-| v0.21.0+                | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support it.
+| v0.21.0+                | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
 
 ## Getting Started
 
@@ -690,7 +690,7 @@ Constructs the CodePush client runtime and includes methods for integrating Code
 
 ## Example Apps
 
-The React Native community has graciously created some awesome open source apps that can serve as examples for developers getting started. The following is a list of OSS React Native apps that are also using CodePush, and can therefore be used to see how others are using the service:
+The React Native community has graciously created some awesome open source apps that can serve as examples for developers that are getting started. The following is a list of OSS React Native apps that are also using CodePush, and can therefore be used to see how others are using the service:
 
 * [Feline for Product Hunt](https://github.com/arjunkomath/Feline-for-Product-Hunt) - An Android client for Product Hunt.
 * [Math Facts](https://github.com/Khan/math-facts) - An app by Khan Academy to help memorize math facts more easily.
