@@ -19,6 +19,7 @@ This plugin provides client-side integration for the [CodePush service](http://c
     * [JavaScript API](#javascript-api-reference)
     * [Objective-C API Reference (iOS)](#objective-c-api-reference-ios)
     * [Java API Reference (Android)](#java-api-reference-android)
+* [Example Apps](#example-apps)
 
 ## How does it work?
 
@@ -42,7 +43,8 @@ We try our best to maintain backwards compatability of our plugin with previous 
 | <0.14.0                 | **Unsupported**                                |
 | v0.14.0                 | v1.3.0 *(introduced Android support)*          |
 | v0.15.0-v0.18.0         | v1.4.0-v1.6.0 *(introduced iOS asset support)* |
-| v0.19.0                 | v1.7.0 *(introduced Android asset support)*    |
+| v0.19.0-v0.20.0         | v1.7.0+ *(introduced Android asset support)*   |
+| v0.21.0+                | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support it.
 
 ## Getting Started
 
@@ -685,3 +687,13 @@ Constructs the CodePush client runtime and includes methods for integrating Code
 - __getBundleUrl(String bundleName)__ - Returns the path to the most recent version of your app's JS bundle file, using the specified resource name (e.g. `index.android.bundle`). This method has the same resolution behavior as the Objective-C equivalent described above.
 
 - __getReactPackage()__ - Returns a `ReactPackage` object that should be added to your `ReactInstanceManager` via its `addPackage` method. Without this, the `react-native-code-push` JS module won't be available to your script.
+
+## Example Apps
+
+The React Native community has graciously created some awesome open source apps that can serve as examples for developers getting started. The following is a list of OSS React Native apps that are also using CodePush, and can therefore be used to see how others are using the service:
+
+* [Feline for Product Hunt](https://github.com/arjunkomath/Feline-for-Product-Hunt) - An Android client for Product Hunt.
+* [Math Facts](https://github.com/Khan/math-facts) - An app by Khan Academy to help memorize math facts more easily.
+* [MoveIt!](https://github.com/multunus/moveit-react-native) - An app by [Multunus](http://www.multunus.com) that allows employees within a company to track their work-outs.
+
+*Note: If you've developed a React Native app using CodePush, that is also open-source, please let us know. We would love to add it to this list!*
