@@ -63,12 +63,12 @@ interface Package {
     
     /**
      * Indicates whether this update is in a "pending" state. When true, that means the update has been downloaded and installed, but the app restart
-     * needed to apply it hasn't occurred yet, and therefore, it's changes aren't currently visible to the end-user. 
+     * needed to apply it hasn't occurred yet, and therefore, its changes aren't currently visible to the end-user. 
      */
     isPending: boolean;
     
     /**
-     * The internal label automatically given to the update by the CodePush server. This value uniquely identifies the update within it's deployment.
+     * The internal label automatically given to the update by the CodePush server. This value uniquely identifies the update within its deployment.
      */
     label: string;
     
