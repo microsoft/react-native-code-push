@@ -1,6 +1,5 @@
 #import "CodePush.h"
 #import "SSZipArchive.h"
-#include <CommonCrypto/CommonDigest.h>
 
 @implementation CodePushPackage
 
