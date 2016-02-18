@@ -154,7 +154,7 @@ NSString * const UnzippedFolderName = @"unzipped";
             NSDictionary* jsonDict = [NSJSONSerialization JSONObjectWithData:data
                                                                      options:kNilOptions
                                                                        error:error];
-            
+
             return jsonDict;
         }
     }
@@ -414,7 +414,7 @@ NSString * const UnzippedFolderName = @"unzipped";
                 doneCallback();
             }
         }
-        
+
         failCallback:failCallback];
     
     [downloadHandler download:updatePackage[@"downloadUrl"]];
@@ -458,7 +458,7 @@ NSString * const UnzippedFolderName = @"unzipped";
     }
     
     [info setValue:packageHash forKey:@"currentPackage"];
-    
+
     [self updateCurrentPackageInfo:info
                              error:error];
 }
