@@ -684,7 +684,7 @@
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/../node_modules/react-native/React/**",
-					"$(SRCROOT)/../../..",
+					"$(SRCROOT)/../../../iOS/**",
 					"$(SRCROOT)/../node_modules/react-native/Libraries/Text/",
 				);
 				INFOPLIST_FILE = ../CodePushDemoAppTests/Info.plist;
@@ -708,7 +708,7 @@
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/../node_modules/react-native/React/**",
-					"$(SRCROOT)/../../..",
+					"$(SRCROOT)/../../../iOS/**",
 					"$(SRCROOT)/../node_modules/react-native/Libraries/Text/",
 				);
 				INFOPLIST_FILE = ../CodePushDemoAppTests/Info.plist;
@@ -727,7 +727,7 @@
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/../node_modules/react-native/React/**",
-					"$(SRCROOT)/../../..",
+					"$(SRCROOT)/../../../iOS/**",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/CodePushDemoApp/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -747,7 +747,7 @@
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/../node_modules/react-native/React/**",
-					"$(SRCROOT)/../../..",
+					"$(SRCROOT)/../../../iOS/**",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/CodePushDemoApp/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

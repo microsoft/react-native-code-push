@@ -104,6 +104,24 @@ failCallback:(void (^)(NSError *err))failCallback;
 
 @end
 
+@interface CodePushUtils : NSObject
+
++ (void)addContentsOfFolderToManifest:(NSString *)folderPath
+                           pathPrefix:(NSString *)pathPrefix
+                             manifest:(NSMutableArray *)manifest
+                                error:(NSError **)error;
++ (NSString *)computeHash:(NSData *)inputData;
++ (void)copyEntriesInFolder:(NSString *)sourceFolder
+                 destFolder:(NSString *)destFolder
+                      error:(NSError **)error;
++ (NSString *)findMainBundleInFolder:(NSString *)folderPath
+                               error:(NSError **)error;
++ (BOOL)verifyHashForZipUpdate:(NSString *)finalUpdateFolder
+                  expectedHash:(NSString *)expectedHash
+                         error:(NSError **)error;
+
+@end
+
 typedef NS_ENUM(NSInteger, CodePushInstallMode) {
     CodePushInstallModeImmediate,
     CodePushInstallModeOnNextRestart,
