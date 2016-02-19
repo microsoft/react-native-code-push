@@ -111,9 +111,9 @@ failCallback:(void (^)(NSError *err))failCallback;
                       error:(NSError **)error;
 + (NSString *)findMainBundleInFolder:(NSString *)folderPath
                                error:(NSError **)error;
-+ (BOOL)verifyHashForZipUpdate:(NSString *)finalUpdateFolder
-                  expectedHash:(NSString *)expectedHash
-                         error:(NSError **)error;
++ (BOOL)verifyHashForDiffUpdate:(NSString *)finalUpdateFolder
+                   expectedHash:(NSString *)expectedHash
+                          error:(NSError **)error;
 
 @end
 

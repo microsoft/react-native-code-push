@@ -127,9 +127,9 @@
     return nil;
 }
 
-+ (BOOL)verifyHashForZipUpdate:(NSString *)finalUpdateFolder
-                  expectedHash:(NSString *)expectedHash
-                         error:(NSError **)error
++ (BOOL)verifyHashForDiffUpdate:(NSString *)finalUpdateFolder
+                   expectedHash:(NSString *)expectedHash
+                          error:(NSError **)error
 {
     NSMutableArray *updateContentsManifest = [NSMutableArray array];
     [self addContentsOfFolderToManifest:finalUpdateFolder

@@ -230,7 +230,8 @@ public class CodePushPackage {
             // Merge contents with current update based on the manifest
             String diffManifestFilePath = CodePushUtils.appendPathComponent(unzippedFolderPath,
                     DIFF_MANIFEST_FILE_NAME);
-            if (FileUtils.fileAtPathExists(diffManifestFilePath)) {
+            boolean isDiffUpdate = FileUtils.fileAtPathExists(diffManifestFilePath);
+            if (isDiffUpdate) {
                 String currentPackageFolderPath = getCurrentPackageFolderPath();
                 CodePushUpdateUtils.copyNecessaryFilesFromCurrentPackage(diffManifestFilePath, currentPackageFolderPath, newUpdateFolderPath);
                 File diffManifestFile = new File(diffManifestFilePath);
@@ -252,7 +253,9 @@ public class CodePushPackage {
                     metadataFileFromOldUpdate.delete();
                 }
 
-                CodePushUpdateUtils.verifyHashForZipUpdate(newUpdateFolderPath, newUpdateHash);
+                if (isDiffUpdate) {
+                    CodePushUpdateUtils.verifyHashForDiffUpdate(newUpdateFolderPath, newUpdateHash);
+                }
 
                 JSONObject updatePackageJSON = CodePushUtils.convertReadableToJsonObject(updatePackage);
                 try {

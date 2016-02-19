@@ -257,8 +257,9 @@ NSString * const UnzippedFolderName = @"unzipped";
                 }
                 
                 NSString *diffManifestFilePath = [unzippedFolderPath stringByAppendingPathComponent:DiffManifestFileName];
+                BOOL isDiffUpdate = [[NSFileManager defaultManager] fileExistsAtPath:diffManifestFilePath];
                 
-                if ([[NSFileManager defaultManager] fileExistsAtPath:diffManifestFilePath]) {
+                if (isDiffUpdate) {
                     // Copy the current package to the new package.
                     NSString *currentPackageFolderPath = [self getCurrentPackageFolderPath:&error];
                     if (error) {
@@ -368,9 +369,9 @@ NSString * const UnzippedFolderName = @"unzipped";
                     }
                 }
                 
-                if (![CodePushUpdateUtils verifyHashForZipUpdate:newUpdateFolderPath
-                                                    expectedHash:newUpdateHash
-                                                           error:&error]) {
+                if (isDiffUpdate && ![CodePushUpdateUtils verifyHashForDiffUpdate:newUpdateFolderPath
+                                                                     expectedHash:newUpdateHash
+                                                                            error:&error]) {
                     if (error) {
                         failCallback(error);
                         return;

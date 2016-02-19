@@ -31,7 +31,6 @@ public class CodePushUpdateUtils {
                 addContentsOfFolderToManifest(fullFilePath, relativePath, manifest);
             } else {
                 try {
-                    // Substring 1 because appendPathComponent creates a "/" prefix to the relativePath.
                     manifest.add(relativePath + ":" + computeHash(new FileInputStream(file)));
                 } catch (FileNotFoundException e) {
                     // Should not happen.
@@ -103,7 +102,7 @@ public class CodePushUpdateUtils {
         return null;
     }
 
-    public static void verifyHashForZipUpdate(String folderPath, String expectedHash) {
+    public static void verifyHashForDiffUpdate(String folderPath, String expectedHash) {
         ArrayList<String> updateContentsManifest = new ArrayList<String>();
         addContentsOfFolderToManifest(folderPath, "", updateContentsManifest);
         Collections.sort(updateContentsManifest);
