@@ -104,6 +104,19 @@ failCallback:(void (^)(NSError *err))failCallback;
 
 @end
 
+@interface CodePushUpdateUtils : NSObject
+
++ (void)copyEntriesInFolder:(NSString *)sourceFolder
+                 destFolder:(NSString *)destFolder
+                      error:(NSError **)error;
++ (NSString *)findMainBundleInFolder:(NSString *)folderPath
+                               error:(NSError **)error;
++ (BOOL)verifyHashForDiffUpdate:(NSString *)finalUpdateFolder
+                   expectedHash:(NSString *)expectedHash
+                          error:(NSError **)error;
+
+@end
+
 typedef NS_ENUM(NSInteger, CodePushInstallMode) {
     CodePushInstallModeImmediate,
     CodePushInstallModeOnNextRestart,
