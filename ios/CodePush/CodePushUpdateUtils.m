@@ -1,7 +1,7 @@
 #import "CodePush.h"
 #include <CommonCrypto/CommonDigest.h>
 
-@implementation CodePushUtils
+@implementation CodePushUpdateUtils
 
 + (void)addContentsOfFolderToManifest:(NSString *)folderPath
                            pathPrefix:(NSString *)pathPrefix

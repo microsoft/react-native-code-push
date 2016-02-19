@@ -104,13 +104,8 @@ failCallback:(void (^)(NSError *err))failCallback;
 
 @end
 
-@interface CodePushUtils : NSObject
+@interface CodePushUpdateUtils : NSObject
 
-+ (void)addContentsOfFolderToManifest:(NSString *)folderPath
-                           pathPrefix:(NSString *)pathPrefix
-                             manifest:(NSMutableArray *)manifest
-                                error:(NSError **)error;
-+ (NSString *)computeHash:(NSData *)inputData;
 + (void)copyEntriesInFolder:(NSString *)sourceFolder
                  destFolder:(NSString *)destFolder
                       error:(NSError **)error;

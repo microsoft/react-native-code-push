@@ -203,15 +203,15 @@ NSString * const UnzippedFolderName = @"unzipped";
            doneCallback:(void (^)())doneCallback
            failCallback:(void (^)(NSError *err))failCallback
 {
-    NSString *newPackageHash = updatePackage[@"packageHash"];
-    NSString *newPackageFolderPath = [self getPackageFolderPath:newPackageHash];
-    NSString *newPackageMetadataPath = [newPackageFolderPath stringByAppendingPathComponent:@"app.json"];
+    NSString *newUpdateHash = updatePackage[@"packageHash"];
+    NSString *newUpdateFolderPath = [self getPackageFolderPath:newUpdateHash];
+    NSString *newUpdateMetadataPath = [newUpdateFolderPath stringByAppendingPathComponent:@"app.json"];
     NSError *error;
     
-    if ([[NSFileManager defaultManager] fileExistsAtPath:newPackageFolderPath]) {
+    if ([[NSFileManager defaultManager] fileExistsAtPath:newUpdateFolderPath]) {
         // This removes any stale data in newPackageFolderPath that could have been left
         // uncleared due to a crash or error during the download or install process.
-        [[NSFileManager defaultManager] removeItemAtPath:newPackageFolderPath
+        [[NSFileManager defaultManager] removeItemAtPath:newUpdateFolderPath
                                                    error:&error];
     } else if (![[NSFileManager defaultManager] fileExistsAtPath:[self getCodePushPath]]) {
         [[NSFileManager defaultManager] createDirectoryAtPath:[self getCodePushPath]
@@ -225,7 +225,7 @@ NSString * const UnzippedFolderName = @"unzipped";
     }
     
     NSString *downloadFilePath = [self getDownloadFilePath];
-    NSString *bundleFilePath = [newPackageFolderPath stringByAppendingPathComponent:UpdateBundleFileName];
+    NSString *bundleFilePath = [newUpdateFolderPath stringByAppendingPathComponent:UpdateBundleFileName];
     
     CodePushDownloadHandler *downloadHandler = [[CodePushDownloadHandler alloc]
         init:downloadFilePath
@@ -267,7 +267,7 @@ NSString * const UnzippedFolderName = @"unzipped";
                     }
                     
                     [[NSFileManager defaultManager] copyItemAtPath:currentPackageFolderPath
-                                                            toPath:newPackageFolderPath
+                                                            toPath:newUpdateFolderPath
                                                              error:&error];
                     if (error) {
                         failCallback(error);
@@ -289,11 +289,14 @@ NSString * const UnzippedFolderName = @"unzipped";
                                                                                    error:&error];
                     NSArray *deletedFiles = manifestJSON[@"deletedFiles"];
                     for (NSString *deletedFileName in deletedFiles) {
-                        [[NSFileManager defaultManager] removeItemAtPath:[newPackageFolderPath stringByAppendingPathComponent:deletedFileName]
-                                                                   error:&error];
-                        if (error) {
-                            failCallback(error);
-                            return;
+                        NSString *absoluteDeletedFilePath = [newUpdateFolderPath stringByAppendingPathComponent:deletedFileName];
+                        if ([[NSFileManager defaultManager] fileExistsAtPath:absoluteDeletedFilePath]) {
+                            [[NSFileManager defaultManager] removeItemAtPath:absoluteDeletedFilePath
+                                                                       error:&error];
+                            if (error) {
+                                failCallback(error);
+                                return;
+                            }
                         }
                     }
                     
@@ -305,8 +308,8 @@ NSString * const UnzippedFolderName = @"unzipped";
                     }
                 }
                 
-                [CodePushUtils copyEntriesInFolder:unzippedFolderPath
-                                        destFolder:newPackageFolderPath
+                [CodePushUpdateUtils copyEntriesInFolder:unzippedFolderPath
+                                        destFolder:newUpdateFolderPath
                                              error:&error];
                 if (error) {
                     failCallback(error);
@@ -320,15 +323,15 @@ NSString * const UnzippedFolderName = @"unzipped";
                     nonFailingError = nil;
                 }
                 
-                NSString *relativeBundlePath = [CodePushUtils findMainBundleInFolder:newPackageFolderPath
-                                                                               error:&error];
+                NSString *relativeBundlePath = [CodePushUpdateUtils findMainBundleInFolder:newUpdateFolderPath
+                                                                                     error:&error];
                 if (error) {
                     failCallback(error);
                     return;
                 }
                 
                 if (relativeBundlePath) {
-                    NSString *absoluteBundlePath = [newPackageFolderPath stringByAppendingPathComponent:relativeBundlePath];
+                    NSString *absoluteBundlePath = [newUpdateFolderPath stringByAppendingPathComponent:relativeBundlePath];
                     NSDictionary *bundleFileAttributes = [[[NSFileManager defaultManager] attributesOfItemAtPath:absoluteBundlePath error:&error] mutableCopy];
                     if (error) {
                         failCallback(error);
@@ -356,8 +359,8 @@ NSString * const UnzippedFolderName = @"unzipped";
                     return;
                 }
                 
-                if ([[NSFileManager defaultManager] fileExistsAtPath:newPackageMetadataPath]) {
-                    [[NSFileManager defaultManager] removeItemAtPath:newPackageMetadataPath
+                if ([[NSFileManager defaultManager] fileExistsAtPath:newUpdateMetadataPath]) {
+                    [[NSFileManager defaultManager] removeItemAtPath:newUpdateMetadataPath
                                                                error:&error];
                     if (error) {
                         failCallback(error);
@@ -365,9 +368,9 @@ NSString * const UnzippedFolderName = @"unzipped";
                     }
                 }
                 
-                if (![CodePushUtils verifyHashForZipUpdate:newPackageFolderPath
-                                              expectedHash:newPackageHash
-                                                     error:&error]) {
+                if (![CodePushUpdateUtils verifyHashForZipUpdate:newUpdateFolderPath
+                                                    expectedHash:newUpdateHash
+                                                           error:&error]) {
                     if (error) {
                         failCallback(error);
                         return;
@@ -383,7 +386,7 @@ NSString * const UnzippedFolderName = @"unzipped";
                     return;
                 }
             } else {
-                [[NSFileManager defaultManager] createDirectoryAtPath:newPackageFolderPath
+                [[NSFileManager defaultManager] createDirectoryAtPath:newUpdateFolderPath
                                           withIntermediateDirectories:YES
                                                            attributes:nil
                                                                 error:&error];
@@ -402,7 +405,7 @@ NSString * const UnzippedFolderName = @"unzipped";
             NSString *packageJsonString = [[NSString alloc] initWithData:updateSerializedData
                                                                 encoding:NSUTF8StringEncoding];
             
-            [packageJsonString writeToFile:newPackageMetadataPath
+            [packageJsonString writeToFile:newUpdateMetadataPath
                                 atomically:YES
                                   encoding:NSUTF8StringEncoding
                                      error:&error];
