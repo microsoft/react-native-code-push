@@ -146,7 +146,7 @@
                                                                            error:error];
     NSString *updateContentsManifestString = [[NSString alloc] initWithData:updateContentsManifestData
                                                                    encoding:NSUTF8StringEncoding];
-    // The JSON serialization turns path seperators into "\/", e.g. "CodePush\/assets\/image.png"
+    // The JSON serialization turns path separators into "\/", e.g. "CodePush\/assets\/image.png"
     updateContentsManifestString = [updateContentsManifestString stringByReplacingOccurrencesOfString:@"\\/"
                                                                                            withString:@"/"];
     NSString *updateContentsManifestHash = [self computeHash:[NSData dataWithBytes:updateContentsManifestString.UTF8String length:updateContentsManifestString.length]];

@@ -296,9 +296,7 @@ NSString * const UnzippedFolderName = @"unzipped";
                             return;
                         }
                     }
-                }
-                
-                if ([[NSFileManager defaultManager] fileExistsAtPath:diffManifestFilePath]) {
+                    
                     [[NSFileManager defaultManager] removeItemAtPath:diffManifestFilePath
                                                                error:&error];
                     if (error) {

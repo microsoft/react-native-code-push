@@ -153,8 +153,9 @@ public class CodePushPackage {
 
     public void downloadPackage(Context applicationContext, ReadableMap updatePackage,
                                 DownloadProgressCallback progressCallback) throws IOException {
-
-        String newPackageFolderPath = getPackageFolderPath(CodePushUtils.tryGetString(updatePackage, PACKAGE_HASH_KEY));
+        String newPackageHash = CodePushUtils.tryGetString(updatePackage, PACKAGE_HASH_KEY);
+        String newPackageFolderPath = getPackageFolderPath(newPackageHash);
+        String newPackageMetadataPath = CodePushUtils.appendPathComponent(newPackageFolderPath, PACKAGE_FILE_NAME);
         if (FileUtils.fileAtPathExists(newPackageFolderPath)) {
             // This removes any stale data in newPackageFolderPath that could have been left
             // uncleared due to a crash or error during the download or install process.
@@ -232,6 +233,8 @@ public class CodePushPackage {
             if (FileUtils.fileAtPathExists(diffManifestFilePath)) {
                 String currentPackageFolderPath = getCurrentPackageFolderPath();
                 CodePushUpdateUtils.copyNecessaryFilesFromCurrentPackage(diffManifestFilePath, currentPackageFolderPath, newPackageFolderPath);
+                File diffManifestFile = new File(diffManifestFilePath);
+                diffManifestFile.delete();
             }
 
             FileUtils.copyDirectoryContents(unzippedFolderPath, newPackageFolderPath);
@@ -242,8 +245,15 @@ public class CodePushPackage {
             String relativeBundlePath = CodePushUpdateUtils.findJSBundleInUpdateContents(newPackageFolderPath);
 
             if (relativeBundlePath == null) {
-                throw new CodePushInvalidUpdateException();
+                throw new CodePushInvalidUpdateException("Update is invalid - no files with extension .bundle, .js or .jsbundle were found in the update package.");
             } else {
+                if (FileUtils.fileAtPathExists(newPackageMetadataPath)) {
+                    File metadataFileFromOldUpdate = new File(newPackageMetadataPath);
+                    metadataFileFromOldUpdate.delete();
+                }
+
+                CodePushUpdateUtils.verifyHashForZipUpdate(newPackageFolderPath, newPackageHash);
+
                 JSONObject updatePackageJSON = CodePushUtils.convertReadableToJsonObject(updatePackage);
                 try {
                     updatePackageJSON.put(RELATIVE_BUNDLE_PATH_KEY, relativeBundlePath);
@@ -261,8 +271,7 @@ public class CodePushPackage {
         }
 
         // Save metadata to the folder.
-        String bundlePath = CodePushUtils.appendPathComponent(newPackageFolderPath, PACKAGE_FILE_NAME);
-        CodePushUtils.writeReadableMapToFile(updatePackage, bundlePath);
+        CodePushUtils.writeReadableMapToFile(updatePackage, newPackageMetadataPath);
     }
 
     public void installPackage(ReadableMap updatePackage, boolean removePendingUpdate) throws IOException {
