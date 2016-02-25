@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.Iterator;
@@ -181,6 +182,25 @@ public class CodePushUtils {
         }
 
         return jsonObj;
+    }
+
+    public static String getStringFromInputStream(InputStream inputStream) throws IOException {
+        BufferedReader bufferedReader = null;
+        try {
+            StringBuilder buffer = new StringBuilder();
+            bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                buffer.append(line);
+                buffer.append("\n");
+            }
+
+            return buffer.toString().trim();
+        } finally {
+            if (bufferedReader != null) bufferedReader.close();
+            if (inputStream != null) inputStream.close();
+        }
     }
 
     public static WritableMap getWritableMapFromFile(String filePath) throws IOException {

@@ -50,6 +50,7 @@ public class CodePush {
 
     private final String ASSETS_BUNDLE_PREFIX = "assets://";
     private final String BINARY_MODIFIED_TIME_KEY = "binaryModifiedTime";
+    private final String CODE_PUSH_HASH_FILE_NAME = "CodePushHash.json";
     private final String CODE_PUSH_PREFERENCES = "CodePush";
     private final String DOWNLOAD_PROGRESS_EVENT_NAME = "CodePushDownloadProgress";
     private final String FAILED_UPDATES_KEY = "CODE_PUSH_FAILED_UPDATES";
@@ -390,6 +391,20 @@ public class CodePush {
             };
 
             asyncTask.execute();
+        }
+
+        @ReactMethod
+        public void getBinaryHash(Promise promise) {
+            try {
+                promise.resolve(CodePushUtils.getStringFromInputStream(mainActivity.getAssets().open(CODE_PUSH_HASH_FILE_NAME)));
+            } catch (IOException e) {
+                if (!isDebugMode) {
+                    // Only print this message in "Release" mode. In "Debug", we may not have the
+                    // hash if the build skips bundling the files.
+                    CodePushUtils.log("Unable to get the hash of the binary's bundled resources - \"codepush.gradle\" may have not been added to the build definition.");
+                }
+                promise.resolve("");
+            }
         }
 
         @ReactMethod

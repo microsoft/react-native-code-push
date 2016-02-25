@@ -2,6 +2,7 @@
 
 @interface CodePush : NSObject <RCTBridgeModule>
 
++ (NSURL *)binaryBundleURL;
 /*
  * This method is used to retrieve the URL for the most recent
  * version of the JavaScript bundle. This could be either the
@@ -68,10 +69,12 @@ failCallback:(void (^)(NSError *err))failCallback;
 
 @interface CodePushPackage : NSObject
 
-+ (void)installPackage:(NSDictionary *)updatePackage
-   removePendingUpdate:(BOOL)removePendingUpdate
-                 error:(NSError **)error;
++ (void)downloadPackage:(NSDictionary *)updatePackage
+       progressCallback:(void (^)(long long, long long))progressCallback
+           doneCallback:(void (^)())doneCallback
+           failCallback:(void (^)(NSError *err))failCallback;
 
++ (NSString *)getBinaryAssetsPath;
 + (NSDictionary *)getCurrentPackage:(NSError **)error;
 + (NSString *)getCurrentPackageFolderPath:(NSError **)error;
 + (NSString *)getCurrentPackageBundlePath:(NSError **)error;
@@ -81,18 +84,17 @@ failCallback:(void (^)(NSError *err))failCallback;
                        error:(NSError **)error;
 
 + (NSString *)getPackageFolderPath:(NSString *)packageHash;
+
++ (void)installPackage:(NSDictionary *)updatePackage
+   removePendingUpdate:(BOOL)removePendingUpdate
+                 error:(NSError **)error;
+
 + (BOOL)isCodePushError:(NSError *)err;
-
-+ (void)downloadPackage:(NSDictionary *)updatePackage
-       progressCallback:(void (^)(long long, long long))progressCallback
-           doneCallback:(void (^)())doneCallback
-           failCallback:(void (^)(NSError *err))failCallback;
-
 + (void)rollbackPackage;
 
 // The below methods are only used during tests.
-+ (void)downloadAndReplaceCurrentBundle:(NSString *)remoteBundleUrl;
 + (void)clearUpdates;
++ (void)downloadAndReplaceCurrentBundle:(NSString *)remoteBundleUrl;
 
 @end
 
@@ -109,8 +111,18 @@ failCallback:(void (^)(NSError *err))failCallback;
 + (void)copyEntriesInFolder:(NSString *)sourceFolder
                  destFolder:(NSString *)destFolder
                       error:(NSError **)error;
+
 + (NSString *)findMainBundleInFolder:(NSString *)folderPath
                                error:(NSError **)error;
+
++ (NSString *)getDefaultAssetsFolderName;
++ (NSString *)getDefaultJsBundleName;
+
++ (NSString *)getHashForBinaryContents:(NSURL *)binaryBundleUrl
+                                 error:(NSError **)error;
+
++ (NSString *)getManifestFolderPrefix;
+
 + (BOOL)verifyHashForDiffUpdate:(NSString *)finalUpdateFolder
                    expectedHash:(NSString *)expectedHash
                           error:(NSError **)error;

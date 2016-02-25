@@ -30,6 +30,7 @@ static NSString *const PendingUpdateIsLoadingKey = @"isLoading";
 
 // These keys are used to inspect/augment the metadata
 // that is associated with an update's package.
+static NSString *const AppVersionKey = @"appVersion";
 static NSString *const BinaryBundleDateKey = @"binaryDate";
 static NSString *const PackageHashKey = @"packageHash";
 static NSString *const PackageIsPendingKey = @"isPending";
@@ -46,6 +47,11 @@ static NSString *bundleResourceExtension = @"jsbundle";
 static NSString *bundleResourceName = @"main";
 
 #pragma mark - Public Obj-C API
+
++ (NSURL *)binaryBundleURL
+{
+    return [[NSBundle mainBundle] URLForResource:bundleResourceName withExtension:bundleResourceExtension];
+}
 
 + (NSURL *)bundleURL
 {
@@ -85,7 +91,7 @@ static NSString *bundleResourceName = @"main";
     }
     
     NSString *packageDate = [currentPackageMetadata objectForKey:BinaryBundleDateKey];
-    NSString *packageAppVersion = [currentPackageMetadata objectForKey:@"appVersion"];
+    NSString *packageAppVersion = [currentPackageMetadata objectForKey:AppVersionKey];
     
     if ([[self modifiedDateStringOfFileAtURL:binaryBundleURL] isEqualToString:packageDate] && ([CodePush isUsingTestConfiguration] ||[binaryAppVersion isEqualToString:packageAppVersion])) {
         // Return package file because it is newer than the app store binary's JS bundle
@@ -149,11 +155,6 @@ static NSString *bundleResourceName = @"main";
 
 @synthesize bridge = _bridge;
 @synthesize methodQueue = _methodQueue;
-
-+ (NSURL *)binaryBundleURL
-{
-    return [[NSBundle mainBundle] URLForResource:bundleResourceName withExtension:bundleResourceExtension];
-}
 
 /*
  * This method is used by the React Native bridge to allow
@@ -458,10 +459,32 @@ RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
                            rejecter:(RCTPromiseRejectBlock)reject)
 {
     NSError *error;
+    if (isRunningBinaryVersion) {
+        // isRunningBinaryVersion will not get set to "YES" if running against the packager.
+        NSString *binaryHash = [CodePushUpdateUtils getHashForBinaryContents:[CodePush binaryBundleURL] error:&error];
+        if (error) {
+            NSLog(@"Error obtaining hash for binary contents: %@", error);
+            resolve(nil);
+            return;
+        } else if (binaryHash == nil) {
+            resolve(nil);
+            return;
+        }
+        
+        resolve(@{
+                  PackageHashKey:binaryHash,
+                  AppVersionKey:[[CodePushConfig current] appVersion]
+                 });
+        return;
+    }
+    
     NSMutableDictionary *package = [[CodePushPackage getCurrentPackage:&error] mutableCopy];
     
     if (error) {
         reject([NSString stringWithFormat: @"%lu", (long)error.code], error.localizedDescription, error);
+        return;
+    } else if (package == nil) {
+        resolve(nil);
         return;
     }
     
