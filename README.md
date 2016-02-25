@@ -151,8 +151,16 @@ In order to integrate CodePush into your Android project, perform the following 
         ...
         compile project(':react-native-code-push')
     }
-    ```
+    ```   
+3. (Only needed in v1.7.4+ of the plugin) In your `android/app/build.gradle` file, add the `codepush.gradle` file as an additional build task definition underneath `react.gradle`:
     
+    ```gradle
+    ...
+    apply from: "react.gradle"
+    apply from: "../../node_modules/react-native-code-push/android/codepush.gradle"
+    ...
+    ```
+
 ### Plugin Configuration (Android - React Native < v0.18.0)
 
 *NOTE: These instructions are specific to apps that are using React Native v0.15.0-v0.17.0. If you are using v0.18.0+, then skip ahead to the next section.*
