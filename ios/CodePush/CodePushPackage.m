@@ -331,23 +331,7 @@ NSString * const UnzippedFolderName = @"unzipped";
                     return;
                 }
                 
-                if (relativeBundlePath) {
-                    NSString *absoluteBundlePath = [newUpdateFolderPath stringByAppendingPathComponent:relativeBundlePath];
-                    NSDictionary *bundleFileAttributes = [[[NSFileManager defaultManager] attributesOfItemAtPath:absoluteBundlePath error:&error] mutableCopy];
-                    if (error) {
-                        failCallback(error);
-                        return;
-                    }
-                    
-                    [bundleFileAttributes setValue:[NSDate date] forKey:NSFileModificationDate];
-                    [[NSFileManager defaultManager] setAttributes:bundleFileAttributes
-                                                     ofItemAtPath:absoluteBundlePath
-                                                            error:&error];
-                    if (error) {
-                        failCallback(error);
-                        return;
-                    }
-                    
+                if (relativeBundlePath) {                    
                     [mutableUpdatePackage setValue:relativeBundlePath forKey:RelativeBundlePathKey];
                 } else {
                     error = [[NSError alloc] initWithDomain:CodePushErrorDomain
