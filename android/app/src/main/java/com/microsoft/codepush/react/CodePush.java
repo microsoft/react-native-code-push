@@ -50,7 +50,6 @@ public class CodePush {
 
     private final String ASSETS_BUNDLE_PREFIX = "assets://";
     private final String BINARY_MODIFIED_TIME_KEY = "binaryModifiedTime";
-    private final String CODE_PUSH_HASH_FILE_NAME = "CodePushHash.json";
     private final String CODE_PUSH_PREFERENCES = "CodePush";
     private final String DOWNLOAD_PROGRESS_EVENT_NAME = "CodePushDownloadProgress";
     private final String FAILED_UPDATES_KEY = "CODE_PUSH_FAILED_UPDATES";
@@ -70,9 +69,9 @@ public class CodePush {
     private CodePushTelemetryManager codePushTelemetryManager;
 
     // Config properties.
-    private String deploymentKey;
     private String appVersion;
     private int buildVersion;
+    private String deploymentKey;
     private final String serverUrl = "https://codepush.azurewebsites.net/";
 
     private Activity mainActivity;
@@ -394,20 +393,6 @@ public class CodePush {
         }
 
         @ReactMethod
-        public void getBinaryHash(Promise promise) {
-            try {
-                promise.resolve(CodePushUtils.getStringFromInputStream(mainActivity.getAssets().open(CODE_PUSH_HASH_FILE_NAME)));
-            } catch (IOException e) {
-                if (!isDebugMode) {
-                    // Only print this message in "Release" mode. In "Debug", we may not have the
-                    // hash if the build skips bundling the files.
-                    CodePushUtils.log("Unable to get the hash of the binary's bundled resources - \"codepush.gradle\" may have not been added to the build definition.");
-                }
-                promise.resolve("");
-            }
-        }
-
-        @ReactMethod
         public void getConfiguration(Promise promise) {
             WritableNativeMap configMap = new WritableNativeMap();
             configMap.putString("appVersion", appVersion);
@@ -417,6 +402,11 @@ public class CodePush {
             configMap.putString("clientUniqueId",
                     Settings.Secure.getString(mainActivity.getContentResolver(),
                             android.provider.Settings.Secure.ANDROID_ID));
+            String binaryHash = CodePushUpdateUtils.getHashForBinaryContents(mainActivity, isDebugMode);
+            if (binaryHash != null) {
+                configMap.putString(PACKAGE_HASH_KEY, binaryHash);
+            }
+
             promise.resolve(configMap);
         }
 

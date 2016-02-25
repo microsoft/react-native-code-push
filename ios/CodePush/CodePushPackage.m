@@ -15,7 +15,7 @@ NSString * const UnzippedFolderName = @"unzipped";
 
 + (NSString *)getBinaryAssetsPath
 {
-    return [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:[CodePushUpdateUtils getDefaultAssetsFolderName]];
+    return [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:[CodePushUpdateUtils getAssetsFolderName]];
 }
 
 + (NSString *)getCodePushPath
@@ -286,7 +286,7 @@ NSString * const UnzippedFolderName = @"unzipped";
                         }
                         
                         [[NSFileManager defaultManager] copyItemAtPath:[self getBinaryAssetsPath]
-                                                                toPath:[newUpdateCodePushPath stringByAppendingPathComponent:[CodePushUpdateUtils getDefaultAssetsFolderName]]
+                                                                toPath:[newUpdateCodePushPath stringByAppendingPathComponent:[CodePushUpdateUtils getAssetsFolderName]]
                                                                  error:&error];
                         if (error) {
                             failCallback(error);

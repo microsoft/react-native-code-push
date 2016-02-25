@@ -3,9 +3,14 @@
 
 @implementation CodePushUpdateUtils
 
-NSString * const ManifestFolderPrefix = @"CodePush";
+NSString * const AssetsFolderName = @"assets";
+NSString * const BinaryHashKey = @"CodePushBinaryHash";
 NSString * const DefaultJsBundleName = @"main.jsbundle";
-NSString * const DefaultAssetsFolderName = @"assets";
+NSString * const ManifestFolderPrefix = @"CodePush";
+
+// These variables are used to cache the hash of the binary contents in memory.
+static NSString *binaryHash = nil;
+static BOOL didLoadBinaryHash = false;
 
 + (void)addContentsOfFolderToManifest:(NSString *)folderPath
                            pathPrefix:(NSString *)pathPrefix
@@ -34,13 +39,32 @@ NSString * const DefaultAssetsFolderName = @"assets";
             }
         } else {
             NSData *fileContents = [NSData dataWithContentsOfFile:fullFilePath];
-            NSString *fileContentsHash = [self computeHash:fileContents];
+            NSString *fileContentsHash = [self computeHashForData:fileContents];
             [manifest addObject:[[relativePath stringByAppendingString:@":"] stringByAppendingString:fileContentsHash]];
         }
     }
 }
 
-+ (NSString *)computeHash:(NSData *)inputData
++ (NSString *)computeFinalHashFromManifest:(NSMutableArray *)manifest
+                                     error:(NSError **)error
+{
+    NSArray *sortedManifest = [manifest sortedArrayUsingSelector:@selector(compare:)];
+    NSData *manifestData = [NSJSONSerialization dataWithJSONObject:sortedManifest
+                                                           options:kNilOptions
+                                                             error:error];
+    if (*error) {
+        return nil;
+    }
+    
+    NSString *manifestString = [[NSString alloc] initWithData:manifestData
+                                                     encoding:NSUTF8StringEncoding];
+    // The JSON serialization turns path separators into "\/", e.g. "CodePush\/assets\/image.png"
+    manifestString = [manifestString stringByReplacingOccurrencesOfString:@"\\/"
+                                                               withString:@"/"];
+    return [self computeHashForData:[NSData dataWithBytes:manifestString.UTF8String length:manifestString.length]];
+}
+
++ (NSString *)computeHashForData:(NSData *)inputData
 {
     uint8_t digest[CC_SHA256_DIGEST_LENGTH];
     CC_SHA256(inputData.bytes, inputData.length, digest);
@@ -131,9 +155,9 @@ NSString * const DefaultAssetsFolderName = @"assets";
     return nil;
 }
 
-+ (NSString *)getDefaultAssetsFolderName
++ (NSString *)getAssetsFolderName
 {
-    return DefaultAssetsFolderName;
+    return AssetsFolderName;
 }
 
 + (NSString *)getDefaultJsBundleName
@@ -144,40 +168,66 @@ NSString * const DefaultAssetsFolderName = @"assets";
 + (NSString *)getHashForBinaryContents:(NSURL *)binaryBundleUrl
                                  error:(NSError **)error
 {
-    NSString *assetsPath = [CodePushPackage getBinaryAssetsPath];
-    NSMutableArray *manifest = [NSMutableArray array];
-    [self addContentsOfFolderToManifest:assetsPath
-                             pathPrefix:[NSString stringWithFormat:@"%@/%@", [self getManifestFolderPrefix], @"assets"]
-                               manifest:manifest
-                                  error:error];
-    if (*error) {
-        return nil;
+    if (!didLoadBinaryHash) {
+        didLoadBinaryHash = true;
+        
+        // Get the cached hash from user preferences if it exists.
+        NSString *binaryModifiedDate = [self modifiedDateStringOfFileAtURL:binaryBundleUrl];
+        NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+        NSMutableDictionary *binaryHashDictionary = [preferences objectForKey:BinaryHashKey];
+        if (binaryHashDictionary != nil) {
+            binaryHash = [binaryHashDictionary objectForKey:binaryModifiedDate];
+            if (binaryHash == nil) {
+                [preferences removeObjectForKey:BinaryHashKey];
+                [preferences synchronize];
+            } else {
+                return binaryHash;
+            }
+        }
+        
+        binaryHashDictionary = [NSMutableDictionary dictionary];
+        
+        NSString *assetsPath = [CodePushPackage getBinaryAssetsPath];
+        NSMutableArray *manifest = [NSMutableArray array];
+        [self addContentsOfFolderToManifest:assetsPath
+                                 pathPrefix:[NSString stringWithFormat:@"%@/%@", [self getManifestFolderPrefix], @"assets"]
+                                   manifest:manifest
+                                      error:error];
+        if (*error) {
+            return nil;
+        }
+        
+        NSData *jsBundleContents = [NSData dataWithContentsOfURL:binaryBundleUrl];
+        NSString *jsBundleContentsHash = [self computeHashForData:jsBundleContents];
+        [manifest addObject:[[NSString stringWithFormat:@"%@/%@", [self getManifestFolderPrefix], [self getDefaultJsBundleName]] stringByAppendingString:jsBundleContentsHash]];
+        binaryHash = [self computeFinalHashFromManifest:manifest error:error];
+        
+        // Cache the hash in user preferences. This assumes that the modified date for the
+        // JS bundle changes every time a new bundle is generated by the packager.
+        [binaryHashDictionary setObject:binaryHash forKey:binaryModifiedDate];
+        [preferences setObject:binaryHashDictionary forKey:BinaryHashKey];
+        [preferences synchronize];
+        return binaryHash;
     }
     
-    NSData *jsBundleContents = [NSData dataWithContentsOfURL:binaryBundleUrl];
-    NSString *jsBundleContentsHash = [self computeHash:jsBundleContents];
-    [manifest addObject:[[NSString stringWithFormat:@"%@/%@", [self getManifestFolderPrefix], [self getDefaultJsBundleName]] stringByAppendingString:jsBundleContentsHash]];
-    
-    NSArray *sortedManifest = [manifest sortedArrayUsingSelector:@selector(compare:)];
-    NSData *manifestData = [NSJSONSerialization dataWithJSONObject:sortedManifest
-                                                           options:kNilOptions
-                                                             error:error];
-    if (*error) {
-        return nil;
-    }
-    
-    NSString *manifestString = [[NSString alloc] initWithData:manifestData
-                                                    encoding:NSUTF8StringEncoding];
-    // The JSON serialization turns path separators into "\/", e.g. "CodePush\/assets\/image.png"
-    manifestString = [manifestString stringByReplacingOccurrencesOfString:@"\\/"
-                                                               withString:@"/"];
-    NSString *manifestHash = [self computeHash:[NSData dataWithBytes:manifestString.UTF8String length:manifestString.length]];
-    return manifestHash;
+    // Use the cached hash in memory.
+    return binaryHash;
 }
 
 + (NSString *)getManifestFolderPrefix
 {
     return ManifestFolderPrefix;
+}
+
++ (NSString *)modifiedDateStringOfFileAtURL:(NSURL *)fileURL
+{
+    if (fileURL != nil) {
+        NSDictionary *fileAttributes = [[NSFileManager defaultManager] attributesOfItemAtPath:[fileURL path] error:nil];
+        NSDate *modifiedDate = [fileAttributes objectForKey:NSFileModificationDate];
+        return [NSString stringWithFormat:@"%f", [modifiedDate timeIntervalSince1970]];
+    } else {
+        return nil;
+    }
 }
 
 + (BOOL)verifyHashForDiffUpdate:(NSString *)finalUpdateFolder
@@ -193,20 +243,12 @@ NSString * const DefaultAssetsFolderName = @"assets";
         return NO;
     }
     
-    NSArray *sortedUpdateContentsManifest = [updateContentsManifest sortedArrayUsingSelector:@selector(compare:)];
-    NSData *updateContentsManifestData = [NSJSONSerialization dataWithJSONObject:sortedUpdateContentsManifest
-                                                                         options:kNilOptions
-                                                                           error:error];
-    if (*error) {
+    NSString *updateContentsManifestHash = [self computeFinalHashFromManifest:updateContentsManifest
+                                                                        error:error];
+    if (*error || updateContentsManifestHash == nil) {
         return NO;
     }
-
-    NSString *updateContentsManifestString = [[NSString alloc] initWithData:updateContentsManifestData
-                                                                   encoding:NSUTF8StringEncoding];
-    // The JSON serialization turns path separators into "\/", e.g. "CodePush\/assets\/image.png"
-    updateContentsManifestString = [updateContentsManifestString stringByReplacingOccurrencesOfString:@"\\/"
-                                                                                           withString:@"/"];
-    NSString *updateContentsManifestHash = [self computeHash:[NSData dataWithBytes:updateContentsManifestString.UTF8String length:updateContentsManifestString.length]];
+    
     return [updateContentsManifestHash isEqualToString:expectedHash];
 }
 

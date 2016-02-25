@@ -40,9 +40,16 @@ async function checkForUpdate(deploymentKey = null) {
    * to send the app version to the server, since we are interested
    * in any updates for current app store version, regardless of hash.
    */
-  const queryPackage = localPackage && localPackage.appVersion && semver.compare(localPackage.appVersion, config.appVersion) === 0 
-                       ? localPackage
-                       : { appVersion: config.appVersion };
+  const queryPackage;
+  if (localPackage && localPackage.appVersion && semver.compare(localPackage.appVersion, config.appVersion) === 0) {
+    queryPackage = localPackage;
+  } else {
+    queryPackage = { appVersion: config.appVersion };
+    if (Platform.OS === "ios" && config.packageHash) {
+      queryPackage.packageHash = config.packageHash;
+    }
+  }
+  
   const update = await sdk.queryUpdateWithCurrentPackage(queryPackage);
   
   /*
@@ -57,26 +64,19 @@ async function checkForUpdate(deploymentKey = null) {
    *    the currently running update. This should _never_ happen, unless there is a
    *    bug in the server, but we're adding this check just to double-check that the
    *    client app is resilient to a potential issue with the update check.
-   * 4) On Android: the server said there is an update, but the update's hash is the
-   *    same as that of the binary's currently running version. We did not attach the 
-   *    binary's hash to the updateCheck request because we want to avoid having to 
-   *    install diff updates against the binary's version, which we can't do yet on
-   *    Android.
+   * 4) The server said there is an update, but the update's hash is the same as that
+   *    of the binary's currently running version. This should only happen in Android -
+   *    unlike iOS, we don't attach the binary's hash to the updateCheck request
+   *    because we want to avoid having to install diff updates against the binary's
+   *    version, which we can't do yet on Android.
    */
-  if (!update || update.updateAppVersion || localPackage && (update.packageHash === localPackage.packageHash)) {
+  if (!update || update.updateAppVersion || localPackage && (update.packageHash === localPackage.packageHash) || config.packageHash === localPackage.packageHash) {
     if (update && update.updateAppVersion) {
       log("An update is available but it is targeting a newer binary version than you are currently running.");
     }
     
     return null;
-  } else {  
-    if (Platform.OS === "android" && !localPackage) {
-      const binaryHash = await NativeCodePush.getBinaryHash();
-      if (update.packageHash === binaryHash) {
-        return null;
-      }
-    } 
-    
+  } else {
     const remotePackage = { ...update, ...PackageMixins.remote(sdk.reportStatusDownload) };
     remotePackage.failedInstall = await NativeCodePush.isFailedUpdate(remotePackage.packageHash);
     remotePackage.deploymentKey = deploymentKey || nativeConfig.deploymentKey;

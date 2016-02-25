@@ -1,5 +1,6 @@
 package com.microsoft.codepush.react;
 
+import android.app.Activity;
 import android.util.Base64;
 
 import com.facebook.react.bridge.ReadableArray;
@@ -20,6 +21,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class CodePushUpdateUtils {
+
+    private static final String CODE_PUSH_HASH_FILE_NAME = "CodePushHash.json";
+
+    // These variables are used to cache the hash of the binary contents in memory.
+    private static String binaryHash = null;
+    private static boolean didLoadBinaryHash = false;
 
     private static void addContentsOfFolderToManifest(String folderPath, String pathPrefix, ArrayList<String> manifest) {
         File folder = new File(folderPath);
@@ -100,6 +107,25 @@ public class CodePushUpdateUtils {
         }
 
         return null;
+    }
+
+    public static String getHashForBinaryContents(Activity mainActivity, boolean isDebugMode) {
+        if (!didLoadBinaryHash) {
+            didLoadBinaryHash = true;
+            try {
+                binaryHash = CodePushUtils.getStringFromInputStream(mainActivity.getAssets().open(CODE_PUSH_HASH_FILE_NAME));
+            } catch (IOException e) {
+                if (!isDebugMode) {
+                    // Only print this message in "Release" mode. In "Debug", we may not have the
+                    // hash if the build skips bundling the files.
+                    CodePushUtils.log("Unable to get the hash of the binary's bundled resources - \"codepush.gradle\" may have not been added to the build definition.");
+                }
+
+                return null;
+            }
+        }
+
+        return binaryHash;
     }
 
     public static void verifyHashForDiffUpdate(String folderPath, String expectedHash) {
