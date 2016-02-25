@@ -70,13 +70,10 @@ async function checkForUpdate(deploymentKey = null) {
     
     return null;
   } else {  
-    if (Platform.OS === "android") {
-      // Diff updates against the binary version not supported on Android
-      if (!localPackage) {
-        const binaryHash = await NativeCodePush.getBinaryHash();
-        if (update.packageHash === binaryHash) {
-          return null;
-        }
+    if (Platform.OS === "android" && !localPackage) {
+      const binaryHash = await NativeCodePush.getBinaryHash();
+      if (update.packageHash === binaryHash) {
+        return null;
       }
     } 
     
