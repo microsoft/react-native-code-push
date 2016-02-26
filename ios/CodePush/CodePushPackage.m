@@ -294,7 +294,7 @@ NSString * const UnzippedFolderName = @"unzipped";
                         }
                         
                         [[NSFileManager defaultManager] copyItemAtPath:[[CodePush binaryBundleURL] path]
-                                                                toPath:[newUpdateCodePushPath stringByAppendingPathComponent:[CodePushUpdateUtils getDefaultJsBundleName]]
+                                                                toPath:[newUpdateCodePushPath stringByAppendingPathComponent:[[CodePush binaryBundleURL] lastPathComponent]]
                                                                  error:&error];
                         if (error) {
                             failCallback(error);

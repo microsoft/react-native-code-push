@@ -5,12 +5,11 @@
 
 NSString * const AssetsFolderName = @"assets";
 NSString * const BinaryHashKey = @"CodePushBinaryHash";
-NSString * const DefaultJsBundleName = @"main.jsbundle";
 NSString * const ManifestFolderPrefix = @"CodePush";
 
 // These variables are used to cache the hash of the binary contents in memory.
 static NSString *binaryHash = nil;
-static BOOL didLoadBinaryHash = false;
+static BOOL didLoadBinaryHash = NO;
 
 + (void)addContentsOfFolderToManifest:(NSString *)folderPath
                            pathPrefix:(NSString *)pathPrefix
@@ -160,16 +159,11 @@ static BOOL didLoadBinaryHash = false;
     return AssetsFolderName;
 }
 
-+ (NSString *)getDefaultJsBundleName
-{
-    return DefaultJsBundleName;
-}
-
 + (NSString *)getHashForBinaryContents:(NSURL *)binaryBundleUrl
                                  error:(NSError **)error
 {
     if (!didLoadBinaryHash) {
-        didLoadBinaryHash = true;
+        didLoadBinaryHash = YES;
         
         // Get the cached hash from user preferences if it exists.
         NSString *binaryModifiedDate = [self modifiedDateStringOfFileAtURL:binaryBundleUrl];
@@ -199,7 +193,7 @@ static BOOL didLoadBinaryHash = false;
         
         NSData *jsBundleContents = [NSData dataWithContentsOfURL:binaryBundleUrl];
         NSString *jsBundleContentsHash = [self computeHashForData:jsBundleContents];
-        [manifest addObject:[[NSString stringWithFormat:@"%@/%@", [self getManifestFolderPrefix], [self getDefaultJsBundleName]] stringByAppendingString:jsBundleContentsHash]];
+        [manifest addObject:[[NSString stringWithFormat:@"%@/%@:", [self getManifestFolderPrefix], [binaryBundleUrl lastPathComponent]] stringByAppendingString:jsBundleContentsHash]];
         binaryHash = [self computeFinalHashFromManifest:manifest error:error];
         
         // Cache the hash in user preferences. This assumes that the modified date for the

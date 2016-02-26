@@ -116,8 +116,6 @@ failCallback:(void (^)(NSError *err))failCallback;
                                error:(NSError **)error;
 
 + (NSString *)getAssetsFolderName;
-+ (NSString *)getDefaultJsBundleName;
-
 + (NSString *)getHashForBinaryContents:(NSURL *)binaryBundleUrl
                                  error:(NSError **)error;
 
