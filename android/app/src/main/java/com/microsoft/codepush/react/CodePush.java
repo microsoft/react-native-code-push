@@ -404,6 +404,8 @@ public class CodePush {
                             android.provider.Settings.Secure.ANDROID_ID));
             String binaryHash = CodePushUpdateUtils.getHashForBinaryContents(mainActivity, isDebugMode);
             if (binaryHash != null) {
+                // binaryHash will be null if the React Native assets were not bundled into the APK
+                // (e.g. in Debug builds)
                 configMap.putString(PACKAGE_HASH_KEY, binaryHash);
             }
 

@@ -70,7 +70,7 @@ async function checkForUpdate(deploymentKey = null) {
    *    because we want to avoid having to install diff updates against the binary's
    *    version, which we can't do yet on Android.
    */
-  if (!update || update.updateAppVersion || localPackage && (update.packageHash === localPackage.packageHash) || localPackage && config.packageHash === localPackage.packageHash) {
+  if (!update || update.updateAppVersion || localPackage && (update.packageHash === localPackage.packageHash) || config.packageHash === update.packageHash) {
     if (update && update.updateAppVersion) {
       log("An update is available but it is targeting a newer binary version than you are currently running.");
     }
