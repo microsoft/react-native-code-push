@@ -27,7 +27,6 @@ async function checkForUpdate(deploymentKey = null) {
    * deployments (e.g. an early access deployment for insiders).
    */
   const config = deploymentKey ? { ...nativeConfig, ...{ deploymentKey } } : nativeConfig;
-  
   const sdk = getPromisifiedSdk(requestFetchAdapter, config);
 
   // Use dynamically overridden getCurrentPackage() during tests.
