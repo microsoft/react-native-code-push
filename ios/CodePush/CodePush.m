@@ -30,6 +30,7 @@ static NSString *const PendingUpdateIsLoadingKey = @"isLoading";
 
 // These keys are used to inspect/augment the metadata
 // that is associated with an update's package.
+static NSString *const AppVersionKey = @"appVersion";
 static NSString *const BinaryBundleDateKey = @"binaryDate";
 static NSString *const PackageHashKey = @"packageHash";
 static NSString *const PackageIsPendingKey = @"isPending";
@@ -46,6 +47,11 @@ static NSString *bundleResourceExtension = @"jsbundle";
 static NSString *bundleResourceName = @"main";
 
 #pragma mark - Public Obj-C API
+
++ (NSURL *)binaryBundleURL
+{
+    return [[NSBundle mainBundle] URLForResource:bundleResourceName withExtension:bundleResourceExtension];
+}
 
 + (NSURL *)bundleURL
 {
@@ -85,9 +91,9 @@ static NSString *bundleResourceName = @"main";
     }
     
     NSString *packageDate = [currentPackageMetadata objectForKey:BinaryBundleDateKey];
-    NSString *packageAppVersion = [currentPackageMetadata objectForKey:@"appVersion"];
+    NSString *packageAppVersion = [currentPackageMetadata objectForKey:AppVersionKey];
     
-    if ([[self modifiedDateStringOfFileAtURL:binaryBundleURL] isEqualToString:packageDate] && ([CodePush isUsingTestConfiguration] ||[binaryAppVersion isEqualToString:packageAppVersion])) {
+    if ([[CodePushUpdateUtils modifiedDateStringOfFileAtURL:binaryBundleURL] isEqualToString:packageDate] && ([CodePush isUsingTestConfiguration] ||[binaryAppVersion isEqualToString:packageAppVersion])) {
         // Return package file because it is newer than the app store binary's JS bundle
         NSURL *packageUrl = [[NSURL alloc] initFileURLWithPath:packageFile];
         NSLog(logMessageFormat, packageUrl);
@@ -149,11 +155,6 @@ static NSString *bundleResourceName = @"main";
 
 @synthesize bridge = _bridge;
 @synthesize methodQueue = _methodQueue;
-
-+ (NSURL *)binaryBundleURL
-{
-    return [[NSBundle mainBundle] URLForResource:bundleResourceName withExtension:bundleResourceExtension];
-}
 
 /*
  * This method is used by the React Native bridge to allow
@@ -288,20 +289,6 @@ static NSString *bundleResourceName = @"main";
 }
 
 /*
- * This returns the modified date as a string for a given file URL.
- */
-+ (NSString *)modifiedDateStringOfFileAtURL:(NSURL *)fileURL
-{
-    if (fileURL != nil) {
-        NSDictionary *fileAttributes = [[NSFileManager defaultManager] attributesOfItemAtPath:[fileURL path] error:nil];
-        NSDate *modifiedDate = [fileAttributes objectForKey:NSFileModificationDate];
-        return [NSString stringWithFormat:@"%f", [modifiedDate timeIntervalSince1970]];
-    } else {
-        return nil;
-    }
-}
-
-/*
  * This method is used when an update has failed installation
  * and the app needs to be rolled back to the previous bundle.
  * This method is automatically called when the rollback timer
@@ -397,7 +384,7 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
     NSDictionary *mutableUpdatePackage = [updatePackage mutableCopy];
     NSURL *binaryBundleURL = [CodePush binaryBundleURL];
     if (binaryBundleURL != nil) {
-        [mutableUpdatePackage setValue:[CodePush modifiedDateStringOfFileAtURL:binaryBundleURL]
+        [mutableUpdatePackage setValue:[CodePushUpdateUtils modifiedDateStringOfFileAtURL:binaryBundleURL]
                                 forKey:BinaryBundleDateKey];
     }
     
@@ -448,7 +435,32 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
 RCT_EXPORT_METHOD(getConfiguration:(RCTPromiseResolveBlock)resolve
                           rejecter:(RCTPromiseRejectBlock)reject)
 {
-    resolve([[CodePushConfig current] configuration]);
+    NSDictionary *configuration = [[CodePushConfig current] configuration];
+    NSError *error;
+    if (isRunningBinaryVersion) {
+        // isRunningBinaryVersion will not get set to "YES" if running against the packager.
+        NSString *binaryHash = [CodePushUpdateUtils getHashForBinaryContents:[CodePush binaryBundleURL] error:&error];
+        if (error) {
+            NSLog(@"Error obtaining hash for binary contents: %@", error);
+            resolve(configuration);
+            return;
+        }
+        
+        if (binaryHash == nil) {
+            // The hash was not generated either due to a previous unknown error or the fact that
+            // the React Native assets were not bundled in the binary (e.g. during dev/simulator)
+            // builds.
+            resolve(configuration);
+            return;
+        }
+        
+        NSMutableDictionary *mutableConfiguration = [configuration mutableCopy];
+        [mutableConfiguration setObject:binaryHash forKey:PackageHashKey];
+        resolve(mutableConfiguration);
+        return;
+    }
+    
+    resolve(configuration);
 }
 
 /*
@@ -462,6 +474,9 @@ RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
     
     if (error) {
         reject([NSString stringWithFormat: @"%lu", (long)error.code], error.localizedDescription, error);
+        return;
+    } else if (package == nil) {
+        resolve(nil);
         return;
     }
     

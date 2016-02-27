@@ -2,6 +2,7 @@ import { AcquisitionManager as Sdk } from "code-push/script/acquisition-sdk";
 import { Alert } from "./AlertAdapter";
 import requestFetchAdapter from "./request-fetch-adapter";
 import semver from "semver";
+import { Platform } from "react-native";
 
 let NativeCodePush = require("react-native").NativeModules.CodePush;
 const PackageMixins = require("./package-mixins")(NativeCodePush);
@@ -39,13 +40,20 @@ async function checkForUpdate(deploymentKey = null) {
    * to send the app version to the server, since we are interested
    * in any updates for current app store version, regardless of hash.
    */
-  const queryPackage = localPackage && localPackage.appVersion && semver.compare(localPackage.appVersion, config.appVersion) === 0 
-                       ? localPackage
-                       : { appVersion: config.appVersion };
+  let queryPackage;
+  if (localPackage && localPackage.appVersion && semver.compare(localPackage.appVersion, config.appVersion) === 0) {
+    queryPackage = localPackage;
+  } else {
+    queryPackage = { appVersion: config.appVersion };
+    if (Platform.OS === "ios" && config.packageHash) {
+      queryPackage.packageHash = config.packageHash;
+    }
+  }
+  
   const update = await sdk.queryUpdateWithCurrentPackage(queryPackage);
   
   /*
-   * There are three cases where checkForUpdate will resolve to null:
+   * There are four cases where checkForUpdate will resolve to null:
    * ----------------------------------------------------------------
    * 1) The server said there isn't an update. This is the most common case.
    * 2) The server said there is an update but it requires a newer binary version.
@@ -56,14 +64,19 @@ async function checkForUpdate(deploymentKey = null) {
    *    the currently running update. This should _never_ happen, unless there is a
    *    bug in the server, but we're adding this check just to double-check that the
    *    client app is resilient to a potential issue with the update check.
+   * 4) The server said there is an update, but the update's hash is the same as that
+   *    of the binary's currently running version. This should only happen in Android -
+   *    unlike iOS, we don't attach the binary's hash to the updateCheck request
+   *    because we want to avoid having to install diff updates against the binary's
+   *    version, which we can't do yet on Android.
    */
-  if (!update || update.updateAppVersion || localPackage && (update.packageHash === localPackage.packageHash)) {
+  if (!update || update.updateAppVersion || localPackage && (update.packageHash === localPackage.packageHash) || !localPackage && config.packageHash === update.packageHash) {
     if (update && update.updateAppVersion) {
       log("An update is available but it is targeting a newer binary version than you are currently running.");
     }
     
     return null;
-  } else {     
+  } else {
     const remotePackage = { ...update, ...PackageMixins.remote(sdk.reportStatusDownload) };
     remotePackage.failedInstall = await NativeCodePush.isFailedUpdate(remotePackage.packageHash);
     remotePackage.deploymentKey = deploymentKey || nativeConfig.deploymentKey;

@@ -69,9 +69,9 @@ public class CodePush {
     private CodePushTelemetryManager codePushTelemetryManager;
 
     // Config properties.
-    private String deploymentKey;
     private String appVersion;
     private int buildVersion;
+    private String deploymentKey;
     private final String serverUrl = "https://codepush.azurewebsites.net/";
 
     private Activity mainActivity;
@@ -402,6 +402,13 @@ public class CodePush {
             configMap.putString("clientUniqueId",
                     Settings.Secure.getString(mainActivity.getContentResolver(),
                             android.provider.Settings.Secure.ANDROID_ID));
+            String binaryHash = CodePushUpdateUtils.getHashForBinaryContents(mainActivity, isDebugMode);
+            if (binaryHash != null) {
+                // binaryHash will be null if the React Native assets were not bundled into the APK
+                // (e.g. in Debug builds)
+                configMap.putString(PACKAGE_HASH_KEY, binaryHash);
+            }
+
             promise.resolve(configMap);
         }
 
