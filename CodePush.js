@@ -373,7 +373,7 @@ let CodePush;
 // If the "NativeCodePush" variable isn't defined, then 
 // the app didn't properly install the native module,
 // and therefore, it doesn't make sense initializing 
-// the the JS interface when it wouldn't work anyways.
+// the JS interface when it wouldn't work anyways.
 if (NativeCodePush) {
     CodePush = {
         AcquisitionSdk: Sdk,
@@ -413,7 +413,7 @@ if (NativeCodePush) {
         }
     }
 } else {
-    log("The CodePush module doesn't appear to be properly installed. Please double-check that everything is setup correctly.");
+    log("The CodePush module doesn't appear to be properly installed Please double-check that everything is setup correctly.");
 }
 
 module.exports = CodePush;
