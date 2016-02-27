@@ -15,7 +15,7 @@ NSString * const UnzippedFolderName = @"unzipped";
 
 + (NSString *)getBinaryAssetsPath
 {
-    return [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:[CodePushUpdateUtils getAssetsFolderName]];
+    return [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:[CodePushUpdateUtils assetsFolderName]];
 }
 
 + (NSString *)getCodePushPath
@@ -275,7 +275,7 @@ NSString * const UnzippedFolderName = @"unzipped";
                     
                     if (currentPackageFolderPath == nil) {
                         // Currently running the binary version, copy files from the bundled resources
-                        NSString *newUpdateCodePushPath = [newUpdateFolderPath stringByAppendingPathComponent:[CodePushUpdateUtils getManifestFolderPrefix]];
+                        NSString *newUpdateCodePushPath = [newUpdateFolderPath stringByAppendingPathComponent:[CodePushUpdateUtils manifestFolderPrefix]];
                         [[NSFileManager defaultManager] createDirectoryAtPath:newUpdateCodePushPath
                                                   withIntermediateDirectories:YES
                                                                    attributes:nil
@@ -286,7 +286,7 @@ NSString * const UnzippedFolderName = @"unzipped";
                         }
                         
                         [[NSFileManager defaultManager] copyItemAtPath:[self getBinaryAssetsPath]
-                                                                toPath:[newUpdateCodePushPath stringByAppendingPathComponent:[CodePushUpdateUtils getAssetsFolderName]]
+                                                                toPath:[newUpdateCodePushPath stringByAppendingPathComponent:[CodePushUpdateUtils assetsFolderName]]
                                                                  error:&error];
                         if (error) {
                             failCallback(error);

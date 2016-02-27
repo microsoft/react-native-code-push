@@ -115,11 +115,11 @@ failCallback:(void (^)(NSError *err))failCallback;
 + (NSString *)findMainBundleInFolder:(NSString *)folderPath
                                error:(NSError **)error;
 
-+ (NSString *)getAssetsFolderName;
++ (NSString *)assetsFolderName;
 + (NSString *)getHashForBinaryContents:(NSURL *)binaryBundleUrl
                                  error:(NSError **)error;
 
-+ (NSString *)getManifestFolderPrefix;
++ (NSString *)manifestFolderPrefix;
 + (NSString *)modifiedDateStringOfFileAtURL:(NSURL *)fileURL;
 
 + (BOOL)verifyHashForDiffUpdate:(NSString *)finalUpdateFolder

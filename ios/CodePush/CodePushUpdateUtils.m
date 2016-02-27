@@ -150,7 +150,7 @@ NSString * const ManifestFolderPrefix = @"CodePush";
     return nil;
 }
 
-+ (NSString *)getAssetsFolderName
++ (NSString *)assetsFolderName
 {
     return AssetsFolderName;
 }
@@ -178,7 +178,7 @@ NSString * const ManifestFolderPrefix = @"CodePush";
     NSString *assetsPath = [CodePushPackage getBinaryAssetsPath];
     NSMutableArray *manifest = [NSMutableArray array];
     [self addContentsOfFolderToManifest:assetsPath
-                             pathPrefix:[NSString stringWithFormat:@"%@/%@", [self getManifestFolderPrefix], @"assets"]
+                             pathPrefix:[NSString stringWithFormat:@"%@/%@", [self manifestFolderPrefix], @"assets"]
                                manifest:manifest
                                   error:error];
     if (*error) {
@@ -187,7 +187,7 @@ NSString * const ManifestFolderPrefix = @"CodePush";
     
     NSData *jsBundleContents = [NSData dataWithContentsOfURL:binaryBundleUrl];
     NSString *jsBundleContentsHash = [self computeHashForData:jsBundleContents];
-    [manifest addObject:[[NSString stringWithFormat:@"%@/%@:", [self getManifestFolderPrefix], [binaryBundleUrl lastPathComponent]] stringByAppendingString:jsBundleContentsHash]];
+    [manifest addObject:[[NSString stringWithFormat:@"%@/%@:", [self manifestFolderPrefix], [binaryBundleUrl lastPathComponent]] stringByAppendingString:jsBundleContentsHash]];
     binaryHash = [self computeFinalHashFromManifest:manifest error:error];
     
     // Cache the hash in user preferences. This assumes that the modified date for the
@@ -198,7 +198,7 @@ NSString * const ManifestFolderPrefix = @"CodePush";
     return binaryHash;
 }
 
-+ (NSString *)getManifestFolderPrefix
++ (NSString *)manifestFolderPrefix
 {
     return ManifestFolderPrefix;
 }
