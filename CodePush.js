@@ -413,7 +413,7 @@ if (NativeCodePush) {
         }
     }
 } else {
-    log("The CodePush module doesn't appear to be properly installed Please double-check that everything is setup correctly.");
+    log("The CodePush module doesn't appear to be properly installed. Please double-check that everything is setup correctly.");
 }
 
 module.exports = CodePush;
