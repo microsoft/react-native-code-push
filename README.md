@@ -65,9 +65,9 @@ Once you've acquired the CodePush plugin, you need to integrate it into the Xcod
 ### Plugin Installation (iOS)
 
 1. Open your app's Xcode project
-2. Find the `CodePush.xcodeproj` file within the `node_modules/react-native-code-push` directory, and drag it into the `Libraries` node in Xcode
+2. Find the `CodePush.xcodeproj` file within the `node_modules/ios/react-native-code-push` directory, and drag it into the `Libraries` node in Xcode
 
-    ![Add CodePush to project](https://cloud.githubusercontent.com/assets/516559/10322414/7688748e-6c32-11e5-83c1-00d3e6758df4.png)
+    ![Add CodePush to project](https://cloud.githubusercontent.com/assets/8598682/13368613/c5c21422-dca0-11e5-8594-c0ec5bde9d81.png)
 
 3. Select the project node in Xcode and select the "Build Phases" tab of your project configuration.
 4. Drag `libCodePush.a` from `Libraries/CodePush.xcodeproj/Products` into the "Link Binary With Libraries" section of your project's "Build Phases" configuration.
