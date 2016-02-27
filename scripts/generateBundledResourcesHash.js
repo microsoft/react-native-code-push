@@ -20,7 +20,6 @@ var getFilesInFolder = require("./getFilesInFolder");
 var CODE_PUSH_FOLDER_PREFIX = "CodePush";
 var CODE_PUSH_HASH_FILE_NAME = "CodePushHash.json";
 var HASH_ALGORITHM = "sha256";
-var JS_BUNDLE_FILE_NAME = "main.jsbundle";
 var TEMP_FILE_PATH = path.join(require("os").tmpdir(), "CodePushResourcesMap.json");
 
 var resourcesDir = process.argv[2];
@@ -61,7 +60,7 @@ if (bundleGeneratedAssetFiles.length) {
                 hashStream.end();
                 var buffer = hashStream.read();
                 var fileHash = buffer.toString("hex");
-                manifest.push(CODE_PUSH_FOLDER_PREFIX + assetFile + ":" + fileHash);
+                manifest.push(CODE_PUSH_FOLDER_PREFIX + assetFile.replace(/\\/g, "/") + ":" + fileHash);
                 
                 if (manifest.length === bundleGeneratedAssetFiles.length) {
                     // Generate hash for JS bundle
@@ -75,7 +74,7 @@ if (bundleGeneratedAssetFiles.length) {
                             hashStream.end();
                             var buffer = hashStream.read();
                             var fileHash = buffer.toString("hex");
-                            manifest.push(CODE_PUSH_FOLDER_PREFIX + "/" + JS_BUNDLE_FILE_NAME + ":" + fileHash); 
+                            manifest.push(CODE_PUSH_FOLDER_PREFIX + "/" + path.basename(jsBundleFilePath) + ":" + fileHash);
                             manifest = manifest.sort();
                             
                             var finalHash = crypto.createHash(HASH_ALGORITHM)

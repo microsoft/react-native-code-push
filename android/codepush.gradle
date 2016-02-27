@@ -21,20 +21,19 @@ gradle.projectsEvaluated {
 
     productFlavors.each { productFlavorName ->
         buildTypes.each { buildTypeName ->
-
-            def sourceName = "${buildTypeName}"
-            def targetName = "${sourceName.capitalize()}"
-            if (productFlavorName) {
-                sourceName = "${productFlavorName}${targetName}"
-            }
+            def targetName = "${productFlavorName.capitalize()}${buildTypeName.capitalize()}"
+            def targetPath = productFlavorName ?
+                    "${productFlavorName}/${buildTypeName}" :
+                    "${buildTypeName}"
 
             def jsBundleDirConfigName = "jsBundleDir${targetName}"
+            def assetsDir = "$buildDir/intermediates/assets/${targetPath}"
             def jsBundleDir = elvisFile(config."$jsBundleDirConfigName") ?:
-                    file("$buildDir/intermediates/assets/${sourceName}")
+                    file(assetsDir)
 
             def resourcesDirConfigName = "jsBundleDir${targetName}"
             def resourcesDir = elvisFile(config."${resourcesDirConfigName}") ?:
-                    file("$buildDir/intermediates/res/merged/${sourceName}")
+                    file("$buildDir/intermediates/res/merged/${targetPath}")
             def jsBundleFile = file("$jsBundleDir/$bundleAssetName")
 
             // Make this task run right before the bundle task
@@ -52,7 +51,7 @@ gradle.projectsEvaluated {
             def generateBundledResourcesHash = tasks.create(
                     name: "generateBundledResourcesHash${targetName}",
                     type: Exec) {
-                commandLine "node", "../../node_modules/react-native-code-push/scripts/generateBundledResourcesHash.js", resourcesDir, "$jsBundleDir/$bundleAssetName", "$buildDir/intermediates/assets/${sourceName}"
+                commandLine "node", "../../node_modules/react-native-code-push/scripts/generateBundledResourcesHash.js", resourcesDir, "$jsBundleDir/$bundleAssetName", assetsDir
             }
 
             generateBundledResourcesHash.dependsOn("bundle${targetName}JsAndAssets")
