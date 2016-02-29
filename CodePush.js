@@ -70,7 +70,12 @@ async function checkForUpdate(deploymentKey = null) {
    *    because we want to avoid having to install diff updates against the binary's
    *    version, which we can't do yet on Android.
    */
-  if (!update || update.updateAppVersion || localPackage && (update.packageHash === localPackage.packageHash) || !localPackage && config.packageHash === update.packageHash) {
+  if (
+    !update || 
+    update.updateAppVersion || 
+    localPackage && (update.packageHash === localPackage.packageHash) || 
+    (!localPackage || localPackage.isRunningBinaryVersion) && config.packageHash === update.packageHash
+  ) {
     if (update && update.updateAppVersion) {
       log("An update is available but it is targeting a newer binary version than you are currently running.");
     }
@@ -368,52 +373,42 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
   } 
 };
 
-let CodePush;
-
-// If the "NativeCodePush" variable isn't defined, then 
-// the app didn't properly install the native module,
-// and therefore, it doesn't make sense initializing 
-// the JS interface when it wouldn't work anyways.
-if (NativeCodePush) {
-    CodePush = {
-        AcquisitionSdk: Sdk,
-        checkForUpdate,
-        getConfiguration,
-        getCurrentPackage,
-        log,
-        notifyApplicationReady,
-        restartApp,
-        setUpTestDependencies,
-        sync,
-        InstallMode: {
-            IMMEDIATE: NativeCodePush.codePushInstallModeImmediate, // Restart the app immediately
-            ON_NEXT_RESTART: NativeCodePush.codePushInstallModeOnNextRestart, // Don't artificially restart the app. Allow the update to be "picked up" on the next app restart
-            ON_NEXT_RESUME: NativeCodePush.codePushInstallModeOnNextResume // Restart the app the next time it is resumed from the background
-        },
-        SyncStatus: {
-            CHECKING_FOR_UPDATE: 0,
-            AWAITING_USER_ACTION: 1,
-            DOWNLOADING_PACKAGE: 2,
-            INSTALLING_UPDATE: 3,
-            UP_TO_DATE: 4, // The running app is up-to-date
-            UPDATE_IGNORED: 5, // The app had an optional update and the end-user chose to ignore it
-            UPDATE_INSTALLED: 6, // The app had an optional/mandatory update that was successfully downloaded and is about to be installed.
-            SYNC_IN_PROGRESS: 7, // There is an ongoing "sync" operation in progress.
-            UNKNOWN_ERROR: -1
-        },
-        DEFAULT_UPDATE_DIALOG: {
-            appendReleaseDescription: false,
-            descriptionPrefix: " Description: ",
-            mandatoryContinueButtonLabel: "Continue",
-            mandatoryUpdateMessage: "An update is available that must be installed.",
-            optionalIgnoreButtonLabel: "Ignore",
-            optionalInstallButtonLabel: "Install",
-            optionalUpdateMessage: "An update is available. Would you like to install it?",
-            title: "Update available"
-        }
-    }
-} else {
-    log("The CodePush module doesn't appear to be properly installed. Please double-check that everything is setup correctly.");
-}
+const CodePush = {
+  AcquisitionSdk: Sdk,
+  checkForUpdate,
+  getConfiguration,
+  getCurrentPackage,
+  log,
+  notifyApplicationReady,
+  restartApp,
+  setUpTestDependencies,
+  sync,
+  InstallMode: {
+    IMMEDIATE: NativeCodePush.codePushInstallModeImmediate, // Restart the app immediately
+    ON_NEXT_RESTART: NativeCodePush.codePushInstallModeOnNextRestart, // Don't artificially restart the app. Allow the update to be "picked up" on the next app restart
+    ON_NEXT_RESUME: NativeCodePush.codePushInstallModeOnNextResume // Restart the app the next time it is resumed from the background
+  },
+  SyncStatus: {
+    CHECKING_FOR_UPDATE: 0,
+    AWAITING_USER_ACTION: 1,
+    DOWNLOADING_PACKAGE: 2,
+    INSTALLING_UPDATE: 3,
+    UP_TO_DATE: 4, // The running app is up-to-date
+    UPDATE_IGNORED: 5, // The app had an optional update and the end-user chose to ignore it
+    UPDATE_INSTALLED: 6, // The app had an optional/mandatory update that was successfully downloaded and is about to be installed.
+    SYNC_IN_PROGRESS: 7, // There is an ongoing "sync" operation in progress.
+    UNKNOWN_ERROR: -1
+  },
+  DEFAULT_UPDATE_DIALOG: {
+    appendReleaseDescription: false,
+    descriptionPrefix: " Description: ",
+    mandatoryContinueButtonLabel: "Continue",
+    mandatoryUpdateMessage: "An update is available that must be installed.",
+    optionalIgnoreButtonLabel: "Ignore",
+    optionalInstallButtonLabel: "Install",
+    optionalUpdateMessage: "An update is available. Would you like to install it?",
+    title: "Update available"
+  }
+};
 
 module.exports = CodePush;

@@ -423,6 +423,10 @@ public class CodePush {
                         return null;
                     }
 
+                    if (isRunningBinaryVersion) {
+                        currentPackage.putBoolean("isRunningBinaryVersion", isRunningBinaryVersion);
+                    }
+
                     Boolean isPendingUpdate = false;
 
                     if (currentPackage.hasKey(codePushPackage.PACKAGE_HASH_KEY)) {
