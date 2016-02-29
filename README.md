@@ -65,7 +65,7 @@ Once you've acquired the CodePush plugin, you need to integrate it into the Xcod
 ### Plugin Installation (iOS)
 
 1. Open your app's Xcode project
-2. Find the `CodePush.xcodeproj` file within the `node_modules/react-native-code-push/ios` directory, and drag it into the `Libraries` node in Xcode
+2. Find the `CodePush.xcodeproj` file within the `node_modules/react-native-code-push/ios` directory (for <=1.7.3-beta installations, it's located in `node_modules/react-native-code-push`) and drag it into the `Libraries` node in Xcode
 
     ![Add CodePush to project](https://cloud.githubusercontent.com/assets/8598682/13368613/c5c21422-dca0-11e5-8594-c0ec5bde9d81.png)
 
@@ -81,7 +81,7 @@ Once you've acquired the CodePush plugin, you need to integrate it into the Xcod
     *Note: Alternatively, if you prefer, you can add the `-lz` flag to the `Other Linker Flags` field in the `Linking` section of the `Build Settings`.*
     
 6. Under the "Build Settings" tab of your project configuration, find the "Header Search Paths" section and edit the value.
-Add a new value, `$(SRCROOT)/../node_modules/react-native-code-push/ios` and select "recursive" in the dropdown.
+Add a new value, `$(SRCROOT)/../node_modules/react-native-code-push` and select "recursive" in the dropdown.
 
     ![Add CodePush library reference](https://cloud.githubusercontent.com/assets/516559/10322038/b8157962-6c30-11e5-9264-494d65fd2626.png)
 
