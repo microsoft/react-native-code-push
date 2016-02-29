@@ -484,7 +484,7 @@ RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
         // This only matters in Debug builds. Since we do not clear "outdated" updates,
         // we need to indicate to the JS side that somehow we have a current update on
         // disk that is not actually running.
-        [package setObject:@(isRunningBinaryVersion) forKey:@"_isDebugOnly"];
+        [package setObject:@(YES) forKey:@"_isDebugOnly"];
     }
     
     // Add the "isPending" virtual property to the package at this point, so that
