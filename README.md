@@ -38,7 +38,7 @@ In order to ensure that your end users always have a functioning version of your
 
 We try our best to maintain backwards compatability of our plugin with previous versions of React Native, but due to the nature of the platform, and the existence of breaking changes between releases, it is possible that you need to use a specific version of the CodePush plugin in order to support the exact version of React Native you are using. The following table outlines which CodePush plugin versions officially support the respective React Native versions:
 
-| React Native version(s) | Supporting CodePush version                    |
+| React Native version(s) | Supporting CodePush version(s)                 |
 |-------------------------|------------------------------------------------|
 | <0.14.0                 | **Unsupported**                                |
 | v0.14.0                 | v1.3.0 *(introduced Android support)*          |
@@ -65,7 +65,7 @@ Once you've acquired the CodePush plugin, you need to integrate it into the Xcod
 ### Plugin Installation (iOS)
 
 1. Open your app's Xcode project
-2. Find the `CodePush.xcodeproj` file within the `node_modules/react-native-code-push/ios` directory (for <=1.7.3-beta installations, it's located in `node_modules/react-native-code-push`) and drag it into the `Libraries` node in Xcode
+2. Find the `CodePush.xcodeproj` file within the `node_modules/react-native-code-push/ios` directory (or `node_modules/react-native-code-push` for <=`1.7.3-beta` installations) and drag it into the `Libraries` node in Xcode
 
     ![Add CodePush to project](https://cloud.githubusercontent.com/assets/8598682/13368613/c5c21422-dca0-11e5-8594-c0ec5bde9d81.png)
 
