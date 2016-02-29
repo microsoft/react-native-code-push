@@ -424,7 +424,7 @@ public class CodePush {
                     }
 
                     if (isRunningBinaryVersion) {
-                        currentPackage.putBoolean("isRunningBinaryVersion", isRunningBinaryVersion);
+                        currentPackage.putBoolean("_isDebugOnly", isRunningBinaryVersion);
                     }
 
                     Boolean isPendingUpdate = false;
