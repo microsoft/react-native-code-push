@@ -4,6 +4,7 @@ This plugin provides client-side integration for the [CodePush service](http://c
 
 * [How does it work?](#how-does-it-work)
 * [Supported React Native Platforms](#supported-react-native-platforms)
+* [Supported Components](#supported-components)
 * [Getting Started](#getting-started)
 * [iOS Setup](#ios-setup)
     * [Plugin Installation](#plugin-installation-ios)
@@ -46,6 +47,24 @@ We try our best to maintain backwards compatability of our plugin with previous 
 | v0.19.0-v0.21.0         | v1.7.0+ *(introduced Android asset support)*   |
 | v0.22.0+                | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
 
+## Supported Components
+
+The following list represents the set of components (and props) that currently support their assets being updated via CodePush:
+
+| Component                                       | Prop(s)                                  | 
+|-------------------------------------------------|------------------------------------------|
+| `Image`                                         | `src`                                    |
+| `ProgressViewIOS`                               | `progressImage`, `trackImage`            |
+| `TabBarIOS.Item`                                | `icon`, `selectedIcon`                   |
+| `ToolbarAndroid` <br />*(React Native 0.21.0+)* | `actions[].icon`, `logo`, `overflowIcon` |
+
+The following list represents the set of components (and props) that don't currently support their assets being updated via CodePush:
+
+| Component   | Prop(s)                                                              |
+|-------------|----------------------------------------------------------------------|
+| `SliderIOS` | `maximumTrackImage`, `minimumTrackImage`, `thumbImage`, `trackImage` |
+
+As new core compoents are released, which suport referencing assets, we'll update this list to ensure users know what exactly they can update using CodePush.
 ## Getting Started
 
 Once you've followed the general-purpose ["getting started"](http://codepush.tools/docs/getting-started.html) instructions for setting up your CodePush account, you can start CodePush-ifying your React Native app by running the following command from within your app's root directory:
