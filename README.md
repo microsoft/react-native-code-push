@@ -49,11 +49,11 @@ We try our best to maintain backwards compatability of our plugin with previous 
 
 ## Supported Components
 
-The following list represents the set of components (and props) that currently support their assets being updated via CodePush:
+When using the React Native assets sytem (e.g. using the `require("./foo.png")` syntax), the following list represents the set of components (and props) that support having their referenced images updated via CodePush:
 
 | Component                                       | Prop(s)                                  | 
 |-------------------------------------------------|------------------------------------------|
-| `Image`                                         | `src`                                    |
+| `Image`                                         | `source`                                    |
 | `ProgressViewIOS`                               | `progressImage`, `trackImage`            |
 | `TabBarIOS.Item`                                | `icon`, `selectedIcon`                   |
 | `ToolbarAndroid` <br />*(React Native 0.21.0+)* | `actions[].icon`, `logo`, `overflowIcon` |
