@@ -49,7 +49,7 @@ We try our best to maintain backwards compatability of our plugin with previous 
 
 ## Supported Components
 
-When using the React Native assets sytem (e.g. using the `require("./foo.png")` syntax), the following list represents the set of components (and props) that support having their referenced images updated via CodePush:
+When using the React Native assets sytem (i.e. using the `require("./foo.png")` syntax), the following list represents the set of components (and props) that support having their referenced images updated via CodePush:
 
 | Component                                       | Prop(s)                                  | 
 |-------------------------------------------------|------------------------------------------|
@@ -58,7 +58,7 @@ When using the React Native assets sytem (e.g. using the `require("./foo.png")` 
 | `TabBarIOS.Item`                                | `icon`, `selectedIcon`                   |
 | `ToolbarAndroid` <br />*(React Native 0.21.0+)* | `actions[].icon`, `logo`, `overflowIcon` |
 
-The following list represents the set of components (and props) that don't currently support their assets being updated via CodePush due to their dependency on static images:
+The following list represents the set of components (and props) that don't currently support their assets being updated via CodePush, due to their dependency on static images (i.e. using the `{ uri: "foo"}` syntax):
 
 | Component   | Prop(s)                                                              |
 |-------------|----------------------------------------------------------------------|
