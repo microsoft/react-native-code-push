@@ -64,7 +64,7 @@ The following list represents the set of components (and props) that don't curre
 |-------------|----------------------------------------------------------------------|
 | `SliderIOS` | `maximumTrackImage`, `minimumTrackImage`, `thumbImage`, `trackImage` |
 
-As new core compoents are released, which suport referencing assets, we'll update this list to ensure users know what exactly they can update using CodePush.
+As new core components are released, which support referencing assets, we'll update this list to ensure users know what exactly they can expect to update using CodePush.
 
 ## Getting Started
 
