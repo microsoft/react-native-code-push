@@ -1,7 +1,6 @@
 package com.microsoft.codepush.react;
 
 import android.app.Activity;
-import android.util.Base64;
 
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.WritableMap;
@@ -64,7 +63,7 @@ public class CodePushUpdateUtils {
         }
 
         byte[] hash = messageDigest.digest();
-        return Base64.encodeToString(hash, 0, hash.length, 0);
+        return String.format("%064x", new java.math.BigInteger(1, hash));
     }
 
     public static void copyNecessaryFilesFromCurrentPackage(String diffManifestFilePath, String currentPackageFolderPath, String newPackageFolderPath) throws IOException{
