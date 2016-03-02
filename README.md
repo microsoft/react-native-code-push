@@ -4,6 +4,7 @@ This plugin provides client-side integration for the [CodePush service](http://c
 
 * [How does it work?](#how-does-it-work)
 * [Supported React Native Platforms](#supported-react-native-platforms)
+* [Supported Components](#supported-components)
 * [Getting Started](#getting-started)
 * [iOS Setup](#ios-setup)
     * [Plugin Installation](#plugin-installation-ios)
@@ -45,6 +46,25 @@ We try our best to maintain backwards compatability of our plugin with previous 
 | v0.15.0-v0.18.0         | v1.4.0-v1.6.0 *(introduced iOS asset support)* |
 | v0.19.0-v0.21.0         | v1.7.0+ *(introduced Android asset support)*   |
 | v0.22.0+                | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
+
+## Supported Components
+
+When using the React Native assets sytem (i.e. using the `require("./foo.png")` syntax), the following list represents the set of components (and props) that support having their referenced images updated via CodePush:
+
+| Component                                       | Prop(s)                                  | 
+|-------------------------------------------------|------------------------------------------|
+| `Image`                                         | `source`                                    |
+| `ProgressViewIOS`                               | `progressImage`, `trackImage`            |
+| `TabBarIOS.Item`                                | `icon`, `selectedIcon`                   |
+| `ToolbarAndroid` <br />*(React Native 0.21.0+)* | `actions[].icon`, `logo`, `overflowIcon` |
+
+The following list represents the set of components (and props) that don't currently support their assets being updated via CodePush, due to their dependency on static images (i.e. using the `{ uri: "foo"}` syntax):
+
+| Component   | Prop(s)                                                              |
+|-------------|----------------------------------------------------------------------|
+| `SliderIOS` | `maximumTrackImage`, `minimumTrackImage`, `thumbImage`, `trackImage` |
+
+As new core components are released, which support referencing assets, we'll update this list to ensure users know what exactly they can expect to update using CodePush.
 
 ## Getting Started
 
