@@ -58,13 +58,14 @@ The following list represents the set of components (and props) that currently s
 | `TabBarIOS.Item`                                | `icon`, `selectedIcon`                   |
 | `ToolbarAndroid` <br />*(React Native 0.21.0+)* | `actions[].icon`, `logo`, `overflowIcon` |
 
-The following list represents the set of components (and props) that don't currently support their assets being updated via CodePush:
+The following list represents the set of components (and props) that don't currently support their assets being updated via CodePush due to their dependency on static images:
 
 | Component   | Prop(s)                                                              |
 |-------------|----------------------------------------------------------------------|
 | `SliderIOS` | `maximumTrackImage`, `minimumTrackImage`, `thumbImage`, `trackImage` |
 
 As new core compoents are released, which suport referencing assets, we'll update this list to ensure users know what exactly they can update using CodePush.
+
 ## Getting Started
 
 Once you've followed the general-purpose ["getting started"](http://codepush.tools/docs/getting-started.html) instructions for setting up your CodePush account, you can start CodePush-ifying your React Native app by running the following command from within your app's root directory:
