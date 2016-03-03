@@ -8,6 +8,9 @@ This plugin provides client-side integration for the [CodePush service](http://c
 * [Getting Started](#getting-started)
 * [iOS Setup](#ios-setup)
     * [Plugin Installation](#plugin-installation-ios)
+        * [RNPM](#plugin-installation-ios---rnpm)
+        * [CocoaPods](#plugin-installation-ios---cocoapods)
+        * ["Manual"](#plugin-installation-ios---manual)
     * [Plugin Configuration](#plugin-configuration-ios)
 * [Android Setup](#android-setup)
     * [Plugin Installation](#plugin-installation-android)
@@ -80,16 +83,54 @@ If you want to see how other projects have integrated with CodePush, you can che
 
 ## iOS Setup
 
-Once you've acquired the CodePush plugin, you need to integrate it into the Xcode project of your React Native app. To do this, take the following steps:
+Once you've acquired the CodePush plugin, you need to integrate it into the Xcode project of your React Native app and configure it correctly. To do this, take the following steps:
 
 ### Plugin Installation (iOS)
 
+In order to accomodate as many developer preferences as possible, the CodePush plugin supports iOS installation via three mechanisms:
+
+1. [**RNPM**](#plugin-installation-ios---rnpm) - [React Native Package Manager (RNPM)](https://github.com/rnpm/rnpm) is an awesome tool that provides the simplest installation experience possible for React Native plugins. If you're already using it, or you want to use it, then we recommend this approach. 
+
+2. [**CocoaPods**](#plugin-installation-ios---cocoapods) - If you're building a native iOS app that is embedding React Native into it, or you simply prefer using [CocoaPods](https://cocoapods.org), then we recommend using the Podspec file that we ship as part of our plugin.
+
+3. [**"Manual"**](#plugin-installation-ios---manual) - If you don't want to depend on any additional tools or are fine with a few extra installation steps (it's a one-time thing), then go with this approach.
+
+#### Plugin Installation (iOS - RNPM)
+
+1. Run `rnpm link react-native-code-push`
+
+2. Open your app's Xcode project
+
+3. Select the project node in Xcode and select the "Build Phases" tab of your project configuration.
+
+4. Click the plus sign underneath the "Link Binary With Libraries" list and select the `libz.tbd` library underneath the `iOS` node that matches your target version. 
+
+    ![Libz reference](https://cloud.githubusercontent.com/assets/116461/11605042/6f786e64-9aaa-11e5-8ca7-14b852f808b1.png)
+    
+    *Note: Alternatively, if you prefer, you can add the `-lz` flag to the `Other Linker Flags` field in the `Linking` section of the `Build Settings`.*
+
+We hope to eventually remove the need for steps #2-4, but in the meantime, RNPM doesn't support automating them.
+
+#### Plugin Installation (iOS - CocoaPods)
+
+1. Add the CodePush plugin dependency to your `Podfile`, pointing at the path where NPM installed it
+
+    ```ruby
+    pod 'CodePush', :path => './node_modules/react-native-code-push`
+    ```
+    
+2. Run `pod install`
+
+#### Plugin Installation (iOS - Manual)
+
 1. Open your app's Xcode project
+
 2. Find the `CodePush.xcodeproj` file within the `node_modules/react-native-code-push/ios` directory (or `node_modules/react-native-code-push` for <=`1.7.3-beta` installations) and drag it into the `Libraries` node in Xcode
 
     ![Add CodePush to project](https://cloud.githubusercontent.com/assets/8598682/13368613/c5c21422-dca0-11e5-8594-c0ec5bde9d81.png)
 
 3. Select the project node in Xcode and select the "Build Phases" tab of your project configuration.
+
 4. Drag `libCodePush.a` from `Libraries/CodePush.xcodeproj/Products` into the "Link Binary With Libraries" section of your project's "Build Phases" configuration.
 
     ![Link CodePush during build](https://cloud.githubusercontent.com/assets/516559/10322221/a75ea066-6c31-11e5-9d88-ff6f6a4d6968.png)
