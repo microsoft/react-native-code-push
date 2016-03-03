@@ -345,7 +345,7 @@ And that's it! for more information regarding the CLI and how the release (or pr
 
 If you are using the new React Native [assets system](https://facebook.github.io/react-native/docs/images.html#content), as opposed to loading your images from the network and/or platform-specific mechanisms (e.g. iOS asset catalogs), then you can't simply pass your jsbundle to CodePush as demonstrated above. You **MUST** provide your images as well. You can do this via one of the following workflows:
 
-### Using the `release-react` command
+### Using the release-react command
 
 The `release-react` command is a utility that automates the process of generating the update contents (JS bundle, image assets) for your project via the `react-native` bundle command and uploading a release to CodePush via the `code-push release` command with those contents. It automatically infers parameters such as the `<targetBinaryRange>` from the project's config files (`Info.plist` for updates targeting iOS or `build.gradle` for updates targeting Android). 
 
