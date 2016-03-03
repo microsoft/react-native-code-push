@@ -381,7 +381,7 @@ For scenarios where you require more control over where and how your update cont
 
     *NOTE: The file name that you specify as the value for the `--bundle-output` parameter must have one of the following extensions in order to be detected by the plugin: `.js`, `.jsbundle`, `.bundle` (e.g. `main.jsbundle`, `ios.js`). The name of the file isn't relevant, but the extension is used for detectining the bundle within the update contents, and therefore, using any other extension will result in the update failing.*
     
-3. Execute `code-push release`, passing the path to the directory you created in #1 as the ["updateContents"](http://codepush.tools/docs/cli.html#package-parameter) parameter, and the [**exact binary version**](http://codepush.tools/docs/cli.html#app-store-version-parameter) that this update is targetting as the ["targetBinaryVersion"](http://codepush.tools/docs/cli.html#app-store-version-parameter) parameter (e.g. `code-push release Foo ./release 1.0.0`). The code-push CLI will automatically handle zipping up the contents for you, so don't worry about handling that yourself.
+3. Execute `code-push release`, passing the path to the directory you created in #1 as the ["updateContents"](http://codepush.tools/docs/cli.html#package-parameter) parameter, and a [**targetBinaryRange**](http://codepush.tools/docs/cli.html#target-binary-range-parameter) that satisfies the app store version that this update targets (e.g. `code-push release Foo ./release 1.0.0`). The code-push CLI will automatically handle zipping up the contents for you, so don't worry about handling that yourself.
 
     For more info regarding the `release` command and its parameters, refer to the [CLI documentation](http://codepush.tools/docs/cli.html#releasing-app-updates).
 
