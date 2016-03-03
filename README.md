@@ -347,9 +347,9 @@ If you are using the new React Native [assets system](https://facebook.github.io
 
 ### Using the release-react command
 
-The `release-react` command is a utility that automates the process of generating the update contents (JS bundle, image assets) for your project via the `react-native` bundle command and uploading a release to CodePush via the `code-push release` command with those contents. It automatically infers parameters such as the `<targetBinaryRange>` from the project's config files (`Info.plist` for updates targeting iOS or `build.gradle` for updates targeting Android). 
+The `release-react` command is a single-step utility that automates the process of generating the update contents (JS bundle, image assets) for your project via the `react-native` bundle command and uploading a release to CodePush via the `code-push release` command with those contents. It automatically infers parameters such as the `<targetBinaryRange>` from the project's config files (`Info.plist` for updates targeting iOS or `build.gradle` for updates targeting Android). 
 
-To use it, execute the `release-react` command specifying your app name and [target platform](http://codepush.tools/docs/cli.html#platform-parameter) ("ios" or "android"), e.g. 
+To use it, simply execute the `release-react` command specifying your app name and [target platform](http://codepush.tools/docs/cli.html#platform-parameter) ("ios" or "android"), e.g. 
 ```
 code-push release-react Foo ios
 ```
