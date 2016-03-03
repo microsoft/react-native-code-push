@@ -1,7 +1,6 @@
 import { AcquisitionManager as Sdk } from "code-push/script/acquisition-sdk";
 import { Alert } from "./AlertAdapter";
 import requestFetchAdapter from "./request-fetch-adapter";
-import semver from "semver";
 import { Platform } from "react-native";
 
 let NativeCodePush = require("react-native").NativeModules.CodePush;
@@ -41,7 +40,7 @@ async function checkForUpdate(deploymentKey = null) {
    * in any updates for current app store version, regardless of hash.
    */
   let queryPackage;
-  if (localPackage && localPackage.appVersion && semver.compare(localPackage.appVersion, config.appVersion) === 0) {
+  if (localPackage && localPackage.appVersion && localPackage.appVersion === config.appVersion) {
     queryPackage = localPackage;
   } else {
     queryPackage = { appVersion: config.appVersion };
