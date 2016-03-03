@@ -349,9 +349,12 @@ If you are using the new React Native [assets system](https://facebook.github.io
 
 The `release-react` command is a utility that automates the process of generating the update contents (JS bundle, image assets) for your project via the `react-native` bundle command and uploading a release to CodePush via the `code-push release` command with those contents. It automatically infers parameters such as the `<targetBinaryRange>` from the project's config files (`Info.plist` for updates targeting iOS or `build.gradle` for updates targeting Android). 
 
-To use it, execute the `release-react` command specifying your app name and [target platform](http://codepush.tools/docs/cli.html#platform-parameter) ("ios" or "android"), e.g. `code-push release-react Foo ios`. After about a minute, your latest update should be released to CodePush!
+To use it, execute the `release-react` command specifying your app name and [target platform](http://codepush.tools/docs/cli.html#platform-parameter) ("ios" or "android"), e.g. 
+```
+code-push release-react Foo ios
+```
 
-For more information about the `release-react` command and its parameters, refer to the [CLI documentation](http://codepush.tools/docs/cli.html#releasing-updates-to-a-react-native-app).
+After about a minute, your latest update should be released to CodePush! For more information about the `release-react` command and its parameters, refer to the [CLI documentation](http://codepush.tools/docs/cli.html#releasing-updates-to-a-react-native-app).
 
 Additionally, the CodePush client supports differential updates, so even though you are releasing your JS bundle and assets on every update, your end users will only actually download the files they need. The service handles this automatically so that you can focus on creating awesome apps and we can worry about optimizing end user downloads.
 
