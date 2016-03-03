@@ -99,6 +99,8 @@ In order to accomodate as many developer preferences as possible, the CodePush p
 
 1. Run `rnpm link react-native-code-push`
 
+    *Note: If you didn't already have RNPM installed, you can do so by running `npm i -g rnpm` and the executing the above command once `rnpm` is in your path.*
+    
 2. Open your app's Xcode project
 
 3. Select the project node in Xcode and select the "Build Phases" tab of your project configuration.
