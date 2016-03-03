@@ -356,7 +356,7 @@ To use it, simply execute the `release-react` command specifying your app name a
 code-push release-react Foo ios
 ```
 
-After about a minute, your latest update should be released to CodePush! For more information about the `release-react` command and its parameters, refer to the [CLI documentation](http://codepush.tools/docs/cli.html#releasing-updates-to-a-react-native-app).
+Once the command has finished execution, your latest update should be released to CodePush! For more information about the `release-react` command and its parameters, refer to the [CLI documentation](http://codepush.tools/docs/cli.html#releasing-updates-to-a-react-native-app).
 
 Additionally, the CodePush client supports differential updates, so even though you are releasing your JS bundle and assets on every update, your end users will only actually download the files they need. The service handles this automatically so that you can focus on creating awesome apps and we can worry about optimizing end user downloads.
 
