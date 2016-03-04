@@ -381,7 +381,7 @@ react-native bundle --platform ios --entry-file index.ios.js --bundle-output cod
 code-push release MyApp codepush.js 1.0.0
 ```
     
-And that's it! for more information regarding the CLI and how the release (or promote and rollback) commands work, refer to the [documentation](http://microsoft.github.io/code-push/docs/cli.html). Additionally, if you run into any issues, you ping us within the [#code-push](https://discord.gg/0ZcbPKXt5bWxFdFu) channel on Reactiflux, [e-mail us](mailto:codepushfeed@microsoft.com) and/or check out the [troubleshooting](#debugging--troubleshooting) details below.
+And that's it! for more information regarding the CLI and how the release (or promote and rollback) commands work, refer to the [documentation](http://microsoft.github.io/code-push/docs/cli.html). Additionally, if you run into any issues, you can ping us within the [#code-push](https://discord.gg/0ZcbPKXt5bWxFdFu) channel on Reactiflux, [e-mail us](mailto:codepushfeed@microsoft.com) and/or check out the [troubleshooting](#debugging--troubleshooting) details below.
 
 *Note: Instead of running `react-native bundle`, you could rely on running `xcodebuild` and/or `gradlew assemble` instead to generate the JavaScript bundle file, but that would be unneccessarily doing a native build, when all you need for distributing updates via CodePush is your JavaScript bundle.*
 
@@ -412,7 +412,7 @@ If you are using the new React Native [assets system](https://facebook.github.io
     
 Additionally, the CodePush client supports differential updates, so even though you are releasing your JS bundle and assets on every update, your end users will only actually download the files they need. The service handles this automatically so that you can focus on creating awesome apps and we can worry about optimizing end user downloads.
 
-If you run into any issues, you ping us within the [#code-push](https://discord.gg/0ZcbPKXt5bWxFdFu) channel on Reactiflux, [e-mail us](mailto:codepushfeed@microsoft.com) and/or check out the [troubleshooting](#debugging--troubleshooting) details below.
+If you run into any issues, you can ping us within the [#code-push](https://discord.gg/0ZcbPKXt5bWxFdFu) channel on Reactiflux, [e-mail us](mailto:codepushfeed@microsoft.com) and/or check out the [troubleshooting](#debugging--troubleshooting) details below.
 
 *Note: Releasing assets via CodePush requires that you're using React Native v0.15.0+ and CodePush v1.4.0+ (for iOS) and React Native v0.19.0+ and CodePush v1.7.0+ (Android). If you are using assets and an older version of the CodePush plugin, you should not release updates via CodePush, because it will break your app's ability to load images from the binary. Please test and release appropriately!*
 
