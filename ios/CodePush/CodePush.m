@@ -6,6 +6,9 @@
 
 #import "CodePush.h"
 
+@interface CodePush () <RCTBridgeModule>
+@end
+
 @implementation CodePush {
     BOOL _hasResumeListener;
     BOOL _isFirstRunAfterUpdate;
