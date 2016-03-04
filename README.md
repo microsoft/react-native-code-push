@@ -24,6 +24,7 @@ This plugin provides client-side integration for the [CodePush service](http://c
     * [Objective-C API Reference (iOS)](#objective-c-api-reference-ios)
     * [Java API Reference (Android)](#java-api-reference-android)
 * [Example Apps](#example-apps)
+* [Debugging / Troubleshooting](#debugging--troubleshooting)
 
 ## How does it work?
 
@@ -380,7 +381,7 @@ react-native bundle --platform ios --entry-file index.ios.js --bundle-output cod
 code-push release MyApp codepush.js 1.0.0
 ```
     
-And that's it! for more information regarding the CLI and how the release (or promote and rollback) commands work, refer to the [documentation](http://microsoft.github.io/code-push/docs/cli.html).
+And that's it! for more information regarding the CLI and how the release (or promote and rollback) commands work, refer to the [documentation](http://microsoft.github.io/code-push/docs/cli.html). Additionally, if you run into any issues, you ping us within the [#code-push](https://discord.gg/0ZcbPKXt5bWxFdFu) channel on Reactiflux, [e-mail us](mailto:codepushfeed@microsoft.com) and/or check out the [troubleshooting](#debugging--troubleshooting) details below.
 
 *Note: Instead of running `react-native bundle`, you could rely on running `xcodebuild` and/or `gradlew assemble` instead to generate the JavaScript bundle file, but that would be unneccessarily doing a native build, when all you need for distributing updates via CodePush is your JavaScript bundle.*
 
@@ -410,6 +411,8 @@ If you are using the new React Native [assets system](https://facebook.github.io
     For more info regarding the `release` command and its parameters, refer to the [CLI documentation](http://codepush.tools/docs/cli.html#releasing-app-updates).
     
 Additionally, the CodePush client supports differential updates, so even though you are releasing your JS bundle and assets on every update, your end users will only actually download the files they need. The service handles this automatically so that you can focus on creating awesome apps and we can worry about optimizing end user downloads.
+
+If you run into any issues, you ping us within the [#code-push](https://discord.gg/0ZcbPKXt5bWxFdFu) channel on Reactiflux, [e-mail us](mailto:codepushfeed@microsoft.com) and/or check out the [troubleshooting](#debugging--troubleshooting) details below.
 
 *Note: Releasing assets via CodePush requires that you're using React Native v0.15.0+ and CodePush v1.4.0+ (for iOS) and React Native v0.19.0+ and CodePush v1.7.0+ (Android). If you are using assets and an older version of the CodePush plugin, you should not release updates via CodePush, because it will break your app's ability to load images from the binary. Please test and release appropriately!*
 
@@ -785,3 +788,31 @@ The React Native community has graciously created some awesome open source apps 
 * [MoveIt!](https://github.com/multunus/moveit-react-native) - An app by [Multunus](http://www.multunus.com) that allows employees within a company to track their work-outs.
 
 *Note: If you've developed a React Native app using CodePush, that is also open-source, please let us know. We would love to add it to this list!*
+
+## Debugging / Troubleshooting
+
+The `sync` method includes a lot of diagnostic logging out-of-the-box, so if you're encountering an issue when using it, the best thing to try first is examining the output logs of your app. This will tell you whether the app is configured correctly (e.g. can the plugin find your deployment key?), if the app is able to reach the server, if an available update is being discovered, if the update is being successfully downloaded/installed, etc. We want to continue improving the logging to be as intutuive/comprehensive as possible, so please [let us know](mailto:codepushfeed@microsoft.com) if you find it to be confusing or missing anything.
+
+![Xcode Console](https://cloud.githubusercontent.com/assets/116461/13536459/d2687bea-e1f4-11e5-9998-b048ca8d201e.png)
+
+To view these logs, you can use either the Chrome DevTools Console, the XCode Console (iOS) and/or ADB logcat (Android). By default, React Native logs are disabled on iOS in release builds, so if you want to view them in a release build, you simply need to make the following changes to your `AppDelegate.m` file:
+
+1. Add an `#import "RCTLog.h"` statement
+
+2. Add the following statement to the top of your `application:didFinishLaunchingWithOptions` method:
+
+    ```objective-c
+    RCTSetLogThreshold(RCTLogLevelInfo);
+    ```
+
+Now you'll be able to see CodePush logs in either debug or release mode, on both iOS or Android. If examining the logs don't provide an indication of the issue, please refer to the following common issues for additional resolution ideas:
+
+| Issue / Symptom | Possible Solution |
+|-----------------|-------------------|
+| Compilation Error | Double check that your version of React Native is [compatible](#supported-react-native-platforms) with the CodePush version you are using |
+| Network timeout / hang when calling `sync` or `checkForUpadte` in the iOS Simulator | Try resetting it the simulator by selecting the `Simulator -> Reset Content and Settings..` menu item. |
+| Server responds with a `404` when calling `sync` or `checkForUpdate` | Double-check that the deployment key you added to your `Info.plist` (iOS), `build.gradle` (Android) or that you're passing to `sync`/`checkForUpdate` is correct. You can run `code-push deployment ls [APP_NAME] -k` to view the correct keys for your app deployments. |
+| Update not being discovered | Double-check that the version of your running app (e.g. `1.0.0`) matches the version you specified when releasing the update to CodePush. Additionally, make sure that you are releasing to the same deployment that you're app is configured to sync with. |
+| Update not being displayed after restart | If you're not calling `sync` on app start (e.g. within `componentDidMount` of your root component), then you need to explicitly call `notifyApplicationReady` on app start, otherwise, the plugin will think your update failed and roll it back. |
+| Images dissappear after installing CodePush update | If your app is using the React Native assets system to load images (i.e. the `require(./foo.png)` syntax), then you **MUST** release your assets along with your JS bundle to CodePush. Follow [these instructions]((#releasing-updates-javascript--images) to see how to do this. |
+| No JS bundle is being found (iOS) when running your app against the simulator | By default, React Native doesn't generate and bundle your JS bundle in the binary when running against the simulator. Therefore, if you're using `[CodePush bundleURL]`, and targetting the iOS simulator, you may be getting a `nil` result. This issue will be fixed in RN 0.22.0, specifically for release builds. You can unblock this scenario right now by making [this change](https://github.com/facebook/react-native/commit/9ae3714f4bebdd2bcab4d7fdbf23acebdc5ed2ba) locally.
