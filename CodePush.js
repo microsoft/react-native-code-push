@@ -218,8 +218,7 @@ const sync = (() => {
     const syncPromise = syncInternal(options, syncStatusChangeCallback, downloadProgressCallback);
     syncPromise
       .then(setSyncCompleted)
-      .catch(setSyncCompleted)
-      .done();
+      .catch(setSyncCompleted);
 
     return syncPromise;
   };
