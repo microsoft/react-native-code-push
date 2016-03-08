@@ -162,7 +162,7 @@ public class CodePush {
             } else {
                 // The binary version is newer.
                 didUpdate = false;
-                if (!this.isDebugMode) {
+                if (!this.isDebugMode || !this.appVersion.equals(packageAppVersion)) {
                     this.clearUpdates();
                 }
 

@@ -40,7 +40,7 @@ async function checkForUpdate(deploymentKey = null) {
    * in any updates for current app store version, regardless of hash.
    */
   let queryPackage;
-  if (localPackage && localPackage.appVersion && localPackage.appVersion === config.appVersion) {
+  if (localPackage) {
     queryPackage = localPackage;
   } else {
     queryPackage = { appVersion: config.appVersion };
