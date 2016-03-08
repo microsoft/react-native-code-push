@@ -103,9 +103,14 @@ static NSString *bundleResourceName = @"main";
         isRunningBinaryVersion = NO;
         return packageUrl;
     } else {
+        BOOL isRelease = NO;
 #ifndef DEBUG
-        [CodePush clearUpdates];
+        isRelease = YES;
 #endif
+        
+        if (isRelease || ![binaryAppVersion isEqualToString:packageAppVersion]) {
+            [CodePush clearUpdates];
+        }
         
         NSLog(logMessageFormat, binaryBundleURL);
         isRunningBinaryVersion = YES;
