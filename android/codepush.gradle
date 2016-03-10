@@ -59,7 +59,6 @@ gradle.projectsEvaluated {
             runBefore("processX86${targetName}Resources", generateBundledResourcesHash)
             runBefore("processUniversal${targetName}Resources", generateBundledResourcesHash)
             runBefore("process${targetName}Resources", generateBundledResourcesHash)
-            runBefore("process${targetName}Manifest", generateBundledResourcesHash)
         }
     }
 }
