@@ -25,8 +25,9 @@ interface LocalPackage extends Package {
      * Installs the update by saving it to the location on disk where the runtime expects to find the latest version of the app.
      * 
      * @param installMode Indicates when you would like the update changes to take affect for the end-user.
+     * @param minimumBackgroundDuration For resume-based installs, this specifies the number of seconds the app needs to be in the background before forcing a restart. Defaults to 0 if unspecified.
      */
-    install(installMode: CodePush.InstallMode): ReactNativePromise<void>;
+    install(installMode: CodePush.InstallMode, minimumBackgroundDuration?: number): ReactNativePromise<void>;
 }
     
 interface Package {
@@ -106,10 +107,24 @@ interface SyncOptions {
     deploymentKey?: string;
     
     /**
-     * Indicates when you would like to "install" the update after downloading it, which includes reloading the JS bundle in order for
-     * any changes to take affect. Defaults to codePush.InstallMode.ON_NEXT_RESTART.
+     * Specifies when you would like to install optional updates (i.e. those that aren't marked as mandatory).
+     * Defaults to codePush.InstallMode.ON_NEXT_RESTART.
      */
     installMode?: CodePush.InstallMode;
+    
+    /**
+     * Specifies when you would like to install updates which are marked as mandatory.
+     * Defaults to codePush.InstallMode.IMMEDIATE.
+     */
+    mandatoryInstallMode?: CodePush.InstallMode;
+    
+    /**
+     * Specifies the minimum number of seconds that the app needs to have been in the background before restarting the app. This property
+     * only applies to updates which are installed using `InstallMode.ON_NEXT_RESUME`, and can be useful for getting your update in front
+     * of end users sooner, without being too obtrusive. Defaults to `0`, which has the effect of applying the update immediately after a 
+     * resume, regardless how long it was in the background.
+     */
+    minimumBackgroundDuration?: number;
     
     /**
      * An "options" object used to determine whether a confirmation dialog should be displayed to the end user when an update is available,
