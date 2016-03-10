@@ -12,6 +12,8 @@
 @implementation CodePush {
     BOOL _hasResumeListener;
     BOOL _isFirstRunAfterUpdate;
+    int _minimumBackgroundDuration;
+    NSDate * _lastResignedDate;
 }
 
 RCT_EXPORT_MODULE()
@@ -380,6 +382,27 @@ static NSString *bundleResourceName = @"main";
     [preferences synchronize];
 }
 
+#pragma mark - Application lifecycle event handlers
+
+// These two handlers will only be registered when there is
+// a resume-based update still pending installation.
+- (void)applicationWillEnterForeground
+{
+    // Determine how long the app was in the background and ensure
+    // that it meets the minimum amount of time requsted.
+    int durationInBackground = [[NSDate date] timeIntervalSinceDate:_lastResignedDate];
+    if (durationInBackground >= _minimumBackgroundDuration) {
+        [self loadBundle];
+    }
+}
+
+- (void)applicationWillResignActive
+{
+    // Save the current time so that when the app is later
+    // resumed, we can detect how long it was in the background.
+    _lastResignedDate = [NSDate date];
+}
+
 #pragma mark - JavaScript-exported module methods
 
 /*
@@ -522,16 +545,27 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
         [self savePendingUpdate:updatePackage[PackageHashKey]
                       isLoading:NO];
         
-        if (installMode == CodePushInstallModeOnNextResume && !_hasResumeListener) {
-            // Ensure we do not add the listener twice.
-            // Register for app resume notifications so that we
-            // can check for pending updates which support "restart on resume"
-            [[NSNotificationCenter defaultCenter] addObserver:self
-                                                     selector:@selector(loadBundle)
-                                                         name:UIApplicationWillEnterForegroundNotification
-                                                       object:[UIApplication sharedApplication]];
-            _hasResumeListener = YES;
+        if (installMode == CodePushInstallModeOnNextResume) {
+            _minimumBackgroundDuration = minimumBackgroundDuration;
+            
+            if (!_hasResumeListener) {
+                // Ensure we do not add the listener twice.
+                // Register for app resume notifications so that we
+                // can check for pending updates which support "restart on resume"
+                [[NSNotificationCenter defaultCenter] addObserver:self
+                                                         selector:@selector(applicationWillEnterForeground)
+                                                             name:UIApplicationWillEnterForegroundNotification
+                                                           object:[UIApplication sharedApplication]];
+                
+                [[NSNotificationCenter defaultCenter] addObserver:self
+                                                         selector:@selector(applicationWillResignActive)
+                                                             name:UIApplicationWillResignActiveNotification
+                                                           object:[UIApplication sharedApplication]];
+                
+                _hasResumeListener = YES;
+            }
         }
+        
         // Signal to JS that the update has been applied.
         resolve(nil);
     }
