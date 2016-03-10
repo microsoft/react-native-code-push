@@ -32,6 +32,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +40,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class CodePush {
-
     private static boolean needToReportRollback = false;
     private static boolean isRunningBinaryVersion = false;
     private static boolean testConfigurationFlag = false;
@@ -348,8 +348,9 @@ public class CodePush {
     }
 
     private class CodePushNativeModule extends ReactContextBaseJavaModule {
-
+        private Date lastPausedDate = null;
         private LifecycleEventListener lifecycleEventListener = null;
+        private int minimumBackgroundDuration = 0;
 
         private void loadBundle() {
             Intent intent = mainActivity.getIntent();
@@ -491,7 +492,7 @@ public class CodePush {
         }
 
         @ReactMethod
-        public void installUpdate(final ReadableMap updatePackage, final int installMode, final Promise promise) {
+        public void installUpdate(final ReadableMap updatePackage, final int installMode, final int minimumBackgroundDuration, final Promise promise) {
             AsyncTask asyncTask = new AsyncTask() {
                 @Override
                 protected Void doInBackground(Object... params) {
@@ -505,24 +506,39 @@ public class CodePush {
                             savePendingUpdate(pendingHash, /* isLoading */false);
                         }
 
-                        if (installMode == CodePushInstallMode.ON_NEXT_RESUME.getValue() &&
-                                lifecycleEventListener == null) {
-                            // Ensure we do not add the listener twice.
-                            lifecycleEventListener = new LifecycleEventListener() {
-                                @Override
-                                public void onHostResume() {
-                                    loadBundle();
-                                }
+                        if (installMode == CodePushInstallMode.ON_NEXT_RESUME.getValue()) {
+                            // Store the minimum duration on the native module as an instance
+                            // variable instead of relying on a closure below, so that any
+                            // subsequent resume-based installs could override it. 
+                            CodePushNativeModule.this.minimumBackgroundDuration = minimumBackgroundDuration;
+                            
+                            if (lifecycleEventListener == null) {
+                                // Ensure we do not add the listener twice.
+                                lifecycleEventListener = new LifecycleEventListener() {
+                                    @Override
+                                    public void onHostResume() {
+                                        // Determine how long the app was in the background and ensure
+                                        // that it meets the minimum duration amount of time.
+                                        int durationInBackground = (new Date() - lastPausedDate) / 1000;
+                                        if (durationInBackground >= CodePushNativeModule.this.minimumBackgroundDuration) {
+                                            loadBundle();
+                                        }
+                                    }
 
-                                @Override
-                                public void onHostPause() {
-                                }
+                                    @Override
+                                    public void onHostPause() {
+                                        // Save the current time so that when the app is later
+                                        // resumed, we can detect how long it was in the background.
+                                        lastPausedDate = new Date();
+                                    }
 
-                                @Override
-                                public void onHostDestroy() {
-                                }
-                            };
-                            getReactApplicationContext().addLifecycleEventListener(lifecycleEventListener);
+                                    @Override
+                                    public void onHostDestroy() {
+                                    }
+                                };
+                                
+                                getReactApplicationContext().addLifecycleEventListener(lifecycleEventListener);
+                            }
                         }
 
                         promise.resolve("");
