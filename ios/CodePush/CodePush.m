@@ -389,7 +389,7 @@ static NSString *bundleResourceName = @"main";
 - (void)applicationWillEnterForeground
 {
     // Determine how long the app was in the background and ensure
-    // that it meets the minimum amount of time requsted.
+    // that it meets the minimum duration amount of time.
     int durationInBackground = [[NSDate date] timeIntervalSinceDate:_lastResignedDate];
     if (durationInBackground >= _minimumBackgroundDuration) {
         [self loadBundle];
