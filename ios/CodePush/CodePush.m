@@ -13,7 +13,7 @@
     BOOL _hasResumeListener;
     BOOL _isFirstRunAfterUpdate;
     int _minimumBackgroundDuration;
-    NSDate * _lastResignedDate;
+    NSDate *_lastResignedDate;
 }
 
 RCT_EXPORT_MODULE()

@@ -348,7 +348,6 @@ public class CodePush {
     }
 
     private class CodePushNativeModule extends ReactContextBaseJavaModule {
-        private Date lastPausedDate = null;
         private LifecycleEventListener lifecycleEventListener = null;
         private int minimumBackgroundDuration = 0;
 
@@ -515,6 +514,8 @@ public class CodePush {
                             if (lifecycleEventListener == null) {
                                 // Ensure we do not add the listener twice.
                                 lifecycleEventListener = new LifecycleEventListener() {
+                                    private Date lastPausedDate = null;
+                                    
                                     @Override
                                     public void onHostResume() {
                                         // Determine how long the app was in the background and ensure
