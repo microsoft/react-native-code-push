@@ -531,6 +531,7 @@ RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
  */
 RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
                     installMode:(CodePushInstallMode)installMode
+      minimumBackgroundDuration:(int)minimumBackgroundDuration
                        resolver:(RCTPromiseResolveBlock)resolve
                        rejecter:(RCTPromiseRejectBlock)reject)
 {
