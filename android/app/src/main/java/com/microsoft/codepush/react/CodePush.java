@@ -365,7 +365,7 @@ public class CodePush {
                     try {
                         WritableMap mutableUpdatePackage = CodePushUtils.convertReadableMapToWritableMap(updatePackage);
                         mutableUpdatePackage.putString(BINARY_MODIFIED_TIME_KEY, "" + getBinaryResourcesModifiedTime());
-                        codePushPackage.downloadPackage(applicationContext, mutableUpdatePackage, new DownloadProgressCallback() {
+                        codePushPackage.downloadPackage(applicationContext, mutableUpdatePackage, CodePush.this.assetsBundleFileName, new DownloadProgressCallback() {
                             @Override
                             public void call(DownloadProgress downloadProgress) {
                                 getReactApplicationContext()
