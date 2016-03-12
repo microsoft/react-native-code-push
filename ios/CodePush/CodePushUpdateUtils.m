@@ -118,6 +118,7 @@ NSString * const ManifestFolderPrefix = @"CodePush";
 }
 
 + (NSString *)findMainBundleInFolder:(NSString *)folderPath
+                    expectedFileName:(NSString *)expectedFileName
                                error:(NSError **)error
 {
     NSArray* folderFiles = [[NSFileManager defaultManager]
@@ -132,7 +133,9 @@ NSString * const ManifestFolderPrefix = @"CodePush";
         BOOL isDir = NO;
         if ([[NSFileManager defaultManager] fileExistsAtPath:fullFilePath
                                                  isDirectory:&isDir] && isDir) {
-            NSString *mainBundlePathInFolder = [self findMainBundleInFolder:fullFilePath error:error];
+            NSString *mainBundlePathInFolder = [self findMainBundleInFolder:fullFilePath
+                                                           expectedFileName:expectedFileName
+                                                                      error:error];
             if (*error) {
                 return nil;
             }
@@ -140,9 +143,7 @@ NSString * const ManifestFolderPrefix = @"CodePush";
             if (mainBundlePathInFolder) {
                 return [fileName stringByAppendingPathComponent:mainBundlePathInFolder];
             }
-        } else if ([[fileName pathExtension] isEqualToString:@"bundle"] ||
-                   [[fileName pathExtension] isEqualToString:@"jsbundle"] ||
-                   [[fileName pathExtension] isEqualToString:@"js"]) {
+        } else if ([fileName isEqualToString:expectedFileName]) {
             return fileName;
         }
     }

@@ -419,7 +419,9 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
                                 forKey:BinaryBundleDateKey];
     }
     
-    [CodePushPackage downloadPackage:mutableUpdatePackage
+    [CodePushPackage
+        downloadPackage:mutableUpdatePackage
+        expectedBundleFileName:[bundleResourceName stringByAppendingPathExtension:bundleResourceExtension]
         // The download is progressing forward
         progressCallback:^(long long expectedContentLength, long long receivedContentLength) {
             dispatch_async(_methodQueue, ^{
