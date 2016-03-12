@@ -16,7 +16,7 @@
     "url": "https://github.com/Microsoft/react-native-code-push"
   },
   "dependencies": {
-    "code-push": "1.5.2-beta"
+    "code-push": "1.7.0-beta"
   },
   "devDependencies": {
     "react-native": "0.19.0"
