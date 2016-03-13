@@ -151,7 +151,7 @@ public class CodePushPackage {
         }
     }
 
-    public void downloadPackage(Context applicationContext, ReadableMap updatePackage,
+    public void downloadPackage(Context applicationContext, ReadableMap updatePackage, String expectedBundleFileName,
                                 DownloadProgressCallback progressCallback) throws IOException {
         String newUpdateHash = CodePushUtils.tryGetString(updatePackage, PACKAGE_HASH_KEY);
         String newUpdateFolderPath = getPackageFolderPath(newUpdateHash);
@@ -243,7 +243,7 @@ public class CodePushPackage {
 
             // For zip updates, we need to find the relative path to the jsBundle and save it in the
             // metadata so that we can find and run it easily the next time.
-            String relativeBundlePath = CodePushUpdateUtils.findJSBundleInUpdateContents(newUpdateFolderPath);
+            String relativeBundlePath = CodePushUpdateUtils.findJSBundleInUpdateContents(newUpdateFolderPath, expectedBundleFileName);
 
             if (relativeBundlePath == null) {
                 throw new CodePushInvalidUpdateException("Update is invalid - no files with extension .bundle, .js or .jsbundle were found in the update package.");

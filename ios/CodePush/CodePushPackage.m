@@ -205,6 +205,7 @@ NSString * const UnzippedFolderName = @"unzipped";
 }
 
 + (void)downloadPackage:(NSDictionary *)updatePackage
+ expectedBundleFileName:(NSString *)expectedBundleFileName
        progressCallback:(void (^)(long long, long long))progressCallback
            doneCallback:(void (^)())doneCallback
            failCallback:(void (^)(NSError *err))failCallback
@@ -360,7 +361,9 @@ NSString * const UnzippedFolderName = @"unzipped";
                 }
                 
                 NSString *relativeBundlePath = [CodePushUpdateUtils findMainBundleInFolder:newUpdateFolderPath
+                                                                          expectedFileName:expectedBundleFileName
                                                                                      error:&error];
+                
                 if (error) {
                     failCallback(error);
                     return;

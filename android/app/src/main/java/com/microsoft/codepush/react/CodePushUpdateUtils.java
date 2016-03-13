@@ -79,24 +79,20 @@ public class CodePushUpdateUtils {
         }
     }
 
-    public static String findJSBundleInUpdateContents(String folderPath) {
+    public static String findJSBundleInUpdateContents(String folderPath, String expectedFileName) {
         File folder = new File(folderPath);
         File[] folderFiles = folder.listFiles();
         for (File file : folderFiles) {
             String fullFilePath = CodePushUtils.appendPathComponent(folderPath, file.getName());
             if (file.isDirectory()) {
-                String mainBundlePathInSubFolder = findJSBundleInUpdateContents(fullFilePath);
+                String mainBundlePathInSubFolder = findJSBundleInUpdateContents(fullFilePath, expectedFileName);
                 if (mainBundlePathInSubFolder != null) {
                     return CodePushUtils.appendPathComponent(file.getName(), mainBundlePathInSubFolder);
                 }
             } else {
                 String fileName = file.getName();
-                int dotIndex = fileName.lastIndexOf(".");
-                if (dotIndex >= 0) {
-                    String fileExtension = fileName.substring(dotIndex + 1);
-                    if (fileExtension.equals("bundle") || fileExtension.equals("js") || fileExtension.equals("jsbundle")) {
-                        return fileName;
-                    }
+                if (fileName.equals(expectedFileName)) {
+                    return fileName;
                 }
             }
         }

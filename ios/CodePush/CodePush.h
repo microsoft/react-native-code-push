@@ -70,6 +70,7 @@ failCallback:(void (^)(NSError *err))failCallback;
 @interface CodePushPackage : NSObject
 
 + (void)downloadPackage:(NSDictionary *)updatePackage
+ expectedBundleFileName:(NSString *)expectedBundleFileName
        progressCallback:(void (^)(long long, long long))progressCallback
            doneCallback:(void (^)())doneCallback
            failCallback:(void (^)(NSError *err))failCallback;
@@ -113,6 +114,7 @@ failCallback:(void (^)(NSError *err))failCallback;
                       error:(NSError **)error;
 
 + (NSString *)findMainBundleInFolder:(NSString *)folderPath
+                    expectedFileName:(NSString *)expectedFileName
                                error:(NSError **)error;
 
 + (NSString *)assetsFolderName;
