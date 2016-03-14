@@ -438,7 +438,7 @@ static NSString *bundleResourceName = @"main";
     _lastResignedDate = [NSDate date];
 }
 
-#pragma mark - JavaScript-exported module methods
+#pragma mark - JavaScript-exported module methods (Public)
 
 /*
  * This is native-side of the RemotePackage.download method
@@ -485,7 +485,7 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
         // The download failed
         failCallback:^(NSError *err) {
             dispatch_async(_methodQueue, ^{
-                if ([CodePushPackage isCodePushError:err]) {
+                if ([CodePushErrorUtils isCodePushError:err]) {
                     [self saveFailedUpdate:mutableUpdatePackage];
                 }
                 
@@ -649,6 +649,33 @@ RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
 }
 
 /*
+ * This method is the native side of the CodePush.restartApp() method.
+ */
+RCT_EXPORT_METHOD(restartApp:(BOOL)onlyIfUpdateIsPending)
+{
+    // If this is an unconditional restart request, or there
+    // is current pending update, then reload the app.
+    if (!onlyIfUpdateIsPending || [self isPendingUpdate:nil]) {
+        [self loadBundle];
+    }
+}
+
+#pragma mark - JavaScript-exported module methods (Private)
+
+/*
+ * This method is the native side of the CodePush.downloadAndReplaceCurrentBundle()
+ * method, which replaces the current bundle with the one downloaded from
+ * removeBundleUrl. It is only to be used during tests and no-ops if the test
+ * configuration flag is not set.
+ */
+RCT_EXPORT_METHOD(downloadAndReplaceCurrentBundle:(NSString *)remoteBundleUrl)
+{
+    if ([CodePush isUsingTestConfiguration]) {
+        [CodePushPackage downloadAndReplaceCurrentBundle:remoteBundleUrl];
+    }
+}
+
+/*
  * This method is checks if a new status update exists (new version was installed,
  * or an update failed) and return its details (version label, status).
  */
@@ -680,31 +707,6 @@ RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
     }
     
     resolve(nil);
-}
-
-/*
- * This method is the native side of the CodePush.restartApp() method.
- */
-RCT_EXPORT_METHOD(restartApp:(BOOL)onlyIfUpdateIsPending)
-{
-    // If this is an unconditional restart request, or there
-    // is current pending update, then reload the app.
-    if (!onlyIfUpdateIsPending || [self isPendingUpdate:nil]) {
-        [self loadBundle];
-    }
-}
-
-/*
- * This method is the native side of the CodePush.downloadAndReplaceCurrentBundle()
- * method, which replaces the current bundle with the one downloaded from
- * removeBundleUrl. It is only to be used during tests and no-ops if the test
- * configuration flag is not set.
- */
-RCT_EXPORT_METHOD(downloadAndReplaceCurrentBundle:(NSString *)remoteBundleUrl)
-{
-    if ([CodePush isUsingTestConfiguration]) {
-        [CodePushPackage downloadAndReplaceCurrentBundle:remoteBundleUrl];
-    }
 }
 
 @end
