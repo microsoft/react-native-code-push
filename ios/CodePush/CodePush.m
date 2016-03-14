@@ -213,12 +213,12 @@ static NSString *bundleResourceName = @"main";
         "1. Update your AppDelegate.m file to load the JS bundle from the packager instead of from CodePush. "
         "You can still test your CodePush update experience using this workflow (debug builds only).\n\n"
         
-        "2. Force the JS bundle to be generated in simulator builds by removing the if block which echoes "
+        "2. Force the JS bundle to be generated in simulator builds by removing the if block that echoes "
         "\"Skipping bundling for Simulator platform\" in the \"node_modules/react-native/packager/react-native-xcode.sh\" file.\n\n"
         
         "3. Deploy a release build to the simulator, which unlike debug builds, will generate the JS bundle (React Native >=0.22.0 only).";
 #else
-        errorMessage =  = [NSString stringWithFormat:@"The specified JS bundle file wasn't found within the app's binary. Is \"%@\" the correct file name?", [bundleResourceName stringByAppendingPathExtension:bundleResourceExtension]];
+        errorMessage = [NSString stringWithFormat:@"The specified JS bundle file wasn't found within the app's binary. Is \"%@\" the correct file name?", [bundleResourceName stringByAppendingPathExtension:bundleResourceExtension]];
 #endif
         
         RCTFatal([NSError errorWithDomain:@"CodePushError" code:-1
