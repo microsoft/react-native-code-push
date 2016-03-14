@@ -1,3 +1,4 @@
+#import "RCTAssert.h"
 #import "RCTBridgeModule.h"
 #import "RCTConvert.h"
 #import "RCTEventDispatcher.h"
