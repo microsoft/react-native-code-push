@@ -221,8 +221,7 @@ static NSString *bundleResourceName = @"main";
         errorMessage = [NSString stringWithFormat:@"The specified JS bundle file wasn't found within the app's binary. Is \"%@\" the correct file name?", [bundleResourceName stringByAppendingPathExtension:bundleResourceExtension]];
 #endif
         
-        RCTFatal([NSError errorWithDomain:@"CodePushError" code:-1
-                                 userInfo:@{ NSLocalizedDescriptionKey: NSLocalizedString(errorMessage, nil) }]);
+        RCTFatal([CodePushErrorUtils errorWithMessage:errorMessage]);
     }
 }
 
