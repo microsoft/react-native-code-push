@@ -130,6 +130,23 @@ static NSString *bundleResourceName = @"main";
     return applicationSupportDirectory;
 }
 
++ (void)setDeploymentKey:(NSString *)deploymentKey
+{
+    [CodePushConfig current].deploymentKey = deploymentKey;
+}
+
+#pragma mark - Test-only methods
+
+/*
+ * WARNING: This cleans up all downloaded and pending updates.
+ */
++ (void)clearUpdates
+{
+    [CodePushPackage clearUpdates];
+    [self removePendingUpdate];
+    [self removeFailedUpdates];
+}
+
 /*
  * This returns a boolean value indicating whether CodePush has
  * been set to run under a test configuration.
@@ -137,11 +154,6 @@ static NSString *bundleResourceName = @"main";
 + (BOOL)isUsingTestConfiguration
 {
     return testConfigurationFlag;
-}
-
-+ (void)setDeploymentKey:(NSString *)deploymentKey
-{
-    [CodePushConfig current].deploymentKey = deploymentKey;
 }
 
 /*
@@ -153,16 +165,6 @@ static NSString *bundleResourceName = @"main";
 + (void)setUsingTestConfiguration:(BOOL)shouldUseTestConfiguration
 {
     testConfigurationFlag = shouldUseTestConfiguration;
-}
-
-/*
- * WARNING: This cleans up all downloaded and pending updates.
- */
-+ (void)clearUpdates
-{
-    [CodePushPackage clearUpdates];
-    [self removePendingUpdate];
-    [self removeFailedUpdates];
 }
 
 #pragma mark - Private API methods
