@@ -75,11 +75,14 @@ static NSString *bundleResourceName = @"main";
 {
     bundleResourceName = resourceName;
     bundleResourceExtension = resourceExtension;
+    
+    [self ensureBinaryBundleExists];
+    
+    NSString *logMessageFormat = @"Loading JS bundle from %@";
+    
     NSError *error;
     NSString *packageFile = [CodePushPackage getCurrentPackageBundlePath:&error];
     NSURL *binaryBundleURL = [self binaryBundleURL];
-    
-    NSString *logMessageFormat = @"Loading JS bundle from %@";
     
     if (error || !packageFile) {
         NSLog(logMessageFormat, binaryBundleURL);
@@ -188,6 +191,36 @@ static NSString *bundleResourceName = @"main";
     // Ensure the global resume handler is cleared, so that
     // this object isn't kept alive unnecessarily
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+/*
+ * This method ensures that the app was packaged with a JS bundle
+ * file, and if not, it throws the appropriate exception.
+ */
++ (void)ensureBinaryBundleExists
+{
+    if (![self binaryBundleURL]) {
+        NSString *errorMessage;
+        
+#if TARGET_IPHONE_SIMULATOR
+        errorMessage = @"React Native doesn't generate your app's JS bundle by default when deploying to the simulator. "
+        "If you'd like to test CodePush using the simulator, you can do one of three things depending on your React "
+        "Native version and/or preferred workflow:\n\n"
+        
+        "1. Update your AppDelegate.m file to load the JS bundle from the packager instead of from CodePush. "
+        "You can still test your CodePush update experience using this workflow (debug builds only).\n\n"
+        
+        "2. Force the JS bundle to be generated in simulator builds by removing the if block which echoes "
+        "\"Skipping bundling for Simulator platform\" in the \"node_modules/react-native/packager/react-native-xcode.sh\" file.\n\n"
+        
+        "3. Deploy a release build to the simulator, which unlike debug builds, will generate the JS bundle (React Native >=0.22.0 only).";
+#else
+        errorMessage =  = [NSString stringWithFormat:@"The specified JS bundle file wasn't found within the app's binary. Is \"%@\" the correct file name?", [bundleResourceName stringByAppendingPathExtension:bundleResourceExtension]];
+#endif
+        
+        RCTFatal([NSError errorWithDomain:@"CodePushError" code:-1
+                                 userInfo:@{ NSLocalizedDescriptionKey: NSLocalizedString(errorMessage, nil) }]);
+    }
 }
 
 - (instancetype)init
