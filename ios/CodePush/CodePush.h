@@ -67,6 +67,13 @@ failCallback:(void (^)(NSError *err))failCallback;
 
 @end
 
+@interface CodePushErrorUtils : NSObject
+
++ (NSError *)errorWithMessage:(NSString *)errorMessage;
++ (BOOL)isCodePushError:(NSError *)error;
+
+@end
+
 @interface CodePushPackage : NSObject
 
 + (void)downloadPackage:(NSDictionary *)updatePackage
@@ -90,7 +97,6 @@ failCallback:(void (^)(NSError *err))failCallback;
    removePendingUpdate:(BOOL)removePendingUpdate
                  error:(NSError **)error;
 
-+ (BOOL)isCodePushError:(NSError *)err;
 + (void)rollbackPackage;
 
 // The below methods are only used during tests.

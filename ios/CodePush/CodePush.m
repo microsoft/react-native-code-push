@@ -1,3 +1,4 @@
+#import "RCTAssert.h"
 #import "RCTBridgeModule.h"
 #import "RCTConvert.h"
 #import "RCTEventDispatcher.h"
@@ -75,11 +76,14 @@ static NSString *bundleResourceName = @"main";
 {
     bundleResourceName = resourceName;
     bundleResourceExtension = resourceExtension;
+    
+    [self ensureBinaryBundleExists];
+    
+    NSString *logMessageFormat = @"Loading JS bundle from %@";
+    
     NSError *error;
     NSString *packageFile = [CodePushPackage getCurrentPackageBundlePath:&error];
     NSURL *binaryBundleURL = [self binaryBundleURL];
-    
-    NSString *logMessageFormat = @"Loading JS bundle from %@";
     
     if (error || !packageFile) {
         NSLog(logMessageFormat, binaryBundleURL);
@@ -126,6 +130,23 @@ static NSString *bundleResourceName = @"main";
     return applicationSupportDirectory;
 }
 
++ (void)setDeploymentKey:(NSString *)deploymentKey
+{
+    [CodePushConfig current].deploymentKey = deploymentKey;
+}
+
+#pragma mark - Test-only methods
+
+/*
+ * WARNING: This cleans up all downloaded and pending updates.
+ */
++ (void)clearUpdates
+{
+    [CodePushPackage clearUpdates];
+    [self removePendingUpdate];
+    [self removeFailedUpdates];
+}
+
 /*
  * This returns a boolean value indicating whether CodePush has
  * been set to run under a test configuration.
@@ -133,11 +154,6 @@ static NSString *bundleResourceName = @"main";
 + (BOOL)isUsingTestConfiguration
 {
     return testConfigurationFlag;
-}
-
-+ (void)setDeploymentKey:(NSString *)deploymentKey
-{
-    [CodePushConfig current].deploymentKey = deploymentKey;
 }
 
 /*
@@ -149,16 +165,6 @@ static NSString *bundleResourceName = @"main";
 + (void)setUsingTestConfiguration:(BOOL)shouldUseTestConfiguration
 {
     testConfigurationFlag = shouldUseTestConfiguration;
-}
-
-/*
- * WARNING: This cleans up all downloaded and pending updates.
- */
-+ (void)clearUpdates
-{
-    [CodePushPackage clearUpdates];
-    [self removePendingUpdate];
-    [self removeFailedUpdates];
 }
 
 #pragma mark - Private API methods
@@ -188,6 +194,35 @@ static NSString *bundleResourceName = @"main";
     // Ensure the global resume handler is cleared, so that
     // this object isn't kept alive unnecessarily
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+/*
+ * This method ensures that the app was packaged with a JS bundle
+ * file, and if not, it throws the appropriate exception.
+ */
++ (void)ensureBinaryBundleExists
+{
+    if (![self binaryBundleURL]) {
+        NSString *errorMessage;
+        
+#if TARGET_IPHONE_SIMULATOR
+        errorMessage = @"React Native doesn't generate your app's JS bundle by default when deploying to the simulator. "
+        "If you'd like to test CodePush using the simulator, you can do one of three things depending on your React "
+        "Native version and/or preferred workflow:\n\n"
+        
+        "1. Update your AppDelegate.m file to load the JS bundle from the packager instead of from CodePush. "
+        "You can still test your CodePush update experience using this workflow (debug builds only).\n\n"
+        
+        "2. Force the JS bundle to be generated in simulator builds by removing the if block that echoes "
+        "\"Skipping bundling for Simulator platform\" in the \"node_modules/react-native/packager/react-native-xcode.sh\" file.\n\n"
+        
+        "3. Deploy a release build to the simulator, which unlike debug builds, will generate the JS bundle (React Native >=0.22.0 only).";
+#else
+        errorMessage = [NSString stringWithFormat:@"The specified JS bundle file wasn't found within the app's binary. Is \"%@\" the correct file name?", [bundleResourceName stringByAppendingPathExtension:bundleResourceExtension]];
+#endif
+        
+        RCTFatal([CodePushErrorUtils errorWithMessage:errorMessage]);
+    }
 }
 
 - (instancetype)init
@@ -403,7 +438,7 @@ static NSString *bundleResourceName = @"main";
     _lastResignedDate = [NSDate date];
 }
 
-#pragma mark - JavaScript-exported module methods
+#pragma mark - JavaScript-exported module methods (Public)
 
 /*
  * This is native-side of the RemotePackage.download method
@@ -450,7 +485,7 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
         // The download failed
         failCallback:^(NSError *err) {
             dispatch_async(_methodQueue, ^{
-                if ([CodePushPackage isCodePushError:err]) {
+                if ([CodePushErrorUtils isCodePushError:err]) {
                     [self saveFailedUpdate:mutableUpdatePackage];
                 }
                 
@@ -614,6 +649,33 @@ RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
 }
 
 /*
+ * This method is the native side of the CodePush.restartApp() method.
+ */
+RCT_EXPORT_METHOD(restartApp:(BOOL)onlyIfUpdateIsPending)
+{
+    // If this is an unconditional restart request, or there
+    // is current pending update, then reload the app.
+    if (!onlyIfUpdateIsPending || [self isPendingUpdate:nil]) {
+        [self loadBundle];
+    }
+}
+
+#pragma mark - JavaScript-exported module methods (Private)
+
+/*
+ * This method is the native side of the CodePush.downloadAndReplaceCurrentBundle()
+ * method, which replaces the current bundle with the one downloaded from
+ * removeBundleUrl. It is only to be used during tests and no-ops if the test
+ * configuration flag is not set.
+ */
+RCT_EXPORT_METHOD(downloadAndReplaceCurrentBundle:(NSString *)remoteBundleUrl)
+{
+    if ([CodePush isUsingTestConfiguration]) {
+        [CodePushPackage downloadAndReplaceCurrentBundle:remoteBundleUrl];
+    }
+}
+
+/*
  * This method is checks if a new status update exists (new version was installed,
  * or an update failed) and return its details (version label, status).
  */
@@ -645,31 +707,6 @@ RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
     }
     
     resolve(nil);
-}
-
-/*
- * This method is the native side of the CodePush.restartApp() method.
- */
-RCT_EXPORT_METHOD(restartApp:(BOOL)onlyIfUpdateIsPending)
-{
-    // If this is an unconditional restart request, or there
-    // is current pending update, then reload the app.
-    if (!onlyIfUpdateIsPending || [self isPendingUpdate:nil]) {
-        [self loadBundle];
-    }
-}
-
-/*
- * This method is the native side of the CodePush.downloadAndReplaceCurrentBundle()
- * method, which replaces the current bundle with the one downloaded from
- * removeBundleUrl. It is only to be used during tests and no-ops if the test
- * configuration flag is not set.
- */
-RCT_EXPORT_METHOD(downloadAndReplaceCurrentBundle:(NSString *)remoteBundleUrl)
-{
-    if ([CodePush isUsingTestConfiguration]) {
-        [CodePushPackage downloadAndReplaceCurrentBundle:remoteBundleUrl];
-    }
 }
 
 @end
