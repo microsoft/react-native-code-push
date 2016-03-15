@@ -1,7 +1,5 @@
 package com.microsoft.codepush.react;
 
-import android.content.Context;
-
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
@@ -21,19 +19,19 @@ import java.nio.ByteBuffer;
 
 public class CodePushPackage {
 
-    public final String CODE_PUSH_FOLDER_PREFIX = "CodePush";
-    public final String CURRENT_PACKAGE_KEY = "currentPackage";
-    public final String DIFF_MANIFEST_FILE_NAME = "hotcodepush.json";
-    public final int DOWNLOAD_BUFFER_SIZE = 1024 * 256;
-    public final String DOWNLOAD_FILE_NAME = "download.zip";
-    public final String DOWNLOAD_URL_KEY = "downloadUrl";
-    public final String PACKAGE_FILE_NAME = "app.json";
-    public final String PACKAGE_HASH_KEY = "packageHash";
-    public final String PREVIOUS_PACKAGE_KEY = "previousPackage";
-    public final String RELATIVE_BUNDLE_PATH_KEY = "bundlePath";
-    public final String STATUS_FILE = "codepush.json";
-    public final String UNZIPPED_FOLDER_NAME = "unzipped";
-    public final String UPDATE_BUNDLE_FILE_NAME = "app.jsbundle";
+    private final String CODE_PUSH_FOLDER_PREFIX = "CodePush";
+    private final String CURRENT_PACKAGE_KEY = "currentPackage";
+    private final String DIFF_MANIFEST_FILE_NAME = "hotcodepush.json";
+    private final int DOWNLOAD_BUFFER_SIZE = 1024 * 256;
+    private final String DOWNLOAD_FILE_NAME = "download.zip";
+    private final String DOWNLOAD_URL_KEY = "downloadUrl";
+    private final String PACKAGE_FILE_NAME = "app.json";
+    private final String PACKAGE_HASH_KEY = "packageHash";
+    private final String PREVIOUS_PACKAGE_KEY = "previousPackage";
+    private final String RELATIVE_BUNDLE_PATH_KEY = "bundlePath";
+    private final String STATUS_FILE = "codepush.json";
+    private final String UNZIPPED_FOLDER_NAME = "unzipped";
+    private final String UPDATE_BUNDLE_FILE_NAME = "app.jsbundle";
 
     private String documentsDirectory;
 
@@ -41,19 +39,19 @@ public class CodePushPackage {
         this.documentsDirectory = documentsDirectory;
     }
 
-    public String getDownloadFilePath() {
+    private String getDownloadFilePath() {
         return CodePushUtils.appendPathComponent(getCodePushPath(), DOWNLOAD_FILE_NAME);
     }
 
-    public String getUnzippedFolderPath() {
+    private String getUnzippedFolderPath() {
         return CodePushUtils.appendPathComponent(getCodePushPath(), UNZIPPED_FOLDER_NAME);
     }
 
-    public String getDocumentsDirectory() {
+    private String getDocumentsDirectory() {
         return documentsDirectory;
     }
 
-    public String getCodePushPath() {
+    private String getCodePushPath() {
         String codePushPath = CodePushUtils.appendPathComponent(getDocumentsDirectory(), CODE_PUSH_FOLDER_PREFIX);
         if (CodePush.isUsingTestConfiguration()) {
             codePushPath = CodePushUtils.appendPathComponent(codePushPath, "TestPackages");
@@ -62,7 +60,7 @@ public class CodePushPackage {
         return codePushPath;
     }
 
-    public String getStatusFilePath() {
+    private String getStatusFilePath() {
         return CodePushUtils.appendPathComponent(getCodePushPath(), STATUS_FILE);
     }
 
@@ -151,7 +149,7 @@ public class CodePushPackage {
         }
     }
 
-    public void downloadPackage(Context applicationContext, ReadableMap updatePackage, String expectedBundleFileName,
+    public void downloadPackage(ReadableMap updatePackage, String expectedBundleFileName,
                                 DownloadProgressCallback progressCallback) throws IOException {
         String newUpdateHash = CodePushUtils.tryGetString(updatePackage, PACKAGE_HASH_KEY);
         String newUpdateFolderPath = getPackageFolderPath(newUpdateHash);
@@ -163,7 +161,6 @@ public class CodePushPackage {
         }
 
         String downloadUrlString = CodePushUtils.tryGetString(updatePackage, DOWNLOAD_URL_KEY);
-        URL downloadUrl = null;
         HttpURLConnection connection = null;
         BufferedInputStream bin = null;
         FileOutputStream fos = null;
@@ -173,7 +170,7 @@ public class CodePushPackage {
 
         // Download the file while checking if it is a zip and notifying client of progress.
         try {
-            downloadUrl = new URL(downloadUrlString);
+            URL downloadUrl = new URL(downloadUrlString);
             connection = (HttpURLConnection) (downloadUrl.openConnection());
 
             long totalBytes = connection.getContentLength();
@@ -206,7 +203,10 @@ public class CodePushPackage {
                 progressCallback.call(new DownloadProgress(totalBytes, receivedBytes));
             }
 
-            assert totalBytes == receivedBytes;
+            if (totalBytes != receivedBytes) {
+                throw new CodePushUnknownException("Received " + receivedBytes + " bytes, expected " + totalBytes);
+            }
+
             isZip = ByteBuffer.wrap(header).getInt() == 0x504b0304;
         } catch (MalformedURLException e) {
             throw new CodePushMalformedDataException(downloadUrlString, e);
@@ -266,7 +266,7 @@ public class CodePushPackage {
                             " in update package.", e);
                 }
 
-                updatePackage = CodePushUtils.convertJsonObjectToWriteable(updatePackageJSON);
+                updatePackage = CodePushUtils.convertJsonObjectToWritable(updatePackageJSON);
             }
         } else {
             // File is a jsbundle, move it to a folder with the packageHash as its name
@@ -277,7 +277,7 @@ public class CodePushPackage {
         CodePushUtils.writeReadableMapToFile(updatePackage, newUpdateMetadataPath);
     }
 
-    public void installPackage(ReadableMap updatePackage, boolean removePendingUpdate) throws IOException {
+    public void installPackage(ReadableMap updatePackage, boolean removePendingUpdate) {
         String packageHash = CodePushUtils.tryGetString(updatePackage, PACKAGE_HASH_KEY);
         WritableMap info = getCurrentPackageInfo();
         if (removePendingUpdate) {

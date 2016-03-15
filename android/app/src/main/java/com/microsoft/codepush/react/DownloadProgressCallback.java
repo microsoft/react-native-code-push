@@ -1,5 +1,5 @@
 package com.microsoft.codepush.react;
 
-public interface DownloadProgressCallback {
+interface DownloadProgressCallback {
     void call(DownloadProgress downloadProgress);
 }

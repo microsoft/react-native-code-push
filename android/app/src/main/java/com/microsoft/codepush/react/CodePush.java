@@ -91,9 +91,8 @@ public class CodePush {
         this.isDebugMode = isDebugMode;
         this.mainActivity = mainActivity;
 
-        PackageInfo pInfo = null;
         try {
-            pInfo = applicationContext.getPackageManager().getPackageInfo(applicationContext.getPackageName(), 0);
+            PackageInfo pInfo = applicationContext.getPackageManager().getPackageInfo(applicationContext.getPackageName(), 0);
             appVersion = pInfo.versionName;
             buildVersion = pInfo.versionCode;
         } catch (PackageManager.NameNotFoundException e) {
@@ -110,11 +109,10 @@ public class CodePush {
         }
     }
     
-    public long getBinaryResourcesModifiedTime() {
-        ApplicationInfo ai = null;
+    private long getBinaryResourcesModifiedTime() {
         ZipFile applicationFile = null;
         try {
-            ai = applicationContext.getPackageManager().getApplicationInfo(applicationContext.getPackageName(), 0);
+            ApplicationInfo ai = applicationContext.getPackageManager().getApplicationInfo(applicationContext.getPackageName(), 0);
             applicationFile = new ZipFile(ai.sourceDir);
             ZipEntry classesDexEntry = applicationFile.getEntry(RESOURCES_BUNDLE);
             return classesDexEntry.getTime();
@@ -155,7 +153,7 @@ public class CodePush {
             String packageAppVersion = CodePushUtils.tryGetString(packageMetadata, "appVersion");
             if (binaryModifiedDateDuringPackageInstall != null &&
                     binaryModifiedDateDuringPackageInstall == binaryResourcesModifiedTime &&
-                    (this.isUsingTestConfiguration() || this.appVersion.equals(packageAppVersion))) {
+                    (isUsingTestConfiguration() || this.appVersion.equals(packageAppVersion))) {
                 CodePushUtils.logBundleUrl(packageFilePath);
                 isRunningBinaryVersion = false;
                 return packageFilePath;
@@ -183,8 +181,7 @@ public class CodePush {
         }
 
         try {
-            JSONArray failedUpdates = new JSONArray(failedUpdatesString);
-            return failedUpdates;
+            return new JSONArray(failedUpdatesString);
         } catch (JSONException e) {
             // Unrecognized data format, clear and replace with expected format.
             JSONArray emptyArray = new JSONArray();
@@ -201,8 +198,7 @@ public class CodePush {
         }
 
         try {
-            JSONObject pendingUpdate = new JSONObject(pendingUpdateString);
-            return pendingUpdate;
+            return new JSONObject(pendingUpdateString);
         } catch (JSONException e) {
             // Should not happen.
             CodePushUtils.log("Unable to parse pending update metadata " + pendingUpdateString +
@@ -251,9 +247,8 @@ public class CodePush {
         JSONArray failedUpdates = getFailedUpdates();
         if (packageHash != null) {
             for (int i = 0; i < failedUpdates.length(); i++) {
-                JSONObject failedPackage = null;
                 try {
-                    failedPackage = failedUpdates.getJSONObject(i);
+                    JSONObject failedPackage = failedUpdates.getJSONObject(i);
                     String failedPackageHash = failedPackage.getString(PACKAGE_HASH_KEY);
                     if (packageHash.equals(failedPackageHash)) {
                         return true;
@@ -271,10 +266,9 @@ public class CodePush {
         JSONObject pendingUpdate = getPendingUpdate();
         
         try {
-            boolean updateIsPending = pendingUpdate != null &&
-                                      pendingUpdate.getBoolean(PENDING_UPDATE_IS_LOADING_KEY) == false &&
-                                      (packageHash == null || pendingUpdate.getString(PENDING_UPDATE_HASH_KEY).equals(packageHash));
-            return updateIsPending;
+            return pendingUpdate != null &&
+                   !pendingUpdate.getBoolean(PENDING_UPDATE_IS_LOADING_KEY) &&
+                   (packageHash == null || pendingUpdate.getString(PENDING_UPDATE_HASH_KEY).equals(packageHash));
         }
         catch (JSONException e) {
             throw new CodePushUnknownException("Unable to read pending update metadata in isPendingUpdate.", e);
@@ -359,13 +353,13 @@ public class CodePush {
 
         @ReactMethod
         public void downloadUpdate(final ReadableMap updatePackage, final Promise promise) {
-            AsyncTask asyncTask = new AsyncTask() {
+            AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
                 @Override
-                protected Void doInBackground(Object... params) {
+                protected Void doInBackground(Void... params) {
                     try {
                         WritableMap mutableUpdatePackage = CodePushUtils.convertReadableMapToWritableMap(updatePackage);
                         mutableUpdatePackage.putString(BINARY_MODIFIED_TIME_KEY, "" + getBinaryResourcesModifiedTime());
-                        codePushPackage.downloadPackage(applicationContext, mutableUpdatePackage, CodePush.this.assetsBundleFileName, new DownloadProgressCallback() {
+                        codePushPackage.downloadPackage(mutableUpdatePackage, CodePush.this.assetsBundleFileName, new DownloadProgressCallback() {
                             @Override
                             public void call(DownloadProgress downloadProgress) {
                                 getReactApplicationContext()
@@ -374,15 +368,15 @@ public class CodePush {
                             }
                         });
 
-                        WritableMap newPackage = codePushPackage.getPackage(CodePushUtils.tryGetString(updatePackage, codePushPackage.PACKAGE_HASH_KEY));
+                        WritableMap newPackage = codePushPackage.getPackage(CodePushUtils.tryGetString(updatePackage, PACKAGE_HASH_KEY));
                         promise.resolve(newPackage);
                     } catch (IOException e) {
                         e.printStackTrace();
-                        promise.reject(e.getMessage());
+                        promise.reject(e);
                     } catch (CodePushInvalidUpdateException e) {
                         e.printStackTrace();
                         saveFailedUpdate(updatePackage);
-                        promise.reject(e.getMessage());
+                        promise.reject(e);
                     }
 
                     return null;
@@ -414,9 +408,9 @@ public class CodePush {
 
         @ReactMethod
         public void getCurrentPackage(final Promise promise) {
-            AsyncTask asyncTask = new AsyncTask() {
+            AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
                 @Override
-                protected Void doInBackground(Object... params) {
+                protected Void doInBackground(Void... params) {
                     WritableMap currentPackage = codePushPackage.getCurrentPackage();
                     if (currentPackage == null) {
                         promise.resolve("");
@@ -429,8 +423,8 @@ public class CodePush {
 
                     Boolean isPendingUpdate = false;
 
-                    if (currentPackage.hasKey(codePushPackage.PACKAGE_HASH_KEY)) {
-                        String currentHash = currentPackage.getString(codePushPackage.PACKAGE_HASH_KEY);
+                    if (currentPackage.hasKey(PACKAGE_HASH_KEY)) {
+                        String currentHash = currentPackage.getString(PACKAGE_HASH_KEY);
                         isPendingUpdate = CodePush.this.isPendingUpdate(currentHash);
                     }
 
@@ -446,16 +440,16 @@ public class CodePush {
         @ReactMethod
         public void getNewStatusReport(final Promise promise) {
 
-            AsyncTask asyncTask = new AsyncTask() {
+            AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
                 @Override
-                protected Void doInBackground(Object... params) {
+                protected Void doInBackground(Void... params) {
                     if (needToReportRollback) {
                         needToReportRollback = false;
                         JSONArray failedUpdates = getFailedUpdates();
                         if (failedUpdates != null && failedUpdates.length() > 0) {
                             try {
                                 JSONObject lastFailedPackageJSON = failedUpdates.getJSONObject(failedUpdates.length() - 1);
-                                WritableMap lastFailedPackage = CodePushUtils.convertJsonObjectToWriteable(lastFailedPackageJSON);
+                                WritableMap lastFailedPackage = CodePushUtils.convertJsonObjectToWritable(lastFailedPackageJSON);
                                 WritableMap failedStatusReport = codePushTelemetryManager.getRollbackReport(lastFailedPackage);
                                 if (failedStatusReport != null) {
                                     promise.resolve(failedStatusReport);
@@ -492,61 +486,56 @@ public class CodePush {
 
         @ReactMethod
         public void installUpdate(final ReadableMap updatePackage, final int installMode, final int minimumBackgroundDuration, final Promise promise) {
-            AsyncTask asyncTask = new AsyncTask() {
+            AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
                 @Override
-                protected Void doInBackground(Object... params) {
-                    try {
-                        codePushPackage.installPackage(updatePackage, isPendingUpdate(null));
+                protected Void doInBackground(Void... params) {
+                    codePushPackage.installPackage(updatePackage, isPendingUpdate(null));
 
-                        String pendingHash = CodePushUtils.tryGetString(updatePackage, codePushPackage.PACKAGE_HASH_KEY);
-                        if (pendingHash == null) {
-                            throw new CodePushUnknownException("Update package to be installed has no hash.");
-                        } else {
-                            savePendingUpdate(pendingHash, /* isLoading */false);
-                        }
-
-                        if (installMode == CodePushInstallMode.ON_NEXT_RESUME.getValue()) {
-                            // Store the minimum duration on the native module as an instance
-                            // variable instead of relying on a closure below, so that any
-                            // subsequent resume-based installs could override it. 
-                            CodePushNativeModule.this.minimumBackgroundDuration = minimumBackgroundDuration;
-                            
-                            if (lifecycleEventListener == null) {
-                                // Ensure we do not add the listener twice.
-                                lifecycleEventListener = new LifecycleEventListener() {
-                                    private Date lastPausedDate = null;
-                                    
-                                    @Override
-                                    public void onHostResume() {
-                                        // Determine how long the app was in the background and ensure
-                                        // that it meets the minimum duration amount of time.
-                                        long durationInBackground = (new Date().getTime() - lastPausedDate.getTime()) / 1000;
-                                        if (durationInBackground >= CodePushNativeModule.this.minimumBackgroundDuration) {
-                                            loadBundle();
-                                        }
-                                    }
-
-                                    @Override
-                                    public void onHostPause() {
-                                        // Save the current time so that when the app is later
-                                        // resumed, we can detect how long it was in the background.
-                                        lastPausedDate = new Date();
-                                    }
-
-                                    @Override
-                                    public void onHostDestroy() {
-                                    }
-                                };
-                                
-                                getReactApplicationContext().addLifecycleEventListener(lifecycleEventListener);
-                            }
-                        }
-
-                        promise.resolve("");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        promise.reject(e.getMessage());
+                    String pendingHash = CodePushUtils.tryGetString(updatePackage, PACKAGE_HASH_KEY);
+                    if (pendingHash == null) {
+                        throw new CodePushUnknownException("Update package to be installed has no hash.");
+                    } else {
+                        savePendingUpdate(pendingHash, /* isLoading */false);
                     }
+
+                    if (installMode == CodePushInstallMode.ON_NEXT_RESUME.getValue()) {
+                        // Store the minimum duration on the native module as an instance
+                        // variable instead of relying on a closure below, so that any
+                        // subsequent resume-based installs could override it.
+                        CodePushNativeModule.this.minimumBackgroundDuration = minimumBackgroundDuration;
+
+                        if (lifecycleEventListener == null) {
+                            // Ensure we do not add the listener twice.
+                            lifecycleEventListener = new LifecycleEventListener() {
+                                private Date lastPausedDate = null;
+
+                                @Override
+                                public void onHostResume() {
+                                    // Determine how long the app was in the background and ensure
+                                    // that it meets the minimum duration amount of time.
+                                    long durationInBackground = (new Date().getTime() - lastPausedDate.getTime()) / 1000;
+                                    if (durationInBackground >= CodePushNativeModule.this.minimumBackgroundDuration) {
+                                        loadBundle();
+                                    }
+                                }
+
+                                @Override
+                                public void onHostPause() {
+                                    // Save the current time so that when the app is later
+                                    // resumed, we can detect how long it was in the background.
+                                    lastPausedDate = new Date();
+                                }
+
+                                @Override
+                                public void onHostDestroy() {
+                                }
+                            };
+
+                            getReactApplicationContext().addLifecycleEventListener(lifecycleEventListener);
+                        }
+                    }
+
+                    promise.resolve("");
 
                     return null;
                 }
@@ -631,12 +620,12 @@ public class CodePush {
 
         @Override
         public List<Class<? extends JavaScriptModule>> createJSModules() {
-            return new ArrayList();
+            return new ArrayList<>();
         }
 
         @Override
         public List<ViewManager> createViewManagers(ReactApplicationContext reactApplicationContext) {
-            return new ArrayList();
+            return new ArrayList<>();
         }
     }
 }

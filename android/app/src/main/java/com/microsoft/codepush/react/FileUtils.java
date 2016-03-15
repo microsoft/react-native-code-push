@@ -9,12 +9,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 public class FileUtils {
 
-    public static final int WRITE_BUFFER_SIZE = 1024 * 8;
+    private static final int WRITE_BUFFER_SIZE = 1024 * 8;
 
     public static void copyDirectoryContents(String sourceDirectoryPath, String destinationDirectoryPath) throws IOException {
         File sourceDir = new File(sourceDirectoryPath);
@@ -55,21 +54,16 @@ public class FileUtils {
         }
     }
 
-    public static boolean createFolderAtPath(String filePath) {
-        File file = new File(filePath);
-        return file.mkdir();
-    }
-
     public static void deleteDirectory(File directory) {
         if (directory.exists()) {
             File[] files = directory.listFiles();
             if (files != null) {
-                for (int i=0; i<files.length; i++) {
-                    if(files[i].isDirectory()) {
-                        deleteDirectory(files[i]);
+                for (File file : files) {
+                    if(file.isDirectory()) {
+                        deleteDirectory(file);
                     }
                     else {
-                        files[i].delete();
+                        file.delete();
                     }
                 }
             }
@@ -88,12 +82,12 @@ public class FileUtils {
     public static void deleteFileOrFolderSilently(File file) {
         if (file.isDirectory()) {
             File[] files = file.listFiles();
-            for (int i = 0; i < files.length; i++) {
-                if (files[i].isDirectory()) {
-                    deleteFileOrFolderSilently(files[i]);
+            for (File fileEntry : files) {
+                if (fileEntry.isDirectory()) {
+                    deleteFileOrFolderSilently(fileEntry);
                 } else {
                     if (!file.delete()) {
-                        files[i].delete();
+                        fileEntry.delete();
                     }
                 }
             }

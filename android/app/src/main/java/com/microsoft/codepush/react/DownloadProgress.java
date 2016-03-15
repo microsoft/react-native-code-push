@@ -3,9 +3,9 @@ package com.microsoft.codepush.react;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
 
-public class DownloadProgress {
-    public long totalBytes;
-    public long receivedBytes;
+class DownloadProgress {
+    private long totalBytes;
+    private long receivedBytes;
 
     public DownloadProgress (long totalBytes, long receivedBytes){
         this.totalBytes = totalBytes;

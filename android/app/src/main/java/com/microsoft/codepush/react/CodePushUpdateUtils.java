@@ -115,7 +115,7 @@ public class CodePushUpdateUtils {
     }
 
     public static void verifyHashForDiffUpdate(String folderPath, String expectedHash) {
-        ArrayList<String> updateContentsManifest = new ArrayList<String>();
+        ArrayList<String> updateContentsManifest = new ArrayList<>();
         addContentsOfFolderToManifest(folderPath, "", updateContentsManifest);
         Collections.sort(updateContentsManifest);
         JSONArray updateContentsJSONArray = new JSONArray();
