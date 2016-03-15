@@ -6,7 +6,7 @@ public enum CodePushInstallMode {
     ON_NEXT_RESUME(2);
 
     private final int value;
-    private CodePushInstallMode(int value) {
+    CodePushInstallMode(int value) {
         this.value = value;
     }
     public int getValue() {

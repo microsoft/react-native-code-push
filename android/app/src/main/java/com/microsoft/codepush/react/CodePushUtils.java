@@ -15,29 +15,22 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.util.Iterator;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 public class CodePushUtils {
 
-    public static final String CODE_PUSH_TAG = "CodePush";
     public static final String REACT_NATIVE_LOG_TAG = "ReactNative";
 
     public static String appendPathComponent(String basePath, String appendPathComponent) {
         return new File(basePath, appendPathComponent).getAbsolutePath();
     }
 
-    public static WritableArray convertJsonArrayToWriteable(JSONArray jsonArr) {
+    public static WritableArray convertJsonArrayToWritable(JSONArray jsonArr) {
         WritableArray arr = Arguments.createArray();
         for (int i=0; i<jsonArr.length(); i++) {
             Object obj = null;
@@ -49,9 +42,9 @@ public class CodePushUtils {
             }
 
             if (obj instanceof JSONObject)
-                arr.pushMap(convertJsonObjectToWriteable((JSONObject) obj));
+                arr.pushMap(convertJsonObjectToWritable((JSONObject) obj));
             else if (obj instanceof JSONArray)
-                arr.pushArray(convertJsonArrayToWriteable((JSONArray) obj));
+                arr.pushArray(convertJsonArrayToWritable((JSONArray) obj));
             else if (obj instanceof String)
                 arr.pushString((String) obj);
             else if (obj instanceof Double)
@@ -69,7 +62,7 @@ public class CodePushUtils {
         return arr;
     }
 
-    public static WritableMap convertJsonObjectToWriteable(JSONObject jsonObj) {
+    public static WritableMap convertJsonObjectToWritable(JSONObject jsonObj) {
         WritableMap map = Arguments.createMap();
         Iterator<String> it = jsonObj.keys();
         while(it.hasNext()){
@@ -83,9 +76,9 @@ public class CodePushUtils {
             }
 
             if (obj instanceof JSONObject)
-                map.putMap(key, convertJsonObjectToWriteable((JSONObject) obj));
+                map.putMap(key, convertJsonObjectToWritable((JSONObject) obj));
             else if (obj instanceof JSONArray)
-                map.putArray(key, convertJsonArrayToWriteable((JSONArray) obj));
+                map.putArray(key, convertJsonArrayToWritable((JSONArray) obj));
             else if (obj instanceof String)
                 map.putString(key, (String) obj);
             else if (obj instanceof Double)
@@ -105,7 +98,7 @@ public class CodePushUtils {
 
     public static WritableMap convertReadableMapToWritableMap(ReadableMap map) {
         JSONObject mapJSON = convertReadableToJsonObject(map);
-        return convertJsonObjectToWriteable(mapJSON);
+        return convertJsonObjectToWritable(mapJSON);
     }
 
     public static JSONArray convertReadableToJsonArray(ReadableArray arr) {
@@ -204,16 +197,13 @@ public class CodePushUtils {
     }
 
     public static WritableMap getWritableMapFromFile(String filePath) throws IOException {
-
         String content = FileUtils.readFileToString(filePath);
-        JSONObject json = null;
         try {
-            json = new JSONObject(content);
-            return convertJsonObjectToWriteable(json);
+            JSONObject json = new JSONObject(content);
+            return convertJsonObjectToWritable(json);
         } catch (JSONException jsonException) {
             throw new CodePushMalformedDataException(filePath, jsonException);
         }
-
     }
 
     public static void log(String message) {

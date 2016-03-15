@@ -1,6 +1,6 @@
 package com.microsoft.codepush.react;
 
-public class CodePushUnknownException extends RuntimeException {
+class CodePushUnknownException extends RuntimeException {
 
     public CodePushUnknownException(String message, Throwable cause) {
         super(message, cause);

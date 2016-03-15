@@ -11,7 +11,7 @@ import com.facebook.react.bridge.ReactMethod;
 
 public class CodePushDialog extends ReactContextBaseJavaModule{
 
-    Activity mainActivity;
+    private Activity mainActivity;
 
     public CodePushDialog(ReactApplicationContext reactContext, Activity mainActivity) {
         super(reactContext);
