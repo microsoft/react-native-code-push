@@ -325,7 +325,7 @@ After installing the plugin and syncing your Android Studio project with Gradle,
     }
     ```
     
-2. If you used RNPM to install/link the CodePush plugin, there are a two additional changes you'll need to make due to the fact thsat RNPM makes some assupmtions about the CodePush plugin that aren't currently true. Otherwise, skip to step #3:
+2. If you used RNPM to install/link the CodePush plugin, there are two additional changes you'll need to make due to the fact that RNPM makes some assumptions about the CodePush plugin that we don't currently support. If you're not using RNPM then simply skip to step #3:
 
     ```java
     ...
