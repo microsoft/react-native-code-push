@@ -282,7 +282,7 @@ After installing the plugin and syncing your Android Studio project with Gradle,
         ...
     }
     ```
-
+    
 ### Plugin Configuration (Android - React Native v0.18.0+)
 
 *NOTE: These instructions are specific to apps that are using React Native v0.18.0+. If you are using v0.15.0-v0.17.0, then refer to the previous section.*
@@ -321,6 +321,27 @@ After installing the plugin and syncing your Android Studio project with Gradle,
                 new MainReactPackage(), this._codePush.getReactPackage());
         }
 
+        ...
+    }
+    ```
+    
+3. If you used RNPM to install/link the CodePush plugin, there are a two additional changes you'll need to make due to the fact thsat RNPM makes some assupmtions about the CodePush plugin that aren't currently true. Otherwise, skip to step #3:
+
+    ```java
+    ...
+    // 1. Remove the following import statement
+    import com.microsoft.codepush.react.CodePushReactPackage;
+    ...
+    public class MainActivity extends ReactActivity {
+        ...
+        @Override
+        protected List<ReactPackage> getPackages() {
+            return Arrays.<ReactPackage>asList(
+                ...
+                new CodePushReactPackage() // 2. Remove this line
+                ...
+            );
+        }
         ...
     }
     ```
