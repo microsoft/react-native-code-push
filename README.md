@@ -325,7 +325,7 @@ After installing the plugin and syncing your Android Studio project with Gradle,
     }
     ```
     
-3. If you used RNPM to install/link the CodePush plugin, there are a two additional changes you'll need to make due to the fact thsat RNPM makes some assupmtions about the CodePush plugin that aren't currently true. Otherwise, skip to step #3:
+2. If you used RNPM to install/link the CodePush plugin, there are a two additional changes you'll need to make due to the fact thsat RNPM makes some assupmtions about the CodePush plugin that aren't currently true. Otherwise, skip to step #3:
 
     ```java
     ...
@@ -346,7 +346,7 @@ After installing the plugin and syncing your Android Studio project with Gradle,
     }
     ```
 
-2. Ensure that the `android.defaultConfig.versionName` property in your `android/app/build.gradle` file is set to a semver compliant value. Note that if the value provided is missing a patch version, the CodePush server will assume it is `0`, i.e. `1.0` will be treated as `1.0.0`.
+3. Ensure that the `android.defaultConfig.versionName` property in your `android/app/build.gradle` file is set to a semver compliant value. Note that if the value provided is missing a patch version, the CodePush server will assume it is `0`, i.e. `1.0` will be treated as `1.0.0`.
     
     ```gradle
     android {
