@@ -175,15 +175,19 @@ NSString * const ManifestFolderPrefix = @"CodePush";
     }
     
     binaryHashDictionary = [NSMutableDictionary dictionary];
-    
-    NSString *assetsPath = [CodePushPackage getBinaryAssetsPath];
     NSMutableArray *manifest = [NSMutableArray array];
-    [self addContentsOfFolderToManifest:assetsPath
-                             pathPrefix:[NSString stringWithFormat:@"%@/%@", [self manifestFolderPrefix], @"assets"]
-                               manifest:manifest
-                                  error:error];
-    if (*error) {
-        return nil;
+    
+    // If the app is using assets, then add
+    // them to the generated content manifest.
+    NSString *assetsPath = [CodePushPackage getBinaryAssetsPath];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:assetsPath]) {
+        [self addContentsOfFolderToManifest:assetsPath
+                                 pathPrefix:[NSString stringWithFormat:@"%@/%@", [self manifestFolderPrefix], @"assets"]
+                                   manifest:manifest
+                                      error:error];
+        if (*error) {
+            return nil;
+        }
     }
     
     NSData *jsBundleContents = [NSData dataWithContentsOfURL:binaryBundleUrl];
