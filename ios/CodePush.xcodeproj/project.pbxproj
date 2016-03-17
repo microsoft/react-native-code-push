@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		13BE3DEE1AC21097009241FE /* CodePush.m in Sources */ = {isa = PBXBuildFile; fileRef = 13BE3DED1AC21097009241FE /* CodePush.m */; };
 		1B23B9141BF9267B000BB2F0 /* RCTConvert+CodePushInstallMode.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B23B9131BF9267B000BB2F0 /* RCTConvert+CodePushInstallMode.m */; };
+		1B762E901C9A5E9A006EF800 /* CodePushErrorUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B762E8F1C9A5E9A006EF800 /* CodePushErrorUtils.m */; };
 		540D20121C7684FE00D6EF41 /* CodePushUpdateUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 540D20111C7684FE00D6EF41 /* CodePushUpdateUtils.m */; };
 		5421FE311C58AD5A00986A55 /* CodePushTelemetryManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 5421FE301C58AD5A00986A55 /* CodePushTelemetryManager.m */; };
 		54A0026C1C0E2880004C3CEC /* aescrypt.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0024C1C0E2880004C3CEC /* aescrypt.c */; };
@@ -47,6 +48,7 @@
 		13BE3DEC1AC21097009241FE /* CodePush.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CodePush.h; path = CodePush/CodePush.h; sourceTree = "<group>"; };
 		13BE3DED1AC21097009241FE /* CodePush.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CodePush.m; path = CodePush/CodePush.m; sourceTree = "<group>"; };
 		1B23B9131BF9267B000BB2F0 /* RCTConvert+CodePushInstallMode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "RCTConvert+CodePushInstallMode.m"; path = "CodePush/RCTConvert+CodePushInstallMode.m"; sourceTree = "<group>"; };
+		1B762E8F1C9A5E9A006EF800 /* CodePushErrorUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CodePushErrorUtils.m; path = CodePush/CodePushErrorUtils.m; sourceTree = "<group>"; };
 		540D20111C7684FE00D6EF41 /* CodePushUpdateUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CodePushUpdateUtils.m; path = CodePush/CodePushUpdateUtils.m; sourceTree = "<group>"; };
 		5421FE301C58AD5A00986A55 /* CodePushTelemetryManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CodePushTelemetryManager.m; path = CodePush/CodePushTelemetryManager.m; sourceTree = "<group>"; };
 		54A0024A1C0E2880004C3CEC /* aes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aes.h; sourceTree = "<group>"; };
@@ -168,10 +170,11 @@
 			children = (
 				54A002481C0E2880004C3CEC /* SSZipArchive */,
 				1B23B9131BF9267B000BB2F0 /* RCTConvert+CodePushInstallMode.m */,
+				81D51F391B6181C2000DA084 /* CodePushConfig.m */,
 				54FFEDDF1BF550630061DD23 /* CodePushDownloadHandler.m */,
+				1B762E8F1C9A5E9A006EF800 /* CodePushErrorUtils.m */,
 				810D4E6C1B96935000B397E9 /* CodePushPackage.m */,
 				5421FE301C58AD5A00986A55 /* CodePushTelemetryManager.m */,
-				81D51F391B6181C2000DA084 /* CodePushConfig.m */,
 				540D20111C7684FE00D6EF41 /* CodePushUpdateUtils.m */,
 				13BE3DEC1AC21097009241FE /* CodePush.h */,
 				13BE3DED1AC21097009241FE /* CodePush.m */,
@@ -254,6 +257,7 @@
 				54A0026F1C0E2880004C3CEC /* entropy.c in Sources */,
 				13BE3DEE1AC21097009241FE /* CodePush.m in Sources */,
 				54A0026C1C0E2880004C3CEC /* aescrypt.c in Sources */,
+				1B762E901C9A5E9A006EF800 /* CodePushErrorUtils.m in Sources */,
 				54A002701C0E2880004C3CEC /* fileenc.c in Sources */,
 				810D4E6D1B96935000B397E9 /* CodePushPackage.m in Sources */,
 			);
