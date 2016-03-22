@@ -297,12 +297,7 @@ After installing the plugin and syncing your Android Studio project with Gradle,
     import com.microsoft.codepush.react.CodePush;
 
     public class MainActivity extends ReactActivity {
-        // 2. Define a private field to hold the CodePush runtime instance
-        private CodePush _codePush;
-
-        ...
-
-        // 3. Override the getJSBundleFile method in order to let
+        // 2. Override the getJSBundleFile method in order to let
         // the CodePush runtime determine where to get the JS
         // bundle location from on each app start
         @Override
@@ -312,41 +307,20 @@ After installing the plugin and syncing your Android Studio project with Gradle,
 
         @Override
         protected List<ReactPackage> getPackages() {
-            // 4. Instantiate an instance of the CodePush runtime, using the right deployment key. If you don't
-            // already have it, you can run "code-push deployment ls <appName> -k" to retrieve your key.
-            this._codePush = new CodePush("0dsIDongIcoH0mqAmoR0CYb5FhBZNy1w4Bf-l", this, BuildConfig.DEBUG);
-
-            // 5. Add the CodePush package to the list of existing packages
+            // 3. Instantiate an instance of the CodePush runtime and add it to the list of
+            // existing packages, specifying the right deployment key. If you don't already 
+            // have it, you can run "code-push deployment ls <appName> -k" to retrieve your key.
             return Arrays.<ReactPackage>asList(
-                new MainReactPackage(), this._codePush.getReactPackage());
-        }
-
-        ...
-    }
-    ```
-    
-2. If you used RNPM to install/link the CodePush plugin, there are two additional changes you'll need to make due to the fact that RNPM makes some assumptions about 3rd party modules that we don't currently support. If you're not using RNPM then simply skip to step #3:
-
-    ```java
-    ...
-    // 1. Remove the following import statement
-    import com.microsoft.codepush.react.CodePushReactPackage;
-    ...
-    public class MainActivity extends ReactActivity {
-        ...
-        @Override
-        protected List<ReactPackage> getPackages() {
-            return Arrays.<ReactPackage>asList(
-                ...
-                new CodePushReactPackage() // 2. Remove this line
-                ...
+                new MainReactPackage(), 
+                new CodePush("0dsIDongIcoH0mqAmoR0CYb5FhBZNy1w4Bf-l", this, BuildConfig.DEBUG)
             );
         }
+
         ...
     }
     ```
 
-3. Ensure that the `android.defaultConfig.versionName` property in your `android/app/build.gradle` file is set to a semver compliant value. Note that if the value provided is missing a patch version, the CodePush server will assume it is `0`, i.e. `1.0` will be treated as `1.0.0`.
+2. Ensure that the `android.defaultConfig.versionName` property in your `android/app/build.gradle` file is set to a semver compliant value. Note that if the value provided is missing a patch version, the CodePush server will assume it is `0`, i.e. `1.0` will be treated as `1.0.0`.
     
     ```gradle
     android {
