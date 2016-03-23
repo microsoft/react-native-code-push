@@ -119,7 +119,7 @@ We hope to eventually remove the need for steps #2-4, but in the meantime, RNPM 
 1. Add the CodePush plugin dependency to your `Podfile`, pointing at the path where NPM installed it
 
     ```ruby
-    pod 'CodePush', :path => './node_modules/react-native-code-push`
+    pod 'CodePush', :path => './node_modules/react-native-code-push'
     ```
     
 2. Run `pod install`
