@@ -27,11 +27,8 @@ module.exports = (NativeCodePush) => {
           const downloadedPackage = await NativeCodePush.downloadUpdate(this);
           reportStatusDownload && reportStatusDownload(this);
           return { ...downloadedPackage, ...local };
-        } catch (e) {
-          // Rethrow the error so that the caller of this method
-          // is aware of the issue (e.g. the update was invalid)
-          throw e;
-        } finally {
+        }
+        finally {
           downloadProgressSubscription && downloadProgressSubscription.remove(); 
         }
       },
