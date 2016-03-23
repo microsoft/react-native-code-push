@@ -269,7 +269,7 @@ After installing the plugin and syncing your Android Studio project with Gradle,
     }
     ```
 
-2. Ensure that the `android.defaultConfig.versionName` property in your `android/app/build.gradle` file is set to a semver compliant value. Note that if the value provided is missing a patch version, the CodePush server will assume it is `0`, i.e. `1.0` will be treated as `1.0.0`.
+2. Ensure that the `android.defaultConfig.versionName` property in your `android/app/build.gradle` file is set to a semver-compliant value. Note that if the value provided is missing a patch version, the CodePush server will assume it is `0`, i.e. `1.0` will be treated as `1.0.0`.
     
     ```gradle
     android {
@@ -312,7 +312,7 @@ After installing the plugin and syncing your Android Studio project with Gradle,
             // have it, you can run "code-push deployment ls <appName> -k" to retrieve your key.
             return Arrays.<ReactPackage>asList(
                 new MainReactPackage(), 
-                new CodePush("0dsIDongIcoH0mqAmoR0CYb5FhBZNy1w4Bf-l", this, BuildConfig.DEBUG)
+                new CodePush("deployment-key-here", this, BuildConfig.DEBUG)
             );
         }
 
@@ -320,7 +320,7 @@ After installing the plugin and syncing your Android Studio project with Gradle,
     }
     ```
 
-2. Ensure that the `android.defaultConfig.versionName` property in your `android/app/build.gradle` file is set to a semver compliant value. Note that if the value provided is missing a patch version, the CodePush server will assume it is `0`, i.e. `1.0` will be treated as `1.0.0`.
+2. Ensure that the `android.defaultConfig.versionName` property in your `android/app/build.gradle` file is set to a semver-compliant value. Note that if the value provided is missing a patch version, the CodePush server will assume it is `0`, i.e. `1.0` will be treated as `1.0.0`.
     
     ```gradle
     android {
