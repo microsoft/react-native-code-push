@@ -27,8 +27,7 @@ module.exports = (NativeCodePush) => {
           const downloadedPackage = await NativeCodePush.downloadUpdate(this);
           reportStatusDownload && reportStatusDownload(this);
           return { ...downloadedPackage, ...local };
-        }
-        finally {
+        } finally {
           downloadProgressSubscription && downloadProgressSubscription.remove(); 
         }
       },
