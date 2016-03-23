@@ -102,7 +102,7 @@ public class CodePush implements ReactPackage {
 
         initializeUpdateAfterRestart();
         if (currentInstance != null) {
-            CodePushUtils.log("More than one CodePush instances has been initialized, please use the non-static method codePush.getBundleUrlInternal() to get the correct bundleURL for a particular instance.");
+            CodePushUtils.log("More than one CodePush instance has been initialized. Please use the instance method codePush.getBundleUrlInternal() to get the correct bundleURL for a particular instance.");
         }
 
         currentInstance = this;
