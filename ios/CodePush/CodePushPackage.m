@@ -207,7 +207,9 @@ static NSString *const UnzippedFolderName = @"unzipped";
                                                         if (relativeBundlePath) {
                                                             [mutableUpdatePackage setValue:relativeBundlePath forKey:RelativeBundlePathKey];
                                                         } else {
-                                                            error = [CodePushErrorUtils errorWithMessage:@"Update is invalid - no files with extension .jsbundle or .bundle were found in the update package."];
+                                                            NSString *errorMessage = [NSString stringWithFormat:@"Update is invalid - A JS bundle file named \"%@\" could not be found within the downloaded contents. Please check that you are releasing your CodePush updates using the exact same JS bundle file name that was shipped with your app's binary.", expectedBundleFileName];
+                                                            
+                                                            error = [CodePushErrorUtils errorWithMessage:errorMessage];
                                                             
                                                             failCallback(error);
                                                             return;
