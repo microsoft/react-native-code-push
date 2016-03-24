@@ -149,7 +149,7 @@ public class CodePush implements ReactPackage {
         long binaryResourcesModifiedTime = this.getBinaryResourcesModifiedTime();
 
         try {
-            String packageFilePath = this.codePushPackage.getCurrentPackageBundlePath();
+            String packageFilePath = codePushPackage.getCurrentPackageBundlePath(this.assetsBundleFileName);
             if (packageFilePath == null) {
                 // There has not been any downloaded updates.
                 CodePushUtils.logBundleUrl(binaryJsBundleUrl);
@@ -586,7 +586,7 @@ public class CodePush implements ReactPackage {
         public void downloadAndReplaceCurrentBundle(String remoteBundleUrl) {
             if (isUsingTestConfiguration()) {
                 try {
-                    codePushPackage.downloadAndReplaceCurrentBundle(remoteBundleUrl);
+                    codePushPackage.downloadAndReplaceCurrentBundle(remoteBundleUrl, assetsBundleFileName);
                 } catch (IOException e) {
                     throw new CodePushUnknownException("Unable to replace current bundle", e);
                 }
