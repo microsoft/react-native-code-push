@@ -39,7 +39,7 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-public class CodePush {
+public class CodePush implements ReactPackage {
     private static boolean needToReportRollback = false;
     private static boolean isRunningBinaryVersion = false;
     private static boolean testConfigurationFlag = false;
@@ -48,8 +48,8 @@ public class CodePush {
 
     private String assetsBundleFileName;
 
-    private final String ASSETS_BUNDLE_PREFIX = "assets://";
-    private final String BINARY_MODIFIED_TIME_KEY = "binaryModifiedTime";
+    private static final String ASSETS_BUNDLE_PREFIX = "assets://";
+    private static final String BINARY_MODIFIED_TIME_KEY = "binaryModifiedTime";
     private final String CODE_PUSH_PREFERENCES = "CodePush";
     private final String DOWNLOAD_PROGRESS_EVENT_NAME = "CodePushDownloadProgress";
     private final String FAILED_UPDATES_KEY = "CODE_PUSH_FAILED_UPDATES";
@@ -65,7 +65,6 @@ public class CodePush {
     // Helper classes.
     private CodePushNativeModule codePushNativeModule;
     private CodePushPackage codePushPackage;
-    private CodePushReactPackage codePushReactPackage;
     private CodePushTelemetryManager codePushTelemetryManager;
 
     // Config properties.
@@ -77,6 +76,8 @@ public class CodePush {
     private Activity mainActivity;
     private Context applicationContext;
     private final boolean isDebugMode;
+
+    private static CodePush currentInstance;
 
     public CodePush(String deploymentKey, Activity mainActivity) {
         this(deploymentKey, mainActivity, false);
@@ -100,6 +101,11 @@ public class CodePush {
         }
 
         initializeUpdateAfterRestart();
+        if (currentInstance != null) {
+            CodePushUtils.log("More than one CodePush instance has been initialized. Please use the instance method codePush.getBundleUrlInternal() to get the correct bundleURL for a particular instance.");
+        }
+
+        currentInstance = this;
     }
 
     private void clearReactDevBundleCache() {
@@ -129,10 +135,18 @@ public class CodePush {
         }
     }
 
-    public String getBundleUrl(String assetsBundleFileName) {
+    public static String getBundleUrl(String assetsBundleFileName) {
+        if (currentInstance == null) {
+            throw new CodePushNotInitializedException("A CodePush instance has not been created yet. Have you added it to your app's list of ReactPackages?");
+        }
+
+        return currentInstance.getBundleUrlInternal(assetsBundleFileName);
+    }
+
+    public String getBundleUrlInternal(String assetsBundleFileName) {
         this.assetsBundleFileName = assetsBundleFileName;
         String binaryJsBundleUrl = ASSETS_BUNDLE_PREFIX + assetsBundleFileName;
-        long binaryResourcesModifiedTime = getBinaryResourcesModifiedTime();
+        long binaryResourcesModifiedTime = this.getBinaryResourcesModifiedTime();
 
         try {
             String packageFilePath = codePushPackage.getCurrentPackageBundlePath(this.assetsBundleFileName);
@@ -143,7 +157,7 @@ public class CodePush {
                 return binaryJsBundleUrl;
             }
 
-            ReadableMap packageMetadata = codePushPackage.getCurrentPackage();
+            ReadableMap packageMetadata = this.codePushPackage.getCurrentPackage();
             Long binaryModifiedDateDuringPackageInstall = null;
             String binaryModifiedDateDuringPackageInstallString = CodePushUtils.tryGetString(packageMetadata, BINARY_MODIFIED_TIME_KEY);
             if (binaryModifiedDateDuringPackageInstallString != null) {
@@ -159,7 +173,7 @@ public class CodePush {
                 return packageFilePath;
             } else {
                 // The binary version is newer.
-                didUpdate = false;
+                this.didUpdate = false;
                 if (!this.isDebugMode || !this.appVersion.equals(packageAppVersion)) {
                     this.clearUpdates();
                 }
@@ -205,13 +219,6 @@ public class CodePush {
                     " stored in SharedPreferences");
             return null;
         }
-    }
-
-    public ReactPackage getReactPackage() {
-        if (codePushReactPackage == null) {
-            codePushReactPackage = new CodePushReactPackage();
-        }
-        return codePushReactPackage;
     }
     
     private void initializeUpdateAfterRestart() {
@@ -349,6 +356,7 @@ public class CodePush {
             Intent intent = mainActivity.getIntent();
             mainActivity.finish();
             mainActivity.startActivity(intent);
+            currentInstance = null;
         }
 
         @ReactMethod
@@ -439,7 +447,6 @@ public class CodePush {
 
         @ReactMethod
         public void getNewStatusReport(final Promise promise) {
-
             AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... params) {
@@ -605,27 +612,25 @@ public class CodePush {
         }
     }
 
-    private class CodePushReactPackage implements ReactPackage {
-        @Override
-        public List<NativeModule> createNativeModules(ReactApplicationContext reactApplicationContext) {
-            List<NativeModule> nativeModules = new ArrayList<>();
-            CodePush.this.codePushNativeModule = new CodePushNativeModule(reactApplicationContext);
-            CodePushDialog dialogModule = new CodePushDialog(reactApplicationContext, mainActivity);
+    @Override
+    public List<NativeModule> createNativeModules(ReactApplicationContext reactApplicationContext) {
+        List<NativeModule> nativeModules = new ArrayList<>();
+        this.codePushNativeModule = new CodePushNativeModule(reactApplicationContext);
+        CodePushDialog dialogModule = new CodePushDialog(reactApplicationContext, mainActivity);
 
-            nativeModules.add(CodePush.this.codePushNativeModule);
-            nativeModules.add(dialogModule);
+        nativeModules.add(this.codePushNativeModule);
+        nativeModules.add(dialogModule);
 
-            return nativeModules;
-        }
+        return nativeModules;
+    }
 
-        @Override
-        public List<Class<? extends JavaScriptModule>> createJSModules() {
-            return new ArrayList<>();
-        }
+    @Override
+    public List<Class<? extends JavaScriptModule>> createJSModules() {
+        return new ArrayList<>();
+    }
 
-        @Override
-        public List<ViewManager> createViewManagers(ReactApplicationContext reactApplicationContext) {
-            return new ArrayList<>();
-        }
+    @Override
+    public List<ViewManager> createViewManagers(ReactApplicationContext reactApplicationContext) {
+        return new ArrayList<>();
     }
 }

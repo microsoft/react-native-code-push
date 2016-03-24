@@ -1,7 +1,5 @@
 package com.microsoft.codepushdemoapp;
 
-import android.os.Bundle;
-
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
@@ -12,17 +10,9 @@ import java.util.List;
 
 public class MainActivity extends ReactActivity {
 
-    private CodePush codePush;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        codePush = new CodePush("deployment-key-here", this, BuildConfig.DEBUG);
-        super.onCreate(savedInstanceState);
-    }
-
     @Override
     protected String getJSBundleFile() {
-        return this.codePush.getBundleUrl("index.android.bundle");
+        return CodePush.getBundleUrl("index.android.bundle");
     }
 
     /**
@@ -51,7 +41,7 @@ public class MainActivity extends ReactActivity {
     protected List<ReactPackage> getPackages() {
         return Arrays.<ReactPackage>asList(
                 new MainReactPackage(),
-                this.codePush.getReactPackage()
+                new CodePush("deployment-key-here", this, BuildConfig.DEBUG)
         );
     }
 }
