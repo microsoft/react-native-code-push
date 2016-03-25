@@ -51,7 +51,7 @@ public class CodePush implements ReactPackage {
     private static final String ASSETS_BUNDLE_PREFIX = "assets://";
     private static final String BINARY_MODIFIED_TIME_KEY = "binaryModifiedTime";
     private final String CODE_PUSH_PREFERENCES = "CodePush";
-    private final String DEFAULT_JS_BUNDLE_NAME = "index.android.bundle";
+    private static final String DEFAULT_JS_BUNDLE_NAME = "index.android.bundle";
     private final String DOWNLOAD_PROGRESS_EVENT_NAME = "CodePushDownloadProgress";
     private final String FAILED_UPDATES_KEY = "CODE_PUSH_FAILED_UPDATES";
     private final String PACKAGE_HASH_KEY = "packageHash";
