@@ -135,6 +135,10 @@ public class CodePush implements ReactPackage {
         }
     }
 
+    public static String getBundleUrl() {
+        return currentInstance.getBundleUrlInternal("index.android.bundle");
+    }
+    
     public static String getBundleUrl(String assetsBundleFileName) {
         if (currentInstance == null) {
             throw new CodePushNotInitializedException("A CodePush instance has not been created yet. Have you added it to your app's list of ReactPackages?");
