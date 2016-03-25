@@ -242,36 +242,36 @@ And that's it for installation using RNPM! Continue below to the [Plugin Configu
 
 After installing the plugin and syncing your Android Studio project with Gradle, you need to configure your app to consult CodePush for the location of your JS bundle, since it will "take control" of managing the current and all future versions. To do this, update the `MainActivity.java` file to use CodePush via the following changes:
     
-    ```java
-    ...
-    // 1. Import the plugin class (if you used RNPM to install the plugin, this
-    // should already be done for you automatically so you can skip this step).
-    import com.microsoft.codepush.react.CodePush;
+```java
+...
+// 1. Import the plugin class (if you used RNPM to install the plugin, this
+// should already be done for you automatically so you can skip this step).
+import com.microsoft.codepush.react.CodePush;
 
-    public class MainActivity extends ReactActivity {
-        // 2. Override the getJSBundleFile method in order to let
-        // the CodePush runtime determine where to get the JS
-        // bundle location from on each app start
-        @Override
-        protected String getJSBundleFile() {
-            return CodePush.getBundleUrl("index.android.bundle");
-        }
-
-        @Override
-        protected List<ReactPackage> getPackages() {
-            // 3. Instantiate an instance of the CodePush runtime and add it to the list of
-            // existing packages, specifying the right deployment key. If you don't already 
-            // have it, you can run "code-push deployment ls <appName> -k" to retrieve your key.
-            return Arrays.<ReactPackage>asList(
-                new MainReactPackage(),
-                // new CodePush() <-- remove this line if you used RNPM for plugin installation.
-                new CodePush("deployment-key-here", this, BuildConfig.DEBUG)
-            );
-        }
-
-        ...
+public class MainActivity extends ReactActivity {
+    // 2. Override the getJSBundleFile method in order to let
+    // the CodePush runtime determine where to get the JS
+    // bundle location from on each app start
+    @Override
+    protected String getJSBundleFile() {
+        return CodePush.getBundleUrl("index.android.bundle");
     }
-    ```
+
+    @Override
+    protected List<ReactPackage> getPackages() {
+        // 3. Instantiate an instance of the CodePush runtime and add it to the list of
+        // existing packages, specifying the right deployment key. If you don't already 
+        // have it, you can run "code-push deployment ls <appName> -k" to retrieve your key.
+        return Arrays.<ReactPackage>asList(
+            new MainReactPackage(),
+            // new CodePush() <-- remove this generated line if you used RNPM for plugin installation.
+            new CodePush("deployment-key-here", this, BuildConfig.DEBUG)
+        );
+    }
+
+    ...
+}
+```
 
 ## Plugin Usage
 
