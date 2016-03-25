@@ -14,8 +14,9 @@ This plugin provides client-side integration for the [CodePush service](http://c
     * [Plugin Configuration](#plugin-configuration-ios)
 * [Android Setup](#android-setup)
     * [Plugin Installation](#plugin-installation-android)
-    * [Plugin Configuration (React Native < v0.18.0)](#plugin-configuration-android---react-native--v0180)
-    * [Plugin Configuration (React Native 0.18.0+)](#plugin-configuration-android---react-native-v0180)
+        * [RNPM](#plugin-installation-android---rnpm)
+        * ["Manual"](#plugin-installation-android---manual)
+    * [Plugin Configuration](#plugin-configuration-android)
 * [Plugin Usage](#plugin-usage)
 * [Releasing Updates (JavaScript-only)](#releasing-updates-javascript-only)
 * [Releasing Updates (JavaScript + images)](#releasing-updates-javascript--images)
@@ -187,21 +188,31 @@ NSURL *jsCodeLocation;
 #endif
 ```
     
-To let the CodePush runtime know which deployment it should query for updates against, perform the following steps:
+To let the CodePush runtime know which deployment it should query for updates against, open your app's `Info.plist` file and add a new entry named `CodePushDeploymentKey`, whose value is the key of the deployment you want to configure this app against (e.g. the key for the `Staging` deployment for the `FooBar` app). You can retrieve this value by running `code-push deployment ls <appName> -k` in the CodePush CLI (the `-k` flag is necessary since keys aren't displayed by default) and copying the value of the `Deployment Key` column which corresponds to the deployment you want to use (see below). Note that using the deployment's name (e.g. Staging) will not work. That "friendly name" is intended only for authenticated management usage from the CLI, and not for public consumption within your app.
 
-1. Open your app's `Info.plist` file and add a new entry named `CodePushDeploymentKey`, whose value is the key of the deployment you want to configure this app against (e.g. the key for the `Staging` deployment for the `FooBar` app). You can retrieve this value by running `code-push deployment ls <appName> -k` in the CodePush CLI (the `-k` flag is necessary since keys aren't displayed by default) and copying the value of the `Deployment Key` column which corresponds to the deployment you want to use (see below). Note that using the deployment's name (e.g. Staging) will not work. That "friendly name" is intended only for authenticated management usage from the CLI, and not for public consumption within your app.
-
-    ![Deployment list](https://cloud.githubusercontent.com/assets/116461/11601733/13011d5e-9a8a-11e5-9ce2-b100498ffb34.png)
-    
-2. In your app's `Info.plist` make sure your `Bundle versions string, short` (aka `CFBundleShortVersionString`) value is a valid [semver](http://semver.org/) version. Note that if the value provided is missing a patch version, the CodePush server will assume it is `0`, i.e. `1.0` will be treated as `1.0.0`.
-
-    ![Bundle version](https://cloud.githubusercontent.com/assets/116461/12307416/f9b82688-b9f3-11e5-839a-f1c6b4acd093.png)
+![Deployment list](https://cloud.githubusercontent.com/assets/116461/11601733/13011d5e-9a8a-11e5-9ce2-b100498ffb34.png)
     
 ## Android Setup
 
 In order to integrate CodePush into your Android project, perform the following steps:
 
 ### Plugin Installation (Android)
+
+In order to accomodate as many developer preferences as possible, the CodePush plugin supports Android installation via two mechanisms:
+
+1. [**RNPM**](#plugin-installation-android---rnpm) - [React Native Package Manager (RNPM)](https://github.com/rnpm/rnpm) is an awesome tool that provides the simplest installation experience possible for React Native plugins. If you're already using it, or you want to use it, then we recommend this approach. 
+
+2. [**"Manual"**](#plugin-installation-android---manual) - If you don't want to depend on any additional tools or are fine with a few extra installation steps (it's a one-time thing), then go with this approach.
+
+#### Plugin Installation (Android - RNPM)
+
+1. Run `rnpm link react-native-code-push`
+
+    *Note: If you don't already have RNPM installed, you can do so by simply running `npm i -g rnpm` and then executing the above command.*
+    
+And that's it for installation using RNPM! Continue below to the [Plugin Configuration](#plugin-configuration-android) section to complete the setup.
+
+#### Plugin Installation (Android - Manual)
 
 1. In your `android/settings.gradle` file, make the following additions:
     
@@ -227,112 +238,42 @@ In order to integrate CodePush into your Android project, perform the following 
     ...
     ```
 
-### Plugin Configuration (Android - React Native < v0.18.0)
+### Plugin Configuration (Android)
 
-*NOTE: These instructions are specific to apps that are using React Native v0.15.0-v0.17.0. If you are using v0.18.0+, then skip ahead to the next section.*
+*Note: If you are using an older version (<=1.9.0-beta) of the CodePush plugin, please refer to [these docs](https://github.com/Microsoft/react-native-code-push/tree/e717eb024fe9d1810ac21c40c097f7bc165ea5f1#plugin-configuration-android---react-native--v0180) instead.*
 
-After installing the plugin and syncing your Android Studio project with Gradle, you need to configure your app to consult CodePush for the location of your JS bundle, since it will "take control" of managing the current and all future versions. To do this, perform the following steps:
-
-1. Update the `MainActivity.java` file to use CodePush via the following changes:
+After installing the plugin and syncing your Android Studio project with Gradle, you need to configure your app to consult CodePush for the location of your JS bundle, since it will "take control" of managing the current and all future versions. To do this, update the `MainActivity.java` file to use CodePush via the following changes:
     
-    ```java
+```java
+...
+// 1. Import the plugin class (if you used RNPM to install the plugin, this
+// should already be done for you automatically so you can skip this step).
+import com.microsoft.codepush.react.CodePush;
+
+public class MainActivity extends ReactActivity {
+    // 2. Override the getJSBundleFile method in order to let
+    // the CodePush runtime determine where to get the JS
+    // bundle location from on each app start
+    @Override
+    protected String getJSBundleFile() {
+        return CodePush.getBundleUrl();
+    }
+
+    @Override
+    protected List<ReactPackage> getPackages() {
+        // 3. Instantiate an instance of the CodePush runtime and add it to the list of
+        // existing packages, specifying the right deployment key. If you don't already 
+        // have it, you can run "code-push deployment ls <appName> -k" to retrieve your key.
+        return Arrays.<ReactPackage>asList(
+            new MainReactPackage(),
+            // new CodePush() <-- remove this generated line if you used RNPM for plugin installation.
+            new CodePush("deployment-key-here", this, BuildConfig.DEBUG)
+        );
+    }
+
     ...
-    // 1. Import the plugin class
-    import com.microsoft.codepush.react.CodePush;
-    
-    // 2. Optional: extend FragmentActivity if you intend to show a dialog prompting users about updates.
-    //    If you do this, make sure to also add "import android.support.v4.app.FragmentActivity" below #1.
-    public class MainActivity extends FragmentActivity implements DefaultHardwareBackBtnHandler {
-        ...
-        
-        @Override
-        protected void onCreate(Bundle savedInstanceState) {
-            ...
-            // 3. Initialize CodePush with your deployment key and an instance of your MainActivity. If you don't
-            // already have it, you can run "code-push deployment ls <appName> -k" in order to retrieve your key.
-            CodePush codePush = new CodePush("d73bf5d8-4fbd-4e55-a837-accd328a21ba", this, BuildConfig.DEBUG);
-            ...
-            mReactInstanceManager = ReactInstanceManager.builder()
-                    .setApplication(getApplication())
-                    ...
-                    // 4. DELETE THIS LINE --> .setBundleAssetName("index.android.bundle")
-                    
-                    // 5. Let CodePush determine which location to load the most updated bundle from.
-                    // If there is no updated bundle from CodePush, the location will be the assets
-                    // folder with the name of the bundle passed in, e.g. index.android.bundle
-                    .setJSBundleFile(codePush.getBundleUrl("index.android.bundle"))
-                    
-                    // 6. Expose the CodePush module to JavaScript.
-                    .addPackage(codePush.getReactPackage())
-                    ...
-        }
-    }
-    ```
-
-2. Ensure that the `android.defaultConfig.versionName` property in your `android/app/build.gradle` file is set to a semver-compliant value. Note that if the value provided is missing a patch version, the CodePush server will assume it is `0`, i.e. `1.0` will be treated as `1.0.0`.
-    
-    ```gradle
-    android {
-        ...
-        defaultConfig {
-            ...
-            versionName "1.0.0"
-            ...
-        }
-        ...
-    }
-    ```
-    
-### Plugin Configuration (Android - React Native v0.18.0+)
-
-*NOTE: These instructions are specific to apps that are using React Native v0.18.0+. If you are using v0.15.0-v0.17.0, then refer to the previous section.*
-
-After installing the plugin and syncing your Android Studio project with Gradle, you need to configure your app to consult CodePush for the location of your JS bundle, since it will "take control" of managing the current and all future versions. To do this, perform the following steps:
-
-1. Update the `MainActivity.java` file to use CodePush via the following changes:
-    
-    ```java
-    ...
-    // 1. Import the plugin class
-    import com.microsoft.codepush.react.CodePush;
-
-    public class MainActivity extends ReactActivity {
-        // 2. Override the getJSBundleFile method in order to let
-        // the CodePush runtime determine where to get the JS
-        // bundle location from on each app start
-        @Override
-        protected String getJSBundleFile() {
-            return this._codePush.getBundleUrl("index.android.bundle");
-        }
-
-        @Override
-        protected List<ReactPackage> getPackages() {
-            // 3. Instantiate an instance of the CodePush runtime and add it to the list of
-            // existing packages, specifying the right deployment key. If you don't already 
-            // have it, you can run "code-push deployment ls <appName> -k" to retrieve your key.
-            return Arrays.<ReactPackage>asList(
-                new MainReactPackage(), 
-                new CodePush("deployment-key-here", this, BuildConfig.DEBUG)
-            );
-        }
-
-        ...
-    }
-    ```
-
-2. Ensure that the `android.defaultConfig.versionName` property in your `android/app/build.gradle` file is set to a semver-compliant value. Note that if the value provided is missing a patch version, the CodePush server will assume it is `0`, i.e. `1.0` will be treated as `1.0.0`.
-    
-    ```gradle
-    android {
-        ...
-        defaultConfig {
-            ...
-            versionName "1.0.0"
-            ...
-        }
-        ...
-    }
-    ```
+}
+```
 
 ## Plugin Usage
 
