@@ -254,7 +254,7 @@ public class MainActivity extends ReactActivity {
     // bundle location from on each app start
     @Override
     protected String getJSBundleFile() {
-        return CodePush.getBundleUrl("index.android.bundle");
+        return CodePush.getBundleUrl();
     }
 
     @Override
