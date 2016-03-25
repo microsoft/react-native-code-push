@@ -136,7 +136,7 @@ public class CodePush implements ReactPackage {
     }
 
     public static String getBundleUrl() {
-        return CodePush.getBundleUrl("index.android.bundle");
+        return getBundleUrl("index.android.bundle");
     }
     
     public static String getBundleUrl(String assetsBundleFileName) {
