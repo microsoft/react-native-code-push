@@ -619,6 +619,7 @@ Contains details about an update that has been downloaded locally or already ins
 - __packageSize__: The size of the code contained within the update, in bytes. *(Number)*
 
 ###### Methods
+
 - __install(installMode: codePush.InstallMode = codePush.InstallMode.ON_NEXT_RESTART, minimumBackgroundDuration = 0): Promise&lt;void&gt;__: Installs the update by saving it to the location on disk where the runtime expects to find the latest version of the app. The `installMode` parameter controls when the changes are actually presented to the end user. The default value is to wait until the next app restart to display the changes, but you can refer to the [`InstallMode`](#installmode) enum reference for a description of the available options and what they do. If the `installMode` parameter is set to `InstallMode.ON_NEXT_RESUME`, then the `minimumBackgroundDuration` parameter allows you to control how long the app must have been in the background before forcing the install after it is resumed. 
 
 ##### RemotePackage
@@ -632,6 +633,7 @@ The `RemotePackage` inherits all of the same properties as the `LocalPackage`, b
 - __downloadUrl__: The URL at which the package is available for download. This property is only needed for advanced usage, since the `download` method will automatically handle the acquisition of updates for you. *(String)*
 
 ###### Methods
+
 - __download(downloadProgressCallback?: Function): Promise&lt;LocalPackage&gt;__: Downloads the available update from the CodePush service. If a `downloadProgressCallback` is specified, it will be called periodically with a `DownloadProgress` object (`{ totalBytes: Number, receivedBytes: Number }`) that reports the progress of the download until it completes. Returns a Promise that resolves with the `LocalPackage`.
 
 #### Enums
@@ -698,11 +700,11 @@ The Java API is made available by importing the `com.microsoft.codepush.react.Co
 
 #### CodePush
 
-Constructs the CodePush client runtime and includes methods for integrating CodePush into your app's `ReactInstanceManager`.
+Constructs the CodePush client runtime and represents the `ReactPackage` instance that you add to you app's list of packages.
 
 ##### Constructors
 
-- __CodePush(String deploymentKey, Activity mainActivity)__ - Creates a new instance of the CodePush runtime, that will be used to query the service for updates via the provided deployment key. The `mainActivity` parameter should always be set to `this` when configuring your `ReactInstanceManager` inside the `MainActivity` class. This constructor puts the CodePush runtime into "release mode", so if you want to enable debugging behavior, use the following constructor instead.
+- __CodePush(String deploymentKey, Activity mainActivity)__ - Creates a new instance of the CodePush runtime, that will be used to query the service for updates via the provided deployment key. The `mainActivity` parameter should always be set to `this` when configuring your React packages list inside the `MainActivity` class. This constructor puts the CodePush runtime into "release mode", so if you want to enable debugging behavior, use the following constructor instead.
 
 - __CodePush(String deploymentKey, Activity mainActivity, bool isDebugMode)__ - Equivalent to the previous constructor, but allows you to specify whether you want the CodePush runtime to be in debug mode or not. When using this constructor, the `isDebugMode` parameter should always be set to `BuildConfig.DEBUG` in order to stay synchronized with your build type. When putting CodePush into debug mode, the following behaviors are enabled:
 
@@ -710,13 +712,11 @@ Constructs the CodePush client runtime and includes methods for integrating Code
     
     2. The local cache that the React Native runtime maintains in debug mode is deleted whenever a CodePush update is installed. This ensures that when the app is restarted after an update is applied, you will see the expected changes. As soon as [this PR](https://github.com/facebook/react-native/pull/4738) is merged, we won't need to do this anymore.
     
-##### Methods
+##### Static Methods
 
 - __getBundleUrl()__ - Returns the path to the most recent version of your app's JS bundle file, assuming that the resource name is `index.android.bundle`. If your app is using a different bundle name, then use the overloaded version of this method which allows specifying it. This method has the same resolution behavior as the Objective-C equivalent described above.
 
 - __getBundleUrl(String bundleName)__ - Returns the path to the most recent version of your app's JS bundle file, using the specified resource name (e.g. `index.android.bundle`). This method has the same resolution behavior as the Objective-C equivalent described above.
-
-- __getReactPackage()__ - Returns a `ReactPackage` object that should be added to your `ReactInstanceManager` via its `addPackage` method. Without this, the `react-native-code-push` JS module won't be available to your script.
 
 ## Example Apps
 
