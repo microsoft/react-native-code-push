@@ -18,8 +18,7 @@ This plugin provides client-side integration for the [CodePush service](http://c
         * ["Manual"](#plugin-installation-android---manual)
     * [Plugin Configuration](#plugin-configuration-android)
 * [Plugin Usage](#plugin-usage)
-* [Releasing Updates (JavaScript-only)](#releasing-updates-javascript-only)
-* [Releasing Updates (JavaScript + images)](#releasing-updates-javascript--images)
+* [Releasing Updates](#releasing-updates)
 * [API Reference](#api-reference)
     * [JavaScript API](#javascript-api-reference)
     * [Objective-C API Reference (iOS)](#objective-c-api-reference-ios)
@@ -280,6 +279,7 @@ public class MainActivity extends ReactActivity {
 With the CodePush plugin downloaded and linked, and your app asking CodePush where to get the right JS bundle from, the only thing left is to add the necessary code to your app to control the following policies:
 
 1. When (and how often) to check for an update? (e.g. app start, in response to clicking a button in a settings page, periodically at some fixed interval)
+
 2. When an update is available, how to present it to the end user?
 
 The simplest way to do this is to perform the following in your app's root component:
@@ -300,57 +300,43 @@ If an update is available, it will be silently downloaded, and installed the nex
 
 <a id="apple-note">*NOTE: While [Apple's developer agreement](https://developer.apple.com/programs/ios/information/iOS_Program_Information_4_3_15.pdf) fully allows performing over-the-air updates of JavaScript and assets (which is what enables CodePush!), it is against their policy for an app to display an update prompt. Because of this, we recommend that App Store-distributed apps don't enable the `updateDialog` option when calling `sync`, whereas Google Play and internally distributed apps (e.g. Enterprise, Fabric, HockeyApp) can choose to enable/customize it.*</a>
 
-## Releasing Updates (JavaScript-only)
+## Releasing Updates
 
-Once your app has been configured and distributed to your users, and you've made some JS changes, it's time to release it to them instantly! If you're not using React Native to bundle images (via `require('./foo.png')`), then perform the following steps. Otherwise, skip to the next section instead:
+Once your app has been configured and distributed to your users, and you've made some JS and/or asset changes, it's time to instantly release them! The simplest (and recommended) way to do this is to use the `release-react` comand in the CodePush CLI, which will handle bundling your JavaScript and asset files and releasing the update to the CodePush server. 
 
-1. Execute `react-native bundle` (passing the appropriate parameters, see example below) in order to generate the updated JS bundle for your app. You can place this file wherever you want via the `--bundle-output` flag, since the exact location isn't relevant for CodePush purposes. It's important, however, that you set `--dev false` so that your JS code is optimized appropriately and any "yellow box" warnings won't be displayed.
-
-2. Execute `code-push release <appName> <jsBundleFilePath> <targetBinaryVersion> --deploymentName <deploymentName>` in order to publish the generated JS bundle to the server. The `<jsBundleFilePath>` parameter should equal the value you provided to the `--bundle-output` flag in step #1. Additionally, the `<targetBinaryVersion>` parameter should equal the [**exact app store version**](http://codepush.tools/docs/cli.html#app-store-version-parameter) (i.e. the semver version end users would see when installing it) you want this CodePush update to target.
-
-    For more info regarding the `release` command and its parameters, refer to the [CLI documentation](http://codepush.tools/docs/cli.html#releasing-app-updates).
-    
-Example Usage:
+In it's most basic form, this command only requires two parameters: your app name and the platform you are bundling the update for (either `ios` or `android`).
 
 ```shell
-react-native bundle --platform ios --entry-file index.ios.js --bundle-output codepush.js --dev false
-code-push release MyApp codepush.js 1.0.0
+code-push release-react <appName> <platform>
+
+code-push release-react MyApp ios
+code-push release-react MyApp-Android android
 ```
-    
-And that's it! for more information regarding the CLI and how the release (or promote and rollback) commands work, refer to the [documentation](http://microsoft.github.io/code-push/docs/cli.html). Additionally, if you run into any issues, you can ping us within the [#code-push](https://discord.gg/0ZcbPKXt5bWxFdFu) channel on Reactiflux, [e-mail us](mailto:codepushfeed@microsoft.com) and/or check out the [troubleshooting](#debugging--troubleshooting) details below.
 
-*Note: Instead of running `react-native bundle`, you could rely on running `xcodebuild` and/or `gradlew assemble` instead to generate the JavaScript bundle file, but that would be unneccessarily doing a native build, when all you need for distributing updates via CodePush is your JavaScript bundle.*
+The `release-react` command enables such a simple workflow because it provides many sensible defaults (e.g. generarting a release bundle, assuming your app's entry file on iOS is either `index.ios.js` or `index.js`). However, all of these defaults can be customized to allow incremental flexibility as neccessary, which makes it a good fit for most scenarios. 
 
-## Releasing Updates (JavaScript + images)
+```shell
+# Release a mandatory update with a changelog
+code-push release-react MyApp ios -m -description "Modified the header color"
 
-*Note: Android support for updating assets was added to React Native v0.19.0, and requires you to use CodePush v1.7.0. If you are using an older version of RN, you can't update assets via CodePush, and therefore, need to either upgrade or use the previous workflow for simply updating your JS bundle.*
+# Release an update for an app that uses a non-standard entry file name, and also capture
+# the sourcemap file generated by react-native bundle
+code-push release-react MyApp ios --entryFile MyApp.js --sourcemapOutput ../maps/MyApp.map
 
-If you are using the new React Native [assets system](https://facebook.github.io/react-native/docs/images.html#content), as opposed to loading your images from the network and/or platform-specific mechanisms (e.g. iOS asset catalogs), then you can't simply pass your jsbundle to CodePush as demonstrated above. You **MUST** provide your images as well. To do this, simply use the following workflow:
+# Release a dev Android build to just 1/4 of your end users
+code-push release-react MyApp-Android android --rollout 25% --dev true
 
-1. Create a new directory that can be used to organize your app's release assets (i.e. the JS bundle and your images). We recommend calling this directory "release" but it can be named anything. If you create this directory within your project's directory, make sure to add it to your `.gitignore` file, since you don't want it checked into source control.
+# Release an update that targets users running any 1.1.* binary, as opposed to
+# limiting the update to exact version name in the build.gradle file
+code-push release-react MyApp-Android android --targetBinaryVersion "~1.1.0"
 
-2. When calling `react-native bundle`, specify that your assets and JS bundle go into the directory you created in #1, and that you want a non-dev build for your respective platform and entry file. For example, assuming you called this directory "release", you could run the following command:
+```
 
-    ```shell
-    react-native bundle \
-    --platform ios \
-    --entry-file index.ios.js \
-    --bundle-output ./release/main.jsbundle \
-    --assets-dest ./release \
-    --dev false
-    ```
+The CodePush client supports differential updates, so even though you are releasing your JS bundle and assets on every update, your end users will only actually download the files they need. The service handles this automatically so that you can focus on creating awesome apps and we can worry about optimizing end user downloads.
 
-    *NOTE: The file name that you specify as the value for the `--bundle-output` parameter must have one of the following extensions in order to be detected by the plugin: `.js`, `.jsbundle`, `.bundle` (e.g. `main.jsbundle`, `ios.js`). The name of the file isn't relevant, but the extension is used for detectining the bundle within the update contents, and therefore, using any other extension will result in the update failing.*
-    
-3. Execute `code-push release`, passing the path to the directory you created in #1 as the ["updateContents"](http://codepush.tools/docs/cli.html#package-parameter) parameter, and the [**exact binary version**](http://codepush.tools/docs/cli.html#app-store-version-parameter) that this update is targetting as the ["targetBinaryVersion"](http://codepush.tools/docs/cli.html#app-store-version-parameter) parameter (e.g. `code-push release Foo ./release 1.0.0`). The code-push CLI will automatically handle zipping up the contents for you, so don't worry about handling that yourself.
+For more details about how the `release-react` command works, as well as the various parameters it exposes, refer to the [CLI docs](https://github.com/Microsoft/code-push/tree/master/cli#releasing-updates-react-native). Additionally, if you would prefer to handle running the `react-native bundle` command yourself, and therefore, want an even more flexible solution than `release-react`, refer to the [`release` command](https://github.com/Microsoft/code-push/tree/master/cli#releasing-updates-general) for more details.
 
-    For more info regarding the `release` command and its parameters, refer to the [CLI documentation](http://codepush.tools/docs/cli.html#releasing-app-updates).
-    
-Additionally, the CodePush client supports differential updates, so even though you are releasing your JS bundle and assets on every update, your end users will only actually download the files they need. The service handles this automatically so that you can focus on creating awesome apps and we can worry about optimizing end user downloads.
-
-If you run into any issues, you can ping us within the [#code-push](https://discord.gg/0ZcbPKXt5bWxFdFu) channel on Reactiflux, [e-mail us](mailto:codepushfeed@microsoft.com) and/or check out the [troubleshooting](#debugging--troubleshooting) details below.
-
-*Note: Releasing assets via CodePush requires that you're using React Native v0.15.0+ and CodePush v1.4.0+ (for iOS) and React Native v0.19.0+ and CodePush v1.7.0+ (Android). If you are using assets and an older version of the CodePush plugin, you should not release updates via CodePush, because it will break your app's ability to load images from the binary. Please test and release appropriately!*
+If you run into any issues, or have any questions/comments/feedback, you can ping us within the [#code-push](https://discord.gg/0ZcbPKXt5bWxFdFu) channel on Reactiflux, [e-mail us](mailto:codepushfeed@microsoft.com) and/or check out the [troubleshooting](#debugging--troubleshooting) details below.
 
 ---
 
