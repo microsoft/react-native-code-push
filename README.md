@@ -209,6 +209,15 @@ In order to accomodate as many developer preferences as possible, the CodePush p
 
     *Note: If you don't already have RNPM installed, you can do so by simply running `npm i -g rnpm` and then executing the above command.*
     
+2. (Only needed in v1.8.0+ of the plugin) In your `android/app/build.gradle` file, add the `codepush.gradle` file as an additional build task definition underneath `react.gradle`:
+    
+    ```gradle
+    ...
+    apply from: "react.gradle"
+    apply from: "../../node_modules/react-native-code-push/android/codepush.gradle"
+    ...
+    ```
+    
 And that's it for installation using RNPM! Continue below to the [Plugin Configuration](#plugin-configuration-android) section to complete the setup.
 
 #### Plugin Installation (Android - Manual)
@@ -219,6 +228,7 @@ And that's it for installation using RNPM! Continue below to the [Plugin Configu
     include ':app', ':react-native-code-push'
     project(':react-native-code-push').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-code-push/android/app')
     ```
+    
 2. In your `android/app/build.gradle` file, add the `:react-native-code-push` project as a compile-time dependency:
     
     ```gradle
@@ -227,7 +237,8 @@ And that's it for installation using RNPM! Continue below to the [Plugin Configu
         ...
         compile project(':react-native-code-push')
     }
-    ```   
+    ```
+    
 3. (Only needed in v1.8.0+ of the plugin) In your `android/app/build.gradle` file, add the `codepush.gradle` file as an additional build task definition underneath `react.gradle`:
     
     ```gradle
