@@ -75,7 +75,7 @@ As new core components are released, which support referencing assets, we'll upd
 Once you've followed the general-purpose ["getting started"](http://codepush.tools/docs/getting-started.html) instructions for setting up your CodePush account, you can start CodePush-ifying your React Native app by running the following command from within your app's root directory:
 
 ```shell
-npm install --save react-native-code-push
+npm install --save react-native-code-push@latest
 ```
 
 As with all other React Native plugins, the integration experience is different for iOS and Android, so perform the following setup steps depending on which platform(s) you are targetting.
