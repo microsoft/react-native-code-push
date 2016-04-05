@@ -1,5 +1,6 @@
 package com.microsoft.codepush.react;
 
+import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -28,6 +29,10 @@ import android.provider.Settings;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.lang.ReflectiveOperationException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 import java.io.File;
 import java.io.IOException;
@@ -101,7 +106,6 @@ public class CodePush implements ReactPackage {
             throw new CodePushUnknownException("Unable to get package info for " + applicationContext.getPackageName(), e);
         }
 
-        initializeUpdateAfterRestart();
         if (currentInstance != null) {
             CodePushUtils.log("More than one CodePush instance has been initialized. Please use the instance method codePush.getBundleUrlInternal() to get the correct bundleURL for a particular instance.");
         }
@@ -147,8 +151,8 @@ public class CodePush implements ReactPackage {
 
         return currentInstance.getBundleUrlInternal(assetsBundleFileName);
     }
-
-    public String getBundleUrlInternal(String assetsBundleFileName) {
+    
+    private String getBundleUrlInternal(String assetsBundleFileName) {
         this.assetsBundleFileName = assetsBundleFileName;
         String binaryJsBundleUrl = ASSETS_BUNDLE_PREFIX + assetsBundleFileName;
         long binaryResourcesModifiedTime = this.getBinaryResourcesModifiedTime();
@@ -356,12 +360,73 @@ public class CodePush implements ReactPackage {
     private class CodePushNativeModule extends ReactContextBaseJavaModule {
         private LifecycleEventListener lifecycleEventListener = null;
         private int minimumBackgroundDuration = 0;
+        
+        public CodePushNativeModule(ReactApplicationContext reactContext) {
+            super(reactContext);
+        }
+        
+        @Override
+        public Map<String, Object> getConstants() {
+            final Map<String, Object> constants = new HashMap<>();
+            constants.put("codePushInstallModeImmediate", CodePushInstallMode.IMMEDIATE.getValue());
+            constants.put("codePushInstallModeOnNextRestart", CodePushInstallMode.ON_NEXT_RESTART.getValue());
+            constants.put("codePushInstallModeOnNextResume", CodePushInstallMode.ON_NEXT_RESUME.getValue());
+            return constants;
+        }
 
-        private void loadBundle() {
+        @Override
+        public String getName() {
+            return "CodePush";
+        }
+        
+        @Override
+        public void initialize() {
+            currentInstance.initializeUpdateAfterRestart();
+        }
+    
+        private void loadBundleLegacy() {
             Intent intent = mainActivity.getIntent();
             mainActivity.finish();
             mainActivity.startActivity(intent);
+            
             currentInstance = null;
+        }
+        
+        private void loadBundle() {
+            try {
+                // #1) Get the private ReactInstanceManager, which is what includes
+                //     the logic to reload the current React context.
+                Field instanceManagerField = ReactActivity.class.getDeclaredField("mReacInstanceManager");
+                instanceManagerField.setAccessible(true); // Make a private field accessible
+                final Object instanceManager = instanceManagerField.get(mainActivity);
+
+                // #2) Update the locally stored JS bundle file path
+                String latestJSBundleFile = CodePush.this.getBundleUrlInternal(CodePush.this.assetsBundleFileName);
+                Field jsBundleField = instanceManager.getClass().getDeclaredField("mJSBundleFile");
+                jsBundleField.setAccessible(true);
+                jsBundleField.set(instanceManager, latestJSBundleFile);
+                            
+                // #3) Get the context creation method and fire it on the UI thread (which RN enforces)
+                final Method recreateMethod = instanceManager.getClass().getMethod("recreateReactContextInBackground");
+                mainActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            recreateMethod.invoke(instanceManager);
+                        }
+                        catch (ReflectiveOperationException e) {
+                            // The recreation method threw an unknown exception
+                            // so just simply fallback to the old behavior
+                            loadBundleLegacy();
+                        }
+                    }
+                });
+            }
+            catch (ReflectiveOperationException e) {
+                // Our reflection logic failed somewhere
+                // so fall back to restarting the Activity
+                loadBundleLegacy();
+            }
         }
 
         @ReactMethod
@@ -596,24 +661,6 @@ public class CodePush implements ReactPackage {
                     throw new CodePushUnknownException("Unable to replace current bundle", e);
                 }
             }
-        }
-
-        @Override
-        public Map<String, Object> getConstants() {
-            final Map<String, Object> constants = new HashMap<>();
-            constants.put("codePushInstallModeImmediate", CodePushInstallMode.IMMEDIATE.getValue());
-            constants.put("codePushInstallModeOnNextRestart", CodePushInstallMode.ON_NEXT_RESTART.getValue());
-            constants.put("codePushInstallModeOnNextResume", CodePushInstallMode.ON_NEXT_RESUME.getValue());
-            return constants;
-        }
-
-        public CodePushNativeModule(ReactApplicationContext reactContext) {
-            super(reactContext);
-        }
-
-        @Override
-        public String getName() {
-            return "CodePush";
         }
     }
 
