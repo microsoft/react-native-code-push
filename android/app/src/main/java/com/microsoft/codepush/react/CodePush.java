@@ -152,7 +152,7 @@ public class CodePush implements ReactPackage {
         return currentInstance.getBundleUrlInternal(assetsBundleFileName);
     }
     
-    private String getBundleUrlInternal(String assetsBundleFileName) {
+    public String getBundleUrlInternal(String assetsBundleFileName) {
         this.assetsBundleFileName = assetsBundleFileName;
         String binaryJsBundleUrl = ASSETS_BUNDLE_PREFIX + assetsBundleFileName;
         long binaryResourcesModifiedTime = this.getBinaryResourcesModifiedTime();
@@ -381,7 +381,7 @@ public class CodePush implements ReactPackage {
         
         @Override
         public void initialize() {
-            currentInstance.initializeUpdateAfterRestart();
+            CodePush.this.initializeUpdateAfterRestart();
         }
     
         private void loadBundleLegacy() {
@@ -416,7 +416,7 @@ public class CodePush implements ReactPackage {
                         }
                         catch (ReflectiveOperationException e) {
                             // The recreation method threw an unknown exception
-                            // so just simply fallback to the old behavior
+                            // so just simply fallback to restarting the Activity
                             loadBundleLegacy();
                         }
                     }
