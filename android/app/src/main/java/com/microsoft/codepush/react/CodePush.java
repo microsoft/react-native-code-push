@@ -396,7 +396,7 @@ public class CodePush implements ReactPackage {
             try {
                 // #1) Get the private ReactInstanceManager, which is what includes
                 //     the logic to reload the current React context.
-                Field instanceManagerField = ReactActivity.class.getDeclaredField("mReacInstanceManager");
+                Field instanceManagerField = ReactActivity.class.getDeclaredField("mReactInstanceManager");
                 instanceManagerField.setAccessible(true); // Make a private field accessible
                 final Object instanceManager = instanceManagerField.get(mainActivity);
 
