@@ -732,7 +732,7 @@ The `sync` method includes a lot of diagnostic logging out-of-the-box, so if you
 
 ![Xcode Console](https://cloud.githubusercontent.com/assets/116461/13536459/d2687bea-e1f4-11e5-9998-b048ca8d201e.png)
 
-To view these logs, you can use either the Chrome DevTools Console, the XCode Console (iOS) and/or ADB logcat (Android). By default, React Native logs are disabled on iOS in release builds, so if you want to view them in a release build, you simply need to make the following changes to your `AppDelegate.m` file:
+To view these logs, you can use either the Chrome DevTools Console, the XCode Console (iOS), the [OS X Console](https://en.wikipedia.org/wiki/Console_%28OS_X%29#.7E.2FLibrary.2FLogs) (iOS) and/or ADB logcat (Android). By default, React Native logs are disabled on iOS in release builds, so if you want to view them in a release build, you simply need to make the following changes to your `AppDelegate.m` file:
 
 1. Add an `#import "RCTLog.h"` statement
 
