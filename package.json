@@ -18,12 +18,9 @@
   "dependencies": {
     "code-push": "1.8.0-beta"
   },
-  "peerDependencies": {
-    "react-native": ">=0.19.0"
-  },
   "rnpm": {
       "android": {
-          "packageInstance": "new CodePush('${androidDeployment}', this, BuildConfig.DEBUG)"
+          "packageInstance": "new CodePush(${androidDeploymentKey}, this, BuildConfig.DEBUG)"
       },
       "ios": {
         "sharedLibraries": ["libz"]  
@@ -31,7 +28,7 @@
       "params": [{
         "type": "input",
         "name": "androidDeploymentKey",
-        "message": "What is your CodePush deployment key for Android"   
+        "message": "What is your CodePush deployment key for Android (hit <ENTER> to ignore)"   
       }]
   }
 }
