@@ -65,9 +65,6 @@ public class CodePush implements ReactPackage {
     private final String PENDING_UPDATE_KEY = "CODE_PUSH_PENDING_UPDATE";
     private final String RESOURCES_BUNDLE = "resources.arsc";
 
-    // This needs to be kept in sync with https://github.com/facebook/react-native/blob/master/ReactAndroid/src/main/java/com/facebook/react/devsupport/DevSupportManager.java#L78
-    private final String REACT_DEV_BUNDLE_CACHE_FILE_NAME = "ReactNativeDevBundle.js";
-
     // Helper classes.
     private CodePushNativeModule codePushNativeModule;
     private CodePushPackage codePushPackage;
@@ -111,13 +108,6 @@ public class CodePush implements ReactPackage {
         }
 
         currentInstance = this;
-    }
-
-    private void clearReactDevBundleCache() {
-        File cachedDevBundle = new File(this.applicationContext.getFilesDir(), REACT_DEV_BUNDLE_CACHE_FILE_NAME);
-        if (cachedDevBundle.exists()) {
-            cachedDevBundle.delete();
-        }
     }
     
     private long getBinaryResourcesModifiedTime() {
@@ -243,10 +233,6 @@ public class CodePush implements ReactPackage {
                     needToReportRollback = true;
                     rollbackPackage();
                 } else {
-                    // Clear the React dev bundle cache so that new updates can be loaded.
-                    if (this.isDebugMode) {
-                        clearReactDevBundleCache();
-                    }
                     // Mark that we tried to initialize the new update, so that if it crashes,
                     // we will know that we need to rollback when the app next starts.
                     savePendingUpdate(pendingUpdate.getString(PENDING_UPDATE_HASH_KEY),
@@ -384,6 +370,14 @@ public class CodePush implements ReactPackage {
             CodePush.this.initializeUpdateAfterRestart();
         }
     
+        private void clearReactDevBundleCache() {
+            // This needs to be kept in sync with https://github.com/facebook/react-native/blob/master/ReactAndroid/src/main/java/com/facebook/react/devsupport/DevSupportManager.java#L78
+            File cachedDevBundle = new File(CodePush.this.applicationContext.getFilesDir(), "ReactNativeDevBundle.js");
+            if (cachedDevBundle.exists()) {
+                cachedDevBundle.delete();
+            }
+        }
+        
         private void loadBundleLegacy() {
             Intent intent = mainActivity.getIntent();
             mainActivity.finish();
@@ -393,6 +387,11 @@ public class CodePush implements ReactPackage {
         }
         
         private void loadBundle() {
+            // Clear the React dev bundle cache so that new updates can be loaded.
+            if (CodePush.this.isDebugMode) {
+                clearReactDevBundleCache();
+            }
+                
             try {
                 // #1) Get the private ReactInstanceManager, which is what includes
                 //     the logic to reload the current React context.
