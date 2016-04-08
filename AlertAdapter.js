@@ -1,34 +1,24 @@
-'use strict';
-
-var { Platform } = require("react-native");
-var Alert;
+import React, { Platform } from "react-native";
+let { Alert } = React;
 
 if (Platform.OS === "android") {
-  var CodePushDialog = require("react-native").NativeModules.CodePushDialog;
+  const { NativeModules: { CodePushDialog } } = React;
+    
   Alert = {
-    alert: function(title, message, buttons) {
+    alert(title, message, buttons) {
       if (buttons.length > 2) {
         throw "Can only show 2 buttons for Android dialog.";
       }
       
-      var button1Text = buttons[0] ? buttons[0].text : null;
-      var button2Text = buttons[1] ? buttons[1].text : null;
+      const button1Text = buttons[0] ? buttons[0].text : null,
+            button2Text = buttons[1] ? buttons[1].text : null;
       
       CodePushDialog.showDialog(
         title, message, button1Text, button2Text,
-        (buttonPressedId) => {
-          buttons[buttonPressedId].onPress && buttons[buttonPressedId].onPress();
-        }, 
-        (error) => {
-          throw error;
-        });
+        (buttonId) => { buttons[buttonId].onPress && buttons[buttonId].onPress(); }, 
+        (error) => { throw error; });
     }
   };
-} else if (Platform.OS === "ios") {   
-  var { AlertIOS } = require("react-native");
-  Alert = AlertIOS;
 }
 
-module.exports = {
-  Alert: Alert
-}
+module.exports = { Alert };
