@@ -1,4 +1,4 @@
-# React Native Plugin for CodePush
+# React Native Module for CodePush
 
 This plugin provides client-side integration for the [CodePush service](http://codepush.tools), allowing you to easily add a dynamic update experience to your React Native app(s).
 
