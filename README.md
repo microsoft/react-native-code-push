@@ -276,7 +276,6 @@ public class MainActivity extends ReactActivity {
         // have it, you can run "code-push deployment ls <appName> -k" to retrieve your key.
         return Arrays.<ReactPackage>asList(
             new MainReactPackage(),
-            // new CodePush() <-- remove this generated line if you used RNPM for plugin installation.
             new CodePush("deployment-key-here", this, BuildConfig.DEBUG)
         );
     }
