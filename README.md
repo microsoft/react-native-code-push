@@ -318,7 +318,7 @@ class AppReactPage : ReactPage
     {
     	get
         {
-       	    return CodePush.GetBundleUrl();
+       	    return CodePush.GetJavaScriptBundleFile();
         }
     }
 
