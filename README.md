@@ -312,7 +312,7 @@ class AppReactPage : ReactPage
     {
     	get
         {
-       	    return CodePush.getBundleUrl();
+       	    return CodePush.GetBundleUrl();
         }
     }
 
@@ -327,7 +327,7 @@ class AppReactPage : ReactPage
             {
                 new MainReactPackage(),
                 ...
-                new CodePush("DEPLOYMENT_KEY", this) 
+                new CodePush("deployment-key-here", this) 
             };
         }
     }
