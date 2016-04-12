@@ -17,6 +17,9 @@ This plugin provides client-side integration for the [CodePush service](http://c
         * [RNPM](#plugin-installation-android---rnpm)
         * ["Manual"](#plugin-installation-android---manual)
     * [Plugin Configuration](#plugin-configuration-android)
+* [Windows Setup](#windows-setup)
+    * [Plugin Installation](#plugin-installation-windows)
+    * [Plugin Configuration](#plugin-configuration-windows)
 * [Plugin Usage](#plugin-usage)
 * [Releasing Updates](#releasing-updates)
 * [API Reference](#api-reference)
@@ -40,6 +43,7 @@ In order to ensure that your end users always have a functioning version of your
 
 - iOS
 - Android
+- Windows
 
 We try our best to maintain backwards compatability of our plugin with previous versions of React Native, but due to the nature of the platform, and the existence of breaking changes between releases, it is possible that you need to use a specific version of the CodePush plugin in order to support the exact version of React Native you are using. The following table outlines which CodePush plugin versions officially support the respective React Native versions:
 
@@ -282,6 +286,61 @@ public class MainActivity extends ReactActivity {
         );
     }
 
+    ...
+}
+```
+
+## Windows Setup
+
+Once you've acquired the CodePush plugin, you need to integrate it into the Visual Studio project of your React Native app and configure it correctly. To do this, take the following steps:
+
+### Plugin Installation (Windows)
+
+1. Open the Visual Studio solution located at `windows\<AppName>\<AppName>.sln` within your app
+
+2. Right-click the solution node in the `Solution Explorer` window and select the `Add -> Existing Project...` menu item
+
+3. Browse to the `node_modules\react-native-code-push\windows` directory, select the `CodePush.sln` file and click `OK`
+
+4. Back in the `Solution Explorer`, right-click the project node that is named after your app, and select the `Add -> Reference...` menu item
+
+5. Select the `Projects` tab on the left hand side, check the `CodePush` item and then click `OK`
+
+### Plugin Configuration (Windows)
+
+After installing the plugin, you need to configure your app to consult CodePush for the location of your JS bundle, since it will "take control" of managing the current and all future versions. To do this, update the `AppReactage.cs` file to use CodePush via the following changes:
+
+```c#
+...
+// 1. Import the CodePush namespace 
+using CodePush;
+
+public class MainActivity extends ReactActivity {
+    // 2. Update the JavaScriptBundleFile property to return the
+    // bundle URL from CodePush instead of staticaly from the binary
+    public override string JavaScriptBundleFile
+    {
+    	get
+        {
+       	    return CodePush.getBundleUrl();
+        }
+    }
+
+    // 3. Instantiate an instance of the CodePush runtime and add it to the list of
+    // existing packages, specifying the right deployment key. If you don't already 
+    // have it, you can run "code-push deployment ls <appName> -k" to retrieve your key.
+    public override List<IReactPackage> Packages
+    {
+        get
+        {
+            return new List<IReactPackage>
+            {
+                new MainReactPackage(),
+                ...
+                new CodePush("DEPLOYMENT_KEY", this) 
+            };
+        }
+    }
     ...
 }
 ```
