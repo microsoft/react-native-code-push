@@ -289,12 +289,18 @@ Once you've acquired the CodePush plugin, you need to integrate it into the Visu
 
 2. Right-click the solution node in the `Solution Explorer` window and select the `Add -> Existing Project...` menu item
 
+   ![Add Project](https://cloud.githubusercontent.com/assets/116461/14467164/ddf6312e-008e-11e6-8a10-44a8b44b5dfc.PNG)
+   
 3. Browse to the `node_modules\react-native-code-push\windows` directory, select the `CodePush.sln` file and click `OK`
 
 4. Back in the `Solution Explorer`, right-click the project node that is named after your app, and select the `Add -> Reference...` menu item
 
+   ![Add Reference](https://cloud.githubusercontent.com/assets/116461/14467154/d833bc98-008e-11e6-8e95-09864b1f05ef.PNG)
+
 5. Select the `Projects` tab on the left hand side, check the `CodePush` item and then click `OK`
 
+   ![Add Reference Dialog](https://cloud.githubusercontent.com/assets/116461/14467147/cb805b6e-008e-11e6-964f-f856c59b65af.PNG)
+   
 ### Plugin Configuration (Windows)
 
 After installing the plugin, you need to configure your app to consult CodePush for the location of your JS bundle, since it will "take control" of managing the current and all future versions. To do this, update the `AppReactPage.cs` file to use CodePush via the following changes:
