@@ -98,12 +98,12 @@ namespace ReactNative.CodePush
             return fileProperties.DateModified.ToUnixTimeMilliseconds();
         }
 
-        public static string GetBundleUrl()
+        public string GetBundleUrl()
         {
             return GetBundleUrl(DEFAULT_JS_BUNDLE_NAME);
         }
 
-        public static string GetBundleUrl(string assetsBundleFileName)
+        public string GetBundleUrl(string assetsBundleFileName)
         {
             if (currentInstance == null)
             {
