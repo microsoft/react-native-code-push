@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using ReactNative.Bridge;
 using ReactNative.Modules.Core;
 using ReactNative.UIManager;
-using Windows.UI.Xaml.Controls;
-using System.Xml;
 using Windows.ApplicationModel;
 using Windows.Storage;
 using System.IO;
@@ -13,13 +11,12 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Reflection;
 using Windows.Web.Http;
-using System.Linq;
-using System.Text.RegularExpressions;
 using Windows.Storage.FileProperties;
+using ReactNative;
 
-namespace ReactNative.CodePush
+namespace CodePush.ReactNative
 {
-    public class CodePush : IReactPackage
+    public class CodePushModule : IReactPackage
     {
         private static bool needToReportRollback = false;
         private static bool isRunningBinaryVersion = false;
@@ -55,9 +52,9 @@ namespace ReactNative.CodePush
 
         private ReactPage mainPage;
 
-        private static CodePush currentInstance;
+        private static CodePushModule currentInstance;
 
-        public CodePush(string deploymentKey, ReactPage mainPage)
+        public CodePushModule(string deploymentKey, ReactPage mainPage)
         {
             codePushPackage = new CodePushPackage();
             // TODO implement telemetryManager 
@@ -98,22 +95,22 @@ namespace ReactNative.CodePush
             return fileProperties.DateModified.ToUnixTimeMilliseconds();
         }
 
-        public string GetBundleUrl()
+        public string GetJavaScriptBundleFile()
         {
-            return GetBundleUrl(DEFAULT_JS_BUNDLE_NAME);
+            return GetJavaScriptBundleFile(DEFAULT_JS_BUNDLE_NAME);
         }
 
-        public string GetBundleUrl(string assetsBundleFileName)
+        public string GetJavaScriptBundleFile(string assetsBundleFileName)
         {
             if (currentInstance == null)
             {
                 throw new CodePushNotInitializedException("A CodePush instance has not been created yet. Have you added it to your app's list of ReactPackages?");
             }
 
-            return currentInstance.GetBundleUrlInternal(assetsBundleFileName).Result;
+            return currentInstance.GetJavaScriptBundleFileAsync(assetsBundleFileName).Result;
         }
 
-        public async Task<string> GetBundleUrlInternal(string assetsBundleFileName)
+        public async Task<string> GetJavaScriptBundleFileAsync(string assetsBundleFileName)
         {
             this.assetsBundleFileName = assetsBundleFileName;
             string binaryJsBundleUrl = ASSETS_BUNDLE_PREFIX + assetsBundleFileName;
@@ -376,9 +373,9 @@ namespace ReactNative.CodePush
             }
 
             // TODO get rid of this
-            private CodePush codePush;
+            private CodePushModule codePush;
 
-            public CodePushNativeModule(ReactContext reactContext, CodePush codePush) : base(reactContext)
+            public CodePushNativeModule(ReactContext reactContext, CodePushModule codePush) : base(reactContext)
             {
                 this.reactContext = reactContext;
                 this.codePush = codePush;
@@ -422,7 +419,7 @@ namespace ReactNative.CodePush
 
                 // #2) Update the locally stored JS bundle file path
                 Type reactInstanceManagerType = typeof(ReactInstanceManager);
-                string latestJSBundleFile = await codePush.GetBundleUrlInternal(codePush.assetsBundleFileName);
+                string latestJSBundleFile = await codePush.GetJavaScriptBundleFileAsync(codePush.assetsBundleFileName);
                 reactInstanceManagerType
                     .GetField("_jsBundleFile", BindingFlags.NonPublic | BindingFlags.Instance)
                     .SetValue(reactInstanceManager, latestJSBundleFile);

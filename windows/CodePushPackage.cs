@@ -9,7 +9,7 @@ using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.Web.Http;
 
-namespace ReactNative.CodePush
+namespace CodePush.ReactNative
 {
     class CodePushPackage
     {

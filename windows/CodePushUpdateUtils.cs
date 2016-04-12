@@ -4,7 +4,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Windows.Storage;
 
-namespace ReactNative.CodePush
+namespace CodePush.ReactNative
 {
     class CodePushUpdateUtils
     {

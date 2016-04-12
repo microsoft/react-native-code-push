@@ -1,14 +1,12 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Diagnostics;
-using System.IO;
-using System.IO.Compression;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.System.Profile;
 
-namespace ReactNative.CodePush
+namespace CodePush.ReactNative
 {
     class CodePushUtils
     {
@@ -37,7 +35,7 @@ namespace ReactNative.CodePush
 
         public static string GetDeviceId()
         {
-            HardwareToken token = Windows.System.Profile.HardwareIdentification.GetPackageSpecificToken(null);
+            HardwareToken token = HardwareIdentification.GetPackageSpecificToken(null);
             IBuffer hardwareId = token.Id;
             DataReader dataReader = DataReader.FromBuffer(hardwareId);
 

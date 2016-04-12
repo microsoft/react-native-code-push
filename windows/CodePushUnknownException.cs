@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ReactNative.CodePush
+namespace CodePush.ReactNative
 {
     class CodePushUnknownException : Exception
     {

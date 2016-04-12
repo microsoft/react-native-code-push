@@ -1,12 +1,8 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
-using System.IO;
-using System.IO.Compression;
+﻿using System;
 using System.Threading.Tasks;
 using Windows.Storage;
-using Windows.Storage.Streams;
 
-namespace ReactNative.CodePush
+namespace CodePush.ReactNative
 {
     class FileUtils
     {

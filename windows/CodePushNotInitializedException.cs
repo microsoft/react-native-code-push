@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace ReactNative.CodePush
+namespace CodePush.ReactNative
 {
-    public class CodePushNotInitializedException : Exception
+    class CodePushNotInitializedException : Exception
     {
         public CodePushNotInitializedException(string message)
             : base(message)
