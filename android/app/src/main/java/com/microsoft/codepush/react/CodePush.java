@@ -30,7 +30,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.Exception;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
