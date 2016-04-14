@@ -30,7 +30,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.ReflectiveOperationException;
+import java.lang.Exception;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
@@ -413,7 +413,7 @@ public class CodePush implements ReactPackage {
                         try {
                             recreateMethod.invoke(instanceManager);
                         }
-                        catch (ReflectiveOperationException e) {
+                        catch (Exception e) {
                             // The recreation method threw an unknown exception
                             // so just simply fallback to restarting the Activity
                             loadBundleLegacy();
@@ -421,7 +421,7 @@ public class CodePush implements ReactPackage {
                     }
                 });
             }
-            catch (ReflectiveOperationException e) {
+            catch (Exception e) {
                 // Our reflection logic failed somewhere
                 // so fall back to restarting the Activity
                 loadBundleLegacy();
