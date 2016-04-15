@@ -84,6 +84,7 @@ failCallback:(void (^)(NSError *err))failCallback;
 
 + (NSString *)getBinaryAssetsPath;
 + (NSDictionary *)getCurrentPackage:(NSError **)error;
++ (NSDictionary *)getPreviousPackage:(NSError **)error;
 + (NSString *)getCurrentPackageFolderPath:(NSError **)error;
 + (NSString *)getCurrentPackageBundlePath:(NSError **)error;
 + (NSString *)getCurrentPackageHash:(NSError **)error;
@@ -140,4 +141,10 @@ typedef NS_ENUM(NSInteger, CodePushInstallMode) {
     CodePushInstallModeImmediate,
     CodePushInstallModeOnNextRestart,
     CodePushInstallModeOnNextResume
+};
+
+typedef NS_ENUM(NSInteger, CodePushUpdateState) {
+    CodePushUpdateStateRunning,
+    CodePushUpdateStatePending,
+    CodePushUpdateStateLatest
 };

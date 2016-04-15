@@ -17,7 +17,6 @@ static NSString *const UnzippedFolderName = @"unzipped";
 + (void)clearUpdates
 {
     [[NSFileManager defaultManager] removeItemAtPath:[self getCodePushPath] error:nil];
-    [[NSFileManager defaultManager] removeItemAtPath:[self getStatusFilePath] error:nil];
 }
 
 + (void)downloadAndReplaceCurrentBundle:(NSString *)remoteBundleUrl
@@ -290,27 +289,8 @@ static NSString *const UnzippedFolderName = @"unzipped";
 
 + (NSDictionary *)getCurrentPackage:(NSError **)error
 {
-    NSString *folderPath = [CodePushPackage getCurrentPackageFolderPath:error];
-    if (!*error) {
-        if (!folderPath) {
-            return nil;
-        }
-        
-        NSString *packagePath = [folderPath stringByAppendingPathComponent:@"app.json"];
-        NSString *content = [NSString stringWithContentsOfFile:packagePath
-                                                      encoding:NSUTF8StringEncoding
-                                                         error:error];
-        if (!*error) {
-            NSData *data = [content dataUsingEncoding:NSUTF8StringEncoding];
-            NSDictionary* jsonDict = [NSJSONSerialization JSONObjectWithData:data
-                                                                     options:kNilOptions
-                                                                       error:error];
-            
-            return jsonDict;
-        }
-    }
-    
-    return nil;
+    NSString *packageHash = [CodePushPackage getCurrentPackageHash:error];
+    return [CodePushPackage getPackage:packageHash error:error];
 }
 
 + (NSString *)getCurrentPackageBundlePath:(NSError **)error
@@ -421,6 +401,12 @@ static NSString *const UnzippedFolderName = @"unzipped";
 + (NSString *)getPackageFolderPath:(NSString *)packageHash
 {
     return [[self getCodePushPath] stringByAppendingPathComponent:packageHash];
+}
+
++ (NSDictionary *)getPreviousPackage:(NSError **)error
+{
+    NSString *packageHash = [CodePushPackage getPreviousPackageHash:error];
+    return [CodePushPackage getPackage:packageHash error:error];
 }
 
 + (NSString *)getPreviousPackageHash:(NSError **)error

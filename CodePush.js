@@ -100,12 +100,16 @@ const getConfiguration = (() => {
 })();
 
 async function getCurrentPackage() {
-  const localPackage = await NativeCodePush.getCurrentPackage();
-  if (localPackage) {
-      localPackage.failedInstall = await NativeCodePush.isFailedUpdate(localPackage.packageHash);
-      localPackage.isFirstRun = await NativeCodePush.isFirstRun(localPackage.packageHash);
+  return await getUpdateMetadata(CodePush.UpdateState.LATEST);
+}
+
+async function getUpdateMetadata(updateState) {
+  const updateMetadata = await NativeCodePush.getUpdateMetadata(updateState || CodePush.UpdateState.RUNNING);
+  if (updateMetadata) {
+      updateMetadata.failedInstall = await NativeCodePush.isFailedUpdate(updateMetadata.packageHash);
+      updateMetadata.isFirstRun = await NativeCodePush.isFirstRun(updateMetadata.packageHash);
   }
-  return localPackage;
+  return updateMetadata;
 }
 
 function getPromisifiedSdk(requestFetchAdapter, config) {
@@ -388,9 +392,11 @@ if (NativeCodePush) {
         checkForUpdate,
         getConfiguration,
         getCurrentPackage,
+        getUpdateMetadata,
         log,
         notifyApplicationReady,
         restartApp,
+        restartApplication: restartApp,
         setUpTestDependencies,
         sync,
         InstallMode: {
@@ -408,6 +414,11 @@ if (NativeCodePush) {
             UPDATE_INSTALLED: 6, // The app had an optional/mandatory update that was successfully downloaded and is about to be installed.
             SYNC_IN_PROGRESS: 7, // There is an ongoing "sync" operation in progress.
             UNKNOWN_ERROR: -1
+        },
+        UpdateState: {
+          RUNNING: NativeCodePush.codePushUpdateStateRunning,
+          PENDING: NativeCodePush.codePushUpdateStatePending,
+          LATEST: NativeCodePush.codePushUpdateStateLatest
         },
         DEFAULT_UPDATE_DIALOG: {
             appendReleaseDescription: false,
