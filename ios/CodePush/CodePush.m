@@ -544,7 +544,7 @@ RCT_EXPORT_METHOD(getUpdateMetadata:(CodePushUpdateState)updateState
 {
     NSError *error;
     NSMutableDictionary *package = [[CodePushPackage getCurrentPackage:&error] mutableCopy];
-    
+
     if (error) {
         return reject([NSString stringWithFormat: @"%lu", (long)error.code], error.localizedDescription, error);
     } else if (package == nil) {
@@ -570,13 +570,17 @@ RCT_EXPORT_METHOD(getUpdateMetadata:(CodePushUpdateState)updateState
         // 1) Caller wanted a pending, and there is a pending update
         // 2) Caller wanted the running update, and there isn't a pending
         // 3) Calers wants the latest update, regardless if it's pending or not
+        
         if (isRunningBinaryVersion) {
             // This only matters in Debug builds. Since we do not clear "outdated" updates,
             // we need to indicate to the JS side that somehow we have a current update on
             // disk that is not actually running.
             [package setObject:@(YES) forKey:@"_isDebugOnly"];
         }
-        
+    
+        // To support differentiating pending vs. non-pending updates
+        // when request an update state of LATEST, provide an isPending flag
+        [package setObject:@(currentUpdateIsPending) forKey:PackageIsPendingKey];
         resolve(package);
     }
 }
