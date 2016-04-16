@@ -193,11 +193,13 @@ declare namespace CodePush {
      * @param deploymentKey The deployment key to use to query the CodePush server for an update.
      */
     function checkForUpdate(deploymentKey?: string): ReactNativePromise<RemotePackage>;  
-    
+
     /**
-     * Retrieves the metadata about the currently installed update (e.g. description, installation time, size).
+     * Retrieves the metadata for an installed update (e.g. description, mandatory).
+     * 
+     * @param updateState The state of the update you want to retrieve the metadata for. Defaults to UpdateState.RUNNING.
      */
-    function getCurrentPackage(): ReactNativePromise<LocalPackage>;
+    function getUpdateMetadata(updateState?: UpdateState) : ReactNativePromise<LocalPackage>;
     
     /**
      * Notifies the CodePush runtime that an installed update is considered successful.
@@ -218,7 +220,7 @@ declare namespace CodePush {
      * @param syncStatusChangedCallback An optional callback that allows tracking the status of the sync operation, as opposed to simply checking the resolved state via the returned Promise.
      * @param downloadProgressCallback An optional callback that allows tracking the progress of an update while it is being downloaded.
      */
-    function sync(options?: SyncOptions, syncStatusChangedCallback?: SyncStatusChangedCallback, downloadProgressCallback?: DowloadProgressCallback): __React.Promise<SyncStatus>;
+    function sync(options?: SyncOptions, syncStatusChangedCallback?: SyncStatusChangedCallback, downloadProgressCallback?: DowloadProgressCallback): ReactNativePromise<SyncStatus>;
 
     /**
      * Indicates when you would like an installed update to actually be applied.
@@ -241,6 +243,9 @@ declare namespace CodePush {
         ON_NEXT_RESUME
     }
     
+    /**
+     * Indicates the current status of a sync operation.
+     */
     enum SyncStatus {
         /**
          * The CodePush server is being queried for an update.
@@ -290,6 +295,29 @@ declare namespace CodePush {
          * The sync operation encountered an unknown error.
          */
         UNKNOWN_ERROR
+    }
+    
+    /**
+     * Indicates the state that an update is currently in.
+     */
+    enum UpdateState {
+        /**
+         * Indicates that an update represents the
+         * version of the app that is currently running. 
+         */
+        RUNNING,
+        
+        /**
+         * Indicates than an update has been installed, but the
+         * app hasn't been restarted yet in order to apply it.
+         */
+        PENDING,
+        
+        /**
+         * Indicates than an update represents the latest available
+         * release, and can be either currently running or pending.
+         */
+        LATEST
     }
 }
 

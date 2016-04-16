@@ -378,7 +378,7 @@ When you require `react-native-code-push`, the module object provides the follow
 
 * [checkForUpdate](#codepushcheckforupdate): Asks the CodePush service whether the configured app deployment has an update available. 
 
-* [getCurrentPackage](#codepushgetcurrentpackage): Retrieves the metadata about the currently installed update (e.g. description, installation time, size).
+* [getUpdateMetadata](#codepushgetupdatemetadata): Retrieves the metadata for an installed update (e.g. description, mandatory).
 
 * [notifyApplicationReady](#codepushnotifyapplicationready): Notifies the CodePush runtime that an installed update is considered successful. If you are manually checking for and installing updates (i.e. not using the [sync](#codepushsync) method to handle it all for you), then this method **MUST** be called; otherwise CodePush will treat the update as failed and rollback to the previous version when the app next restarts.
 
@@ -417,33 +417,41 @@ codePush.checkForUpdate()
 });
 ```
 
-#### codePush.getCurrentPackage
+#### codePush.getUpdateMetadata
 
 ```javascript
-codePush.getCurrentPackage(): Promise<LocalPackage>;
+codePush.getUpdateMetadata(updateState: UpdateState = UpdateState.RUNNING): Promise<LocalPackage>;
 ```
 
-Retrieves the metadata about the currently installed "package" (e.g. description, installation time). This can be useful for scenarios such as displaying a "what's new?" dialog after an update has been applied or checking whether there is a pending update that is waiting to be applied via a resume or restart.
+Retrieves the metadata for an installed update (e.g. description, mandatory) whose state matches the specified `updateState` parameter. This can be useful for scenarios such as displaying a "what's new?" dialog after an update has been applied or checking whether there is a pending update that is waiting to be applied via a resume or restart. For more details about the possible update states, and what they represent, refer to the [UpdateState reference](#updatestate).
 
 This method returns a `Promise` which resolves to one of two possible values:
 
-1. `null` if the app is currently running the JS bundle from the binary and not a CodePush update. This occurs in the following scenarios:
+1. `null` if an update with the specified state doesn't currently exist. This occurs in the following scenarios:
 
-    1. The end-user installed the app binary and has yet to install a CodePush update
+    1. The end-user hasn't installed any CodePush updates yet, and therefore, no metadata is available for any updates, regardless what you specify as the `updateState` parameter.
     1. The end-user installed an update of the binary (e.g. from the store), which cleared away the old CodePush updates, and gave precedence back to the JS binary in the binary.
+    1. The `updateState` parameter is set to `UpdateState.RUNNING`, but the app isn't currently running a CodePush update. There may be a pending update, which requires an app restart to become active.
+    1. The `updateState` parameter is set to `UpdateState.PENDING`, but the app doesn't have any pending updates.
 
-2. A [`LocalPackage`](#localpackage) instance which represents the metadata for the currently running CodePush update.
+2. A [`LocalPackage`](#localpackage) instance which represents the metadata for the currently requested CodePush update (either the running or pending).
 
 Example Usage: 
 
 ```javascript
-codePush.getCurrentPackage()
-.then((update) => {
-    // If the current app "session" represents the first time
-    // this update has run, and it had a description provided
-    // with it upon release, let's show it to the end user
-    if (update.isFirstRun && update.description) {
-        // Display a "what's new?" modal
+// Check if there is currently a CodePush update running, and if
+// so, register it with the HockeyApp SDK (https://github.com/slowpath/react-native-hockeyapp)
+//  so that crash reports will correctly display the JS bundle version the user was running.
+codePush.getUpdateMetadata().then((update) => {
+    if (update) {
+        hockeyApp.addMetadata({ CodePushRelease: update.label });
+    }
+});
+
+// Check to see if there is still an update pending.
+codePush.getUpdateMetadata(UpdateState.PENDING).then((update) => {
+    if (update) {
+        // There's a pending update, do we want to force a restart?   
     }
 });
 ```
@@ -485,7 +493,6 @@ This method provides support for two different (but customizable) "modes" to eas
 1. **Silent mode** *(the default behavior)*, which automatically downloads available updates, and applies them the next time the app restarts (e.g. the OS or end user killed it, or the device was restarted). This way, the entire update experience is "silent" to the end user, since they don't see any update prompt and/or "synthetic" app restarts.
 
 2. **Active mode**, which when an update is available, prompts the end user for permission before downloading it, and then immediately applies the update. If an update was released using the `mandatory` flag, the end user would still be notified about the update, but they wouldn't have the choice to ignore it.
-
 
 Example Usage: 
 
@@ -650,7 +657,7 @@ The CodePush API includes the following enums which can be used to customize the
 
 ##### InstallMode
 
-This enum specified when you would like an installed update to actually be applied, and can be passed to either the `sync` or `LocalPackage.install` methods. It includes the following values:
+This enum specifies when you would like an installed update to actually be applied, and can be passed to either the `sync` or `LocalPackage.install` methods. It includes the following values:
 
 * __codePush.InstallMode.IMMEDIATE__ *(0)* - Indicates that you want to install the update and restart the app immediately. This value is appropriate for debugging scenarios as well as when displaying an update prompt to the user, since they would expect to see the changes immediately after accepting the installation. Additionally, this mode can be used to enforce mandatory updates, since it removes the potentially undesired latency between the update installation and the next time the end user restarts or resumes the app.
 
@@ -671,6 +678,16 @@ This enum is provided to the `syncStatusChangedCallback` function that can be pa
 * __codePush.SyncStatus.UPDATE_INSTALLED__ *(6)* - An available update has been installed and will be run either immediately after the `syncStatusChangedCallback` function returns or the next time the app resumes/restarts, depending on the `InstallMode` specified in `SyncOptions`.
 * __codePush.SyncStatus.SYNC_IN_PROGRESS__ *(7)* - There is an ongoing `sync` operation running which prevents the current call from being executed.
 * __codePush.SyncStatus.UNKNOWN_ERROR__ *(-1)* - The sync operation encountered an unknown error. 
+
+##### UpdateState
+
+This enum specifies the state that an update is currently in, and can be specified when calling the `getUpdateMetadata` method. It includes the following values:
+
+* __codePush.UpdateState.RUNNING__ *(0)* - Indicates that an update represents the version of the app that is currently running. This can be useful for identifying attributes about the app, for scenarios such as displaying the release description in a "what's new?" dialog or reporting the latest version to an analytics and/or crash reporting service.
+
+* __codePush.UpdateState.PENDING__ *(1)* - Indicates than an update has been installed, but the app hasn't been restarted yet in order to apply it. This can be useful for determining whether there is a pending update, which you may want to force a programmatic restart (via `restartApp`) in order to apply.
+ 
+* __codePush.UpdateState.LATEST__ *(2)* - Indicates than an update represents the latest available release, and can be either currently running or pending.
 
 ### Objective-C API Reference (iOS)
 
