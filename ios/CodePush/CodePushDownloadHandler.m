@@ -90,9 +90,12 @@ failCallback:(void (^)(NSError *err))failCallback {
 }
 
 -(void)connectionDidFinishLoading:(NSURLConnection *)connection {
-    // We should have received all of the bytes if this is called.
-    assert(self.receivedContentLength == self.expectedContentLength);
-    
+    // expectedContentLength might be -1 when NSURLConnection don't know the length(e.g. response encode with gzip)
+    if (self.expectedContentLength > 0) {
+        // We should have received all of the bytes if this is called.
+        assert(self.receivedContentLength == self.expectedContentLength);
+    }
+
     [self.outputFileStream close];
     BOOL isZip = _header[0] == 'P' && _header[1] == 'K' && _header[2] == 3 && _header[3] == 4;
     self.doneCallback(isZip);
