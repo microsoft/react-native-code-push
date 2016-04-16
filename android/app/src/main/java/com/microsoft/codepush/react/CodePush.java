@@ -353,9 +353,15 @@ public class CodePush implements ReactPackage {
         @Override
         public Map<String, Object> getConstants() {
             final Map<String, Object> constants = new HashMap<>();
+            
             constants.put("codePushInstallModeImmediate", CodePushInstallMode.IMMEDIATE.getValue());
             constants.put("codePushInstallModeOnNextRestart", CodePushInstallMode.ON_NEXT_RESTART.getValue());
             constants.put("codePushInstallModeOnNextResume", CodePushInstallMode.ON_NEXT_RESUME.getValue());
+            
+            constants.put("codePushUpdateStateRunning", CodePushUpdateState.RUNNING.getValue());
+            constants.put("codePushUpdateStatePending", CodePushUpdateState.PENDING.getValue());
+            constants.put("codePushUpdateStateLatest", CodePushUpdateState.LATEST.getValue());
+            
             return constants;
         }
 
@@ -481,31 +487,53 @@ public class CodePush implements ReactPackage {
 
             promise.resolve(configMap);
         }
-
+        
         @ReactMethod
-        public void getCurrentPackage(final Promise promise) {
+        public void getUpdateMetadata(final int updateState, final Promise promise) {
             AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... params) {
                     WritableMap currentPackage = codePushPackage.getCurrentPackage();
+                    
                     if (currentPackage == null) {
                         promise.resolve("");
                         return null;
                     }
 
-                    if (isRunningBinaryVersion) {
-                        currentPackage.putBoolean("_isDebugOnly", true);
-                    }
-
-                    Boolean isPendingUpdate = false;
+                    Boolean currentUpdateIsPending = false;
 
                     if (currentPackage.hasKey(PACKAGE_HASH_KEY)) {
                         String currentHash = currentPackage.getString(PACKAGE_HASH_KEY);
-                        isPendingUpdate = CodePush.this.isPendingUpdate(currentHash);
+                        currentUpdateIsPending = CodePush.this.isPendingUpdate(currentHash);
                     }
+                    
+                    if (updateState == CodePushUpdateState.PENDING.getValue() && !currentUpdateIsPending) {
+                        // The caller wanted a pending update
+                        // but there isn't currently one.
+                        promise.resolve("");
+                    } else if (updateState == CodePushUpdateState.RUNNING.getValue() && currentUpdateIsPending) {
+                        // The caller wants the running update, but the current
+                        // one is pending, so we need to grab the previous.
+                        promise.resolve(codePushPackage.getPreviousPackage());
+                    } else {
+                        // The current package satisfies the request:
+                        // 1) Caller wanted a pending, and there is a pending update
+                        // 2) Caller wanted the running update, and there isn't a pending
+                        // 3) Calers wants the latest update, regardless if it's pending or not
+                        
+                        if (isRunningBinaryVersion) {
+                            // This only matters in Debug builds. Since we do not clear "outdated" updates,
+                            // we need to indicate to the JS side that somehow we have a current update on
+                            // disk that is not actually running.
+                            currentPackage.putBoolean("_isDebugOnly", true);
+                        }
 
-                    currentPackage.putBoolean("isPending", isPendingUpdate);
-                    promise.resolve(currentPackage);
+                        // To support differentiating pending vs. non-pending updates
+                        // when request an update state of LATEST, provide an isPending flag
+                        currentPackage.putBoolean("isPending", currentUpdateIsPending);
+                        promise.resolve(currentPackage);
+                    }
+                    
                     return null;
                 }
             };
