@@ -291,7 +291,6 @@ static NSString *const UnzippedFolderName = @"unzipped";
 + (NSDictionary *)getCurrentPackage:(NSError **)error
 {
     NSString *packageHash = [CodePushPackage getCurrentPackageHash:error];
-    
     if (*error || !packageHash) {
         return nil;
     }
@@ -410,7 +409,6 @@ static NSString *const UnzippedFolderName = @"unzipped";
 + (NSDictionary *)getPreviousPackage:(NSError **)error
 {
     NSString *packageHash = [self getPreviousPackageHash:error];
-    
     if (*error || !packageHash) {
         return nil;
     }

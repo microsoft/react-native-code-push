@@ -564,7 +564,7 @@ RCT_EXPORT_METHOD(getUpdateMetadata:(CodePushUpdateState)updateState
     } else if (updateState == CodePushUpdateStateRunning && currentUpdateIsPending) {
         // The caller wants the running update, but the current
         // one is pending, so we need to grab the previous.
-        resolve([CodePushPackage getPreviousPackage:nil]);
+        resolve([CodePushPackage getPreviousPackage:&error]);
     } else {
         // The current package satisfies the request:
         // 1) Caller wanted a pending, and there is a pending update
