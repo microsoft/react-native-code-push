@@ -180,12 +180,16 @@ static NSString *bundleResourceName = @"main";
  */
 - (NSDictionary *)constantsToExport
 {
-    // Export the values of the CodePushInstallMode enum
-    // so that the script-side can easily stay in sync
+    // Export the values of the CodePushInstallMode and CodePushUpdateState
+    // enums so that the script-side can easily stay in sync
     return @{
              @"codePushInstallModeOnNextRestart":@(CodePushInstallModeOnNextRestart),
              @"codePushInstallModeImmediate": @(CodePushInstallModeImmediate),
-             @"codePushInstallModeOnNextResume": @(CodePushInstallModeOnNextResume)
+             @"codePushInstallModeOnNextResume": @(CodePushInstallModeOnNextResume),
+             
+             @"codePushUpdateStateRunning": @(CodePushUpdateStateRunning),
+             @"codePushUpdateStatePending": @(CodePushUpdateStatePending),
+             @"codePushUpdateStateLatest": @(CodePushUpdateStateLatest)
             };
 };
 
@@ -532,35 +536,51 @@ RCT_EXPORT_METHOD(getConfiguration:(RCTPromiseResolveBlock)resolve
 }
 
 /*
- * This method is the native side of the CodePush.getCurrentPackage method.
+ * This method is the native side of the CodePush.getUpdateMetadata method.
  */
-RCT_EXPORT_METHOD(getCurrentPackage:(RCTPromiseResolveBlock)resolve
+RCT_EXPORT_METHOD(getUpdateMetadata:(CodePushUpdateState)updateState
+                           resolver:(RCTPromiseResolveBlock)resolve
                            rejecter:(RCTPromiseRejectBlock)reject)
 {
     NSError *error;
     NSMutableDictionary *package = [[CodePushPackage getCurrentPackage:&error] mutableCopy];
-    
+
     if (error) {
-        reject([NSString stringWithFormat: @"%lu", (long)error.code], error.localizedDescription, error);
-        return;
+        return reject([NSString stringWithFormat: @"%lu", (long)error.code], error.localizedDescription, error);
     } else if (package == nil) {
+        // The app hasn't downloaded any CodePush updates yet,
+        // so we simply return nil regardless if the user
+        // wanted to retrieve the pending or running update.
+        return resolve(nil);
+    }
+    
+    // We have a CodePush update, so let's see if it's currently in a pending state.
+    BOOL currentUpdateIsPending = [self isPendingUpdate:[package objectForKey:PackageHashKey]];
+   
+    if (updateState == CodePushUpdateStatePending && !currentUpdateIsPending) {
+        // The caller wanted a pending update
+        // but there isn't currently one.
         resolve(nil);
-        return;
+    } else if (updateState == CodePushUpdateStateRunning && currentUpdateIsPending) {
+        // The caller wants the running update, but the current
+        // one is pending, so we need to grab the previous.
+        resolve([CodePushPackage getPreviousPackage:nil]);
+    } else {
+        // The current package satisfies the request:
+        // 1) Caller wanted a pending, and there is a pending update
+        // 2) Caller wanted the running update, and there isn't a pending
+        // 3) Caller wants the latest update, regardless if it's pending or not
+        if (isRunningBinaryVersion) {
+            // This only matters in Debug builds. Since we do not clear "outdated" updates,
+            // we need to indicate to the JS side that somehow we have a current update on
+            // disk that is not actually running.
+            [package setObject:@(YES) forKey:@"_isDebugOnly"];
+        }
+    
+        // Enable differentiating pending vs. non-pending updates
+        [package setObject:@(currentUpdateIsPending) forKey:PackageIsPendingKey];
+        resolve(package);
     }
-    
-    if (isRunningBinaryVersion) {
-        // This only matters in Debug builds. Since we do not clear "outdated" updates,
-        // we need to indicate to the JS side that somehow we have a current update on
-        // disk that is not actually running.
-        [package setObject:@(YES) forKey:@"_isDebugOnly"];
-    }
-    
-    // Add the "isPending" virtual property to the package at this point, so that
-    // the script-side doesn't need to immediately call back into native to populate it.
-    BOOL isPendingUpdate = [self isPendingUpdate:[package objectForKey:PackageHashKey]];
-    [package setObject:@(isPendingUpdate) forKey:PackageIsPendingKey];
-    
-    resolve(package);
 }
 
 /*
