@@ -569,8 +569,7 @@ RCT_EXPORT_METHOD(getUpdateMetadata:(CodePushUpdateState)updateState
         // The current package satisfies the request:
         // 1) Caller wanted a pending, and there is a pending update
         // 2) Caller wanted the running update, and there isn't a pending
-        // 3) Calers wants the latest update, regardless if it's pending or not
-        
+        // 3) Caller wants the latest update, regardless if it's pending or not
         if (isRunningBinaryVersion) {
             // This only matters in Debug builds. Since we do not clear "outdated" updates,
             // we need to indicate to the JS side that somehow we have a current update on
@@ -578,8 +577,7 @@ RCT_EXPORT_METHOD(getUpdateMetadata:(CodePushUpdateState)updateState
             [package setObject:@(YES) forKey:@"_isDebugOnly"];
         }
     
-        // To support differentiating pending vs. non-pending updates
-        // when request an update state of LATEST, provide an isPending flag
+        // Enable differentiating pending vs. non-pending updates
         [package setObject:@(currentUpdateIsPending) forKey:PackageIsPendingKey];
         resolve(package);
     }

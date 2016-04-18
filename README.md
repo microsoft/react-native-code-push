@@ -441,7 +441,7 @@ Example Usage:
 ```javascript
 // Check if there is currently a CodePush update running, and if
 // so, register it with the HockeyApp SDK (https://github.com/slowpath/react-native-hockeyapp)
-//  so that crash reports will correctly display the JS bundle version the user was running.
+// so that crash reports will correctly display the JS bundle version the user was running.
 codePush.getUpdateMetadata().then((update) => {
     if (update) {
         hockeyApp.addMetadata({ CodePushRelease: update.label });
