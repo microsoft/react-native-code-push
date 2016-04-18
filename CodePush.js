@@ -387,52 +387,52 @@ let CodePush;
 // and therefore, it doesn't make sense initializing 
 // the JS interface when it wouldn't work anyways.
 if (NativeCodePush) {
-    CodePush = {
-        AcquisitionSdk: Sdk,
-        checkForUpdate,
-        getConfiguration,
-        getCurrentPackage,
-        getUpdateMetadata,
-        log,
-        notifyApplicationReady,
-        restartApp,
-        restartApplication: restartApp,
-        setUpTestDependencies,
-        sync,
-        InstallMode: {
-            IMMEDIATE: NativeCodePush.codePushInstallModeImmediate, // Restart the app immediately
-            ON_NEXT_RESTART: NativeCodePush.codePushInstallModeOnNextRestart, // Don't artificially restart the app. Allow the update to be "picked up" on the next app restart
-            ON_NEXT_RESUME: NativeCodePush.codePushInstallModeOnNextResume // Restart the app the next time it is resumed from the background
-        },
-        SyncStatus: {
-            CHECKING_FOR_UPDATE: 0,
-            AWAITING_USER_ACTION: 1,
-            DOWNLOADING_PACKAGE: 2,
-            INSTALLING_UPDATE: 3,
-            UP_TO_DATE: 4, // The running app is up-to-date
-            UPDATE_IGNORED: 5, // The app had an optional update and the end-user chose to ignore it
-            UPDATE_INSTALLED: 6, // The app had an optional/mandatory update that was successfully downloaded and is about to be installed.
-            SYNC_IN_PROGRESS: 7, // There is an ongoing "sync" operation in progress.
-            UNKNOWN_ERROR: -1
-        },
-        UpdateState: {
-          RUNNING: NativeCodePush.codePushUpdateStateRunning,
-          PENDING: NativeCodePush.codePushUpdateStatePending,
-          LATEST: NativeCodePush.codePushUpdateStateLatest
-        },
-        DEFAULT_UPDATE_DIALOG: {
-            appendReleaseDescription: false,
-            descriptionPrefix: " Description: ",
-            mandatoryContinueButtonLabel: "Continue",
-            mandatoryUpdateMessage: "An update is available that must be installed.",
-            optionalIgnoreButtonLabel: "Ignore",
-            optionalInstallButtonLabel: "Install",
-            optionalUpdateMessage: "An update is available. Would you like to install it?",
-            title: "Update available"
-        }
+  CodePush = {
+    AcquisitionSdk: Sdk,
+    checkForUpdate,
+    getConfiguration,
+    getCurrentPackage,
+    getUpdateMetadata,
+    log,
+    notifyAppReady: notifyApplicationReady,
+    notifyApplicationReady,
+    restartApp,
+    setUpTestDependencies,
+    sync,
+    InstallMode: {
+      IMMEDIATE: NativeCodePush.codePushInstallModeImmediate, // Restart the app immediately
+      ON_NEXT_RESTART: NativeCodePush.codePushInstallModeOnNextRestart, // Don't artificially restart the app. Allow the update to be "picked up" on the next app restart
+      ON_NEXT_RESUME: NativeCodePush.codePushInstallModeOnNextResume // Restart the app the next time it is resumed from the background
+    },
+    SyncStatus: {
+      CHECKING_FOR_UPDATE: 0,
+      AWAITING_USER_ACTION: 1,
+      DOWNLOADING_PACKAGE: 2,
+      INSTALLING_UPDATE: 3,
+      UP_TO_DATE: 4, // The running app is up-to-date
+      UPDATE_IGNORED: 5, // The app had an optional update and the end-user chose to ignore it
+      UPDATE_INSTALLED: 6, // The app had an optional/mandatory update that was successfully downloaded and is about to be installed.
+      SYNC_IN_PROGRESS: 7, // There is an ongoing "sync" operation in progress.
+      UNKNOWN_ERROR: -1
+    },
+    UpdateState: {
+      RUNNING: NativeCodePush.codePushUpdateStateRunning,
+      PENDING: NativeCodePush.codePushUpdateStatePending,
+      LATEST: NativeCodePush.codePushUpdateStateLatest
+    },
+    DEFAULT_UPDATE_DIALOG: {
+      appendReleaseDescription: false,
+      descriptionPrefix: " Description: ",
+      mandatoryContinueButtonLabel: "Continue",
+      mandatoryUpdateMessage: "An update is available that must be installed.",
+      optionalIgnoreButtonLabel: "Ignore",
+      optionalInstallButtonLabel: "Install",
+      optionalUpdateMessage: "An update is available. Would you like to install it?",
+      title: "Update available"
     }
+  };
 } else {
-    log("The CodePush module doesn't appear to be properly installed. Please double-check that everything is setup correctly.");
+  log("The CodePush module doesn't appear to be properly installed. Please double-check that everything is setup correctly.");
 }
 
 module.exports = CodePush;

@@ -204,7 +204,7 @@ declare namespace CodePush {
     /**
      * Notifies the CodePush runtime that an installed update is considered successful.
      */
-    function notifyApplicationReady(): ReactNativePromise<void>;
+    function notifyAppReady(): ReactNativePromise<void>;
     
     /**
      * Immediately restarts the app.
