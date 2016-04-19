@@ -247,6 +247,20 @@ static NSString *bundleResourceName = @"main";
  */
 - (void)initializeUpdateAfterRestart
 {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if ([_bridge.bundleURL.scheme hasPrefix:@"http"]) {
+            NSError *error;
+            NSString *binaryAppVersion = [[CodePushConfig current] appVersion];
+            NSDictionary *currentPackageMetadata = [CodePushPackage getCurrentPackage:&error];
+            if (currentPackageMetadata) {
+                NSString *packageAppVersion = [currentPackageMetadata objectForKey:AppVersionKey];
+                if (![binaryAppVersion isEqualToString:packageAppVersion]) {
+                    [CodePush clearUpdates];
+                }
+            }
+        }
+    });
+    
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];
     if (pendingUpdate) {
