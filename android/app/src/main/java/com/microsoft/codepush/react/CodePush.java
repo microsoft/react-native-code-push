@@ -107,8 +107,20 @@ public class CodePush implements ReactPackage {
         }
 
         currentInstance = this;
+        
+        clearDebugCacheIfNeeded();
     }
     
+    private void clearDebugCacheIfNeeded() {
+        if (isDebugMode && isPendingUpdate(null)) {
+            // This needs to be kept in sync with https://github.com/facebook/react-native/blob/master/ReactAndroid/src/main/java/com/facebook/react/devsupport/DevSupportManager.java#L78
+            File cachedDevBundle = new File(applicationContext.getFilesDir(), "ReactNativeDevBundle.js");
+            if (cachedDevBundle.exists()) {
+                cachedDevBundle.delete();
+            }
+        }
+    }
+        
     private long getBinaryResourcesModifiedTime() {
         ZipFile applicationFile = null;
         try {
@@ -374,14 +386,6 @@ public class CodePush implements ReactPackage {
         public void initialize() {
             CodePush.this.initializeUpdateAfterRestart();
         }
-    
-        private void clearReactDevBundleCache() {
-            // This needs to be kept in sync with https://github.com/facebook/react-native/blob/master/ReactAndroid/src/main/java/com/facebook/react/devsupport/DevSupportManager.java#L78
-            File cachedDevBundle = new File(CodePush.this.applicationContext.getFilesDir(), "ReactNativeDevBundle.js");
-            if (cachedDevBundle.exists()) {
-                cachedDevBundle.delete();
-            }
-        }
         
         private void loadBundleLegacy() {
             Intent intent = mainActivity.getIntent();
@@ -392,10 +396,7 @@ public class CodePush implements ReactPackage {
         }
         
         private void loadBundle() {
-            // Clear the React dev bundle cache so that new updates can be loaded.
-            if (CodePush.this.isDebugMode) {
-                clearReactDevBundleCache();
-            }
+            CodePush.this.clearDebugCacheIfNeeded();
                 
             try {
                 // #1) Get the private ReactInstanceManager, which is what includes
