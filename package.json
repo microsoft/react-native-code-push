@@ -1,6 +1,6 @@
 {
   "name": "react-native-code-push",
-  "version": "1.10.2-beta",
+  "version": "1.10.3-beta",
   "description": "React Native plugin for the CodePush service",
   "main": "CodePush.js",
   "homepage": "https://microsoft.github.io/code-push",
@@ -23,12 +23,12 @@
           "packageInstance": "new CodePush(${androidDeploymentKey}, this, BuildConfig.DEBUG)"
       },
       "ios": {
-        "sharedLibraries": ["libz"]  
+        "sharedLibraries": ["libz"]
       },
       "params": [{
         "type": "input",
         "name": "androidDeploymentKey",
-        "message": "What is your CodePush deployment key for Android (hit <ENTER> to ignore)"   
+        "message": "What is your CodePush deployment key for Android (hit <ENTER> to ignore)"
       }]
   }
 }
