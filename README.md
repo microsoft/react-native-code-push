@@ -617,24 +617,31 @@ In addition to the options, the `sync` method also accepts two optional function
 * __syncStatusChangedCallback__ *((syncStatus: Number) => void)* - Called when the sync process moves from one stage to another in the overall update process. The method is called with a status code which represents the current state, and can be any of the [`SyncStatus`](#syncstatus) values.
 
 * __downloadProgressCallback__ *((progress: DownloadProgress) => void)* - Called periodically when an available update is being downloaded from the CodePush server. The method is called with a `DownloadProgress` object, which contains the following two properties:
-    * __totalBytes__ *(Number)* - The total number of bytes expected to be received for this update package
-    * __receivedBytes__ *(Number)* - The number of bytes downloaded thus far.
+
+    * __totalBytes__ *(Number)* - The total number of bytes expected to be received for this update (i.e. the size of the set of files which changed from the previous release).
+   
+    * __receivedBytes__ *(Number)* - The number of bytes downloaded thus far, which can be used to track download progress.
 
 Example Usage:
 
 ```javascript
 // Prompt the user when an update is available
 // and then display a "downloading" modal 
-codePush.sync({ updateDialog: true }, (status) => {
-    switch (status) {
-        case codePush.SyncStatus.DOWNLOADING_PACKAGE:
-            // Show "downloading" modal
-            break;
-        case codePush.SyncStatus.INSTALLING_UPDATE:
-            // Hide "downloading" modal
-            break;
-    }
-});
+codePush.sync({ updateDialog: true }, 
+  (status) => {
+      switch (status) {
+          case codePush.SyncStatus.DOWNLOADING_PACKAGE:
+              // Show "downloading" modal
+              break;
+          case codePush.SyncStatus.INSTALLING_UPDATE:
+              // Hide "downloading" modal
+              break;
+      }
+  },
+  (totalBytes, receivedBytes) => { 
+    /* Update download modal progress */ 
+  }
+);
 ```
 
 This method returns a `Promise` which is resolved to a `SyncStatus` code that indicates why the `sync` call succeeded. This code can be one of the following `SyncStatus` values:
