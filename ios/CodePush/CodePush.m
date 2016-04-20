@@ -173,6 +173,29 @@ static NSString *bundleResourceName = @"main";
 @synthesize methodQueue = _methodQueue;
 
 /*
+ * This method is used to clear updates that are installed
+ * under a different app version and hence don't apply anymore,
+ * during a debug run configuration and when the bridge is 
+ * running the JS bundle from the dev server.
+ */
+- (void)clearDebugUpdates
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if ([_bridge.bundleURL.scheme hasPrefix:@"http"]) {
+            NSError *error;
+            NSString *binaryAppVersion = [[CodePushConfig current] appVersion];
+            NSDictionary *currentPackageMetadata = [CodePushPackage getCurrentPackage:&error];
+            if (currentPackageMetadata) {
+                NSString *packageAppVersion = [currentPackageMetadata objectForKey:AppVersionKey];
+                if (![binaryAppVersion isEqualToString:packageAppVersion]) {
+                    [CodePush clearUpdates];
+                }
+            }
+        }
+    });
+}
+
+/*
  * This method is used by the React Native bridge to allow
  * our plugin to expose constants to the JS-side. In our case
  * we're simply exporting enum values so that the JS and Native
@@ -240,23 +263,6 @@ static NSString *bundleResourceName = @"main";
     return self;
 }
 
-- (void)clearDebugUpdates
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        if ([_bridge.bundleURL.scheme hasPrefix:@"http"]) {
-            NSError *error;
-            NSString *binaryAppVersion = [[CodePushConfig current] appVersion];
-            NSDictionary *currentPackageMetadata = [CodePushPackage getCurrentPackage:&error];
-            if (currentPackageMetadata) {
-                NSString *packageAppVersion = [currentPackageMetadata objectForKey:AppVersionKey];
-                if (![binaryAppVersion isEqualToString:packageAppVersion]) {
-                    [CodePush clearUpdates];
-                }
-            }
-        }
-    });
-}
-
 /*
  * This method is used when the app is started to either
  * initialize a pending update or rollback a faulty update
@@ -264,7 +270,9 @@ static NSString *bundleResourceName = @"main";
  */
 - (void)initializeUpdateAfterRestart
 {
+#ifdef DEBUG
     [self clearDebugUpdates];
+#endif
     
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];
