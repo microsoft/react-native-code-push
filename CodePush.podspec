@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name                = 'CodePush'
-  s.version             = '1.10.2'
+  s.version             = '1.10.4'
   s.summary             = 'React Native plugin for the CodePush service'
   s.author              = 'Microsoft Corporation'
   s.license             = 'MIT'
