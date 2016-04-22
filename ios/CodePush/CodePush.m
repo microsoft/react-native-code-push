@@ -175,7 +175,7 @@ static NSString *bundleResourceName = @"main";
 /*
  * This method is used to clear updates that are installed
  * under a different app version and hence don't apply anymore,
- * during a debug run configuration and when the bridge is 
+ * during a debug run configuration and when the bridge is
  * running the JS bundle from the dev server.
  */
 - (void)clearDebugUpdates
@@ -273,7 +273,7 @@ static NSString *bundleResourceName = @"main";
 #ifdef DEBUG
     [self clearDebugUpdates];
 #endif
-    
+
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];
     if (pendingUpdate) {
@@ -456,7 +456,11 @@ static NSString *bundleResourceName = @"main";
 {
     // Determine how long the app was in the background and ensure
     // that it meets the minimum duration amount of time.
-    int durationInBackground = [[NSDate date] timeIntervalSinceDate:_lastResignedDate];
+    int durationInBackground = 0;
+    if (_lastResignedDate) {
+        durationInBackground = [[NSDate date] timeIntervalSinceDate:_lastResignedDate];
+    }
+
     if (durationInBackground >= _minimumBackgroundDuration) {
         [self loadBundle];
     }
