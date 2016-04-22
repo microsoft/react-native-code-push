@@ -107,10 +107,10 @@ public class CodePush implements ReactPackage {
         }
 
         currentInstance = this;
-        
+
         clearDebugCacheIfNeeded();
     }
-    
+
     private void clearDebugCacheIfNeeded() {
         if (isDebugMode && isPendingUpdate(null)) {
             // This needs to be kept in sync with https://github.com/facebook/react-native/blob/master/ReactAndroid/src/main/java/com/facebook/react/devsupport/DevSupportManager.java#L78
@@ -120,7 +120,7 @@ public class CodePush implements ReactPackage {
             }
         }
     }
-        
+
     private long getBinaryResourcesModifiedTime() {
         ZipFile applicationFile = null;
         try {
@@ -144,7 +144,7 @@ public class CodePush implements ReactPackage {
     public static String getBundleUrl() {
         return getBundleUrl(DEFAULT_JS_BUNDLE_NAME);
     }
-    
+
     public static String getBundleUrl(String assetsBundleFileName) {
         if (currentInstance == null) {
             throw new CodePushNotInitializedException("A CodePush instance has not been created yet. Have you added it to your app's list of ReactPackages?");
@@ -152,7 +152,7 @@ public class CodePush implements ReactPackage {
 
         return currentInstance.getBundleUrlInternal(assetsBundleFileName);
     }
-    
+
     public String getBundleUrlInternal(String assetsBundleFileName) {
         this.assetsBundleFileName = assetsBundleFileName;
         String binaryJsBundleUrl = ASSETS_BUNDLE_PREFIX + assetsBundleFileName;
@@ -230,7 +230,7 @@ public class CodePush implements ReactPackage {
             return null;
         }
     }
-    
+
     private void initializeUpdateAfterRestart() {
         JSONObject pendingUpdate = getPendingUpdate();
         if (pendingUpdate != null) {
@@ -277,7 +277,7 @@ public class CodePush implements ReactPackage {
 
     private boolean isPendingUpdate(String packageHash) {
         JSONObject pendingUpdate = getPendingUpdate();
-        
+
         try {
             return pendingUpdate != null &&
                    !pendingUpdate.getBoolean(PENDING_UPDATE_IS_LOADING_KEY) &&
@@ -297,7 +297,7 @@ public class CodePush implements ReactPackage {
         SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
         settings.edit().remove(PENDING_UPDATE_KEY).commit();
     }
-    
+
     private void rollbackPackage() {
         WritableMap failedPackage = codePushPackage.getCurrentPackage();
         saveFailedUpdate(failedPackage);
@@ -357,23 +357,23 @@ public class CodePush implements ReactPackage {
     private class CodePushNativeModule extends ReactContextBaseJavaModule {
         private LifecycleEventListener lifecycleEventListener = null;
         private int minimumBackgroundDuration = 0;
-        
+
         public CodePushNativeModule(ReactApplicationContext reactContext) {
             super(reactContext);
         }
-        
+
         @Override
         public Map<String, Object> getConstants() {
             final Map<String, Object> constants = new HashMap<>();
-            
+
             constants.put("codePushInstallModeImmediate", CodePushInstallMode.IMMEDIATE.getValue());
             constants.put("codePushInstallModeOnNextRestart", CodePushInstallMode.ON_NEXT_RESTART.getValue());
             constants.put("codePushInstallModeOnNextResume", CodePushInstallMode.ON_NEXT_RESUME.getValue());
-            
+
             constants.put("codePushUpdateStateRunning", CodePushUpdateState.RUNNING.getValue());
             constants.put("codePushUpdateStatePending", CodePushUpdateState.PENDING.getValue());
             constants.put("codePushUpdateStateLatest", CodePushUpdateState.LATEST.getValue());
-            
+
             return constants;
         }
 
@@ -381,23 +381,23 @@ public class CodePush implements ReactPackage {
         public String getName() {
             return "CodePush";
         }
-        
+
         @Override
         public void initialize() {
             CodePush.this.initializeUpdateAfterRestart();
         }
-        
+
         private void loadBundleLegacy() {
             Intent intent = mainActivity.getIntent();
             mainActivity.finish();
             mainActivity.startActivity(intent);
-            
+
             currentInstance = null;
         }
-        
+
         private void loadBundle() {
             CodePush.this.clearDebugCacheIfNeeded();
-                
+
             try {
                 // #1) Get the private ReactInstanceManager, which is what includes
                 //     the logic to reload the current React context.
@@ -410,7 +410,7 @@ public class CodePush implements ReactPackage {
                 Field jsBundleField = instanceManager.getClass().getDeclaredField("mJSBundleFile");
                 jsBundleField.setAccessible(true);
                 jsBundleField.set(instanceManager, latestJSBundleFile);
-                            
+
                 // #3) Get the context creation method and fire it on the UI thread (which RN enforces)
                 final Method recreateMethod = instanceManager.getClass().getMethod("recreateReactContextInBackground");
                 mainActivity.runOnUiThread(new Runnable() {
@@ -488,14 +488,14 @@ public class CodePush implements ReactPackage {
 
             promise.resolve(configMap);
         }
-        
+
         @ReactMethod
         public void getUpdateMetadata(final int updateState, final Promise promise) {
             AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... params) {
                     WritableMap currentPackage = codePushPackage.getCurrentPackage();
-                    
+
                     if (currentPackage == null) {
                         promise.resolve("");
                         return null;
@@ -507,7 +507,7 @@ public class CodePush implements ReactPackage {
                         String currentHash = currentPackage.getString(PACKAGE_HASH_KEY);
                         currentUpdateIsPending = CodePush.this.isPendingUpdate(currentHash);
                     }
-                    
+
                     if (updateState == CodePushUpdateState.PENDING.getValue() && !currentUpdateIsPending) {
                         // The caller wanted a pending update
                         // but there isn't currently one.
@@ -532,7 +532,7 @@ public class CodePush implements ReactPackage {
                         currentPackage.putBoolean("isPending", currentUpdateIsPending);
                         promise.resolve(currentPackage);
                     }
-                    
+
                     return null;
                 }
             };
@@ -615,7 +615,11 @@ public class CodePush implements ReactPackage {
                                 public void onHostResume() {
                                     // Determine how long the app was in the background and ensure
                                     // that it meets the minimum duration amount of time.
-                                    long durationInBackground = (new Date().getTime() - lastPausedDate.getTime()) / 1000;
+                                    long durationInBackground = 0;
+                                    if (lastPausedDate != null) {
+                                        durationInBackground = (new Date().getTime() - lastPausedDate.getTime()) / 1000;
+                                    }
+
                                     if (durationInBackground >= CodePushNativeModule.this.minimumBackgroundDuration) {
                                         loadBundle();
                                     }
@@ -645,7 +649,7 @@ public class CodePush implements ReactPackage {
 
             asyncTask.execute();
         }
-        
+
         @ReactMethod
         public void isFailedUpdate(String packageHash, Promise promise) {
             promise.resolve(isFailedHash(packageHash));
@@ -665,7 +669,7 @@ public class CodePush implements ReactPackage {
             removePendingUpdate();
             promise.resolve("");
         }
-        
+
         @ReactMethod
         public void restartApp(boolean onlyIfUpdateIsPending) {
             // If this is an unconditional restart request, or there
