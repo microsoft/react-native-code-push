@@ -53,11 +53,12 @@ We try our best to maintain backwards compatability of our plugin with previous 
 
 ## Supported Components
 
-When using the React Native assets sytem (i.e. using the `require("./foo.png")` syntax), the following list represents the set of components (and props) that support having their referenced images updated via CodePush:
+When using the React Native assets sytem (i.e. using the `require("./foo.png")` syntax), the following list represents the set of core components (and props) that support having their referenced images updated via CodePush:
 
 | Component                                       | Prop(s)                                  | 
 |-------------------------------------------------|------------------------------------------|
-| `Image`                                         | `source`                                    |
+| `Image`                                         | `source`   |
+| `MapView.Marker` <br />*(Requires [react-native-maps](https://github.com/lelandrichardson/react-native-maps) `>=O.3.2`)* | `image`                             |
 | `ProgressViewIOS`                               | `progressImage`, `trackImage`            |
 | `TabBarIOS.Item`                                | `icon`, `selectedIcon`                   |
 | `ToolbarAndroid` <br />*(React Native 0.21.0+)* | `actions[].icon`, `logo`, `overflowIcon` |
@@ -67,6 +68,7 @@ The following list represents the set of components (and props) that don't curre
 | Component   | Prop(s)                                                              |
 |-------------|----------------------------------------------------------------------|
 | `SliderIOS` | `maximumTrackImage`, `minimumTrackImage`, `thumbImage`, `trackImage` |
+| `Video`     | `source`                                                             |
 
 As new core components are released, which support referencing assets, we'll update this list to ensure users know what exactly they can expect to update using CodePush.
 
