@@ -21,7 +21,7 @@ module.exports = {
         headers: headers,
         body: requestBody
       });
-        
+
       const statusCode = response.status;
       const body = await response.text();
       callback(null, { statusCode, body });

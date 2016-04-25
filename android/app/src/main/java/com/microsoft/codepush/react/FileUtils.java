@@ -47,7 +47,7 @@ public class FileUtils {
                         if (fromBufferedStream != null) fromBufferedStream.close();
                         if (destStream != null) destStream.close();
                     } catch (IOException e) {
-                        throw new CodePushUnknownException("Error closing IO resources.", e);
+                        CodePushUtils.logException("Error closing IO resources.", e);
                     }
                 }
             }
@@ -110,8 +110,8 @@ public class FileUtils {
 
         File newFilePath = new File(newFolderPath, newFileName);
         if (!fileToMove.renameTo(newFilePath)) {
-            throw new CodePushUnknownException("Unable to move file from " +
-                    fileToMove.getAbsolutePath() + " to " + newFilePath.getAbsolutePath() + ".");
+            CodePushUtils.log("Unable to move file from " + fileToMove.getAbsolutePath() +
+                    " to " + newFilePath.getAbsolutePath() + ".");
         }
     }
 
@@ -185,7 +185,7 @@ public class FileUtils {
                 if (bufferedStream != null) bufferedStream.close();
                 if (fileStream != null) fileStream.close();
             } catch (IOException e) {
-                throw new CodePushUnknownException("Error closing IO resources.", e);
+                CodePushUtils.logException("Error closing IO resources.", e);
             }
         }
     }

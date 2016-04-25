@@ -36,7 +36,7 @@ public class CodePushUpdateUtils {
                     manifest.add(relativePath + ":" + computeHash(new FileInputStream(file)));
                 } catch (FileNotFoundException e) {
                     // Should not happen.
-                    throw new CodePushUnknownException("Unable to compute hash of update contents.", e);
+                    CodePushUtils.logException("Unable to compute hash of update contents.", e);
                 }
             }
         }
@@ -52,7 +52,7 @@ public class CodePushUpdateUtils {
             while (digestInputStream.read(byteBuffer) != -1);
         } catch (NoSuchAlgorithmException | IOException e) {
             // Should not happen.
-            throw new CodePushUnknownException("Unable to compute hash of update contents.", e);
+            CodePushUtils.logException("Unable to compute hash of update contents.", e);
         } finally {
             try {
                 if (digestInputStream != null) digestInputStream.close();

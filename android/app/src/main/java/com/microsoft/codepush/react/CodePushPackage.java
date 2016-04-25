@@ -71,7 +71,9 @@ public class CodePushPackage {
         try {
             return CodePushUtils.getWritableMapFromFile(statusFilePath);
         } catch (IOException e) {
-            throw new CodePushUnknownException("Error getting current package info" , e);
+            // Should not happen.
+            CodePushUtils.logException("Error getting current package info" , e);
+            return new WritableNativeMap();
         }
     }
 
@@ -79,7 +81,8 @@ public class CodePushPackage {
         try {
             CodePushUtils.writeReadableMapToFile(packageInfo, getStatusFilePath());
         } catch (IOException e) {
-            throw new CodePushUnknownException("Error updating current package info" , e);
+            // Should not happen.
+            CodePushUtils.logException("Error updating current package info" , e);
         }
     }
 
@@ -100,6 +103,10 @@ public class CodePushPackage {
         }
 
         WritableMap currentPackage = getCurrentPackage();
+        if (currentPackage == null) {
+            return null;
+        }
+
         String relativeBundlePath = CodePushUtils.tryGetString(currentPackage, RELATIVE_BUNDLE_PATH_KEY);
         if (relativeBundlePath == null) {
             return CodePushUtils.appendPathComponent(packageFolder, bundleFileName);
@@ -205,12 +212,10 @@ public class CodePushPackage {
             }
 
             if (totalBytes != receivedBytes) {
-                throw new CodePushUnknownException("Received " + receivedBytes + " bytes, expected " + totalBytes);
+                CodePushUtils.log("Received " + receivedBytes + " bytes, expected " + totalBytes);
             }
 
             isZip = ByteBuffer.wrap(header).getInt() == 0x504b0304;
-        } catch (MalformedURLException e) {
-            throw new CodePushMalformedDataException(downloadUrlString, e);
         } finally {
             try {
                 if (bout != null) bout.close();
@@ -218,7 +223,7 @@ public class CodePushPackage {
                 if (bin != null) bin.close();
                 if (connection != null) connection.disconnect();
             } catch (IOException e) {
-                throw new CodePushUnknownException("Error closing IO resources.", e);
+                CodePushUtils.logException("Error closing IO resources.", e);
             }
         }
 
@@ -262,9 +267,8 @@ public class CodePushPackage {
                 try {
                     updatePackageJSON.put(RELATIVE_BUNDLE_PATH_KEY, relativeBundlePath);
                 } catch (JSONException e) {
-                    throw new CodePushUnknownException("Unable to set key " +
-                            RELATIVE_BUNDLE_PATH_KEY + " to value " + relativeBundlePath +
-                            " in update package.", e);
+                    CodePushUtils.logException("Unable to set key " + RELATIVE_BUNDLE_PATH_KEY +
+                            " to value " + relativeBundlePath + " in update package.", e);
                 }
 
                 updatePackage = CodePushUtils.convertJsonObjectToWritable(updatePackageJSON);
@@ -327,8 +331,6 @@ public class CodePushPackage {
             while ((numBytesRead = bin.read(data, 0, DOWNLOAD_BUFFER_SIZE)) >= 0) {
                 bout.write(data, 0, numBytesRead);
             }
-        } catch (MalformedURLException e) {
-            throw new CodePushMalformedDataException(remoteBundleUrl, e);
         } finally {
             try {
                 if (bout != null) bout.close();
@@ -336,7 +338,7 @@ public class CodePushPackage {
                 if (bin != null) bin.close();
                 if (connection != null) connection.disconnect();
             } catch (IOException e) {
-                throw new CodePushUnknownException("Error closing IO resources.", e);
+                CodePushUtils.logException("Error closing IO resources.", e);
             }
         }
     }
