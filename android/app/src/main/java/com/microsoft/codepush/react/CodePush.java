@@ -99,7 +99,7 @@ public class CodePush implements ReactPackage {
             appVersion = pInfo.versionName;
             buildVersion = pInfo.versionCode;
         } catch (PackageManager.NameNotFoundException e) {
-            CodePushUtils.logException("Unable to get package info for " + applicationContext.getPackageName(), e);
+            throw new CodePushUnknownException("Unable to get package info for " + applicationContext.getPackageName(), e);
         }
 
         if (currentInstance != null) {
@@ -130,14 +130,13 @@ public class CodePush implements ReactPackage {
             ZipEntry classesDexEntry = applicationFile.getEntry(RESOURCES_BUNDLE);
             return classesDexEntry.getTime();
         } catch (PackageManager.NameNotFoundException | IOException e) {
-            CodePushUtils.logException("Error in getting file information about compiled resources", e);
-            return -1;
+            throw new CodePushUnknownException("Error in getting file information about compiled resources", e);
         } finally {
             if (applicationFile != null) {
                 try {
                     applicationFile.close();
                 } catch (IOException e) {
-                    CodePushUtils.logException("Error in closing application file.", e);
+                    throw new CodePushUnknownException("Error in closing application file.", e);
                 }
             }
         }
@@ -195,8 +194,7 @@ public class CodePush implements ReactPackage {
                 return binaryJsBundleUrl;
             }
         } catch (NumberFormatException e) {
-            CodePushUtils.logException("Error in closing application file.", e);
-            return binaryJsBundleUrl;
+            throw new CodePushUnknownException("Error in reading binary modified date from package metadata", e);
         }
     }
 
@@ -254,7 +252,7 @@ public class CodePush implements ReactPackage {
                 }
             } catch (JSONException e) {
                 // Should not happen.
-                CodePushUtils.logException("Unable to read pending update metadata stored in SharedPreferences", e);
+                throw new CodePushUnknownException("Unable to read pending update metadata stored in SharedPreferences", e);
             }
         }
     }
@@ -270,7 +268,7 @@ public class CodePush implements ReactPackage {
                         return true;
                     }
                 } catch (JSONException e) {
-                    CodePushUtils.logException("Unable to read failedUpdates data stored in SharedPreferences.", e);
+                    throw new CodePushUnknownException("Unable to read failedUpdates data stored in SharedPreferences.", e);
                 }
             }
         }
@@ -287,8 +285,7 @@ public class CodePush implements ReactPackage {
                    (packageHash == null || pendingUpdate.getString(PENDING_UPDATE_HASH_KEY).equals(packageHash));
         }
         catch (JSONException e) {
-            CodePushUtils.logException("Unable to read pending update metadata in isPendingUpdate.", e);
-            return false;
+            throw new CodePushUnknownException("Unable to read pending update metadata in isPendingUpdate.", e);
         }
     }
 
@@ -320,9 +317,8 @@ public class CodePush implements ReactPackage {
                 failedUpdates = new JSONArray(failedUpdatesString);
             } catch (JSONException e) {
                 // Should not happen.
-                CodePushUtils.logException("Unable to parse failed updates information " +
+                throw new CodePushMalformedDataException("Unable to parse failed updates information " +
                         failedUpdatesString + " stored in SharedPreferences", e);
-                failedUpdates = new JSONArray();
             }
         }
 
@@ -340,7 +336,7 @@ public class CodePush implements ReactPackage {
             settings.edit().putString(PENDING_UPDATE_KEY, pendingUpdate.toString()).commit();
         } catch (JSONException e) {
             // Should not happen.
-            CodePushUtils.logException("Unable to save pending update.", e);
+            throw new CodePushUnknownException("Unable to save pending update.", e);
         }
     }
 
@@ -559,7 +555,7 @@ public class CodePush implements ReactPackage {
                                     return null;
                                 }
                             } catch (JSONException e) {
-                                CodePushUtils.logException("Unable to read failed updates information stored in SharedPreferences.", e);
+                                throw new CodePushUnknownException("Unable to read failed updates information stored in SharedPreferences.", e);
                             }
                         }
                     } else if (didUpdate) {
@@ -596,8 +592,7 @@ public class CodePush implements ReactPackage {
 
                     String pendingHash = CodePushUtils.tryGetString(updatePackage, PACKAGE_HASH_KEY);
                     if (pendingHash == null) {
-                        CodePushUtils.log("Update package to be installed has no hash.");
-                        return null;
+                        throw new CodePushUnknownException("Update package to be installed has no hash.");
                     } else {
                         savePendingUpdate(pendingHash, /* isLoading */false);
                     }
@@ -689,7 +684,7 @@ public class CodePush implements ReactPackage {
                 try {
                     codePushPackage.downloadAndReplaceCurrentBundle(remoteBundleUrl, assetsBundleFileName);
                 } catch (IOException e) {
-                    CodePushUtils.logException("Unable to replace current bundle", e);
+                    throw new CodePushUnknownException("Unable to replace current bundle", e);
                 }
             }
         }

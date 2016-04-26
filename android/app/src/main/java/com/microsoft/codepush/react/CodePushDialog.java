@@ -36,6 +36,8 @@ public class CodePushDialog extends ReactContextBaseJavaModule{
                     case DialogInterface.BUTTON_NEGATIVE:
                         successCallback.invoke(1);
                         break;
+                    default:
+                        throw new CodePushUnknownException("Unknown button ID pressed.");
                 }
             }
         };

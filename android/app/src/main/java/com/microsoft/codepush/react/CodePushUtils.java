@@ -38,7 +38,7 @@ public class CodePushUtils {
                 obj = jsonArr.get(i);
             } catch (JSONException jsonException) {
                 // Should not happen.
-                CodePushUtils.logException(i + " should be within bounds of array " + jsonArr.toString(), jsonException);
+                throw new CodePushUnknownException(i + " should be within bounds of array " + jsonArr.toString(), jsonException);
             }
 
             if (obj instanceof JSONObject)
@@ -56,7 +56,7 @@ public class CodePushUtils {
             else if (obj == null)
                 arr.pushNull();
             else
-                CodePushUtils.log("Unrecognized object: " + obj);
+                throw new CodePushUnknownException("Unrecognized object: " + obj);
         }
 
         return arr;
@@ -72,7 +72,7 @@ public class CodePushUtils {
                 obj = jsonObj.get(key);
             } catch (JSONException jsonException) {
                 // Should not happen.
-                CodePushUtils.logException("Key " + key + " should exist in " + jsonObj.toString() + ".", jsonException);
+                throw new CodePushUnknownException("Key " + key + " should exist in " + jsonObj.toString() + ".", jsonException);
             }
 
             if (obj instanceof JSONObject)
@@ -90,7 +90,7 @@ public class CodePushUtils {
             else if (obj == null)
                 map.putNull(key);
             else
-                CodePushUtils.log("Unrecognized object: " + obj);
+                throw new CodePushUnknownException("Unrecognized object: " + obj);
         }
 
         return map;
@@ -124,7 +124,7 @@ public class CodePushUtils {
                         try {
                             jsonArr.put(number.doubleValue());
                         } catch (JSONException jsonException) {
-                            CodePushUtils.log("Unable to put value " + arr.getDouble(i) + " in JSONArray");
+                            throw new CodePushUnknownException("Unable to put value " + arr.getDouble(i) + " in JSONArray");
                         }
                     }
                     break;
@@ -167,10 +167,10 @@ public class CodePushUtils {
                         jsonObj.put(key, null);
                         break;
                     default:
-                        CodePushUtils.log("Unrecognized type: " + type + " of key: " + key);
+                        throw new CodePushUnknownException("Unrecognized type: " + type + " of key: " + key);
                 }
             } catch (JSONException jsonException) {
-                CodePushUtils.logException("Error setting key: " + key + " in JSONObject", jsonException);
+                throw new CodePushUnknownException("Error setting key: " + key + " in JSONObject", jsonException);
             }
         }
 
@@ -203,8 +203,7 @@ public class CodePushUtils {
             return convertJsonObjectToWritable(json);
         } catch (JSONException jsonException) {
             // Should not happen
-            CodePushUtils.logException(filePath, jsonException);
-            return null;
+            throw new CodePushMalformedDataException(filePath, jsonException);
         }
     }
 
@@ -214,11 +213,6 @@ public class CodePushUtils {
 
     public static void logBundleUrl(String path) {
         log("Loading JS bundle from \"" + path + "\"");
-    }
-
-    public static void logException(String message, Exception e) {
-        log(message);
-        e.printStackTrace();
     }
 
     public static String tryGetString(ReadableMap map, String key) {
