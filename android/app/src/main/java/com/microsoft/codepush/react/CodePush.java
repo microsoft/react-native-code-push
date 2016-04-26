@@ -109,6 +109,7 @@ public class CodePush implements ReactPackage {
         currentInstance = this;
 
         clearDebugCacheIfNeeded();
+        initializeUpdateAfterRestart();
     }
 
     private void clearDebugCacheIfNeeded() {
@@ -382,11 +383,6 @@ public class CodePush implements ReactPackage {
             return "CodePush";
         }
 
-        @Override
-        public void initialize() {
-            CodePush.this.initializeUpdateAfterRestart();
-        }
-
         private void loadBundleLegacy() {
             Intent intent = mainActivity.getIntent();
             mainActivity.finish();
@@ -418,6 +414,7 @@ public class CodePush implements ReactPackage {
                     public void run() {
                         try {
                             recreateMethod.invoke(instanceManager);
+                            initializeUpdateAfterRestart();
                         }
                         catch (Exception e) {
                             // The recreation method threw an unknown exception

@@ -27,12 +27,12 @@ static NSString * const ServerURLConfigKey = @"serverUrl";
 {
     self = [super init];
     NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
-    
+
     NSString *appVersion = [infoDictionary objectForKey:@"CFBundleShortVersionString"];
     NSString *buildVersion = [infoDictionary objectForKey:(NSString *)kCFBundleVersionKey];
     NSString *deploymentKey = [infoDictionary objectForKey:@"CodePushDeploymentKey"];
     NSString *serverURL = [infoDictionary objectForKey:@"CodePushServerURL"];
-    
+
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     NSString *clientUniqueId = [userDefaults stringForKey:ClientUniqueIDConfigKey];
     if (clientUniqueId == nil) {
@@ -40,11 +40,11 @@ static NSString * const ServerURLConfigKey = @"serverUrl";
         [userDefaults setObject:clientUniqueId forKey:ClientUniqueIDConfigKey];
         [userDefaults synchronize];
     }
-    
+
     if (!serverURL) {
         serverURL = @"https://codepush.azurewebsites.net/";
     }
-    
+
     _configDictionary = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
                             appVersion,AppVersionConfigKey,
                             buildVersion,BuildVdersionConfigKey,
@@ -52,7 +52,7 @@ static NSString * const ServerURLConfigKey = @"serverUrl";
                             clientUniqueId,ClientUniqueIDConfigKey,
                             deploymentKey,DeploymentKeyConfigKey,
                             nil];
-    
+
     return self;
 }
 
