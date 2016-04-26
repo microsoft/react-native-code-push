@@ -233,9 +233,12 @@ public class CodePush implements ReactPackage {
     }
 
     private void initializeUpdateAfterRestart() {
+        // Re-set the state that indicates that
+        // the app was just updated.
+        didUpdate = false;
+        
         JSONObject pendingUpdate = getPendingUpdate();
         if (pendingUpdate != null) {
-            didUpdate = true;
             try {
                 boolean updateIsLoading = pendingUpdate.getBoolean(PENDING_UPDATE_IS_LOADING_KEY);
                 if (updateIsLoading) {
@@ -245,6 +248,10 @@ public class CodePush implements ReactPackage {
                     needToReportRollback = true;
                     rollbackPackage();
                 } else {
+                    // There is in fact a new update running for the first
+                    // time, so update the local state to ensure isFirstRun works
+                    didUpdate = true;
+                    
                     // Mark that we tried to initialize the new update, so that if it crashes,
                     // we will know that we need to rollback when the app next starts.
                     savePendingUpdate(pendingUpdate.getString(PENDING_UPDATE_HASH_KEY),
