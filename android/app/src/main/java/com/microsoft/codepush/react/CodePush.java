@@ -233,8 +233,8 @@ public class CodePush implements ReactPackage {
     }
 
     private void initializeUpdateAfterRestart() {
-        // Re-set the state that indicates that
-        // the app was just updated.
+        // Reset the state which indicates that
+        // the app was just freshly updated.
         didUpdate = false;
         
         JSONObject pendingUpdate = getPendingUpdate();
@@ -249,7 +249,7 @@ public class CodePush implements ReactPackage {
                     rollbackPackage();
                 } else {
                     // There is in fact a new update running for the first
-                    // time, so update the local state to ensure isFirstRun works
+                    // time, so update the local state to ensure the client knows.
                     didUpdate = true;
                     
                     // Mark that we tried to initialize the new update, so that if it crashes,
