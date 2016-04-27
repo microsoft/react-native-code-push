@@ -495,37 +495,33 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
     [CodePushPackage
         downloadPackage:mutableUpdatePackage
         expectedBundleFileName:[bundleResourceName stringByAppendingPathExtension:bundleResourceExtension]
-        usingQueue:_methodQueue
+        operationQueue:_methodQueue
         // The download is progressing forward
         progressCallback:^(long long expectedContentLength, long long receivedContentLength) {
             // Notify the script-side about the progress
             if (notifyProgress) {
-                [self sendDownloadProgressDuringNextFrame:expectedContentLength
-                                    receivedContentLength:receivedContentLength];
+                [self updateDownloadProgressForNextFrame:expectedContentLength
+                                   receivedContentLength:receivedContentLength];
             }
         }
         // The download completed
         doneCallback:^{
-            dispatch_async(_methodQueue, ^{
-                NSError *err;
-                NSDictionary *newPackage = [CodePushPackage getPackage:mutableUpdatePackage[PackageHashKey] error:&err];
+            NSError *err;
+            NSDictionary *newPackage = [CodePushPackage getPackage:mutableUpdatePackage[PackageHashKey] error:&err];
 
-                if (err) {
-                    return reject([NSString stringWithFormat: @"%lu", (long)err.code], err.localizedDescription, err);
-                }
+            if (err) {
+                return reject([NSString stringWithFormat: @"%lu", (long)err.code], err.localizedDescription, err);
+            }
 
-                resolve(newPackage);
-            });
+            resolve(newPackage);
         }
         // The download failed
         failCallback:^(NSError *err) {
-            dispatch_async(_methodQueue, ^{
-                if ([CodePushErrorUtils isCodePushError:err]) {
-                    [self saveFailedUpdate:mutableUpdatePackage];
-                }
+            if ([CodePushErrorUtils isCodePushError:err]) {
+                [self saveFailedUpdate:mutableUpdatePackage];
+            }
 
-                reject([NSString stringWithFormat: @"%lu", (long)err.code], err.localizedDescription, err);
-            });
+            reject([NSString stringWithFormat: @"%lu", (long)err.code], err.localizedDescription, err);
         }];
 }
 
@@ -777,8 +773,8 @@ long long latestReceivedConentLength = -1;
     _paused = YES;
 }
 
-- (void)sendDownloadProgressDuringNextFrame:(long long)expectedContentLength
-                      receivedContentLength:(long long)receivedContentLength
+- (void)updateDownloadProgressForNextFrame:(long long)expectedContentLength
+                     receivedContentLength:(long long)receivedContentLength
 {
     latestExpectedContentLength = expectedContentLength;
     latestReceivedConentLength = receivedContentLength;

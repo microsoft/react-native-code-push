@@ -6,14 +6,14 @@
 }
 
 - (id)init:(NSString *)downloadFilePath
-usingQueue:(dispatch_queue_t)usingQueue
+operationQueue:(dispatch_queue_t)operationQueue
 progressCallback:(void (^)(long long, long long))progressCallback
 doneCallback:(void (^)(BOOL))doneCallback
 failCallback:(void (^)(NSError *err))failCallback {
     self.outputFileStream = [NSOutputStream outputStreamToFileAtPath:downloadFilePath
                                                               append:NO];
     self.receivedContentLength = 0;
-    self.usingQueue = usingQueue;
+    self.operationQueue = operationQueue;
     self.progressCallback = progressCallback;
     self.doneCallback = doneCallback;
     self.failCallback = failCallback;
@@ -25,7 +25,7 @@ failCallback:(void (^)(NSError *err))failCallback {
                                              cachePolicy:NSURLRequestUseProtocolCachePolicy
                                          timeoutInterval:60.0];
     NSOperationQueue *delegateQueue = [NSOperationQueue new];
-    delegateQueue.underlyingQueue = self.usingQueue;
+    delegateQueue.underlyingQueue = self.operationQueue;
     NSURLConnection *connection = [[NSURLConnection alloc] initWithRequest:request
                                                                   delegate:self
                                                           startImmediately:NO];

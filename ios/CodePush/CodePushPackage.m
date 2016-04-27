@@ -41,7 +41,7 @@ static NSString *const UnzippedFolderName = @"unzipped";
 
 + (void)downloadPackage:(NSDictionary *)updatePackage
  expectedBundleFileName:(NSString *)expectedBundleFileName
-             usingQueue:(dispatch_queue_t)usingQueue
+         operationQueue:(dispatch_queue_t)operationQueue
        progressCallback:(void (^)(long long, long long))progressCallback
            doneCallback:(void (^)())doneCallback
            failCallback:(void (^)(NSError *err))failCallback
@@ -72,7 +72,7 @@ static NSString *const UnzippedFolderName = @"unzipped";
     
     CodePushDownloadHandler *downloadHandler = [[CodePushDownloadHandler alloc]
                                                 init:downloadFilePath
-                                                usingQueue:usingQueue
+                                                operationQueue:operationQueue
                                                 progressCallback:progressCallback
                                                 doneCallback:^(BOOL isZip) {
                                                     NSError *error = nil;
