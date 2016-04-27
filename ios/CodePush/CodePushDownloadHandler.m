@@ -24,11 +24,11 @@ failCallback:(void (^)(NSError *err))failCallback {
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]
                                              cachePolicy:NSURLRequestUseProtocolCachePolicy
                                          timeoutInterval:60.0];
-    NSOperationQueue *delegateQueue = [NSOperationQueue new];
-    delegateQueue.underlyingQueue = self.operationQueue;
     NSURLConnection *connection = [[NSURLConnection alloc] initWithRequest:request
                                                                   delegate:self
                                                           startImmediately:NO];
+    NSOperationQueue *delegateQueue = [NSOperationQueue new];
+    delegateQueue.underlyingQueue = self.operationQueue;
     [connection setDelegateQueue:delegateQueue];
     [connection start];
 }
@@ -53,31 +53,31 @@ failCallback:(void (^)(NSError *err))failCallback {
             if (headerOffset >= 4) {
                 break;
             }
-            
+
             const char *bytes = [data bytes];
             _header[headerOffset] = bytes[i];
         }
     }
-    
+
     self.receivedContentLength = self.receivedContentLength + [data length];
-    
+
     NSInteger bytesLeft = [data length];
-    
+
     do {
         NSInteger bytesWritten = [self.outputFileStream write:[data bytes]
                                                      maxLength:bytesLeft];
         if (bytesWritten == -1) {
             break;
         }
-        
+
         bytesLeft -= bytesWritten;
     } while (bytesLeft > 0);
-    
+
     self.progressCallback(self.expectedContentLength, self.receivedContentLength);
-    
+
     // bytesLeft should not be negative.
     assert(bytesLeft >= 0);
-    
+
     if (bytesLeft) {
         [self.outputFileStream close];
         [connection cancel];
