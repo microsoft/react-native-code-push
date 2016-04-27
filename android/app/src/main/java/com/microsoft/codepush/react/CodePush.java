@@ -13,6 +13,7 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.facebook.react.uimanager.ReactChoreographer;
 import com.facebook.react.uimanager.ViewManager;
 import com.facebook.soloader.SoLoader;
 
@@ -25,6 +26,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.provider.Settings;
+import android.view.Choreographer;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -439,7 +441,7 @@ public class CodePush implements ReactPackage {
         }
 
         @ReactMethod
-        public void downloadUpdate(final ReadableMap updatePackage, final Promise promise) {
+        public void downloadUpdate(final ReadableMap updatePackage, final boolean notifyProgress, final Promise promise) {
             AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... params) {
@@ -447,11 +449,35 @@ public class CodePush implements ReactPackage {
                         WritableMap mutableUpdatePackage = CodePushUtils.convertReadableMapToWritableMap(updatePackage);
                         mutableUpdatePackage.putString(BINARY_MODIFIED_TIME_KEY, "" + getBinaryResourcesModifiedTime());
                         codePushPackage.downloadPackage(mutableUpdatePackage, CodePush.this.assetsBundleFileName, new DownloadProgressCallback() {
+                            private boolean nextFrameBusy = false;
+                            private DownloadProgress latestDownloadProgress = null;
+
                             @Override
                             public void call(DownloadProgress downloadProgress) {
-                                getReactApplicationContext()
-                                        .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                                        .emit(DOWNLOAD_PROGRESS_EVENT_NAME, downloadProgress.createWritableMap());
+                                if (!notifyProgress) {
+                                    return;
+                                }
+
+                                this.latestDownloadProgress = downloadProgress;
+                                if (nextFrameBusy) {
+                                    return;
+                                }
+
+                                nextFrameBusy = true;
+                                mainActivity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        ReactChoreographer.getInstance().postFrameCallback(ReactChoreographer.CallbackType.TIMERS_EVENTS, new Choreographer.FrameCallback() {
+                                            @Override
+                                            public void doFrame(long frameTimeNanos) {
+                                                getReactApplicationContext()
+                                                        .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                                                        .emit(DOWNLOAD_PROGRESS_EVENT_NAME, latestDownloadProgress.createWritableMap());
+                                                nextFrameBusy = false;
+                                            }
+                                        });
+                                    }
+                                });
                             }
                         });
 

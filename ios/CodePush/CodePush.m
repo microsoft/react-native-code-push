@@ -7,7 +7,7 @@
 
 #import "CodePush.h"
 
-@interface CodePush () <RCTBridgeModule>
+@interface CodePush () <RCTBridgeModule, RCTFrameUpdateObserver>
 @end
 
 @implementation CodePush {
@@ -171,6 +171,8 @@ static NSString *bundleResourceName = @"main";
 
 @synthesize bridge = _bridge;
 @synthesize methodQueue = _methodQueue;
+@synthesize pauseCallback = _pauseCallback;
+@synthesize paused = _paused;
 
 /*
  * This method is used to clear updates that are installed
@@ -273,7 +275,7 @@ static NSString *bundleResourceName = @"main";
 #ifdef DEBUG
     [self clearDebugUpdates];
 #endif
-
+    _paused = YES;
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];
     if (pendingUpdate) {
@@ -479,6 +481,7 @@ static NSString *bundleResourceName = @"main";
  * This is native-side of the RemotePackage.download method
  */
 RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
+                  notifyProgress:(BOOL)notifyProgress
                         resolver:(RCTPromiseResolveBlock)resolve
                         rejecter:(RCTPromiseRejectBlock)reject)
 {
@@ -488,21 +491,18 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
         [mutableUpdatePackage setValue:[CodePushUpdateUtils modifiedDateStringOfFileAtURL:binaryBundleURL]
                                 forKey:BinaryBundleDateKey];
     }
-
+    
     [CodePushPackage
         downloadPackage:mutableUpdatePackage
         expectedBundleFileName:[bundleResourceName stringByAppendingPathExtension:bundleResourceExtension]
+        usingQueue:_methodQueue
         // The download is progressing forward
         progressCallback:^(long long expectedContentLength, long long receivedContentLength) {
-            dispatch_async(_methodQueue, ^{
-                // Notify the script-side about the progress
-                [self.bridge.eventDispatcher
-                    sendDeviceEventWithName:@"CodePushDownloadProgress"
-                    body:@{
-                            @"totalBytes":[NSNumber numberWithLongLong:expectedContentLength],
-                            @"receivedBytes":[NSNumber numberWithLongLong:receivedContentLength]
-                          }];
-            });
+            // Notify the script-side about the progress
+            if (notifyProgress) {
+                [self sendDownloadProgressDuringNextFrame:expectedContentLength
+                                    receivedContentLength:receivedContentLength];
+            }
         }
         // The download completed
         doneCallback:^{
@@ -758,6 +758,31 @@ RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
     }
 
     resolve(nil);
+}
+
+#pragma mark - Methods for handling dispatching of download progress events to JS (Private)
+
+long long latestExpectedContentLength = -1;
+long long latestReceivedConentLength = -1;
+
+- (void)didUpdateFrame:(RCTFrameUpdate *)update
+{
+    // Notify the script-side about the progress
+    [self.bridge.eventDispatcher
+     sendDeviceEventWithName:@"CodePushDownloadProgress"
+     body:@{
+            @"totalBytes":[NSNumber numberWithLongLong:latestExpectedContentLength],
+            @"receivedBytes":[NSNumber numberWithLongLong:latestReceivedConentLength]
+           }];
+    _paused = YES;
+}
+
+- (void)sendDownloadProgressDuringNextFrame:(long long)expectedContentLength
+                      receivedContentLength:(long long)receivedContentLength
+{
+    latestExpectedContentLength = expectedContentLength;
+    latestReceivedConentLength = receivedContentLength;
+    _paused = NO;
 }
 
 @end

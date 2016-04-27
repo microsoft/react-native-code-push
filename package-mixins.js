@@ -14,24 +14,24 @@ module.exports = (NativeCodePush) => {
 
         let downloadProgressSubscription;
         if (downloadProgressCallback) {
-          // Use event subscription to obtain download progress.   
+          // Use event subscription to obtain download progress.
           downloadProgressSubscription = DeviceEventEmitter.addListener(
             "CodePushDownloadProgress",
             downloadProgressCallback
           );
         }
-      
+
         // Use the downloaded package info. Native code will save the package info
         // so that the client knows what the current package version is.
-        try {  
-          const downloadedPackage = await NativeCodePush.downloadUpdate(this);
+        try {
+          const downloadedPackage = await NativeCodePush.downloadUpdate(this, !!downloadProgressCallback);
           reportStatusDownload && reportStatusDownload(this);
           return { ...downloadedPackage, ...local };
         } finally {
           downloadProgressSubscription && downloadProgressSubscription.remove();
         }
       },
-    
+
       isPending: false // A remote package could never be in a pending state
     };
   };
@@ -47,7 +47,7 @@ module.exports = (NativeCodePush) => {
         localPackage.isPending = true; // Mark the package as pending since it hasn't been applied yet
       }
     },
-    
+
     isPending: false // A local package wouldn't be pending until it was installed
   };
 
