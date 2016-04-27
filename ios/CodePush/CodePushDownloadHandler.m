@@ -24,11 +24,11 @@ failCallback:(void (^)(NSError *err))failCallback {
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]
                                              cachePolicy:NSURLRequestUseProtocolCachePolicy
                                          timeoutInterval:60.0];
-    NSOperationQueue *delegateQueue = [NSOperationQueue new];
-    delegateQueue.underlyingQueue = self.usingQueue;
     NSURLConnection *connection = [[NSURLConnection alloc] initWithRequest:request
                                                                   delegate:self
                                                           startImmediately:NO];
+    NSOperationQueue *delegateQueue = [NSOperationQueue new];
+    delegateQueue.underlyingQueue = self.usingQueue;
     [connection setDelegateQueue:delegateQueue];
     [connection start];
 }
