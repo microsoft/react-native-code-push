@@ -756,7 +756,7 @@ RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
     resolve(nil);
 }
 
-#pragma mark - Methods for handling dispatching of download progress events to JS (Private)
+#pragma mark - RCTFrameUpdateObserver Methods
 
 long long latestExpectedContentLength = -1;
 long long latestReceivedConentLength = -1;
