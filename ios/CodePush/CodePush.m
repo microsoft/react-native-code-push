@@ -492,6 +492,10 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
                                 forKey:BinaryBundleDateKey];
     }
     
+    if (notifyProgress) {
+        [self setupFrameObserverForDownloadProgress];
+    }
+    
     [CodePushPackage
         downloadPackage:mutableUpdatePackage
         expectedBundleFileName:[bundleResourceName stringByAppendingPathExtension:bundleResourceExtension]
@@ -499,10 +503,8 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
         // The download is progressing forward
         progressCallback:^(long long expectedContentLength, long long receivedContentLength) {
             // Notify the script-side about the progress
-            if (notifyProgress) {
-                [self updateDownloadProgressForNextFrame:expectedContentLength
-                                   receivedContentLength:receivedContentLength];
-            }
+            [self updateDownloadProgressForNextFrame:expectedContentLength
+                               receivedContentLength:receivedContentLength];
         }
         // The download completed
         doneCallback:^{
@@ -512,7 +514,8 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
             if (err) {
                 return reject([NSString stringWithFormat: @"%lu", (long)err.code], err.localizedDescription, err);
             }
-
+            
+            [self pauseFrameObserver];
             resolve(newPackage);
         }
         // The download failed
@@ -520,7 +523,8 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
             if ([CodePushErrorUtils isCodePushError:err]) {
                 [self saveFailedUpdate:mutableUpdatePackage];
             }
-
+            
+            [self pauseFrameObserver];
             reject([NSString stringWithFormat: @"%lu", (long)err.code], err.localizedDescription, err);
         }];
 }
@@ -760,9 +764,14 @@ RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
 
 long long latestExpectedContentLength = -1;
 long long latestReceivedConentLength = -1;
+BOOL didUpdateProgress = NO;
 
 - (void)didUpdateFrame:(RCTFrameUpdate *)update
 {
+    if (!didUpdateProgress) {
+        return;
+    }
+    
     // Notify the script-side about the progress
     [self.bridge.eventDispatcher
      sendDeviceEventWithName:@"CodePushDownloadProgress"
@@ -770,7 +779,8 @@ long long latestReceivedConentLength = -1;
             @"totalBytes":[NSNumber numberWithLongLong:latestExpectedContentLength],
             @"receivedBytes":[NSNumber numberWithLongLong:latestReceivedConentLength]
            }];
-    _paused = YES;
+    didUpdateProgress = NO;
+    
 }
 
 - (void)updateDownloadProgressForNextFrame:(long long)expectedContentLength
@@ -778,7 +788,19 @@ long long latestReceivedConentLength = -1;
 {
     latestExpectedContentLength = expectedContentLength;
     latestReceivedConentLength = receivedContentLength;
+    didUpdateProgress = YES;
+}
+
+
+- (void)setupFrameObserverForDownloadProgress
+{
+    didUpdateProgress = NO;
     _paused = NO;
+}
+
+- (void)pauseFrameObserver
+{
+    _paused = YES;
 }
 
 @end
