@@ -458,26 +458,39 @@ public class CodePush implements ReactPackage {
                                     return;
                                 }
 
-                                this.latestDownloadProgress = downloadProgress;
+                                latestDownloadProgress = downloadProgress;
+                                // If the download is completed, synchronously send the last event.
+                                if (latestDownloadProgress.isCompleted()) {
+                                    dispatchDownloadProgressEvent();
+                                    return;
+                                }
+
                                 if (hasScheduledNextFrame) {
                                     return;
                                 }
 
                                 hasScheduledNextFrame = true;
-                                mainActivity.runOnUiThread(new Runnable() {
+                                getReactApplicationContext().runOnUiQueueThread(new Runnable() {
                                     @Override
                                     public void run() {
                                         ReactChoreographer.getInstance().postFrameCallback(ReactChoreographer.CallbackType.TIMERS_EVENTS, new Choreographer.FrameCallback() {
                                             @Override
                                             public void doFrame(long frameTimeNanos) {
-                                                getReactApplicationContext()
-                                                        .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                                                        .emit(DOWNLOAD_PROGRESS_EVENT_NAME, latestDownloadProgress.createWritableMap());
+                                                if (!latestDownloadProgress.isCompleted()) {
+                                                    dispatchDownloadProgressEvent();
+                                                }
+
                                                 hasScheduledNextFrame = false;
                                             }
                                         });
                                     }
                                 });
+                            }
+
+                            public void dispatchDownloadProgressEvent() {
+                                getReactApplicationContext()
+                                        .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                                        .emit(DOWNLOAD_PROGRESS_EVENT_NAME, latestDownloadProgress.createWritableMap());
                             }
                         });
 

@@ -275,7 +275,7 @@ static NSString *bundleResourceName = @"main";
 #ifdef DEBUG
     [self clearDebugUpdates];
 #endif
-    _paused = YES;
+    [self pauseFrameObserver];
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];
     if (pendingUpdate) {
@@ -502,9 +502,13 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
         operationQueue:_methodQueue
         // The download is progressing forward
         progressCallback:^(long long expectedContentLength, long long receivedContentLength) {
-            // Notify the script-side about the progress
             [self updateDownloadProgressForNextFrame:expectedContentLength
                                receivedContentLength:receivedContentLength];
+            // If the download is completed, stop observing frame updates and synchronously send the last event.
+            if (expectedContentLength == receivedContentLength) {
+                [self pauseFrameObserver];
+                [self dispatchDownloadProgressEvent];
+            }
         }
         // The download completed
         doneCallback:^{
@@ -514,8 +518,6 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
             if (err) {
                 return reject([NSString stringWithFormat: @"%lu", (long)err.code], err.localizedDescription, err);
             }
-            
-            [self pauseFrameObserver];
             resolve(newPackage);
         }
         // The download failed
@@ -772,15 +774,19 @@ BOOL didUpdateProgress = NO;
         return;
     }
     
+    [self dispatchDownloadProgressEvent];
+    didUpdateProgress = NO;
+}
+
+- (void)dispatchDownloadProgressEvent
+{
     // Notify the script-side about the progress
     [self.bridge.eventDispatcher
      sendDeviceEventWithName:@"CodePushDownloadProgress"
      body:@{
             @"totalBytes":[NSNumber numberWithLongLong:latestExpectedContentLength],
             @"receivedBytes":[NSNumber numberWithLongLong:latestReceivedConentLength]
-           }];
-    didUpdateProgress = NO;
-    
+            }];
 }
 
 - (void)updateDownloadProgressForNextFrame:(long long)expectedContentLength
@@ -800,6 +806,7 @@ BOOL didUpdateProgress = NO;
 
 - (void)pauseFrameObserver
 {
+    didUpdateProgress = NO;
     _paused = YES;
 }
 
