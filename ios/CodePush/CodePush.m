@@ -15,6 +15,9 @@
     BOOL _isFirstRunAfterUpdate;
     int _minimumBackgroundDuration;
     NSDate *_lastResignedDate;
+    long long latestExpectedContentLength;
+    long long latestReceivedConentLength;
+    BOOL didUpdateProgress;
 }
 
 RCT_EXPORT_MODULE()
@@ -225,6 +228,17 @@ static NSString *bundleResourceName = @"main";
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
+- (void)dispatchDownloadProgressEvent
+{
+    // Notify the script-side about the progress
+    [self.bridge.eventDispatcher
+     sendDeviceEventWithName:@"CodePushDownloadProgress"
+     body:@{
+            @"totalBytes":[NSNumber numberWithLongLong:latestExpectedContentLength],
+            @"receivedBytes":[NSNumber numberWithLongLong:latestReceivedConentLength]
+            }];
+}
+
 /*
  * This method ensures that the app was packaged with a JS bundle
  * file, and if not, it throws the appropriate exception.
@@ -275,7 +289,7 @@ static NSString *bundleResourceName = @"main";
 #ifdef DEBUG
     [self clearDebugUpdates];
 #endif
-    [self pauseFrameObserver];
+    _paused = YES;
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];
     if (pendingUpdate) {
@@ -493,7 +507,10 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
     }
     
     if (notifyProgress) {
-        [self setupFrameObserverForDownloadProgress];
+        // Set up and unpause the frame observer so that it can emit
+        // progress events every frame if the progress is updated.
+        didUpdateProgress = NO;
+        _paused = NO;
     }
     
     [CodePushPackage
@@ -502,11 +519,16 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
         operationQueue:_methodQueue
         // The download is progressing forward
         progressCallback:^(long long expectedContentLength, long long receivedContentLength) {
-            [self updateDownloadProgressForNextFrame:expectedContentLength
-                               receivedContentLength:receivedContentLength];
-            // If the download is completed, stop observing frame updates and synchronously send the last event.
+            // Update the download progress so that the frame observer can notify the JS side
+            latestExpectedContentLength = expectedContentLength;
+            latestReceivedConentLength = receivedContentLength;
+            didUpdateProgress = YES;
+            
+            // If the download is completed, stop observing frame
+            // updates and synchronously send the last event.
             if (expectedContentLength == receivedContentLength) {
-                [self pauseFrameObserver];
+                didUpdateProgress = NO;
+                _paused = YES;
                 [self dispatchDownloadProgressEvent];
             }
         }
@@ -526,7 +548,9 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
                 [self saveFailedUpdate:mutableUpdatePackage];
             }
             
-            [self pauseFrameObserver];
+            // Stop observing frame updates if the download fails.
+            didUpdateProgress = NO;
+            _paused = YES;
             reject([NSString stringWithFormat: @"%lu", (long)err.code], err.localizedDescription, err);
         }];
 }
@@ -764,10 +788,6 @@ RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
 
 #pragma mark - RCTFrameUpdateObserver Methods
 
-long long latestExpectedContentLength = -1;
-long long latestReceivedConentLength = -1;
-BOOL didUpdateProgress = NO;
-
 - (void)didUpdateFrame:(RCTFrameUpdate *)update
 {
     if (!didUpdateProgress) {
@@ -776,38 +796,6 @@ BOOL didUpdateProgress = NO;
     
     [self dispatchDownloadProgressEvent];
     didUpdateProgress = NO;
-}
-
-- (void)dispatchDownloadProgressEvent
-{
-    // Notify the script-side about the progress
-    [self.bridge.eventDispatcher
-     sendDeviceEventWithName:@"CodePushDownloadProgress"
-     body:@{
-            @"totalBytes":[NSNumber numberWithLongLong:latestExpectedContentLength],
-            @"receivedBytes":[NSNumber numberWithLongLong:latestReceivedConentLength]
-            }];
-}
-
-- (void)updateDownloadProgressForNextFrame:(long long)expectedContentLength
-                     receivedContentLength:(long long)receivedContentLength
-{
-    latestExpectedContentLength = expectedContentLength;
-    latestReceivedConentLength = receivedContentLength;
-    didUpdateProgress = YES;
-}
-
-
-- (void)setupFrameObserverForDownloadProgress
-{
-    didUpdateProgress = NO;
-    _paused = NO;
-}
-
-- (void)pauseFrameObserver
-{
-    didUpdateProgress = NO;
-    _paused = YES;
 }
 
 @end
