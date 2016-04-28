@@ -238,7 +238,7 @@ public class CodePush implements ReactPackage {
         // Reset the state which indicates that
         // the app was just freshly updated.
         didUpdate = false;
-        
+
         JSONObject pendingUpdate = getPendingUpdate();
         if (pendingUpdate != null) {
             try {
@@ -253,7 +253,7 @@ public class CodePush implements ReactPackage {
                     // There is in fact a new update running for the first
                     // time, so update the local state to ensure the client knows.
                     didUpdate = true;
-                    
+
                     // Mark that we tried to initialize the new update, so that if it crashes,
                     // we will know that we need to rollback when the app next starts.
                     savePendingUpdate(pendingUpdate.getString(PENDING_UPDATE_HASH_KEY),
@@ -449,7 +449,7 @@ public class CodePush implements ReactPackage {
                         WritableMap mutableUpdatePackage = CodePushUtils.convertReadableMapToWritableMap(updatePackage);
                         mutableUpdatePackage.putString(BINARY_MODIFIED_TIME_KEY, "" + getBinaryResourcesModifiedTime());
                         codePushPackage.downloadPackage(mutableUpdatePackage, CodePush.this.assetsBundleFileName, new DownloadProgressCallback() {
-                            private boolean nextFrameBusy = false;
+                            private boolean hasScheduledNextFrame = false;
                             private DownloadProgress latestDownloadProgress = null;
 
                             @Override
@@ -459,11 +459,11 @@ public class CodePush implements ReactPackage {
                                 }
 
                                 this.latestDownloadProgress = downloadProgress;
-                                if (nextFrameBusy) {
+                                if (hasScheduledNextFrame) {
                                     return;
                                 }
 
-                                nextFrameBusy = true;
+                                hasScheduledNextFrame = true;
                                 mainActivity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
@@ -473,7 +473,7 @@ public class CodePush implements ReactPackage {
                                                 getReactApplicationContext()
                                                         .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                                                         .emit(DOWNLOAD_PROGRESS_EVENT_NAME, latestDownloadProgress.createWritableMap());
-                                                nextFrameBusy = false;
+                                                hasScheduledNextFrame = false;
                                             }
                                         });
                                     }
