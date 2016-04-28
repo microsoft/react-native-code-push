@@ -60,6 +60,11 @@ static NSString *const UnzippedFolderName = @"unzipped";
                                   withIntermediateDirectories:YES
                                                    attributes:nil
                                                         error:&error];
+                                                        
+        // Ensure that none of the CodePush updates we store on disk are
+        // ever included in the end users iTunes and/or iCloud backups
+        NSURL *codePushURL = [NSURL fileURLWithPath:[self getCodePushPath]];
+        [codePushURL setResourceValue:@YES forKey:NSURLIsExcludedFromBackupKey error:nil];
     }
     
     if (error) {
