@@ -15,6 +15,8 @@
     BOOL _isFirstRunAfterUpdate;
     int _minimumBackgroundDuration;
     NSDate *_lastResignedDate;
+    
+    // Used to coordinate the dispatching of download progress events to JS.
     long long _latestExpectedContentLength;
     long long _latestReceivedConentLength;
     BOOL _didUpdateProgress;
@@ -174,6 +176,7 @@ static NSString *bundleResourceName = @"main";
 
 @synthesize bridge = _bridge;
 @synthesize methodQueue = _methodQueue;
+@synthesize pauseCallback = _pauseCallback;
 @synthesize paused = _paused;
 
 /*
