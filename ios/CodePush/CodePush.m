@@ -15,9 +15,9 @@
     BOOL _isFirstRunAfterUpdate;
     int _minimumBackgroundDuration;
     NSDate *_lastResignedDate;
-    long long latestExpectedContentLength;
-    long long latestReceivedConentLength;
-    BOOL didUpdateProgress;
+    long long _latestExpectedContentLength;
+    long long _latestReceivedConentLength;
+    BOOL _didUpdateProgress;
 }
 
 RCT_EXPORT_MODULE()
@@ -174,7 +174,6 @@ static NSString *bundleResourceName = @"main";
 
 @synthesize bridge = _bridge;
 @synthesize methodQueue = _methodQueue;
-@synthesize pauseCallback = _pauseCallback;
 @synthesize paused = _paused;
 
 /*
@@ -234,8 +233,8 @@ static NSString *bundleResourceName = @"main";
     [self.bridge.eventDispatcher
      sendDeviceEventWithName:@"CodePushDownloadProgress"
      body:@{
-            @"totalBytes":[NSNumber numberWithLongLong:latestExpectedContentLength],
-            @"receivedBytes":[NSNumber numberWithLongLong:latestReceivedConentLength]
+            @"totalBytes":[NSNumber numberWithLongLong:_latestExpectedContentLength],
+            @"receivedBytes":[NSNumber numberWithLongLong:_latestReceivedConentLength]
             }];
 }
 
@@ -509,7 +508,7 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
     if (notifyProgress) {
         // Set up and unpause the frame observer so that it can emit
         // progress events every frame if the progress is updated.
-        didUpdateProgress = NO;
+        _didUpdateProgress = NO;
         _paused = NO;
     }
     
@@ -520,14 +519,14 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
         // The download is progressing forward
         progressCallback:^(long long expectedContentLength, long long receivedContentLength) {
             // Update the download progress so that the frame observer can notify the JS side
-            latestExpectedContentLength = expectedContentLength;
-            latestReceivedConentLength = receivedContentLength;
-            didUpdateProgress = YES;
+            _latestExpectedContentLength = expectedContentLength;
+            _latestReceivedConentLength = receivedContentLength;
+            _didUpdateProgress = YES;
             
             // If the download is completed, stop observing frame
             // updates and synchronously send the last event.
             if (expectedContentLength == receivedContentLength) {
-                didUpdateProgress = NO;
+                _didUpdateProgress = NO;
                 _paused = YES;
                 [self dispatchDownloadProgressEvent];
             }
@@ -549,7 +548,7 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
             }
             
             // Stop observing frame updates if the download fails.
-            didUpdateProgress = NO;
+            _didUpdateProgress = NO;
             _paused = YES;
             reject([NSString stringWithFormat: @"%lu", (long)err.code], err.localizedDescription, err);
         }];
@@ -790,12 +789,12 @@ RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
 
 - (void)didUpdateFrame:(RCTFrameUpdate *)update
 {
-    if (!didUpdateProgress) {
+    if (!_didUpdateProgress) {
         return;
     }
     
     [self dispatchDownloadProgressEvent];
-    didUpdateProgress = NO;
+    _didUpdateProgress = NO;
 }
 
 @end
