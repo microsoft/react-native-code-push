@@ -13,6 +13,7 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.facebook.react.uimanager.ReactChoreographer;
 import com.facebook.react.uimanager.ViewManager;
 import com.facebook.soloader.SoLoader;
 
@@ -25,6 +26,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.provider.Settings;
+import android.view.Choreographer;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -236,7 +238,7 @@ public class CodePush implements ReactPackage {
         // Reset the state which indicates that
         // the app was just freshly updated.
         didUpdate = false;
-        
+
         JSONObject pendingUpdate = getPendingUpdate();
         if (pendingUpdate != null) {
             try {
@@ -251,7 +253,7 @@ public class CodePush implements ReactPackage {
                     // There is in fact a new update running for the first
                     // time, so update the local state to ensure the client knows.
                     didUpdate = true;
-                    
+
                     // Mark that we tried to initialize the new update, so that if it crashes,
                     // we will know that we need to rollback when the app next starts.
                     savePendingUpdate(pendingUpdate.getString(PENDING_UPDATE_HASH_KEY),
@@ -439,7 +441,7 @@ public class CodePush implements ReactPackage {
         }
 
         @ReactMethod
-        public void downloadUpdate(final ReadableMap updatePackage, final Promise promise) {
+        public void downloadUpdate(final ReadableMap updatePackage, final boolean notifyProgress, final Promise promise) {
             AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... params) {
@@ -447,11 +449,48 @@ public class CodePush implements ReactPackage {
                         WritableMap mutableUpdatePackage = CodePushUtils.convertReadableMapToWritableMap(updatePackage);
                         mutableUpdatePackage.putString(BINARY_MODIFIED_TIME_KEY, "" + getBinaryResourcesModifiedTime());
                         codePushPackage.downloadPackage(mutableUpdatePackage, CodePush.this.assetsBundleFileName, new DownloadProgressCallback() {
+                            private boolean hasScheduledNextFrame = false;
+                            private DownloadProgress latestDownloadProgress = null;
+
                             @Override
                             public void call(DownloadProgress downloadProgress) {
+                                if (!notifyProgress) {
+                                    return;
+                                }
+
+                                latestDownloadProgress = downloadProgress;
+                                // If the download is completed, synchronously send the last event.
+                                if (latestDownloadProgress.isCompleted()) {
+                                    dispatchDownloadProgressEvent();
+                                    return;
+                                }
+
+                                if (hasScheduledNextFrame) {
+                                    return;
+                                }
+
+                                hasScheduledNextFrame = true;
+                                getReactApplicationContext().runOnUiQueueThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        ReactChoreographer.getInstance().postFrameCallback(ReactChoreographer.CallbackType.TIMERS_EVENTS, new Choreographer.FrameCallback() {
+                                            @Override
+                                            public void doFrame(long frameTimeNanos) {
+                                                if (!latestDownloadProgress.isCompleted()) {
+                                                    dispatchDownloadProgressEvent();
+                                                }
+
+                                                hasScheduledNextFrame = false;
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+
+                            public void dispatchDownloadProgressEvent() {
                                 getReactApplicationContext()
                                         .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                                        .emit(DOWNLOAD_PROGRESS_EVENT_NAME, downloadProgress.createWritableMap());
+                                        .emit(DOWNLOAD_PROGRESS_EVENT_NAME, latestDownloadProgress.createWritableMap());
                             }
                         });
 
