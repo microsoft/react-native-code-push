@@ -640,7 +640,7 @@ codePush.sync({ updateDialog: true },
               break;
       }
   },
-  (totalBytes, receivedBytes) => { 
+  ({ receivedBytes, totalBytes, }) => { 
     /* Update download modal progress */ 
   }
 );
