@@ -3,53 +3,77 @@
 @implementation CodePushDownloadHandler {
     // Header chars used to determine if the file is a zip.
     char _header[4];
+    
+    dispatch_queue_t _operationQueue;
+    NSOutputStream *_outputFileStream;
+    
+    // State for tracking download progress.
+    long long _expectedContentLength;
+    long long _receivedContentLength;
+    
+    // Notification callbacks
+    void (^_doneCallback)(BOOL);
+    void (^_failCallback)(NSError *err);
+    void (^_progressCallback)(long long, long long);    
 }
 
-- (id)init:(NSString *)downloadFilePath
-operationQueue:(dispatch_queue_t)operationQueue
-progressCallback:(void (^)(long long, long long))progressCallback
-doneCallback:(void (^)(BOOL))doneCallback
-failCallback:(void (^)(NSError *err))failCallback {
-    self.outputFileStream = [NSOutputStream outputStreamToFileAtPath:downloadFilePath
-                                                              append:NO];
-    self.receivedContentLength = 0;
-    self.operationQueue = operationQueue;
-    self.progressCallback = progressCallback;
-    self.doneCallback = doneCallback;
-    self.failCallback = failCallback;
+#pragma mark - Public methods
+
+- (instancetype)init:(NSString *)downloadFilePath
+      operationQueue:(dispatch_queue_t)operationQueue
+    progressCallback:(void (^)(long long, long long))progressCallback
+        doneCallback:(void (^)(BOOL))doneCallback
+        failCallback:(void (^)(NSError *err))failCallback
+{
+    _operationQueue = operationQueue;
+    _outputFileStream = [NSOutputStream outputStreamToFileAtPath:downloadFilePath
+                                                          append:NO];
+
+    _doneCallback = doneCallback;
+    _failCallback = failCallback;
+    _progressCallback = progressCallback;    
+    
     return self;
 }
 
--(void)download:(NSString*)url {
+- (void)download:(NSString *)url
+{
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]
                                              cachePolicy:NSURLRequestUseProtocolCachePolicy
                                          timeoutInterval:60.0];
+                                         
     NSURLConnection *connection = [[NSURLConnection alloc] initWithRequest:request
                                                                   delegate:self
                                                           startImmediately:NO];
+                                                    
+    // Ensure that the download is run on the same GCD
+    // queue as the CodePush native module      
     NSOperationQueue *delegateQueue = [NSOperationQueue new];
-    delegateQueue.underlyingQueue = self.operationQueue;
+    delegateQueue.underlyingQueue = _operationQueue;
     [connection setDelegateQueue:delegateQueue];
     [connection start];
 }
 
-#pragma mark NSURLConnection Delegate Methods
+#pragma mark - NSURLConnectionDelegate Methods
 
 - (NSCachedURLResponse *)connection:(NSURLConnection *)connection
-                  willCacheResponse:(NSCachedURLResponse*)cachedResponse {
+                  willCacheResponse:(NSCachedURLResponse *)cachedResponse
+{
     // Return nil to indicate not necessary to store a cached response for this connection
     return nil;
 }
 
--(void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
-    self.expectedContentLength = response.expectedContentLength;
-    [self.outputFileStream open];
+- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response
+{
+    _expectedContentLength = response.expectedContentLength;
+    [_outputFileStream open];
 }
 
--(void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
-    if (self.receivedContentLength < 4) {
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data
+{
+    if (_receivedContentLength < 4) {
         for (int i = 0; i < [data length]; i++) {
-            int headerOffset = (int)self.receivedContentLength + i;
+            int headerOffset = (int)_receivedContentLength + i;
             if (headerOffset >= 4) {
                 break;
             }
@@ -59,12 +83,12 @@ failCallback:(void (^)(NSError *err))failCallback {
         }
     }
 
-    self.receivedContentLength = self.receivedContentLength + [data length];
+    _receivedContentLength = _receivedContentLength + [data length];
 
     NSInteger bytesLeft = [data length];
 
     do {
-        NSInteger bytesWritten = [self.outputFileStream write:[data bytes]
+        NSInteger bytesWritten = [_outputFileStream write:[data bytes]
                                                      maxLength:bytesLeft];
         if (bytesWritten == -1) {
             break;
@@ -73,34 +97,35 @@ failCallback:(void (^)(NSError *err))failCallback {
         bytesLeft -= bytesWritten;
     } while (bytesLeft > 0);
 
-    self.progressCallback(self.expectedContentLength, self.receivedContentLength);
+    _progressCallback(_expectedContentLength, _receivedContentLength);
 
     // bytesLeft should not be negative.
     assert(bytesLeft >= 0);
 
     if (bytesLeft) {
-        [self.outputFileStream close];
+        [_outputFileStream close];
         [connection cancel];
-        self.failCallback([self.outputFileStream streamError]);
+        _failCallback([_outputFileStream streamError]);
     }
 }
 
-- (void)connection:(NSURLConnection*)connection didFailWithError:(NSError*)error
+- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error
 {
-    [self.outputFileStream close];
-    self.failCallback(error);
+    [_outputFileStream close];
+    _failCallback(error);
 }
 
--(void)connectionDidFinishLoading:(NSURLConnection *)connection {
+- (void)connectionDidFinishLoading:(NSURLConnection *)connection
+{
     // expectedContentLength might be -1 when NSURLConnection don't know the length(e.g. response encode with gzip)
-    if (self.expectedContentLength > 0) {
+    if (_expectedContentLength > 0) {
         // We should have received all of the bytes if this is called.
-        assert(self.receivedContentLength == self.expectedContentLength);
+        assert(_receivedContentLength == _expectedContentLength);
     }
 
-    [self.outputFileStream close];
+    [_outputFileStream close];
     BOOL isZip = _header[0] == 'P' && _header[1] == 'K' && _header[2] == 3 && _header[3] == 4;
-    self.doneCallback(isZip);
+    _doneCallback(isZip);
 }
 
 @end
