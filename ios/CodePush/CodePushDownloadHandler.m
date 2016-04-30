@@ -36,7 +36,7 @@
     return self;
 }
 
--(void)download:(NSString *)url
+- (void)download:(NSString *)url
 {
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]
                                              cachePolicy:NSURLRequestUseProtocolCachePolicy
