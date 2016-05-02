@@ -21,6 +21,13 @@
 + (NSURL *)bundleURLForResource:(NSString *)resourceName
                   withExtension:(NSString *)resourceExtension;
 
++ (NSURL *)bundleURLFromAppExtension;
+
++ (NSURL *)bundleURLFromAppExtensionForResource:(NSString *)resourceName;
+
++ (NSURL *)bundleURLFromAppExtensionForResource:(NSString *)resourceName
+                                  withExtension:(NSString *)resourceExtension;
+
 + (NSString *)getApplicationSupportDirectory;
 
 /*

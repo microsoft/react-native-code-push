@@ -15,7 +15,7 @@
     BOOL _isFirstRunAfterUpdate;
     int _minimumBackgroundDuration;
     NSDate *_lastResignedDate;
-    
+
     // Used to coordinate the dispatching of download progress events to JS.
     long long _latestExpectedContentLength;
     long long _latestReceivedConentLength;
@@ -51,6 +51,7 @@ static NSString *const PackageIsPendingKey = @"isPending";
 static BOOL isRunningBinaryVersion = NO;
 static BOOL needToReportRollback = NO;
 static BOOL testConfigurationFlag = NO;
+static BOOL isAppExtension = NO;
 
 // These values are used to save the bundleURL and extension for the JS bundle
 // in the binary.
@@ -61,7 +62,11 @@ static NSString *bundleResourceName = @"main";
 
 + (NSURL *)binaryBundleURL
 {
-    return [[NSBundle mainBundle] URLForResource:bundleResourceName withExtension:bundleResourceExtension];
+    NSBundle *bundle = [NSBundle mainBundle];
+    if (isAppExtension && [[bundle.bundleURL pathExtension] isEqualToString:@"appex"]) {
+      bundle = [NSBundle bundleWithURL:[[bundle.bundleURL URLByDeletingLastPathComponent] URLByDeletingLastPathComponent]];
+    }
+    return [bundle URLForResource:bundleResourceName withExtension:bundleResourceExtension];
 }
 
 + (NSURL *)bundleURL
@@ -72,6 +77,26 @@ static NSString *bundleResourceName = @"main";
 + (NSURL *)bundleURLForResource:(NSString *)resourceName
 {
     bundleResourceName = resourceName;
+    return [self bundleURLForResource:resourceName
+                        withExtension:bundleResourceExtension];
+}
+
++ (NSURL *)bundleURLFromAppExtension
+{
+    isAppExtension = YES;
+    return [self bundleURL];
+}
+
++ (NSURL *)bundleURLFromAppExtensionForResource:(NSString *)resourceName
+{
+    isAppExtension = YES;
+    return [self bundleURLForResource:resourceName];
+}
+
++ (NSURL *)bundleURLFromAppExtensionForResource:(NSString *)resourceName
+                  withExtension:(NSString *)resourceExtension
+{
+    isAppExtension = YES;
     return [self bundleURLForResource:resourceName
                         withExtension:bundleResourceExtension];
 }
@@ -507,14 +532,14 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
         [mutableUpdatePackage setValue:[CodePushUpdateUtils modifiedDateStringOfFileAtURL:binaryBundleURL]
                                 forKey:BinaryBundleDateKey];
     }
-    
+
     if (notifyProgress) {
         // Set up and unpause the frame observer so that it can emit
         // progress events every frame if the progress is updated.
         _didUpdateProgress = NO;
         _paused = NO;
     }
-    
+
     [CodePushPackage
         downloadPackage:mutableUpdatePackage
         expectedBundleFileName:[bundleResourceName stringByAppendingPathExtension:bundleResourceExtension]
@@ -525,7 +550,7 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
             _latestExpectedContentLength = expectedContentLength;
             _latestReceivedConentLength = receivedContentLength;
             _didUpdateProgress = YES;
-            
+
             // If the download is completed, stop observing frame
             // updates and synchronously send the last event.
             if (expectedContentLength == receivedContentLength) {
@@ -549,7 +574,7 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
             if ([CodePushErrorUtils isCodePushError:err]) {
                 [self saveFailedUpdate:mutableUpdatePackage];
             }
-            
+
             // Stop observing frame updates if the download fails.
             _didUpdateProgress = NO;
             _paused = YES;
@@ -795,7 +820,7 @@ RCT_EXPORT_METHOD(getNewStatusReport:(RCTPromiseResolveBlock)resolve
     if (!_didUpdateProgress) {
         return;
     }
-    
+
     [self dispatchDownloadProgressEvent];
     _didUpdateProgress = NO;
 }
