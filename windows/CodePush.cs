@@ -372,7 +372,6 @@ namespace CodePush.ReactNative
                 }
             }
 
-            // TODO get rid of this
             private CodePushModule codePush;
 
             public CodePushNativeModule(ReactContext reactContext, CodePushModule codePush) : base(reactContext)
