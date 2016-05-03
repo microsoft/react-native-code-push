@@ -323,10 +323,10 @@ class AppReactPage : ReactPage
     // deployment key, you can run "code-push deployment ls <appName> -k" to retrieve it.
     public override string JavaScriptBundleFile
     {
-    	get
+        get
         {
             codePushModule = new CodePushModule("deployment-key-here", this);
-       	    return codePushModule.GetJavaScriptBundleFile();
+            return codePushModule.GetJavaScriptBundleFile();
         }
     }
 
