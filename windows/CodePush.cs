@@ -33,7 +33,7 @@ namespace CodePush.ReactNative
         private readonly string DOWNLOAD_PROGRESS_EVENT_NAME = "CodePushDownloadProgress";
         private readonly string FAILED_UPDATES_KEY = "CODE_PUSH_FAILED_UPDATES";
         private static readonly string FILE_BUNDLE_PREFIX = "ms-appdata:///local";
-        private readonly string PACKAGE_HASH_KEY = "packageHash";
+        private static readonly string PACKAGE_HASH_KEY = "packageHash";
         private readonly string PENDING_UPDATE_HASH_KEY = "hash";
         private readonly string PENDING_UPDATE_IS_LOADING_KEY = "isLoading";
         private readonly string PENDING_UPDATE_KEY = "CODE_PUSH_PENDING_UPDATE";
@@ -397,6 +397,9 @@ namespace CodePush.ReactNative
                     constants["codePushInstallModeImmediate"] = CodePushInstallMode.IMMEDIATE;
                     constants["codePushInstallModeOnNextRestart"] = CodePushInstallMode.ON_NEXT_RESTART;
                     constants["codePushInstallModeOnNextResume"] = CodePushInstallMode.ON_NEXT_RESUME;
+                    constants["codePushUpdateStateRunning"] = CodePushUpdateState.RUNNING;
+                    constants["codePushUpdateStatePending"] = CodePushUpdateState.PENDING;
+                    constants["codePushUpdateStateLatest"] = CodePushUpdateState.LATEST;
                     return constants;
                 }
             }
@@ -433,7 +436,7 @@ namespace CodePush.ReactNative
             }
 
             [ReactMethod]
-            public void downloadUpdate(JObject updatePackage, IPromise promise)
+            public void downloadUpdate(JObject updatePackage, bool notifyProgress, IPromise promise)
             {
                 Action downloadAction = async () =>
                 {
@@ -446,6 +449,11 @@ namespace CodePush.ReactNative
                             new Progress<HttpProgress>(
                                 (HttpProgress progress) =>
                                 {
+                                    if (!notifyProgress)
+                                    {
+                                        return;
+                                    }
+
                                     JObject downloadProgress = new JObject();
                                     downloadProgress["totalBytes"] = progress.TotalBytesToReceive;
                                     downloadProgress["receivedBytes"] = progress.BytesReceived;
@@ -456,7 +464,7 @@ namespace CodePush.ReactNative
                             )
                         );
 
-                        JObject newPackage = await codePush.codePushPackage.GetPackage((string)updatePackage[codePush.PACKAGE_HASH_KEY]);
+                        JObject newPackage = await codePush.codePushPackage.GetPackage((string)updatePackage[PACKAGE_HASH_KEY]);
                         promise.Resolve(newPackage);
                     }
                     catch (CodePushInvalidUpdateException e)
@@ -496,10 +504,10 @@ namespace CodePush.ReactNative
             }
 
             [ReactMethod]
-            public void getCurrentPackage(IPromise promise)
+            public void getUpdateMetadata(int updateState, IPromise promise)
             {
                 Action getCurrentPackageAction = async () =>
-                {
+                { 
                     JObject currentPackage = await codePush.codePushPackage.GetCurrentPackage();
                     if (currentPackage == null)
                     {
@@ -507,20 +515,44 @@ namespace CodePush.ReactNative
                         return;
                     }
 
-                    if (isRunningBinaryVersion)
+                    bool currentUpdateIsPending = false;
+
+                    if (currentPackage[PACKAGE_HASH_KEY] != null)
                     {
-                        currentPackage["_isDebugOnly"] = true;
+                        string currentHash = (string)currentPackage[PACKAGE_HASH_KEY];
+                        currentUpdateIsPending = codePush.IsPendingUpdate(currentHash);
                     }
 
-                    bool isPendingUpdate = false;
-                    string currentHash = (string)currentPackage[codePush.PACKAGE_HASH_KEY];
-                    if (currentHash != null)
+                    if (updateState == (int)CodePushUpdateState.PENDING && !currentUpdateIsPending)
                     {
-                        isPendingUpdate = codePush.IsPendingUpdate(currentHash);
+                        // The caller wanted a pending update
+                        // but there isn't currently one.
+                        promise.Resolve("");
                     }
+                    else if (updateState == (int)CodePushUpdateState.RUNNING && currentUpdateIsPending)
+                    {
+                        // The caller wants the running update, but the current
+                        // one is pending, so we need to grab the previous.
+                        promise.Resolve(await codePush.codePushPackage.GetPreviousPackage());
+                    }
+                    else
+                    {
+                        // The current package satisfies the request:
+                        // 1) Caller wanted a pending, and there is a pending update
+                        // 2) Caller wanted the running update, and there isn't a pending
+                        // 3) Caller wants the latest update, regardless if it's pending or not
+                        if (isRunningBinaryVersion)
+                        {
+                            // This only matters in Debug builds. Since we do not clear "outdated" updates,
+                            // we need to indicate to the JS side that somehow we have a current update on
+                            // disk that is not actually running.
+                            currentPackage["_isDebugOnly"] = true;
+                        }
 
-                    currentPackage["isPending"] = isPendingUpdate;
-                    promise.Resolve(currentPackage);
+                        // Enable differentiating pending vs. non-pending updates
+                        currentPackage["isPending"] = currentUpdateIsPending;
+                        promise.Resolve(currentPackage);
+                    }
                 };
 
                 Context.RunOnNativeModulesQueueThread(getCurrentPackageAction);
@@ -540,7 +572,7 @@ namespace CodePush.ReactNative
                 Action installUpdateAction = async () =>
                 {
                     await codePush.codePushPackage.InstallPackage(updatePackage, codePush.IsPendingUpdate(null));
-                    string pendingHash = (string)updatePackage[codePush.PACKAGE_HASH_KEY];
+                    string pendingHash = (string)updatePackage[PACKAGE_HASH_KEY];
                     codePush.SavePendingUpdate(pendingHash, /* isLoading */false);
                     if (installMode == (int)CodePushInstallMode.ON_NEXT_RESUME)
                     {

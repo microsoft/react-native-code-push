@@ -133,8 +133,22 @@ namespace CodePush.ReactNative
 
         public async Task<string> GetCurrentPackageHash()
         {
-            JObject metadata = await GetCurrentPackage();
-            return (string)metadata[PACKAGE_HASH_KEY];
+            JObject info = await GetCurrentPackageInfo();
+            string currentPackageShortHash = (string)info[CURRENT_PACKAGE_KEY];
+            if (currentPackageShortHash == null)
+            {
+                return null;
+            }
+
+            JObject currentPackageMetadata = await GetPackage(currentPackageShortHash);
+            if (currentPackageMetadata == null)
+            {
+                return null;
+            }
+            else
+            {
+                return (string)currentPackageMetadata[PACKAGE_HASH_KEY];
+            }
         }
 
         public async Task<string> GetPreviousPackageHash()
@@ -159,22 +173,24 @@ namespace CodePush.ReactNative
 
         public async Task<JObject> GetCurrentPackage()
         {
-            StorageFolder currentPackageFolder = await GetCurrentPackageFolder();
-            if (currentPackageFolder == null)
+            string packageHash = await GetCurrentPackageHash();
+            if (packageHash == null)
             {
                 return null;
             }
 
-            try
+            return await GetPackage(packageHash);
+        }
+        
+        public async Task<JObject> GetPreviousPackage()
+        {
+            string packageHash = await GetPreviousPackageHash();
+            if (packageHash == null)
             {
-                StorageFile packageFile = await currentPackageFolder.GetFileAsync(PACKAGE_FILE_NAME);
-                return await CodePushUtils.GetJObjectFromFile(packageFile);
-            }
-            catch (IOException)
-            {
-                // Should not happen unless the update metadata was somehow deleted.
                 return null;
             }
+
+            return await GetPackage(packageHash);
         }
 
         public async Task<JObject> GetPackage(string packageHash)

@@ -18,13 +18,13 @@ let CodePushDemoApp = React.createClass({
     let self = this;
     try {
       return await CodePush.sync(
-        { 
+        {
           updateDialog: true,
           installMode: CodePush.InstallMode.ON_NEXT_RESUME
-        }, 
+        },
         (syncStatus) => {
           switch(syncStatus) {
-            case CodePush.SyncStatus.CHECKING_FOR_UPDATE: 
+            case CodePush.SyncStatus.CHECKING_FOR_UPDATE:
               self.setState({
                 syncMessage: "Checking for update."
               });
@@ -80,36 +80,36 @@ let CodePushDemoApp = React.createClass({
       CodePush.log(error);
     }
   },
-  
+
   componentDidMount() {
       CodePush.notifyApplicationReady();
   },
-  
+
   getInitialState() {
     return { };
   },
-  
+
   render() {
     let syncView, syncButton, progressView;
-    
+
     if (this.state.syncMessage) {
       syncView = (
         <Text style={styles.messages}>{this.state.syncMessage}</Text>
       );
     } else {
-      syncButton = ( 
+      syncButton = (
         <Button style={{color: 'green'}} onPress={this.sync}>
           Start Sync!
         </Button>
       );
     }
-    
+
     if (this.state.progress) {
       progressView = (
         <Text style={styles.messages}>{this.state.progress.receivedBytes} of {this.state.progress.totalBytes} bytes received</Text>
       );
     }
-    
+
     return (
       <View style={styles.container}>
         <Text style={styles.welcome}>

@@ -113,6 +113,7 @@
     <Compile Include="CodePushNotInitializedException.cs" />
     <Compile Include="CodePushPackage.cs" />
     <Compile Include="CodePushUnknownException.cs" />
+    <Compile Include="CodePushUpdateState.cs" />
     <Compile Include="CodePushUpdateUtils.cs" />
     <Compile Include="CodePushUtils.cs" />
     <Compile Include="FileUtils.cs" />

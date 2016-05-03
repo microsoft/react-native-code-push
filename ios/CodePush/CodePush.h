@@ -54,11 +54,13 @@
 @property (strong) NSOutputStream *outputFileStream;
 @property long long expectedContentLength;
 @property long long receivedContentLength;
+@property dispatch_queue_t operationQueue;
 @property (copy) void (^progressCallback)(long long, long long);
 @property (copy) void (^doneCallback)(BOOL);
 @property (copy) void (^failCallback)(NSError *err);
 
 - (id)init:(NSString *)downloadFilePath
+operationQueue:(dispatch_queue_t)operationQueue
 progressCallback:(void (^)(long long, long long))progressCallback
 doneCallback:(void (^)(BOOL))doneCallback
 failCallback:(void (^)(NSError *err))failCallback;
@@ -78,12 +80,14 @@ failCallback:(void (^)(NSError *err))failCallback;
 
 + (void)downloadPackage:(NSDictionary *)updatePackage
  expectedBundleFileName:(NSString *)expectedBundleFileName
+         operationQueue:(dispatch_queue_t)operationQueue
        progressCallback:(void (^)(long long, long long))progressCallback
            doneCallback:(void (^)())doneCallback
            failCallback:(void (^)(NSError *err))failCallback;
 
 + (NSString *)getBinaryAssetsPath;
 + (NSDictionary *)getCurrentPackage:(NSError **)error;
++ (NSDictionary *)getPreviousPackage:(NSError **)error;
 + (NSString *)getCurrentPackageFolderPath:(NSError **)error;
 + (NSString *)getCurrentPackageBundlePath:(NSError **)error;
 + (NSString *)getCurrentPackageHash:(NSError **)error;
@@ -140,4 +144,10 @@ typedef NS_ENUM(NSInteger, CodePushInstallMode) {
     CodePushInstallModeImmediate,
     CodePushInstallModeOnNextRestart,
     CodePushInstallModeOnNextResume
+};
+
+typedef NS_ENUM(NSInteger, CodePushUpdateState) {
+    CodePushUpdateStateRunning,
+    CodePushUpdateStatePending,
+    CodePushUpdateStateLatest
 };

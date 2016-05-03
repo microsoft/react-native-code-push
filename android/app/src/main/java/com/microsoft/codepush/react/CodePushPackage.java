@@ -18,7 +18,6 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 
 public class CodePushPackage {
-
     private final String CODE_PUSH_FOLDER_PREFIX = "CodePush";
     private final String CURRENT_PACKAGE_KEY = "currentPackage";
     private final String DIFF_MANIFEST_FILE_NAME = "hotcodepush.json";
@@ -72,6 +71,7 @@ public class CodePushPackage {
         try {
             return CodePushUtils.getWritableMapFromFile(statusFilePath);
         } catch (IOException e) {
+            // Should not happen.
             throw new CodePushUnknownException("Error getting current package info" , e);
         }
     }
@@ -80,6 +80,7 @@ public class CodePushPackage {
         try {
             CodePushUtils.writeReadableMapToFile(packageInfo, getStatusFilePath());
         } catch (IOException e) {
+            // Should not happen.
             throw new CodePushUnknownException("Error updating current package info" , e);
         }
     }
@@ -101,6 +102,10 @@ public class CodePushPackage {
         }
 
         WritableMap currentPackage = getCurrentPackage();
+        if (currentPackage == null) {
+            return null;
+        }
+
         String relativeBundlePath = CodePushUtils.tryGetString(currentPackage, RELATIVE_BUNDLE_PATH_KEY);
         if (relativeBundlePath == null) {
             return CodePushUtils.appendPathComponent(packageFolder, bundleFileName);
@@ -124,18 +129,21 @@ public class CodePushPackage {
     }
 
     public WritableMap getCurrentPackage() {
-        String folderPath = getCurrentPackageFolderPath();
-        if (folderPath == null) {
+        String packageHash = getCurrentPackageHash();
+        if (packageHash == null) {
             return null;
         }
-
-        String packagePath = CodePushUtils.appendPathComponent(folderPath, PACKAGE_FILE_NAME);
-        try {
-            return CodePushUtils.getWritableMapFromFile(packagePath);
-        } catch (IOException e) {
-            // Should not happen unless the update metadata was somehow deleted.
+        
+        return getPackage(packageHash);
+    }
+    
+    public WritableMap getPreviousPackage() {
+        String packageHash = getPreviousPackageHash();
+        if (packageHash == null) {
             return null;
         }
+        
+        return getPackage(packageHash);
     }
 
     public WritableMap getPackage(String packageHash) {
@@ -340,8 +348,6 @@ public class CodePushPackage {
     }
 
     public void clearUpdates() {
-        File statusFile = new File(getStatusFilePath());
-        statusFile.delete();
         FileUtils.deleteDirectoryAtPath(getCodePushPath());
     }
 }
