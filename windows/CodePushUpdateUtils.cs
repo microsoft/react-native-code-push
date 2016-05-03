@@ -10,6 +10,7 @@ namespace CodePush.ReactNative
     {
         // TODO: Generate binary hash
         // private static readonly String CODE_PUSH_HASH_FILE_NAME = "CodePushHash.json";
+
         public async static Task CopyNecessaryFilesFromCurrentPackage(StorageFile diffManifestFile, StorageFolder currentPackageFolder, StorageFolder newPackageFolder)
         {
             await FileUtils.MergeDirectories(currentPackageFolder, newPackageFolder);

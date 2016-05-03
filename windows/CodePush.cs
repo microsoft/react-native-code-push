@@ -656,11 +656,7 @@ namespace CodePush.ReactNative
         {
             List<INativeModule> nativeModules = new List<INativeModule>();
             codePushNativeModule = new CodePushNativeModule(reactContext, this);
-            //CodePushDialog dialogModule = new CodePushDialog(reactApplicationContext, mainActivity);
-
             nativeModules.Add(codePushNativeModule);
-            //nativeModules.add(dialogModule);
-
             return nativeModules;
         }
 
