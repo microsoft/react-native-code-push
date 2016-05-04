@@ -404,7 +404,7 @@ public class CodePush implements ReactPackage {
             CodePush.this.clearDebugCacheIfNeeded();
 
             // Our preferred reload logic relies on the user's Activity inheriting from the
-            // core ReactActivity class, so if doesn't, we just fallback to legacy behavior.
+            // core ReactActivity class, so if it doesn't, we fallback early to our legacy behavior.
             if (!ReactActivity.class.isInstance(mainActivity)) {
                 loadBundleLegacy();  
                 return; 
