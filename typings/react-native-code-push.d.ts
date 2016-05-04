@@ -1,4 +1,4 @@
-// Type definitions for React Native CodePush pligin.
+// Type definitions for React Native CodePush module.
 // Project: https://github.com/Microsoft/react-native-code-push
 
 /// <reference path="../react-native/react-native.d.ts" />
