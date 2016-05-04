@@ -403,6 +403,13 @@ public class CodePush implements ReactPackage {
         private void loadBundle() {
             CodePush.this.clearDebugCacheIfNeeded();
 
+            // Our preferred reload logic relies on the user's Activity inheriting from the
+            // core ReactActivity class, so if doesn't, we just fallback to legacy behavior.
+            if (!ReactActivity.class.isInstance(mainActivity)) {
+                loadBundleLegacy();  
+                return; 
+            }
+                
             try {
                 // #1) Get the private ReactInstanceManager, which is what includes
                 //     the logic to reload the current React context.
