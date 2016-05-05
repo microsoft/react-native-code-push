@@ -107,15 +107,15 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CodePush.cs" />
+    <Compile Include="CodePushReactPackage.cs" />
     <Compile Include="CodePushConstants.cs" />
-    <Compile Include="CodePushInstallMode.cs" />
+    <Compile Include="CodePushResumeListener.cs" />
+    <Compile Include="InstallMode.cs" />
     <Compile Include="CodePushInvalidUpdateException.cs" />
     <Compile Include="CodePushNativeModule.cs" />
-    <Compile Include="CodePushPackage.cs" />
-    <Compile Include="CodePushUnknownException.cs" />
-    <Compile Include="CodePushUpdateState.cs" />
-    <Compile Include="CodePushUpdateUtils.cs" />
+    <Compile Include="UpdateManager.cs" />
+    <Compile Include="UpdateState.cs" />
+    <Compile Include="UpdateUtils.cs" />
     <Compile Include="CodePushUtils.cs" />
     <Compile Include="FileUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
