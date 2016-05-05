@@ -315,7 +315,7 @@ using CodePush.ReactNative;
 class AppReactPage : ReactPage
 {
     // 2. Declare a private instance variable for the CodePushModule instance.
-    private CodePushModule codePushModule;
+    private CodePushReactPackage codePushReactPackage;
     
     // 3. Update the JavaScriptBundleFile property to initalize the CodePush runtime,
     // specifying the right deployment key, then use it to return the bundle URL from 
@@ -325,12 +325,12 @@ class AppReactPage : ReactPage
     {
         get
         {
-            codePushModule = new CodePushModule("deployment-key-here", this);
-            return codePushModule.GetJavaScriptBundleFile();
+            codePushReactPackage = new CodePushReactPackage("deployment-key-here", this);
+            return codePushReactPackage.GetJavaScriptBundleFile();
         }
     }
 
-    // 4. Add the codePushModule instance to the list of existing packages. 
+    // 4. Add the codePushReactPackage instance to the list of existing packages. 
     public override List<IReactPackage> Packages
     {
         get
@@ -339,7 +339,7 @@ class AppReactPage : ReactPage
             {
                 new MainReactPackage(),
                 ...
-                codePushModule
+                codePushReactPackage
             };
         }
     }
