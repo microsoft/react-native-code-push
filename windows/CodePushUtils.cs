@@ -42,9 +42,9 @@ namespace CodePush.ReactNative
         {
             HardwareToken token = HardwareIdentification.GetPackageSpecificToken(null);
             IBuffer hardwareId = token.Id;
-            DataReader dataReader = DataReader.FromBuffer(hardwareId);
+            var dataReader = DataReader.FromBuffer(hardwareId);
 
-            byte[] bytes = new byte[hardwareId.Length];
+            var bytes = new byte[hardwareId.Length];
             dataReader.ReadBytes(bytes);
 
             return BitConverter.ToString(bytes);

@@ -13,7 +13,7 @@ namespace CodePush.ReactNative
 {
     internal class UpdateManager
     {
-        // Internal methods
+        #region Internal methods
         internal async Task ClearUpdates()
         {
             await (await GetCodePushFolder()).DeleteAsync();
@@ -60,14 +60,14 @@ namespace CodePush.ReactNative
                     StorageFolder currentPackageFolder = await GetCurrentPackageFolder();
                     if (currentPackageFolder == null)
                     {
-                        throw new CodePushInvalidUpdateException("Received a diff update, but there is no current version to diff against.");
+                        throw new InvalidDataException("Received a diff update, but there is no current version to diff against.");
                     }
 
                     await UpdateUtils.CopyNecessaryFilesFromCurrentPackage(diffManifestFile, currentPackageFolder, newUpdateFolder);
                     await diffManifestFile.DeleteAsync();
                 }
 
-                await FileUtils.MergeDirectories(unzippedFolder, newUpdateFolder);
+                await FileUtils.MergeFolders(unzippedFolder, newUpdateFolder);
                 await unzippedFolder.DeleteAsync();
 
                 // For zip updates, we need to find the relative path to the jsBundle and save it in the
@@ -75,7 +75,7 @@ namespace CodePush.ReactNative
                 string relativeBundlePath = await UpdateUtils.FindJSBundleInUpdateContents(newUpdateFolder, expectedBundleFileName);
                 if (relativeBundlePath == null)
                 {
-                    throw new CodePushInvalidUpdateException("Update is invalid - A JS bundle file named \"" + expectedBundleFileName + "\" could not be found within the downloaded contents. Please check that you are releasing your CodePush updates using the exact same JS bundle file name that was shipped with your app's binary.");
+                    throw new InvalidDataException("Update is invalid - A JS bundle file named \"" + expectedBundleFileName + "\" could not be found within the downloaded contents. Please check that you are releasing your CodePush updates using the exact same JS bundle file name that was shipped with your app's binary.");
                 }
                 else
                 {
@@ -218,8 +218,9 @@ namespace CodePush.ReactNative
             info[CodePushConstants.PreviousPackageKey] = null;
             await UpdateCurrentPackageInfo(info);
         }
+        #endregion
 
-        // Private methods
+        #region Private methods
         private async Task<StorageFolder> GetCodePushFolder()
         {
             return await ApplicationData.Current.LocalFolder.CreateFolderAsync(CodePushConstants.CodePushFolderPrefix, CreationCollisionOption.OpenIfExists);
@@ -265,5 +266,6 @@ namespace CodePush.ReactNative
         {
             await FileIO.WriteTextAsync(await GetStatusFile(), JsonConvert.SerializeObject(packageInfo));
         }
+        #endregion
     }
 }

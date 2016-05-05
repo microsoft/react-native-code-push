@@ -3,16 +3,16 @@ using System;
 
 namespace CodePush.ReactNative
 {
-    internal class CodePushResumeListener : ILifecycleEventListener
+    internal class CodePushLifecycleEventListener : ILifecycleEventListener
     {
         private DateTime? _lastSuspendDate = null;
-        private CodePushNativeModule _codePushNativeModule;
+        private Action _loadBundleAction;
 
         internal int MinimumBackgroundDuration { get; set; }
 
-        internal CodePushResumeListener(CodePushNativeModule codePushNativeModule, int minimumBackgroundDuration)
+        internal CodePushLifecycleEventListener(Action loadBundleAction, int minimumBackgroundDuration)
         {
-            _codePushNativeModule = codePushNativeModule;
+            _loadBundleAction = loadBundleAction;
             MinimumBackgroundDuration = minimumBackgroundDuration;
         }
 
@@ -29,12 +29,7 @@ namespace CodePush.ReactNative
                 double durationInBackground = (new DateTime() - (DateTime)_lastSuspendDate).TotalSeconds;
                 if (durationInBackground >= MinimumBackgroundDuration)
                 {
-                    Action loadBundleAction = async () =>
-                    {
-                        await _codePushNativeModule.LoadBundle();
-                    };
-
-                    _codePushNativeModule.Context.RunOnNativeModulesQueueThread(loadBundleAction);
+                    _loadBundleAction.Invoke();
                 }
             }
         }

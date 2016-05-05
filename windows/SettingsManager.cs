@@ -7,15 +7,11 @@ namespace CodePush.ReactNative
 {
     internal class SettingsManager
     {
-        private static ApplicationDataContainer GetCodePushSettings()
-        {
-            return ApplicationData.Current.LocalSettings.CreateContainer(CodePushConstants.CodePushPreferences, ApplicationDataCreateDisposition.Always);
-        }
+        private static ApplicationDataContainer Settings = ApplicationData.Current.LocalSettings.CreateContainer(CodePushConstants.CodePushPreferences, ApplicationDataCreateDisposition.Always);
 
         public static JArray GetFailedUpdates()
         {
-            ApplicationDataContainer settings = GetCodePushSettings();
-            var failedUpdatesString = (string)settings.Values[CodePushConstants.FailedUpdatesKey];
+            var failedUpdatesString = (string)Settings.Values[CodePushConstants.FailedUpdatesKey];
             if (failedUpdatesString == null)
             {
                 return new JArray();
@@ -28,15 +24,14 @@ namespace CodePush.ReactNative
             catch (Exception)
             {
                 var emptyArray = new JArray();
-                settings.Values[CodePushConstants.FailedUpdatesKey] = JsonConvert.SerializeObject(emptyArray);
+                Settings.Values[CodePushConstants.FailedUpdatesKey] = JsonConvert.SerializeObject(emptyArray);
                 return emptyArray;
             }
         }
 
         internal static JObject GetPendingUpdate()
         {
-            ApplicationDataContainer settings = GetCodePushSettings();
-            var pendingUpdateString = (string)settings.Values[CodePushConstants.PendingUpdateKey];
+            var pendingUpdateString = (string)Settings.Values[CodePushConstants.PendingUpdateKey];
             if (pendingUpdateString == null)
             {
                 return null;
@@ -55,22 +50,45 @@ namespace CodePush.ReactNative
             }
         }
 
+        internal static bool IsFailedHash(string packageHash)
+        {
+            JArray failedUpdates = SettingsManager.GetFailedUpdates();
+            if (packageHash != null)
+            {
+                foreach (var failedPackage in failedUpdates)
+                {
+                    var failedPackageHash = (string)failedPackage[CodePushConstants.PackageHashKey];
+                    if (packageHash.Equals(failedPackageHash))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        internal static bool IsPendingUpdate(string packageHash)
+        {
+            JObject pendingUpdate = SettingsManager.GetPendingUpdate();
+            return pendingUpdate != null &&
+                    !(bool)pendingUpdate[CodePushConstants.PendingUpdateIsLoadingKey] &&
+                    (packageHash == null || ((string)pendingUpdate[CodePushConstants.PendingUpdateHashKey]).Equals(packageHash));
+        }
+
         internal static void RemoveFailedUpdates()
         {
-            ApplicationDataContainer settings = GetCodePushSettings();
-            settings.Values.Remove(CodePushConstants.FailedUpdatesKey);
+            Settings.Values.Remove(CodePushConstants.FailedUpdatesKey);
         }
 
         internal static void RemovePendingUpdate()
         {
-            ApplicationDataContainer settings = GetCodePushSettings();
-            settings.Values.Remove(CodePushConstants.PendingUpdateKey);
+            Settings.Values.Remove(CodePushConstants.PendingUpdateKey);
         }
 
         internal static void SaveFailedUpdate(JObject failedPackage)
         {
-            ApplicationDataContainer settings = GetCodePushSettings();
-            var failedUpdatesString = (string)settings.Values[CodePushConstants.FailedUpdatesKey];
+            var failedUpdatesString = (string)Settings.Values[CodePushConstants.FailedUpdatesKey];
             JArray failedUpdates;
             if (failedUpdatesString == null)
             {
@@ -82,17 +100,18 @@ namespace CodePush.ReactNative
             }
 
             failedUpdates.Add(failedPackage);
-            settings.Values[CodePushConstants.FailedUpdatesKey] = JsonConvert.SerializeObject(failedUpdates);
+            Settings.Values[CodePushConstants.FailedUpdatesKey] = JsonConvert.SerializeObject(failedUpdates);
         }
 
         internal static void SavePendingUpdate(string packageHash, bool isLoading)
         {
-            ApplicationDataContainer settings = GetCodePushSettings();
-            var pendingUpdate = new JObject();
-            pendingUpdate[CodePushConstants.PendingUpdateHashKey] = packageHash;
-            pendingUpdate[CodePushConstants.PendingUpdateIsLoadingKey] = isLoading;
-            settings.Values[CodePushConstants.PendingUpdateKey] = JsonConvert.SerializeObject(pendingUpdate);
-        }
+            var pendingUpdate = new JObject()
+            {
+                { CodePushConstants.PendingUpdateHashKey, packageHash },
+                { CodePushConstants.PendingUpdateIsLoadingKey, isLoading }
+            };
 
+            Settings.Values[CodePushConstants.PendingUpdateKey] = JsonConvert.SerializeObject(pendingUpdate);
+        }
     }
 }

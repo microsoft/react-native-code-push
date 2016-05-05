@@ -10,7 +10,7 @@ namespace CodePush.ReactNative
     {
         internal async static Task CopyNecessaryFilesFromCurrentPackage(StorageFile diffManifestFile, StorageFolder currentPackageFolder, StorageFolder newPackageFolder)
         {
-            await FileUtils.MergeDirectories(currentPackageFolder, newPackageFolder);
+            await FileUtils.MergeFolders(currentPackageFolder, newPackageFolder);
             JObject diffManifest = await CodePushUtils.GetJObjectFromFile(diffManifestFile);
             var deletedFiles = (JArray)diffManifest["deletedFiles"];
             foreach (string fileNameToDelete in deletedFiles)

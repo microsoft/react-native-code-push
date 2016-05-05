@@ -109,9 +109,8 @@
   <ItemGroup>
     <Compile Include="CodePushReactPackage.cs" />
     <Compile Include="CodePushConstants.cs" />
-    <Compile Include="CodePushResumeListener.cs" />
+    <Compile Include="CodePushLifecycleEventListener.cs" />
     <Compile Include="InstallMode.cs" />
-    <Compile Include="CodePushInvalidUpdateException.cs" />
     <Compile Include="CodePushNativeModule.cs" />
     <Compile Include="UpdateManager.cs" />
     <Compile Include="UpdateState.cs" />

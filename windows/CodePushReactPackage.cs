@@ -48,7 +48,7 @@ namespace CodePush.ReactNative
             CurrentInstance = this;
         }
 
-        // Public methods
+        #region Public methods
         public IReadOnlyList<Type> CreateJavaScriptModulesConfig()
         {
             return new List<Type>();
@@ -131,8 +131,9 @@ namespace CodePush.ReactNative
                 return binaryJsBundleUrl;
             }
         }
+        #endregion
 
-        // Internal methods
+        #region Internal methods
         internal async Task<long> GetBinaryResourcesModifiedTime()
         {
             var assetJSBundleFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri(CodePushConstants.AssetsBundlePrefix + AssetsBundleFileName));
@@ -169,40 +170,15 @@ namespace CodePush.ReactNative
             }
         }
 
-        internal bool IsFailedHash(string packageHash)
-        {
-            JArray failedUpdates = SettingsManager.GetFailedUpdates();
-            if (packageHash != null)
-            {
-                foreach (var failedPackage in failedUpdates)
-                {
-                    var failedPackageHash = (string)failedPackage[CodePushConstants.PackageHashKey];
-                    if (packageHash.Equals(failedPackageHash))
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        internal bool IsPendingUpdate(string packageHash)
-        {
-            JObject pendingUpdate = SettingsManager.GetPendingUpdate();
-            return pendingUpdate != null &&
-                    !(bool)pendingUpdate[CodePushConstants.PendingUpdateIsLoadingKey] &&
-                    (packageHash == null || ((string)pendingUpdate[CodePushConstants.PendingUpdateHashKey]).Equals(packageHash));
-        }
-
         internal async Task ClearUpdates()
         {
             await UpdateManager.ClearUpdates();
             SettingsManager.RemovePendingUpdate();
             SettingsManager.RemoveFailedUpdates();
         }
+        #endregion
 
-        // Private methods
+        #region Private methods
         private async Task ClearReactDevBundleCache()
         {
             var devBundleCacheFile = (StorageFile) await ApplicationData.Current.LocalFolder.TryGetItemAsync(CodePushConstants.ReactDevBundleCacheFileName);
@@ -219,5 +195,6 @@ namespace CodePush.ReactNative
             await UpdateManager.RollbackPackage();
             SettingsManager.RemovePendingUpdate();
         }
+        #endregion
     }
 }

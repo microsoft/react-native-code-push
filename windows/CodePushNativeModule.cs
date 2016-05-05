@@ -4,6 +4,7 @@ using ReactNative.Bridge;
 using ReactNative.Modules.Core;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using Windows.Web.Http;
@@ -12,7 +13,7 @@ namespace CodePush.ReactNative
 {
     internal class CodePushNativeModule : ReactContextNativeModuleBase
     {
-        private CodePushResumeListener _codePushLifecycleEventListener = null;
+        private CodePushLifecycleEventListener _codePushLifecycleEventListener = null;
         private ReactContext _reactContext;
         private CodePushReactPackage _codePush;
 
@@ -36,12 +37,12 @@ namespace CodePush.ReactNative
             {
                 return new Dictionary<string, object>
                 {
-                    { "codePushInstallModeImmediate", InstallMode.ON_NEXT_RESTART },
-                    { "codePushInstallModeOnNextResume", InstallMode.ON_NEXT_RESUME },
-                    { "codePushInstallModeOnNextRestart", InstallMode.ON_NEXT_RESTART },
-                    { "codePushUpdateStateRunning", UpdateState.RUNNING },
-                    { "codePushUpdateStatePending", UpdateState.PENDING },
-                    { "codePushUpdateStateLatest", UpdateState.LATEST },
+                    { "codePushInstallModeImmediate", InstallMode.Immediate },
+                    { "codePushInstallModeOnNextResume", InstallMode.OnNextResume },
+                    { "codePushInstallModeOnNextRestart", InstallMode.OnNextRestart },
+                    { "codePushUpdateStateRunning", UpdateState.Running },
+                    { "codePushUpdateStatePending", UpdateState.Pending },
+                    { "codePushUpdateStateLatest", UpdateState.Lastest },
                 };
             }
         }
@@ -70,9 +71,12 @@ namespace CodePush.ReactNative
                                     return;
                                 }
 
-                                var downloadProgress = new JObject();
-                                downloadProgress["totalBytes"] = progress.TotalBytesToReceive;
-                                downloadProgress["receivedBytes"] = progress.BytesReceived;
+                                var downloadProgress = new JObject()
+                                {
+                                    { "totalBytes", progress.TotalBytesToReceive },
+                                    { "receivedBytes", progress.BytesReceived }
+                                };
+
                                 _reactContext
                                     .GetJavaScriptModule<RCTDeviceEventEmitter>()
                                     .emit(CodePushConstants.DownloadProgressEventName, downloadProgress);
@@ -83,7 +87,7 @@ namespace CodePush.ReactNative
                     JObject newPackage = await _codePush.UpdateManager.GetPackage((string)updatePackage[CodePushConstants.PackageHashKey]);
                     promise.Resolve(newPackage);
                 }
-                catch (CodePushInvalidUpdateException e)
+                catch (InvalidDataException e)
                 {
                     CodePushUtils.Log(e.ToString());
                     SettingsManager.SaveFailedUpdate(updatePackage);
@@ -105,9 +109,9 @@ namespace CodePush.ReactNative
             var config = new JObject
             {
                 { "appVersion", _codePush.AppVersion },
-                { "deploymentKey", _codePush.DeploymentKey },
-                { "serverUrl", CodePushConstants.CodePushServerUrl },
                 { "clientUniqueId", CodePushUtils.GetDeviceId() },
+                { "deploymentKey", _codePush.DeploymentKey },
+                { "serverUrl", CodePushConstants.CodePushServerUrl }
             };
 
             // TODO generate binary hash
@@ -136,16 +140,16 @@ namespace CodePush.ReactNative
                 if (currentPackage[CodePushConstants.PackageHashKey] != null)
                 {
                     var currentHash = (string)currentPackage[CodePushConstants.PackageHashKey];
-                    currentUpdateIsPending = _codePush.IsPendingUpdate(currentHash);
+                    currentUpdateIsPending = SettingsManager.IsPendingUpdate(currentHash);
                 }
 
-                if (updateState == (int)UpdateState.PENDING && !currentUpdateIsPending)
+                if (updateState == (int)UpdateState.Pending && !currentUpdateIsPending)
                 {
                     // The caller wanted a pending update
                     // but there isn't currently one.
                     promise.Resolve("");
                 }
-                else if (updateState == (int)UpdateState.RUNNING && currentUpdateIsPending)
+                else if (updateState == (int)UpdateState.Running && currentUpdateIsPending)
                 {
                     // The caller wants the running update, but the current
                     // one is pending, so we need to grab the previous.
@@ -187,15 +191,23 @@ namespace CodePush.ReactNative
         {
             Action installUpdateAction = async () =>
             {
-                await _codePush.UpdateManager.InstallPackage(updatePackage, _codePush.IsPendingUpdate(null));
+                await _codePush.UpdateManager.InstallPackage(updatePackage, SettingsManager.IsPendingUpdate(null));
                 var pendingHash = (string)updatePackage[CodePushConstants.PackageHashKey];
                 SettingsManager.SavePendingUpdate(pendingHash, /* isLoading */false);
-                if (installMode == (int)InstallMode.ON_NEXT_RESUME)
+                if (installMode == (int)InstallMode.OnNextResume)
                 {
                     if (_codePushLifecycleEventListener == null)
                     {
                         // Ensure we do not add the listener twice.
-                        _codePushLifecycleEventListener = new CodePushResumeListener(this, minimumBackgroundDuration);
+                        Action loadBundleAction = () =>
+                        {
+                            Context.RunOnNativeModulesQueueThread(async () =>
+                            {
+                                await LoadBundle();
+                            });
+                        };
+                        
+                        _codePushLifecycleEventListener = new CodePushLifecycleEventListener(loadBundleAction, minimumBackgroundDuration);
                         _reactContext.AddLifecycleEventListener(_codePushLifecycleEventListener);
                     }
                     else
@@ -213,7 +225,7 @@ namespace CodePush.ReactNative
         [ReactMethod]
         public void isFailedUpdate(string packageHash, IPromise promise)
         {
-            promise.Resolve(_codePush.IsFailedHash(packageHash));
+            promise.Resolve(SettingsManager.IsFailedHash(packageHash));
         }
 
         [ReactMethod]
@@ -245,7 +257,7 @@ namespace CodePush.ReactNative
             {
                 // If this is an unconditional restart request, or there
                 // is current pending update, then reload the app.
-                if (!onlyIfUpdateIsPending || _codePush.IsPendingUpdate(null))
+                if (!onlyIfUpdateIsPending || SettingsManager.IsPendingUpdate(null))
                 {
                     await LoadBundle();
                 }
