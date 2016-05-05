@@ -5,7 +5,7 @@ namespace CodePush.ReactNative
 {
     internal class MinBackgroundListener : ILifecycleEventListener
     {
-        private DateTime? _lastSuspendDate = null;
+        private DateTime? _lastSuspendDate;
         private Action _resumeAction;
 
         internal int MinimumBackgroundDuration { get; set; }
