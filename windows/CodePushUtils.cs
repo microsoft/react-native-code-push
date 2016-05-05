@@ -8,11 +8,9 @@ using Windows.System.Profile;
 
 namespace CodePush.ReactNative
 {
-    class CodePushUtils
+    internal class CodePushUtils
     {
-        public static readonly string REACT_NATIVE_LOG_CATEGORY = "ReactNative";
-
-        public async static Task<JObject> GetJObjectFromFile(StorageFile file)
+        internal async static Task<JObject> GetJObjectFromFile(StorageFile file)
         {
             string jsonString = await FileIO.ReadTextAsync(file);
             if (jsonString.Length == 0)
@@ -20,20 +18,27 @@ namespace CodePush.ReactNative
                 return new JObject();
             }
 
-            return JObject.Parse(jsonString);
+            try
+            {
+                return JObject.Parse(jsonString);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
-        public static void log(string message)
+        internal static void Log(string message)
         {
-            Debug.WriteLine("[CodePush] " + message, REACT_NATIVE_LOG_CATEGORY);
-        }
-        
-        public static void logBundleUrl(string path)
-        {
-            log("Loading JS bundle from \"" + path + "\"");
+            Debug.WriteLine("[CodePush] " + message, CodePushConstants.ReactNativeLogCategory);
         }
 
-        public static string GetDeviceId()
+        internal static void LogBundleUrl(string path)
+        {
+            Log("Loading JS bundle from \"" + path + "\"");
+        }
+
+        internal static string GetDeviceId()
         {
             HardwareToken token = HardwareIdentification.GetPackageSpecificToken(null);
             IBuffer hardwareId = token.Id;

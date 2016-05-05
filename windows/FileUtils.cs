@@ -4,9 +4,9 @@ using Windows.Storage;
 
 namespace CodePush.ReactNative
 {
-    class FileUtils
+    internal class FileUtils
     {
-        public async static Task MergeDirectories(StorageFolder source, StorageFolder target)
+        internal async static Task MergeDirectories(StorageFolder source, StorageFolder target)
         {
             foreach (StorageFile sourceFile in await source.GetFilesAsync())
             {

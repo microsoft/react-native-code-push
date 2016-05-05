@@ -6,16 +6,13 @@ using Windows.Storage;
 
 namespace CodePush.ReactNative
 {
-    class CodePushUpdateUtils
+    internal class UpdateUtils
     {
-        // TODO: Generate binary hash
-        // private static readonly String CODE_PUSH_HASH_FILE_NAME = "CodePushHash.json";
-
-        public async static Task CopyNecessaryFilesFromCurrentPackage(StorageFile diffManifestFile, StorageFolder currentPackageFolder, StorageFolder newPackageFolder)
+        internal async static Task CopyNecessaryFilesFromCurrentPackage(StorageFile diffManifestFile, StorageFolder currentPackageFolder, StorageFolder newPackageFolder)
         {
             await FileUtils.MergeDirectories(currentPackageFolder, newPackageFolder);
             JObject diffManifest = await CodePushUtils.GetJObjectFromFile(diffManifestFile);
-            JArray deletedFiles = (JArray)diffManifest["deletedFiles"];
+            var deletedFiles = (JArray)diffManifest["deletedFiles"];
             foreach (string fileNameToDelete in deletedFiles)
             {
                 StorageFile fileToDelete = await newPackageFolder.GetFileAsync(fileNameToDelete);
@@ -23,7 +20,7 @@ namespace CodePush.ReactNative
             }
         }
 
-        public async static Task<string> FindJSBundleInUpdateContents(StorageFolder updateFolder, string expectedFileName)
+        internal async static Task<string> FindJSBundleInUpdateContents(StorageFolder updateFolder, string expectedFileName)
         {
             foreach (StorageFile file in await updateFolder.GetFilesAsync())
             {

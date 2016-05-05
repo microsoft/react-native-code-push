@@ -2,9 +2,9 @@
 
 namespace CodePush.ReactNative
 {
-    class CodePushInvalidUpdateException : Exception
+    internal class CodePushInvalidUpdateException : Exception
     {
-        public CodePushInvalidUpdateException(string message)
+        internal CodePushInvalidUpdateException(string message)
             : base(message)
         {
         }
