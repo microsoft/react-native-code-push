@@ -139,8 +139,7 @@ namespace CodePush.ReactNative
             var fileProperties = await assetJSBundleFile.GetBasicPropertiesAsync();
             return fileProperties.DateModified.ToUnixTimeMilliseconds();
         }
-
-
+        
         internal void InitializeUpdateAfterRestart()
         {
             JObject pendingUpdate = SettingsManager.GetPendingUpdate();

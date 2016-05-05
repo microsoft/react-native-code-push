@@ -235,14 +235,7 @@ namespace CodePush.ReactNative
         private async Task<JObject> GetCurrentPackageInfo()
         {
             StorageFile statusFile = await GetStatusFile();
-            try
-            {
-                return await CodePushUtils.GetJObjectFromFile(statusFile);
-            }
-            catch (Exception e)
-            {
-                throw new CodePushUnknownException("Error getting current package info", e);
-            }
+            return await CodePushUtils.GetJObjectFromFile(statusFile);
         }
 
         private async Task<StorageFile> GetDownloadFile()
@@ -270,14 +263,7 @@ namespace CodePush.ReactNative
 
         private async Task UpdateCurrentPackageInfo(JObject packageInfo)
         {
-            try
-            {
-                await FileIO.WriteTextAsync(await GetStatusFile(), JsonConvert.SerializeObject(packageInfo));
-            }
-            catch (IOException e)
-            {
-                throw new CodePushUnknownException("Error updating current package info", e);
-            }
+            await FileIO.WriteTextAsync(await GetStatusFile(), JsonConvert.SerializeObject(packageInfo));
         }
     }
 }
