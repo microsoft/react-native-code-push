@@ -124,7 +124,7 @@ namespace CodePush.ReactNative
         }
 
         [ReactMethod]
-        public void getUpdateMetadata(int updateState, IPromise promise)
+        public void getUpdateMetadata(UpdateState updateState, IPromise promise)
         {
             Action getCurrentPackageAction = async () =>
             {
@@ -143,13 +143,13 @@ namespace CodePush.ReactNative
                     currentUpdateIsPending = SettingsManager.IsPendingUpdate(currentHash);
                 }
 
-                if (updateState == (int)UpdateState.Pending && !currentUpdateIsPending)
+                if (updateState == UpdateState.Pending && !currentUpdateIsPending)
                 {
                     // The caller wanted a pending update
                     // but there isn't currently one.
                     promise.Resolve("");
                 }
-                else if (updateState == (int)UpdateState.Running && currentUpdateIsPending)
+                else if (updateState == UpdateState.Running && currentUpdateIsPending)
                 {
                     // The caller wants the running update, but the current
                     // one is pending, so we need to grab the previous.
@@ -187,14 +187,14 @@ namespace CodePush.ReactNative
         }
 
         [ReactMethod]
-        public void installUpdate(JObject updatePackage, int installMode, int minimumBackgroundDuration, IPromise promise)
+        public void installUpdate(JObject updatePackage, InstallMode installMode, int minimumBackgroundDuration, IPromise promise)
         {
             Action installUpdateAction = async () =>
             {
                 await _codePush.UpdateManager.InstallPackage(updatePackage, SettingsManager.IsPendingUpdate(null));
                 var pendingHash = (string)updatePackage[CodePushConstants.PackageHashKey];
                 SettingsManager.SavePendingUpdate(pendingHash, /* isLoading */false);
-                if (installMode == (int)InstallMode.OnNextResume)
+                if (installMode == InstallMode.OnNextResume)
                 {
                     if (_minBackgroundListener == null)
                     {
