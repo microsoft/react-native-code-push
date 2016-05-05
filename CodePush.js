@@ -271,13 +271,9 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
             log("User cancelled the update.");
             break;
           case CodePush.SyncStatus.UPDATE_INSTALLED:
-            /*
-             * If the install mode is IMMEDIATE, this will not get returned as the
-             * app will be restarted to a new Javascript context.
-             */
             if (resolvedInstallMode == CodePush.InstallMode.ON_NEXT_RESTART) {
               log("Update is installed and will be run on the next app restart.");
-            } else {
+            } else if (resolvedInstallMode == CodePush.InstallMode.ON_NEXT_RESUME) {
               if (syncOptions.minimumBackgroundDuration > 0) {
                 log(`Update is installed and will be run after the app has been in the background for at least ${syncOptions.minimumBackgroundDuration} seconds.`);
               } else {

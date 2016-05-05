@@ -109,7 +109,7 @@
   <ItemGroup>
     <Compile Include="CodePushReactPackage.cs" />
     <Compile Include="CodePushConstants.cs" />
-    <Compile Include="CodePushLifecycleEventListener.cs" />
+    <Compile Include="MinBackgroundListener.cs" />
     <Compile Include="InstallMode.cs" />
     <Compile Include="CodePushNativeModule.cs" />
     <Compile Include="UpdateManager.cs" />

@@ -56,13 +56,10 @@ namespace CodePush.ReactNative
 
         public IReadOnlyList<INativeModule> CreateNativeModules(ReactContext reactContext)
         {
-            _codePushNativeModule = new CodePushNativeModule(reactContext, this);
-            var nativeModules = new List<INativeModule>
+            return new List<INativeModule>
             {
-                _codePushNativeModule
+                 new CodePushNativeModule(reactContext, this)
             };
-
-            return nativeModules;
         }
 
         public IReadOnlyList<IViewManager> CreateViewManagers(ReactContext reactContext)

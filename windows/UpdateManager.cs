@@ -123,7 +123,14 @@ namespace CodePush.ReactNative
 
         internal async Task<string> GetCurrentPackageHash()
         {
-            JObject currentPackageMetadata = await GetCurrentPackage();
+            JObject info = await GetCurrentPackageInfo();
+            string currentPackageShortHash = (string)info[CodePushConstants.CurrentPackageKey];
+            if (currentPackageShortHash == null)
+            {
+                return null;
+            }
+
+            JObject currentPackageMetadata = await GetPackage(currentPackageShortHash);
             return currentPackageMetadata == null ? null : (string)currentPackageMetadata[CodePushConstants.PackageHashKey];
         }
 
@@ -170,16 +177,25 @@ namespace CodePush.ReactNative
 
         internal async Task<string> GetPreviousPackageHash()
         {
-            JObject previousPackageMetadata = await GetPreviousPackage();
+            JObject info = await GetCurrentPackageInfo();
+            string previousPackageShortHash = (string)info[CodePushConstants.PreviousPackageKey];
+            if (previousPackageShortHash == null)
+            {
+                return null;
+            }
+
+            JObject previousPackageMetadata = await GetPackage(previousPackageShortHash);
             return previousPackageMetadata == null ? null : (string)previousPackageMetadata[CodePushConstants.PackageHashKey];
         }
 
-        internal async Task InstallPackage(JObject updatePackage, bool removePendingUpdate)
+        internal async Task InstallPackage(JObject updatePackage, bool currentUpdateIsPending)
         {
             var packageHash = (string)updatePackage[CodePushConstants.PackageHashKey];
             JObject info = await GetCurrentPackageInfo();
-            if (removePendingUpdate)
+            if (currentUpdateIsPending)
             {
+                // Don't back up current update to the "previous" position because
+                // it is an unverified update which should not be rolled back to.
                 StorageFolder currentPackageFolder = await GetCurrentPackageFolder();
                 if (currentPackageFolder != null)
                 {

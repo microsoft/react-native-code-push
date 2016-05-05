@@ -3,17 +3,17 @@ using System;
 
 namespace CodePush.ReactNative
 {
-    internal class CodePushLifecycleEventListener : ILifecycleEventListener
+    internal class MinBackgroundListener : ILifecycleEventListener
     {
         private DateTime? _lastSuspendDate = null;
-        private Action _loadBundleAction;
+        private Action _resumeAction;
 
         internal int MinimumBackgroundDuration { get; set; }
 
-        internal CodePushLifecycleEventListener(Action loadBundleAction, int minimumBackgroundDuration)
+        internal MinBackgroundListener(Action resumeAction, int minBackgroundDuration)
         {
-            _loadBundleAction = loadBundleAction;
-            MinimumBackgroundDuration = minimumBackgroundDuration;
+            _resumeAction = resumeAction;
+            MinimumBackgroundDuration = minBackgroundDuration;
         }
 
         public void OnDestroy()
@@ -29,7 +29,7 @@ namespace CodePush.ReactNative
                 double durationInBackground = (new DateTime() - (DateTime)_lastSuspendDate).TotalSeconds;
                 if (durationInBackground >= MinimumBackgroundDuration)
                 {
-                    _loadBundleAction.Invoke();
+                    _resumeAction.Invoke();
                 }
             }
         }
