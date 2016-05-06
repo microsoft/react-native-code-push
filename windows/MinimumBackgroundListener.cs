@@ -3,17 +3,17 @@ using System;
 
 namespace CodePush.ReactNative
 {
-    internal class MinBackgroundListener : ILifecycleEventListener
+    internal class MinimumBackgroundListener : ILifecycleEventListener
     {
         private DateTime? _lastSuspendDate = null;
         private Action _resumeAction;
 
         internal int MinimumBackgroundDuration { get; set; }
 
-        internal MinBackgroundListener(Action resumeAction, int minBackgroundDuration)
+        internal MinimumBackgroundListener(Action resumeAction, int minimumBackgroundDuration)
         {
             _resumeAction = resumeAction;
-            MinimumBackgroundDuration = minBackgroundDuration;
+            MinimumBackgroundDuration = minimumBackgroundDuration;
         }
 
         public void OnDestroy()

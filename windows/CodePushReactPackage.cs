@@ -128,9 +128,11 @@ namespace CodePush.ReactNative
                 return binaryJsBundleUrl;
             }
         }
+
         #endregion
 
         #region Internal methods
+
         internal async Task<long> GetBinaryResourcesModifiedTime()
         {
             var assetJSBundleFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri(CodePushConstants.AssetsBundlePrefix + AssetsBundleFileName));
@@ -173,9 +175,11 @@ namespace CodePush.ReactNative
             SettingsManager.RemovePendingUpdate();
             SettingsManager.RemoveFailedUpdates();
         }
+
         #endregion
 
         #region Private methods
+
         private async Task ClearReactDevBundleCache()
         {
             var devBundleCacheFile = (StorageFile) await ApplicationData.Current.LocalFolder.TryGetItemAsync(CodePushConstants.ReactDevBundleCacheFileName);
@@ -192,6 +196,7 @@ namespace CodePush.ReactNative
             await UpdateManager.RollbackPackage();
             SettingsManager.RemovePendingUpdate();
         }
+
         #endregion
     }
 }

@@ -14,7 +14,7 @@ namespace CodePush.ReactNative
     internal class CodePushNativeModule : ReactContextNativeModuleBase
     {
         private CodePushReactPackage _codePush;
-        private MinBackgroundListener _minBackgroundListener;
+        private MinimumBackgroundListener _minimumBackgroundListener;
         private ReactContext _reactContext;
 
         public CodePushNativeModule(ReactContext reactContext, CodePushReactPackage codePush) : base(reactContext)
@@ -196,7 +196,7 @@ namespace CodePush.ReactNative
                 SettingsManager.SavePendingUpdate(pendingHash, /* isLoading */false);
                 if (installMode == InstallMode.OnNextResume)
                 {
-                    if (_minBackgroundListener == null)
+                    if (_minimumBackgroundListener == null)
                     {
                         // Ensure we do not add the listener twice.
                         Action loadBundleAction = () =>
@@ -207,12 +207,12 @@ namespace CodePush.ReactNative
                             });
                         };
                         
-                        _minBackgroundListener = new MinBackgroundListener(loadBundleAction, minimumBackgroundDuration);
-                        _reactContext.AddLifecycleEventListener(_minBackgroundListener);
+                        _minimumBackgroundListener = new MinimumBackgroundListener(loadBundleAction, minimumBackgroundDuration);
+                        _reactContext.AddLifecycleEventListener(_minimumBackgroundListener);
                     }
                     else
                     {
-                        _minBackgroundListener.MinimumBackgroundDuration = minimumBackgroundDuration;
+                        _minimumBackgroundListener.MinimumBackgroundDuration = minimumBackgroundDuration;
                     }
                 }
 

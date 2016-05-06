@@ -14,6 +14,7 @@ namespace CodePush.ReactNative
     internal class UpdateManager
     {
         #region Internal methods
+
         internal async Task ClearUpdates()
         {
             await (await GetCodePushFolder()).DeleteAsync();
@@ -234,9 +235,11 @@ namespace CodePush.ReactNative
             info[CodePushConstants.PreviousPackageKey] = null;
             await UpdateCurrentPackageInfo(info);
         }
+
         #endregion
 
         #region Private methods
+
         private async Task<StorageFolder> GetCodePushFolder()
         {
             return await ApplicationData.Current.LocalFolder.CreateFolderAsync(CodePushConstants.CodePushFolderPrefix, CreationCollisionOption.OpenIfExists);
@@ -282,6 +285,7 @@ namespace CodePush.ReactNative
         {
             await FileIO.WriteTextAsync(await GetStatusFile(), JsonConvert.SerializeObject(packageInfo));
         }
+
         #endregion
     }
 }
