@@ -38,7 +38,7 @@ In order to ensure that your end users always have a functioning version of your
 
 ## Supported React Native platforms
 
-- iOS (7+)
+- iOS (8+)
 - Android (4.1+)
 
 We try our best to maintain backwards compatability of our plugin with previous versions of React Native, but due to the nature of the platform, and the existence of breaking changes between releases, it is possible that you need to use a specific version of the CodePush plugin in order to support the exact version of React Native you are using. The following table outlines which CodePush plugin versions officially support the respective React Native versions:
@@ -48,8 +48,8 @@ We try our best to maintain backwards compatability of our plugin with previous 
 | <0.14.0                 | **Unsupported**                                |
 | v0.14.0                 | v1.3.0 *(introduced Android support)*          |
 | v0.15.0-v0.18.0         | v1.4.0-v1.6.0 *(introduced iOS asset support)* |
-| v0.19.0-v0.25.0         | v1.7.0+ *(introduced Android asset support)*   |
-| v0.26.0+                | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
+| v0.19.0-v0.26.0         | v1.7.0+ *(introduced Android asset support)*   |
+| v0.27.0+                | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
 
 ## Supported Components
 
