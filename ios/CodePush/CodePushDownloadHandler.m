@@ -1,5 +1,4 @@
 #import "CodePush.h"
-#import <UIKit/UIKit.h>
 
 @implementation CodePushDownloadHandler {
     // Header chars used to determine if the file is a zip.
@@ -36,7 +35,7 @@ failCallback:(void (^)(NSError *err))failCallback {
         [connection scheduleInRunLoop:[NSRunLoop mainRunLoop]
                               forMode:NSDefaultRunLoopMode];
     }
-    
+
     [connection start];
 }
 
