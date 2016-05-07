@@ -27,7 +27,7 @@ failCallback:(void (^)(NSError *err))failCallback {
     NSURLConnection *connection = [[NSURLConnection alloc] initWithRequest:request
                                                                   delegate:self
                                                           startImmediately:NO];
-    if ([NSOperationQueue respondsToSelector:@selector(setUnderlyingQueue:)]) {
+    if ([NSOperationQueue instancesRespondToSelector:@selector(setUnderlyingQueue:)]) {
         NSOperationQueue *delegateQueue = [NSOperationQueue new];
         delegateQueue.underlyingQueue = self.operationQueue;
         [connection setDelegateQueue:delegateQueue];
