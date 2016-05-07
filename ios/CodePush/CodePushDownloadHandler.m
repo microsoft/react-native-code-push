@@ -27,9 +27,15 @@ failCallback:(void (^)(NSError *err))failCallback {
     NSURLConnection *connection = [[NSURLConnection alloc] initWithRequest:request
                                                                   delegate:self
                                                           startImmediately:NO];
-    NSOperationQueue *delegateQueue = [NSOperationQueue new];
-    delegateQueue.underlyingQueue = self.operationQueue;
-    [connection setDelegateQueue:delegateQueue];
+    if ([NSOperationQueue instancesRespondToSelector:@selector(setUnderlyingQueue:)]) {
+        NSOperationQueue *delegateQueue = [NSOperationQueue new];
+        delegateQueue.underlyingQueue = self.operationQueue;
+        [connection setDelegateQueue:delegateQueue];
+    } else {
+        [connection scheduleInRunLoop:[NSRunLoop mainRunLoop]
+                              forMode:NSDefaultRunLoopMode];
+    }
+
     [connection start];
 }
 

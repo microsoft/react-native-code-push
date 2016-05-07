@@ -114,7 +114,7 @@ static NSString *const LastDeploymentReportKey = @"CODE_PUSH_LAST_DEPLOYMENT_REP
 
 + (BOOL)isStatusReportIdentifierCodePushLabel:(NSString *)statusReportIdentifier
 {
-    return statusReportIdentifier != nil && [statusReportIdentifier containsString:@":"];
+    return statusReportIdentifier != nil && [statusReportIdentifier rangeOfString:@":"].location != NSNotFound;
 }
 
 + (void)recordDeploymentStatusReported:(NSString *)appVersionOrPackageIdentifier
