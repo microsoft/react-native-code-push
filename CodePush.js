@@ -159,59 +159,62 @@ function log(message) {
   console.log(`[CodePush] ${message}`)
 }
 
-// This ensures that notifyApplicationReadyInternal is only called once
-// in the lifetime of this module instance.
+// This ensures that the native call to notifyApplicationReady
+// only happens once in the lifetime of this module instance.
 const notifyApplicationReady = (() => {
   let notifyApplicationReadyPromise;
   return () => {
     if (!notifyApplicationReadyPromise) {
-      notifyApplicationReadyPromise = notifyApplicationReadyInternal();
+      notifyApplicationReadyPromise = NativeCodePush.notifyApplicationReady();
     }
 
-    return notifyApplicationReadyPromise;
+    return notifyApplicationReadyPromise
+      .then(() => {
+        tryReportStatus();
+      });
   };
 })();
 
-async function notifyApplicationReadyInternal() {
-  await NativeCodePush.notifyApplicationReady();
-  tryReportStatus();
-}
+let tryReportStatus = (function() {
+  let resumeListener;
+  return async function () {
+    const statusReport = await NativeCodePush.getNewStatusReport();
+    if (statusReport) {
+      const config = await getConfiguration();
+      const previousLabelOrAppVersion = statusReport.previousLabelOrAppVersion;
+      const previousDeploymentKey = statusReport.previousDeploymentKey || config.deploymentKey;
+      try {
+        if (statusReport.appVersion) {
+          const sdk = getPromisifiedSdk(requestFetchAdapter, config);
+          await sdk.reportStatusDeploy(/* deployedPackage */ null, /* status */ null, previousLabelOrAppVersion, previousDeploymentKey);
+        } else {
+          config.deploymentKey = statusReport.package.deploymentKey;
+          const sdk = getPromisifiedSdk(requestFetchAdapter, config);
+          await sdk.reportStatusDeploy(statusReport.package, statusReport.status, previousLabelOrAppVersion, previousDeploymentKey);
+        }
 
-async function tryReportStatus(resumeListener) {
-  const statusReport = await NativeCodePush.getNewStatusReport();
-  if (statusReport) {
-    const config = await getConfiguration();
-    const previousLabelOrAppVersion = statusReport.previousLabelOrAppVersion;
-    const previousDeploymentKey = statusReport.previousDeploymentKey || config.deploymentKey;
-    try {
-      if (statusReport.appVersion) {
-        const sdk = getPromisifiedSdk(requestFetchAdapter, config);
-        await sdk.reportStatusDeploy(/* deployedPackage */ null, /* status */ null, previousLabelOrAppVersion, previousDeploymentKey);
-      } else {
-        config.deploymentKey = statusReport.package.deploymentKey;
-        const sdk = getPromisifiedSdk(requestFetchAdapter, config);
-        await sdk.reportStatusDeploy(statusReport.package, statusReport.status, previousLabelOrAppVersion, previousDeploymentKey);
+        log(`Reported status: ${JSON.stringify(statusReport)}`);
+        NativeCodePush.recordStatusReported(statusReport);
+        resumeListener && AppState.removeEventListener("change", resumeListener);
+        resumeListener = null;
+      } catch (e) {
+        log(`Report status failed: ${JSON.stringify(statusReport)}`);
+        NativeCodePush.saveStatusReportForRetry(statusReport);
+        // Try again when the app resumes
+        if (!resumeListener) {
+          resumeListener = (newState) => {
+            newState === "active" && tryReportStatus(resumeListener);
+          };
+
+          AppState.addEventListener("change", resumeListener);
+        }
       }
-
-      log(`Reported status: ${JSON.stringify(statusReport)}`);
-      NativeCodePush.recordStatusReported(statusReport);
+    } else {
       resumeListener && AppState.removeEventListener("change", resumeListener);
-    } catch (e) {
-      log(`Report status failed: ${JSON.stringify(statusReport)}`);
-      NativeCodePush.saveStatusReportForRetry(statusReport);
-      // Try again when the app resumes
-      if (!resumeListener) {
-        resumeListener = (newState) => {
-          newState === "active" && tryReportStatus(resumeListener);
-        };
-
-        AppState.addEventListener("change", resumeListener);
-      }
+      resumeListener = null;
     }
-  } else {
-    resumeListener && AppState.removeEventListener("change", resumeListener);
   }
-}
+})();
 
 function restartApp(onlyIfUpdateIsPending = false) {
   NativeCodePush.restartApp(onlyIfUpdateIsPending);
