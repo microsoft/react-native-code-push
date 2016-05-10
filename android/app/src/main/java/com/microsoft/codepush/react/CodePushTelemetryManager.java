@@ -33,14 +33,14 @@ public class CodePushTelemetryManager {
 
     public WritableMap getBinaryUpdateReport(String appVersion) {
         String previousStatusReportIdentifier = this.getPreviousStatusReportIdentifier();
+        WritableNativeMap reportMap = null;
         if (previousStatusReportIdentifier == null) {
             this.clearRetryStatusReport();
-            WritableNativeMap reportMap = new WritableNativeMap();
+            reportMap = new WritableNativeMap();
             reportMap.putString(APP_VERSION_KEY, appVersion);
-            return reportMap;
         } else if (!previousStatusReportIdentifier.equals(appVersion)) {
             this.clearRetryStatusReport();
-            WritableNativeMap reportMap = new WritableNativeMap();
+            reportMap = new WritableNativeMap();
             if (this.isStatusReportIdentifierCodePushLabel(previousStatusReportIdentifier)) {
                 String previousDeploymentKey = this.getDeploymentKeyFromStatusReportIdentifier(previousStatusReportIdentifier);
                 String previousLabel = this.getVersionLabelFromStatusReportIdentifier(previousStatusReportIdentifier);
@@ -52,10 +52,9 @@ public class CodePushTelemetryManager {
                 reportMap.putString(APP_VERSION_KEY, appVersion);
                 reportMap.putString(PREVIOUS_LABEL_OR_APP_VERSION_KEY, previousStatusReportIdentifier);
             }
-            return reportMap;
         }
 
-        return null;
+        return reportMap;
     }
 
     public WritableMap getRetryStatusReport() {
@@ -68,7 +67,6 @@ public class CodePushTelemetryManager {
                 return CodePushUtils.convertJsonObjectToWritable(retryStatusReport);
             } catch (JSONException e) {
                 e.printStackTrace();
-                return null;
             }
         }
 
@@ -85,36 +83,33 @@ public class CodePushTelemetryManager {
     public WritableMap getUpdateReport(WritableMap currentPackage) {
         String currentPackageIdentifier = this.getPackageStatusReportIdentifier(currentPackage);
         String previousStatusReportIdentifier = this.getPreviousStatusReportIdentifier();
+        WritableNativeMap reportMap = null;
         if (currentPackageIdentifier != null) {
             if (previousStatusReportIdentifier == null) {
                 this.clearRetryStatusReport();
-                WritableNativeMap reportMap = new WritableNativeMap();
+                reportMap = new WritableNativeMap();
                 reportMap.putMap(PACKAGE_KEY, currentPackage);
                 reportMap.putString(STATUS_KEY, DEPLOYMENT_SUCCEEDED_STATUS);
-                return reportMap;
             } else if (!previousStatusReportIdentifier.equals(currentPackageIdentifier)) {
                 this.clearRetryStatusReport();
+                reportMap = new WritableNativeMap();
                 if (this.isStatusReportIdentifierCodePushLabel(previousStatusReportIdentifier)) {
                     String previousDeploymentKey = this.getDeploymentKeyFromStatusReportIdentifier(previousStatusReportIdentifier);
                     String previousLabel = this.getVersionLabelFromStatusReportIdentifier(previousStatusReportIdentifier);
-                    WritableNativeMap reportMap = new WritableNativeMap();
                     reportMap.putMap(PACKAGE_KEY, currentPackage);
                     reportMap.putString(STATUS_KEY, DEPLOYMENT_SUCCEEDED_STATUS);
                     reportMap.putString(PREVIOUS_DEPLOYMENT_KEY_KEY, previousDeploymentKey);
                     reportMap.putString(PREVIOUS_LABEL_OR_APP_VERSION_KEY, previousLabel);
-                    return reportMap;
                 } else {
                     // Previous status report was with a binary app version.
-                    WritableNativeMap reportMap = new WritableNativeMap();
                     reportMap.putMap(PACKAGE_KEY, currentPackage);
                     reportMap.putString(STATUS_KEY, DEPLOYMENT_SUCCEEDED_STATUS);
                     reportMap.putString(PREVIOUS_LABEL_OR_APP_VERSION_KEY, previousStatusReportIdentifier);
-                    return reportMap;
                 }
             }
         }
 
-        return null;
+        return reportMap;
     }
 
     public void recordStatusReported(ReadableMap statusReport) {
