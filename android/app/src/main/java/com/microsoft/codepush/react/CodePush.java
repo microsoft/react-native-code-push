@@ -626,6 +626,12 @@ public class CodePush implements ReactPackage {
                             promise.resolve(newAppVersionStatusReport);
                             return null;
                         }
+                    } else {
+                        WritableMap retryStatusReport = codePushTelemetryManager.getRetryStatusReport();
+                        if (retryStatusReport != null) {
+                            promise.resolve(retryStatusReport);
+                            return null;
+                        }
                     }
 
                     promise.resolve("");
@@ -721,12 +727,22 @@ public class CodePush implements ReactPackage {
         }
 
         @ReactMethod
+        public void recordStatusReported(ReadableMap statusReport) {
+            codePushTelemetryManager.recordStatusReported(statusReport);
+        }
+
+        @ReactMethod
         public void restartApp(boolean onlyIfUpdateIsPending) {
             // If this is an unconditional restart request, or there
             // is current pending update, then reload the app.
             if (!onlyIfUpdateIsPending || CodePush.this.isPendingUpdate(null)) {
                 loadBundle();
             }
+        }
+
+        @ReactMethod
+        public void saveStatusReportForRetry(ReadableMap statusReport) {
+            codePushTelemetryManager.saveStatusReportForRetry(statusReport);
         }
 
         @ReactMethod

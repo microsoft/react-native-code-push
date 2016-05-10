@@ -1,10 +1,16 @@
 #import "CodePush.h"
 
+static NSString *const AppVersionKey = @"appVersion";
 static NSString *const DeploymentFailed = @"DeploymentFailed";
 static NSString *const DeploymentKeyKey = @"deploymentKey";
 static NSString *const DeploymentSucceeded = @"DeploymentSucceeded";
 static NSString *const LabelKey = @"label";
 static NSString *const LastDeploymentReportKey = @"CODE_PUSH_LAST_DEPLOYMENT_REPORT";
+static NSString *const PackageKey = @"package";
+static NSString *const PreviousDeploymentKeyKey = @"previousDeploymentKey";
+static NSString *const PreviousLabelOrAppVersionKey = @"previousLabelOrAppVersion";
+static NSString *const RetryDeploymentReportKey = @"CODE_PUSH_RETRY_DEPLOYMENT_REPORT";
+static NSString *const StatusKey = @"status";
 
 @implementation CodePushTelemetryManager
 
@@ -12,35 +18,49 @@ static NSString *const LastDeploymentReportKey = @"CODE_PUSH_LAST_DEPLOYMENT_REP
 {
     NSString *previousStatusReportIdentifier = [self getPreviousStatusReportIdentifier];
     if (previousStatusReportIdentifier == nil) {
-        [self recordDeploymentStatusReported:appVersion];
-        return @{ @"appVersion": appVersion };
+        [self clearRetryStatusReport];
+        return @{ AppVersionKey: appVersion };
     } else if (![previousStatusReportIdentifier isEqualToString:appVersion]) {
-        [self recordDeploymentStatusReported:appVersion];
         if ([self isStatusReportIdentifierCodePushLabel:previousStatusReportIdentifier]) {
             NSString *previousDeploymentKey = [self getDeploymentKeyFromStatusReportIdentifier:previousStatusReportIdentifier];
             NSString *previousLabel = [self getVersionLabelFromStatusReportIdentifier:previousStatusReportIdentifier];
+            [self clearRetryStatusReport];
             return @{
-                      @"appVersion": appVersion,
-                      @"previousDeploymentKey": previousDeploymentKey,
-                      @"previousLabelOrAppVersion": previousLabel
+                      AppVersionKey: appVersion,
+                      PreviousDeploymentKeyKey: previousDeploymentKey,
+                      PreviousLabelOrAppVersionKey: previousLabel
                     };
         } else {
+            [self clearRetryStatusReport];
             // Previous status report was with a binary app version.
             return @{
-                      @"appVersion": appVersion,
-                      @"previousLabelOrAppVersion": previousStatusReportIdentifier
+                      AppVersionKey: appVersion,
+                      PreviousLabelOrAppVersionKey: previousStatusReportIdentifier
                     };
         }
     }
-    
+
     return nil;
+}
+
++ (NSDictionary *)getRetryStatusReport
+{
+    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+    NSDictionary *retryStatusReport = [preferences objectForKey:RetryDeploymentReportKey];
+    if (retryStatusReport) {
+        [self clearRetryStatusReport];
+        return retryStatusReport;
+    } else {
+        return nil;
+    }
 }
 
 + (NSDictionary *)getRollbackReport:(NSDictionary *)lastFailedPackage
 {
+    [self clearRetryStatusReport];
     return @{
-              @"package": lastFailedPackage,
-              @"status": DeploymentFailed
+              PackageKey: lastFailedPackage,
+              StatusKey: DeploymentFailed
             };
 }
 
@@ -50,37 +70,62 @@ static NSString *const LastDeploymentReportKey = @"CODE_PUSH_LAST_DEPLOYMENT_REP
     NSString *previousStatusReportIdentifier = [self getPreviousStatusReportIdentifier];
     if (currentPackageIdentifier) {
         if (previousStatusReportIdentifier == nil) {
-            [self recordDeploymentStatusReported:currentPackageIdentifier];
+            [self clearRetryStatusReport];
             return @{
-                      @"package": currentPackage,
-                      @"status": DeploymentSucceeded
+                      PackageKey: currentPackage,
+                      StatusKey: DeploymentSucceeded
                     };
         } else if (![previousStatusReportIdentifier isEqualToString:currentPackageIdentifier]) {
-            [self recordDeploymentStatusReported:currentPackageIdentifier];
             if ([self isStatusReportIdentifierCodePushLabel:previousStatusReportIdentifier]) {
                 NSString *previousDeploymentKey = [self getDeploymentKeyFromStatusReportIdentifier:previousStatusReportIdentifier];
                 NSString *previousLabel = [self getVersionLabelFromStatusReportIdentifier:previousStatusReportIdentifier];
+                [self clearRetryStatusReport];
                 return @{
-                          @"package": currentPackage,
-                          @"status": DeploymentSucceeded,
-                          @"previousDeploymentKey": previousDeploymentKey,
-                          @"previousLabelOrAppVersion": previousLabel
+                          PackageKey: currentPackage,
+                          StatusKey: DeploymentSucceeded,
+                          PreviousDeploymentKeyKey: previousDeploymentKey,
+                          PreviousLabelOrAppVersionKey: previousLabel
                         };
             } else {
+                [self clearRetryStatusReport];
                 // Previous status report was with a binary app version.
                 return @{
-                          @"package": currentPackage,
-                          @"status": DeploymentSucceeded,
-                          @"previousLabelOrAppVersion": previousStatusReportIdentifier
+                          PackageKey: currentPackage,
+                          StatusKey: DeploymentSucceeded,
+                          PreviousLabelOrAppVersionKey: previousStatusReportIdentifier
                         };
             }
         }
     }
-    
+
     return nil;
 }
 
++ (void)recordStatusReported:(NSDictionary *)statusReport
+{
+    if (statusReport[AppVersionKey]) {
+        [self saveStatusReportedForIdentifier:statusReport[AppVersionKey]];
+    } else if (statusReport[PackageKey]) {
+        NSString *packageIdentifier = [self getPackageStatusReportIdentifier:statusReport[PackageKey]];
+        [self saveStatusReportedForIdentifier:packageIdentifier];
+    }
+}
+
++ (void)saveStatusReportForRetry:(NSDictionary *)statusReport
+{
+    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+    [preferences setValue:statusReport forKey:RetryDeploymentReportKey];
+    [preferences synchronize];
+}
+
 #pragma mark - private methods
+
++ (void)clearRetryStatusReport
+{
+    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+    [preferences setValue:nil forKey:RetryDeploymentReportKey];
+    [preferences synchronize];
+}
 
 + (NSString *)getDeploymentKeyFromStatusReportIdentifier:(NSString *)statusReportIdentifier
 {
@@ -117,7 +162,7 @@ static NSString *const LastDeploymentReportKey = @"CODE_PUSH_LAST_DEPLOYMENT_REP
     return statusReportIdentifier != nil && [statusReportIdentifier rangeOfString:@":"].location != NSNotFound;
 }
 
-+ (void)recordDeploymentStatusReported:(NSString *)appVersionOrPackageIdentifier
++ (void)saveStatusReportedForIdentifier:(NSString *)appVersionOrPackageIdentifier
 {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     [preferences setValue:appVersionOrPackageIdentifier forKey:LastDeploymentReportKey];

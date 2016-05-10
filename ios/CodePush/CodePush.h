@@ -112,8 +112,11 @@ failCallback:(void (^)(NSError *err))failCallback;
 @interface CodePushTelemetryManager : NSObject
 
 + (NSDictionary *)getBinaryUpdateReport:(NSString *)appVersion;
++ (NSDictionary *)getRetryStatusReport;
 + (NSDictionary *)getRollbackReport:(NSDictionary *)lastFailedPackage;
 + (NSDictionary *)getUpdateReport:(NSDictionary *)currentPackage;
++ (void)recordStatusReported:(NSDictionary *)statusReport;
++ (void)saveStatusReportForRetry:(NSDictionary *)statusReport;
 
 @end
 
