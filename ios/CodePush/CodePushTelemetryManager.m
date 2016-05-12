@@ -57,7 +57,6 @@ static NSString *const StatusKey = @"status";
 
 + (NSDictionary *)getRollbackReport:(NSDictionary *)lastFailedPackage
 {
-    [self clearRetryStatusReport];
     return @{
               PackageKey: lastFailedPackage,
               StatusKey: DeploymentFailed
@@ -76,10 +75,10 @@ static NSString *const StatusKey = @"status";
                       StatusKey: DeploymentSucceeded
                     };
         } else if (![previousStatusReportIdentifier isEqualToString:currentPackageIdentifier]) {
+            [self clearRetryStatusReport];
             if ([self isStatusReportIdentifierCodePushLabel:previousStatusReportIdentifier]) {
                 NSString *previousDeploymentKey = [self getDeploymentKeyFromStatusReportIdentifier:previousStatusReportIdentifier];
                 NSString *previousLabel = [self getVersionLabelFromStatusReportIdentifier:previousStatusReportIdentifier];
-                [self clearRetryStatusReport];
                 return @{
                           PackageKey: currentPackage,
                           StatusKey: DeploymentSucceeded,
@@ -87,7 +86,6 @@ static NSString *const StatusKey = @"status";
                           PreviousLabelOrAppVersionKey: previousLabel
                         };
             } else {
-                [self clearRetryStatusReport];
                 // Previous status report was with a binary app version.
                 return @{
                           PackageKey: currentPackage,
