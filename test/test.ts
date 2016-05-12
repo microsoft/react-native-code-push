@@ -37,17 +37,32 @@ class RNProjectManager extends ProjectManager {
             del.sync([projectDirectory], { force: true });
         }
         mkdirp.sync(projectDirectory);
-
-        return ProjectManager.execChildProcess("react-native init " + appNamespace, { cwd: projectDirectory + "/.." })
-            .then(() => {
-                var promises: Q.Promise<string>[] = [];
+        
+        function copyDirectoryRecursively(directoryFrom: string, directoryTo: string): Q.Promise<string> {
+            var promises: Q.Promise<string>[] = [];
+            
+            fs.readdirSync(directoryFrom).forEach(file => {
+                var fileStats: fs.Stats = fs.statSync(file);
+                var fileInFrom: string = path.join(directoryFrom, file);
+                var fileInTo: string = path.join(directoryTo, file);
                 
-                fs.readdirSync(templatePath).forEach(file => {
-                    promises.push(ProjectManager.copyFile(path.join(templatePath, file), path.join(projectDirectory, file)));
-                });
-                
-                return Q.all<string>(promises);
+                // If it is a file, just copy directly
+                if (fileStats.isFile()) promises.push(ProjectManager.copyFile(fileInFrom, fileInTo));
+                else {
+                    // If it is a directory, create the directory if it doesn't exist on the target and then copy over
+                    if (!fs.existsSync(fileInTo)) mkdirp.sync(fileInTo);
+                    promises.push(copyDirectoryRecursively(fileInFrom, fileInTo));
+                }
             });
+            
+            return Q.all<string>(promises);
+        }
+
+        // React-Native adds a "com." to the front of the name you provide, so provide the namespace with the "com." removed
+        return ProjectManager.execChildProcess("react-native init " + appNamespace.slice("com.".length, appNamespace.length), { cwd: projectDirectory + "/.." })
+            // Copy over the template
+            // Overwrites existing files with the files that are provided in the template (MainActivity.java, AppDelegate.m)
+            .then(copyDirectoryRecursively.bind(this, templatePath, projectDirectory));
     }
     
     /**
@@ -65,7 +80,7 @@ class RNProjectManager extends ProjectManager {
         
         console.log("Setting up scenario " + jsPath + " in " + projectDirectory);
 
-        // copy index html file and replace
+        // Copy index html file and replace
         return ProjectManager.copyFile(templateIndexPath, destinationIndexPath, true)
             .then<void>(ProjectManager.replaceString.bind(undefined, destinationIndexPath, ProjectManager.SERVER_URL_PLACEHOLDER, targetPlatform.getServerUrl()))
             .then<void>(ProjectManager.replaceString.bind(undefined, destinationIndexPath, ProjectManager.INDEX_JS_PLACEHOLDER, scenarioJs))
@@ -84,7 +99,7 @@ class RNProjectManager extends ProjectManager {
             deferred.resolve();
         });
         return deferred.promise
-            .then(ProjectManager.execChildProcess.bind(this, "react-native bundle --platform " + targetPlatform.getName() + " --entry-file index." + targetPlatform.getName() + ".js --bundle-output " + bundlePath + " --assets-dest " + bundleFolder, { cwd: projectDirectory }))
+            .then(ProjectManager.execChildProcess.bind(this, "react-native bundle --platform " + targetPlatform.getName() + " --entry-file index." + targetPlatform.getName() + ".js --bundle-output " + bundlePath + " --assets-dest " + bundleFolder + " --dev false", { cwd: projectDirectory }))
             .then(() => { return bundlePath; });
     }
     
@@ -126,14 +141,18 @@ class RNProjectManager extends ProjectManager {
             .then(() => {
                 if (targetPlatform === Platform.Android.getInstance()) {
                     // Link through RNPM
-                    return ProjectManager.execChildProcess("rnpm link react-native-code-push", { cwd: projectDirectory })
-                        // NOTE: this step can be removed when RNPM supports dynamic linking
+                    return ProjectManager.execChildProcess("rnpm link react-native-code-push", { cwd: projectFolder })
+                        // NOTE: this "then" can be removed when RNPM supports dynamic linking
                         .then(ProjectManager.replaceString.bind(undefined, path.join(projectFolder, "android", "app", "build.gradle"),
                             "apply from: \"react.gradle\"",
-                            "apply from: \"react.gradle\"\napply from: \"" + path.join(projectFolder, "node_modules", "react-native-code-push", "android", "codepush.gradle") + "\""))
-                        .then(ProjectManager.copyFile.bind(undefined, path.join(PluginTestingFramework.thisPluginPath, )));
+                            "apply from: \"react.gradle\"\napply from: \"" + path.join(projectFolder, "node_modules", "react-native-code-push", "android", "codepush.gradle") + "\""));
                 } else if (targetPlatform === Platform.IOS.getInstance()) {
-                    
+                    var iOSProject: string = path.join(projectFolder, "iOS");
+                    // Create and install the Podfile
+                    return ProjectManager.execChildProcess("pod init", { cwd: iOSProject })
+                        .then(ProjectManager.replaceString.bind(undefined, path.join(iOSProject, "Podfile"), "# use_frameworks!",
+                            "use_frameworks!\n  pod 'React', :path => './node_modules/react-native', :subspecs => [ 'Core', 'RCTImage', 'RCTNetwork', 'RCTText', 'RCTWebSocket', ]\n  pod 'CodePush', :path => './node_modules/react-native-code-push'"))
+                        .then(ProjectManager.execChildProcess("pod install", { cwd: iOSProject });
                 }
             });
     }
