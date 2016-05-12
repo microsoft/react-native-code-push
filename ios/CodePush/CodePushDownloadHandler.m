@@ -20,7 +20,7 @@ failCallback:(void (^)(NSError *err))failCallback {
     return self;
 }
 
--(void)download:(NSString*)url {
+- (void)download:(NSString*)url {
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]
                                              cachePolicy:NSURLRequestUseProtocolCachePolicy
                                          timeoutInterval:60.0];
@@ -47,12 +47,12 @@ failCallback:(void (^)(NSError *err))failCallback {
     return nil;
 }
 
--(void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
+- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
     self.expectedContentLength = response.expectedContentLength;
     [self.outputFileStream open];
 }
 
--(void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
     if (self.receivedContentLength < 4) {
         for (int i = 0; i < [data length]; i++) {
             int headerOffset = (int)self.receivedContentLength + i;
@@ -97,7 +97,7 @@ failCallback:(void (^)(NSError *err))failCallback {
     self.failCallback(error);
 }
 
--(void)connectionDidFinishLoading:(NSURLConnection *)connection {
+- (void)connectionDidFinishLoading:(NSURLConnection *)connection {
     // expectedContentLength might be -1 when NSURLConnection don't know the length(e.g. response encode with gzip)
     if (self.expectedContentLength > 0) {
         // We should have received all of the bytes if this is called.

@@ -1,7 +1,7 @@
 import { AcquisitionManager as Sdk } from "code-push/script/acquisition-sdk";
 import { Alert } from "./AlertAdapter";
 import requestFetchAdapter from "./request-fetch-adapter";
-import { Platform } from "react-native";
+import { AppState, Platform } from "react-native";
 
 let NativeCodePush = require("react-native").NativeModules.CodePush;
 const PackageMixins = require("./package-mixins")(NativeCodePush);
@@ -174,19 +174,42 @@ const notifyApplicationReady = (() => {
 
 async function notifyApplicationReadyInternal() {
   await NativeCodePush.notifyApplicationReady();
+  tryReportStatus();
+}
+
+async function tryReportStatus(resumeListener) {
   const statusReport = await NativeCodePush.getNewStatusReport();
   if (statusReport) {
     const config = await getConfiguration();
     const previousLabelOrAppVersion = statusReport.previousLabelOrAppVersion;
     const previousDeploymentKey = statusReport.previousDeploymentKey || config.deploymentKey;
-    if (statusReport.appVersion) {
-      const sdk = getPromisifiedSdk(requestFetchAdapter, config);
-      sdk.reportStatusDeploy(/* deployedPackage */ null, /* status */ null, previousLabelOrAppVersion, previousDeploymentKey);
-    } else {
-      config.deploymentKey = statusReport.package.deploymentKey;
-      const sdk = getPromisifiedSdk(requestFetchAdapter, config);
-      sdk.reportStatusDeploy(statusReport.package, statusReport.status, previousLabelOrAppVersion, previousDeploymentKey);
+    try {
+      if (statusReport.appVersion) {
+        const sdk = getPromisifiedSdk(requestFetchAdapter, config);
+        await sdk.reportStatusDeploy(/* deployedPackage */ null, /* status */ null, previousLabelOrAppVersion, previousDeploymentKey);
+      } else {
+        config.deploymentKey = statusReport.package.deploymentKey;
+        const sdk = getPromisifiedSdk(requestFetchAdapter, config);
+        await sdk.reportStatusDeploy(statusReport.package, statusReport.status, previousLabelOrAppVersion, previousDeploymentKey);
+      }
+
+      log(`Reported status: ${JSON.stringify(statusReport)}`);
+      NativeCodePush.recordStatusReported(statusReport);
+      resumeListener && AppState.removeEventListener("change", resumeListener);
+    } catch (e) {
+      log(`Report status failed: ${JSON.stringify(statusReport)}`);
+      NativeCodePush.saveStatusReportForRetry(statusReport);
+      // Try again when the app resumes
+      if (!resumeListener) {
+        resumeListener = (newState) => {
+          newState === "active" && tryReportStatus(resumeListener);
+        };
+
+        AppState.addEventListener("change", resumeListener);
+      }
     }
+  } else {
+    resumeListener && AppState.removeEventListener("change", resumeListener);
   }
 }
 
