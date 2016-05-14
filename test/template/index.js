@@ -16,7 +16,7 @@ import CodePush from "react-native-code-push";
 
 var testScenario = require("./CODE_PUSH_INDEX_JS_PATH");
 
-var RNTestTester = React.createClass({
+var TestCodePush = React.createClass({
     // CodePush API Callbacks
     
     // checkForUpdate
@@ -33,6 +33,9 @@ var RNTestTester = React.createClass({
     },
     checkUpdateError(error) {
         this.setStateAndSendMessage("An error occured while checking for updates.", "CHECK_ERROR");
+        this.setState({
+            message: this.state.message + "\n...\n" + error
+        });
     },
     
     // remotePackage.download
@@ -41,6 +44,9 @@ var RNTestTester = React.createClass({
     },
     downloadError(error) {
         this.setStateAndSendMessage("Download error.", "DOWNLOAD_ERROR");
+        this.setState({
+            message: this.state.message + "\n...\n" + error
+        });
     },
     
     // localPackage.install
@@ -57,6 +63,9 @@ var RNTestTester = React.createClass({
     },
     onSyncError(error) {
         this.setStateAndSendMessage("Sync error.", "SYNC_ERROR");
+        this.setState({
+            message: this.state.message + "\n...\n" + error
+        });
     },
     
     
@@ -150,4 +159,4 @@ const styles = StyleSheet.create({
     },
 });
 
-AppRegistry.registerComponent('RNTestTester', () => RNTestTester);
+AppRegistry.registerComponent('TestCodePush', () => TestCodePush);

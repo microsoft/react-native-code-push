@@ -4,7 +4,6 @@ var child_process = require("child_process");
 var Q = require("q");
 var runSequence = require("run-sequence");
 
-var sourcePath = "./www";
 var testPath = "./test";
 var binPath = "./bin";
 var tsFiles = "/**/*.ts";
@@ -129,7 +128,7 @@ function runTests(callback, options) {
 }
 
 gulp.task("compile", function (callback) {
-    runSequence("compile-src", "compile-test", callback);
+    runSequence("compile-test", callback);
 });
 
 gulp.task("compile-test", function () {
@@ -140,16 +139,6 @@ gulp.task("compile-test", function () {
         .pipe(ts(tsCompileOptions))
         .pipe(insert.prepend(compiledSourceWarningMessage))
         .pipe(gulp.dest(path.join(binPath, testPath)));
-});
-
-gulp.task("compile-src", function () {
-    var ts = require("gulp-typescript");
-    var insert = require("gulp-insert");
-
-    return gulp.src([sourcePath + tsFiles])
-        .pipe(ts(tsCompileOptions))
-        .pipe(insert.prepend(compiledSourceWarningMessage))
-        .pipe(gulp.dest(path.join(binPath, sourcePath)));
 });
 
 gulp.task("tslint", function () {
@@ -193,7 +182,7 @@ gulp.task("tslint", function () {
         }
     }
 
-    return gulp.src([sourcePath + tsFiles, testPath + tsFiles])
+    return gulp.src([testPath + tsFiles])
         .pipe(tslint({ configuration: config }))
         .pipe(tslint.report("verbose"));
 });

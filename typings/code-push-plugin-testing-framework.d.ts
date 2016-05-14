@@ -273,7 +273,11 @@ declare module 'code-push-plugin-testing-framework/script/projectManager' {
 	    /**
 	     * Copies a file from a given location to another.
 	     */
-	    static copyFile(source: string, destination: string, overwrite: boolean): Q.Promise<void>;
+	    static copyFile(source: string, destination: string, overwrite: boolean): Q.Promise<string>;
+	    /**
+	     * Archives the contents of targetFolder and puts it in an archive at archivePath.
+	     */
+	    static archiveFolder(targetFolder: string, archivePath: string, isDiff: boolean): Q.Promise<string>;
 	}
 
 }
@@ -370,6 +374,10 @@ declare module 'code-push-plugin-testing-framework/script/testUtil' {
 	        maxBuffer?: number;
 	        killSignal?: string;
 	    }, logOutput?: boolean): Q.Promise<string>;
+	    /**
+	     * Returns the name of the plugin that is being tested.
+	     */
+	    static getPluginName(): string;
 	}
 
 }
@@ -498,12 +506,15 @@ declare module 'code-push-plugin-testing-framework/script/test' {
 	    private testBuilders;
 	    /** Whether or not this.testBuilders directly contains any TestBuildIt objects */
 	    private hasIts;
+	    /** The function that create calls (used for describe.only) */
+	    private functionToUse;
 	    /**
 	     * describeName - used as the description in the call to describe
 	     * scenarioPath - if specified, will be set up before the tests run
 	     * testBuilders - the testBuilders to create within this describe call
+	     * only - if true, use describe.only
 	     */
-	    constructor(describeName: string, testBuilders: TestBuilder[], scenarioPath?: string);
+	    constructor(describeName: string, testBuilders: TestBuilder[], scenarioPath?: string, only?: boolean);
 	    /**
 	     * Called to create the test suite by the initializeTests function
 	     *
@@ -521,12 +532,15 @@ declare module 'code-push-plugin-testing-framework/script/test' {
 	    private test;
 	    /** Whether or not the test should be run when "--core" is supplied */
 	    private isCoreTest;
+	    /** The function that create calls (used for it.only) */
+	    private functionToUse;
 	    /**
 	     * testName - used as the expectation in the call to it
 	     * test - the test to provide to it
 	     * isCoreTest - whether or not the test should run when "--core" is supplied
+	     * only - if true, use it.only
 	     */
-	    constructor(testName: string, test: (projectManager: tm.ProjectManager, targetPlatform: platform.IPlatform, done: MochaDone) => void, isCoreTest: boolean);
+	    constructor(testName: string, test: (projectManager: tm.ProjectManager, targetPlatform: platform.IPlatform, done: MochaDone) => void, isCoreTest: boolean, only?: boolean);
 	    /**
 	     * Called to create the test suite by the initializeTests function
 	     *
@@ -560,6 +574,14 @@ declare module 'code-push-plugin-testing-framework/script/test' {
 	 * Waits for the next set of test messages sent by the app and asserts that they are equal to the expected messages
 	 */
 	export function verifyMessages(expectedMessages: (string | su.AppMessage)[], deferred: Q.Deferred<void>): (requestBody: any) => void;
+	/**
+	 * Sets up the server that the test app uses to send test messages and check for and download updates.
+	 */
+	export function setupServer(targetPlatform: platform.IPlatform): void;
+	/**
+	 * Closes the server.
+	 */
+	export function cleanupServer(): void;
 	/**
 	 * Call this function with a ProjectManager and an array of TestBuilderDescribe objects to run tests
 	 */

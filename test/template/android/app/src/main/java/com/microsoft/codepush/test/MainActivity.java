@@ -1,4 +1,4 @@
-package com.microsoft.codepushdemoapp;
+package com.microsoft.codepush.test;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactPackage;
@@ -21,7 +21,7 @@ public class MainActivity extends ReactActivity {
      */
     @Override
     protected String getMainComponentName() {
-        return "CodePushDemoApp";
+        return "TestCodePush";
     }
 
     /**
@@ -41,7 +41,7 @@ public class MainActivity extends ReactActivity {
     protected List<ReactPackage> getPackages() {
         return Arrays.<ReactPackage>asList(
                 new MainReactPackage(),
-                new CodePush("deployment-key-here", this, BuildConfig.DEBUG)
+                new CodePush("CODE_PUSH_ANDROID_DEPLOYMENT_KEY", this, BuildConfig.DEBUG, "CODE_PUSH_SERVER_URL")
         );
     }
 }

@@ -42,12 +42,16 @@ class RNProjectManager extends ProjectManager {
             var promises: Q.Promise<string>[] = [];
             
             fs.readdirSync(directoryFrom).forEach(file => {
-                var fileStats: fs.Stats = fs.statSync(file);
+                var fileStats: fs.Stats;
                 var fileInFrom: string = path.join(directoryFrom, file);
                 var fileInTo: string = path.join(directoryTo, file);
                 
+                try { fileStats = fs.statSync(fileInFrom); } catch (e) { /* fs.statSync throws if the file doesn't exist. */ }
+                
                 // If it is a file, just copy directly
-                if (fileStats.isFile()) promises.push(ProjectManager.copyFile(fileInFrom, fileInTo));
+                if (fileStats && fileStats.isFile()) {
+                    promises.push(ProjectManager.copyFile(fileInFrom, fileInTo, true));
+                }
                 else {
                     // If it is a directory, create the directory if it doesn't exist on the target and then copy over
                     if (!fs.existsSync(fileInTo)) mkdirp.sync(fileInTo);
@@ -55,14 +59,16 @@ class RNProjectManager extends ProjectManager {
                 }
             });
             
-            return Q.all<string>(promises);
+            // Chain promise so that it maintains Q.Promise<string> type instead of Q.Promise<string[]>
+            return Q.all<string>(promises).then(() => { return null; });
         }
 
         // React-Native adds a "com." to the front of the name you provide, so provide the namespace with the "com." removed
-        return ProjectManager.execChildProcess("react-native init " + appNamespace.slice("com.".length, appNamespace.length), { cwd: projectDirectory + "/.." })
+        return ProjectManager.execChildProcess("react-native init " + appName + " --package " + appNamespace, { cwd: projectDirectory }, true)
             // Copy over the template
             // Overwrites existing files with the files that are provided in the template (MainActivity.java, AppDelegate.m)
-            .then(copyDirectoryRecursively.bind(this, templatePath, projectDirectory));
+            .then<void>(copyDirectoryRecursively.bind(this, templatePath, path.join(projectDirectory, PluginTestingFramework.TestAppName)))
+            .then<string>(ProjectManager.execChildProcess.bind(undefined, "npm install " + PluginTestingFramework.thisPluginPath, { cwd: path.join(projectDirectory, PluginTestingFramework.TestAppName) }));
     }
     
     /**
@@ -71,12 +77,12 @@ class RNProjectManager extends ProjectManager {
     public setupScenario(projectDirectory: string, appId: string, templatePath: string, jsPath: string, targetPlatform: Platform.IPlatform, version?: string): Q.Promise<string> {
         var indexHtml = "index.js";
         var templateIndexPath = path.join(templatePath, indexHtml);
-        var destinationIndexPath = path.join(projectDirectory, indexHtml);
+        var destinationIndexPath = path.join(projectDirectory, PluginTestingFramework.TestAppName, indexHtml);
         
         var scenarioJs = "scenarios/" + jsPath;
         
-        var packageFile = eval("(" + fs.readFileSync("./package.json", "utf8") + ")");
-        var pluginVersion = packageFile.version;
+        // var packageFile = eval("(" + fs.readFileSync("./package.json", "utf8") + ")");
+        // var pluginVersion = packageFile.version;
         
         console.log("Setting up scenario " + jsPath + " in " + projectDirectory);
 
@@ -84,23 +90,26 @@ class RNProjectManager extends ProjectManager {
         return ProjectManager.copyFile(templateIndexPath, destinationIndexPath, true)
             .then<void>(ProjectManager.replaceString.bind(undefined, destinationIndexPath, ProjectManager.SERVER_URL_PLACEHOLDER, targetPlatform.getServerUrl()))
             .then<void>(ProjectManager.replaceString.bind(undefined, destinationIndexPath, ProjectManager.INDEX_JS_PLACEHOLDER, scenarioJs))
-            .then<void>(ProjectManager.replaceString.bind(undefined, destinationIndexPath, ProjectManager.CODE_PUSH_APP_VERSION_PLACEHOLDER, version));
+            .then<void>(ProjectManager.replaceString.bind(undefined, destinationIndexPath, ProjectManager.CODE_PUSH_APP_VERSION_PLACEHOLDER, version))
+            // Chain promise so that it maintains Q.Promise<string> type instead of Q.Promise<void>
+            .then<string>(() => { return null; });
     }
 
     /**
      * Creates a CodePush update package zip for a project.
      */
     public createUpdateArchive(projectDirectory: string, targetPlatform: Platform.IPlatform, isDiff?: boolean): Q.Promise<string> {
-        var bundleFolder: string = path.join(projectDirectory, "CodePush/");
+        var bundleFolder: string = path.join(projectDirectory, PluginTestingFramework.TestAppName, "CodePush/");
         var bundlePath: string = path.join(bundleFolder, "./main.jsbundle");
         var deferred = Q.defer<string>();
         fs.exists(bundleFolder, (exists) => {
             if (exists) fs.mkdirSync(bundleFolder);
-            deferred.resolve();
+            deferred.resolve(undefined);
         });
         return deferred.promise
-            .then(ProjectManager.execChildProcess.bind(this, "react-native bundle --platform " + targetPlatform.getName() + " --entry-file index." + targetPlatform.getName() + ".js --bundle-output " + bundlePath + " --assets-dest " + bundleFolder + " --dev false", { cwd: projectDirectory }))
-            .then(() => { return bundlePath; });
+            .then(ProjectManager.execChildProcess.bind(undefined, "react-native bundle --platform " + targetPlatform.getName() + " --entry-file index." + targetPlatform.getName() + ".js --bundle-output " + bundlePath + " --assets-dest " + bundleFolder + " --dev false",
+                { cwd: path.join(projectDirectory, PluginTestingFramework.TestAppName) }))
+            .then<string>(ProjectManager.archiveFolder.bind(undefined, bundleFolder, path.join(projectDirectory, PluginTestingFramework.TestAppName, "update.zip"), isDiff));
     }
     
     /** JSON file containing the platforms the plugin is currently installed for.
@@ -112,7 +121,7 @@ class RNProjectManager extends ProjectManager {
      *      "ios": false
      *  }
      */
-    private static platformJSONPath: string = "./platforms.json";
+    private static platformsJSON: string = "platforms.json";
     
     /**
      * Prepares a specific platform for tests.
@@ -120,41 +129,60 @@ class RNProjectManager extends ProjectManager {
     public preparePlatform(projectFolder: string, targetPlatform: Platform.IPlatform): Q.Promise<string> {
         var deferred= Q.defer<string>();
         
+        var platformsJSONPath = path.join(projectFolder, RNProjectManager.platformsJSON);
+        
         // We create a JSON file in the project folder to contain the installed platforms.
         // Check the file to see if the plugin for this platform has been installed and update the file appropriately.
-        fs.exists(this.platformJSONPath, (exists) => {
+        fs.exists(platformsJSONPath, (exists) => {
             if (!exists) {
-                fs.writeFileSync(this.platformJSONPath, "{}");
+                fs.writeFileSync(platformsJSONPath, "{}");
             }
             
-            var platformJSON = eval("(" + fs.readFileSync(this.platformJSONPath, "utf8") + ")");
-            if (platformJSON[targetPlatform.getName()]) deferred.reject("Platform " + targetPlatform.getName() + " is already installed!");
+            var platformJSON = eval("(" + fs.readFileSync(platformsJSONPath, "utf8") + ")");
+            if (platformJSON[targetPlatform.getName()] === true) deferred.reject("Platform " + targetPlatform.getName() + " is already installed!");
             else {
                 platformJSON[targetPlatform.getName()] = true;
-                fs.writeFileSync(this.platformJSONPath, JSON.stringify(platformJSON));
-                deferred.resolve();
+                fs.writeFileSync(platformsJSONPath, JSON.stringify(platformJSON));
+                deferred.resolve(undefined);
             }
         });
         
+        var innerProjectFolder: string = path.join(projectFolder, PluginTestingFramework.TestAppName);
+        
         // Install the CodePush plugin for the platform.
         return deferred.promise
-            .then(() => {
+            .then<string>(() => {
                 if (targetPlatform === Platform.Android.getInstance()) {
-                    // Link through RNPM
-                    return ProjectManager.execChildProcess("rnpm link react-native-code-push", { cwd: projectFolder })
-                        // NOTE: this "then" can be removed when RNPM supports dynamic linking
-                        .then(ProjectManager.replaceString.bind(undefined, path.join(projectFolder, "android", "app", "build.gradle"),
-                            "apply from: \"react.gradle\"",
-                            "apply from: \"react.gradle\"\napply from: \"" + path.join(projectFolder, "node_modules", "react-native-code-push", "android", "codepush.gradle") + "\""));
+                    // Add to android/app/build.gradle
+                    var buildGradle = path.join(innerProjectFolder, "android", "app", "build.gradle");
+                    ProjectManager.replaceString(buildGradle,
+                        "apply from: \"../../node_modules/react-native/react.gradle\"",
+                        "apply from: \"../../node_modules/react-native/react.gradle\"\napply from: \"" + path.join(innerProjectFolder, "node_modules", "react-native-code-push", "android", "codepush.gradle") + "\"");
+                    ProjectManager.replaceString(buildGradle,
+                        "// From node_modules",
+                        "\n    compile project(':react-native-code-push') // From node_modules");
+                    // Add to android/settings.gradle
+                    ProjectManager.replaceString(path.join(innerProjectFolder, "android", "settings.gradle"),
+                        "include ':app'",
+                        "include ':app', ':react-native-code-push'\nproject(':react-native-code-push').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-code-push/android/app')");
+                    // Replace the MainActivity.java with the correct server url and deployment key
+                    var mainActivity = path.join(innerProjectFolder, "android", "app", "src", "main", "java", "com", "microsoft", "codepush", "test", "MainActivity.java");
+                    ProjectManager.replaceString(mainActivity, ProjectManager.SERVER_URL_PLACEHOLDER, Platform.Android.getInstance().getServerUrl());
+                    ProjectManager.replaceString(mainActivity, ProjectManager.ANDROID_KEY_PLACEHOLDER, Platform.Android.getInstance().getDefaultDeploymentKey());
                 } else if (targetPlatform === Platform.IOS.getInstance()) {
-                    var iOSProject: string = path.join(projectFolder, "iOS");
+                    var iOSProject: string = path.join(innerProjectFolder, "iOS");
                     // Create and install the Podfile
                     return ProjectManager.execChildProcess("pod init", { cwd: iOSProject })
                         .then(ProjectManager.replaceString.bind(undefined, path.join(iOSProject, "Podfile"), "# use_frameworks!",
-                            "use_frameworks!\n  pod 'React', :path => './node_modules/react-native', :subspecs => [ 'Core', 'RCTImage', 'RCTNetwork', 'RCTText', 'RCTWebSocket', ]\n  pod 'CodePush', :path => './node_modules/react-native-code-push'"))
-                        .then(ProjectManager.execChildProcess("pod install", { cwd: iOSProject });
+                            "use_frameworks!\n  pod 'React', :path => '../node_modules/react-native', :subspecs => [ 'Core', 'RCTImage', 'RCTNetwork', 'RCTText', 'RCTWebSocket', ]\n  pod 'CodePush', :path => '../node_modules/react-native-code-push'"))
+                        // Put the IOS deployment key in the Info.plist
+                        .then(ProjectManager.replaceString.bind(undefined, path.join(iOSProject, PluginTestingFramework.TestAppName, "Info.plist"),
+                            "</dict>\n</plist>",
+                            "<key>CodePushDeploymentKey</key>\n\t<string>" + Platform.IOS.getInstance().getDefaultDeploymentKey() + "</string>\n\t<key>CodePushServerURL</key>\n\t<string>" + Platform.IOS.getInstance().getServerUrl() + "</string>\n\t</dict>\n</plist>"))
+                        // Install the Pod
+                        .then(ProjectManager.execChildProcess.bind(undefined, "pod install", { cwd: iOSProject }));
                 }
-            });
+            }, (error) => { /* The platform is already installed! */ console.log(error); return null; });
     }
     
     /**
@@ -171,7 +199,7 @@ class RNProjectManager extends ProjectManager {
     public runPlatform(projectFolder: string, targetPlatform: Platform.IPlatform): Q.Promise<string> {
         console.log("Running project in " + projectFolder + " on " + targetPlatform.getName());
         // Don't log the build output because iOS's build output is too verbose and overflows the buffer!
-        return ProjectManager.execChildProcess("react-native run-" + targetPlatform.getName(), { cwd: projectFolder }, false);
+        return ProjectManager.execChildProcess("react-native run-" + targetPlatform.getName(), { cwd: path.join(projectFolder, PluginTestingFramework.TestAppName) });
     }
 };
 
