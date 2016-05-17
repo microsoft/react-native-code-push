@@ -6,28 +6,36 @@
 }
 
 - (id)init:(NSString *)downloadFilePath
+operationQueue:(dispatch_queue_t)operationQueue
 progressCallback:(void (^)(long long, long long))progressCallback
 doneCallback:(void (^)(BOOL))doneCallback
 failCallback:(void (^)(NSError *err))failCallback {
     self.outputFileStream = [NSOutputStream outputStreamToFileAtPath:downloadFilePath
                                                               append:NO];
     self.receivedContentLength = 0;
+    self.operationQueue = operationQueue;
     self.progressCallback = progressCallback;
     self.doneCallback = doneCallback;
     self.failCallback = failCallback;
     return self;
 }
 
--(void)download:(NSString*)url {
+- (void)download:(NSString*)url {
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]
                                              cachePolicy:NSURLRequestUseProtocolCachePolicy
                                          timeoutInterval:60.0];
-    
     NSURLConnection *connection = [[NSURLConnection alloc] initWithRequest:request
                                                                   delegate:self
                                                           startImmediately:NO];
-    [connection scheduleInRunLoop:[NSRunLoop mainRunLoop]
-                          forMode:NSDefaultRunLoopMode];
+    if ([NSOperationQueue instancesRespondToSelector:@selector(setUnderlyingQueue:)]) {
+        NSOperationQueue *delegateQueue = [NSOperationQueue new];
+        delegateQueue.underlyingQueue = self.operationQueue;
+        [connection setDelegateQueue:delegateQueue];
+    } else {
+        [connection scheduleInRunLoop:[NSRunLoop mainRunLoop]
+                              forMode:NSDefaultRunLoopMode];
+    }
+
     [connection start];
 }
 
@@ -39,43 +47,43 @@ failCallback:(void (^)(NSError *err))failCallback {
     return nil;
 }
 
--(void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
+- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
     self.expectedContentLength = response.expectedContentLength;
     [self.outputFileStream open];
 }
 
--(void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
     if (self.receivedContentLength < 4) {
         for (int i = 0; i < [data length]; i++) {
             int headerOffset = (int)self.receivedContentLength + i;
             if (headerOffset >= 4) {
                 break;
             }
-            
+
             const char *bytes = [data bytes];
             _header[headerOffset] = bytes[i];
         }
     }
-    
+
     self.receivedContentLength = self.receivedContentLength + [data length];
-    
+
     NSInteger bytesLeft = [data length];
-    
+
     do {
         NSInteger bytesWritten = [self.outputFileStream write:[data bytes]
                                                      maxLength:bytesLeft];
         if (bytesWritten == -1) {
             break;
         }
-        
+
         bytesLeft -= bytesWritten;
     } while (bytesLeft > 0);
-    
+
     self.progressCallback(self.expectedContentLength, self.receivedContentLength);
-    
+
     // bytesLeft should not be negative.
     assert(bytesLeft >= 0);
-    
+
     if (bytesLeft) {
         [self.outputFileStream close];
         [connection cancel];
@@ -89,7 +97,7 @@ failCallback:(void (^)(NSError *err))failCallback {
     self.failCallback(error);
 }
 
--(void)connectionDidFinishLoading:(NSURLConnection *)connection {
+- (void)connectionDidFinishLoading:(NSURLConnection *)connection {
     // expectedContentLength might be -1 when NSURLConnection don't know the length(e.g. response encode with gzip)
     if (self.expectedContentLength > 0) {
         // We should have received all of the bytes if this is called.

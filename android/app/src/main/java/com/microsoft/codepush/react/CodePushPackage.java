@@ -71,6 +71,7 @@ public class CodePushPackage {
         try {
             return CodePushUtils.getWritableMapFromFile(statusFilePath);
         } catch (IOException e) {
+            // Should not happen.
             throw new CodePushUnknownException("Error getting current package info" , e);
         }
     }
@@ -79,6 +80,7 @@ public class CodePushPackage {
         try {
             CodePushUtils.writeReadableMapToFile(packageInfo, getStatusFilePath());
         } catch (IOException e) {
+            // Should not happen.
             throw new CodePushUnknownException("Error updating current package info" , e);
         }
     }
@@ -100,6 +102,10 @@ public class CodePushPackage {
         }
 
         WritableMap currentPackage = getCurrentPackage();
+        if (currentPackage == null) {
+            return null;
+        }
+
         String relativeBundlePath = CodePushUtils.tryGetString(currentPackage, RELATIVE_BUNDLE_PATH_KEY);
         if (relativeBundlePath == null) {
             return CodePushUtils.appendPathComponent(packageFolder, bundleFileName);
