@@ -23,7 +23,7 @@ var TestCodePush = React.createClass({
     checkUpdateSuccess(remotePackage) {
         if (remotePackage) {
             if (!remotePackage.failedInstall) {
-                this.setStateAndSendMessage("There is an update available. Remote package:" + JSON.stringify(remotePackage), "CHECK_UPDATE_AVAILABLE");
+                this.setStateAndSendMessage("There is an update available. Remote package:" + JSON.stringify(remotePackage), "CHECK_UPDATE_AVAILABLE", [remotePackage]);
             } else {
                 this.setStateAndSendMessage("An update is available but failed previously. Remote package:" + JSON.stringify(remotePackage), "UPDATE_FAILED_PREVIOUSLY");
             }

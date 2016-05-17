@@ -12,7 +12,7 @@ public class MainActivity extends ReactActivity {
 
     @Override
     protected String getJSBundleFile() {
-        return CodePush.getBundleUrl("index.android.bundle");
+        return CodePush.getBundleUrl();
     }
 
     /**

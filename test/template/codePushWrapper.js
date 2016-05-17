@@ -28,7 +28,8 @@ module.exports = {
     install: function(testApp, onSuccess, onError, installMode, minBackgroundDuration, localPackage) {
         return localPackage.install(installMode, minBackgroundDuration)
             .then(() => {
-                testApp.installSuccess();
+                // Since immediate installs cannot be reliably logged, we only log "UPDATE_INSTALLED" if it is a resume or restart update.
+                if (installMode !== CodePush.InstallMode.IMMEDIATE) testApp.installSuccess();
                 return onSuccess && onSuccess();
             }, () => {
                 testApp.installError();
@@ -39,8 +40,8 @@ module.exports = {
     checkAndInstall: function(testApp, onSuccess, onError, installMode, minBackgroundDuration) {
         return this.checkForUpdate(testApp,
             this.download.bind(undefined, testApp,
-                this.install.bind(undefined, testApp, undefined, undefined, installMode, minBackgroundDuration),
-                undefined));
+                this.install.bind(undefined, testApp, onSuccess, onError, installMode, minBackgroundDuration),
+                onError));
     },
     
     sync: function(testApp, onSyncStatus, onSyncError, options) {
