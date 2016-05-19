@@ -1,14 +1,26 @@
-// Type definitions for React Native CodePush module.
-// Project: https://github.com/Microsoft/react-native-code-push
+// Define an interal interface for Promise, so that
+// we don't need to reference an additional d.ts file.
+interface Promise<T> {
+    /**
+     * Append a rejection handler callback to the promise.
+     * 
+     * @param onRejected Callback to be triggered when the promise is rejected.
+     */
+    catch(onRejected?: (reason: any) => Promise<T>): Promise<T>;
+    
+    /**
+     * Append a fulfillment and/or rejection handler to the promise.
+     * 
+     * @param onFulfilled Callback to be triggered when the promise is fulfilled.
+     * @param onRejected Callback to be triggered when the promise is rejected.
+     */
+    then(onFulfilled?: (value: T) => void, onRejected?: (reason: any) => Promise<T>): Promise<T>;
+}
 
-/// <reference path="../react-native/react-native.d.ts" />
+export type DowloadProgressCallback = (progress: DownloadProgress) => void;
+export type SyncStatusChangedCallback = (status: CodePush.SyncStatus) => void;
 
-import ReactNativePromise = __React.Promise;
-
-type DowloadProgressCallback = (progress: DownloadProgress) => void;
-type SyncStatusChangedCallback = (status: CodePush.SyncStatus) => void;
-
-interface DownloadProgress {
+export interface DownloadProgress {
     /**
      * The total number of bytes expected to be received for this update.
      */
@@ -20,17 +32,17 @@ interface DownloadProgress {
     receivedBytes: number;
 }
 
-interface LocalPackage extends Package {
+export interface LocalPackage extends Package {
     /**
      * Installs the update by saving it to the location on disk where the runtime expects to find the latest version of the app.
      * 
      * @param installMode Indicates when you would like the update changes to take affect for the end-user.
      * @param minimumBackgroundDuration For resume-based installs, this specifies the number of seconds the app needs to be in the background before forcing a restart. Defaults to 0 if unspecified.
      */
-    install(installMode: CodePush.InstallMode, minimumBackgroundDuration?: number): ReactNativePromise<void>;
+    install(installMode: CodePush.InstallMode, minimumBackgroundDuration?: number): Promise<void>;
 }
     
-interface Package {
+export interface Package {
     /**
      * The app binary version that this update is dependent on. This is the value that was
      * specified via the appStoreVersion parameter when calling the CLI's release command.
@@ -84,13 +96,13 @@ interface Package {
     packageSize: number;
 }
     
-interface RemotePackage extends Package {
+export interface RemotePackage extends Package {
     /**
      * Downloads the available update from the CodePush service. 
      * 
      * @param downloadProgressCallback An optional callback that allows tracking the progress of the update while it is being downloaded.
      */
-    download(downloadProgressCallback?: DowloadProgressCallback): ReactNativePromise<LocalPackage>;
+    download(downloadProgressCallback?: DowloadProgressCallback): Promise<LocalPackage>;
     
     /**
      * The URL at which the package is available for download.
@@ -98,7 +110,7 @@ interface RemotePackage extends Package {
     downloadUrl: string;
 }
     
-interface SyncOptions {
+export interface SyncOptions {
     /**
      * Specifies the deployment key you want to query for an update against. By default, this value is derived from the Info.plist
      * file (iOS) and MainActivity.java file (Android), but this option allows you to override it from the script-side if you need to
@@ -135,7 +147,7 @@ interface SyncOptions {
     updateDialog?: UpdateDialog;
 }
     
-interface UpdateDialog {
+export interface UpdateDialog {
     /**
      * Indicates whether you would like to append the description of an available release to the
      * notification message which is displayed to the end user. Defaults to false.
@@ -192,19 +204,19 @@ declare namespace CodePush {
      * 
      * @param deploymentKey The deployment key to use to query the CodePush server for an update.
      */
-    function checkForUpdate(deploymentKey?: string): ReactNativePromise<RemotePackage>;  
+    function checkForUpdate(deploymentKey?: string): Promise<RemotePackage>;  
 
     /**
      * Retrieves the metadata for an installed update (e.g. description, mandatory).
      * 
      * @param updateState The state of the update you want to retrieve the metadata for. Defaults to UpdateState.RUNNING.
      */
-    function getUpdateMetadata(updateState?: UpdateState) : ReactNativePromise<LocalPackage>;
+    function getUpdateMetadata(updateState?: UpdateState) : Promise<LocalPackage>;
     
     /**
      * Notifies the CodePush runtime that an installed update is considered successful.
      */
-    function notifyAppReady(): ReactNativePromise<void>;
+    function notifyAppReady(): Promise<void>;
     
     /**
      * Immediately restarts the app.
@@ -220,7 +232,7 @@ declare namespace CodePush {
      * @param syncStatusChangedCallback An optional callback that allows tracking the status of the sync operation, as opposed to simply checking the resolved state via the returned Promise.
      * @param downloadProgressCallback An optional callback that allows tracking the progress of an update while it is being downloaded.
      */
-    function sync(options?: SyncOptions, syncStatusChangedCallback?: SyncStatusChangedCallback, downloadProgressCallback?: DowloadProgressCallback): ReactNativePromise<SyncStatus>;
+    function sync(options?: SyncOptions, syncStatusChangedCallback?: SyncStatusChangedCallback, downloadProgressCallback?: DowloadProgressCallback): Promise<SyncStatus>;
 
     /**
      * Indicates when you would like an installed update to actually be applied.
@@ -321,6 +333,4 @@ declare namespace CodePush {
     }
 }
 
-declare module "react-native-code-push" {
-    export default CodePush;
-}
+export default CodePush;
