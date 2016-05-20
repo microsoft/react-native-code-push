@@ -15,8 +15,9 @@ This plugin provides client-side integration for the [CodePush service](http://c
     * [JavaScript API](#javascript-api-reference)
     * [Objective-C API Reference (iOS)](#objective-c-api-reference-ios)
     * [Java API Reference (Android)](#java-api-reference-android)
-* [Example Apps](#example-apps)
 * [Debugging / Troubleshooting](#debugging--troubleshooting)
+* [Example Apps](#example-apps)
+* [Continuous Integration / Delivery](#continuous-integration---delivery)
 
 ## How does it work?
 
@@ -894,3 +895,10 @@ Now you'll be able to see CodePush logs in either debug or release mode, on both
 | Update not being displayed after restart | If you're not calling `sync` on app start (e.g. within `componentDidMount` of your root component), then you need to explicitly call `notifyApplicationReady` on app start, otherwise, the plugin will think your update failed and roll it back. |
 | Images dissappear after installing CodePush update | If your app is using the React Native assets system to load images (i.e. the `require(./foo.png)` syntax), then you **MUST** release your assets along with your JS bundle to CodePush. Follow [these instructions](#releasing-updates-javascript--images) to see how to do this. |
 | No JS bundle is being found when running your app against the iOS simulator | By default, React Native doesn't generate your JS bundle when running against the simulator. Therefore, if you're using `[CodePush bundleURL]`, and targetting the iOS simulator, you may be getting a `nil` result. This issue will be fixed in RN 0.22.0, but only for release builds. You can unblock this scenario right now by making [this change](https://github.com/facebook/react-native/commit/9ae3714f4bebdd2bcab4d7fdbf23acebdc5ed2ba) locally.
+
+## Continuous Integration / Delivery
+
+In addition to using the CodePush CLI to "manually" release updates, we want to help support a continuous delivery solution that allows you and your teams automatically release updates to the CodePush server whenever you push a change to your repo (or whenever your personal needs demands). To help simplify the process of adding a CodePuhs-based CD solition to your existing CI setup, refer to the following OSS products which provide integration with various CI servers:
+
+* [Visual Studio Team Services](https://marketplace.visualstudio.com/items?itemName=ms-vsclient.code-push)
+* [Travis CI](https://github.com/mondora/code-push-travis-cli)
