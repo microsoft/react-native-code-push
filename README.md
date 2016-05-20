@@ -17,7 +17,7 @@ This plugin provides client-side integration for the [CodePush service](http://c
     * [Java API Reference (Android)](#java-api-reference-android)
 * [Debugging / Troubleshooting](#debugging--troubleshooting)
 * [Example Apps](#example-apps)
-* [Continuous Integration / Delivery](#continuous-integration---delivery)
+* [Continuous Integration / Delivery](#continuous-integration--delivery)
 
 ## How does it work?
 
