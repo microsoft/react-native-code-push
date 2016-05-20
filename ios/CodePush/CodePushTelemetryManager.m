@@ -101,11 +101,13 @@ static NSString *const StatusKey = @"status";
 
 + (void)recordStatusReported:(NSDictionary *)statusReport
 {
-    if (statusReport[AppVersionKey]) {
-        [self saveStatusReportedForIdentifier:statusReport[AppVersionKey]];
-    } else if (statusReport[PackageKey]) {
-        NSString *packageIdentifier = [self getPackageStatusReportIdentifier:statusReport[PackageKey]];
-        [self saveStatusReportedForIdentifier:packageIdentifier];
+    if ([DeploymentSucceeded isEqualToString:statusReport[StatusKey]]) {
+        if (statusReport[AppVersionKey]) {
+            [self saveStatusReportedForIdentifier:statusReport[AppVersionKey]];
+        } else if (statusReport[PackageKey]) {
+            NSString *packageIdentifier = [self getPackageStatusReportIdentifier:statusReport[PackageKey]];
+            [self saveStatusReportedForIdentifier:packageIdentifier];
+        }
     }
 }
 

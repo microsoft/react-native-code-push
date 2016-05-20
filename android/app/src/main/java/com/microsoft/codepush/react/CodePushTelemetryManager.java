@@ -113,11 +113,13 @@ public class CodePushTelemetryManager {
     }
 
     public void recordStatusReported(ReadableMap statusReport) {
-        if (statusReport.hasKey(APP_VERSION_KEY)) {
-            saveStatusReportedForIdentifier(statusReport.getString(APP_VERSION_KEY));
-        } else if (statusReport.hasKey(PACKAGE_KEY)) {
-            String packageIdentifier = getPackageStatusReportIdentifier(statusReport.getMap(PACKAGE_KEY));
-            saveStatusReportedForIdentifier(packageIdentifier);
+        if (statusReport.hasKey(STATUS_KEY) && DEPLOYMENT_SUCCEEDED_STATUS.equals(statusReport.getString(STATUS_KEY))) {
+            if (statusReport.hasKey(APP_VERSION_KEY)) {
+                saveStatusReportedForIdentifier(statusReport.getString(APP_VERSION_KEY));
+            } else if (statusReport.hasKey(PACKAGE_KEY)) {
+                String packageIdentifier = getPackageStatusReportIdentifier(statusReport.getMap(PACKAGE_KEY));
+                saveStatusReportedForIdentifier(packageIdentifier);
+            }
         }
     }
 
