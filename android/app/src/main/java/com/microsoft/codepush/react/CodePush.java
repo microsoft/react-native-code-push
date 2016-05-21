@@ -375,6 +375,7 @@ public class CodePush implements ReactPackage {
             constants.put("codePushInstallModeImmediate", CodePushInstallMode.IMMEDIATE.getValue());
             constants.put("codePushInstallModeOnNextRestart", CodePushInstallMode.ON_NEXT_RESTART.getValue());
             constants.put("codePushInstallModeOnNextResume", CodePushInstallMode.ON_NEXT_RESUME.getValue());
+            constants.put("codePushInstallModeOnNextRestartOpportunity", CodePushInstallMode.ON_NEXT_RESTART_OPPORTUNITY.getValue());
 
             constants.put("codePushUpdateStateRunning", CodePushUpdateState.RUNNING.getValue());
             constants.put("codePushUpdateStatePending", CodePushUpdateState.PENDING.getValue());

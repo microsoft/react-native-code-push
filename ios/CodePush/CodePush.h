@@ -146,6 +146,7 @@ failCallback:(void (^)(NSError *err))failCallback;
 typedef NS_ENUM(NSInteger, CodePushInstallMode) {
     CodePushInstallModeImmediate,
     CodePushInstallModeOnNextRestart,
+    CodePushInstallModeOnNextRestartOpportunity,
     CodePushInstallModeOnNextResume
 };
 
