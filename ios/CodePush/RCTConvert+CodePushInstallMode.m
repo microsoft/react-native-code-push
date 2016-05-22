@@ -7,8 +7,7 @@
 
 RCT_ENUM_CONVERTER(CodePushInstallMode, (@{ @"codePushInstallModeImmediate": @(CodePushInstallModeImmediate),
                                             @"codePushInstallModeOnNextRestart": @(CodePushInstallModeOnNextRestart),
-                                            @"codePushInstallModeOnNextResume": @(CodePushInstallModeOnNextResume),
-                                            @"codePushInstallModeOnNextRestartOpportunity": @(CodePushInstallModeOnNextRestartOpportunity) }),
+                                            @"codePushInstallModeOnNextResume": @(CodePushInstallModeOnNextResume) }),
                    CodePushInstallModeImmediate, // Default enum value
                    integerValue)
 

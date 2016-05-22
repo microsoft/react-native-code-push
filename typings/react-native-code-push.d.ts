@@ -270,14 +270,7 @@ declare namespace CodePush {
          * Indicates that you want to install the update, but don't want to restart the
          * app until the next time the end user resumes it from the background.
          */
-        ON_NEXT_RESUME,
-
-        /**
-         * Indicates that you want to install the update, and restart the app as soon as possible.
-         * You can allow/forbid restarts with CodePush.allowRestart and CodePush.disallowRestart
-         * respectively.
-         */
-        ON_NEXT_RESTART_OPPORTUNITY
+        ON_NEXT_RESUME
     }
     
     /**

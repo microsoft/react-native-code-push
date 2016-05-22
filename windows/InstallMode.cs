@@ -4,7 +4,6 @@
     {
         Immediate,
         OnNextRestart,
-        OnNextResume,
-        OnNextRestartOpportunity
+        OnNextResume
     }
 }
