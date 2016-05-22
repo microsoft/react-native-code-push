@@ -2,22 +2,16 @@ let NativeCodePush = require("react-native").NativeModules.CodePush;
 
 const RestartManager = (() => {
     let _allowed = true;
-    let restartPending = false;
 
-    function tryRestart() {
-        if (restartPending && _allowed == true) {
-            NativeCodePush.restartApp(true);
+    function restartApp(onlyIfUpdateIsPending = false) {
+        if (_allowed) {
+            NativeCodePush.restartApp(onlyIfUpdateIsPending);
         }
-    }
-
-    function requestRestart() {
-        restartPending = true;
-        tryRestart();
     }
 
     function allow() {
         _allowed = true;
-        tryRestart();
+        restartApp(true);
     }
 
     function allowed() {
@@ -32,7 +26,7 @@ const RestartManager = (() => {
         allow,
         disallow,
         allowed,
-        requestRestart
+        restartApp,
     };
 })();
 

@@ -214,10 +214,6 @@ async function tryReportStatus(resumeListener) {
   }
 }
 
-function restartApp(onlyIfUpdateIsPending = false) {
-  NativeCodePush.restartApp(onlyIfUpdateIsPending);
-}
-
 var testConfig;
 
 // This function is only used for tests. Replaces the default SDK, configuration and native bridge
@@ -410,7 +406,7 @@ if (NativeCodePush) {
     log,
     notifyAppReady: notifyApplicationReady,
     notifyApplicationReady,
-    restartApp,
+    restartApp: RestartManager.restartApp,
     setUpTestDependencies,
     sync,
     disallowRestart: RestartManager.disallow,
@@ -420,7 +416,6 @@ if (NativeCodePush) {
       IMMEDIATE: NativeCodePush.codePushInstallModeImmediate, // Restart the app immediately
       ON_NEXT_RESTART: NativeCodePush.codePushInstallModeOnNextRestart, // Don't artificially restart the app. Allow the update to be "picked up" on the next app restart
       ON_NEXT_RESUME: NativeCodePush.codePushInstallModeOnNextResume, // Restart the app the next time it is resumed from the background
-      ON_NEXT_RESTART_OPPORTUNITY: NativeCodePush.codePushInstallModeOnNextRestartOpportunity
     },
     SyncStatus: {
       CHECKING_FOR_UPDATE: 0,

@@ -43,11 +43,8 @@ module.exports = (NativeCodePush) => {
       await NativeCodePush.installUpdate(this, installMode, minimumBackgroundDuration);
       updateInstalledCallback && updateInstalledCallback();
       if (installMode == NativeCodePush.codePushInstallModeImmediate) {
-        NativeCodePush.restartApp(false);
+        RestartManager.restartApp(false);
       } else {
-        if (installMode == NativeCodePush.codePushInstallModeOnNextRestartOpportunity) {
-          RestartManager.requestRestart();
-        }
         localPackage.isPending = true; // Mark the package as pending since it hasn't been applied yet
       }
     },
