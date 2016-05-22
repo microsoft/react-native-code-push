@@ -217,6 +217,24 @@ declare namespace CodePush {
      * Notifies the CodePush runtime that an installed update is considered successful.
      */
     function notifyAppReady(): Promise<void>;
+
+    /**
+     * Allow CodePush to automatically restart the app if an update is installed with 
+     * InstallMode.ON_NEXT_RESTART_OPPORTUNITY.
+     */
+    function allowRestart(): void;
+
+    /**
+     * Forbid CodePush to automatically restart the app if an update is installed with 
+     * InstallMode.ON_NEXT_RESTART_OPPORTUNITY.
+     */
+    function disallowRestart(): void;
+
+    /**
+     * Check if CodePush is allowed to automatically restart the app if an update is installed
+     * with InstallMode.ON_NEXT_RESTART_OPPORTUNITY.
+     */
+    function restartAllowed(): boolean;
     
     /**
      * Immediately restarts the app.
@@ -252,7 +270,14 @@ declare namespace CodePush {
          * Indicates that you want to install the update, but don't want to restart the
          * app until the next time the end user resumes it from the background.
          */
-        ON_NEXT_RESUME
+        ON_NEXT_RESUME,
+
+        /**
+         * Indicates that you want to install the update, and restart the app as soon as possible.
+         * You can allow/forbid restarts with CodePush.allowRestart and CodePush.disallowRestart
+         * respectively.
+         */
+        ON_NEXT_RESTART_OPPORTUNITY
     }
     
     /**
