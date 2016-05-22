@@ -383,7 +383,9 @@ AppState.addEventListener("change", (newState) => {
     newState === "active" && codePush.sync();
 });
 ```
-   
+
+*NOTE: If you are using [Redux](http://redux.js.org) and [Redux Saga](http://yelouafi.github.io/redux-saga/), you can alternatively use the [react-native-code-push-saga](http://github.com/lostintangent/react-native-code-push-saga) module, which allows you to customize when `sync` is called in simpler/more idiomatic way.*
+
 Additionally, if you would like to display an update confirmation dialog (an "active install"), configure when an available update is installed (e.g. force an immediate restart) or customize the update experience in any way, refer to the `sync` method's [API reference](#codepushsync) for information on how to tweak this default behavior.
 
 <a id="apple-note">*NOTE: While [Apple's developer agreement](https://developer.apple.com/programs/ios/information/iOS_Program_Information_4_3_15.pdf) fully allows performing over-the-air updates of JavaScript and assets (which is what enables CodePush!), it is against their policy for an app to display an update prompt. Because of this, we recommend that App Store-distributed apps don't enable the `updateDialog` option when calling `sync`, whereas Google Play and internally distributed apps (e.g. Enterprise, Fabric, HockeyApp) can choose to enable/customize it.*</a>
@@ -898,7 +900,7 @@ Now you'll be able to see CodePush logs in either debug or release mode, on both
 
 ## Continuous Integration / Delivery
 
-In addition to using the CodePush CLI to "manually" release updates, we want to help support a continuous delivery solution that allows you and your teams automatically release updates to the CodePush server whenever you push a change to your repo (or whenever your personal needs demands). To help simplify the process of adding a CodePuhs-based CD solition to your existing CI setup, refer to the following OSS products which provide integration with various CI servers:
+In addition to being able to use the CodePush CLI to "manually" release updates, we believe that it's important to create a repeatable and sustainable solution for contiously delivering updates to your app. That way, it's simple enough for you and/or your team to create and maintain the rhythm of performing agile deployments. In order to assist with seting up a CodePush-based CD pipeline, refer to the following integrations with various CI servers:
 
-* [Visual Studio Team Services](https://marketplace.visualstudio.com/items?itemName=ms-vsclient.code-push)
+* [Visual Studio Team Services](https://marketplace.visualstudio.com/items?itemName=ms-vsclient.code-push) - *NOTE: VSTS also has extensions for publishing to [HockeyApp](https://marketplace.visualstudio.com/items?itemName=ms.hockeyapp) and the [Google Play](https://github.com/Microsoft/google-play-vsts-extension) store, so it provides a pretty great mobile CD solution in general.*
 * [Travis CI](https://github.com/mondora/code-push-travis-cli)
