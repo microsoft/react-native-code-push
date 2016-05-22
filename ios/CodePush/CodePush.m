@@ -216,7 +216,6 @@ static NSString *bundleResourceName = @"main";
              @"codePushInstallModeOnNextRestart":@(CodePushInstallModeOnNextRestart),
              @"codePushInstallModeImmediate": @(CodePushInstallModeImmediate),
              @"codePushInstallModeOnNextResume": @(CodePushInstallModeOnNextResume),
-             @"codePushInstallModeOnNextRestartOpportunity": @(CodePushInstallModeOnNextRestartOpportunity),
 
              @"codePushUpdateStateRunning": @(CodePushUpdateStateRunning),
              @"codePushUpdateStatePending": @(CodePushUpdateStatePending),

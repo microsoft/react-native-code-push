@@ -19,7 +19,7 @@ let CodePushDemoApp = React.createClass({
     try {
       return await CodePush.sync(
         {
-          installMode: CodePush.InstallMode.ON_NEXT_RESTART_OPPORTUNITY,
+          installMode: CodePush.InstallMode.IMMEDIATE,
         },
         (syncStatus) => {
           switch(syncStatus) {

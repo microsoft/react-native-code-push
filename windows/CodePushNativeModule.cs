@@ -40,7 +40,6 @@ namespace CodePush.ReactNative
                     { "codePushInstallModeImmediate", InstallMode.Immediate },
                     { "codePushInstallModeOnNextResume", InstallMode.OnNextResume },
                     { "codePushInstallModeOnNextRestart", InstallMode.OnNextRestart },
-                    { "codePushInstallModeOnNextRestartOpportunity", InstallMode.OnNextRestartOpportunity },
                     { "codePushUpdateStateRunning", UpdateState.Running },
                     { "codePushUpdateStatePending", UpdateState.Pending },
                     { "codePushUpdateStateLatest", UpdateState.Lastest },
