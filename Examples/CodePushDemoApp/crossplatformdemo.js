@@ -19,8 +19,7 @@ let CodePushDemoApp = React.createClass({
     try {
       return await CodePush.sync(
         {
-          updateDialog: true,
-          installMode: CodePush.InstallMode.ON_NEXT_RESUME
+          installMode: CodePush.InstallMode.ON_NEXT_RESTART_OPPORTUNITY,
         },
         (syncStatus) => {
           switch(syncStatus) {
@@ -89,6 +88,15 @@ let CodePushDemoApp = React.createClass({
     return { };
   },
 
+  toggleAllowRestart() {
+    if (CodePush.restartAllowed()) {
+      CodePush.disallowRestart();
+    } else {
+      CodePush.allowRestart();
+    }
+    this.forceUpdate();
+  },
+
   render() {
     let syncView, syncButton, progressView;
 
@@ -119,6 +127,9 @@ let CodePushDemoApp = React.createClass({
         {syncView}
         {progressView}
         <Image style={styles.image} resizeMode={Image.resizeMode.contain} source={require('./images/laptop_phone_howitworks.png')}/>
+        <Button onPress={this.toggleAllowRestart}>
+          Restart { CodePush.restartAllowed() ? "allowed" : "forbidden"}
+        </Button>
       </View>
     );
   }
