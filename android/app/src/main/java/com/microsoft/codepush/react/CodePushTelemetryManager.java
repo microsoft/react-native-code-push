@@ -114,8 +114,9 @@ public class CodePushTelemetryManager {
 
     public void recordStatusReported(ReadableMap statusReport) {
         // We don't need to record rollback reports, so exit early if that's what was specified.
-        if (statusReport.hasKey(STATUS_KEY) && DEPLOYMENT_FAILED_STATUS.equals(statusReport.getString(STATUS_KEY)))
+        if (statusReport.hasKey(STATUS_KEY) && DEPLOYMENT_FAILED_STATUS.equals(statusReport.getString(STATUS_KEY))) {
             return;
+        }
         
         if (statusReport.hasKey(APP_VERSION_KEY)) {
             saveStatusReportedForIdentifier(statusReport.getString(APP_VERSION_KEY));
