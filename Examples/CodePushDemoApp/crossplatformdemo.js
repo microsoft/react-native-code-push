@@ -85,16 +85,16 @@ let CodePushDemoApp = React.createClass({
   },
 
   getInitialState() {
-    return { };
+    return { restartAllowed: true };
   },
 
   toggleAllowRestart() {
-    if (CodePush.restartAllowed()) {
+    if (this.state.restartAllowed) {
       CodePush.disallowRestart();
     } else {
       CodePush.allowRestart();
     }
-    this.forceUpdate();
+    this.setState({restartAllowed: !this.state.restartAllowed});
   },
 
   render() {
@@ -128,7 +128,7 @@ let CodePushDemoApp = React.createClass({
         {progressView}
         <Image style={styles.image} resizeMode={Image.resizeMode.contain} source={require('./images/laptop_phone_howitworks.png')}/>
         <Button onPress={this.toggleAllowRestart}>
-          Restart { CodePush.restartAllowed() ? "allowed" : "forbidden"}
+          Restart { this.state.restartAllowed ? "allowed" : "forbidden"}
         </Button>
       </View>
     );
