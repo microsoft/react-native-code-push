@@ -101,13 +101,16 @@ static NSString *const StatusKey = @"status";
 
 + (void)recordStatusReported:(NSDictionary *)statusReport
 {
-    if ([DeploymentSucceeded isEqualToString:statusReport[StatusKey]]) {
-        if (statusReport[AppVersionKey]) {
-            [self saveStatusReportedForIdentifier:statusReport[AppVersionKey]];
-        } else if (statusReport[PackageKey]) {
-            NSString *packageIdentifier = [self getPackageStatusReportIdentifier:statusReport[PackageKey]];
-            [self saveStatusReportedForIdentifier:packageIdentifier];
-        }
+    // We don't need to record rollback reports, so exit early if that's what was specified.
+    if ([DeploymentFailed isEqualToString:statusReport[StatusKey]]) {
+        return;
+    }
+    
+    if (statusReport[AppVersionKey]) {
+        [self saveStatusReportedForIdentifier:statusReport[AppVersionKey]];
+    } else if (statusReport[PackageKey]) {
+        NSString *packageIdentifier = [self getPackageStatusReportIdentifier:statusReport[PackageKey]];
+        [self saveStatusReportedForIdentifier:packageIdentifier];
     }
 }
 
