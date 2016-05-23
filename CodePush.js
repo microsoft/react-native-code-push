@@ -2,6 +2,8 @@ import { AcquisitionManager as Sdk } from "code-push/script/acquisition-sdk";
 import { Alert } from "./AlertAdapter";
 import requestFetchAdapter from "./request-fetch-adapter";
 import { AppState, Platform } from "react-native";
+import RestartManager from "./RestartManager";
+import log from './logging';
 
 let NativeCodePush = require("react-native").NativeModules.CodePush;
 const PackageMixins = require("./package-mixins")(NativeCodePush);
@@ -154,11 +156,6 @@ function getPromisifiedSdk(requestFetchAdapter, config) {
   return sdk;
 }
 
-/* Logs messages to console with the [CodePush] prefix */
-function log(message) {
-  console.log(`[CodePush] ${message}`)
-}
-
 // This ensures that notifyApplicationReadyInternal is only called once
 // in the lifetime of this module instance.
 const notifyApplicationReady = (() => {
@@ -211,10 +208,6 @@ async function tryReportStatus(resumeListener) {
   } else {
     resumeListener && AppState.removeEventListener("change", resumeListener);
   }
-}
-
-function restartApp(onlyIfUpdateIsPending = false) {
-  NativeCodePush.restartApp(onlyIfUpdateIsPending);
 }
 
 var testConfig;
@@ -409,9 +402,11 @@ if (NativeCodePush) {
     log,
     notifyAppReady: notifyApplicationReady,
     notifyApplicationReady,
-    restartApp,
+    restartApp: RestartManager.restartApp,
     setUpTestDependencies,
     sync,
+    disallowRestart: RestartManager.disallow,
+    allowRestart: RestartManager.allow,
     InstallMode: {
       IMMEDIATE: NativeCodePush.codePushInstallModeImmediate, // Restart the app immediately
       ON_NEXT_RESTART: NativeCodePush.codePushInstallModeOnNextRestart, // Don't artificially restart the app. Allow the update to be "picked up" on the next app restart
