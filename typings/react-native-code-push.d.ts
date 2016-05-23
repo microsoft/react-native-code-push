@@ -229,11 +229,6 @@ declare namespace CodePush {
     function disallowRestart(): void;
 
     /**
-     * Check if CodePush is allowed to restart the app.
-     */
-    function restartAllowed(): boolean;
-    
-    /**
      * Immediately restarts the app.
      * 
      * @param onlyIfUpdateIsPending Indicates whether you want the restart to no-op if there isn't currently a pending update.
