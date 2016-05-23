@@ -8,9 +8,11 @@ const RestartManager = (() => {
     function restartApp(onlyIfUpdateIsPending = false) {
         if (_allowed) {
             NativeCodePush.restartApp(onlyIfUpdateIsPending);
+            log('restaes');
         } else {
             log("restart not allowed");
             _restartPending = true;
+            return true;
         }
     }
 
@@ -28,10 +30,15 @@ const RestartManager = (() => {
         _allowed = false;
     }
 
+    function clearPendingRestart() {
+        _restartPending = false;
+    }
+
     return {
         allow,
         disallow,
         restartApp,
+        clearPendingRestart
     };
 })();
 

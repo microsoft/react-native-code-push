@@ -45,6 +45,7 @@ module.exports = (NativeCodePush) => {
       if (installMode == NativeCodePush.codePushInstallModeImmediate) {
         RestartManager.restartApp(false);
       } else {
+        RestartManager.clearPendingRestart();
         localPackage.isPending = true; // Mark the package as pending since it hasn't been applied yet
       }
     },
