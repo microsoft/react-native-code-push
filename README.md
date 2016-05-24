@@ -16,7 +16,7 @@ This plugin provides client-side integration for the [CodePush service](http://c
     * [Objective-C API Reference (iOS)](#objective-c-api-reference-ios)
     * [Java API Reference (Android)](#java-api-reference-android)
 * [Debugging / Troubleshooting](#debugging--troubleshooting)
-* [Example Apps](#example-apps)
+* [Example Apps / Starters](#example-apps--starters)
 * [Continuous Integration / Delivery](#continuous-integration--delivery)
 
 ## How does it work?
@@ -864,7 +864,7 @@ Constructs the CodePush client runtime and represents the `ReactPackage` instanc
 
 - __getBundleUrl(String bundleName)__ - Returns the path to the most recent version of your app's JS bundle file, using the specified resource name (e.g. `index.android.bundle`). This method has the same resolution behavior as the Objective-C equivalent described above.
 
-## Example Apps
+## Example Apps / Starters
 
 The React Native community has graciously created some awesome open source apps that can serve as examples for developers that are getting started. The following is a list of OSS React Native apps that are also using CodePush, and can therefore be used to see how others are using the service:
 
@@ -873,6 +873,8 @@ The React Native community has graciously created some awesome open source apps 
 * [GeoEncoding](https://github.com/LynxITDigital/GeoEncoding) - An app by [Lynx IT Digital](https://digital.lynxit.com.au) which demonstrates how to use numerous React Native components and modules.
 * [Math Facts](https://github.com/Khan/math-facts) - An app by Khan Academy to help memorize math facts more easily.
 * [MoveIt!](https://github.com/multunus/moveit-react-native) - An app by [Multunus](http://www.multunus.com) that allows employees within a company to track their work-outs.
+
+Additionally, if you're looking to get started with React Native + CodePush, and are looking for an awesome starter kit, you should check out [Pepperoni](http://getpepperoni.com/). It includes everything you'll need to get going quickly, with modern / best practices (including CodePush!).
 
 *Note: If you've developed a React Native app using CodePush, that is also open-source, please let us know. We would love to add it to this list!*
 
