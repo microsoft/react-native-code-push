@@ -118,7 +118,7 @@ We hope to eventually remove the need for steps #2-4, but in the meantime, RNPM 
     pod 'CodePush', :path => './node_modules/react-native-code-push'
     ```
     
-    CodePush depends on an internal copy of the `SSZipArchive` library, so if your project already includes that (either directly or via a transitive dependency), then you can install a version of CodePush which excludes its by using the following subspec:
+    CodePush depends on an internal copy of the `SSZipArchive` library, so if your project already includes that (either directly or via a transitive dependency), then you can install a version of CodePush which excludes it by using the following subspec:
     
     ```ruby
     pod 'CodePush', :path => './node_modules/react-native-code-push', :subspecs => ['NoZip']
