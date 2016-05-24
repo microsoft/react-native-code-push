@@ -118,12 +118,18 @@ We hope to eventually remove the need for steps #2-4, but in the meantime, RNPM 
     pod 'CodePush', :path => './node_modules/react-native-code-push'
     ```
     
-    *NOTE: The above path needs to be relative to your app's `Podfile`, so adjust it as neccessary.*
+    CodePush depends on an internal copy of the `SSZipArchive` library, so if your project already includes that (either directly or via a transitive dependency), then you can install a version of CodePush which excludes its by using the following subspec:
+    
+    ```ruby
+    pod 'CodePush', :path => './node_modules/react-native-code-push', :subspecs => ['NoZip']
+    ```
+    
+    *NOTE: The above paths needs to be relative to your app's `Podfile`, so adjust it as neccessary.*
     
 2. Run `pod install`
 
 *NOTE: The CodePush `.podspec` depends on the `React` pod, and so in order to ensure that it can correctly use the version of React Native that your app is built with, please make sure to define the `React` dependency in your app's `Podfile` as explained [here](http://facebook.github.io/react-native/docs/embedded-app-ios.html#install-react-native-using-cocoapods).*
-
+    
 #### Plugin Installation (iOS - Manual)
 
 1. Open your app's Xcode project
