@@ -182,15 +182,23 @@ async function tryReportStatus(resumeListener) {
     const previousDeploymentKey = statusReport.previousDeploymentKey || config.deploymentKey;
     try {
       if (statusReport.appVersion) {
+        log(`Reporting binary update (${statusReport.appVersion})`);
+        
         const sdk = getPromisifiedSdk(requestFetchAdapter, config);
         await sdk.reportStatusDeploy(/* deployedPackage */ null, /* status */ null, previousLabelOrAppVersion, previousDeploymentKey);
       } else {
+        const label = statusReport.package.label;
+        if (statusReport.status === "DeploymentSucceeded") {
+          log(`Reporting CodePush update success (${label})`);
+        } else {
+          log(`Reporting CodePush update rollback (${label})`);
+        }
+      
         config.deploymentKey = statusReport.package.deploymentKey;
         const sdk = getPromisifiedSdk(requestFetchAdapter, config);
         await sdk.reportStatusDeploy(statusReport.package, statusReport.status, previousLabelOrAppVersion, previousDeploymentKey);
       }
-
-      log(`Reported status: ${JSON.stringify(statusReport)}`);
+      
       NativeCodePush.recordStatusReported(statusReport);
       resumeListener && AppState.removeEventListener("change", resumeListener);
     } catch (e) {

@@ -1,44 +1,45 @@
-let log = require('./logging');
-let NativeCodePush = require("react-native").NativeModules.CodePush;
+const log = require("./logging");
+const NativeCodePush = require("react-native").NativeModules.CodePush;
 
 const RestartManager = (() => {
     let _allowed = true;
     let _restartPending = false;
 
+    function allow() {
+        log("Re-allowing restarts");
+        _allowed = true;
+        
+        if (_restartPending) {
+            log("Executing pending restart");
+            restartApp(true);
+        }
+    }
+    
+    function clearPendingRestart() {
+        _restartPending = false;
+    }
+    
+    function disallow() {
+        log("Disallowing restarts");
+        _allowed = false;
+    }
+
     function restartApp(onlyIfUpdateIsPending = false) {
         if (_allowed) {
             NativeCodePush.restartApp(onlyIfUpdateIsPending);
-            log('restaes');
+            log("Restarting app");
         } else {
-            log("restart not allowed");
+            log("Restart request queued until restarts are re-allowed");
             _restartPending = true;
             return true;
         }
     }
 
-    function allow() {
-        log("allow restart");
-        _allowed = true;
-        if (_restartPending) {
-            log("executing pending restart");
-            restartApp(true);
-        }
-    }
-
-    function disallow() {
-        log("disallow restart");
-        _allowed = false;
-    }
-
-    function clearPendingRestart() {
-        _restartPending = false;
-    }
-
     return {
         allow,
+        clearPendingRestart,        
         disallow,
-        restartApp,
-        clearPendingRestart
+        restartApp
     };
 })();
 
