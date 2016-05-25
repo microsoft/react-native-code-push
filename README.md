@@ -124,7 +124,8 @@ We hope to eventually remove the need for steps #2-4, but in the meantime, RNPM 
     pod 'CodePush', :path => './node_modules/react-native-code-push', :subspecs => ['NoZip']
     ```
     
-    *NOTE: The above paths needs to be relative to your app's `Podfile`, so adjust it as neccessary.*
+    *NOTE: The above paths needs to be relative to your app's `Podfile`, so adjust it as nec
+    cessary.*
     
 2. Run `pod install`
 
@@ -409,7 +410,7 @@ code-push release-react MyApp ios
 code-push release-react MyApp-Android android
 ```
 
-The `release-react` command enables such a simple workflow because it provides many sensible defaults (e.g. generating a release bundle, assuming your app's entry file on iOS is either `index.ios.js` or `index.js`). However, all of these defaults can be customized to allow incremental flexibility as neccessary, which makes it a good fit for most scenarios. 
+The `release-react` command enables such a simple workflow because it provides many sensible defaults (e.g. generating a release bundle, assuming your app's entry file on iOS is either `index.ios.js` or `index.js`). However, all of these defaults can be customized to allow incremental flexibility as necessary, which makes it a good fit for most scenarios. 
 
 ```shell
 # Release a mandatory update with a changelog
@@ -450,11 +451,11 @@ The following sections describe the shape and behavior of these APIs in detail:
 
 When you require `react-native-code-push`, the module object provides the following top-level methods:
 
-* [allowRestart](#codepushallowrestart): Re-allows programmatic restarts to occur as a result of an update being installed, and optionally, immediately restarts the app if a pending update had attempted to restart the app while restarts were disallowed. This is an advanced API and is only neccessary if your app explicitly disallowed restarts via the `disallowRestart` method.
+* [allowRestart](#codepushallowrestart): Re-allows programmatic restarts to occur as a result of an update being installed, and optionally, immediately restarts the app if a pending update had attempted to restart the app while restarts were disallowed. This is an advanced API and is only necessary if your app explicitly disallowed restarts via the `disallowRestart` method.
 
 * [checkForUpdate](#codepushcheckforupdate): Asks the CodePush service whether the configured app deployment has an update available. 
 
-* [disallowRestart](#codepushdisallowrestart): Temporarily disallows any programmatic restarts to occur as a result of a CodePush update being installed. This is an advanced API, and is useful when a component within your app (e.g. an onboarding wizard) needs to ensure that no end-user interruptions can occur during its lifetime.
+* [disallowRestart](#codepushdisallowrestart): Temporarily disallows any programmatic restarts to occur as a result of a CodePush update being installed. This is an advanced API, and is useful when a component within your app (e.g. an onboarding process) needs to ensure that no end-user interruptions can occur during its lifetime.
 
 * [getCurrentPackage](#codepushgetcurrentpackage): Retrieves the metadata about the currently installed update (e.g. description, installation time, size). *NOTE: As of `v1.10.3-beta` of the CodePush module, this method is deprecated in favor of [`getUpdateMetadata`](#codepushgetupdatemetadata)*.
 
@@ -474,7 +475,7 @@ codePush.allowRestart(): void;
 
 Re-allows programmatic restarts to occur, that would have otherwise been rejected due to a previous call to `disallowRestart`. If `disallowRestart` was never called in the first place, then calling this method will simply result in a no-op.
 
-If a CodePush update is currently pending, which attempted to restart the app (e.g. it used `InstallMode.IMMEDIATE`), but was blocked due to `disallowRestart` having been called, then calling `allowRestart` will result in an immediate restart. This allows the update to be applied as soon as possible, without interrupting the end user during critical workflows (e.g. an onboarding wizard).
+If a CodePush update is currently pending, which attempted to restart the app (e.g. it used `InstallMode.IMMEDIATE`), but was blocked due to `disallowRestart` having been called, then calling `allowRestart` will result in an immediate restart. This allows the update to be applied as soon as possible, without interrupting the end user during critical workflows (e.g. an onboarding process).
 
 For example, calling `allowRestart` would trigger an immediate restart if either of the three scenarios mentioned in the [`disallowRestart` docs](#codepushdisallowrestart) occured after `disallowRestart` was called. However, calling `allowRestart` wouldn't trigger a restart if the following were true:
 
@@ -484,9 +485,9 @@ For example, calling `allowRestart` would trigger an immediate restart if either
 
 3. There is currently a pending CodePush update, but it was installed via `InstallMode.ON_NEXT_RESUME` and the app hasn't been put into the background yet, and therefore, there isn't a need to programmatically restart yet.
 
-3. No calls to `restartApp` were made since the last time `disallowRestart` was called.
+4. No calls to `restartApp` were made since the last time `disallowRestart` was called.
 
-This behavior ensures that no restarts will be triggered as a result of calling `reallowRestart` unless one was explictly requested during the disallowed period. In this way, `allowRestart` is somewhat similar to calling `restartApp(true)`, except the former will only trigger a restart if the currently pending update wanted to restart, whereas the later would restart as long as an update is pending.
+This behavior ensures that no restarts will be triggered as a result of calling `allowRestart` unless one was explictly requested during the disallowed period. In this way, `allowRestart` is somewhat similar to calling `restartApp(true)`, except the former will only trigger a restart if the currently pending update wanted to restart, whereas the later would restart as long as an update is pending.
 
 See [disallowRestart](#codepushdisallowrestart) for an example of how this method can be used.
 
@@ -535,16 +536,16 @@ Temporarily disallows programmatic restarts to occur as a result of either of fo
 
 *NOTE: #1 and #2 effectively work by calling `restartApp` for you, so you can think of `disallowRestart` as blocking any call to `restartApp`, regardless if your app calls it directly or indirectly.*
 
-After calling this method, any calls to `sync` would still be allowed to check for an update, download it and install it, but an attempt to restart the app would be queued until `reallowRestart` is called. This way, the restart request is captured and can be "flushed" whenever you want to allow it to occur.
+After calling this method, any calls to `sync` would still be allowed to check for an update, download it and install it, but an attempt to restart the app would be queued until `allowRestart` is called. This way, the restart request is captured and can be "flushed" whenever you want to allow it to occur.
 
-This is an advanced API, and is primarily useful when individual components within your app (e.g. an onboarding wizard) need to ensure that no end-user interruptions can occur during their lifetime, while continuing to allow the app to keep syncing with the CodePush server at its own pace and using whatever install modes are appropriate. This has the benefit of allowing the app to discover and download available updates as soon as possible, while also preventing any disruptions during key end-user experiences.
+This is an advanced API, and is primarily useful when individual components within your app (e.g. an onboarding process) need to ensure that no end-user interruptions can occur during their lifetime, while continuing to allow the app to keep syncing with the CodePush server at its own pace and using whatever install modes are appropriate. This has the benefit of allowing the app to discover and download available updates as soon as possible, while also preventing any disruptions during key end-user experiences.
 
-As an alternative, you could also choose to simply use `InstallMode.ON_NEXT_RESTART` whenever calling `sync` (which will never attempt to programmatically restart the app), and then explicity calling `restartApp` at points in your app that you know it is "safe" to do so. `disallowRestart` provides an alternative approach to this when the code that sychronizes with the CodePush server is seperate from the code/comopents that want to enforce a no-restart policy.
+As an alternative, you could also choose to simply use `InstallMode.ON_NEXT_RESTART` whenever calling `sync` (which will never attempt to programmatically restart the app), and then explicity calling `restartApp` at points in your app that you know it is "safe" to do so. `disallowRestart` provides an alternative approach to this when the code that synchronizes with the CodePush server is separate from the code/components that want to enforce a no-restart policy.
 
 Example Usage: 
 
 ```javascript
-class OnboardingWizard extends Component {
+class OnboardingProcess extends Component {
     ...
     
     componentWillMount() {
@@ -899,7 +900,7 @@ The `CodePush` class' methods can be thought of as composite resolvers which alw
 
 4. Repeat #2 and #3 as the CodePush releases and app store releases continue on into infinity (and beyond?)
 
-Because of this behavior, you can safely deploy updates to both the app store(s) and CodePush as neccesary, and rest assured that your end-users will always get the most recent version.  
+Because of this behavior, you can safely deploy updates to both the app store(s) and CodePush as necesary, and rest assured that your end-users will always get the most recent version.  
 
 ##### Methods
 
