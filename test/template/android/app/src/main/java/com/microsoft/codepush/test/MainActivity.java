@@ -21,7 +21,7 @@ public class MainActivity extends ReactActivity {
      */
     @Override
     protected String getMainComponentName() {
-        return "TestCodePush";
+        return "CODE_PUSH_TEST_APP_NAME";
     }
 
     /**

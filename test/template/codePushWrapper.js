@@ -6,52 +6,44 @@ module.exports = {
     checkForUpdate: function(testApp, onSuccess, onError, deploymentKey) {
         return CodePush.checkForUpdate(deploymentKey)
             .then((remotePackage) => {
-                testApp.checkUpdateSuccess(remotePackage);
-                return onSuccess && onSuccess(remotePackage);
+                return testApp.checkUpdateSuccess(remotePackage).then(() => { return onSuccess && onSuccess(remotePackage); });
             }, (error) => {
-                testApp.checkUpdateError(error);
-                return onError && onError(error);
+                return testApp.checkUpdateError(error).then(() => { return onError && onError(error); });
             });
     },
     
     download: function(testApp, onSuccess, onError, remotePackage) {
         return remotePackage.download()
             .then((localPackage) => {
-                testApp.downloadSuccess(localPackage);
-                return onSuccess && onSuccess(localPackage);
+                return testApp.downloadSuccess(localPackage).then(() => { return onSuccess && onSuccess(localPackage); });
             }, (error) => {
-                testApp.downloadError(error);
-                return onError && onError(error);
+                return testApp.downloadError(error).then(() => { return onError && onError(error); });
             });
     },
     
     install: function(testApp, onSuccess, onError, installMode, minBackgroundDuration, localPackage) {
         return localPackage.install(installMode, minBackgroundDuration)
             .then(() => {
-                // Since immediate installs cannot be reliably logged, we only log "UPDATE_INSTALLED" if it is a resume or restart update.
-                if (installMode !== CodePush.InstallMode.IMMEDIATE) testApp.installSuccess();
+                // Since immediate installs cannot be reliably logged (due to async network calls), we only log "UPDATE_INSTALLED" if it is a resume or restart update.
+                if (installMode !== CodePush.InstallMode.IMMEDIATE) return testApp.installSuccess().then(() => { return onSuccess && onSuccess(); });
                 return onSuccess && onSuccess();
             }, () => {
-                testApp.installError();
-                return onError && onError();
+                return testApp.installError().then(() => { return onError && onError(); });
             });
     },
     
     checkAndInstall: function(testApp, onSuccess, onError, installMode, minBackgroundDuration) {
-        return this.checkForUpdate(testApp,
-            this.download.bind(undefined, testApp,
-                this.install.bind(undefined, testApp, onSuccess, onError, installMode, minBackgroundDuration),
-                onError));
+        var installUpdate = this.install.bind(this, testApp, onSuccess, onError, installMode, minBackgroundDuration);
+        var downloadUpdate = this.download.bind(this, testApp, installUpdate, onError);
+        return this.checkForUpdate(testApp, downloadUpdate, onError);
     },
     
     sync: function(testApp, onSyncStatus, onSyncError, options) {
         return CodePush.sync(options)
             .then((status) => {
-                testApp.onSyncStatus(status);
-                return onSyncStatus(status);
+                return testApp.onSyncStatus(status).then(() => { return onSyncStatus(status); });
             }, (error) => {
-                testApp.onSyncError(error);
-                return onSyncError(error);
+                return testApp.onSyncError(error).then(() => { return onSyncError(error); });
             });
     }
 }

@@ -114,6 +114,7 @@ public class CodePush implements ReactPackage {
         initializeUpdateAfterRestart();
     }
 
+    // USED FOR TESTING SO THAT IT CAN CONNECT TO DEBUG SERVER
     public CodePush(String deploymentKey, Activity mainActivity, boolean isDebugMode, String serverUrl) {
         this(deploymentKey, mainActivity, isDebugMode);
         this.serverUrl = serverUrl;
@@ -512,6 +513,10 @@ public class CodePush implements ReactPackage {
                         e.printStackTrace();
                         promise.reject(e);
                     } catch (CodePushInvalidUpdateException e) {
+                        e.printStackTrace();
+                        saveFailedUpdate(updatePackage);
+                        promise.reject(e);
+                    } catch (CodePushMalformedDataException e) {
                         e.printStackTrace();
                         saveFailedUpdate(updatePackage);
                         promise.reject(e);
