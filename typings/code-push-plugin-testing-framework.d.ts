@@ -9,13 +9,14 @@ declare module 'code-push-plugin-testing-framework/script/platform' {
 	     */
 	    getName(): string;
 	    /**
+	     * The command line flag used to determine whether or not this platform should run.
+	     * Runs when the flag is present, doesn't run otherwise.
+	     */
+	    getCommandLineFlagName(): string;
+	    /**
 	     * Gets the server url used for testing.
 	     */
 	    getServerUrl(): string;
-	    /**
-	     * Gets the root of the platform www folder used for creating update packages.
-	     */
-	    getPlatformWwwPath(projectDirectory: string): string;
 	    /**
 	     * Gets an IEmulatorManager that is used to control the emulator during the tests.
 	     */
@@ -30,6 +31,10 @@ declare module 'code-push-plugin-testing-framework/script/platform' {
 	 */
 	export interface IEmulatorManager {
 	    /**
+	     * Returns the target emulator, which is specified through the command line.
+	     */
+	    getTargetEmulator(): Q.Promise<string>;
+	    /**
 	     * Boots the target emulator.
 	     */
 	    bootEmulator(restartEmulators: boolean): Q.Promise<string>;
@@ -48,7 +53,7 @@ declare module 'code-push-plugin-testing-framework/script/platform' {
 	    /**
 	     * Navigates away from the current app, waits for a delay (defaults to 1 second), then navigates to the specified app.
 	     */
-	    resumeApplication(appId: string, delayBeforeResumingMs: number): Q.Promise<string>;
+	    resumeApplication(appId: string, delayBeforeResumingMs?: number): Q.Promise<string>;
 	    /**
 	     * Prepares the emulator for a test.
 	     */
@@ -62,69 +67,72 @@ declare module 'code-push-plugin-testing-framework/script/platform' {
 	 * Android implementations of IPlatform.
 	 */
 	export class Android implements IPlatform {
-	    private static instance;
 	    private emulatorManager;
 	    private serverUrl;
 	    constructor(emulatorManager: IEmulatorManager);
-	    static getInstance(): Android;
+	    /**
+	     * Gets the platform name. (e.g. "android" for the Android platform).
+	     */
 	    getName(): string;
+	    /**
+	     * The command line flag used to determine whether or not this platform should run.
+	     * Runs when the flag is present, doesn't run otherwise.
+	     */
+	    getCommandLineFlagName(): string;
+	    private static ANDROID_SERVER_URL_OPTION_NAME;
+	    private static DEFAULT_ANDROID_SERVER_URL;
 	    /**
 	     * Gets the server url used for testing.
 	     */
 	    getServerUrl(): string;
-	    getPlatformWwwPath(projectDirectory: string): string;
+	    /**
+	     * Gets an IEmulatorManager that is used to control the emulator during the tests.
+	     */
 	    getEmulatorManager(): IEmulatorManager;
+	    /**
+	     * Gets the default deployment key.
+	     */
 	    getDefaultDeploymentKey(): string;
 	}
 	/**
 	 * IOS implementation of IPlatform.
 	 */
 	export class IOS implements IPlatform {
-	    private static instance;
 	    private emulatorManager;
 	    private serverUrl;
 	    constructor(emulatorManager: IEmulatorManager);
-	    static getInstance(): IOS;
+	    /**
+	     * Gets the platform name. (e.g. "android" for the Android platform).
+	     */
 	    getName(): string;
+	    /**
+	     * The command line flag used to determine whether or not this platform should run.
+	     * Runs when the flag is present, doesn't run otherwise.
+	     */
+	    getCommandLineFlagName(): string;
+	    private static IOS_SERVER_URL_OPTION_NAME;
+	    private static DEFAULT_IOS_SERVER_URL;
 	    /**
 	     * Gets the server url used for testing.
 	     */
 	    getServerUrl(): string;
-	    getPlatformWwwPath(projectDirectory: string): string;
+	    /**
+	     * Gets an IEmulatorManager that is used to control the emulator during the tests.
+	     */
 	    getEmulatorManager(): IEmulatorManager;
+	    /**
+	     * Gets the default deployment key.
+	     */
 	    getDefaultDeploymentKey(): string;
 	}
-	export class IOSEmulatorManager implements IEmulatorManager {
-	    /**
-	     * Boots the target emulator.
-	     */
-	    bootEmulator(restartEmulators: boolean): Q.Promise<string>;
-	    /**
-	     * Launches an already installed application by app id.
-	     */
-	    launchInstalledApplication(appId: string): Q.Promise<string>;
-	    /**
-	     * Ends a running application given its app id.
-	     */
-	    endRunningApplication(appId: string): Q.Promise<string>;
-	    /**
-	     * Restarts an already installed application by app id.
-	     */
-	    restartApplication(appId: string): Q.Promise<string>;
-	    /**
-	     * Navigates away from the current app, waits for a delay (defaults to 1 second), then navigates to the specified app.
-	     */
-	    resumeApplication(appId: string, delayBeforeResumingMs?: number): Q.Promise<string>;
-	    /**
-	     * Prepares the emulator for a test.
-	     */
-	    prepareEmulatorForTest(appId: string): Q.Promise<string>;
-	    /**
-	     * Uninstalls the app from the emulator.
-	     */
-	    uninstallApplication(appId: string): Q.Promise<string>;
-	}
 	export class AndroidEmulatorManager implements IEmulatorManager {
+	    private static ANDROID_EMULATOR_OPTION_NAME;
+	    private static DEFAULT_ANDROID_EMULATOR;
+	    private targetEmulator;
+	    /**
+	     * Returns the target emulator, which is specified through the command line.
+	     */
+	    getTargetEmulator(): Q.Promise<string>;
 	    /**
 	     * Boots the target emulator.
 	     */
@@ -154,19 +162,41 @@ declare module 'code-push-plugin-testing-framework/script/platform' {
 	     */
 	    uninstallApplication(appId: string): Q.Promise<string>;
 	}
-	/**
-	 * Supported platforms resolver.
-	 */
-	export class PlatformResolver {
-	    private static supportedPlatforms;
+	export class IOSEmulatorManager implements IEmulatorManager {
+	    private static IOS_EMULATOR_OPTION_NAME;
+	    private targetEmulator;
 	    /**
-	     * Given the cordova name of a platform, this method returns the IPlatform associated with it.
+	     * Returns the target emulator, which is specified through the command line.
 	     */
-	    static resolvePlatforms(cordovaPlatformNames: string[]): IPlatform[];
+	    getTargetEmulator(): Q.Promise<string>;
 	    /**
-	     * Given the cordova name of a platform, this method returns the IPlatform associated with it.
+	     * Boots the target emulator.
 	     */
-	    static resolvePlatform(cordovaPlatformName: string): IPlatform;
+	    bootEmulator(restartEmulators: boolean): Q.Promise<string>;
+	    /**
+	     * Launches an already installed application by app id.
+	     */
+	    launchInstalledApplication(appId: string): Q.Promise<string>;
+	    /**
+	     * Ends a running application given its app id.
+	     */
+	    endRunningApplication(appId: string): Q.Promise<string>;
+	    /**
+	     * Restarts an already installed application by app id.
+	     */
+	    restartApplication(appId: string): Q.Promise<string>;
+	    /**
+	     * Navigates away from the current app, waits for a delay (defaults to 1 second), then navigates to the specified app.
+	     */
+	    resumeApplication(appId: string, delayBeforeResumingMs?: number): Q.Promise<string>;
+	    /**
+	     * Prepares the emulator for a test.
+	     */
+	    prepareEmulatorForTest(appId: string): Q.Promise<string>;
+	    /**
+	     * Uninstalls the app from the emulator.
+	     */
+	    uninstallApplication(appId: string): Q.Promise<string>;
 	}
 
 }
@@ -177,17 +207,10 @@ declare module 'code-push-plugin-testing-framework/script/projectManager' {
 	 * In charge of project related operations.
 	 */
 	export class ProjectManager {
-	    static ANDROID_KEY_PLACEHOLDER: string;
-	    static IOS_KEY_PLACEHOLDER: string;
-	    static SERVER_URL_PLACEHOLDER: string;
-	    static INDEX_JS_PLACEHOLDER: string;
-	    static CODE_PUSH_APP_VERSION_PLACEHOLDER: string;
-	    static CODE_PUSH_APP_ID_PLACEHOLDER: string;
-	    static PLUGIN_VERSION_PLACEHOLDER: string;
 	    static DEFAULT_APP_VERSION: string;
 	    private static NOT_IMPLEMENTED_ERROR_MSG;
 	    /**
-	     * Returns the name of the plugin being tested, ie Cordova or React-Native.
+	     * Returns the name of the plugin being tested, for example Cordova or React-Native.
 	     *
 	     * Overwrite this in your implementation!
 	     */
@@ -216,168 +239,19 @@ declare module 'code-push-plugin-testing-framework/script/projectManager' {
 	     *
 	     * Overwrite this in your implementation!
 	     */
-	    preparePlatform(projectFolder: string, targetPlatform: platform.IPlatform): Q.Promise<string>;
+	    preparePlatform(projectDirectory: string, targetPlatform: platform.IPlatform): Q.Promise<string>;
 	    /**
 	     * Cleans up a specific platform after tests.
 	     *
 	     * Overwrite this in your implementation!
 	     */
-	    cleanupAfterPlatform(projectFolder: string, targetPlatform: platform.IPlatform): Q.Promise<string>;
+	    cleanupAfterPlatform(projectDirectory: string, targetPlatform: platform.IPlatform): Q.Promise<string>;
 	    /**
 	     * Runs the test app on the given target / platform.
 	     *
 	     * Overwrite this in your implementation!
 	     */
-	    runPlatform(projectFolder: string, targetPlatform: platform.IPlatform): Q.Promise<string>;
-	    /**
-	     * Launch the test app on the given target / platform.
-	     */
-	    launchApplication(appNamespace: string, targetPlatform: platform.IPlatform): Q.Promise<string>;
-	    /**
-	     * Kill the test app on the given target / platform.
-	     */
-	    endRunningApplication(appNamespace: string, targetPlatform: platform.IPlatform): Q.Promise<string>;
-	    /**
-	     * Prepares the emulator for a test.
-	     */
-	    prepareEmulatorForTest(appNamespace: string, targetPlatform: platform.IPlatform): Q.Promise<string>;
-	    /**
-	     * Uninstalls the app from the emulator.
-	     */
-	    uninstallApplication(appNamespace: string, targetPlatform: platform.IPlatform): Q.Promise<string>;
-	    /**
-	     * Stops and restarts an application specified by its namespace identifier.
-	     */
-	    restartApplication(appNamespace: string, targetPlatform: platform.IPlatform): Q.Promise<string>;
-	    /**
-	     * Navigates away from the application and then navigates back to it.
-	     */
-	    resumeApplication(appNamespace: string, targetPlatform: platform.IPlatform, delayBeforeResumingMs?: number): Q.Promise<string>;
-	    /**
-	     * Executes a child process and logs its output to the console and returns its output in the promise as a string
-	     */
-	    static execChildProcess(command: string, options?: {
-	        cwd?: string;
-	        stdio?: any;
-	        customFds?: any;
-	        env?: any;
-	        encoding?: string;
-	        timeout?: number;
-	        maxBuffer?: number;
-	        killSignal?: string;
-	    }, logOutput?: boolean): Q.Promise<string>;
-	    /**
-	     * Replaces a regex in a file with a given string.
-	     */
-	    static replaceString(filePath: string, regex: string, replacement: string): void;
-	    /**
-	     * Copies a file from a given location to another.
-	     */
-	    static copyFile(source: string, destination: string, overwrite: boolean): Q.Promise<string>;
-	    /**
-	     * Archives the contents of targetFolder and puts it in an archive at archivePath.
-	     */
-	    static archiveFolder(targetFolder: string, archivePath: string, isDiff: boolean): Q.Promise<string>;
-	}
-
-}
-declare module 'code-push-plugin-testing-framework/script/testUtil' {
-	import Q = require("q");
-	export class TestUtil {
-	    static ANDROID_PLATFORM_OPTION_NAME: string;
-	    static ANDROID_SERVER_URL: string;
-	    static defaultAndroidServerUrl: string;
-	    static ANDROID_EMULATOR: string;
-	    static defaultAndroidEmulator: string;
-	    static IOS_PLATFORM_OPTION_NAME: string;
-	    static IOS_SERVER_URL: string;
-	    static defaultIOSServerUrl: string;
-	    static IOS_EMULATOR: string;
-	    static SHOULD_USE_WKWEBVIEW: string;
-	    static templatePath: string;
-	    static thisPluginPath: string;
-	    static TEST_RUN_DIRECTORY: string;
-	    private static defaultTestRunDirectory;
-	    static TEST_UPDATES_DIRECTORY: string;
-	    private static defaultUpdatesDirectory;
-	    static CORE_TESTS_ONLY: string;
-	    static PULL_FROM_NPM: string;
-	    static SETUP: string;
-	    static RESTART_EMULATORS: string;
-	    /**
-	     * Reads the directory in which the test project is.
-	     */
-	    static readTestRunDirectory(): string;
-	    /**
-	     * Reads the directory in which the test project for updates is.
-	     */
-	    static readTestUpdatesDirectory(): string;
-	    /**
-	     * Reads the path of the plugin (whether or not we should use the local copy or pull from npm)
-	     */
-	    static readPluginPath(): string;
-	    /**
-	     * Reads the Android server url to use
-	     */
-	    static readAndroidServerUrl(): string;
-	    /**
-	     * Reads the iOS server url to use
-	     */
-	    static readIOSServerUrl(): string;
-	    /**
-	     * Reads the Android emulator to use
-	     */
-	    static readAndroidEmulator(): string;
-	    /**
-	     * Reads the iOS emulator to use
-	     */
-	    static readIOSEmulator(): Q.Promise<string>;
-	    /**
-	     * Reads whether or not emulators should be restarted.
-	     */
-	    static readRestartEmulators(): boolean;
-	    /**
-	     * Reads whether or not only core tests should be run.
-	     */
-	    static readCoreTestsOnly(): boolean;
-	    /**
-	     * Reads whether or not to setup the test project directories.
-	     */
-	    static readShouldSetup(): boolean;
-	    /**
-	     * Reads the test target platforms.
-	     */
-	    static readTargetPlatforms(): string[];
-	    /**
-	     * Reads if we should use the WkWebView or the UIWebView or run tests for both.
-	     * 0 for UIWebView, 1 for WkWebView, 2 for both
-	     */
-	    static readShouldUseWkWebView(): number;
-	    /**
-	     * Reads command line options passed to mocha.
-	     */
-	    private static readMochaCommandLineOption(optionName);
-	    /**
-	     * Reads command line options passed to mocha.
-	     */
-	    private static readMochaCommandLineFlag(optionName);
-	    /**
-	     * Executes a child process returns its output as a string.
-	     */
-	    static getProcessOutput(command: string, options?: {
-	        cwd?: string;
-	        stdio?: any;
-	        customFds?: any;
-	        env?: any;
-	        encoding?: string;
-	        timeout?: number;
-	        maxBuffer?: number;
-	        killSignal?: string;
-	    }, logOutput?: boolean): Q.Promise<string>;
-	    /**
-	     * Returns the name of the plugin that is being tested.
-	     */
-	    static getPluginName(): string;
+	    runApplication(projectDirectory: string, targetPlatform: platform.IPlatform): Q.Promise<string>;
 	}
 
 }
@@ -461,11 +335,17 @@ declare module 'code-push-plugin-testing-framework/script/test' {
 	import platform = require('code-push-plugin-testing-framework/script/platform');
 	import Q = require("q");
 	import tm = require('code-push-plugin-testing-framework/script/projectManager');
-	import tu = require('code-push-plugin-testing-framework/script/testUtil');
 	import su = require('code-push-plugin-testing-framework/script/serverUtil');
 	export const TestAppName: string;
 	export const TestNamespace: string;
 	export const AcquisitionSDKPluginName: string;
+	export const templatePath: string;
+	export const thisPluginPath: string;
+	export const testRunDirectory: string;
+	export const updatesDirectory: string;
+	export const onlyRunCoreTests: boolean;
+	export const shouldSetup: boolean;
+	export const restartEmulators: boolean;
 	/** Response the server gives the next update check request */
 	export var updateResponse: any;
 	/** Response the server gives the next test message request */
@@ -476,17 +356,10 @@ declare module 'code-push-plugin-testing-framework/script/test' {
 	export var updateCheckCallback: (requestBody: any) => void;
 	/** Location of the update package given in the update check response */
 	export var updatePackagePath: string;
-	export var testUtil: typeof tu.TestUtil;
-	export var templatePath: string;
-	export var thisPluginPath: string;
-	export var testRunDirectory: string;
-	export var updatesDirectory: string;
-	export var onlyRunCoreTests: boolean;
-	export var targetPlatforms: platform.IPlatform[];
-	export var shouldUseWkWebView: number;
-	export var shouldSetup: boolean;
-	export var restartEmulators: boolean;
-	export interface TestBuilder {
+	export class TestBuilder {
+	    only: boolean;
+	    skip: boolean;
+	    constructor(options: any);
 	    /**
 	     * Called to create the test suite by the initializeTests function
 	     *
@@ -497,7 +370,7 @@ declare module 'code-push-plugin-testing-framework/script/test' {
 	    create(coreTestsOnly: boolean, projectManager: tm.ProjectManager, targetPlatform: platform.IPlatform): void;
 	}
 	/** Use this class to create a mocha.describe that contains additional tests */
-	export class TestBuilderDescribe implements TestBuilder {
+	export class TestBuilderDescribe extends TestBuilder {
 	    /** The name passed to the describe */
 	    private describeName;
 	    /** The path to the scenario that will be loaded by the test app for the nested TestBuilder objects */
@@ -506,15 +379,15 @@ declare module 'code-push-plugin-testing-framework/script/test' {
 	    private testBuilders;
 	    /** Whether or not this.testBuilders directly contains any TestBuildIt objects */
 	    private hasIts;
-	    /** The function that create calls (used for describe.only) */
-	    private functionToUse;
+	    /** Whether or not this.testBuilders directly contains any TestBuilder objects that are only */
+	    hasOnly: boolean;
 	    /**
 	     * describeName - used as the description in the call to describe
 	     * scenarioPath - if specified, will be set up before the tests run
 	     * testBuilders - the testBuilders to create within this describe call
 	     * only - if true, use describe.only
 	     */
-	    constructor(describeName: string, testBuilders: TestBuilder[], scenarioPath?: string, only?: boolean);
+	    constructor(describeName: string, testBuilders: TestBuilder[], scenarioPath?: string, options?: any);
 	    /**
 	     * Called to create the test suite by the initializeTests function
 	     *
@@ -525,22 +398,20 @@ declare module 'code-push-plugin-testing-framework/script/test' {
 	    create(coreTestsOnly: boolean, projectManager: tm.ProjectManager, targetPlatform: platform.IPlatform): void;
 	}
 	/** Use this class to create a test through mocha.it */
-	export class TestBuilderIt implements TestBuilder {
+	export class TestBuilderIt extends TestBuilder {
 	    /** The name of the test */
 	    private testName;
 	    /** The test to be run */
 	    private test;
 	    /** Whether or not the test should be run when "--core" is supplied */
 	    private isCoreTest;
-	    /** The function that create calls (used for it.only) */
-	    private functionToUse;
 	    /**
 	     * testName - used as the expectation in the call to it
 	     * test - the test to provide to it
 	     * isCoreTest - whether or not the test should run when "--core" is supplied
 	     * only - if true, use it.only
 	     */
-	    constructor(testName: string, test: (projectManager: tm.ProjectManager, targetPlatform: platform.IPlatform, done: MochaDone) => void, isCoreTest: boolean, only?: boolean);
+	    constructor(testName: string, test: (projectManager: tm.ProjectManager, targetPlatform: platform.IPlatform, done: MochaDone) => void, isCoreTest: boolean, options?: any);
 	    /**
 	     * Called to create the test suite by the initializeTests function
 	     *
@@ -557,11 +428,7 @@ declare module 'code-push-plugin-testing-framework/script/test' {
 	/**
 	 * Returns a default update response to give to the app in a checkForUpdate request
 	 */
-	export function createMockResponse(mandatory?: boolean): su.CheckForUpdateResponseMock;
-	/**
-	 * Returns a default update response with a download URL and random package hash.
-	 */
-	export function getMockResponse(targetPlatform: platform.IPlatform, mandatory?: boolean, randomHash?: boolean): su.CheckForUpdateResponseMock;
+	export function createUpdateResponse(mandatory?: boolean, targetPlatform?: platform.IPlatform, randomHash?: boolean): su.CheckForUpdateResponseMock;
 	/**
 	 * Wrapper for ProjectManager.setupScenario
 	 */
@@ -571,9 +438,9 @@ declare module 'code-push-plugin-testing-framework/script/test' {
 	 */
 	export function createUpdate(projectManager: tm.ProjectManager, targetPlatform: platform.IPlatform, scenarioJsPath: string, version: string): Q.Promise<string>;
 	/**
-	 * Waits for the next set of test messages sent by the app and asserts that they are equal to the expected messages
+	 * Returns a promise that waits for the next set of test messages sent by the app and resolves if that they are equal to the expected messages or rejects if they are not.
 	 */
-	export function verifyMessages(expectedMessages: (string | su.AppMessage)[], deferred: Q.Deferred<void>): (requestBody: any) => void;
+	export function expectTestMessages(expectedMessages: (string | su.AppMessage)[]): Q.Promise<void>;
 	/**
 	 * Sets up the server that the test app uses to send test messages and check for and download updates.
 	 */
@@ -585,7 +452,58 @@ declare module 'code-push-plugin-testing-framework/script/test' {
 	/**
 	 * Call this function with a ProjectManager and an array of TestBuilderDescribe objects to run tests
 	 */
-	export function initializeTests(projectManager: tm.ProjectManager, tests: TestBuilderDescribe[]): void;
+	export function initializeTests(projectManager: tm.ProjectManager, tests: TestBuilderDescribe[], supportedTargetPlatforms: platform.IPlatform[]): void;
+
+}
+declare module 'code-push-plugin-testing-framework/script/testUtil' {
+	import Q = require("q");
+	export class TestUtil {
+	    static ANDROID_KEY_PLACEHOLDER: string;
+	    static IOS_KEY_PLACEHOLDER: string;
+	    static SERVER_URL_PLACEHOLDER: string;
+	    static INDEX_JS_PLACEHOLDER: string;
+	    static CODE_PUSH_APP_VERSION_PLACEHOLDER: string;
+	    static CODE_PUSH_TEST_APP_NAME_PLACEHOLDER: string;
+	    static CODE_PUSH_APP_ID_PLACEHOLDER: string;
+	    static PLUGIN_VERSION_PLACEHOLDER: string;
+	    /**
+	     * Reads a command line option passed to mocha and returns a default if unspecified.
+	     */
+	    static readMochaCommandLineOption(optionName: string, defaultValue?: string): string;
+	    /**
+	     * Reads command line options passed to mocha.
+	     */
+	    static readMochaCommandLineFlag(optionName: string): boolean;
+	    /**
+	     * Executes a child process and returns a promise that resolves with its output or rejects with its error.
+	     */
+	    static getProcessOutput(command: string, options?: {
+	        cwd?: string;
+	        stdio?: any;
+	        customFds?: any;
+	        env?: any;
+	        encoding?: string;
+	        timeout?: number;
+	        maxBuffer?: number;
+	        killSignal?: string;
+	    }, logStdOut?: boolean, logStdErr?: boolean): Q.Promise<string>;
+	    /**
+	     * Returns the name of the plugin that is being tested.
+	     */
+	    static getPluginName(): string;
+	    /**
+	     * Replaces a regex in a file with a given string.
+	     */
+	    static replaceString(filePath: string, regex: string, replacement: string): void;
+	    /**
+	     * Copies a file from a given location to another.
+	     */
+	    static copyFile(source: string, destination: string, overwrite: boolean): Q.Promise<string>;
+	    /**
+	     * Archives the contents of targetFolder and puts it in an archive at archivePath.
+	     */
+	    static archiveFolder(targetFolder: string, archivePath: string, isDiff: boolean): Q.Promise<string>;
+	}
 
 }
 declare module 'code-push-plugin-testing-framework/script/index' {
@@ -593,7 +511,7 @@ declare module 'code-push-plugin-testing-framework/script/index' {
 	import * as PluginTestingFramework from 'code-push-plugin-testing-framework/script/test';
 	import { ProjectManager } from 'code-push-plugin-testing-framework/script/projectManager';
 	import * as ServerUtil from 'code-push-plugin-testing-framework/script/serverUtil';
-	import * as TestUtil from 'code-push-plugin-testing-framework/script/testUtil';
+	import { TestUtil } from 'code-push-plugin-testing-framework/script/testUtil';
 	export { Platform, PluginTestingFramework, ProjectManager, ServerUtil, TestUtil };
 
 }
