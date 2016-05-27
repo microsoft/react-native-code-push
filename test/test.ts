@@ -1,6 +1,6 @@
 /// <reference path="../typings/assert.d.ts" />
 /// <reference path="../typings/codePush.d.ts" />
-/// <reference path="../typings/code-push-plugin-testing-framework.d.ts" />
+/// <reference path="../node_modules/code-push-plugin-testing-framework/typings/code-push-plugin-testing-framework.d.ts" />
 /// <reference path="../typings/mocha.d.ts" />
 /// <reference path="../typings/mkdirp.d.ts" />
 /// <reference path="../typings/node.d.ts" />
@@ -134,7 +134,7 @@ class RNAndroid extends Platform.Android implements RNPlatform {
         var androidDirectory: string = path.join(projectDirectory, PluginTestingFramework.TestAppName, "android");
         var apkPath = this.getBinaryPath(projectDirectory);
         return TestUtil.getProcessOutput("./gradlew assembleRelease --daemon", { cwd: androidDirectory })
-            .then<string>(TestUtil.getProcessOutput.bind(undefined, "jarsigner -verbose -keystore ~/.android/debug.keystore -storepass android -keypass android " + apkPath + " androiddebugkey", { cwd: androidDirectory }, false));
+            .then<string>(TestUtil.getProcessOutput.bind(undefined, "jarsigner -verbose -keystore ~/.android/debug.keystore -storepass android -keypass android " + apkPath + " androiddebugkey", { cwd: androidDirectory }));
     }
 }
 
@@ -232,7 +232,7 @@ class RNIOS extends Platform.IOS implements RNPlatform {
                 var hashWithParen = hashRegEx.exec(targetEmulator)[0];
                 var hash = hashWithParen.substr(1, hashWithParen.length - 2);
                 return TestUtil.getProcessOutput("xcodebuild -workspace " + path.join(iOSProject, PluginTestingFramework.TestAppName) + ".xcworkspace -scheme " + PluginTestingFramework.TestAppName + 
-                    " -configuration Release -destination \"platform=iOS Simulator,id=" + hash + "\" -derivedDataPath build", { cwd: iOSProject, maxBuffer: 1024 * 1000 * 10 }, false);
+                    " -configuration Release -destination \"platform=iOS Simulator,id=" + hash + "\" -derivedDataPath build", { cwd: iOSProject, maxBuffer: 1024 * 1000 * 10, noLogStdOut: true });
             })
             .then<string>(
                 () => { return null; },
@@ -303,8 +303,7 @@ class RNProjectManager extends ProjectManager {
         }
         mkdirp.sync(projectDirectory);
 
-        // React-Native adds a "com." to the front of the name you provide, so provide the namespace with the "com." removed
-        return TestUtil.getProcessOutput("react-native init " + appName + " --package " + appNamespace, { cwd: projectDirectory }, true)
+        return TestUtil.getProcessOutput("react-native init " + appName + " --package " + appNamespace, { cwd: projectDirectory })
             .then(this.copyTemplate.bind(this, templatePath, projectDirectory))
             .then<string>(TestUtil.getProcessOutput.bind(undefined, "npm install " + PluginTestingFramework.thisPluginPath, { cwd: path.join(projectDirectory, PluginTestingFramework.TestAppName) }));
     }
@@ -1350,7 +1349,9 @@ var testBuilderDescribes: PluginTestingFramework.TestBuilderDescribe[] = [
         ])
 ];
 
+var rootTestBuilder = new PluginTestingFramework.TestBuilderDescribe("CodePush", testBuilderDescribes);
+
 //////////////////////////////////////////////////////////////////////////////////////////
 // Initialize the tests.
 
-PluginTestingFramework.initializeTests(new RNProjectManager(), testBuilderDescribes, supportedTargetPlatforms);
+PluginTestingFramework.initializeTests(new RNProjectManager(), rootTestBuilder, supportedTargetPlatforms);
