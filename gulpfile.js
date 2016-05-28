@@ -40,74 +40,36 @@ function spawnCommand(command, args, callback, silent, detached) {
         options.stdio = ["ignore"];
     }
     
-    var process = child_process.spawn(command, args, options);
-
-    process.stdout.on('data', function (data) {
-        if (!silent) console.log("" + data);
-    });
-
-    process.stderr.on('data', function (data) {
-        if (!silent) console.error("" + data);
-    });
+    var spawnProcess = child_process.spawn(command, args, options);
+        
+    if (!silent) spawnProcess.stdout.pipe(process.stdout);
+    if (!silent) spawnProcess.stderr.pipe(process.stderr);
 
     if (!detached) {
-        process.on('exit', function (code) {
+        spawnProcess.on('exit', function (code) {
             callback && callback(code === 0 ? undefined : "Error code: " + code);
         });
     }
     
-    return process;
+    return spawnProcess;
 };
 
 function execCommand(command, args, callback, silent) {
-    var process = child_process.exec(command + " " + args.join(" "));
-
-    process.stdout.on('data', function (data) {
-        if (!silent) console.log("" + data);
-    });
-
-    process.stderr.on('data', function (data) {
-        if (!silent) console.error("" + data);
-    });
+    var execProcess = child_process.exec(command + " " + args.join(" "));
+        
+    if (!silent) execProcess.stdout.pipe(process.stdout);
+    if (!silent) execProcess.stderr.pipe(process.stderr);
     
-    process.on('error', function (error) {
+    execProcess.on('error', function (error) {
         callback && callback(error);
     })
     
-    process.on('exit', function (code) {
+    execProcess.on('exit', function (code) {
         callback && callback(code === 0 ? undefined : "Error code: " + code);
     });
     
-    return process;
+    return execProcess;
 };
-
-/**
- * Executes a child process and returns its output in the promise as a string
- */
-function execCommandWithPromise(command, options, logOutput) {
-    var deferred = Q.defer();
-
-    options = options || {};
-    options.maxBuffer = 1024 * 500;
-    // abort processes that run longer than five minutes
-    options.timeout = 5 * 60 * 1000;
-
-    console.log("Running command: " + command);
-    child_process.exec(command, options, (error, stdout, stderr) => {
-
-        if (logOutput) stdout && console.log(stdout);
-        stderr && console.error(stderr);
-
-        if (error) {
-            console.error(error);
-            deferred.reject(error);
-        } else {
-            deferred.resolve(stdout.toString());
-        }
-    });
-
-    return deferred.promise;
-}
 
 function runTests(callback, options) {
     var command = "mocha";

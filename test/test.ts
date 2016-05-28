@@ -133,8 +133,8 @@ class RNAndroid extends Platform.Android implements RNPlatform {
         // In order to run on Android without the package manager, we must create a release APK and then sign it with the debug certificate.
         var androidDirectory: string = path.join(projectDirectory, PluginTestingFramework.TestAppName, "android");
         var apkPath = this.getBinaryPath(projectDirectory);
-        return TestUtil.getProcessOutput("./gradlew assembleRelease --daemon", { cwd: androidDirectory })
-            .then<string>(TestUtil.getProcessOutput.bind(undefined, "jarsigner -verbose -keystore ~/.android/debug.keystore -storepass android -keypass android " + apkPath + " androiddebugkey", { cwd: androidDirectory }));
+        return TestUtil.getProcessOutput("./gradlew assembleRelease", { cwd: androidDirectory })
+            .then<string>(TestUtil.getProcessOutput.bind(undefined, "jarsigner -verbose -keystore ~/.android/debug.keystore -storepass android -keypass android " + apkPath + " androiddebugkey", { cwd: androidDirectory, noLogStdOut: true }));
     }
 }
 
@@ -228,8 +228,8 @@ class RNIOS extends Platform.IOS implements RNPlatform {
         
         return this.getEmulatorManager().getTargetEmulator()
             .then((targetEmulator: string) => {
-                var hashRegEx = /([0-9A-Z-]*)/g;
-                var hashWithParen = hashRegEx.exec(targetEmulator)[0];
+                var hashRegEx = /[(][0-9A-Z-]*[)]/g;
+                var hashWithParen = targetEmulator.match(hashRegEx)[0];
                 var hash = hashWithParen.substr(1, hashWithParen.length - 2);
                 return TestUtil.getProcessOutput("xcodebuild -workspace " + path.join(iOSProject, PluginTestingFramework.TestAppName) + ".xcworkspace -scheme " + PluginTestingFramework.TestAppName + 
                     " -configuration Release -destination \"platform=iOS Simulator,id=" + hash + "\" -derivedDataPath build", { cwd: iOSProject, maxBuffer: 1024 * 1000 * 10, noLogStdOut: true });
@@ -435,10 +435,11 @@ class RNProjectManager extends ProjectManager {
         return Q<string>(undefined)
             .then(() => {
                 // Build if this scenario has not yet been built.
-                if (!RNProjectManager.currentScenarioHasBuilt[projectDirectory]) {
+                /* if (!RNProjectManager.currentScenarioHasBuilt[projectDirectory]) {
                     RNProjectManager.currentScenarioHasBuilt[projectDirectory] = true;
                     return (<RNPlatform><any>targetPlatform).buildApp(projectDirectory);
-                }
+                } */
+                return (<RNPlatform><any>targetPlatform).buildApp(projectDirectory);
             })
             .then(() => {
                 // Uninstall the app so that the app's data doesn't carry over between tests.
@@ -653,8 +654,8 @@ var testBuilderDescribes: PluginTestingFramework.TestBuilderDescribe[] = [
                 (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
                     PluginTestingFramework.updateResponse = { updateInfo: PluginTestingFramework.createUpdateResponse(false, targetPlatform) };
 
-                    /* pass an invalid path */
-                    PluginTestingFramework.updatePackagePath = path.join(PluginTestingFramework.templatePath, "invalid_path.zip");
+                    /* pass an invalid update url */
+                    PluginTestingFramework.updateResponse.updateInfo.downloadURL = "invalid_url";
                     
                     projectManager.runApplication(PluginTestingFramework.testRunDirectory, targetPlatform);
                     
@@ -1346,7 +1347,7 @@ var testBuilderDescribes: PluginTestingFramework.TestBuilderDescribe[] = [
                         })
                         .done(() => { done(); }, (e) => { done(e); });
                 }, false)
-        ])
+        ], undefined)
 ];
 
 var rootTestBuilder = new PluginTestingFramework.TestBuilderDescribe("CodePush", testBuilderDescribes);
