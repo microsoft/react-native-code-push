@@ -1,10 +1,10 @@
 # Contributing
 
-## Building the plugin
+## Using the plugin
 
 ### Environment setup
 
-`node.js` and `npm` are needed for building this project. `npm` comes bundled with the `node.js` installer. You can download the `node.js` installer here: https://nodejs.org/download/.
+`node.js` and `npm` are needed for using this project. `npm` comes bundled with the `node.js` installer. You can download the `node.js` installer here: https://nodejs.org/download/.
 
 Once you have installed `node.js` and `npm`, install the dev dependencies for the project.
 
@@ -12,9 +12,9 @@ Once you have installed `node.js` and `npm`, install the dev dependencies for th
 npm install
 ```
 
-### Compile
+### Using the plugin manually
 
-Follow these steps to build a new version of the plugin:
+Follow these steps to test your modifications to the plugin manually:
 - clone this repository
 - install the dependencies
 
@@ -22,13 +22,13 @@ Follow these steps to build a new version of the plugin:
 	```
 	npm install
 	```
-- compile
+- install the plugin in a React-Native project
 
-	From the same root folder location, run:
+	Navigate to the root folder of your React-Native project from your command line console and run:
 	```
-	gulp
+	npm install local_path_to_your_clone_of_this_repo
 	```
-	This will compile the sources and place them in the `bin` folder. Any compilation errors will be displayed in the console.
+- configure the plugin using the steps in the README.md
 
 ## Test
 
