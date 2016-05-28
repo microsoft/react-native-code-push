@@ -29,3 +29,6 @@ npm-debug.log
 # Don't publish example apps
 Examples/
 Recipes/
+
+# Don't publish compiled testing code
+bin/
