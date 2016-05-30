@@ -497,16 +497,18 @@ See [disallowRestart](#codepushdisallowrestart) for an example of how this metho
 codePush.checkForUpdate(deploymentKey: String = null): Promise<RemotePackage>;
 ```
 
-Queries the CodePush service to see whether the configured app deployment has an update available. By default, it will use the deployment key that is configured in your `Info.plist` file (iOS), or `MainActivity.java` file (Android), but you can override that by specifying a value via the optional `deploymentKey` parameter. This can be useful when you want to dynamically "redirect" a user to a specific deployment, such as allowing "Early access" via an easter egg or a user setting switch.
+Queries the CodePush service to see whether the configured app deployment has an update available. By default, it will use the deployment key that is configured in your `Info.plist` file (iOS), or `MainActivity.java` file (Android), but you can override that by specifying a value via the optional `deploymentKey` parameter. This can be useful when you want to dynamically "redirect" a user to a specific deployment, such as allowing "early access" via an easter egg or a user setting switch.
 
 This method returns a `Promise` which resolves to one of two possible values:
 
-1. `null` if there is no update available. This occurs in the following scenarios:
+1. `null` if there is no update available. This can occur in the following scenarios:
 
     1. The configured deployment doesn't contain any releases, and therefore, nothing to update.
     2. The latest release within the configured deployment is targeting a different binary version than what you're currently running (either older or newer).
     3. The currently running app already has the latest release from the configured deployment, and therefore, doesn't need it again.
-    
+    4. The latest release within the configured deployment is currently marked as disabled, and therefore, isn't allowed to be downloaded.
+    5. The latest release within the configured deployment is in an "active rollout" state, and the requesting device doesn't fall within the percentage of users who are eligible for it.
+
 2. A [`RemotePackage`](#remotepackage) instance which represents an available update that can be inspected and/or subsequently downloaded.
 
 Example Usage: 
