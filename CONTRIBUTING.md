@@ -29,12 +29,13 @@ Follow these steps to test your modifications to the plugin manually:
 	npm install local_path_to_your_clone_of_this_repo
 	```
 - configure the plugin using the steps in the README.md
+- build and run your app on an emulator or device
 
 ## Test
 
 ### Environment setup
 
-First, make sure you can build the plugin by following the steps above.
+First, make sure you have installed the dependencies for the plugin by following the steps above.
 
 Then, make sure you have installed `gulp`.
 

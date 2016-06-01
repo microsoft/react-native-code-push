@@ -133,7 +133,7 @@ class RNAndroid extends Platform.Android implements RNPlatform {
         // In order to run on Android without the package manager, we must create a release APK and then sign it with the debug certificate.
         var androidDirectory: string = path.join(projectDirectory, PluginTestingFramework.TestAppName, "android");
         var apkPath = this.getBinaryPath(projectDirectory);
-        return TestUtil.getProcessOutput("./gradlew assembleRelease", { cwd: androidDirectory })
+        return TestUtil.getProcessOutput("./gradlew assembleRelease --daemon", { cwd: androidDirectory })
             .then<string>(TestUtil.getProcessOutput.bind(undefined, "jarsigner -verbose -keystore ~/.android/debug.keystore -storepass android -keypass android " + apkPath + " androiddebugkey", { cwd: androidDirectory, noLogStdOut: true }));
     }
 }
@@ -240,6 +240,10 @@ class RNIOS extends Platform.IOS implements RNPlatform {
                     // The first time an iOS project is built, it fails because it does not finish building libReact.a before it builds the test app.
                     // Simply build again to fix the issue.
                     if (!RNIOS.iosFirstBuild[projectDirectory]) {
+                        var iosBuildFolder = path.join(iOSProject, "build");
+                        if (fs.existsSync(iosBuildFolder)) {
+                            del.sync([iosBuildFolder], { force: true });
+                        }
                         RNIOS.iosFirstBuild[projectDirectory] = true;
                         return this.buildApp(projectDirectory);
                     }
@@ -435,14 +439,13 @@ class RNProjectManager extends ProjectManager {
         return Q<string>(undefined)
             .then(() => {
                 // Build if this scenario has not yet been built.
-                /* if (!RNProjectManager.currentScenarioHasBuilt[projectDirectory]) {
+                if (!RNProjectManager.currentScenarioHasBuilt[projectDirectory]) {
                     RNProjectManager.currentScenarioHasBuilt[projectDirectory] = true;
                     return (<RNPlatform><any>targetPlatform).buildApp(projectDirectory);
-                } */
-                return (<RNPlatform><any>targetPlatform).buildApp(projectDirectory);
+                }
             })
             .then(() => {
-                // Uninstall the app so that the app's data doesn't carry over between tests.
+                // Uninstall the app so that the installation is clean and no files are left around for each test.
                 return targetPlatform.getEmulatorManager().uninstallApplication(PluginTestingFramework.TestNamespace);
             })
             .then(() => {
@@ -1051,9 +1054,7 @@ var testBuilderDescribes: PluginTestingFramework.TestBuilderDescribe[] = [
                                 .then<void>((updatePath: string) => {
                                     PluginTestingFramework.updatePackagePath = updatePath;
                                     projectManager.runApplication(PluginTestingFramework.testRunDirectory, targetPlatform);
-                                    return PluginTestingFramework.expectTestMessages([
-                                        new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UPDATE_INSTALLED]),
-                                        ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                                    return PluginTestingFramework.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
                                 })
                                 .then<void>(() => {
                                     targetPlatform.getEmulatorManager().restartApplication(PluginTestingFramework.TestNamespace);
@@ -1073,8 +1074,6 @@ var testBuilderDescribes: PluginTestingFramework.TestBuilderDescribe[] = [
                                     PluginTestingFramework.updatePackagePath = updatePath;
                                     projectManager.runApplication(PluginTestingFramework.testRunDirectory, targetPlatform);
                                     return PluginTestingFramework.expectTestMessages([
-                                        new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UPDATE_INSTALLED]),
-                                        // the update is immediate so the update will install
                                         ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE,
                                         new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UP_TO_DATE])]);
                                 })
@@ -1155,7 +1154,6 @@ var testBuilderDescribes: PluginTestingFramework.TestBuilderDescribe[] = [
                                     projectManager.runApplication(PluginTestingFramework.testRunDirectory, targetPlatform);
                                     return PluginTestingFramework.expectTestMessages([
                                         new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_IN_PROGRESS]),
-                                        new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UPDATE_INSTALLED]),
                                         ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
                                 })
                                 .then<void>(() => {
@@ -1178,8 +1176,6 @@ var testBuilderDescribes: PluginTestingFramework.TestBuilderDescribe[] = [
                                     projectManager.runApplication(PluginTestingFramework.testRunDirectory, targetPlatform);
                                     return PluginTestingFramework.expectTestMessages([
                                         new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_IN_PROGRESS]),
-                                        new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UPDATE_INSTALLED]),
-                                        // the update is immediate so the update will install
                                         ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE,
                                         new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_IN_PROGRESS]),
                                         new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UP_TO_DATE])]);
@@ -1299,9 +1295,7 @@ var testBuilderDescribes: PluginTestingFramework.TestBuilderDescribe[] = [
                         .then<void>((updatePath: string) => {
                             PluginTestingFramework.updatePackagePath = updatePath;
                             projectManager.runApplication(PluginTestingFramework.testRunDirectory, targetPlatform);
-                            return PluginTestingFramework.expectTestMessages([
-                                new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UPDATE_INSTALLED]),
-                                ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                            return PluginTestingFramework.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
                         })
                         .done(() => { done(); }, (e) => { done(e); });
                 }, false),
@@ -1341,13 +1335,11 @@ var testBuilderDescribes: PluginTestingFramework.TestBuilderDescribe[] = [
                         .then<void>((updatePath: string) => {
                             PluginTestingFramework.updatePackagePath = updatePath;
                             projectManager.runApplication(PluginTestingFramework.testRunDirectory, targetPlatform);
-                            return PluginTestingFramework.expectTestMessages([
-                                new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UPDATE_INSTALLED]),
-                                ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                            return PluginTestingFramework.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
                         })
                         .done(() => { done(); }, (e) => { done(e); });
                 }, false)
-        ], undefined)
+        ])
 ];
 
 var rootTestBuilder = new PluginTestingFramework.TestBuilderDescribe("CodePush", testBuilderDescribes);

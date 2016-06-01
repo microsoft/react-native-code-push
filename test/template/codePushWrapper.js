@@ -39,11 +39,35 @@ module.exports = {
     },
     
     sync: function(testApp, onSyncStatus, onSyncError, options) {
-        return CodePush.sync(options)
-            .then((status) => {
-                return testApp.onSyncStatus(status).then(() => { return onSyncStatus(status); });
-            }, (error) => {
-                return testApp.onSyncError(error).then(() => { return onSyncError(error); });
-            });
+        return CodePush.checkForUpdate()
+            .then(
+                (remotePackage) => {
+                    // Since immediate installs cannot be reliably logged (due to async network calls), we don't log "UPDATE_INSTALLED" when the installation is immediate.
+                    // However, to determine this, we must first figure out whether or not the package is mandatory because mandatory packages use a different install mode than regular updates.
+                    // This requires an additional call to checkForUpdate before syncing.
+                    var regularUpdateIsImmediate = options && options.installMode === CodePush.InstallMode.IMMEDIATE;
+                    var mandatoryUpdateIsImmediate = !options || (options && (!options.mandatoryInstallMode || options.mandatoryInstallMode === CodePush.InstallMode.IMMEDIATE));
+                    var isInstallImmediate = (remotePackage && remotePackage.isMandatory) ? mandatoryUpdateIsImmediate : regularUpdateIsImmediate;
+                    
+                    return CodePush.sync(options)
+                        .then((status) => {
+                            if (!(isInstallImmediate && status === CodePush.SyncStatus.UPDATE_INSTALLED)) {
+                                return testApp.onSyncStatus(status).then(() => { return onSyncStatus(status); });
+                            }
+                            return onSyncStatus(status);
+                        }, (error) => {
+                            return testApp.onSyncError(error).then(() => { return onSyncError(error); });
+                        });
+                },
+                (error) => {
+                    return CodePush.sync(options)
+                        .then((status) => {
+                            // Should fail because the check for update failed, so no need to check whether the install is immediate.
+                            return testApp.onSyncStatus(status).then(() => { return onSyncStatus(status); });
+                        }, (error) => {
+                            return testApp.onSyncError(error).then(() => { return onSyncError(error); });
+                        });
+                }
+            );
     }
 }
