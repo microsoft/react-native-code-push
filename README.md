@@ -17,7 +17,7 @@ This plugin provides client-side integration for the [CodePush service](http://c
     * [Java API Reference (Android)](#java-api-reference-android)
 * [Debugging / Troubleshooting](#debugging--troubleshooting)
 * [Example Apps / Starters](#example-apps--starters)
-* [Multi-Deployment Releases](#multi-deplyoment-releases)
+* [Multi-Deployment Releases](#multi-deployment-releases)
 * [Continuous Integration / Delivery](#continuous-integration--delivery)
 
 ## How does it work?
@@ -199,6 +199,8 @@ To let the CodePush runtime know which deployment it should query for updates ag
 
 ![Deployment list](https://cloud.githubusercontent.com/assets/116461/11601733/13011d5e-9a8a-11e5-9ce2-b100498ffb34.png)
     
+In order to effectively make use of the `Staging` and `Production` deployments that were created along with your CodePush app, refer to the [multi-deployment releases](#multi-deployment-releases) docs below before actually moving your app's usage of CodePush into production.
+
 ## Android Setup
 
 In order to integrate CodePush into your Android project, perform the following steps:
@@ -293,6 +295,8 @@ public class MainActivity extends ReactActivity {
     ...
 }
 ```
+
+In order to effectively make use of the `Staging` and `Production` deployments that were created along with your CodePush app, refer to the [multi-deployment releases](#multi-deployment-releases) docs below before actually moving your app's usage of CodePush into production.
 
 ## Windows Setup
 
