@@ -1001,7 +1001,7 @@ To set this up, perform the following steps:
 
 1. Open your app's `build.gradle` file (e.g. `android/app/build.gradle`)
 
-2. Find the `android { buildTypes }` section and define [`buildConfigField`](http://google.github.io/android-gradle-dsl/current/com.android.build.gradle.internal.dsl.BuildType.html#com.android.build.gradle.internal.dsl.BuildType:buildConfigField(java.lang.String,%20java.lang.String,%20java.lang.String) entries for both your `debug` and `release` build types, which reference your `Staging` and `Production` deployment keys respectively. 
+2. Find the `android { buildTypes }` section and define `buildConfigField` entries for both your `debug` and `release` build types, which reference your `Staging` and `Production` deployment keys respectively. 
  
     ```groovy
     android {
