@@ -17,6 +17,7 @@ This plugin provides client-side integration for the [CodePush service](http://c
     * [Java API Reference (Android)](#java-api-reference-android)
 * [Debugging / Troubleshooting](#debugging--troubleshooting)
 * [Example Apps / Starters](#example-apps--starters)
+* [Multi-Deployment Releases](#multi-deplyoment-releases)
 * [Continuous Integration / Delivery](#continuous-integration--delivery)
 
 ## How does it work?
@@ -979,6 +980,110 @@ Now you'll be able to see CodePush logs in either debug or release mode, on both
 | Update not being displayed after restart | If you're not calling `sync` on app start (e.g. within `componentDidMount` of your root component), then you need to explicitly call `notifyApplicationReady` on app start, otherwise, the plugin will think your update failed and roll it back. |
 | Images dissappear after installing CodePush update | If your app is using the React Native assets system to load images (i.e. the `require(./foo.png)` syntax), then you **MUST** release your assets along with your JS bundle to CodePush. Follow [these instructions](#releasing-updates-javascript--images) to see how to do this. |
 | No JS bundle is being found when running your app against the iOS simulator | By default, React Native doesn't generate your JS bundle when running against the simulator. Therefore, if you're using `[CodePush bundleURL]`, and targetting the iOS simulator, you may be getting a `nil` result. This issue will be fixed in RN 0.22.0, but only for release builds. You can unblock this scenario right now by making [this change](https://github.com/facebook/react-native/commit/9ae3714f4bebdd2bcab4d7fdbf23acebdc5ed2ba) locally.
+
+## Multi-Deployment Releases
+
+In our [getting started](#getting-started) docs, we illustrated how to configure the CodePush plugin, using a specific deployment key. However, in order to effectively test your releases, it is critical that you leverage the `Staging` and `Production` deployments that are auto-generated when you first created your CodePush app. This way, you never release an update to your end users that you haven't been able to validate yourself.
+
+*NOTE: Our client-side rollback feature can help mitigate releases which result in an app crash, and server-side rollbacks (e.g. `code-push rollback`) allow you to prevent additional users from installing a bad release, however, it's obviously better if you can prevent an erroneous update from being broadly released in the first place.*
+
+Setting this up requires unique steps for each platform, so refer to the following sections for an example of how this can be achieved in your React Native app, depending on the platform(s) you are targeting.
+
+### Android
+
+The [Android Gradle plugin](http://google.github.io/android-gradle-dsl/current/index.html) allows you to define custom config settings for each "build type" (e.g. debug, release), which in turn are generated as properties on the `BuildConfig` class that you can reference from your Java code. This mechanism allows you to easily configure your debug builds to use your CodePush staging deployment key, and your release builds to use your CodePush production deployment key.
+
+To set this up, perform the following steps:
+
+1. Open your app's `build.gradle` file (e.g. `android/app/build.gradle`)
+
+2. Find the `android { buildTypes }` section and define [`buildConfigField`](http://google.github.io/android-gradle-dsl/current/com.android.build.gradle.internal.dsl.BuildType.html#com.android.build.gradle.internal.dsl.BuildType:buildConfigField(java.lang.String,%20java.lang.String,%20java.lang.String) entries for both your `debug` and `release` build types, which reference your `Staging` and `Production` deployment keys respectively. 
+ 
+    ```groovy
+    android {
+        ... 
+        buildTypes {
+            debug {
+                ...
+                buildConfigField "String", "CODEPUSH_KEY", "<INSERT_STAGING_KEY>"
+                ...
+            }
+            
+            release {
+                ...
+                buildConfigField "String", "CODEPUSH_KEY", "<INSERT_PRODUCTION_KEY>"
+                ...
+            }
+        }
+        ...
+    }
+    ```
+
+    *NOTE: As a reminder, you can retrieve these keys by running `code-push deployment ls <APP_NAME> -k` from your terminal.*
+    
+4. Open up your `MainAtivity.java` file and change the `CodePush` constructor to pass the deployment key in via the build config you just defined, as opposed to a string literal. 
+
+    ```java
+    new CodePush(BuildConfig.CODEPUSH_KEY, this, BuildConfig.DEBUG);
+    ```
+    
+    *Note: If you gave your build setting a different name in your Gradle file, simply make sure to reflect that in your Java code.*
+    
+And that's it! Now when you run or build your app, your debug builds will automatically be configured to sync with your `Staging` deployment, and your release builds will be configured to sync with your `Production` deployment.
+
+If you want to be able to install both debug and release builds simultaneously on the same device, then you can also specify an [`applicationIdSuffix`](http://google.github.io/android-gradle-dsl/current/com.android.build.gradle.internal.dsl.BuildType.html#com.android.build.gradle.internal.dsl.BuildType:applicationIdSuffix) field for your debug build type, so that the OS sees them as seperate apps (e.g. `com.foo` and `com.foo.debug`).
+
+```groovy
+buildTypes {
+    debug {
+        applicationIdSuffix ".debug"
+    }
+}
+```
+  
+Additionally, if you want to give them seperate names and/or icons, you can define new resource files (`strings.xml` and drawables) for your debug build by creating a `app/src/debug` directory. View [here](http://tools.android.com/tech-docs/new-build-system/resource-merging) for more details on how resource merging works in Android.
+
+Finally, refer to the [React Native docs](http://facebook.github.io/react-native/docs/signed-apk-android.html#content) for details about how to configure and create release builds for your Android apps.
+
+### iOS
+
+Xcode allows you to define custom build settings for each "configuration" (e.g. debug, release), which can then be referenced as the value of keys within the `Info.plist` file. This mechanism allows you to easily configure your debug builds to use your CodePush staging deployment key, and your release builds to use your CodePush production deployment key.
+
+To set this up, perform the following steps:
+
+1. Open up your Xcode project and select your project in the `Project navigator` window
+
+2. Select the `Build Settings` tab
+
+3. Click the `+` button on the toolbar and select `Add User-Defined Setting`
+
+   ![Setting](https://cloud.githubusercontent.com/assets/116461/15764165/a16dbe30-28dd-11e6-94f2-fa3b7eb0c7de.png)
+
+4. Name this new setting something like `CODEPUSH_KEY`, expand it, and specify your `Staging` deployment key for the `Debug` config and your `Production` deployment key for the `Production` config.
+
+    ![Setting Keys](https://cloud.githubusercontent.com/assets/116461/15764230/106c245c-28de-11e6-96fe-2615f9220b07.png)
+    
+    *NOTE: As a reminder, you can retrieve these keys by running `code-push deployment ls <APP_NAME> -k` from your terminal.*
+    
+5. Open your project's `Info.plist` file and change the value of your `CodePushDeploymentKey` entry to `$(CODEPUSH_KEY)`
+
+    ![Infoplist](https://cloud.githubusercontent.com/assets/116461/15764252/3ac8aed2-28de-11e6-8c19-2270ae9857a7.png)
+    
+And that's it! Now when you run or build your app, your debug builds will automatically be configured to sync with your `Staging` deployment, and your release builds will be configured to sync with your `Production` deployment.
+ 
+If you want to be able to install both debug and release builds simultaneously on the same device, then you can also specify an [`applicationIdSuffix`](http://google.github.io/android-gradle-dsl/current/com.android.build.gradle.internal.dsl.BuildType.html#com.android.build.gradle.internal.dsl.BuildType:applicationIdSuffix) field for your debug build type, so that the OS sees them as seperate apps (e.g. `com.foo` and `com.foo.debug`).
+
+```groovy
+buildTypes {
+    debug {
+        applicationIdSuffix ".debug"
+    }
+}
+```
+  
+Additionally, if you want to give them seperate names and/or icons, you can modify the `Product Name` and `Asset Catalog App Icon Set Name` build settings, so that the debug configuration has a unique value.
+
+![Product name](https://cloud.githubusercontent.com/assets/116461/15764314/b3a4cfac-28de-11e6-9e8c-b1cbd8ac7c6c.png)
 
 ## Continuous Integration / Delivery
 
