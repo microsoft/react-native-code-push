@@ -1074,17 +1074,7 @@ To set this up, perform the following steps:
     ![Infoplist](https://cloud.githubusercontent.com/assets/116461/15764252/3ac8aed2-28de-11e6-8c19-2270ae9857a7.png)
     
 And that's it! Now when you run or build your app, your debug builds will automatically be configured to sync with your `Staging` deployment, and your release builds will be configured to sync with your `Production` deployment.
- 
-If you want to be able to install both debug and release builds simultaneously on the same device, then you can also specify an [`applicationIdSuffix`](http://google.github.io/android-gradle-dsl/current/com.android.build.gradle.internal.dsl.BuildType.html#com.android.build.gradle.internal.dsl.BuildType:applicationIdSuffix) field for your debug build type, so that the OS sees them as seperate apps (e.g. `com.foo` and `com.foo.debug`).
 
-```groovy
-buildTypes {
-    debug {
-        applicationIdSuffix ".debug"
-    }
-}
-```
-  
 Additionally, if you want to give them seperate names and/or icons, you can modify the `Product Name` and `Asset Catalog App Icon Set Name` build settings, so that the debug configuration has a unique value.
 
 ![Product name](https://cloud.githubusercontent.com/assets/116461/15764314/b3a4cfac-28de-11e6-9e8c-b1cbd8ac7c6c.png)
