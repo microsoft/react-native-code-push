@@ -447,6 +447,18 @@ In our [getting started](#getting-started) docs, we illustrated how to configure
 
 *NOTE: Our client-side rollback feature can help mitigate releases which result in an app crash, and server-side rollbacks (e.g. `code-push rollback`) allow you to prevent additional users from installing a bad release, however, it's obviously better if you can prevent an erroneous update from being broadly released in the first place.*
 
+Using these deployments, allows you to acheive a workflow like the following:
+
+1. Release a CodePush update to your `Staging` deployment using the `code-push release-react` command (or `code-push release` if you need more control)
+
+2. Run your "Staging" build of your app, sync the update from the server and verify it works as expected
+
+3. Promote the tested release from `Staging` to `Production` using the `code-push promote` command
+
+4. Run your "Production" build of your app, sync the update from the server and verify it works as expected
+
+*NOTE: If you want to get really fancy, you can even choose to perform a "staged rollout" as part of #3, which allows you to mitigate any potential risk with the update (e.g. did your testing in #2 touch all possible devices/conditions?) by only making the production update available to a percentage of your users (e.g. `code-push promote <APP_NAME> Staging Production -r 20%`). Then, after waiting for a reasonable amount of time to see if any crash reports or customer feedback comes in, you can expand it to your entire audience by running `code-push patch <APP_NAME> Production -r 100%`.*
+
 Setting this up requires unique steps for each platform, so refer to the following sections for an example of how this can be achieved in your React Native app, depending on the platform(s) you are targeting.
 
 ### Android
