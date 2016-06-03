@@ -193,6 +193,10 @@ class RNIOS extends Platform.IOS implements RNPlatform {
             // Fix the linker flag list in project.pbxproj (pod install adds an extra comma)
             .then(TestUtil.replaceString.bind(undefined, path.join(iOSProject, TestConfig.TestAppName + ".xcodeproj", "project.pbxproj"), 
                 "\"[$][(]inherited[)]\",\\s*[)];", "\"$(inherited)\"\n\t\t\t\t);"))
+            // Prevent the packager from starting during builds by replacing the script that starts it with a file that does nothing.
+            .then(TestUtil.copyFile.bind(undefined, 
+                path.join(TestConfig.templatePath, "ios", "launchPackager.command"),
+                path.join(projectDirectory, TestConfig.TestAppName, "node_modules", "react-native", "packager", "launchPackager.command"), true))
             // Copy the AppDelegate.m to the project
             .then(TestUtil.copyFile.bind(undefined,
                 path.join(TestConfig.templatePath, "ios", TestConfig.TestAppName, "AppDelegate.m"),

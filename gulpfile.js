@@ -34,7 +34,7 @@ var tsCompileOptions = {
 };
 
 function spawnCommand(command, args, callback, silent, detached) {
-    var options = {};
+    var options = { maxBuffer: 1024 * 1024 };
     if (detached) {
         options.detached = true;
         options.stdio = ["ignore"];
@@ -55,7 +55,7 @@ function spawnCommand(command, args, callback, silent, detached) {
 };
 
 function execCommand(command, args, callback, silent) {
-    var execProcess = child_process.exec(command + " " + args.join(" "));
+    var execProcess = child_process.exec(command + " " + args.join(" "), { maxBuffer: 1024 * 1024 });
         
     if (!silent) execProcess.stdout.pipe(process.stdout);
     if (!silent) execProcess.stderr.pipe(process.stderr);
