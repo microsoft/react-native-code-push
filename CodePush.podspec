@@ -20,11 +20,11 @@ Pod::Spec.new do |s|
   s.default_subspec = 'Full'
   
   s.subspec 'Full' do |ss|
-    s.source_files = 'ios/CodePush/*.{h,m}', 'ios/CodePush/SSZipArchive/*.{h,m}', 'ios/CodePush/SSZipArchive/aes/*.{h,c}', 'ios/CodePush/SSZipArchive/minizip/*.{h,c}'    
+    ss.source_files = 'ios/CodePush/*.{h,m}', 'ios/CodePush/SSZipArchive/*.{h,m}', 'ios/CodePush/SSZipArchive/aes/*.{h,c}', 'ios/CodePush/SSZipArchive/minizip/*.{h,c}'    
   end
   
   s.subspec 'NoZip' do |ss|
-    s.source_files = 'ios/CodePush/*.{h,m}'    
+    ss.source_files = 'ios/CodePush/*.{h,m}'    
   end
   
 end
