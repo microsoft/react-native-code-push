@@ -948,7 +948,7 @@ Contains details about an update that has been downloaded locally or already ins
 
 - __failedInstall__: Indicates whether this update has been previously installed but was rolled back. The `sync` method will automatically ignore updates which have previously failed, so you only need to worry about this property if using `checkForUpdate`. *(Boolean)*
 
-- __installLocation__: The absolute path to the directory where the update's contents are installed. This can be useful if you need to construct an absolute path for a file that is contained with a CodePush release, and therefore, you need to resolve the filename relative to the update it's contained within. *(String)*
+- __installLocation__: The absolute path to the directory where the update's contents are installed. This can be useful if you need to construct an absolute path for a file that is contained within a CodePush release. *(String)*
 
 - __isFirstRun__: Indicates whether this is the first time the update has been run after being installed. This is useful for determining whether you would like to show a "What's New?" UI to the end user after installing an update. *(Boolean)*
 
