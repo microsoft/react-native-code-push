@@ -40,6 +40,11 @@ export interface LocalPackage extends Package {
      * @param minimumBackgroundDuration For resume-based installs, this specifies the number of seconds the app needs to be in the background before forcing a restart. Defaults to 0 if unspecified.
      */
     install(installMode: CodePush.InstallMode, minimumBackgroundDuration?: number): Promise<void>;
+    
+    /**
+     * The absolute path to the directory where the update's contents are installed.
+     */
+    installLocation: string;
 }
     
 export interface Package {
