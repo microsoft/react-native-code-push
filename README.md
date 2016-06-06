@@ -11,7 +11,8 @@ This plugin provides client-side integration for the [CodePush service](http://c
 * [Windows Setup](#windows-setup)
 * [Plugin Usage](#plugin-usage)
 * [Releasing Updates](#releasing-updates)
-* [Multi-Deployment Releases](#multi-deployment-releases)
+* [Multi-Deployment Testing](#multi-deployment-testing)
+* [Dynamic Deployment Assignment](#dynamic-deployment-assignment)
 * [API Reference](#api-reference)
     * [JavaScript API](#javascript-api-reference)
     * [Objective-C API Reference (iOS)](#objective-c-api-reference-ios)
@@ -441,7 +442,7 @@ For more details about how the `release-react` command works, as well as the var
 If you run into any issues, or have any questions/comments/feedback, you can ping us within the [#code-push](https://discord.gg/0ZcbPKXt5bWxFdFu) channel on Reactiflux, [e-mail us](mailto:codepushfeed@microsoft.com) and/or check out the [troubleshooting](#debugging--troubleshooting) details below.
 
 
-## Multi-Deployment Releases
+## Multi-Deployment Testing
 
 In our [getting started](#getting-started) docs, we illustrated how to configure the CodePush plugin using a specific deployment key. However, in order to effectively test your releases, it is critical that you leverage the `Staging` and `Production` deployments that are auto-generated when you first created your CodePush app (or any custom deployments you may have created). This way, you never release an update to your end users that you haven't been able to validate yourself.
 
@@ -556,6 +557,26 @@ And that's it! Now when you run or build your app, your debug builds will automa
 Additionally, if you want to give them seperate names and/or icons, you can modify the `Product Name` and `Asset Catalog App Icon Set Name` build settings, so that the debug configuration has a unique value.
 
 ![Product name](https://cloud.githubusercontent.com/assets/116461/15764314/b3a4cfac-28de-11e6-9e8c-b1cbd8ac7c6c.png)
+
+## Dynamic Deployment Assignment
+
+The above section illustrated how you can leverage multiple CodePush deployments in order to effectively test your updates before broadly releasing them to your end users. However, since that workflow statically embeds the deployment assignment into the actual binary, a staging or production build will only ever sync updates from that deployment. In many cases, this is sufficient, since you only want your team, customers, stakeholders, etc. to sync with your pre-production releases, and therefore, only they need a build that knows how to sync with staging. However, if you want to be able to perform A/B tests, or provide early access of your app to certain users, it can prove very useful to be able to dynamically place specific users (or audiences) into specific deployments at runtime.
+
+In order to achieve this kind of workflow, all you need to do is specify the deployment key you want the current user to syncronize with when calling the `checkForUpdate` or `sync` methods. When specified, this key will override the "default" one that was provided in your app's `Info.plist` (iOS) or `MainActivity.java` (Android) files. This allows you to produce a build for staging or production, that is also capabable of being dynamically "redirected" as needed.
+
+```javascript
+// Imagine that "userProfile" is a prop that this component received
+// which includes the deployment key that the current user should use.
+codePush.sync({ deploymentKey: userProfile.CODEPUSH_KEY });
+```
+
+With that change in place, now it's just a matter of choosing how your app determines the right deployment key for the current user. In practice, there are typically two solutions for this:
+
+1. Expose a user-visible mechanism for changing deployments at any time. For example, your settings page could have a toggle for enabling "beta" access. This model works well if you're not concerned with the privacy of your pre-production updates, and you have power users that may want to opt-in to earlier (and potentially buggy) updates at their own will (kind of like Chrome channels). However, this solution puts the decision in the hands of your users, which doesn't help you perform A/B tests.
+
+2. Annotate the profile's of your users with an additional piece of metadata which indicates the deployment they should sync with. By default, your app could just use the embedded key, but after a user has authenticated, your server can choose to "redirect" them to a different deployment, which allows you to incrementally place certain users or groups in different deployments as needed. You could even choose to store the server-response in local storage so that it becomes the new defaul. How you store the key alongside your user's profiles is entirely up to your authentication solution (e.g. Auth0, Firebase, custom DB + REST API), but is generally pretty trivial to do.
+
+*NOTE: If needed, you could also implement a hybrid solution that allowed your end-users to toggle between different deployments, while also allowing your server to override that decision. This way, you have a hierarchy of "deployment resolution" that ensures your app has the ability to update itself out-of-the-box, your end users can feel rewarded by getting early access to bits, but you also have the ability to run A/B tests on your users as needed.
 
 ---
 
