@@ -302,10 +302,10 @@ class RNProjectManager extends ProjectManager {
         return copyDirectoryRecursively(templatePath, path.join(projectDirectory, TestConfig.TestAppName));
     }
 
-	/**
-	 * Creates a new test application at the specified path, and configures it
-	 * with the given server URL, android and ios deployment keys.
-	 */
+    /**
+     * Creates a new test application at the specified path, and configures it
+     * with the given server URL, android and ios deployment keys.
+     */
     public setupProject(projectDirectory: string, templatePath: string, appName: string, appNamespace: string, version?: string): Q.Promise<string> {
         if (fs.existsSync(projectDirectory)) {
             del.sync([projectDirectory], { force: true });
