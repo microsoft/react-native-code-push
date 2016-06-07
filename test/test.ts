@@ -457,9 +457,8 @@ class RNProjectManager extends ProjectManager {
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////
-// Create the tests.
-
 // Scenarios used in the tests.
+
 const ScenarioCheckForUpdatePath = "scenarioCheckForUpdate.js";
 const ScenarioCheckForUpdateCustomKey = "scenarioCheckForUpdateCustomKey.js";
 const ScenarioDownloadUpdate = "scenarioDownloadUpdate.js";
@@ -483,52 +482,18 @@ const UpdateSync = "updateSync.js";
 const UpdateSync2x = "updateSync2x.js";
 const UpdateNotifyApplicationReadyConditional = "updateNARConditional.js";
 
-// Describe the tests.
-var testBuilders = [
-    
-    TestBuilder.describe("#window.codePush.checkForUpdate",
-    
-        [
-            TestBuilder.it("window.codePush.checkForUpdate.noUpdate",
-                (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                    var noUpdateResponse = ServerUtil.createDefaultResponse();
-                    noUpdateResponse.isAvailable = false;
-                    noUpdateResponse.appVersion = "0.0.1";
-                    ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
+//////////////////////////////////////////////////////////////////////////////////////////
+// Initialize the tests.
 
-                    ServerUtil.testMessageCallback = (requestBody: any) => {
-                        try {
-                            assert.equal(requestBody.message, ServerUtil.TestMessage.CHECK_UP_TO_DATE);
-                            done();
-                        } catch (e) {
-                            done(e);
-                        }
-                    };
-
-                    projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                },
-                false),
-            
-            TestBuilder.it("window.codePush.checkForUpdate.sendsBinaryHash",
-                (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                    if (!(<RNPlatform><any>targetPlatform).isDiffsSupported()) {
-                        console.log(targetPlatform.getName() + " does not send a binary hash!");
-                        done();
-                        return;
-                    }
-                    
-                    var noUpdateResponse = ServerUtil.createDefaultResponse();
+PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPlatforms,
+    (projectManager: ProjectManager, targetPlatform: Platform.IPlatform) => {
+        TestBuilder.describe("#window.codePush.checkForUpdate",
+            () => {
+                TestBuilder.it("window.codePush.checkForUpdate.noUpdate", false,
+                    (done: MochaDone) => {
+                        var noUpdateResponse = ServerUtil.createDefaultResponse();
                         noUpdateResponse.isAvailable = false;
                         noUpdateResponse.appVersion = "0.0.1";
-
-                        ServerUtil.updateCheckCallback = (request: any) => {
-                            try {
-                                assert(request.query.packageHash);
-                            } catch (e) {
-                                done(e);
-                            }
-                        };
-                        
                         ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
 
                         ServerUtil.testMessageCallback = (requestBody: any) => {
@@ -541,69 +506,124 @@ var testBuilders = [
                         };
 
                         projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                }, false),
-            
-            TestBuilder.it("window.codePush.checkForUpdate.noUpdate.updateAppVersion", 
-                (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                    var updateAppVersionResponse = ServerUtil.createDefaultResponse();
-                    updateAppVersionResponse.updateAppVersion = true;
-                    updateAppVersionResponse.appVersion = "2.0.0";
-
-                    ServerUtil.updateResponse = { updateInfo: updateAppVersionResponse };
-
-                    ServerUtil.testMessageCallback = (requestBody: any) => {
-                        try {
-                            assert.equal(requestBody.message, ServerUtil.TestMessage.CHECK_UP_TO_DATE);
+                    });
+                
+                TestBuilder.it("window.codePush.checkForUpdate.sendsBinaryHash", false,
+                    (done: MochaDone) => {
+                        if (!(<RNPlatform><any>targetPlatform).isDiffsSupported()) {
+                            console.log(targetPlatform.getName() + " does not send a binary hash!");
                             done();
-                        } catch (e) {
-                            done(e);
+                            return;
                         }
-                    };
+                        
+                        var noUpdateResponse = ServerUtil.createDefaultResponse();
+                            noUpdateResponse.isAvailable = false;
+                            noUpdateResponse.appVersion = "0.0.1";
 
-                    projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                }, false),
-            
-            TestBuilder.it("window.codePush.checkForUpdate.update", 
-                (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
+                            ServerUtil.updateCheckCallback = (request: any) => {
+                                try {
+                                    assert(request.query.packageHash);
+                                } catch (e) {
+                                    done(e);
+                                }
+                            };
+                            
+                            ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
+
+                            ServerUtil.testMessageCallback = (requestBody: any) => {
+                                try {
+                                    assert.equal(requestBody.message, ServerUtil.TestMessage.CHECK_UP_TO_DATE);
+                                    done();
+                                } catch (e) {
+                                    done(e);
+                                }
+                            };
+
+                            projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                    });
+                
+                TestBuilder.it("window.codePush.checkForUpdate.noUpdate.updateAppVersion", false,
+                    (done: MochaDone) => {
+                        var updateAppVersionResponse = ServerUtil.createDefaultResponse();
+                        updateAppVersionResponse.updateAppVersion = true;
+                        updateAppVersionResponse.appVersion = "2.0.0";
+
+                        ServerUtil.updateResponse = { updateInfo: updateAppVersionResponse };
+
+                        ServerUtil.testMessageCallback = (requestBody: any) => {
+                            try {
+                                assert.equal(requestBody.message, ServerUtil.TestMessage.CHECK_UP_TO_DATE);
+                                done();
+                            } catch (e) {
+                                done(e);
+                            }
+                        };
+
+                        projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                    });
+                
+                TestBuilder.it("window.codePush.checkForUpdate.update", true,
+                    (done: MochaDone) => {
+                        var updateResponse = ServerUtil.createUpdateResponse();
+                        ServerUtil.updateResponse = { updateInfo: updateResponse };
+
+                        ServerUtil.testMessageCallback = (requestBody: any) => {
+                            try {
+                                assert.equal(requestBody.message, ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE);
+                                assert.notEqual(requestBody.args[0], null);
+                                var remotePackage: IRemotePackage = requestBody.args[0];
+                                assert.equal(remotePackage.downloadUrl, updateResponse.downloadURL);
+                                assert.equal(remotePackage.isMandatory, updateResponse.isMandatory);
+                                assert.equal(remotePackage.label, updateResponse.label);
+                                assert.equal(remotePackage.packageHash, updateResponse.packageHash);
+                                assert.equal(remotePackage.packageSize, updateResponse.packageSize);
+                                assert.equal(remotePackage.deploymentKey, targetPlatform.getDefaultDeploymentKey());
+                                done();
+                            } catch (e) {
+                                done(e);
+                            }
+                        };
+
+                        ServerUtil.updateCheckCallback = (request: any) => {
+                            try {
+                                assert.notEqual(null, request);
+                                assert.equal(request.query.deploymentKey, targetPlatform.getDefaultDeploymentKey());
+                            } catch (e) {
+                                done(e);
+                            }
+                        };
+
+                        projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                    });
+                
+                TestBuilder.it("window.codePush.checkForUpdate.error", false,
+                    (done: MochaDone) => {
+                        ServerUtil.updateResponse = "invalid {{ json";
+
+                        ServerUtil.testMessageCallback = (requestBody: any) => {
+                            try {
+                                assert.equal(requestBody.message, ServerUtil.TestMessage.CHECK_ERROR);
+                                done();
+                            } catch (e) {
+                                done(e);
+                            }
+                        };
+
+                        projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                    });
+            }, ScenarioCheckForUpdatePath);
+        
+        TestBuilder.describe("#window.codePush.checkForUpdate.customKey",
+            () => {
+                TestBuilder.it("window.codePush.checkForUpdate.customKey.update", false,
+                (done: MochaDone) => {
                     var updateResponse = ServerUtil.createUpdateResponse();
                     ServerUtil.updateResponse = { updateInfo: updateResponse };
-
-                    ServerUtil.testMessageCallback = (requestBody: any) => {
-                        try {
-                            assert.equal(requestBody.message, ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE);
-                            assert.notEqual(requestBody.args[0], null);
-                            var remotePackage: IRemotePackage = requestBody.args[0];
-                            assert.equal(remotePackage.downloadUrl, updateResponse.downloadURL);
-                            assert.equal(remotePackage.isMandatory, updateResponse.isMandatory);
-                            assert.equal(remotePackage.label, updateResponse.label);
-                            assert.equal(remotePackage.packageHash, updateResponse.packageHash);
-                            assert.equal(remotePackage.packageSize, updateResponse.packageSize);
-                            assert.equal(remotePackage.deploymentKey, targetPlatform.getDefaultDeploymentKey());
-                            done();
-                        } catch (e) {
-                            done(e);
-                        }
-                    };
 
                     ServerUtil.updateCheckCallback = (request: any) => {
                         try {
                             assert.notEqual(null, request);
-                            assert.equal(request.query.deploymentKey, targetPlatform.getDefaultDeploymentKey());
-                        } catch (e) {
-                            done(e);
-                        }
-                    };
-
-                    projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                }, true),
-            
-            TestBuilder.it("window.codePush.checkForUpdate.error", 
-                (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                    ServerUtil.updateResponse = "invalid {{ json";
-
-                    ServerUtil.testMessageCallback = (requestBody: any) => {
-                        try {
-                            assert.equal(requestBody.message, ServerUtil.TestMessage.CHECK_ERROR);
+                            assert.equal(request.query.deploymentKey, "CUSTOM-DEPLOYMENT-KEY");
                             done();
                         } catch (e) {
                             done(e);
@@ -611,740 +631,704 @@ var testBuilders = [
                     };
 
                     projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                }, false)
-        ], ScenarioCheckForUpdatePath),
-    
-    TestBuilder.describe("#window.codePush.checkForUpdate.customKey",
-        
-        [TestBuilder.it("window.codePush.checkForUpdate.customKey.update",
-            (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                var updateResponse = ServerUtil.createUpdateResponse();
-                ServerUtil.updateResponse = { updateInfo: updateResponse };
-
-                ServerUtil.updateCheckCallback = (request: any) => {
-                    try {
-                        assert.notEqual(null, request);
-                        assert.equal(request.query.deploymentKey, "CUSTOM-DEPLOYMENT-KEY");
-                        done();
-                    } catch (e) {
-                        done(e);
-                    }
-                };
-
-                projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-            }, false)],
-        ScenarioCheckForUpdateCustomKey),
-        
-    TestBuilder.describe("#remotePackage.download",
-        
-        [
-            TestBuilder.it("remotePackage.download.success",
-                (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                    ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
-
-                    /* pass the path to any file for download (here, index.js) to make sure the download completed callback is invoked */
-                    ServerUtil.updatePackagePath = path.join(TestConfig.templatePath, "index.js");
-                    
-                    projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                    
-                    ServerUtil.expectTestMessages([
-                        ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
-                        ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED])
-                        .then(() => { done(); }, (e) => { done(e); });
-                }, false),
+                });
+            }, ScenarioCheckForUpdateCustomKey);
             
-            TestBuilder.it("remotePackage.download.error",
-                (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                    ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
+        TestBuilder.describe("#remotePackage.download",
+            () => {
+                TestBuilder.it("remotePackage.download.success", false,
+                    (done: MochaDone) => {
+                        ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
 
-                    /* pass an invalid update url */
-                    ServerUtil.updateResponse.updateInfo.downloadURL = "invalid_url";
-                    
-                    projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                    
-                    ServerUtil.expectTestMessages([
-                        ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
-                        ServerUtil.TestMessage.DOWNLOAD_ERROR])
-                        .then(() => { done(); }, (e) => { done(e); });
-                }, false)
-        ], ScenarioDownloadUpdate),
-        
-    TestBuilder.describe("#localPackage.install",
-    
-        [
-            // // CHANGE THIS TEST CASE, accepts both a jsbundle and a zip
-            // TestBuilder.it("localPackage.install.unzip.error",
-            //     (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-            //         ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
-
-            //         /* pass an invalid zip file, here, index.js */
-            //         ServerUtil.updatePackagePath = path.join(TestConfig.templatePath, "index.js");
-                    
-            //         var deferred = Q.defer<void>();
-            //         deferred.promise.then(() => { done(); }, (e) => { done(e); });
-
-            //         ServerUtil.testMessageCallback = PluginTestingFramework.verifyMessages([
-            //             ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
-            //             ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED,
-            //             ServerUtil.TestMessage.INSTALL_ERROR], deferred);
-
-            //         projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-            //     }, false),
-            
-            TestBuilder.it("localPackage.install.handlesDiff.againstBinary",
-                (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                    if (!(<RNPlatform><any>targetPlatform).isDiffsSupported()) {
-                        console.log(targetPlatform.getName() + " does not support diffs!");
-                        done();
-                        return;
-                    }
-                    
-                    ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
-
-                    /* create an update */
-                    setupUpdateScenario(projectManager, targetPlatform, UpdateNotifyApplicationReady, "Diff Update 1")
-                        .then<void>((updatePath: string) => {
-                            ServerUtil.updatePackagePath = updatePath;
-                            projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                            return ServerUtil.expectTestMessages([
-                                ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
-                                ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED,
-                                ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
-                        })
-                        .then<void>(() => {
-                            /* run the app again to ensure it was not reverted */
-                            targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
-                            return ServerUtil.expectTestMessages([
-                                ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
-                        })
-                        .done(() => { done(); }, (e) => { done(e); });
-                }, false),
-            
-            TestBuilder.it("localPackage.install.immediately",
-                (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                    ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
-
-                    /* create an update */
-                    setupUpdateScenario(projectManager, targetPlatform, UpdateNotifyApplicationReady, "Update 1")
-                        .then<void>((updatePath: string) => {
-                            ServerUtil.updatePackagePath = updatePath;
-                            projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                            return ServerUtil.expectTestMessages([
-                                ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
-                                ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED,
-                                ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
-                        })
-                        .then<void>(() => {
-                            /* run the app again to ensure it was not reverted */
-                            targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
-                            return ServerUtil.expectTestMessages([
-                                ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
-                        })
-                        .done(() => { done(); }, (e) => { done(e); });
-                }, false)
-        ], ScenarioInstall),
-        
-    TestBuilder.describe("#localPackage.install.revert",
-    
-        [
-            TestBuilder.it("localPackage.install.revert.dorevert",
-                (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                    ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
-
-                    /* create an update */
-                    setupUpdateScenario(projectManager, targetPlatform, UpdateDeviceReady, "Update 1 (bad update)")
-                        .then<void>((updatePath: string) => {
-                            ServerUtil.updatePackagePath = updatePath;
-                            projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                            return ServerUtil.expectTestMessages([
-                                ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
-                                ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED,
-                                ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
-                        })
-                        .then<void>(() => {
-                            /* restart the app to ensure it was reverted and send it another update */
-                            ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
-                            targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
-                            return ServerUtil.expectTestMessages([
-                                ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
-                                ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED,
-                                ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
-                        })
-                        .then<void>(() => {
-                            /* restart the app again to ensure it was reverted again and send the same update and expect it to reject it */
-                            targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
-                            return ServerUtil.expectTestMessages([ServerUtil.TestMessage.UPDATE_FAILED_PREVIOUSLY]);
-                        })
-                        .done(() => { done(); }, (e) => { done(e); });
-                }, false),
-            
-            TestBuilder.it("localPackage.install.revert.norevert",
-                (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                    ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
-
-                    /* create an update */
-                    setupUpdateScenario(projectManager, targetPlatform, UpdateNotifyApplicationReady, "Update 1 (good update)")
-                        .then<void>((updatePath: string) => {
-                            ServerUtil.updatePackagePath = updatePath;
-                            projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                            return ServerUtil.expectTestMessages([
-                                ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
-                                ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED,
-                                ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
-                        })
-                        .then<void>(() => {
-                            /* run the app again to ensure it was not reverted */
-                            targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
-                            return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
-                        })
-                        .done(() => { done(); }, (e) => { done(e); });
-                }, false)
-        ], ScenarioInstallWithRevert),
-    
-    TestBuilder.describe("#localPackage.installOnNextResume",
-    
-        [
-            TestBuilder.it("localPackage.installOnNextResume.dorevert",
-                (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                    ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
-
-                    setupUpdateScenario(projectManager, targetPlatform, UpdateDeviceReady, "Update 1")
-                        .then<void>((updatePath: string) => {
-                            ServerUtil.updatePackagePath = updatePath;
-                            projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                            return ServerUtil.expectTestMessages([
-                                ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
-                                ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED,
-                                ServerUtil.TestMessage.UPDATE_INSTALLED]);
-                        })
-                        .then<void>(() => {
-                            /* resume the application */
-                            targetPlatform.getEmulatorManager().resumeApplication(TestConfig.TestNamespace);
-                            return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
-                        })
-                        .then<void>(() => {
-                            /* restart to revert it */
-                            targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
-                            return ServerUtil.expectTestMessages([ServerUtil.TestMessage.UPDATE_FAILED_PREVIOUSLY]);
-                        })
-                        .done(() => { done(); }, (e) => { done(e); });
-                }, true),
-            
-            TestBuilder.it("localPackage.installOnNextResume.norevert",
-                (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                    ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
-
-                    /* create an update */
-                    setupUpdateScenario(projectManager, targetPlatform, UpdateNotifyApplicationReady, "Update 1 (good update)")
-                        .then<void>((updatePath: string) => {
-                            ServerUtil.updatePackagePath = updatePath;
-                            projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                            return ServerUtil.expectTestMessages([
-                                ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
-                                ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED,
-                                ServerUtil.TestMessage.UPDATE_INSTALLED]);
-                        })
-                        .then<void>(() => {
-                            /* resume the application */
-                            targetPlatform.getEmulatorManager().resumeApplication(TestConfig.TestNamespace);
-                            return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
-                        })
-                        .then<void>(() => {
-                            /* restart to make sure it did not revert */
-                            targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
-                            return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
-                        })
-                        .done(() => { done(); }, (e) => { done(e); });
-                }, true)
-        ], ScenarioInstallOnResumeWithRevert),
-        
-    TestBuilder.describe("localPackage installOnNextRestart",
-    
-        [
-            TestBuilder.it("localPackage.installOnNextRestart.dorevert",
-                (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                    ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
-
-                    setupUpdateScenario(projectManager, targetPlatform, UpdateDeviceReady, "Update 1")
-                        .then<void>((updatePath: string) => {
-                            ServerUtil.updatePackagePath = updatePath;
-                            projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                            return ServerUtil.expectTestMessages([
-                                ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
-                                ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED,
-                                ServerUtil.TestMessage.UPDATE_INSTALLED]);
-                        })
-                        .then<void>(() => {
-                            /* restart the application */
-                            console.log("Update hash: " + ServerUtil.updateResponse.updateInfo.packageHash);
-                            targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
-                            return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
-                        })
-                        .then<void>(() => {
-                            /* restart the application */
-                            console.log("Update hash: " + ServerUtil.updateResponse.updateInfo.packageHash);
-                            targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
-                            return ServerUtil.expectTestMessages([ServerUtil.TestMessage.UPDATE_FAILED_PREVIOUSLY]);
-                        })
-                        .done(() => { done(); }, (e) => { done(e); });
-                }, false),
-            
-            TestBuilder.it("localPackage.installOnNextRestart.norevert",
-                (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                    ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
-
-                    /* create an update */
-                    setupUpdateScenario(projectManager, targetPlatform, UpdateNotifyApplicationReady, "Update 1 (good update)")
-                        .then<void>((updatePath: string) => {
-                            ServerUtil.updatePackagePath = updatePath;
-                            projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                            return ServerUtil.expectTestMessages([
-                                ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
-                                ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED,
-                                ServerUtil.TestMessage.UPDATE_INSTALLED]);
-                        })
-                        .then<void>(() => {
-                            /* "resume" the application - run it again */
-                            targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
-                            return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
-                        })
-                        .then<void>(() => {
-                            /* run again to make sure it did not revert */
-                            targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
-                            return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
-                        })
-                        .done(() => { done(); }, (e) => { done(e); });
-                }, true),
-            
-            TestBuilder.it("localPackage.installOnNextRestart.revertToPrevious",
-                (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                    ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
-
-                    /* create an update */
-                    setupUpdateScenario(projectManager, targetPlatform, UpdateNotifyApplicationReadyConditional, "Update 1 (good update)")
-                        .then<void>((updatePath: string) => {
-                            ServerUtil.updatePackagePath = updatePath;
-                            projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                            return ServerUtil.expectTestMessages([
-                                ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
-                                ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED,
-                                ServerUtil.TestMessage.UPDATE_INSTALLED]);
-                        })
-                        .then<void>(() => {
-                            /* run good update, set up another (bad) update */
-                            ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
-                            setupUpdateScenario(projectManager, targetPlatform, UpdateDeviceReady, "Update 2 (bad update)")
-                                .then(() => { return targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace); });
-                            return ServerUtil.expectTestMessages([
-                                ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE,
-                                ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
-                                ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED,
-                                ServerUtil.TestMessage.UPDATE_INSTALLED]);
-                        })
-                        .then<void>(() => {
-                            /* run the bad update without calling notifyApplicationReady */
-                            targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
-                            return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
-                        })
-                        .then<void>(() => {
-                            /* run the good update and don't call notifyApplicationReady - it should not revert */
-                            ServerUtil.testMessageResponse = ServerUtil.TestMessageResponse.SKIP_NOTIFY_APPLICATION_READY;
-                            targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
-                            return ServerUtil.expectTestMessages([
-                                ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE, 
-                                ServerUtil.TestMessage.SKIPPED_NOTIFY_APPLICATION_READY]);
-                        })
-                        .then<void>(() => {
-                            /* run the application again */
-                            ServerUtil.testMessageResponse = undefined;
-                            targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
-                            return ServerUtil.expectTestMessages([
-                                ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE, 
-                                ServerUtil.TestMessage.UPDATE_FAILED_PREVIOUSLY]);
-                        })
-                        .done(() => { done(); }, (e) => { done(e); });
-                }, false)
-        ], ScenarioInstallOnRestartWithRevert),
-        
-    TestBuilder.describe("#codePush.restartApplication",
-    
-        [
-            TestBuilder.it("codePush.restartApplication.checkPackages",
-                (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                    ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
-
-                    setupUpdateScenario(projectManager, targetPlatform, UpdateNotifyApplicationReady, "Update 1")
-                        .then<void>((updatePath: string) => {
-                            ServerUtil.updatePackagePath = updatePath;
-                            projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                            return ServerUtil.expectTestMessages([
-                                new ServerUtil.AppMessage(ServerUtil.TestMessage.PENDING_PACKAGE, [null]),
-                                new ServerUtil.AppMessage(ServerUtil.TestMessage.CURRENT_PACKAGE, [null]),
-                                new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UPDATE_INSTALLED]),
-                                new ServerUtil.AppMessage(ServerUtil.TestMessage.PENDING_PACKAGE, [ServerUtil.updateResponse.updateInfo.packageHash]),
-                                new ServerUtil.AppMessage(ServerUtil.TestMessage.CURRENT_PACKAGE, [null]),
-                                ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
-                        })
-                        .then<void>(() => {
-                            /* restart the application */
-                            targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
-                            return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
-                        })
-                        .done(() => { done(); }, (e) => { done(e); });
-                }, true)
-        ], ScenarioRestart),
-        
-    TestBuilder.describe("#window.codePush.sync",
-        [
-            // We test the functionality with sync twice--first, with sync only called once,
-            // then, with sync called again while the first sync is still running.
-            TestBuilder.describe("#window.codePush.sync 1x",
-                [
-                    // Tests where sync is called just once
-                    TestBuilder.it("window.codePush.sync.noupdate",
-                        (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                            var noUpdateResponse = ServerUtil.createDefaultResponse();
-                            noUpdateResponse.isAvailable = false;
-                            noUpdateResponse.appVersion = "0.0.1";
-                            ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
-
-                            Q({})
-                                .then<void>(p => {
-                                    projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                                    return ServerUtil.expectTestMessages([
-                                        new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UP_TO_DATE])]);
-                                })
-                                .done(() => { done(); }, (e) => { done(e); });
-                        }, false),
-                    
-                    TestBuilder.it("window.codePush.sync.checkerror",
-                        (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                            ServerUtil.updateResponse = "invalid {{ json";
-
-                            Q({})
-                                .then<void>(p => {
-                                    projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                                    return ServerUtil.expectTestMessages([
-                                        new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_ERROR])]);
-                                })
-                                .done(() => { done(); }, (e) => { done(e); });
-                        }, false),
-                    
-                    TestBuilder.it("window.codePush.sync.downloaderror",
-                        (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                            var invalidUrlResponse = ServerUtil.createUpdateResponse();
-                            invalidUrlResponse.downloadURL = path.join(TestConfig.templatePath, "invalid_path.zip");
-                            ServerUtil.updateResponse = { updateInfo: invalidUrlResponse };
-
-                            Q({})
-                                .then<void>(p => {
-                                    projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                                    return ServerUtil.expectTestMessages([
-                                        new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_ERROR])]);
-                                })
-                                .done(() => { done(); }, (e) => { done(e); });
-                        }, false),
-                    
-                    TestBuilder.it("window.codePush.sync.dorevert",
-                        (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                            ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
+                        /* pass the path to any file for download (here, index.js) to make sure the download completed callback is invoked */
+                        ServerUtil.updatePackagePath = path.join(TestConfig.templatePath, "index.js");
                         
-                            /* create an update */
-                            setupUpdateScenario(projectManager, targetPlatform, UpdateDeviceReady, "Update 1 (bad update)")
-                                .then<void>((updatePath: string) => {
-                                    ServerUtil.updatePackagePath = updatePath;
-                                    projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                                    return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
-                                })
-                                .then<void>(() => {
-                                    targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
-                                    return ServerUtil.expectTestMessages([
-                                        new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UP_TO_DATE])]);
-                                })
-                                .done(() => { done(); }, (e) => { done(e); });
-                        }, false),
-                    
-                    TestBuilder.it("window.codePush.sync.update",
-                        (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                            ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
-
-                            /* create an update */
-                            setupUpdateScenario(projectManager, targetPlatform, UpdateSync, "Update 1 (good update)")
-                                .then<void>((updatePath: string) => {
-                                    ServerUtil.updatePackagePath = updatePath;
-                                    projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                                    return ServerUtil.expectTestMessages([
-                                        ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE,
-                                        new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UP_TO_DATE])]);
-                                })
-                                .then<void>(() => {
-                                    // restart the app and make sure it didn't roll out!
-                                    var noUpdateResponse = ServerUtil.createDefaultResponse();
-                                    noUpdateResponse.isAvailable = false;
-                                    noUpdateResponse.appVersion = "0.0.1";
-                                    ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
-                                    targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
-                                    return ServerUtil.expectTestMessages([
-                                        ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE,
-                                        new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UP_TO_DATE])]);
-                                })
-                                .done(() => { done(); }, (e) => { done(e); });
-                        }, false)
-                    
-                ], ScenarioSync1x),
+                        projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                        
+                        ServerUtil.expectTestMessages([
+                            ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
+                            ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED])
+                            .then(() => { done(); }, (e) => { done(e); });
+                    });
                 
-            TestBuilder.describe("#window.codePush.sync 2x",
-                [
-                    // Tests where sync is called again before the first sync finishes
-                    TestBuilder.it("window.codePush.sync.2x.noupdate",
-                        (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                            var noUpdateResponse = ServerUtil.createDefaultResponse();
-                            noUpdateResponse.isAvailable = false;
-                            noUpdateResponse.appVersion = "0.0.1";
-                            ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
+                TestBuilder.it("remotePackage.download.error", false,
+                    (done: MochaDone) => {
+                        ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
 
-                            Q({})
-                                .then<void>(p => {
-                                    projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                                    return ServerUtil.expectTestMessages([
-                                        new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_IN_PROGRESS]),
-                                        new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UP_TO_DATE])]);
-                                })
-                                .done(() => { done(); }, (e) => { done(e); });
-                        }, false),
-                    
-                    TestBuilder.it("window.codePush.sync.2x.checkerror",
-                        (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                            ServerUtil.updateResponse = "invalid {{ json";
-
-                            Q({})
-                                .then<void>(p => {
-                                    projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                                    return ServerUtil.expectTestMessages([
-                                        new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_IN_PROGRESS]),
-                                        new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_ERROR])]);
-                                })
-                                .done(() => { done(); }, (e) => { done(e); });
-                        }, false),
-                    
-                    TestBuilder.it("window.codePush.sync.2x.downloaderror",
-                        (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                            var invalidUrlResponse = ServerUtil.createUpdateResponse();
-                            invalidUrlResponse.downloadURL = path.join(TestConfig.templatePath, "invalid_path.zip");
-                            ServerUtil.updateResponse = { updateInfo: invalidUrlResponse };
-
-                            Q({})
-                                .then<void>(p => {
-                                    projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                                    return ServerUtil.expectTestMessages([
-                                        new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_IN_PROGRESS]),
-                                        new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_ERROR])]);
-                                })
-                                .done(() => { done(); }, (e) => { done(e); });
-                        }, false),
-                    
-                    TestBuilder.it("window.codePush.sync.2x.dorevert",
-                        (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                            ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
-                    
-                            /* create an update */
-                            setupUpdateScenario(projectManager, targetPlatform, UpdateDeviceReady, "Update 1 (bad update)")
-                                .then<void>((updatePath: string) => {
-                                    ServerUtil.updatePackagePath = updatePath;
-                                    projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                                    return ServerUtil.expectTestMessages([
-                                        new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_IN_PROGRESS]),
-                                        ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
-                                })
-                                .then<void>(() => {
-                                    targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
-                                    return ServerUtil.expectTestMessages([
-                                        new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_IN_PROGRESS]),
-                                        new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UP_TO_DATE])]);
-                                })
-                                .done(() => { done(); }, (e) => { done(e); });
-                        }, false),
-                    
-                    TestBuilder.it("window.codePush.sync.2x.update",
-                        (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                            ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
-
-                            /* create an update */
-                            setupUpdateScenario(projectManager, targetPlatform, UpdateSync2x, "Update 1 (good update)")
-                                .then<void>((updatePath: string) => {
-                                    ServerUtil.updatePackagePath = updatePath;
-                                    projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                                    return ServerUtil.expectTestMessages([
-                                        new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_IN_PROGRESS]),
-                                        ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE,
-                                        new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_IN_PROGRESS]),
-                                        new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UP_TO_DATE])]);
-                                })
-                                .then<void>(() => {
-                                    // restart the app and make sure it didn't roll out!
-                                    var noUpdateResponse = ServerUtil.createDefaultResponse();
-                                    noUpdateResponse.isAvailable = false;
-                                    noUpdateResponse.appVersion = "0.0.1";
-                                    ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
-                                    targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
-                                    return ServerUtil.expectTestMessages([
-                                        ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE,
-                                        new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_IN_PROGRESS]),
-                                        new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UP_TO_DATE])]);
-                                })
-                                .done(() => { done(); }, (e) => { done(e); });
-                        }, true)
-                ], ScenarioSync2x)
-        ]),
-    
-    TestBuilder.describe("#window.codePush.sync minimum background duration tests",
-    
-        [
-            TestBuilder.it("defaults to no minimum",
-                (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                    ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
-
-                    setupTestRunScenario(projectManager, targetPlatform, ScenarioSyncResume).then<string>(() => {
-                            return setupUpdateScenario(projectManager, targetPlatform, UpdateSync, "Update 1 (good update)");
-                        })
-                        .then<void>((updatePath: string) => {
-                            ServerUtil.updatePackagePath = updatePath;
-                            projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                            return ServerUtil.expectTestMessages([
-                                new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UPDATE_INSTALLED])]);
-                        })
-                        .then<void>(() => {
-                            var noUpdateResponse = ServerUtil.createDefaultResponse();
-                            noUpdateResponse.isAvailable = false;
-                            noUpdateResponse.appVersion = "0.0.1";
-                            ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
-                            targetPlatform.getEmulatorManager().resumeApplication(TestConfig.TestNamespace);
-                            return ServerUtil.expectTestMessages([
-                                ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE,
-                                new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UP_TO_DATE])]);
-                        })
-                        .done(() => { done(); }, (e) => { done(e); });
-                }, false),
+                        /* pass an invalid update url */
+                        ServerUtil.updateResponse.updateInfo.downloadURL = "invalid_url";
+                        
+                        projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                        
+                        ServerUtil.expectTestMessages([
+                            ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
+                            ServerUtil.TestMessage.DOWNLOAD_ERROR])
+                            .then(() => { done(); }, (e) => { done(e); });
+                    });
+            }, ScenarioDownloadUpdate);
             
-            TestBuilder.it("min background duration 5s",
-                (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                    ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
+        TestBuilder.describe("#localPackage.install",
+            () => {
+                // // CHANGE THIS TEST CASE, accepts both a jsbundle and a zip
+                // TestBuilder.it("localPackage.install.unzip.error",
+                //     (done: MochaDone) => {
+                //         ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
 
-                    setupTestRunScenario(projectManager, targetPlatform, ScenarioSyncResumeDelay).then<string>(() => {
-                            return setupUpdateScenario(projectManager, targetPlatform, UpdateSync, "Update 1 (good update)");
-                        })
-                        .then<void>((updatePath: string) => {
-                            ServerUtil.updatePackagePath = updatePath;
-                            projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                            return ServerUtil.expectTestMessages([
-                                new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UPDATE_INSTALLED])]);
-                        })
-                        .then<string>(() => {
-                            var noUpdateResponse = ServerUtil.createDefaultResponse();
-                            noUpdateResponse.isAvailable = false;
-                            noUpdateResponse.appVersion = "0.0.1";
-                            ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
-                            return targetPlatform.getEmulatorManager().resumeApplication(TestConfig.TestNamespace, 3 * 1000);
-                        })
-                        .then<void>(() => {
-                            targetPlatform.getEmulatorManager().resumeApplication(TestConfig.TestNamespace, 6 * 1000);
-                            return ServerUtil.expectTestMessages([
-                                ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE,
-                                new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UP_TO_DATE])]);
-                        })
-                        .done(() => { done(); }, (e) => { done(e); });
-                }, false),
+                //         /* pass an invalid zip file, here, index.js */
+                //         ServerUtil.updatePackagePath = path.join(TestConfig.templatePath, "index.js");
+                        
+                //         var deferred = Q.defer<void>();
+                //         deferred.promise.then(() => { done(); }, (e) => { done(e); });
+
+                //         ServerUtil.testMessageCallback = PluginTestingFramework.verifyMessages([
+                //             ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
+                //             ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED,
+                //             ServerUtil.TestMessage.INSTALL_ERROR], deferred);
+
+                //         projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                //     }, false),
                 
-            TestBuilder.it("has no effect on restart",
-                (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                    ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
+                TestBuilder.it("localPackage.install.handlesDiff.againstBinary", false,
+                    (done: MochaDone) => {
+                        if (!(<RNPlatform><any>targetPlatform).isDiffsSupported()) {
+                            console.log(targetPlatform.getName() + " does not support diffs!");
+                            done();
+                            return;
+                        }
+                        
+                        ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
 
-                    setupTestRunScenario(projectManager, targetPlatform, ScenarioSyncRestartDelay).then<string>(() => {
-                            return setupUpdateScenario(projectManager, targetPlatform, UpdateSync, "Update 1 (good update)");
-                        })
-                        .then<void>((updatePath: string) => {
-                            ServerUtil.updatePackagePath = updatePath;
-                            projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                            return ServerUtil.expectTestMessages([
-                                new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UPDATE_INSTALLED])]);
-                        })
-                        .then<void>(() => {
-                            var noUpdateResponse = ServerUtil.createDefaultResponse();
-                            noUpdateResponse.isAvailable = false;
-                            noUpdateResponse.appVersion = "0.0.1";
-                            ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
-                            targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
-                            return ServerUtil.expectTestMessages([
-                                ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE,
-                                new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UP_TO_DATE])]);
-                        })
-                        .done(() => { done(); }, (e) => { done(e); });
-                }, false)
-        ]),
+                        /* create an update */
+                        setupUpdateScenario(projectManager, targetPlatform, UpdateNotifyApplicationReady, "Diff Update 1")
+                            .then<void>((updatePath: string) => {
+                                ServerUtil.updatePackagePath = updatePath;
+                                projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                return ServerUtil.expectTestMessages([
+                                    ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
+                                    ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED,
+                                    ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                            })
+                            .then<void>(() => {
+                                /* run the app again to ensure it was not reverted */
+                                targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
+                                return ServerUtil.expectTestMessages([
+                                    ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                            })
+                            .done(() => { done(); }, (e) => { done(e); });
+                    });
+                
+                TestBuilder.it("localPackage.install.immediately", false,
+                    (done: MochaDone) => {
+                        ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
+
+                        /* create an update */
+                        setupUpdateScenario(projectManager, targetPlatform, UpdateNotifyApplicationReady, "Update 1")
+                            .then<void>((updatePath: string) => {
+                                ServerUtil.updatePackagePath = updatePath;
+                                projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                return ServerUtil.expectTestMessages([
+                                    ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
+                                    ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED,
+                                    ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                            })
+                            .then<void>(() => {
+                                /* run the app again to ensure it was not reverted */
+                                targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
+                                return ServerUtil.expectTestMessages([
+                                    ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                            })
+                            .done(() => { done(); }, (e) => { done(e); });
+                    });
+            }, ScenarioInstall);
+            
+        TestBuilder.describe("#localPackage.install.revert",
+            () => {
+                TestBuilder.it("localPackage.install.revert.dorevert", false,
+                    (done: MochaDone) => {
+                        ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
+
+                        /* create an update */
+                        setupUpdateScenario(projectManager, targetPlatform, UpdateDeviceReady, "Update 1 (bad update)")
+                            .then<void>((updatePath: string) => {
+                                ServerUtil.updatePackagePath = updatePath;
+                                projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                return ServerUtil.expectTestMessages([
+                                    ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
+                                    ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED,
+                                    ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                            })
+                            .then<void>(() => {
+                                /* restart the app to ensure it was reverted and send it another update */
+                                ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
+                                targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
+                                return ServerUtil.expectTestMessages([
+                                    ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
+                                    ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED,
+                                    ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                            })
+                            .then<void>(() => {
+                                /* restart the app again to ensure it was reverted again and send the same update and expect it to reject it */
+                                targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
+                                return ServerUtil.expectTestMessages([ServerUtil.TestMessage.UPDATE_FAILED_PREVIOUSLY]);
+                            })
+                            .done(() => { done(); }, (e) => { done(e); });
+                    });
+                
+                TestBuilder.it("localPackage.install.revert.norevert", false,
+                    (done: MochaDone) => {
+                        ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
+
+                        /* create an update */
+                        setupUpdateScenario(projectManager, targetPlatform, UpdateNotifyApplicationReady, "Update 1 (good update)")
+                            .then<void>((updatePath: string) => {
+                                ServerUtil.updatePackagePath = updatePath;
+                                projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                return ServerUtil.expectTestMessages([
+                                    ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
+                                    ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED,
+                                    ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                            })
+                            .then<void>(() => {
+                                /* run the app again to ensure it was not reverted */
+                                targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
+                                return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                            })
+                            .done(() => { done(); }, (e) => { done(e); });
+                    });
+            }, ScenarioInstallWithRevert),
         
-    TestBuilder.describe("#window.codePush.sync mandatory install mode tests",
-    
-        [
-            TestBuilder.it("defaults to IMMEDIATE",
-                (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                    ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(true, targetPlatform) };
+        TestBuilder.describe("#localPackage.installOnNextResume",
+            () => {
+                TestBuilder.it("localPackage.installOnNextResume.dorevert", true,
+                    (done: MochaDone) => {
+                        ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
 
-                    setupTestRunScenario(projectManager, targetPlatform, ScenarioSyncMandatoryDefault).then<string>(() => {
-                            return setupUpdateScenario(projectManager, targetPlatform, UpdateDeviceReady, "Update 1 (good update)");
-                        })
-                        .then<void>((updatePath: string) => {
-                            ServerUtil.updatePackagePath = updatePath;
-                            projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                            return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
-                        })
-                        .done(() => { done(); }, (e) => { done(e); });
-                }, false),
+                        setupUpdateScenario(projectManager, targetPlatform, UpdateDeviceReady, "Update 1")
+                            .then<void>((updatePath: string) => {
+                                ServerUtil.updatePackagePath = updatePath;
+                                projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                return ServerUtil.expectTestMessages([
+                                    ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
+                                    ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED,
+                                    ServerUtil.TestMessage.UPDATE_INSTALLED]);
+                            })
+                            .then<void>(() => {
+                                /* resume the application */
+                                targetPlatform.getEmulatorManager().resumeApplication(TestConfig.TestNamespace);
+                                return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                            })
+                            .then<void>(() => {
+                                /* restart to revert it */
+                                targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
+                                return ServerUtil.expectTestMessages([ServerUtil.TestMessage.UPDATE_FAILED_PREVIOUSLY]);
+                            })
+                            .done(() => { done(); }, (e) => { done(e); });
+                    });
                 
-            TestBuilder.it("works correctly when update is mandatory and mandatory install mode is specified",
-                (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                    ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(true, targetPlatform) };
+                TestBuilder.it("localPackage.installOnNextResume.norevert", false,
+                    (done: MochaDone) => {
+                        ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
 
-                    setupTestRunScenario(projectManager, targetPlatform, ScenarioSyncMandatoryResume).then<string>(() => {
-                            return setupUpdateScenario(projectManager, targetPlatform, UpdateDeviceReady, "Update 1 (good update)");
-                        })
-                        .then<void>((updatePath: string) => {
-                            ServerUtil.updatePackagePath = updatePath;
-                            projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                            return ServerUtil.expectTestMessages([
-                                new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UPDATE_INSTALLED])]);
-                        })
-                        .then<void>(() => {
-                            var noUpdateResponse = ServerUtil.createDefaultResponse();
-                            noUpdateResponse.isAvailable = false;
-                            noUpdateResponse.appVersion = "0.0.1";
-                            ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
-                            targetPlatform.getEmulatorManager().resumeApplication(TestConfig.TestNamespace, 5 * 1000);
-                            return ServerUtil.expectTestMessages([
-                                ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
-                        })
-                        .done(() => { done(); }, (e) => { done(e); });
-                }, false),
+                        /* create an update */
+                        setupUpdateScenario(projectManager, targetPlatform, UpdateNotifyApplicationReady, "Update 1 (good update)")
+                            .then<void>((updatePath: string) => {
+                                ServerUtil.updatePackagePath = updatePath;
+                                projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                return ServerUtil.expectTestMessages([
+                                    ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
+                                    ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED,
+                                    ServerUtil.TestMessage.UPDATE_INSTALLED]);
+                            })
+                            .then<void>(() => {
+                                /* resume the application */
+                                targetPlatform.getEmulatorManager().resumeApplication(TestConfig.TestNamespace);
+                                return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                            })
+                            .then<void>(() => {
+                                /* restart to make sure it did not revert */
+                                targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
+                                return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                            })
+                            .done(() => { done(); }, (e) => { done(e); });
+                    });
+            }, ScenarioInstallOnResumeWithRevert);
+            
+        TestBuilder.describe("localPackage installOnNextRestart",
+            () => {
+                TestBuilder.it("localPackage.installOnNextRestart.dorevert", false,
+                    (done: MochaDone) => {
+                        ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
+
+                        setupUpdateScenario(projectManager, targetPlatform, UpdateDeviceReady, "Update 1")
+                            .then<void>((updatePath: string) => {
+                                ServerUtil.updatePackagePath = updatePath;
+                                projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                return ServerUtil.expectTestMessages([
+                                    ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
+                                    ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED,
+                                    ServerUtil.TestMessage.UPDATE_INSTALLED]);
+                            })
+                            .then<void>(() => {
+                                /* restart the application */
+                                console.log("Update hash: " + ServerUtil.updateResponse.updateInfo.packageHash);
+                                targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
+                                return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                            })
+                            .then<void>(() => {
+                                /* restart the application */
+                                console.log("Update hash: " + ServerUtil.updateResponse.updateInfo.packageHash);
+                                targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
+                                return ServerUtil.expectTestMessages([ServerUtil.TestMessage.UPDATE_FAILED_PREVIOUSLY]);
+                            })
+                            .done(() => { done(); }, (e) => { done(e); });
+                    });
                 
-            TestBuilder.it("has no effect on updates that are not mandatory",
-                (projectManager: ProjectManager, targetPlatform: Platform.IPlatform, done: MochaDone) => {
-                    ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
+                TestBuilder.it("localPackage.installOnNextRestart.norevert", true,
+                    (done: MochaDone) => {
+                        ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
 
-                    setupTestRunScenario(projectManager, targetPlatform, ScenarioSyncMandatoryRestart).then<string>(() => {
-                            return setupUpdateScenario(projectManager, targetPlatform, UpdateDeviceReady, "Update 1 (good update)");
-                        })
-                        .then<void>((updatePath: string) => {
-                            ServerUtil.updatePackagePath = updatePath;
-                            projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
-                            return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
-                        })
-                        .done(() => { done(); }, (e) => { done(e); });
-                }, false)
-        ])
-];
+                        /* create an update */
+                        setupUpdateScenario(projectManager, targetPlatform, UpdateNotifyApplicationReady, "Update 1 (good update)")
+                            .then<void>((updatePath: string) => {
+                                ServerUtil.updatePackagePath = updatePath;
+                                projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                return ServerUtil.expectTestMessages([
+                                    ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
+                                    ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED,
+                                    ServerUtil.TestMessage.UPDATE_INSTALLED]);
+                            })
+                            .then<void>(() => {
+                                /* "resume" the application - run it again */
+                                targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
+                                return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                            })
+                            .then<void>(() => {
+                                /* run again to make sure it did not revert */
+                                targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
+                                return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                            })
+                            .done(() => { done(); }, (e) => { done(e); });
+                    });
+                
+                TestBuilder.it("localPackage.installOnNextRestart.revertToPrevious", false,
+                    (done: MochaDone) => {
+                        ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
 
-var rootTestBuilder = TestBuilder.describe("CodePush", testBuilders);
+                        /* create an update */
+                        setupUpdateScenario(projectManager, targetPlatform, UpdateNotifyApplicationReadyConditional, "Update 1 (good update)")
+                            .then<void>((updatePath: string) => {
+                                ServerUtil.updatePackagePath = updatePath;
+                                projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                return ServerUtil.expectTestMessages([
+                                    ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
+                                    ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED,
+                                    ServerUtil.TestMessage.UPDATE_INSTALLED]);
+                            })
+                            .then<void>(() => {
+                                /* run good update, set up another (bad) update */
+                                ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
+                                setupUpdateScenario(projectManager, targetPlatform, UpdateDeviceReady, "Update 2 (bad update)")
+                                    .then(() => { return targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace); });
+                                return ServerUtil.expectTestMessages([
+                                    ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE,
+                                    ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
+                                    ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED,
+                                    ServerUtil.TestMessage.UPDATE_INSTALLED]);
+                            })
+                            .then<void>(() => {
+                                /* run the bad update without calling notifyApplicationReady */
+                                targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
+                                return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                            })
+                            .then<void>(() => {
+                                /* run the good update and don't call notifyApplicationReady - it should not revert */
+                                ServerUtil.testMessageResponse = ServerUtil.TestMessageResponse.SKIP_NOTIFY_APPLICATION_READY;
+                                targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
+                                return ServerUtil.expectTestMessages([
+                                    ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE, 
+                                    ServerUtil.TestMessage.SKIPPED_NOTIFY_APPLICATION_READY]);
+                            })
+                            .then<void>(() => {
+                                /* run the application again */
+                                ServerUtil.testMessageResponse = undefined;
+                                targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
+                                return ServerUtil.expectTestMessages([
+                                    ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE, 
+                                    ServerUtil.TestMessage.UPDATE_FAILED_PREVIOUSLY]);
+                            })
+                            .done(() => { done(); }, (e) => { done(e); });
+                    });
+            }, ScenarioInstallOnRestartWithRevert);
+            
+        TestBuilder.describe("#codePush.restartApplication",
+            () => {
+                TestBuilder.it("codePush.restartApplication.checkPackages", true,
+                    (done: MochaDone) => {
+                        ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
 
-//////////////////////////////////////////////////////////////////////////////////////////
-// Initialize the tests.
+                        setupUpdateScenario(projectManager, targetPlatform, UpdateNotifyApplicationReady, "Update 1")
+                            .then<void>((updatePath: string) => {
+                                ServerUtil.updatePackagePath = updatePath;
+                                projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                return ServerUtil.expectTestMessages([
+                                    new ServerUtil.AppMessage(ServerUtil.TestMessage.PENDING_PACKAGE, [null]),
+                                    new ServerUtil.AppMessage(ServerUtil.TestMessage.CURRENT_PACKAGE, [null]),
+                                    new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UPDATE_INSTALLED]),
+                                    new ServerUtil.AppMessage(ServerUtil.TestMessage.PENDING_PACKAGE, [ServerUtil.updateResponse.updateInfo.packageHash]),
+                                    new ServerUtil.AppMessage(ServerUtil.TestMessage.CURRENT_PACKAGE, [null]),
+                                    ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                            })
+                            .then<void>(() => {
+                                /* restart the application */
+                                targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
+                                return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                            })
+                            .done(() => { done(); }, (e) => { done(e); });
+                    });
+            }, ScenarioRestart);
+            
+        TestBuilder.describe("#window.codePush.sync",
+            () => {
+                // We test the functionality with sync twice--first, with sync only called once,
+                // then, with sync called again while the first sync is still running.
+                TestBuilder.describe("#window.codePush.sync 1x",
+                    () => {
+                        // Tests where sync is called just once
+                        TestBuilder.it("window.codePush.sync.noupdate", false,
+                            (done: MochaDone) => {
+                                var noUpdateResponse = ServerUtil.createDefaultResponse();
+                                noUpdateResponse.isAvailable = false;
+                                noUpdateResponse.appVersion = "0.0.1";
+                                ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
 
-PluginTestingFramework.initializeTests(new RNProjectManager(), rootTestBuilder, supportedTargetPlatforms);
+                                Q({})
+                                    .then<void>(p => {
+                                        projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                        return ServerUtil.expectTestMessages([
+                                            new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UP_TO_DATE])]);
+                                    })
+                                    .done(() => { done(); }, (e) => { done(e); });
+                            });
+                        
+                        TestBuilder.it("window.codePush.sync.checkerror", false,
+                            (done: MochaDone) => {
+                                ServerUtil.updateResponse = "invalid {{ json";
+
+                                Q({})
+                                    .then<void>(p => {
+                                        projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                        return ServerUtil.expectTestMessages([
+                                            new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_ERROR])]);
+                                    })
+                                    .done(() => { done(); }, (e) => { done(e); });
+                            });
+                        
+                        TestBuilder.it("window.codePush.sync.downloaderror", false,
+                            (done: MochaDone) => {
+                                var invalidUrlResponse = ServerUtil.createUpdateResponse();
+                                invalidUrlResponse.downloadURL = path.join(TestConfig.templatePath, "invalid_path.zip");
+                                ServerUtil.updateResponse = { updateInfo: invalidUrlResponse };
+
+                                Q({})
+                                    .then<void>(p => {
+                                        projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                        return ServerUtil.expectTestMessages([
+                                            new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_ERROR])]);
+                                    })
+                                    .done(() => { done(); }, (e) => { done(e); });
+                            });
+                        
+                        TestBuilder.it("window.codePush.sync.dorevert", false,
+                            (done: MochaDone) => {
+                                ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
+                            
+                                /* create an update */
+                                setupUpdateScenario(projectManager, targetPlatform, UpdateDeviceReady, "Update 1 (bad update)")
+                                    .then<void>((updatePath: string) => {
+                                        ServerUtil.updatePackagePath = updatePath;
+                                        projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                        return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                                    })
+                                    .then<void>(() => {
+                                        targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
+                                        return ServerUtil.expectTestMessages([
+                                            new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UP_TO_DATE])]);
+                                    })
+                                    .done(() => { done(); }, (e) => { done(e); });
+                            });
+                        
+                        TestBuilder.it("window.codePush.sync.update", false,
+                            (done: MochaDone) => {
+                                ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
+
+                                /* create an update */
+                                setupUpdateScenario(projectManager, targetPlatform, UpdateSync, "Update 1 (good update)")
+                                    .then<void>((updatePath: string) => {
+                                        ServerUtil.updatePackagePath = updatePath;
+                                        projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                        return ServerUtil.expectTestMessages([
+                                            ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE,
+                                            new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UP_TO_DATE])]);
+                                    })
+                                    .then<void>(() => {
+                                        // restart the app and make sure it didn't roll out!
+                                        var noUpdateResponse = ServerUtil.createDefaultResponse();
+                                        noUpdateResponse.isAvailable = false;
+                                        noUpdateResponse.appVersion = "0.0.1";
+                                        ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
+                                        targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
+                                        return ServerUtil.expectTestMessages([
+                                            ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE,
+                                            new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UP_TO_DATE])]);
+                                    })
+                                    .done(() => { done(); }, (e) => { done(e); });
+                            });
+                        
+                    }, ScenarioSync1x);
+                    
+                TestBuilder.describe("#window.codePush.sync 2x",
+                    () => {
+                        // Tests where sync is called again before the first sync finishes
+                        TestBuilder.it("window.codePush.sync.2x.noupdate", false,
+                            (done: MochaDone) => {
+                                var noUpdateResponse = ServerUtil.createDefaultResponse();
+                                noUpdateResponse.isAvailable = false;
+                                noUpdateResponse.appVersion = "0.0.1";
+                                ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
+
+                                Q({})
+                                    .then<void>(p => {
+                                        projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                        return ServerUtil.expectTestMessages([
+                                            new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_IN_PROGRESS]),
+                                            new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UP_TO_DATE])]);
+                                    })
+                                    .done(() => { done(); }, (e) => { done(e); });
+                            });
+                        
+                        TestBuilder.it("window.codePush.sync.2x.checkerror", false,
+                            (done: MochaDone) => {
+                                ServerUtil.updateResponse = "invalid {{ json";
+
+                                Q({})
+                                    .then<void>(p => {
+                                        projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                        return ServerUtil.expectTestMessages([
+                                            new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_IN_PROGRESS]),
+                                            new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_ERROR])]);
+                                    })
+                                    .done(() => { done(); }, (e) => { done(e); });
+                            });
+                        
+                        TestBuilder.it("window.codePush.sync.2x.downloaderror", false,
+                            (done: MochaDone) => {
+                                var invalidUrlResponse = ServerUtil.createUpdateResponse();
+                                invalidUrlResponse.downloadURL = path.join(TestConfig.templatePath, "invalid_path.zip");
+                                ServerUtil.updateResponse = { updateInfo: invalidUrlResponse };
+
+                                Q({})
+                                    .then<void>(p => {
+                                        projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                        return ServerUtil.expectTestMessages([
+                                            new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_IN_PROGRESS]),
+                                            new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_ERROR])]);
+                                    })
+                                    .done(() => { done(); }, (e) => { done(e); });
+                            });
+                        
+                        TestBuilder.it("window.codePush.sync.2x.dorevert", false,
+                            (done: MochaDone) => {
+                                ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
+                        
+                                /* create an update */
+                                setupUpdateScenario(projectManager, targetPlatform, UpdateDeviceReady, "Update 1 (bad update)")
+                                    .then<void>((updatePath: string) => {
+                                        ServerUtil.updatePackagePath = updatePath;
+                                        projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                        return ServerUtil.expectTestMessages([
+                                            new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_IN_PROGRESS]),
+                                            ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                                    })
+                                    .then<void>(() => {
+                                        targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
+                                        return ServerUtil.expectTestMessages([
+                                            new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_IN_PROGRESS]),
+                                            new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UP_TO_DATE])]);
+                                    })
+                                    .done(() => { done(); }, (e) => { done(e); });
+                            });
+                        
+                        TestBuilder.it("window.codePush.sync.2x.update", true,
+                            (done: MochaDone) => {
+                                ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
+
+                                /* create an update */
+                                setupUpdateScenario(projectManager, targetPlatform, UpdateSync2x, "Update 1 (good update)")
+                                    .then<void>((updatePath: string) => {
+                                        ServerUtil.updatePackagePath = updatePath;
+                                        projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                        return ServerUtil.expectTestMessages([
+                                            new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_IN_PROGRESS]),
+                                            ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE,
+                                            new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_IN_PROGRESS]),
+                                            new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UP_TO_DATE])]);
+                                    })
+                                    .then<void>(() => {
+                                        // restart the app and make sure it didn't roll out!
+                                        var noUpdateResponse = ServerUtil.createDefaultResponse();
+                                        noUpdateResponse.isAvailable = false;
+                                        noUpdateResponse.appVersion = "0.0.1";
+                                        ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
+                                        targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
+                                        return ServerUtil.expectTestMessages([
+                                            ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE,
+                                            new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_IN_PROGRESS]),
+                                            new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UP_TO_DATE])]);
+                                    })
+                                    .done(() => { done(); }, (e) => { done(e); });
+                            });
+                    }, ScenarioSync2x);
+            });
+        
+        TestBuilder.describe("#window.codePush.sync minimum background duration tests",
+            () => {
+                TestBuilder.it("defaults to no minimum", false,
+                    (done: MochaDone) => {
+                        ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
+
+                        setupTestRunScenario(projectManager, targetPlatform, ScenarioSyncResume).then<string>(() => {
+                                return setupUpdateScenario(projectManager, targetPlatform, UpdateSync, "Update 1 (good update)");
+                            })
+                            .then<void>((updatePath: string) => {
+                                ServerUtil.updatePackagePath = updatePath;
+                                projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                return ServerUtil.expectTestMessages([
+                                    new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UPDATE_INSTALLED])]);
+                            })
+                            .then<void>(() => {
+                                var noUpdateResponse = ServerUtil.createDefaultResponse();
+                                noUpdateResponse.isAvailable = false;
+                                noUpdateResponse.appVersion = "0.0.1";
+                                ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
+                                targetPlatform.getEmulatorManager().resumeApplication(TestConfig.TestNamespace);
+                                return ServerUtil.expectTestMessages([
+                                    ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE,
+                                    new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UP_TO_DATE])]);
+                            })
+                            .done(() => { done(); }, (e) => { done(e); });
+                    });
+                
+                TestBuilder.it("min background duration 5s", false,
+                    (done: MochaDone) => {
+                        ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
+
+                        setupTestRunScenario(projectManager, targetPlatform, ScenarioSyncResumeDelay).then<string>(() => {
+                                return setupUpdateScenario(projectManager, targetPlatform, UpdateSync, "Update 1 (good update)");
+                            })
+                            .then((updatePath: string) => {
+                                ServerUtil.updatePackagePath = updatePath;
+                                projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                return ServerUtil.expectTestMessages([
+                                    new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UPDATE_INSTALLED])]);
+                            })
+                            .then(() => {
+                                var noUpdateResponse = ServerUtil.createDefaultResponse();
+                                noUpdateResponse.isAvailable = false;
+                                noUpdateResponse.appVersion = "0.0.1";
+                                ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
+                                return targetPlatform.getEmulatorManager().resumeApplication(TestConfig.TestNamespace, 3 * 1000);
+                            })
+                            .then(() => {
+                                targetPlatform.getEmulatorManager().resumeApplication(TestConfig.TestNamespace, 6 * 1000);
+                                return ServerUtil.expectTestMessages([
+                                    ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE,
+                                    new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UP_TO_DATE])]);
+                            })
+                            .done(() => { done(); }, (e) => { done(e); });
+                    });
+                    
+                TestBuilder.it("has no effect on restart", false,
+                    (done: MochaDone) => {
+                        ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
+
+                        setupTestRunScenario(projectManager, targetPlatform, ScenarioSyncRestartDelay).then<string>(() => {
+                                return setupUpdateScenario(projectManager, targetPlatform, UpdateSync, "Update 1 (good update)");
+                            })
+                            .then<void>((updatePath: string) => {
+                                ServerUtil.updatePackagePath = updatePath;
+                                projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                return ServerUtil.expectTestMessages([
+                                    new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UPDATE_INSTALLED])]);
+                            })
+                            .then<void>(() => {
+                                var noUpdateResponse = ServerUtil.createDefaultResponse();
+                                noUpdateResponse.isAvailable = false;
+                                noUpdateResponse.appVersion = "0.0.1";
+                                ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
+                                targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
+                                return ServerUtil.expectTestMessages([
+                                    ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE,
+                                    new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UP_TO_DATE])]);
+                            })
+                            .done(() => { done(); }, (e) => { done(e); });
+                    });
+            });
+            
+        TestBuilder.describe("#window.codePush.sync mandatory install mode tests",
+            () => {
+                TestBuilder.it("defaults to IMMEDIATE", false,
+                    (done: MochaDone) => {
+                        ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(true, targetPlatform) };
+
+                        setupTestRunScenario(projectManager, targetPlatform, ScenarioSyncMandatoryDefault).then<string>(() => {
+                                return setupUpdateScenario(projectManager, targetPlatform, UpdateDeviceReady, "Update 1 (good update)");
+                            })
+                            .then<void>((updatePath: string) => {
+                                ServerUtil.updatePackagePath = updatePath;
+                                projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                            })
+                            .done(() => { done(); }, (e) => { done(e); });
+                    });
+                    
+                TestBuilder.it("works correctly when update is mandatory and mandatory install mode is specified", false,
+                    (done: MochaDone) => {
+                        ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(true, targetPlatform) };
+
+                        setupTestRunScenario(projectManager, targetPlatform, ScenarioSyncMandatoryResume).then<string>(() => {
+                                return setupUpdateScenario(projectManager, targetPlatform, UpdateDeviceReady, "Update 1 (good update)");
+                            })
+                            .then<void>((updatePath: string) => {
+                                ServerUtil.updatePackagePath = updatePath;
+                                projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                return ServerUtil.expectTestMessages([
+                                    new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UPDATE_INSTALLED])]);
+                            })
+                            .then<void>(() => {
+                                var noUpdateResponse = ServerUtil.createDefaultResponse();
+                                noUpdateResponse.isAvailable = false;
+                                noUpdateResponse.appVersion = "0.0.1";
+                                ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
+                                targetPlatform.getEmulatorManager().resumeApplication(TestConfig.TestNamespace, 5 * 1000);
+                                return ServerUtil.expectTestMessages([
+                                    ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                            })
+                            .done(() => { done(); }, (e) => { done(e); });
+                    });
+                    
+                TestBuilder.it("has no effect on updates that are not mandatory", false,
+                    (done: MochaDone) => {
+                        ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
+
+                        setupTestRunScenario(projectManager, targetPlatform, ScenarioSyncMandatoryRestart).then<string>(() => {
+                                return setupUpdateScenario(projectManager, targetPlatform, UpdateDeviceReady, "Update 1 (good update)");
+                            })
+                            .then<void>((updatePath: string) => {
+                                ServerUtil.updatePackagePath = updatePath;
+                                projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                            })
+                            .done(() => { done(); }, (e) => { done(e); });
+                    });
+            });
+    });
