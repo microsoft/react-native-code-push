@@ -41,17 +41,17 @@ interface RNPlatform {
     /**
      * Installs the platform on the given project.
      */
-    installPlatform(projectDirectory: string): Q.Promise<string>;
+    installPlatform(projectDirectory: string): Q.Promise<void>;
     
     /**
      * Installs the binary of the given project on this platform.
      */
-    installApp(projectDirectory: string): Q.Promise<string>;
+    installApp(projectDirectory: string): Q.Promise<void>;
     
     /**
      * Builds the binary of the project on this platform.
      */
-    buildApp(projectDirectory: string): Q.Promise<string>;
+    buildApp(projectDirectory: string): Q.Promise<void>;
 }
 
 class RNAndroid extends Platform.Android implements RNPlatform {
@@ -83,7 +83,7 @@ class RNAndroid extends Platform.Android implements RNPlatform {
     /**
      * Installs the platform on the given project.
      */
-    installPlatform(projectDirectory: string): Q.Promise<string> {
+    installPlatform(projectDirectory: string): Q.Promise<void> {
         var innerprojectDirectory: string = path.join(projectDirectory, TestConfig.TestAppName);
         
         //// Set up gradle to build CodePush with the app
@@ -115,26 +115,26 @@ class RNAndroid extends Platform.Android implements RNPlatform {
         TestUtil.replaceString(mainActivity, TestUtil.SERVER_URL_PLACEHOLDER, this.getServerUrl());
         TestUtil.replaceString(mainActivity, TestUtil.ANDROID_KEY_PLACEHOLDER, this.getDefaultDeploymentKey());
         
-        return Q<string>(undefined);
+        return Q<void>(null);
     }
     
     /**
      * Installs the binary of the given project on this platform.
      */
-    installApp(projectDirectory: string): Q.Promise<string> {
+    installApp(projectDirectory: string): Q.Promise<void> {
         var androidDirectory: string = path.join(projectDirectory, TestConfig.TestAppName, "android");
-        return TestUtil.getProcessOutput("adb install -r " + this.getBinaryPath(projectDirectory), { cwd: androidDirectory });
+        return TestUtil.getProcessOutput("adb install -r " + this.getBinaryPath(projectDirectory), { cwd: androidDirectory }).then(() => { return null; });
     }
     
     /**
      * Builds the binary of the project on this platform.
      */
-    buildApp(projectDirectory: string): Q.Promise<string> {
+    buildApp(projectDirectory: string): Q.Promise<void> {
         // In order to run on Android without the package manager, we must create a release APK and then sign it with the debug certificate.
         var androidDirectory: string = path.join(projectDirectory, TestConfig.TestAppName, "android");
         var apkPath = this.getBinaryPath(projectDirectory);
         return TestUtil.getProcessOutput("./gradlew assembleRelease --daemon", { cwd: androidDirectory })
-            .then<string>(TestUtil.getProcessOutput.bind(undefined, "jarsigner -verbose -keystore ~/.android/debug.keystore -storepass android -keypass android " + apkPath + " androiddebugkey", { cwd: androidDirectory, noLogStdOut: true }));
+            .then<void>(TestUtil.getProcessOutput.bind(undefined, "jarsigner -verbose -keystore ~/.android/debug.keystore -storepass android -keypass android " + apkPath + " androiddebugkey", { cwd: androidDirectory, noLogStdOut: true })).then(() => { return null; });
     }
 }
 
@@ -167,7 +167,7 @@ class RNIOS extends Platform.IOS implements RNPlatform {
     /**
      * Installs the platform on the given project.
      */
-    installPlatform(projectDirectory: string): Q.Promise<string> {
+    installPlatform(projectDirectory: string): Q.Promise<void> {
         var iOSProject: string = path.join(projectDirectory, TestConfig.TestAppName, "ios");
         var infoPlistPath: string = path.join(iOSProject, TestConfig.TestAppName, "Info.plist");
         var appDelegatePath: string = path.join(iOSProject, TestConfig.TestAppName, "AppDelegate.m");
@@ -197,14 +197,14 @@ class RNIOS extends Platform.IOS implements RNPlatform {
             .then(TestUtil.copyFile.bind(undefined,
                 path.join(TestConfig.templatePath, "ios", TestConfig.TestAppName, "AppDelegate.m"),
                 appDelegatePath, true))
-            .then<string>(TestUtil.replaceString.bind(undefined, appDelegatePath, TestUtil.CODE_PUSH_TEST_APP_NAME_PLACEHOLDER, TestConfig.TestAppName));
+            .then<void>(TestUtil.replaceString.bind(undefined, appDelegatePath, TestUtil.CODE_PUSH_TEST_APP_NAME_PLACEHOLDER, TestConfig.TestAppName));
     }
     
     /**
      * Installs the binary of the given project on this platform.
      */
-    installApp(projectDirectory: string): Q.Promise<string> {
-        return TestUtil.getProcessOutput("xcrun simctl install booted " + this.getBinaryPath(projectDirectory));
+    installApp(projectDirectory: string): Q.Promise<void> {
+        return TestUtil.getProcessOutput("xcrun simctl install booted " + this.getBinaryPath(projectDirectory)).then(() => { return null; });
     }
     
     /**
@@ -223,7 +223,7 @@ class RNIOS extends Platform.IOS implements RNPlatform {
     /**
      * Builds the binary of the project on this platform.
      */
-    buildApp(projectDirectory: string): Q.Promise<string> {
+    buildApp(projectDirectory: string): Q.Promise<void> {
         var iOSProject: string = path.join(projectDirectory, TestConfig.TestAppName, "ios");
         
         return this.getEmulatorManager().getTargetEmulator()
@@ -234,7 +234,7 @@ class RNIOS extends Platform.IOS implements RNPlatform {
                 return TestUtil.getProcessOutput("xcodebuild -workspace " + path.join(iOSProject, TestConfig.TestAppName) + ".xcworkspace -scheme " + TestConfig.TestAppName + 
                     " -configuration Release -destination \"platform=iOS Simulator,id=" + hash + "\" -derivedDataPath build", { cwd: iOSProject, maxBuffer: 1024 * 1000 * 10, noLogStdOut: true });
             })
-            .then<string>(
+            .then<void>(
                 () => { return null; },
                 () => {
                     // The first time an iOS project is built, it fails because it does not finish building libReact.a before it builds the test app.
@@ -268,9 +268,9 @@ class RNProjectManager extends ProjectManager {
     /**
      * Copies over the template files into the specified project, overwriting existing files.
      */
-    public copyTemplate(templatePath: string, projectDirectory: string): Q.Promise<string> {
-        function copyDirectoryRecursively(directoryFrom: string, directoryTo: string): Q.Promise<string> {
-            var promises: Q.Promise<string>[] = [];
+    public copyTemplate(templatePath: string, projectDirectory: string): Q.Promise<void> {
+        function copyDirectoryRecursively(directoryFrom: string, directoryTo: string): Q.Promise<void> {
+            var promises: Q.Promise<void>[] = [];
             
             fs.readdirSync(directoryFrom).forEach(file => {
                 var fileStats: fs.Stats;
@@ -290,8 +290,8 @@ class RNProjectManager extends ProjectManager {
                 }
             });
             
-            // Chain promise so that it maintains Q.Promise<string> type instead of Q.Promise<string[]>
-            return Q.all<string>(promises).then(() => { return null; });
+            // Chain promise so that it maintains Q.Promise<void> type instead of Q.Promise<void[]>
+            return Q.all<void>(promises).then(() => { return null; });
         }
         
         return copyDirectoryRecursively(templatePath, path.join(projectDirectory, TestConfig.TestAppName));
@@ -301,7 +301,7 @@ class RNProjectManager extends ProjectManager {
 	 * Creates a new test application at the specified path, and configures it
 	 * with the given server URL, android and ios deployment keys.
 	 */
-    public setupProject(projectDirectory: string, templatePath: string, appName: string, appNamespace: string, version?: string): Q.Promise<string> {
+    public setupProject(projectDirectory: string, templatePath: string, appName: string, appNamespace: string, version?: string): Q.Promise<void> {
         if (fs.existsSync(projectDirectory)) {
             del.sync([projectDirectory], { force: true });
         }
@@ -309,7 +309,7 @@ class RNProjectManager extends ProjectManager {
 
         return TestUtil.getProcessOutput("react-native init " + appName + " --package " + appNamespace, { cwd: projectDirectory })
             .then(this.copyTemplate.bind(this, templatePath, projectDirectory))
-            .then<string>(TestUtil.getProcessOutput.bind(undefined, "npm install " + TestConfig.thisPluginPath, { cwd: path.join(projectDirectory, TestConfig.TestAppName) }));
+            .then<void>(TestUtil.getProcessOutput.bind(undefined, "npm install " + TestConfig.thisPluginPath, { cwd: path.join(projectDirectory, TestConfig.TestAppName) })).then(() => { return null; });
     }
     
     /** JSON mapping project directories to the current scenario
@@ -335,9 +335,9 @@ class RNProjectManager extends ProjectManager {
     /**
      * Sets up the scenario for a test in an already existing project.
      */
-    public setupScenario(projectDirectory: string, appId: string, templatePath: string, jsPath: string, targetPlatform: Platform.IPlatform, version?: string): Q.Promise<string> {
+    public setupScenario(projectDirectory: string, appId: string, templatePath: string, jsPath: string, targetPlatform: Platform.IPlatform, version?: string): Q.Promise<void> {
         // We don't need to anything if it is the current scenario.
-        if (RNProjectManager.currentScenario[projectDirectory] === jsPath) return Q<string>(undefined);
+        if (RNProjectManager.currentScenario[projectDirectory] === jsPath) return Q<void>(null);
         RNProjectManager.currentScenario[projectDirectory] = jsPath;
         RNProjectManager.currentScenarioHasBuilt[projectDirectory] = false;
         
@@ -354,7 +354,7 @@ class RNProjectManager extends ProjectManager {
             .then<void>(TestUtil.replaceString.bind(undefined, destinationIndexPath, TestUtil.CODE_PUSH_TEST_APP_NAME_PLACEHOLDER, TestConfig.TestAppName))
             .then<void>(TestUtil.replaceString.bind(undefined, destinationIndexPath, TestUtil.SERVER_URL_PLACEHOLDER, targetPlatform.getServerUrl()))
             .then<void>(TestUtil.replaceString.bind(undefined, destinationIndexPath, TestUtil.INDEX_JS_PLACEHOLDER, scenarioJs))
-            .then<string>(TestUtil.replaceString.bind(undefined, destinationIndexPath, TestUtil.CODE_PUSH_APP_VERSION_PLACEHOLDER, version));
+            .then<void>(TestUtil.replaceString.bind(undefined, destinationIndexPath, TestUtil.CODE_PUSH_APP_VERSION_PLACEHOLDER, version));
     }
 
     /**
@@ -390,7 +390,7 @@ class RNProjectManager extends ProjectManager {
     /**
      * Prepares a specific platform for tests.
      */
-    public preparePlatform(projectDirectory: string, targetPlatform: Platform.IPlatform): Q.Promise<string> {
+    public preparePlatform(projectDirectory: string, targetPlatform: Platform.IPlatform): Q.Promise<void> {
         var deferred= Q.defer<string>();
         
         var platformsJSONPath = path.join(projectDirectory, RNProjectManager.platformsJSON);
@@ -412,7 +412,7 @@ class RNProjectManager extends ProjectManager {
         });
         
         return deferred.promise
-            .then<string>(() => {
+            .then<void>(() => {
                 return (<RNPlatform><any>targetPlatform).installPlatform(projectDirectory);
             }, (error: any) => { /* The platform is already installed! */ console.log(error); return null; });
     }
@@ -420,18 +420,18 @@ class RNProjectManager extends ProjectManager {
     /**
      * Cleans up a specific platform after tests.
      */
-    public cleanupAfterPlatform(projectDirectory: string, targetPlatform: Platform.IPlatform): Q.Promise<string> {
+    public cleanupAfterPlatform(projectDirectory: string, targetPlatform: Platform.IPlatform): Q.Promise<void> {
         // Can't uninstall from command line, so noop.
-        return Q<string>(undefined);
+        return Q<void>(null);
     }
 
     /**
      * Runs the test app on the given target / platform.
      */
-    public runApplication(projectDirectory: string, targetPlatform: Platform.IPlatform): Q.Promise<string> {
+    public runApplication(projectDirectory: string, targetPlatform: Platform.IPlatform): Q.Promise<void> {
         console.log("Running project in " + projectDirectory + " on " + targetPlatform.getName());
         
-        return Q<string>(undefined)
+        return Q<void>(null)
             .then(() => {
                 // Build if this scenario has not yet been built.
                 if (!RNProjectManager.currentScenarioHasBuilt[projectDirectory]) {
@@ -446,7 +446,7 @@ class RNProjectManager extends ProjectManager {
             .then(() => {
                 // Install and launch the app.
                 return (<RNPlatform><any>targetPlatform).installApp(projectDirectory)
-                    .then<string>(targetPlatform.getEmulatorManager().launchInstalledApplication.bind(undefined, TestConfig.TestNamespace));
+                    .then<void>(targetPlatform.getEmulatorManager().launchInstalledApplication.bind(undefined, TestConfig.TestNamespace));
             });
     }
 };
