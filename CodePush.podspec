@@ -17,13 +17,6 @@ Pod::Spec.new do |s|
 
   s.dependency 'React'
 
-  s.default_subspec = 'Full'
-
-  s.subspec 'Full' do |ss|
-    ss.dependency 'CodePush/Core'
-    ss.dependency 'CodePush/SSZipArchive'
-  end
-
   s.subspec 'Core' do |ss|
     ss.source_files = 'ios/CodePush/*.{h,m}'
     ss.public_header_files = ['ios/CodePush/CodePush.h']
