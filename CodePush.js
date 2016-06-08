@@ -353,8 +353,9 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
         let message = null;
         const dialogButtons = [{
           text: null,
-          onPress: async () => {
-            resolve(await doDownloadAndInstall());
+          onPress:() => {
+            doDownloadAndInstall()
+              .then(resolve, reject);
           }
         }];
 
