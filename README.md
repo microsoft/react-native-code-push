@@ -446,7 +446,7 @@ If you run into any issues, or have any questions/comments/feedback, you can pin
 
 In our [getting started](#getting-started) docs, we illustrated how to configure the CodePush plugin using a specific deployment key. However, in order to effectively test your releases, it is critical that you leverage the `Staging` and `Production` deployments that are auto-generated when you first created your CodePush app (or any custom deployments you may have created). This way, you never release an update to your end users that you haven't been able to validate yourself.
 
-*NOTE: Our client-side rollback feature can help unblock users after installing a release that resulted in a crash, and server-side rollbacks (i.e. `code-push rollback`) allow you to prevent additional users from installing a bad release once it's been identified. Hhowever, it's obviously better if you can prevent an erroneous update from being broadly released in the first place.*
+*NOTE: Our client-side rollback feature can help unblock users after installing a release that resulted in a crash, and server-side rollbacks (i.e. `code-push rollback`) allow you to prevent additional users from installing a bad release once it's been identified. However, it's obviously better if you can prevent an erroneous update from being broadly released in the first place.*
 
 Taking advantage of the `Staging` and `Production` deployments allows you to acheive a workflow like the following (feel free to customize!):
 
