@@ -24,6 +24,7 @@ public class CodePushPackage {
     private final int DOWNLOAD_BUFFER_SIZE = 1024 * 256;
     private final String DOWNLOAD_FILE_NAME = "download.zip";
     private final String DOWNLOAD_URL_KEY = "downloadUrl";
+    private final String INSTALL_LOCATION_KEY = "installLocation";
     private final String PACKAGE_FILE_NAME = "app.json";
     private final String PACKAGE_HASH_KEY = "packageHash";
     private final String PREVIOUS_PACKAGE_KEY = "previousPackage";
@@ -228,6 +229,14 @@ public class CodePushPackage {
             }
         }
 
+        JSONObject updatePackageJSON = CodePushUtils.convertReadableToJsonObject(updatePackage);
+        try {
+            updatePackageJSON.put(INSTALL_LOCATION_KEY, newUpdateFolderPath);
+        } catch (JSONException e) {
+            String errorMessage = String.format("Unable to set the update's \"%s\" property", INSTALL_LOCATION_KEY);
+            throw new CodePushUnknownException(errorMessage, e);
+        }
+            
         if (isZip) {
             // Unzip the downloaded file and then delete the zip
             String unzippedFolderPath = getUnzippedFolderPath();
@@ -235,8 +244,7 @@ public class CodePushPackage {
             FileUtils.deleteFileOrFolderSilently(downloadFile);
 
             // Merge contents with current update based on the manifest
-            String diffManifestFilePath = CodePushUtils.appendPathComponent(unzippedFolderPath,
-                    DIFF_MANIFEST_FILE_NAME);
+            String diffManifestFilePath = CodePushUtils.appendPathComponent(unzippedFolderPath, DIFF_MANIFEST_FILE_NAME);
             boolean isDiffUpdate = FileUtils.fileAtPathExists(diffManifestFilePath);
             if (isDiffUpdate) {
                 String currentPackageFolderPath = getCurrentPackageFolderPath();
@@ -247,7 +255,7 @@ public class CodePushPackage {
 
             FileUtils.copyDirectoryContents(unzippedFolderPath, newUpdateFolderPath);
             FileUtils.deleteFileAtPathSilently(unzippedFolderPath);
-
+            
             // For zip updates, we need to find the relative path to the jsBundle and save it in the
             // metadata so that we can find and run it easily the next time.
             String relativeBundlePath = CodePushUpdateUtils.findJSBundleInUpdateContents(newUpdateFolderPath, expectedBundleFileName);
@@ -263,8 +271,7 @@ public class CodePushPackage {
                 if (isDiffUpdate) {
                     CodePushUpdateUtils.verifyHashForDiffUpdate(newUpdateFolderPath, newUpdateHash);
                 }
-
-                JSONObject updatePackageJSON = CodePushUtils.convertReadableToJsonObject(updatePackage);
+                
                 try {
                     updatePackageJSON.put(RELATIVE_BUNDLE_PATH_KEY, relativeBundlePath);
                 } catch (JSONException e) {
@@ -272,15 +279,14 @@ public class CodePushPackage {
                             RELATIVE_BUNDLE_PATH_KEY + " to value " + relativeBundlePath +
                             " in update package.", e);
                 }
-
-                updatePackage = CodePushUtils.convertJsonObjectToWritable(updatePackageJSON);
             }
         } else {
             // File is a jsbundle, move it to a folder with the packageHash as its name
             FileUtils.moveFile(downloadFile, newUpdateFolderPath, expectedBundleFileName);
         }
-
-        // Save metadata to the folder.
+                
+        // Save metadata to the folder.    
+        updatePackage = CodePushUtils.convertJsonObjectToWritable(updatePackageJSON);
         CodePushUtils.writeReadableMapToFile(updatePackage, newUpdateMetadataPath);
     }
 

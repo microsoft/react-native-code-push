@@ -972,15 +972,27 @@ The `checkForUpdate` and `getUpdateMetadata` methods return `Promise` objects, t
 Contains details about an update that has been downloaded locally or already installed. You can get a reference to an instance of this object either by calling the module-level `getUpdateMetadata` method, or as the value of the promise returned by the `RemotePackage.download` method.
 
 ###### Properties
+
 - __appVersion__: The app binary version that this update is dependent on. This is the value that was specified via the `appStoreVersion` parameter when calling the CLI's `release` command. *(String)*
+
 - __deploymentKey__: The deployment key that was used to originally download this update. *(String)*
+
 - __description__: The description of the update. This is the same value that you specified in the CLI when you released the update. *(String)*
+
 - __failedInstall__: Indicates whether this update has been previously installed but was rolled back. The `sync` method will automatically ignore updates which have previously failed, so you only need to worry about this property if using `checkForUpdate`. *(Boolean)*
+
+- __installLocation__: The absolute path to the directory where the update's contents are installed. This can be useful if you need to construct an absolute path for a file that is contained within a CodePush release. *(String)*
+
 - __isFirstRun__: Indicates whether this is the first time the update has been run after being installed. This is useful for determining whether you would like to show a "What's New?" UI to the end user after installing an update. *(Boolean)*
+
 - __isMandatory__: Indicates whether the update is considered mandatory.  This is the value that was specified in the CLI when the update was released. *(Boolean)*
+
 - __isPending__: Indicates whether this update is in a "pending" state. When `true`, that means the update has been downloaded and installed, but the app restart needed to apply it hasn't occurred yet, and therefore, it's changes aren't currently visible to the end-user. *(Boolean)*
+
 - __label__: The internal label automatically given to the update by the CodePush server. This value uniquely identifies the update within it's deployment. *(String)*
+
 - __packageHash__: The SHA hash value of the update. *(String)*
+
 - __packageSize__: The size of the code contained within the update, in bytes. *(Number)*
 
 ###### Methods

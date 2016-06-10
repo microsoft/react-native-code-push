@@ -7,6 +7,7 @@
 
 static NSString *const DiffManifestFileName = @"hotcodepush.json";
 static NSString *const DownloadFileName = @"download.zip";
+static NSString *const InstallLocationKey = @"installLocation";
 static NSString *const RelativeBundlePathKey = @"bundlePath";
 static NSString *const StatusFile = @"codepush.json";
 static NSString *const UpdateBundleFileName = @"app.jsbundle";
@@ -81,8 +82,10 @@ static NSString *const UnzippedFolderName = @"unzipped";
                                                 progressCallback:progressCallback
                                                 doneCallback:^(BOOL isZip) {
                                                     NSError *error = nil;
-                                                    NSString * unzippedFolderPath = [CodePushPackage getUnzippedFolderPath];
-                                                    NSMutableDictionary * mutableUpdatePackage = [updatePackage mutableCopy];
+                                                    NSString *unzippedFolderPath = [CodePushPackage getUnzippedFolderPath];
+                                                    NSMutableDictionary *mutableUpdatePackage = [updatePackage mutableCopy];
+                                                    [mutableUpdatePackage setValue:newUpdateFolderPath forKey:InstallLocationKey];
+                                                    
                                                     if (isZip) {
                                                         if ([[NSFileManager defaultManager] fileExistsAtPath:unzippedFolderPath]) {
                                                             // This removes any unzipped download data that could have been left
@@ -261,6 +264,7 @@ static NSString *const UnzippedFolderName = @"unzipped";
                                                     NSData *updateSerializedData = [NSJSONSerialization dataWithJSONObject:mutableUpdatePackage
                                                                                                                    options:0
                                                                                                                      error:&error];
+                                                                                                                     
                                                     NSString *packageJsonString = [[NSString alloc] initWithData:updateSerializedData
                                                                                                         encoding:NSUTF8StringEncoding];
                                                     
@@ -268,6 +272,7 @@ static NSString *const UnzippedFolderName = @"unzipped";
                                                                         atomically:YES
                                                                           encoding:NSUTF8StringEncoding
                                                                              error:&error];
+                                                                             
                                                     if (error) {
                                                         failCallback(error);
                                                     } else {
