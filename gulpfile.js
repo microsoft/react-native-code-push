@@ -1,3 +1,4 @@
+var del = require("del");
 var gulp = require("gulp");
 var path = require("path");
 var child_process = require("child_process");
@@ -163,7 +164,6 @@ gulp.task("tslint", function () {
 });
 
 gulp.task("clean", function () {
-    var del = require("del");
     return del([binPath + "/**"], { force: true });
 });
 
