@@ -1,0 +1,12 @@
+{
+  "file://host/path": "\\\\host\\path",
+  "file://localhost/etc/fstab": "\\etc\\fstab",
+  "file:///etc/fstab": "\\etc\\fstab",
+  "file:///c:/WINDOWS/clock.avi": "c:\\WINDOWS\\clock.avi",
+  "file://localhost/c|/WINDOWS/clock.avi": "c:\\WINDOWS\\clock.avi",
+  "file:///c|/WINDOWS/clock.avi": "c:\\WINDOWS\\clock.avi",
+  "file://localhost/c:/WINDOWS/clock.avi": "c:\\WINDOWS\\clock.avi",
+  "file://hostname/path/to/the%20file.txt": "\\\\hostname\\path\\to\\the file.txt",
+  "file:///c:/path/to/the%20file.txt": "c:\\path\\to\\the file.txt",
+  "file:///C:/Documents%20and%20Settings/davris/FileSchemeURIs.doc": "C:\\Documents and Settings\\davris\\FileSchemeURIs.doc"
+}

@@ -1,0 +1,64 @@
+diff --git a/bin/replace.js b/bin/replace.js
+index 318c573..0941bb4 100755
+--- a/bin/replace.js
++++ b/bin/replace.js
+@@ -34,12 +34,6 @@ var options = nomnom.opts({
+         full: 'ignore-case',
+         help: "Ignore case when matching"
+     },
+-    multiline: {
+-        abbr: 'm',
+-        flag: true,
+-        help: "Match line by line, default is true",
+-        default: true
+-    },
+     funcFile: {
+         abbr: 'f',
+         full: 'function-file',
+diff --git a/bin/search.js b/bin/search.js
+index b36f1a0..597acb2 100755
+--- a/bin/search.js
++++ b/bin/search.js
+@@ -24,12 +24,6 @@ var options = nomnom.opts({
+         string: '-i, --ignore-case',
+         help: "Ignore case when searching"
+     },
+-    multiline: {
+-        abbr: 'm',
+-        flag: true,
+-        help: "Match line by line, default is true",
+-        default: true
+-    },
+     include: {
+         string: '--include=PATHS',
+         help: "Only search in these files, e.g. '*.js,*.foo'"
+diff --git a/replace.js b/replace.js
+index 6e45164..587e909 100644
+--- a/replace.js
++++ b/replace.js
+@@ -13,13 +13,10 @@ var excludes = [],
+ 
+ module.exports = function(opts) {
+     options = opts;
+-    var flags = "g"; // global multiline
++    var flags = "gm"; // global multiline
+     if (options.ignoreCase) {
+         flags += "i";
+     }
+-    if (options.multiline) {
+-        flags += "m";
+-    }
+     regex = new RegExp(options.regex, flags);
+     canReplace = !options.preview && options.replacement !== undefined;
+ 
+@@ -153,9 +150,7 @@ function replacizeText(text, file) {
+         }
+         console.log(printout);
+     }
+-    if (!options.silent && !options.quiet
+-       && !(lineCount > options.maxLines)
+-       && options.multiline) {
++    if (!options.silent && !options.quiet && !(lineCount > options.maxLines)) {
+         var lines = text.split("\n");
+         for (var i = 0; i < lines.length; i++) {
+             var line = lines[i];
