@@ -179,6 +179,16 @@ static NSString *bundleResourceName = @"main";
 @synthesize pauseCallback = _pauseCallback;
 @synthesize paused = _paused;
 
+- (void)setPaused:(BOOL)paused
+{
+    if (_paused != paused) {
+        _paused = paused;
+        if (_pauseCallback) {
+            _pauseCallback();
+        }
+    }
+}
+
 /*
  * This method is used to clear updates that are installed
  * under a different app version and hence don't apply anymore,
@@ -291,7 +301,7 @@ static NSString *bundleResourceName = @"main";
 #ifdef DEBUG
     [self clearDebugUpdates];
 #endif
-    _paused = YES;
+    self.paused = YES;
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];
     if (pendingUpdate) {
@@ -512,7 +522,7 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
         // Set up and unpause the frame observer so that it can emit
         // progress events every frame if the progress is updated.
         _didUpdateProgress = NO;
-        _paused = NO;
+        self.paused = NO;
     }
 
     [CodePushPackage
@@ -530,7 +540,7 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
             // updates and synchronously send the last event.
             if (expectedContentLength == receivedContentLength) {
                 _didUpdateProgress = NO;
-                _paused = YES;
+                self.paused = YES;
                 [self dispatchDownloadProgressEvent];
             }
         }
@@ -552,7 +562,7 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
 
             // Stop observing frame updates if the download fails.
             _didUpdateProgress = NO;
-            _paused = YES;
+            self.paused = YES;
             reject([NSString stringWithFormat: @"%lu", (long)err.code], err.localizedDescription, err);
         }];
 }

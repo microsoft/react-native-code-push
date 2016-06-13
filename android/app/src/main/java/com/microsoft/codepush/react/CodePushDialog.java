@@ -26,8 +26,15 @@ public class CodePushDialog extends ReactContextBaseJavaModule{
         builder.setCancelable(false);
 
         DialogInterface.OnClickListener clickListener = new DialogInterface.OnClickListener() {
+            private boolean callbackConsumed = false;
+
             @Override
-            public void onClick(DialogInterface dialog, int which) {
+            public synchronized void onClick(DialogInterface dialog, int which) {
+                if (callbackConsumed) {
+                    return;
+                }
+
+                callbackConsumed = true;
                 dialog.cancel();
                 switch (which) {
                     case DialogInterface.BUTTON_POSITIVE:

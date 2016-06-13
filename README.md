@@ -11,12 +11,15 @@ This plugin provides client-side integration for the [CodePush service](http://c
 * [Windows Setup](#windows-setup)
 * [Plugin Usage](#plugin-usage)
 * [Releasing Updates](#releasing-updates)
+* [Multi-Deployment Testing](#multi-deployment-testing)
+* [Dynamic Deployment Assignment](#dynamic-deployment-assignment)
 * [API Reference](#api-reference)
     * [JavaScript API](#javascript-api-reference)
     * [Objective-C API Reference (iOS)](#objective-c-api-reference-ios)
     * [Java API Reference (Android)](#java-api-reference-android)
-* [Example Apps](#example-apps)
 * [Debugging / Troubleshooting](#debugging--troubleshooting)
+* [Example Apps / Starters](#example-apps--starters)
+* [Continuous Integration / Delivery](#continuous-integration--delivery)
 
 ## How does it work?
 
@@ -41,8 +44,8 @@ We try our best to maintain backwards compatability of our plugin with previous 
 | <0.14.0                 | **Unsupported**                                |
 | v0.14.0                 | v1.3.0 *(introduced Android support)*          |
 | v0.15.0-v0.18.0         | v1.4.0-v1.6.0 *(introduced iOS asset support)* |
-| v0.19.0-v0.26.0         | v1.7.0+ *(introduced Android asset support)*   |
-| v0.27.0+                | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
+| v0.19.0-v0.28.0         | v1.7.0+ *(introduced Android asset support)*   |
+| v0.29.0+                | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
 
 ## Supported Components
 
@@ -56,7 +59,7 @@ When using the React Native assets sytem (i.e. using the `require("./foo.png")` 
 | `TabBarIOS.Item`                                | `icon`, `selectedIcon`                   |
 | `ToolbarAndroid` <br />*(React Native 0.21.0+)* | `actions[].icon`, `logo`, `overflowIcon` |
 
-The following list represents the set of components (and props) that don't currently support their assets being updated via CodePush, due to their dependency on static images (i.e. using the `{ uri: "foo"}` syntax):
+The following list represents the set of components (and props) that don't currently support their assets being updated via CodePush, due to their dependency on static images (i.e. using the `{ uri: "foo" }` syntax):
 
 | Component   | Prop(s)                                                              |
 |-------------|----------------------------------------------------------------------|
@@ -117,12 +120,19 @@ We hope to eventually remove the need for steps #2-4, but in the meantime, RNPM 
     pod 'CodePush', :path => './node_modules/react-native-code-push'
     ```
     
-    *NOTE: The above path needs to be relative to your app's `Podfile`, so adjust it as neccessary.*
+    CodePush depends on an internal copy of the `SSZipArchive` library, so if your project already includes it (either directly or via a transitive dependency), then you can install a version of CodePush which excludes it by depending specificaly on the `Core` subspec:
+    
+    ```ruby
+    pod 'CodePush', :path => './node_modules/react-native-code-push', :subspecs => ['Core']
+    ```
+    
+    *NOTE: The above paths needs to be relative to your app's `Podfile`, so adjust it as nec
+    cessary.*
     
 2. Run `pod install`
 
 *NOTE: The CodePush `.podspec` depends on the `React` pod, and so in order to ensure that it can correctly use the version of React Native that your app is built with, please make sure to define the `React` dependency in your app's `Podfile` as explained [here](http://facebook.github.io/react-native/docs/embedded-app-ios.html#install-react-native-using-cocoapods).*
-
+    
 #### Plugin Installation (iOS - Manual)
 
 1. Open your app's Xcode project
@@ -190,6 +200,8 @@ To let the CodePush runtime know which deployment it should query for updates ag
 
 ![Deployment list](https://cloud.githubusercontent.com/assets/116461/11601733/13011d5e-9a8a-11e5-9ce2-b100498ffb34.png)
     
+In order to effectively make use of the `Staging` and `Production` deployments that were created along with your CodePush app, refer to the [multi-deployment releases](#multi-deployment-releases) docs below before actually moving your app's usage of CodePush into production.
+
 ## Android Setup
 
 In order to integrate CodePush into your Android project, perform the following steps:
@@ -284,6 +296,8 @@ public class MainActivity extends ReactActivity {
     ...
 }
 ```
+
+In order to effectively make use of the `Staging` and `Production` deployments that were created along with your CodePush app, refer to the [multi-deployment releases](#multi-deployment-releases) docs below before actually moving your app's usage of CodePush into production.
 
 ## Windows Setup
 
@@ -382,7 +396,9 @@ AppState.addEventListener("change", (newState) => {
     newState === "active" && codePush.sync();
 });
 ```
-   
+
+*NOTE: If you are using [Redux](http://redux.js.org) and [Redux Saga](http://yelouafi.github.io/redux-saga/), you can alternatively use the [react-native-code-push-saga](http://github.com/lostintangent/react-native-code-push-saga) module, which allows you to customize when `sync` is called in simpler/more idiomatic way.*
+
 Additionally, if you would like to display an update confirmation dialog (an "active install"), configure when an available update is installed (e.g. force an immediate restart) or customize the update experience in any way, refer to the `sync` method's [API reference](#codepushsync) for information on how to tweak this default behavior.
 
 <a id="apple-note">*NOTE: While [Apple's developer agreement](https://developer.apple.com/programs/ios/information/iOS_Program_Information_4_3_15.pdf) fully allows performing over-the-air updates of JavaScript and assets (which is what enables CodePush!), it is against their policy for an app to display an update prompt. Because of this, we recommend that App Store-distributed apps don't enable the `updateDialog` option when calling `sync`, whereas Google Play and internally distributed apps (e.g. Enterprise, Fabric, HockeyApp) can choose to enable/customize it.*</a>
@@ -400,7 +416,7 @@ code-push release-react MyApp ios
 code-push release-react MyApp-Android android
 ```
 
-The `release-react` command enables such a simple workflow because it provides many sensible defaults (e.g. generating a release bundle, assuming your app's entry file on iOS is either `index.ios.js` or `index.js`). However, all of these defaults can be customized to allow incremental flexibility as neccessary, which makes it a good fit for most scenarios. 
+The `release-react` command enables such a simple workflow because it provides many sensible defaults (e.g. generating a release bundle, assuming your app's entry file on iOS is either `index.ios.js` or `index.js`). However, all of these defaults can be customized to allow incremental flexibility as necessary, which makes it a good fit for most scenarios. 
 
 ```shell
 # Release a mandatory update with a changelog
@@ -425,6 +441,155 @@ For more details about how the `release-react` command works, as well as the var
 
 If you run into any issues, or have any questions/comments/feedback, you can ping us within the [#code-push](https://discord.gg/0ZcbPKXt5bWxFdFu) channel on Reactiflux, [e-mail us](mailto:codepushfeed@microsoft.com) and/or check out the [troubleshooting](#debugging--troubleshooting) details below.
 
+
+## Multi-Deployment Testing
+
+In our [getting started](#getting-started) docs, we illustrated how to configure the CodePush plugin using a specific deployment key. However, in order to effectively test your releases, it is critical that you leverage the `Staging` and `Production` deployments that are auto-generated when you first created your CodePush app (or any custom deployments you may have created). This way, you never release an update to your end users that you haven't been able to validate yourself.
+
+*NOTE: Our client-side rollback feature can help unblock users after installing a release that resulted in a crash, and server-side rollbacks (i.e. `code-push rollback`) allow you to prevent additional users from installing a bad release once it's been identified. However, it's obviously better if you can prevent an erroneous update from being broadly released in the first place.*
+
+Taking advantage of the `Staging` and `Production` deployments allows you to acheive a workflow like the following (feel free to customize!):
+
+1. Release a CodePush update to your `Staging` deployment using the `code-push release-react` command (or `code-push release` if you need more control)
+
+2. Run your staging/beta build of your app, sync the update from the server, and verify it works as expected
+
+3. Promote the tested release from `Staging` to `Production` using the `code-push promote` command
+
+4. Run your production/release build of your app, sync the update from the server and verify it works as expected
+
+*NOTE: If you want to get really fancy, you can even choose to perform a "staged rollout" as part of #3, which allows you to mitigate additional potential risk with the update (e.g. did your testing in #2 touch all possible devices/conditions?) by only making the production update available to a percentage of your users (e.g. `code-push promote <APP_NAME> Staging Production -r 20%`). Then, after waiting for a reasonable amount of time to see if any crash reports or customer feedback comes in, you can expand it to your entire audience by running `code-push patch <APP_NAME> Production -r 100%`.*
+
+You'll notice that the above steps refer to a "staging build" and "production build" of your app. If your build process already generates distinct binaries per "environment", then you don't need to read any further, since swapping out CodePush deployment keys is just like handling environment-specific config for any other service your app uses (e.g. Facebook). However, if you're looking for  examples on how to setup your build process to accomodate this, then refer to the following sections, depending on the platform(s) your app is targeting.
+
+### Android
+
+The [Android Gradle plugin](http://google.github.io/android-gradle-dsl/current/index.html) allows you to define custom config settings for each "build type" (e.g. debug, release), which in turn are generated as properties on the `BuildConfig` class that you can reference from your Java code. This mechanism allows you to easily configure your debug builds to use your CodePush staging deployment key and your release builds to use your CodePush production deployment key.
+
+To set this up, perform the following steps:
+
+1. Open your app's `build.gradle` file (e.g. `android/app/build.gradle` in standard React Native projects)
+
+2. Find the `android { buildTypes {} }` section and define `buildConfigField` entries for both your `debug` and `release` build types, which reference your `Staging` and `Production` deployment keys respectively. If you prefer, you can define the key literals in your `gradle.properties` file, and then reference them here. Either way will work, and it's just a matter of personal preference.
+ 
+    ```groovy
+    android {
+        ... 
+        buildTypes {
+            debug {
+                ...
+                buildConfigField "String", "CODEPUSH_KEY", "<INSERT_STAGING_KEY>"
+                ...
+            }
+            
+            release {
+                ...
+                buildConfigField "String", "CODEPUSH_KEY", "<INSERT_PRODUCTION_KEY>"
+                ...
+            }
+        }
+        ...
+    }
+    ```
+
+    *NOTE: As a reminder, you can retrieve these keys by running `code-push deployment ls <APP_NAME> -k` from your terminal.*
+    
+4. Open up your `MainAtivity.java` file and change the `CodePush` constructor to pass the deployment key in via the build config you just defined, as opposed to a string literal. 
+
+    ```java
+    new CodePush(BuildConfig.CODEPUSH_KEY, this, BuildConfig.DEBUG);
+    ```
+    
+    *Note: If you gave your build setting a different name in your Gradle file, simply make sure to reflect that in your Java code.*
+    
+And that's it! Now when you run or build your app, your debug builds will automatically be configured to sync with your `Staging` deployment, and your release builds will be configured to sync with your `Production` deployment.
+
+*NOTE: By default, the `react-native run-android` command builds and deploys the debug version of your app, so if you want to test out a release/production build, simply run `react-native run-android --variant release. Refer to the [React Native docs](http://facebook.github.io/react-native/docs/signed-apk-android.html#conten) for details about how to configure and create release builds for your Android apps.*
+
+If you want to be able to install both debug and release builds simultaneously on the same device (highly recommended!), then you need to ensure that your debug build has a unique identity and icon from your release build. Otherwise, neither the OS nor you will be able to differentiate between the two. You can achieve this by performing the following steps:
+
+1. In your `build.gradle` file, specify the [`applicationIdSuffix`](http://google.github.io/android-gradle-dsl/current/com.android.build.gradle.internal.dsl.BuildType.html#com.android.build.gradle.internal.dsl.BuildType:applicationIdSuffix) field for your debug build type, which gives your debug build a unique identity for the OS (e.g. `com.foo` vs. `com.foo.debug`).
+
+```groovy
+buildTypes {
+    debug {
+        applicationIdSuffix ".debug"
+    }
+}
+```
+
+2. Create the `app/src/debug/res` directory structure in your app, which allows overriding resources (e.g. strings, icons, layouts) for your debug builds
+
+3. Create a `values` directory underneath the debug res directory created in #2, and copy the existing `strings.xml` file from the `app/src/main/res/values` directory
+
+4. Open up the new debug `strings.xml` file and change the `<string name="app_name">` element's value to something else (e.g. `foo-debug`). This ensures that your debug build now has a distinct display name, so that you can differentiate it from your release build.
+
+5. Optionally, create "mirrored" directories in the `app/src/debug/res` directory for all of your app's icons that you want to change for your debug build. This part isn't technically critical, but it can make it easier to quickly spot your debug builds on a device if its icon is noticeable different.
+
+And that's it! View [here](http://tools.android.com/tech-docs/new-build-system/resource-merging) for more details on how resource merging works in Android.
+
+### iOS
+
+Xcode allows you to define custom build settings for each "configuration" (e.g. debug, release), which can then be referenced as the value of keys within the `Info.plist` file. This mechanism allows you to easily configure your debug builds to use your CodePush staging deployment key, and your release builds to use your CodePush production deployment key.
+
+To set this up, perform the following steps:
+
+1. Open up your Xcode project and select your project in the `Project navigator` window
+
+2. Select the `Build Settings` tab
+
+3. Click the `+` button on the toolbar and select `Add User-Defined Setting`
+
+   ![Setting](https://cloud.githubusercontent.com/assets/116461/15764165/a16dbe30-28dd-11e6-94f2-fa3b7eb0c7de.png)
+
+4. Name this new setting something like `CODEPUSH_KEY`, expand it, and specify your `Staging` deployment key for the `Debug` config and your `Production` deployment key for the `Production` config.
+
+    ![Setting Keys](https://cloud.githubusercontent.com/assets/116461/15764230/106c245c-28de-11e6-96fe-2615f9220b07.png)
+    
+    *NOTE: As a reminder, you can retrieve these keys by running `code-push deployment ls <APP_NAME> -k` from your terminal.*
+    
+5. Open your project's `Info.plist` file and change the value of your `CodePushDeploymentKey` entry to `$(CODEPUSH_KEY)`
+
+    ![Infoplist](https://cloud.githubusercontent.com/assets/116461/15764252/3ac8aed2-28de-11e6-8c19-2270ae9857a7.png)
+    
+And that's it! Now when you run or build your app, your debug builds will automatically be configured to sync with your `Staging` deployment, and your release builds will be configured to sync with your `Production` deployment.
+
+Additionally, if you want to give them seperate names and/or icons, you can modify the `Product Name` and `Asset Catalog App Icon Set Name` build settings, so that the debug configuration has a unique value.
+
+![Product name](https://cloud.githubusercontent.com/assets/116461/15764314/b3a4cfac-28de-11e6-9e8c-b1cbd8ac7c6c.png)
+
+## Dynamic Deployment Assignment
+
+The above section illustrated how you can leverage multiple CodePush deployments in order to effectively test your updates before broadly releasing them to your end users. However, since that workflow statically embeds the deployment assignment into the actual binary, a staging or production build will only ever sync updates from that deployment. In many cases, this is sufficient, since you only want your team, customers, stakeholders, etc. to sync with your pre-production releases, and therefore, only they need a build that knows how to sync with staging. However, if you want to be able to perform A/B tests, or provide early access of your app to certain users, it can prove very useful to be able to dynamically place specific users (or audiences) into specific deployments at runtime.
+
+In order to achieve this kind of workflow, all you need to do is specify the deployment key you want the current user to syncronize with when calling the `checkForUpdate` or `sync` methods. When specified, this key will override the "default" one that was provided in your app's `Info.plist` (iOS) or `MainActivity.java` (Android) files. This allows you to produce a build for staging or production, that is also capabable of being dynamically "redirected" as needed.
+
+```javascript
+// Imagine that "userProfile" is a prop that this component received
+// which includes the deployment key that the current user should use.
+codePush.sync({ deploymentKey: userProfile.CODEPUSH_KEY });
+```
+
+With that change in place, now it's just a matter of choosing how your app determines the right deployment key for the current user. In practice, there are typically two solutions for this:
+
+1. Expose a user-visible mechanism for changing deployments at any time. For example, your settings page could have a toggle for enabling "beta" access. This model works well if you're not concerned with the privacy of your pre-production updates, and you have power users that may want to opt-in to earlier (and potentially buggy) updates at their own will (kind of like Chrome channels). However, this solution puts the decision in the hands of your users, which doesn't help you perform A/B tests transparently.
+
+2. Annotate the server-side profile of your users with an additional piece of metadata which indicates the deployment they should sync with. By default, your app could just use the binary-embedded key, but after a user has authenticated, your server can choose to "redirect" them to a different deployment, which allows you to incrementally place certain users or groups in different deployments as needed. You could even choose to store the server-response in local storage so that it becomes the new default. How you store the key alongside your user's profiles is entirely up to your authentication solution (e.g. Auth0, Firebase, custom DB + REST API), but is generally pretty trivial to do.
+
+*NOTE: If needed, you could also implement a hybrid solution that allowed your end-users to toggle between different deployments, while also allowing your server to override that decision. This way, you have a hierarchy of "deployment resolution" that ensures your app has the ability to update itself out-of-the-box, your end users can feel rewarded by getting early access to bits, but you also have the ability to run A/B tests on your users as needed.*
+
+Since we recommend using the `Staging` deployment for pre-release testing of your updates (as explained in the previous section), it doesn't neccessarily make sense to use it for performing A/B tests on your users, as opposed to allowing early-access (as explained in option #1 above). Therefore, we recommend making full use of custom app deployments, so that you can segment your users however makes sense for your needs. For example, you could create long-term or even one-off deployments, release a variant of your app to it, and then place certain users into it in order to see how they engage.
+
+```javascript
+// #1) Create your new deployment to hold releases of a specific app variant
+code-push deployment add [APP_NAME] test-variant-one
+
+// #2) Target any new releases at that custom deployment
+code-push release-react [APP_NAME] ios -d test-variant-one
+```
+
+*NOTE: The total user count that is reported in your deployment's "Install Metrics" will take into account users that have "switched" from one deployment to another. For example, if your `Production` deployment currently reports having 1 total user, but you dynamically switch that user to `Staging`, then the `Production` deployment would report 0 total users, while `Staging` would report 1 (the user that just switched). This behavior allows you to accurately track your release adoption, even in the event of using a runtime-based deployment redirection solution.*
+
 ---
 
 ## API Reference
@@ -441,7 +606,11 @@ The following sections describe the shape and behavior of these APIs in detail:
 
 When you require `react-native-code-push`, the module object provides the following top-level methods:
 
+* [allowRestart](#codepushallowrestart): Re-allows programmatic restarts to occur as a result of an update being installed, and optionally, immediately restarts the app if a pending update had attempted to restart the app while restarts were disallowed. This is an advanced API and is only necessary if your app explicitly disallowed restarts via the `disallowRestart` method.
+
 * [checkForUpdate](#codepushcheckforupdate): Asks the CodePush service whether the configured app deployment has an update available. 
+
+* [disallowRestart](#codepushdisallowrestart): Temporarily disallows any programmatic restarts to occur as a result of a CodePush update being installed. This is an advanced API, and is useful when a component within your app (e.g. an onboarding process) needs to ensure that no end-user interruptions can occur during its lifetime.
 
 * [getCurrentPackage](#codepushgetcurrentpackage): Retrieves the metadata about the currently installed update (e.g. description, installation time, size). *NOTE: As of `v1.10.3-beta` of the CodePush module, this method is deprecated in favor of [`getUpdateMetadata`](#codepushgetupdatemetadata)*.
 
@@ -453,22 +622,48 @@ When you require `react-native-code-push`, the module object provides the follow
 
 * [sync](#codepushsync): Allows checking for an update, downloading it and installing it, all with a single call. Unless you need custom UI and/or behavior, we recommend most developers to use this method when integrating CodePush into their apps
 
+#### codePush.allowRestart
+
+```javascript
+codePush.allowRestart(): void;
+```
+
+Re-allows programmatic restarts to occur, that would have otherwise been rejected due to a previous call to `disallowRestart`. If `disallowRestart` was never called in the first place, then calling this method will simply result in a no-op.
+
+If a CodePush update is currently pending, which attempted to restart the app (e.g. it used `InstallMode.IMMEDIATE`), but was blocked due to `disallowRestart` having been called, then calling `allowRestart` will result in an immediate restart. This allows the update to be applied as soon as possible, without interrupting the end user during critical workflows (e.g. an onboarding process).
+
+For example, calling `allowRestart` would trigger an immediate restart if either of the three scenarios mentioned in the [`disallowRestart` docs](#codepushdisallowrestart) occured after `disallowRestart` was called. However, calling `allowRestart` wouldn't trigger a restart if the following were true:
+
+1. No CodePush updates were installed since the last time `disallowRestart` was called, and therefore, there isn't any need to restart anyways.
+
+2. There is currently a pending CodePush update, but it was installed via `InstallMode.ON_NEXT_RESTART`, and therefore, doesn't require a programmatic restart.
+
+3. There is currently a pending CodePush update, but it was installed via `InstallMode.ON_NEXT_RESUME` and the app hasn't been put into the background yet, and therefore, there isn't a need to programmatically restart yet.
+
+4. No calls to `restartApp` were made since the last time `disallowRestart` was called.
+
+This behavior ensures that no restarts will be triggered as a result of calling `allowRestart` unless one was explictly requested during the disallowed period. In this way, `allowRestart` is somewhat similar to calling `restartApp(true)`, except the former will only trigger a restart if the currently pending update wanted to restart, whereas the later would restart as long as an update is pending.
+
+See [disallowRestart](#codepushdisallowrestart) for an example of how this method can be used.
+
 #### codePush.checkForUpdate
 
 ```javascript
 codePush.checkForUpdate(deploymentKey: String = null): Promise<RemotePackage>;
 ```
 
-Queries the CodePush service to see whether the configured app deployment has an update available. By default, it will use the deployment key that is configured in your `Info.plist` file (iOS), or `MainActivity.java` file (Android), but you can override that by specifying a value via the optional `deploymentKey` parameter. This can be useful when you want to dynamically "redirect" a user to a specific deployment, such as allowing "Early access" via an easter egg or a user setting switch.
+Queries the CodePush service to see whether the configured app deployment has an update available. By default, it will use the deployment key that is configured in your `Info.plist` file (iOS), or `MainActivity.java` file (Android), but you can override that by specifying a value via the optional `deploymentKey` parameter. This can be useful when you want to dynamically "redirect" a user to a specific deployment, such as allowing "early access" via an easter egg or a user setting switch.
 
 This method returns a `Promise` which resolves to one of two possible values:
 
-1. `null` if there is no update available. This occurs in the following scenarios:
+1. `null` if there is no update available. This can occur in the following scenarios:
 
     1. The configured deployment doesn't contain any releases, and therefore, nothing to update.
     2. The latest release within the configured deployment is targeting a different binary version than what you're currently running (either older or newer).
     3. The currently running app already has the latest release from the configured deployment, and therefore, doesn't need it again.
-    
+    4. The latest release within the configured deployment is currently marked as disabled, and therefore, isn't allowed to be downloaded.
+    5. The latest release within the configured deployment is in an "active rollout" state, and the requesting device doesn't fall within the percentage of users who are eligible for it.
+
 2. A [`RemotePackage`](#remotepackage) instance which represents an available update that can be inspected and/or subsequently downloaded.
 
 Example Usage: 
@@ -482,6 +677,49 @@ codePush.checkForUpdate()
         console.log("An update is available! Should we download it?");
     }
 });
+```
+
+#### codePush.disallowRestart
+
+```javascript
+codePush.disallowRestart(): void;
+```
+
+Temporarily disallows programmatic restarts to occur as a result of either of following scenarios:
+
+1. A CodePush update is installed using `InstallMode.IMMEDIATE`
+2. A CodePush update is installed using `InstallMode.ON_NEXT_RESUME` and the app is resumed from the background (optionally being throttled by the `minimumBackgroundDuration` property)
+3. The `restartApp` method was called
+
+*NOTE: #1 and #2 effectively work by calling `restartApp` for you, so you can think of `disallowRestart` as blocking any call to `restartApp`, regardless if your app calls it directly or indirectly.*
+
+After calling this method, any calls to `sync` would still be allowed to check for an update, download it and install it, but an attempt to restart the app would be queued until `allowRestart` is called. This way, the restart request is captured and can be "flushed" whenever you want to allow it to occur.
+
+This is an advanced API, and is primarily useful when individual components within your app (e.g. an onboarding process) need to ensure that no end-user interruptions can occur during their lifetime, while continuing to allow the app to keep syncing with the CodePush server at its own pace and using whatever install modes are appropriate. This has the benefit of allowing the app to discover and download available updates as soon as possible, while also preventing any disruptions during key end-user experiences.
+
+As an alternative, you could also choose to simply use `InstallMode.ON_NEXT_RESTART` whenever calling `sync` (which will never attempt to programmatically restart the app), and then explicity calling `restartApp` at points in your app that you know it is "safe" to do so. `disallowRestart` provides an alternative approach to this when the code that synchronizes with the CodePush server is separate from the code/components that want to enforce a no-restart policy.
+
+Example Usage: 
+
+```javascript
+class OnboardingProcess extends Component {
+    ...
+    
+    componentWillMount() {
+        // Ensure that any CodePush updates which are
+        // synchronized in the background can't trigger
+        // a restart while this component is mounted.
+        codePush.disallowRestart();    
+    }
+    
+    componentWillUnmount() {
+        // Reallow restarts, and optionally trigger
+        // a restart if one was currently pending.
+        codePush.allowRestart();
+    }
+    
+    ...   
+}
 ```
 
 #### codePush.getCurrentPackage
@@ -819,7 +1057,7 @@ The `CodePush` class' methods can be thought of as composite resolvers which alw
 
 4. Repeat #2 and #3 as the CodePush releases and app store releases continue on into infinity (and beyond?)
 
-Because of this behavior, you can safely deploy updates to both the app store(s) and CodePush as neccesary, and rest assured that your end-users will always get the most recent version.  
+Because of this behavior, you can safely deploy updates to both the app store(s) and CodePush as necesary, and rest assured that your end-users will always get the most recent version.  
 
 ##### Methods
 
@@ -855,7 +1093,7 @@ Constructs the CodePush client runtime and represents the `ReactPackage` instanc
 
 - __getBundleUrl(String bundleName)__ - Returns the path to the most recent version of your app's JS bundle file, using the specified resource name (e.g. `index.android.bundle`). This method has the same resolution behavior as the Objective-C equivalent described above.
 
-## Example Apps
+## Example Apps / Starters
 
 The React Native community has graciously created some awesome open source apps that can serve as examples for developers that are getting started. The following is a list of OSS React Native apps that are also using CodePush, and can therefore be used to see how others are using the service:
 
@@ -864,6 +1102,11 @@ The React Native community has graciously created some awesome open source apps 
 * [GeoEncoding](https://github.com/LynxITDigital/GeoEncoding) - An app by [Lynx IT Digital](https://digital.lynxit.com.au) which demonstrates how to use numerous React Native components and modules.
 * [Math Facts](https://github.com/Khan/math-facts) - An app by Khan Academy to help memorize math facts more easily.
 * [MoveIt!](https://github.com/multunus/moveit-react-native) - An app by [Multunus](http://www.multunus.com) that allows employees within a company to track their work-outs.
+
+Additionally, if you're looking to get started with React Native + CodePush, and are looking for an awesome starter kit, you should check out the following:
+
+* [Native Starter Pro](http://strapmobile.com/native-starter-pro/)
+* [Pepperoni](http://getpepperoni.com/)
 
 *Note: If you've developed a React Native app using CodePush, that is also open-source, please let us know. We would love to add it to this list!*
 
@@ -888,9 +1131,16 @@ Now you'll be able to see CodePush logs in either debug or release mode, on both
 | Issue / Symptom | Possible Solution |
 |-----------------|-------------------|
 | Compilation Error | Double-check that your version of React Native is [compatible](#supported-react-native-platforms) with the CodePush version you are using. |
-| Network timeout / hang when calling `sync` or `checkForUpadte` in the iOS Simulator | Try resetting the simulator by selecting the `Simulator -> Reset Content and Settings..` menu item, and then re-running your app. |
+| Network timeout / hang when calling `sync` or `checkForUpdate` in the iOS Simulator | Try resetting the simulator by selecting the `Simulator -> Reset Content and Settings..` menu item, and then re-running your app. |
 | Server responds with a `404` when calling `sync` or `checkForUpdate` | Double-check that the deployment key you added to your `Info.plist` (iOS), `build.gradle` (Android) or that you're passing to `sync`/`checkForUpdate`, is in fact correct. You can run `code-push deployment ls [APP_NAME] -k` to view the correct keys for your app deployments. |
 | Update not being discovered | Double-check that the version of your running app (e.g. `1.0.0`) matches the version you specified when releasing the update to CodePush. Additionally, make sure that you are releasing to the same deployment that your app is configured to sync with. |
 | Update not being displayed after restart | If you're not calling `sync` on app start (e.g. within `componentDidMount` of your root component), then you need to explicitly call `notifyApplicationReady` on app start, otherwise, the plugin will think your update failed and roll it back. |
 | Images dissappear after installing CodePush update | If your app is using the React Native assets system to load images (i.e. the `require(./foo.png)` syntax), then you **MUST** release your assets along with your JS bundle to CodePush. Follow [these instructions](#releasing-updates-javascript--images) to see how to do this. |
 | No JS bundle is being found when running your app against the iOS simulator | By default, React Native doesn't generate your JS bundle when running against the simulator. Therefore, if you're using `[CodePush bundleURL]`, and targetting the iOS simulator, you may be getting a `nil` result. This issue will be fixed in RN 0.22.0, but only for release builds. You can unblock this scenario right now by making [this change](https://github.com/facebook/react-native/commit/9ae3714f4bebdd2bcab4d7fdbf23acebdc5ed2ba) locally.
+
+## Continuous Integration / Delivery
+
+In addition to being able to use the CodePush CLI to "manually" release updates, we believe that it's important to create a repeatable and sustainable solution for contiously delivering updates to your app. That way, it's simple enough for you and/or your team to create and maintain the rhythm of performing agile deployments. In order to assist with seting up a CodePush-based CD pipeline, refer to the following integrations with various CI servers:
+
+* [Visual Studio Team Services](https://marketplace.visualstudio.com/items?itemName=ms-vsclient.code-push) - *NOTE: VSTS also has extensions for publishing to [HockeyApp](https://marketplace.visualstudio.com/items?itemName=ms.hockeyapp) and the [Google Play](https://github.com/Microsoft/google-play-vsts-extension) store, so it provides a pretty great mobile CD solution in general.*
+* [Travis CI](https://github.com/mondora/code-push-travis-cli)

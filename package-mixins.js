@@ -1,5 +1,6 @@
 import { AcquisitionManager as Sdk } from "code-push/script/acquisition-sdk";
 import { DeviceEventEmitter } from "react-native";
+import RestartManager from "./RestartManager";
 
 // This function is used to augment remote and local
 // package objects with additional functionality/properties
@@ -42,8 +43,9 @@ module.exports = (NativeCodePush) => {
       await NativeCodePush.installUpdate(this, installMode, minimumBackgroundDuration);
       updateInstalledCallback && updateInstalledCallback();
       if (installMode == NativeCodePush.codePushInstallModeImmediate) {
-        NativeCodePush.restartApp(false);
+        RestartManager.restartApp(false);
       } else {
+        RestartManager.clearPendingRestart();
         localPackage.isPending = true; // Mark the package as pending since it hasn't been applied yet
       }
     },

@@ -104,10 +104,6 @@ public class CodePush implements ReactPackage {
             throw new CodePushUnknownException("Unable to get package info for " + applicationContext.getPackageName(), e);
         }
 
-        if (currentInstance != null) {
-            CodePushUtils.log("More than one CodePush instance has been initialized. Please use the instance method codePush.getBundleUrlInternal() to get the correct bundleURL for a particular instance.");
-        }
-
         currentInstance = this;
 
         clearDebugCacheIfNeeded();

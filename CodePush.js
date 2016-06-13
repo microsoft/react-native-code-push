@@ -2,6 +2,8 @@ import { AcquisitionManager as Sdk } from "code-push/script/acquisition-sdk";
 import { Alert } from "./AlertAdapter";
 import requestFetchAdapter from "./request-fetch-adapter";
 import { AppState, Platform } from "react-native";
+import RestartManager from "./RestartManager";
+import log from './logging';
 
 let NativeCodePush = require("react-native").NativeModules.CodePush;
 const PackageMixins = require("./package-mixins")(NativeCodePush);
@@ -154,11 +156,6 @@ function getPromisifiedSdk(requestFetchAdapter, config) {
   return sdk;
 }
 
-/* Logs messages to console with the [CodePush] prefix */
-function log(message) {
-  console.log(`[CodePush] ${message}`)
-}
-
 // This ensures that notifyApplicationReadyInternal is only called once
 // in the lifetime of this module instance.
 const notifyApplicationReady = (() => {
@@ -185,15 +182,23 @@ async function tryReportStatus(resumeListener) {
     const previousDeploymentKey = statusReport.previousDeploymentKey || config.deploymentKey;
     try {
       if (statusReport.appVersion) {
+        log(`Reporting binary update (${statusReport.appVersion})`);
+        
         const sdk = getPromisifiedSdk(requestFetchAdapter, config);
         await sdk.reportStatusDeploy(/* deployedPackage */ null, /* status */ null, previousLabelOrAppVersion, previousDeploymentKey);
       } else {
+        const label = statusReport.package.label;
+        if (statusReport.status === "DeploymentSucceeded") {
+          log(`Reporting CodePush update success (${label})`);
+        } else {
+          log(`Reporting CodePush update rollback (${label})`);
+        }
+      
         config.deploymentKey = statusReport.package.deploymentKey;
         const sdk = getPromisifiedSdk(requestFetchAdapter, config);
         await sdk.reportStatusDeploy(statusReport.package, statusReport.status, previousLabelOrAppVersion, previousDeploymentKey);
       }
-
-      log(`Reported status: ${JSON.stringify(statusReport)}`);
+      
       NativeCodePush.recordStatusReported(statusReport);
       resumeListener && AppState.removeEventListener("change", resumeListener);
     } catch (e) {
@@ -211,10 +216,6 @@ async function tryReportStatus(resumeListener) {
   } else {
     resumeListener && AppState.removeEventListener("change", resumeListener);
   }
-}
-
-function restartApp(onlyIfUpdateIsPending = false) {
-  NativeCodePush.restartApp(onlyIfUpdateIsPending);
 }
 
 var testConfig;
@@ -352,8 +353,9 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
         let message = null;
         const dialogButtons = [{
           text: null,
-          onPress: async () => {
-            resolve(await doDownloadAndInstall());
+          onPress:() => {
+            doDownloadAndInstall()
+              .then(resolve, reject);
           }
         }];
 
@@ -409,9 +411,11 @@ if (NativeCodePush) {
     log,
     notifyAppReady: notifyApplicationReady,
     notifyApplicationReady,
-    restartApp,
+    restartApp: RestartManager.restartApp,
     setUpTestDependencies,
     sync,
+    disallowRestart: RestartManager.disallow,
+    allowRestart: RestartManager.allow,
     InstallMode: {
       IMMEDIATE: NativeCodePush.codePushInstallModeImmediate, // Restart the app immediately
       ON_NEXT_RESTART: NativeCodePush.codePushInstallModeOnNextRestart, // Don't artificially restart the app. Allow the update to be "picked up" on the next app restart

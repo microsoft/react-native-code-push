@@ -217,7 +217,17 @@ declare namespace CodePush {
      * Notifies the CodePush runtime that an installed update is considered successful.
      */
     function notifyAppReady(): Promise<void>;
-    
+
+    /**
+     * Allow CodePush to restart the app.
+     */
+    function allowRestart(): void;
+
+    /**
+     * Forbid CodePush to restart the app.
+     */
+    function disallowRestart(): void;
+
     /**
      * Immediately restarts the app.
      * 
