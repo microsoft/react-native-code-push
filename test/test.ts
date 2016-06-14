@@ -173,7 +173,7 @@ class RNIOS extends Platform.IOS implements RNPlatform {
         var appDelegatePath: string = path.join(iOSProject, TestConfig.TestAppName, "AppDelegate.m");
         // Create and install the Podfile
         return TestUtil.getProcessOutput("pod init", { cwd: iOSProject })
-            .then(() => { return fs.appendFileSync(path.join(iOSProject, "Podfile"),
+            .then(() => { return fs.writeFileSync(path.join(iOSProject, "Podfile"),
                 "target '" + TestConfig.TestAppName + "'\n  pod 'React', :path => '../node_modules/react-native', :subspecs => [ 'Core', 'RCTImage', 'RCTNetwork', 'RCTText', 'RCTWebSocket', ]\n  pod 'CodePush', :path => '../node_modules/react-native-code-push'\n"); })
             // Put the IOS deployment key in the Info.plist
             .then(TestUtil.replaceString.bind(undefined, infoPlistPath,
