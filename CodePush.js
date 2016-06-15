@@ -172,50 +172,41 @@ const notifyApplicationReady = (() => {
 
 async function notifyApplicationReadyInternal() {
   await NativeCodePush.notifyApplicationReady();
-  tryReportStatus();
+  const statusReport = await NativeCodePush.getNewStatusReport();
+  tryReportStatus(statusReport); // Don't wait for this to complete.
+
+  return statusReport;
 }
 
-async function tryReportStatus(resumeListener) {
-  const statusReport = await NativeCodePush.getNewStatusReport();
-  if (statusReport) {
-    const config = await getConfiguration();
-    const previousLabelOrAppVersion = statusReport.previousLabelOrAppVersion;
-    const previousDeploymentKey = statusReport.previousDeploymentKey || config.deploymentKey;
-    try {
-      if (statusReport.appVersion) {
-        log(`Reporting binary update (${statusReport.appVersion})`);
-        
-        const sdk = getPromisifiedSdk(requestFetchAdapter, config);
-        await sdk.reportStatusDeploy(/* deployedPackage */ null, /* status */ null, previousLabelOrAppVersion, previousDeploymentKey);
-      } else {
-        const label = statusReport.package.label;
-        if (statusReport.status === "DeploymentSucceeded") {
-          log(`Reporting CodePush update success (${label})`);
-        } else {
-          log(`Reporting CodePush update rollback (${label})`);
-        }
-      
-        config.deploymentKey = statusReport.package.deploymentKey;
-        const sdk = getPromisifiedSdk(requestFetchAdapter, config);
-        await sdk.reportStatusDeploy(statusReport.package, statusReport.status, previousLabelOrAppVersion, previousDeploymentKey);
-      }
-      
-      NativeCodePush.recordStatusReported(statusReport);
-      resumeListener && AppState.removeEventListener("change", resumeListener);
-    } catch (e) {
-      log(`Report status failed: ${JSON.stringify(statusReport)}`);
-      NativeCodePush.saveStatusReportForRetry(statusReport);
-      // Try again when the app resumes
-      if (!resumeListener) {
-        resumeListener = (newState) => {
-          newState === "active" && tryReportStatus(resumeListener);
-        };
+async function tryReportStatus(statusReport) {
+  if (!statusReport) return;
 
-        AppState.addEventListener("change", resumeListener);
+  const config = await getConfiguration();
+  const previousLabelOrAppVersion = statusReport.previousLabelOrAppVersion;
+  const previousDeploymentKey = statusReport.previousDeploymentKey || config.deploymentKey;
+  try {
+    if (statusReport.appVersion) {
+      log(`Reporting binary update (${statusReport.appVersion})`);
+
+      const sdk = getPromisifiedSdk(requestFetchAdapter, config);
+      await sdk.reportStatusDeploy(/* deployedPackage */ null, /* status */ null, previousLabelOrAppVersion, previousDeploymentKey);
+    } else {
+      const label = statusReport.package.label;
+      if (statusReport.status === "DeploymentSucceeded") {
+        log(`Reporting CodePush update success (${label})`);
+      } else {
+        log(`Reporting CodePush update rollback (${label})`);
       }
+
+      config.deploymentKey = statusReport.package.deploymentKey;
+      const sdk = getPromisifiedSdk(requestFetchAdapter, config);
+      await sdk.reportStatusDeploy(statusReport.package, statusReport.status, previousLabelOrAppVersion, previousDeploymentKey);
     }
-  } else {
-    resumeListener && AppState.removeEventListener("change", resumeListener);
+
+    NativeCodePush.recordStatusReported(statusReport);
+  } catch (e) {
+    log(`Report status failed: ${JSON.stringify(statusReport)}`);
+    NativeCodePush.saveStatusReportForRetry(statusReport);
   }
 }
 
