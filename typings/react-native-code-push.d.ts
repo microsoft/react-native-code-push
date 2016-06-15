@@ -369,7 +369,7 @@ declare namespace CodePush {
      */
     enum DeploymentStatus {
         /**
-         * The deployment failed.
+         * The deployment failed (and was rolled back).
          */
         FAILED,
 
