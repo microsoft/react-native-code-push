@@ -22,7 +22,7 @@
   "devDependencies": {
     "archiver": "latest",
     "body-parser": "latest",
-    "code-push-plugin-testing-framework": "file:./node_modules/code-push-plugin-testing-framework",
+    "code-push-plugin-testing-framework": "file:./code-push-plugin-testing-framework",
     "del": "latest",
     "express": "latest",
     "gulp-typescript": "2.12.2",

@@ -32,3 +32,5 @@ Recipes/
 
 # Don't publish compiled testing code
 bin/
+
+code-push-plugin-testing-framework/
