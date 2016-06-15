@@ -199,9 +199,14 @@ export interface StatusReport {
     status: CodePush.DeploymentStatus;
 
     /**
+     * The version of the app that was deployed (for a native app upgrade).
+     */
+    appVersion?: string;
+
+    /**
      * Details of the package that was deployed (or attempted to).
      */
-    package: Package;
+    package?: Package;
 
     /**
      * Deployment key used when deploying the previous package.
