@@ -191,8 +191,30 @@ export interface UpdateDialog {
      */
     title?: string;
 }
-      
-declare namespace CodePush { 
+
+export interface StatusReport {
+    /**
+     * Whether the deployment succeeded or failed.
+     */
+    status: CodePush.DeploymentStatus;
+
+    /**
+     * Details of the package that was deployed (or attempted to).
+     */
+    package: Package;
+
+    /**
+     * Deployment key used when deploying the previous package.
+     */
+    previousDeploymentKey?: string;
+
+    /**
+     * The label (v#) of the package that was upgraded from.
+     */
+    previousLabelOrAppVersion?: string;
+}
+
+declare namespace CodePush {
     /**
      * Represents the default settings that will be used by the sync method if
      * an update dialog is configured to be displayed.
@@ -216,7 +238,7 @@ declare namespace CodePush {
     /**
      * Notifies the CodePush runtime that an installed update is considered successful.
      */
-    function notifyAppReady(): Promise<void>;
+    function notifyAppReady(): Promise<StatusReport>;
 
     /**
      * Allow CodePush to restart the app.
@@ -273,73 +295,88 @@ declare namespace CodePush {
          * The CodePush server is being queried for an update.
          */
         CHECKING_FOR_UPDATE,
-        
+
         /**
          * An update is available, and a confirmation dialog was shown
          * to the end user. (This is only applicable when the updateDialog is used)
          */
         AWAITING_USER_ACTION,
-        
+
         /**
          * An available update is being downloaded from the CodePush server.
          */
         DOWNLOADING_PACKAGE,
-        
+
         /**
          * An available update was downloaded and is about to be installed.
          */
         INSTALLING_UPDATE,
-        
-        /** 
+
+        /**
          * The app is up-to-date with the CodePush server.
          */
         UP_TO_DATE,
-        
+
         /**
          * The app had an optional update which the end user chose to ignore.
          * (This is only applicable when the updateDialog is used)
          */
         UPDATE_IGNORED,
-        
+
         /**
          * An available update has been installed and will be run either immediately after the
          * syncStatusChangedCallback function returns or the next time the app resumes/restarts,
          * depending on the InstallMode specified in SyncOptions
          */
         UPDATE_INSTALLED,
-        
+
         /**
          * There is an ongoing sync operation running which prevents the current call from being executed.
          */
         SYNC_IN_PROGRESS,
-        
+
         /**
          * The sync operation encountered an unknown error.
          */
         UNKNOWN_ERROR
     }
-    
+
     /**
      * Indicates the state that an update is currently in.
      */
     enum UpdateState {
         /**
          * Indicates that an update represents the
-         * version of the app that is currently running. 
+         * version of the app that is currently running.
          */
         RUNNING,
-        
+
         /**
          * Indicates than an update has been installed, but the
          * app hasn't been restarted yet in order to apply it.
          */
         PENDING,
-        
+
         /**
          * Indicates than an update represents the latest available
          * release, and can be either currently running or pending.
          */
         LATEST
+    }
+
+    /**
+     * Indicates the status of a deployment (after installing and restarting).
+     */
+    enum DeploymentStatus {
+        /**
+         * The deployment failed.
+         */
+        FAILED,
+
+        /**
+         * The deployment succeeded.
+         */
+        SUCCEEDED
     }
 }
 

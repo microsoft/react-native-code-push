@@ -429,6 +429,10 @@ if (NativeCodePush) {
       PENDING: NativeCodePush.codePushUpdateStatePending,
       LATEST: NativeCodePush.codePushUpdateStateLatest
     },
+    DeploymentStatus: {
+      FAILED: "DeploymentFailed",
+      SUCCEEDED: "DeploymentSucceeded",
+    },
     DEFAULT_UPDATE_DIALOG: {
       appendReleaseDescription: false,
       descriptionPrefix: " Description: ",
