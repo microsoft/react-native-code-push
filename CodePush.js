@@ -106,8 +106,9 @@ async function getCurrentPackage() {
 }
 
 async function getUpdateMetadata(updateState) {
-  const updateMetadata = await NativeCodePush.getUpdateMetadata(updateState || CodePush.UpdateState.RUNNING);
+  let updateMetadata = await NativeCodePush.getUpdateMetadata(updateState || CodePush.UpdateState.RUNNING);
   if (updateMetadata) {
+    updateMetadata = {...PackageMixins.local, ...updateMetadata};
     updateMetadata.failedInstall = await NativeCodePush.isFailedUpdate(updateMetadata.packageHash);
     updateMetadata.isFirstRun = await NativeCodePush.isFirstRun(updateMetadata.packageHash);
   }
