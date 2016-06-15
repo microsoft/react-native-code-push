@@ -75,7 +75,7 @@ public class CodePush implements ReactPackage {
     private String appVersion;
     private int buildVersion;
     private String deploymentKey;
-    private final String serverUrl = "https://codepush.azurewebsites.net/";
+    private String serverUrl = "https://codepush.azurewebsites.net/";
 
     private Activity mainActivity;
     private Context applicationContext;
@@ -108,6 +108,12 @@ public class CodePush implements ReactPackage {
 
         clearDebugCacheIfNeeded();
         initializeUpdateAfterRestart();
+    }
+
+    // USED FOR TESTING SO THAT IT CAN CONNECT TO DEBUG SERVER
+    public CodePush(String deploymentKey, Activity mainActivity, boolean isDebugMode, String serverUrl) {
+        this(deploymentKey, mainActivity, isDebugMode);
+        this.serverUrl = serverUrl;
     }
 
     private void clearDebugCacheIfNeeded() {
@@ -503,6 +509,10 @@ public class CodePush implements ReactPackage {
                         e.printStackTrace();
                         promise.reject(e);
                     } catch (CodePushInvalidUpdateException e) {
+                        e.printStackTrace();
+                        saveFailedUpdate(updatePackage);
+                        promise.reject(e);
+                    } catch (CodePushMalformedDataException e) {
                         e.printStackTrace();
                         saveFailedUpdate(updatePackage);
                         promise.reject(e);

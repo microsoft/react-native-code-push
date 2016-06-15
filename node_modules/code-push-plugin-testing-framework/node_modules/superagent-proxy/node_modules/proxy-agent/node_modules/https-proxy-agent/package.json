@@ -1,0 +1,62 @@
+{
+  "name": "https-proxy-agent",
+  "version": "1.0.0",
+  "description": "An HTTP(s) proxy `http.Agent` implementation for HTTPS",
+  "main": "https-proxy-agent.js",
+  "scripts": {
+    "test": "mocha --reporter spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/TooTallNate/node-https-proxy-agent.git"
+  },
+  "keywords": [
+    "https",
+    "proxy",
+    "endpoint",
+    "agent"
+  ],
+  "author": {
+    "name": "Nathan Rajlich",
+    "email": "nathan@tootallnate.net",
+    "url": "http://n8.io/"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/TooTallNate/node-https-proxy-agent/issues"
+  },
+  "dependencies": {
+    "agent-base": "2",
+    "debug": "2",
+    "extend": "3"
+  },
+  "devDependencies": {
+    "mocha": "2",
+    "proxy": "~0.2.3",
+    "semver": "~2.2.1"
+  },
+  "gitHead": "cb7577b6aa9a2466ca7612b1ebd6fc281407187f",
+  "homepage": "https://github.com/TooTallNate/node-https-proxy-agent#readme",
+  "_id": "https-proxy-agent@1.0.0",
+  "_shasum": "35f7da6c48ce4ddbfa264891ac593ee5ff8671e6",
+  "_from": "https-proxy-agent@>=1.0.0 <2.0.0",
+  "_npmVersion": "2.11.2",
+  "_nodeVersion": "0.12.6",
+  "_npmUser": {
+    "name": "tootallnate",
+    "email": "nathan@tootallnate.net"
+  },
+  "maintainers": [
+    {
+      "name": "tootallnate",
+      "email": "nathan@tootallnate.net"
+    }
+  ],
+  "dist": {
+    "shasum": "35f7da6c48ce4ddbfa264891ac593ee5ff8671e6",
+    "tarball": "https://registry.npmjs.org/https-proxy-agent/-/https-proxy-agent-1.0.0.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/https-proxy-agent/-/https-proxy-agent-1.0.0.tgz",
+  "readme": "ERROR: No README data found!"
+}

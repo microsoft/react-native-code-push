@@ -1,0 +1,66 @@
+diff --git a/replace.js b/replace.js
+index 6e45164..a6884de 100644
+--- a/replace.js
++++ b/replace.js
+@@ -2,6 +2,7 @@ var fs = require("fs"),
+     path = require("path"),
+     colors = require("colors");
+ 
++
+ var excludes = [],
+     includes,
+     regex,
+@@ -35,7 +36,7 @@ module.exports = function(opts) {
+             return line && line.indexOf("#");
+         })
+         .map(patternToRegex);
+-    
++
+     if (!options.silent) {
+         var verb = canReplace ? "Replaced" : "Found";
+         console.log(verb + " occurences in these files:");
+@@ -64,7 +65,7 @@ function includeFile(file) {
+             if (file.match(includes[i]))
+                 return true;
+         }
+-        return false;      
++        return false;
+     }
+     else {
+         for (var i = 0; i < excludes.length; i++) {
+@@ -86,7 +87,7 @@ function replacizeFile(file) {
+       if (stats.isFile()) {
+           if (!includeFile(file)) {
+               return;
+-          }     
++          }
+           fs.readFile(file, "utf-8", function(err, text) {
+               if (err) {
+                   if (err.code == 'EMFILE') {
+@@ -96,7 +97,7 @@ function replacizeFile(file) {
+                   throw err;
+               }
+ 
+-              text = replacizeText(text, file);             
++              text = replacizeText(text, file);
+               if(canReplace) {
+                   fs.writeFile(file, text, function(err) {
+                       if (err) throw err;
+@@ -124,7 +125,7 @@ function replacizeFileSync(file) {
+   if (stats.isFile()) {
+       if (!includeFile(file)) {
+           return;
+-      }   
++      }
+       var text = fs.readFileSync(file, "utf-8");
+ 
+       text = replacizeText(text, file);
+@@ -135,7 +136,7 @@ function replacizeFileSync(file) {
+   else if (stats.isDirectory() && options.recursive) {
+       var files = fs.readdirSync(file);
+       for (var i = 0; i < files.length; i++) {
+-          replacizeFileSync(path.join(file, files[i]));                      
++          replacizeFileSync(path.join(file, files[i]));
+       }
+   }
+ }

@@ -1,0 +1,13 @@
+language: node_js
+node_js:
+- '0.12'
+- '0.10'
+deploy:
+  provider: npm
+  email: michael.lee.allen@gmail.com
+  api_key:
+    secure: YWl4mwTdJp7KI+SsFKR1JD2mBfwzVyCixuB3yOMgc8ELKF9yY766kFU5RaQzQlC4tETuLraNSNRhLMWBfAVERklA5taUgF7swioISO9YjdNumfAlwtbeKKMljV+vWPJ94r5We15Y6WysBaE0YuqG08Hy4KZ58FS+40eKsAaCnQw=
+  on:
+    branch: master
+    tags: true
+    repo: michaelleeallen/mocha-junit-reporter

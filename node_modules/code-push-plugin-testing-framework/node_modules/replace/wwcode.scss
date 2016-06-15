@@ -1,0 +1,103 @@
+$pink: #f06;
+
+body {
+  font-family: Georgia;
+}
+
+#title {
+  text-align: center;
+  margin-top: 20px;
+  padding-bottom: 40px;
+  color: $pink;
+  font-size: 4em;
+  font-size: 36px;
+}
+
+#title-image {
+  display: block; /* At the end */
+  margin: auto;
+}
+
+#content {
+  width: 800px;
+  margin: auto;
+  overflow: auto;
+}
+
+#events {
+  width: 400px;
+  float: left;
+}
+
+#tweets {
+  width: 360px;
+  float: right;
+}
+
+.upcoming, .upcoming:visited {
+  color: hsl(0, 0%, 0%);
+}
+
+.past, .past:visited {
+  color: hsl(0, 0%, 30%);
+}
+
+.event {
+  display: block;
+  margin-top: 0.4em;
+  width: 100%;
+  overflow: auto;
+  text-decoration: none;
+}
+
+.event:hover {
+  text-decoration: underline;
+}
+
+.event-date {
+  float: left;
+  width: 20%;
+}
+
+.event-name {
+  float: right;
+  width: 80%;
+}
+
+.tweet {
+  margin-bottom: 0.8em;
+  font-size: 14px;
+}
+
+.tweet-title {
+  font-family: Arial;
+}
+
+.tweet-link {
+  color: hsl(300, 90%, 40%);
+  text-decoration: none;
+}
+
+.tweet-username {
+  font-size: 0.84em;
+}
+
+.tweet-body {
+  font-size: 0.9em;
+  padding-bottom: 10px;
+}
+
+.tweet-time {
+  color: hsl(0, 0%, 40%);
+  font-size: 0.8em;
+  float: right;
+}
+
+.tweet-image {
+  float: left;
+  padding-right: 10px;
+}
+
+.tweet-info {
+  padding-left: 10px;
+}

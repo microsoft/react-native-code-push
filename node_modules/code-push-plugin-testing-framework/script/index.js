@@ -1,0 +1,17 @@
+"use strict";
+var Platform = require("./platform");
+exports.Platform = Platform;
+var PluginTestingFramework = require("./test");
+exports.PluginTestingFramework = PluginTestingFramework;
+var projectManager_1 = require("./projectManager");
+exports.ProjectManager = projectManager_1.ProjectManager;
+exports.setupTestRunScenario = projectManager_1.setupTestRunScenario;
+exports.setupUpdateScenario = projectManager_1.setupUpdateScenario;
+var ServerUtil = require("./serverUtil");
+exports.ServerUtil = ServerUtil;
+var testBuilder_1 = require("./testBuilder");
+exports.TestBuilder = testBuilder_1.TestBuilder;
+var TestConfig = require("./testConfig");
+exports.TestConfig = TestConfig;
+var testUtil_1 = require("./testUtil");
+exports.TestUtil = testUtil_1.TestUtil;
