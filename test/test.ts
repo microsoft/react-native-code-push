@@ -1,10 +1,9 @@
-/// <reference path="../typings/assert.d.ts" />
-/// <reference path="../typings/codePush.d.ts" />
+/// <reference path="./typings/assert.d.ts" />
 /// <reference path="../node_modules/code-push-plugin-testing-framework/typings/code-push-plugin-testing-framework.d.ts" />
-/// <reference path="../typings/mocha.d.ts" />
-/// <reference path="../typings/mkdirp.d.ts" />
-/// <reference path="../typings/node.d.ts" />
-/// <reference path="../typings/q.d.ts" />
+/// <reference path="./typings/mocha.d.ts" />
+/// <reference path="./typings/mkdirp.d.ts" />
+/// <reference path="./typings/node.d.ts" />
+/// <reference path="./typings/q.d.ts" />
 
 "use strict";
 
@@ -571,7 +570,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                             try {
                                 assert.equal(requestBody.message, ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE);
                                 assert.notEqual(requestBody.args[0], null);
-                                var remotePackage: IRemotePackage = requestBody.args[0];
+                                var remotePackage: any = requestBody.args[0];
                                 assert.equal(remotePackage.downloadUrl, updateResponse.downloadURL);
                                 assert.equal(remotePackage.isMandatory, updateResponse.isMandatory);
                                 assert.equal(remotePackage.label, updateResponse.label);

@@ -111,7 +111,7 @@ gulp.task("compile-test", function () {
     var ts = require("gulp-typescript");
     var insert = require("gulp-insert");
 
-    return gulp.src([testPath + tsFiles])
+    return gulp.src([testPath + "/test.ts"])
         .pipe(ts(tsCompileOptions))
         .pipe(insert.prepend(compiledSourceWarningMessage))
         .pipe(gulp.dest(path.join(binPath, testPath)));
@@ -158,7 +158,7 @@ gulp.task("tslint", function () {
         }
     }
 
-    return gulp.src([testPath + tsFiles])
+    return gulp.src([testPath + tsFiles, "!" + testPath + "/typings/*"])
         .pipe(tslint({ configuration: config }))
         .pipe(tslint.report("verbose"));
 });
