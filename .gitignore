@@ -151,6 +151,6 @@ captures/
 
 # DELETE THIS AFTER PLUGIN TESTING FRAMEWORK IS ON NPM
 # ALSO SEE THE node_modules/* above
+node_modules/code-push-plugin-testing-framework/node_modules/
 !node_modules/
-!node_modules/code-push-plugin-testing-framework/
 !node_modules/code-push-plugin-testing-framework/*
