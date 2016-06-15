@@ -111,7 +111,7 @@ gulp.task("compile-test", function () {
     var ts = require("gulp-typescript");
     var insert = require("gulp-insert");
 
-    return gulp.src([testPath + "/test.ts"])
+    return gulp.src([testPath + tsFiles])
         .pipe(ts(tsCompileOptions))
         .pipe(insert.prepend(compiledSourceWarningMessage))
         .pipe(gulp.dest(path.join(binPath, testPath)));
