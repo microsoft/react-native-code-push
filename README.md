@@ -441,7 +441,6 @@ For more details about how the `release-react` command works, as well as the var
 
 If you run into any issues, or have any questions/comments/feedback, you can ping us within the [#code-push](https://discord.gg/0ZcbPKXt5bWxFdFu) channel on Reactiflux, [e-mail us](mailto:codepushfeed@microsoft.com) and/or check out the [troubleshooting](#debugging--troubleshooting) details below.
 
-
 ## Multi-Deployment Testing
 
 In our [getting started](#getting-started) docs, we illustrated how to configure the CodePush plugin using a specific deployment key. However, in order to effectively test your releases, it is critical that you leverage the `Staging` and `Production` deployments that are auto-generated when you first created your CodePush app (or any custom deployments you may have created). This way, you never release an update to your end users that you haven't been able to validate yourself.
@@ -460,7 +459,7 @@ Taking advantage of the `Staging` and `Production` deployments allows you to ach
 
 *NOTE: If you want to get really fancy, you can even choose to perform a "staged rollout" as part of #3, which allows you to mitigate additional potential risk with the update (e.g. did your testing in #2 touch all possible devices/conditions?) by only making the production update available to a percentage of your users (e.g. `code-push promote <APP_NAME> Staging Production -r 20%`). Then, after waiting for a reasonable amount of time to see if any crash reports or customer feedback comes in, you can expand it to your entire audience by running `code-push patch <APP_NAME> Production -r 100%`.*
 
-You'll notice that the above steps refer to a "staging build" and "production build" of your app. If your build process already generates distinct binaries per "environment", then you don't need to read any further, since swapping out CodePush deployment keys is just like handling environment-specific config for any other service your app uses (e.g. Facebook). However, if you're looking for  examples on how to setup your build process to accomodate this, then refer to the following sections, depending on the platform(s) your app is targeting.
+You'll notice that the above steps refer to a "staging build" and "production build" of your app. If your build process already generates distinct binaries per "environment", then you don't need to read any further, since swapping out CodePush deployment keys is just like handling environment-specific config for any other service your app uses (e.g. Facebook). However, if you're looking for examples on how to setup your build process to accomodate this, then refer to the following sections, depending on the platform(s) your app is targeting.
 
 ### Android
 
@@ -530,29 +529,39 @@ And that's it! View [here](http://tools.android.com/tech-docs/new-build-system/r
 
 ### iOS
 
-Xcode allows you to define custom build settings for each "configuration" (e.g. debug, release), which can then be referenced as the value of keys within the `Info.plist` file. This mechanism allows you to easily configure your debug builds to use your CodePush staging deployment key, and your release builds to use your CodePush production deployment key.
+Xcode allows you to define custom build settings for each "configuration" (e.g. debug, release), which can then be referenced as the value of keys within the `Info.plist` file (e.g. the `CodePushDeploymentKey` setting). This mechanism allows you to easily configure your builds to produce binaries, which are configured to synchronize with different CodePush deployments.
 
 To set this up, perform the following steps:
 
 1. Open up your Xcode project and select your project in the `Project navigator` window
 
-2. Select the `Build Settings` tab
+2. Ensure the project node is selected, as opposed to one of your targets
 
-3. Click the `+` button on the toolbar and select `Add User-Defined Setting`
+3. Select the `Info` tab
+
+4. Click the `+` button within the `Configurations` section and select `Duplicate "Release" Configuration`
+
+   ![Configuration](https://cloud.githubusercontent.com/assets/116461/16101597/088714c0-331c-11e6-9504-5469d9a59d74.png)
+   
+5. Name the new configuration `Staging` (or whatever you prefer)
+
+6. Select the `Build Settings` tab
+
+7. Click the `+` button on the toolbar and select `Add User-Defined Setting`
 
    ![Setting](https://cloud.githubusercontent.com/assets/116461/15764165/a16dbe30-28dd-11e6-94f2-fa3b7eb0c7de.png)
 
-4. Name this new setting something like `CODEPUSH_KEY`, expand it, and specify your `Staging` deployment key for the `Debug` config and your `Production` deployment key for the `Production` config.
+8. Name this new setting something like `CODEPUSH_KEY`, expand it, and specify your `Staging` deployment key for the `Staging` config and your `Production` deployment key for the `Release` config.
 
     ![Setting Keys](https://cloud.githubusercontent.com/assets/116461/15764230/106c245c-28de-11e6-96fe-2615f9220b07.png)
     
     *NOTE: As a reminder, you can retrieve these keys by running `code-push deployment ls <APP_NAME> -k` from your terminal.*
     
-5. Open your project's `Info.plist` file and change the value of your `CodePushDeploymentKey` entry to `$(CODEPUSH_KEY)`
+9. Open your project's `Info.plist` file and change the value of your `CodePushDeploymentKey` entry to `$(CODEPUSH_KEY)`
 
     ![Infoplist](https://cloud.githubusercontent.com/assets/116461/15764252/3ac8aed2-28de-11e6-8c19-2270ae9857a7.png)
     
-And that's it! Now when you run or build your app, your debug builds will automatically be configured to sync with your `Staging` deployment, and your release builds will be configured to sync with your `Production` deployment.
+And that's it! Now when you run or build your app, your staging builds will automatically be configured to sync with your `Staging` deployment, and your release builds will be configured to sync with your `Production` deployment.
 
 Additionally, if you want to give them seperate names and/or icons, you can modify the `Product Name` and `Asset Catalog App Icon Set Name` build settings, so that the debug configuration has a unique value.
 
