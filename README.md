@@ -563,9 +563,7 @@ To set this up, perform the following steps:
     
 And that's it! Now when you run or build your app, your staging builds will automatically be configured to sync with your `Staging` deployment, and your release builds will be configured to sync with your `Production` deployment.
 
-Additionally, if you want to give them seperate names and/or icons, you can modify the `Product Name` and `Asset Catalog App Icon Set Name` build settings, so that the debug configuration has a unique value.
-
-![Product name](https://cloud.githubusercontent.com/assets/116461/15764314/b3a4cfac-28de-11e6-9e8c-b1cbd8ac7c6c.png)
+Additionally, if you want to give them seperate names and/or icons, you can modify the `Product Name` and `Asset Catalog App Icon Set Name` build settings, which will allow your staging builds to be distinguishable from release builds when installed on the same device.
 
 ## Dynamic Deployment Assignment
 
