@@ -148,5 +148,5 @@ proguard/
 # Android Studio captures folder
 captures/
 
-# REMOVE AFTER NPM
+# Remove after this framework is published on NPM
 code-push-plugin-testing-framework/node_modules
