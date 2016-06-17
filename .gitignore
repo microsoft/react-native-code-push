@@ -73,8 +73,7 @@ build/Release
 
 # Dependency directory
 # https://docs.npmjs.com/misc/faq#should-i-check-my-node-modules-folder-into-git
-node_modules/*
-#remove /* after plugin-testing-framework is checked into npm
+node_modules
 
 # Xcode
 #
@@ -149,8 +148,5 @@ proguard/
 # Android Studio captures folder
 captures/
 
-# DELETE THIS AFTER PLUGIN TESTING FRAMEWORK IS ON NPM
-# ALSO SEE THE node_modules/* above
-!node_modules/
-!node_modules/code-push-plugin-testing-framework/
-!node_modules/code-push-plugin-testing-framework/*
+# Remove after this framework is published on NPM
+code-push-plugin-testing-framework/node_modules

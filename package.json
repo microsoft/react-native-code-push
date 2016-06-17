@@ -17,9 +17,12 @@
     "url": "https://github.com/Microsoft/react-native-code-push"
   },
   "dependencies": {
+    "code-push": "1.8.0-beta"
+  },
+  "devDependencies": {
     "archiver": "latest",
     "body-parser": "latest",
-    "code-push": "1.8.0-beta",
+    "code-push-plugin-testing-framework": "file:./code-push-plugin-testing-framework",
     "del": "latest",
     "express": "latest",
     "gulp-typescript": "2.12.2",

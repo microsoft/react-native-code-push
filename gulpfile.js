@@ -158,7 +158,7 @@ gulp.task("tslint", function () {
         }
     }
 
-    return gulp.src([testPath + tsFiles])
+    return gulp.src([testPath + tsFiles, "!" + testPath + "/typings/*"])
         .pipe(tslint({ configuration: config }))
         .pipe(tslint.report("verbose"));
 });
