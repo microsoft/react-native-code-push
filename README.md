@@ -200,7 +200,7 @@ To let the CodePush runtime know which deployment it should query for updates ag
 
 ![Deployment list](https://cloud.githubusercontent.com/assets/116461/11601733/13011d5e-9a8a-11e5-9ce2-b100498ffb34.png)
     
-In order to effectively make use of the `Staging` and `Production` deployments that were created along with your CodePush app, refer to the [multi-deployment releases](#multi-deployment-releases) docs below before actually moving your app's usage of CodePush into production.
+In order to effectively make use of the `Staging` and `Production` deployments that were created along with your CodePush app, refer to the [multi-deployment testing](#multi-deployment-testing) docs below before actually moving your app's usage of CodePush into production.
 
 ## Android Setup
 
@@ -297,7 +297,7 @@ public class MainActivity extends ReactActivity {
 }
 ```
 
-In order to effectively make use of the `Staging` and `Production` deployments that were created along with your CodePush app, refer to the [multi-deployment releases](#multi-deployment-releases) docs below before actually moving your app's usage of CodePush into production.
+In order to effectively make use of the `Staging` and `Production` deployments that were created along with your CodePush app, refer to the [multi-deployment testing](#multi-deployment-testing) docs below before actually moving your app's usage of CodePush into production.
 
 ## Windows Setup
 
