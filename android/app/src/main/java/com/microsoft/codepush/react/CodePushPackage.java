@@ -253,7 +253,7 @@ public class CodePushPackage {
             String relativeBundlePath = CodePushUpdateUtils.findJSBundleInUpdateContents(newUpdateFolderPath, expectedBundleFileName);
 
             if (relativeBundlePath == null) {
-                throw new CodePushInvalidUpdateException("Update is invalid - A JS bundle file named \"" + expectedBundleFileName + "\" could not be found within the downloaded contents. Please check that you are releasing your CodePush updates using the exact same JS bundle file name that was shipped with your app's binary.");
+                throw new CodePushInvalidUpdateException("Update is invalid - A JS bundle file named \"" + expectedBundleFileName + "\" could not be found within the downloaded contents. Please ensure that your app is syncing with the correct deployment and that you are releasing your CodePush updates using the exact same JS bundle file name that was shipped with your app's binary.");
             } else {
                 if (FileUtils.fileAtPathExists(newUpdateMetadataPath)) {
                     File metadataFileFromOldUpdate = new File(newUpdateMetadataPath);
