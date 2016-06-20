@@ -465,6 +465,7 @@ const ScenarioInstall = "scenarioInstall.js";
 const ScenarioInstallOnResumeWithRevert = "scenarioInstallOnResumeWithRevert.js";
 const ScenarioInstallOnRestartWithRevert = "scenarioInstallOnRestartWithRevert.js";
 const ScenarioInstallWithRevert = "scenarioInstallWithRevert.js";
+const ScenarioInstallRestart2x = "scenarioInstallRestart2x.js";
 const ScenarioSync1x = "scenarioSync.js";
 const ScenarioSyncResume = "scenarioSyncResume.js";
 const ScenarioSyncResumeDelay = "scenarioSyncResumeDelay.js";
@@ -985,6 +986,26 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                             .done(() => { done(); }, (e) => { done(e); });
                     });
             }, ScenarioRestart);
+            
+        TestBuilder.describe("#codePush.restartApplication.2x",
+            () => {
+                TestBuilder.it("with pending update", false,
+                    (done: MochaDone) => {
+                        ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
+                        
+                        setupUpdateScenario(projectManager, targetPlatform, UpdateDeviceReady, "Update 1")
+                            .then<void>((updatePath: string) => {
+                                ServerUtil.updatePackagePath = updatePath;
+                                projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                                return ServerUtil.expectTestMessages([
+                                    ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
+                                    ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED,
+                                    ServerUtil.TestMessage.UPDATE_INSTALLED,
+                                    ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                            })
+                            .done(() => { done(); }, (e) => { done(e); });
+                    });
+            }, ScenarioInstallRestart2x);
             
         TestBuilder.describe("#window.codePush.sync",
             () => {
