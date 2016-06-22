@@ -216,7 +216,7 @@ In order to accommodate as many developer preferences as possible, the CodePush 
     
     ```gradle
     ...
-    apply from: "react.gradle"
+    apply from: "../../node_modules/react-native/react.gradle"
     apply from: "../../node_modules/react-native-code-push/android/codepush.gradle"
     ...
     ```
