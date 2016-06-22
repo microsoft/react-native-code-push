@@ -101,17 +101,7 @@ In order to accomodate as many developer preferences as possible, the CodePush p
 
     *Note: If you don't already have RNPM installed, you can do so by simply running `npm i -g rnpm` and then executing the above command.*
     
-2. Open your app's Xcode project
-
-3. Select the project node in Xcode and select the "Build Phases" tab of your project configuration.
-
-4. Click the plus sign underneath the "Link Binary With Libraries" list and select the `libz.tbd` library underneath the `iOS` node that matches your target version. 
-
-    ![Libz reference](https://cloud.githubusercontent.com/assets/116461/11605042/6f786e64-9aaa-11e5-8ca7-14b852f808b1.png)
-    
-    *Note: Alternatively, if you prefer, you can add the `-lz` flag to the `Other Linker Flags` field in the `Linking` section of the `Build Settings`.*
-
-We hope to eventually remove the need for steps #2-4, but in the meantime, RNPM doesn't support automating them.
+And that's it! Isn't RNPM awesome? :)
 
 #### Plugin Installation (iOS - CocoaPods)
 
