@@ -79,7 +79,7 @@ npm install --save react-native-code-push@latest
 
 As with all other React Native plugins, the integration experience is different for iOS and Android, so perform the following setup steps depending on which platform(s) you are targetting.
 
-If you want to see how other projects have integrated with CodePush, you can check out the excellent [example apps](#example-apps) provided by the community. Additionally, if you'd like to quickly familiarize yourself with CodePush + React Native, you can check out the awesome [getting started video](https://www.youtube.com/watch?v=uN0FRWk-YW8&feature=youtu.be) shot by [Bilal Budhani](https://twitter.com/BilalBudhani).
+If you want to see how other projects have integrated with CodePush, you can check out the excellent [example apps](example-apps--starters) provided by the community. Additionally, if you'd like to quickly familiarize yourself with CodePush + React Native, you can check out the awesome [getting started video](https://www.youtube.com/watch?v=uN0FRWk-YW8&feature=youtu.be) shot by [Bilal Budhani](https://twitter.com/BilalBudhani).
 
 ## iOS Setup
 
