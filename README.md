@@ -87,7 +87,7 @@ Once you've acquired the CodePush plugin, you need to integrate it into the Xcod
 
 ### Plugin Installation (iOS)
 
-In order to accomodate as many developer preferences as possible, the CodePush plugin supports iOS installation via three mechanisms:
+In order to accommodate as many developer preferences as possible, the CodePush plugin supports iOS installation via three mechanisms:
 
 1. [**RNPM**](#plugin-installation-ios---rnpm) - [React Native Package Manager (RNPM)](https://github.com/rnpm/rnpm) is an awesome tool that provides the simplest installation experience possible for React Native plugins. If you're already using it, or you want to use it, then we recommend this approach. 
 
@@ -199,7 +199,7 @@ In order to integrate CodePush into your Android project, perform the following 
 
 ### Plugin Installation (Android)
 
-In order to accomodate as many developer preferences as possible, the CodePush plugin supports Android installation via two mechanisms:
+In order to accommodate as many developer preferences as possible, the CodePush plugin supports Android installation via two mechanisms:
 
 1. [**RNPM**](#plugin-installation-android---rnpm) - [React Native Package Manager (RNPM)](https://github.com/rnpm/rnpm) is an awesome tool that provides the simplest installation experience possible for React Native plugins. If you're already using it, or you want to use it, then we recommend this approach. 
 
@@ -450,7 +450,7 @@ Taking advantage of the `Staging` and `Production` deployments allows you to ach
 
 *NOTE: If you want to get really fancy, you can even choose to perform a "staged rollout" as part of #3, which allows you to mitigate additional potential risk with the update (e.g. did your testing in #2 touch all possible devices/conditions?) by only making the production update available to a percentage of your users (e.g. `code-push promote <APP_NAME> Staging Production -r 20%`). Then, after waiting for a reasonable amount of time to see if any crash reports or customer feedback comes in, you can expand it to your entire audience by running `code-push patch <APP_NAME> Production -r 100%`.*
 
-You'll notice that the above steps refer to a "staging build" and "production build" of your app. If your build process already generates distinct binaries per "environment", then you don't need to read any further, since swapping out CodePush deployment keys is just like handling environment-specific config for any other service your app uses (e.g. Facebook). However, if you're looking for examples on how to setup your build process to accomodate this, then refer to the following sections, depending on the platform(s) your app is targeting.
+You'll notice that the above steps refer to a "staging build" and "production build" of your app. If your build process already generates distinct binaries per "environment", then you don't need to read any further, since swapping out CodePush deployment keys is just like handling environment-specific config for any other service your app uses (e.g. Facebook). However, if you're looking for examples on how to setup your build process to accommodate this, then refer to the following sections, depending on the platform(s) your app is targeting.
 
 ### Android
 
@@ -1045,7 +1045,7 @@ The Objective-C API is made available by importing the `CodePush.h` header into 
 
 Contains static methods for retreiving the `NSURL` that represents the most recent JavaScript bundle file, and can be passed to the `RCTRootView`'s `initWithBundleURL` method when bootstrapping your app in the `AppDelegate.m` file. 
 
-The `CodePush` class' methods can be thought of as composite resolvers which always load the appropriate bundle, in order to accomodate the following scenarios:
+The `CodePush` class' methods can be thought of as composite resolvers which always load the appropriate bundle, in order to accommodate the following scenarios:
 
 1. When an end-user installs your app from the store (e.g. `1.0.0`), they will get the JS bundle that is contained within the binary. This is the behavior you would get without using CodePush, but we make sure it doesn't break :)
 
