@@ -70,7 +70,6 @@ As new core components are released, which support referencing assets, we'll upd
 
 ## Getting Started
 
-
 Once you've followed the general-purpose ["getting started"](http://codepush.tools/docs/getting-started.html) instructions for setting up your CodePush account, you can start CodePush-ifying your React Native app by running the following command from within your app's root directory:
 
 ```shell
@@ -99,7 +98,7 @@ In order to accommodate as many developer preferences as possible, the CodePush 
 
 1. Run `rnpm link react-native-code-push`
 
-    *Note: If you don't already have RNPM installed, you can do so by simply running `npm i -g rnpm` and then executing the above command.*
+    *Note: If you don't already have RNPM installed, you can do so by simply running `npm i -g rnpm` and then executing the above command. Alternatively, if you're using React Native 0.28+, you can run `react-native link` instead, since RNPM was merged into React Native starting in that version.*
     
 And that's it! Isn't RNPM awesome? :)
 
@@ -209,7 +208,7 @@ In order to accommodate as many developer preferences as possible, the CodePush 
 
 1. Run `rnpm link react-native-code-push`
 
-    *Note: If you don't already have RNPM installed, you can do so by simply running `npm i -g rnpm` and then executing the above command.*
+    *Note: If you don't already have RNPM installed, you can do so by simply running `npm i -g rnpm` and then executing the above command. Alternatively, if you're using React Native 0.28+, you can run `react-native link` instead, since RNPM was merged into React Native starting in that version.*
     
 2. If you're using RNPM >=1.6.0, you will be prompted for the deployment key you'd like to use. If you don't already have it, you can retreive this value by running `code-push deployment ls <appName> -k`, or you can choose to ignore it (by simply hitting `<ENTER>`) and add it in later. To get started, we would recommend just using your `Staging` deployment key, so that you can test out the CodePush end-to-end.
 
