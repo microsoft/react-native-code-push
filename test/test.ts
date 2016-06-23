@@ -472,6 +472,7 @@ const ScenarioSyncResumeDelay = "scenarioSyncResumeDelay.js";
 const ScenarioSyncRestartDelay = "scenarioSyncResumeDelay.js";
 const ScenarioSync2x = "scenarioSync2x.js";
 const ScenarioRestart = "scenarioRestart.js";
+const ScenarioRestart2x = "scenarioRestart2x.js";
 const ScenarioSyncMandatoryDefault = "scenarioSyncMandatoryDefault.js";
 const ScenarioSyncMandatoryResume = "scenarioSyncMandatoryResume.js";
 const ScenarioSyncMandatoryRestart = "scenarioSyncMandatoryRestart.js";
@@ -989,11 +990,28 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
             
         TestBuilder.describe("#codePush.restartApplication.2x",
             () => {
-                TestBuilder.it("with pending update", false,
+                // TestBuilder.it("blocks when a restart is in progress and doesn't crash if there is a pending package", false,
+                //     (done: MochaDone) => {
+                //         ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
+                //         setupTestRunScenario(projectManager, targetPlatform, ScenarioInstallRestart2x)
+                //             .then(setupUpdateScenario.bind(this, projectManager, targetPlatform, UpdateDeviceReady, "Good Update"))
+                //             .then<void>((updatePath: string) => {
+                //                 ServerUtil.updatePackagePath = updatePath;
+                //                 projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
+                //                 return ServerUtil.expectTestMessages([
+                //                     ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE,
+                //                     ServerUtil.TestMessage.DOWNLOAD_SUCCEEDED,
+                //                     ServerUtil.TestMessage.UPDATE_INSTALLED,
+                //                     ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
+                //             })
+                //             .done(() => { done(); }, (e) => { done(e); });
+                //     });
+                    
+                TestBuilder.it("doesn't block when the restart is ignored", false,
                     (done: MochaDone) => {
                         ServerUtil.updateResponse = { updateInfo: ServerUtil.createUpdateResponse(false, targetPlatform) };
-                        
-                        setupUpdateScenario(projectManager, targetPlatform, UpdateDeviceReady, "Update 1")
+                        setupTestRunScenario(projectManager, targetPlatform, ScenarioRestart2x)
+                            .then(setupUpdateScenario.bind(this, projectManager, targetPlatform, UpdateDeviceReady, "Good Update"))
                             .then<void>((updatePath: string) => {
                                 ServerUtil.updatePackagePath = updatePath;
                                 projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
@@ -1005,7 +1023,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                             })
                             .done(() => { done(); }, (e) => { done(e); });
                     });
-            }, ScenarioInstallRestart2x);
+            });
             
         TestBuilder.describe("#window.codePush.sync",
             () => {
