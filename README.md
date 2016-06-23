@@ -467,13 +467,13 @@ To set this up, perform the following steps:
         buildTypes {
             debug {
                 ...
-                buildConfigField 'String', 'CODEPUSH_KEY', '"<INSERT_STAGING_KEY>"'
+                buildConfigField "String", "CODEPUSH_KEY", '"<INSERT_STAGING_KEY>"'
                 ...
             }
             
             release {
                 ...
-                buildConfigField 'String', 'CODEPUSH_KEY', '"<INSERT_PRODUCTION_KEY>"'
+                buildConfigField "String", "CODEPUSH_KEY", '"<INSERT_PRODUCTION_KEY>"'
                 ...
             }
         }
@@ -502,7 +502,7 @@ If you want to be able to install both debug and release builds simultaneously o
 ```groovy
 buildTypes {
     debug {
-        applicationIdSuffix '.debug'
+        applicationIdSuffix ".debug"
     }
 }
 ```
