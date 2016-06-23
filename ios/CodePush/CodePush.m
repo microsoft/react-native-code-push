@@ -740,13 +740,17 @@ RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
 /*
  * This method is the native side of the CodePush.restartApp() method.
  */
-RCT_EXPORT_METHOD(restartApp:(BOOL)onlyIfUpdateIsPending)
+RCT_EXPORT_METHOD(restartApp:(BOOL)onlyIfUpdateIsPending
+                     resolve:(RCTPromiseResolveBlock)resolve
+                    rejecter:(RCTPromiseRejectBlock)reject)
 {
     // If this is an unconditional restart request, or there
     // is current pending update, then reload the app.
     if (!onlyIfUpdateIsPending || [self isPendingUpdate:nil]) {
         [self loadBundle];
+        resolve(@(YES));
     }
+    resolve(@(NO));
 }
 
 #pragma mark - JavaScript-exported module methods (Private)

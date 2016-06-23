@@ -48,7 +48,7 @@ var TestUtil = (function () {
         if (options.maxBuffer === undefined)
             options.maxBuffer = 1024 * 500;
         if (options.timeout === undefined)
-            options.timeout = 10 * 60 * 1000;
+            options.timeout = 20 * 60 * 1000;
         if (!options.noLogCommand)
             console.log("Running command: " + command);
         var execProcess = child_process.exec(command, options, function (error, stdout, stderr) {

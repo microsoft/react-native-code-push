@@ -3,9 +3,12 @@ const NativeCodePush = require("react-native").NativeModules.CodePush;
 const CodePush = require("./CodePush");
 
 const RestartManager = (() => {
-    let _inProgress = false;
+    let _inProgressPromise = null;
+    let _inProgressOnUpdateOnly = false;
+    
     let _allowed = true;
     let _restartPending = false;
+    let _restartPendingOnUpdateOnly = false;
 
     function allow() {
         log("Re-allowing restarts");
@@ -13,7 +16,7 @@ const RestartManager = (() => {
         
         if (_restartPending) {
             log("Executing pending restart");
-            restartApp(true);
+            restartApp(_restartPendingOnUpdateOnly);
         }
     }
     
@@ -27,18 +30,42 @@ const RestartManager = (() => {
     }
 
     function restartApp(onlyIfUpdateIsPending = false) {
-        if (_allowed) {
-            if (_inProgress) {
-                log("A restart request is already in progress or queued");
+        (async function(onlyIfUpdateIsPending) {
+            var didRestartSucceed = false;
+            
+            if (_restartPending) {
+                _restartPendingOnUpdateOnly = _restartPendingOnUpdateOnly && onlyIfUpdateIsPending;
+                log("Restart request queued until restarts are re-allowed");
                 return;
             }
-            // The restart won't execute if `onlyIfUpdateIsPending === true` and there is no pending update.
-            _inProgress = !onlyIfUpdateIsPending || !!(NativeCodePush.getUpdateMetadata(CodePush.UpdateState.PENDING));
-            NativeCodePush.restartApp(onlyIfUpdateIsPending);
+            
+            if (!!_inProgressPromise) {
+                didRestartSucceed = await _inProgressPromise;
+                if (didRestartSucceed) {
+                    log("A restart is already in progress.");
+                    return;
+                }
+            }
+            
+            _inProgressPromise = new Promise(async function(resolve, reject) {
+                resolve(await restartAppInternal(onlyIfUpdateIsPending));
+            });
+            _inProgressOnUpdateOnly = onlyIfUpdateIsPending;
+            
+            didRestartSucceed = await _inProgressPromise;
+            if (!didRestartSucceed) _inProgressPromise = null;
+        })(onlyIfUpdateIsPending);
+    };
+    
+    async function restartAppInternal(onlyIfUpdateIsPending = false) {
+        if (_allowed) {
+            var didRestartSucceed = await NativeCodePush.restartApp(onlyIfUpdateIsPending);
             log("Restarting app");
+            return didRestartSucceed;
         } else {
             log("Restart request queued until restarts are re-allowed");
             _restartPending = true;
+            _restartPendingOnUpdateOnly = onlyIfUpdateIsPending;
             return true;
         }
     }
