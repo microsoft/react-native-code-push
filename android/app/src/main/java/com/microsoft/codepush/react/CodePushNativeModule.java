@@ -1,0 +1,477 @@
+package com.microsoft.codepush.react;
+
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.os.AsyncTask;
+import android.provider.Settings;
+import android.view.Choreographer;
+
+import com.facebook.react.ReactActivity;
+import com.facebook.react.ReactInstanceManager;
+import com.facebook.react.bridge.LifecycleEventListener;
+import com.facebook.react.bridge.Promise;
+import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReactContextBaseJavaModule;
+import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.WritableNativeMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.facebook.react.uimanager.ReactChoreographer;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+public class CodePushNativeModule extends ReactContextBaseJavaModule {
+    private LifecycleEventListener lifecycleEventListener = null;
+    private int minimumBackgroundDuration = 0;
+    private CodePush codePush;
+    private CodePushPackage codePushPackage;
+    private CodePushTelemetryManager codePushTelemetryManager;
+    private SettingsManager settingsManager;
+
+    private static final String REACT_APPLICATION_CLASS_NAME = "com.facebook.react.ReactApplication";
+    private static final String REACT_NATIVE_HOST_CLASS_NAME = "com.facebook.react.ReactNativeHost";
+
+    public CodePushNativeModule(ReactApplicationContext reactContext, CodePush codePush, CodePushPackage codePushPackage, CodePushTelemetryManager codePushTelemetryManager, SettingsManager settingsManager) {
+        super(reactContext);
+        this.codePush = codePush;
+        this.codePushPackage = codePushPackage;
+        this.codePushTelemetryManager = codePushTelemetryManager;
+        this.settingsManager = settingsManager;
+    }
+
+    @Override
+    public Map<String, Object> getConstants() {
+        final Map<String, Object> constants = new HashMap<>();
+
+        constants.put("codePushInstallModeImmediate", CodePushInstallMode.IMMEDIATE.getValue());
+        constants.put("codePushInstallModeOnNextRestart", CodePushInstallMode.ON_NEXT_RESTART.getValue());
+        constants.put("codePushInstallModeOnNextResume", CodePushInstallMode.ON_NEXT_RESUME.getValue());
+
+        constants.put("codePushUpdateStateRunning", CodePushUpdateState.RUNNING.getValue());
+        constants.put("codePushUpdateStatePending", CodePushUpdateState.PENDING.getValue());
+        constants.put("codePushUpdateStateLatest", CodePushUpdateState.LATEST.getValue());
+
+        return constants;
+    }
+
+    @Override
+    public String getName() {
+        return "CodePush";
+    }
+
+    private Class tryGetClass(String className) {
+        try {
+            return Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            return null;
+        }
+    }
+
+    private boolean isReactApplication(Context context) {
+        Class reactApplicationClass = tryGetClass(REACT_APPLICATION_CLASS_NAME);
+        if (reactApplicationClass != null && reactApplicationClass.isInstance(context)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private void loadBundleLegacy() {
+        Activity currentActivity = getCurrentActivity();
+        Intent intent = currentActivity.getIntent();
+        currentActivity.finish();
+        currentActivity.startActivity(intent);
+
+        codePush.invalidateCurrentInstance();
+    }
+
+    private void loadBundle() {
+        codePush.clearDebugCacheIfNeeded();
+
+
+        if (isReactApplication(codePush.getContext()) || ReactActivity.class.isInstance(codePush.getContext())) {
+            try {
+                Activity currentActivity = getCurrentActivity();
+
+                // #1) Get the ReactInstanceManager instance, which is what includes the
+                //     logic to reload the current React context, and the current Activity
+                //     instance, which is needed to run the reload operation on its UI thread.
+                final ReactInstanceManager instanceManager;
+                if (isReactApplication(codePush.getContext())) {
+                    Class reactApplicationClass = tryGetClass(REACT_APPLICATION_CLASS_NAME);
+                    Method getReactNativeHostMethod = reactApplicationClass.getMethod("getReactNativeHost");
+                    Object reactNativeHost = getReactNativeHostMethod.invoke(codePush.getContext());
+                    Class reactNativeHostClass = tryGetClass(REACT_NATIVE_HOST_CLASS_NAME);
+                    Method getReactInstanceManagerMethod = reactNativeHostClass.getMethod("getReactInstanceManager");
+                    instanceManager = (ReactInstanceManager)getReactInstanceManagerMethod.invoke(reactNativeHost);
+                } else {
+                    ReactActivity reactActivity = (ReactActivity)codePush.getContext();
+                    Field instanceManagerField = ReactActivity.class.getDeclaredField("mReactInstanceManager");
+                    instanceManagerField.setAccessible(true);
+                    instanceManager = (ReactInstanceManager)instanceManagerField.get(reactActivity);
+                }
+
+                String latestJSBundleFile = codePush.getBundleUrlInternal(codePush.getAssetsBundleFileName());
+
+                // #2) Update the locally stored JS bundle file path
+                Field jsBundleField = instanceManager.getClass().getDeclaredField("mJSBundleFile");
+                jsBundleField.setAccessible(true);
+                jsBundleField.set(instanceManager, latestJSBundleFile);
+
+                // #3) Get the context creation method and fire it on the UI thread (which RN enforces)
+                final Method recreateMethod = instanceManager.getClass().getMethod("recreateReactContextInBackground");
+
+                currentActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            recreateMethod.invoke(instanceManager);
+                            codePush.initializeUpdateAfterRestart();
+                        }
+                        catch (Exception e) {
+                            // The recreation method threw an unknown exception
+                            // so just simply fallback to restarting the Activity
+                            loadBundleLegacy();
+                        }
+                    }
+                });
+            } catch (Exception e) {
+                // Our reflection logic failed somewhere
+                // so fall back to restarting the Activity
+                loadBundleLegacy();
+            }
+        } else {
+            // Our preferred reload logic relies on the user's Activity inheriting from the
+            // core ReactActivity or ReactApplication class, so if it doesn't, we fallback
+            // early to our legacy behavior.
+            loadBundleLegacy();
+        }
+    }
+
+    @ReactMethod
+    public void downloadUpdate(final ReadableMap updatePackage, final boolean notifyProgress, final Promise promise) {
+        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    WritableMap mutableUpdatePackage = CodePushUtils.convertReadableMapToWritableMap(updatePackage);
+                    mutableUpdatePackage.putString(CodePushConstants.BINARY_MODIFIED_TIME_KEY, "" + codePush.getBinaryResourcesModifiedTime());
+                    codePushPackage.downloadPackage(mutableUpdatePackage, codePush.getAssetsBundleFileName(), new DownloadProgressCallback() {
+                        private boolean hasScheduledNextFrame = false;
+                        private DownloadProgress latestDownloadProgress = null;
+
+                        @Override
+                        public void call(DownloadProgress downloadProgress) {
+                            if (!notifyProgress) {
+                                return;
+                            }
+
+                            latestDownloadProgress = downloadProgress;
+                            // If the download is completed, synchronously send the last event.
+                            if (latestDownloadProgress.isCompleted()) {
+                                dispatchDownloadProgressEvent();
+                                return;
+                            }
+
+                            if (hasScheduledNextFrame) {
+                                return;
+                            }
+
+                            hasScheduledNextFrame = true;
+                            getReactApplicationContext().runOnUiQueueThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    ReactChoreographer.getInstance().postFrameCallback(ReactChoreographer.CallbackType.TIMERS_EVENTS, new Choreographer.FrameCallback() {
+                                        @Override
+                                        public void doFrame(long frameTimeNanos) {
+                                            if (!latestDownloadProgress.isCompleted()) {
+                                                dispatchDownloadProgressEvent();
+                                            }
+
+                                            hasScheduledNextFrame = false;
+                                        }
+                                    });
+                                }
+                            });
+                        }
+
+                        public void dispatchDownloadProgressEvent() {
+                            getReactApplicationContext()
+                                    .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                                    .emit(CodePushConstants.DOWNLOAD_PROGRESS_EVENT_NAME, latestDownloadProgress.createWritableMap());
+                        }
+                    });
+
+                    WritableMap newPackage = codePushPackage.getPackage(CodePushUtils.tryGetString(updatePackage, CodePushConstants.PACKAGE_HASH_KEY));
+                    promise.resolve(newPackage);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    promise.reject(e);
+                } catch (CodePushInvalidUpdateException e) {
+                    e.printStackTrace();
+                    settingsManager.saveFailedUpdate(updatePackage);
+                    promise.reject(e);
+                }
+
+                return null;
+            }
+        };
+
+        asyncTask.execute();
+    }
+
+    @ReactMethod
+    public void getConfiguration(Promise promise) {
+        Activity currentActivity = getCurrentActivity();
+        WritableNativeMap configMap = new WritableNativeMap();
+        configMap.putString("appVersion", codePush.getAppVersion());
+        configMap.putInt("buildVersion", codePush.getBuildVersion());
+        configMap.putString("deploymentKey", codePush.getDeploymentKey());
+        configMap.putString("serverUrl", codePush.getServerUrl());
+        configMap.putString("clientUniqueId",
+                Settings.Secure.getString(currentActivity.getContentResolver(),
+                        android.provider.Settings.Secure.ANDROID_ID));
+        String binaryHash = CodePushUpdateUtils.getHashForBinaryContents(currentActivity, codePush.isDebugMode());
+        if (binaryHash != null) {
+            // binaryHash will be null if the React Native assets were not bundled into the APK
+            // (e.g. in Debug builds)
+            configMap.putString(CodePushConstants.PACKAGE_HASH_KEY, binaryHash);
+        }
+
+        promise.resolve(configMap);
+    }
+
+    public Activity getCurrentActivityPublic() {
+        return this.getCurrentActivity();
+    }
+
+    @ReactMethod
+    public void getUpdateMetadata(final int updateState, final Promise promise) {
+        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                WritableMap currentPackage = codePushPackage.getCurrentPackage();
+
+                if (currentPackage == null) {
+                    promise.resolve("");
+                    return null;
+                }
+
+                Boolean currentUpdateIsPending = false;
+
+                if (currentPackage.hasKey(CodePushConstants.PACKAGE_HASH_KEY)) {
+                    String currentHash = currentPackage.getString(CodePushConstants.PACKAGE_HASH_KEY);
+                    currentUpdateIsPending = settingsManager.isPendingUpdate(currentHash);
+                }
+
+                if (updateState == CodePushUpdateState.PENDING.getValue() && !currentUpdateIsPending) {
+                    // The caller wanted a pending update
+                    // but there isn't currently one.
+                    promise.resolve("");
+                } else if (updateState == CodePushUpdateState.RUNNING.getValue() && currentUpdateIsPending) {
+                    // The caller wants the running update, but the current
+                    // one is pending, so we need to grab the previous.
+                    promise.resolve(codePushPackage.getPreviousPackage());
+                } else {
+                    // The current package satisfies the request:
+                    // 1) Caller wanted a pending, and there is a pending update
+                    // 2) Caller wanted the running update, and there isn't a pending
+                    // 3) Caller wants the latest update, regardless if it's pending or not
+                    if (codePush.isRunningBinaryVersion()) {
+                        // This only matters in Debug builds. Since we do not clear "outdated" updates,
+                        // we need to indicate to the JS side that somehow we have a current update on
+                        // disk that is not actually running.
+                        currentPackage.putBoolean("_isDebugOnly", true);
+                    }
+
+                    // Enable differentiating pending vs. non-pending updates
+                    currentPackage.putBoolean("isPending", currentUpdateIsPending);
+                    promise.resolve(currentPackage);
+                }
+
+                return null;
+            }
+        };
+
+        asyncTask.execute();
+    }
+
+    @ReactMethod
+    public void getNewStatusReport(final Promise promise) {
+        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                if (codePush.needToReportRollback()) {
+                    codePush.setNeedToReportRollback(false);
+                    JSONArray failedUpdates = settingsManager.getFailedUpdates();
+                    if (failedUpdates != null && failedUpdates.length() > 0) {
+                        try {
+                            JSONObject lastFailedPackageJSON = failedUpdates.getJSONObject(failedUpdates.length() - 1);
+                            WritableMap lastFailedPackage = CodePushUtils.convertJsonObjectToWritable(lastFailedPackageJSON);
+                            WritableMap failedStatusReport = codePushTelemetryManager.getRollbackReport(lastFailedPackage);
+                            if (failedStatusReport != null) {
+                                promise.resolve(failedStatusReport);
+                                return null;
+                            }
+                        } catch (JSONException e) {
+                            throw new CodePushUnknownException("Unable to read failed updates information stored in SharedPreferences.", e);
+                        }
+                    }
+                } else if (codePush.didUpdate()) {
+                    WritableMap currentPackage = codePushPackage.getCurrentPackage();
+                    if (currentPackage != null) {
+                        WritableMap newPackageStatusReport = codePushTelemetryManager.getUpdateReport(currentPackage);
+                        if (newPackageStatusReport != null) {
+                            promise.resolve(newPackageStatusReport);
+                            return null;
+                        }
+                    }
+                } else if (codePush.isRunningBinaryVersion()) {
+                    WritableMap newAppVersionStatusReport = codePushTelemetryManager.getBinaryUpdateReport(codePush.getAppVersion());
+                    if (newAppVersionStatusReport != null) {
+                        promise.resolve(newAppVersionStatusReport);
+                        return null;
+                    }
+                } else {
+                    WritableMap retryStatusReport = codePushTelemetryManager.getRetryStatusReport();
+                    if (retryStatusReport != null) {
+                        promise.resolve(retryStatusReport);
+                        return null;
+                    }
+                }
+
+                promise.resolve("");
+                return null;
+            }
+        };
+
+        asyncTask.execute();
+    }
+
+    @ReactMethod
+    public void installUpdate(final ReadableMap updatePackage, final int installMode, final int minimumBackgroundDuration, final Promise promise) {
+        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                codePushPackage.installPackage(updatePackage, settingsManager.isPendingUpdate(null));
+
+                String pendingHash = CodePushUtils.tryGetString(updatePackage, CodePushConstants.PACKAGE_HASH_KEY);
+                if (pendingHash == null) {
+                    throw new CodePushUnknownException("Update package to be installed has no hash.");
+                } else {
+                    settingsManager.savePendingUpdate(pendingHash, /* isLoading */false);
+                }
+
+                if (installMode == CodePushInstallMode.ON_NEXT_RESUME.getValue()) {
+                    // Store the minimum duration on the native module as an instance
+                    // variable instead of relying on a closure below, so that any
+                    // subsequent resume-based installs could override it.
+                    CodePushNativeModule.this.minimumBackgroundDuration = minimumBackgroundDuration;
+
+                    if (lifecycleEventListener == null) {
+                        // Ensure we do not add the listener twice.
+                        lifecycleEventListener = new LifecycleEventListener() {
+                            private Date lastPausedDate = null;
+
+                            @Override
+                            public void onHostResume() {
+                                // Determine how long the app was in the background and ensure
+                                // that it meets the minimum duration amount of time.
+                                long durationInBackground = 0;
+                                if (lastPausedDate != null) {
+                                    durationInBackground = (new Date().getTime() - lastPausedDate.getTime()) / 1000;
+                                }
+
+                                if (durationInBackground >= CodePushNativeModule.this.minimumBackgroundDuration) {
+                                    loadBundle();
+                                }
+                            }
+
+                            @Override
+                            public void onHostPause() {
+                                // Save the current time so that when the app is later
+                                // resumed, we can detect how long it was in the background.
+                                lastPausedDate = new Date();
+                            }
+
+                            @Override
+                            public void onHostDestroy() {
+                            }
+                        };
+
+                        getReactApplicationContext().addLifecycleEventListener(lifecycleEventListener);
+                    }
+                }
+
+                promise.resolve("");
+
+                return null;
+            }
+        };
+
+        asyncTask.execute();
+    }
+
+    @ReactMethod
+    public void isFailedUpdate(String packageHash, Promise promise) {
+        promise.resolve(settingsManager.isFailedHash(packageHash));
+    }
+
+    @ReactMethod
+    public void isFirstRun(String packageHash, Promise promise) {
+        boolean isFirstRun = codePush.didUpdate()
+                && packageHash != null
+                && packageHash.length() > 0
+                && packageHash.equals(codePushPackage.getCurrentPackageHash());
+        promise.resolve(isFirstRun);
+    }
+
+    @ReactMethod
+    public void notifyApplicationReady(Promise promise) {
+        settingsManager.removePendingUpdate();
+        promise.resolve("");
+    }
+
+    @ReactMethod
+    public void recordStatusReported(ReadableMap statusReport) {
+        codePushTelemetryManager.recordStatusReported(statusReport);
+    }
+
+    @ReactMethod
+    public void restartApp(boolean onlyIfUpdateIsPending) {
+        // If this is an unconditional restart request, or there
+        // is current pending update, then reload the app.
+        if (!onlyIfUpdateIsPending || settingsManager.isPendingUpdate(null)) {
+            loadBundle();
+        }
+    }
+
+    @ReactMethod
+    public void saveStatusReportForRetry(ReadableMap statusReport) {
+        codePushTelemetryManager.saveStatusReportForRetry(statusReport);
+    }
+
+    @ReactMethod
+    // Replaces the current bundle with the one downloaded from removeBundleUrl.
+    // It is only to be used during tests. No-ops if the test configuration flag is not set.
+    public void downloadAndReplaceCurrentBundle(String remoteBundleUrl) {
+        if (codePush.isUsingTestConfiguration()) {
+            try {
+                codePushPackage.downloadAndReplaceCurrentBundle(remoteBundleUrl, codePush.getAssetsBundleFileName());
+            } catch (IOException e) {
+                throw new CodePushUnknownException("Unable to replace current bundle", e);
+            }
+        }
+    }
+}

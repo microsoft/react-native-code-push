@@ -18,18 +18,6 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 
 public class CodePushPackage {
-    private final String CODE_PUSH_FOLDER_PREFIX = "CodePush";
-    private final String CURRENT_PACKAGE_KEY = "currentPackage";
-    private final String DIFF_MANIFEST_FILE_NAME = "hotcodepush.json";
-    private final int DOWNLOAD_BUFFER_SIZE = 1024 * 256;
-    private final String DOWNLOAD_FILE_NAME = "download.zip";
-    private final String DOWNLOAD_URL_KEY = "downloadUrl";
-    private final String PACKAGE_FILE_NAME = "app.json";
-    private final String PACKAGE_HASH_KEY = "packageHash";
-    private final String PREVIOUS_PACKAGE_KEY = "previousPackage";
-    private final String RELATIVE_BUNDLE_PATH_KEY = "bundlePath";
-    private final String STATUS_FILE = "codepush.json";
-    private final String UNZIPPED_FOLDER_NAME = "unzipped";
 
     private String documentsDirectory;
 
@@ -38,11 +26,11 @@ public class CodePushPackage {
     }
 
     private String getDownloadFilePath() {
-        return CodePushUtils.appendPathComponent(getCodePushPath(), DOWNLOAD_FILE_NAME);
+        return CodePushUtils.appendPathComponent(getCodePushPath(), CodePushConstants.DOWNLOAD_FILE_NAME);
     }
 
     private String getUnzippedFolderPath() {
-        return CodePushUtils.appendPathComponent(getCodePushPath(), UNZIPPED_FOLDER_NAME);
+        return CodePushUtils.appendPathComponent(getCodePushPath(), CodePushConstants.UNZIPPED_FOLDER_NAME);
     }
 
     private String getDocumentsDirectory() {
@@ -50,7 +38,7 @@ public class CodePushPackage {
     }
 
     private String getCodePushPath() {
-        String codePushPath = CodePushUtils.appendPathComponent(getDocumentsDirectory(), CODE_PUSH_FOLDER_PREFIX);
+        String codePushPath = CodePushUtils.appendPathComponent(getDocumentsDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX);
         if (CodePush.isUsingTestConfiguration()) {
             codePushPath = CodePushUtils.appendPathComponent(codePushPath, "TestPackages");
         }
@@ -59,7 +47,7 @@ public class CodePushPackage {
     }
 
     private String getStatusFilePath() {
-        return CodePushUtils.appendPathComponent(getCodePushPath(), STATUS_FILE);
+        return CodePushUtils.appendPathComponent(getCodePushPath(), CodePushConstants.STATUS_FILE);
     }
 
     public WritableMap getCurrentPackageInfo() {
@@ -87,7 +75,7 @@ public class CodePushPackage {
 
     public String getCurrentPackageFolderPath() {
         WritableMap info = getCurrentPackageInfo();
-        String packageHash = CodePushUtils.tryGetString(info, CURRENT_PACKAGE_KEY);
+        String packageHash = CodePushUtils.tryGetString(info, CodePushConstants.CURRENT_PACKAGE_KEY);
         if (packageHash == null) {
             return null;
         }
@@ -106,7 +94,7 @@ public class CodePushPackage {
             return null;
         }
 
-        String relativeBundlePath = CodePushUtils.tryGetString(currentPackage, RELATIVE_BUNDLE_PATH_KEY);
+        String relativeBundlePath = CodePushUtils.tryGetString(currentPackage, CodePushConstants.RELATIVE_BUNDLE_PATH_KEY);
         if (relativeBundlePath == null) {
             return CodePushUtils.appendPathComponent(packageFolder, bundleFileName);
         } else {
@@ -120,12 +108,12 @@ public class CodePushPackage {
 
     public String getCurrentPackageHash() {
         WritableMap info = getCurrentPackageInfo();
-        return CodePushUtils.tryGetString(info, CURRENT_PACKAGE_KEY);
+        return CodePushUtils.tryGetString(info, CodePushConstants.CURRENT_PACKAGE_KEY);
     }
 
     public String getPreviousPackageHash() {
         WritableMap info = getCurrentPackageInfo();
-        return CodePushUtils.tryGetString(info, PREVIOUS_PACKAGE_KEY);
+        return CodePushUtils.tryGetString(info, CodePushConstants.PREVIOUS_PACKAGE_KEY);
     }
 
     public WritableMap getCurrentPackage() {
@@ -148,7 +136,7 @@ public class CodePushPackage {
 
     public WritableMap getPackage(String packageHash) {
         String folderPath = getPackageFolderPath(packageHash);
-        String packageFilePath = CodePushUtils.appendPathComponent(folderPath, PACKAGE_FILE_NAME);
+        String packageFilePath = CodePushUtils.appendPathComponent(folderPath, CodePushConstants.PACKAGE_FILE_NAME);
         try {
             return CodePushUtils.getWritableMapFromFile(packageFilePath);
         } catch (IOException e) {
@@ -158,16 +146,16 @@ public class CodePushPackage {
 
     public void downloadPackage(ReadableMap updatePackage, String expectedBundleFileName,
                                 DownloadProgressCallback progressCallback) throws IOException {
-        String newUpdateHash = CodePushUtils.tryGetString(updatePackage, PACKAGE_HASH_KEY);
+        String newUpdateHash = CodePushUtils.tryGetString(updatePackage, CodePushConstants.PACKAGE_HASH_KEY);
         String newUpdateFolderPath = getPackageFolderPath(newUpdateHash);
-        String newUpdateMetadataPath = CodePushUtils.appendPathComponent(newUpdateFolderPath, PACKAGE_FILE_NAME);
+        String newUpdateMetadataPath = CodePushUtils.appendPathComponent(newUpdateFolderPath, CodePushConstants.PACKAGE_FILE_NAME);
         if (FileUtils.fileAtPathExists(newUpdateFolderPath)) {
             // This removes any stale data in newPackageFolderPath that could have been left
             // uncleared due to a crash or error during the download or install process.
             FileUtils.deleteDirectoryAtPath(newUpdateFolderPath);
         }
 
-        String downloadUrlString = CodePushUtils.tryGetString(updatePackage, DOWNLOAD_URL_KEY);
+        String downloadUrlString = CodePushUtils.tryGetString(updatePackage, CodePushConstants.DOWNLOAD_URL_KEY);
         HttpURLConnection connection = null;
         BufferedInputStream bin = null;
         FileOutputStream fos = null;
@@ -186,14 +174,14 @@ public class CodePushPackage {
             bin = new BufferedInputStream(connection.getInputStream());
             File downloadFolder = new File(getCodePushPath());
             downloadFolder.mkdirs();
-            downloadFile = new File(downloadFolder, DOWNLOAD_FILE_NAME);
+            downloadFile = new File(downloadFolder, CodePushConstants.DOWNLOAD_FILE_NAME);
             fos = new FileOutputStream(downloadFile);
-            bout = new BufferedOutputStream(fos, DOWNLOAD_BUFFER_SIZE);
-            byte[] data = new byte[DOWNLOAD_BUFFER_SIZE];
+            bout = new BufferedOutputStream(fos, CodePushConstants.DOWNLOAD_BUFFER_SIZE);
+            byte[] data = new byte[CodePushConstants.DOWNLOAD_BUFFER_SIZE];
             byte[] header = new byte[4];
 
             int numBytesRead = 0;
-            while ((numBytesRead = bin.read(data, 0, DOWNLOAD_BUFFER_SIZE)) >= 0) {
+            while ((numBytesRead = bin.read(data, 0, CodePushConstants.DOWNLOAD_BUFFER_SIZE)) >= 0) {
                 if (receivedBytes < 4) {
                     for (int i = 0; i < numBytesRead; i++) {
                         int headerOffset = (int)(receivedBytes) + i;
@@ -236,7 +224,7 @@ public class CodePushPackage {
 
             // Merge contents with current update based on the manifest
             String diffManifestFilePath = CodePushUtils.appendPathComponent(unzippedFolderPath,
-                    DIFF_MANIFEST_FILE_NAME);
+                    CodePushConstants.DIFF_MANIFEST_FILE_NAME);
             boolean isDiffUpdate = FileUtils.fileAtPathExists(diffManifestFilePath);
             if (isDiffUpdate) {
                 String currentPackageFolderPath = getCurrentPackageFolderPath();
@@ -253,7 +241,7 @@ public class CodePushPackage {
             String relativeBundlePath = CodePushUpdateUtils.findJSBundleInUpdateContents(newUpdateFolderPath, expectedBundleFileName);
 
             if (relativeBundlePath == null) {
-                throw new CodePushInvalidUpdateException("Update is invalid - A JS bundle file named \"" + expectedBundleFileName + "\" could not be found within the downloaded contents. Please ensure that your app is syncing with the correct deployment and that you are releasing your CodePush updates using the exact same JS bundle file name that was shipped with your app's binary.");
+                throw new CodePushInvalidUpdateException("Update is invalid - A JS bundle file named \"" + expectedBundleFileName + "\" could not be found within the downloaded contents. Please check that you are releasing your CodePush updates using the exact same JS bundle file name that was shipped with your app's binary.");
             } else {
                 if (FileUtils.fileAtPathExists(newUpdateMetadataPath)) {
                     File metadataFileFromOldUpdate = new File(newUpdateMetadataPath);
@@ -266,10 +254,10 @@ public class CodePushPackage {
 
                 JSONObject updatePackageJSON = CodePushUtils.convertReadableToJsonObject(updatePackage);
                 try {
-                    updatePackageJSON.put(RELATIVE_BUNDLE_PATH_KEY, relativeBundlePath);
+                    updatePackageJSON.put(CodePushConstants.RELATIVE_BUNDLE_PATH_KEY, relativeBundlePath);
                 } catch (JSONException e) {
                     throw new CodePushUnknownException("Unable to set key " +
-                            RELATIVE_BUNDLE_PATH_KEY + " to value " + relativeBundlePath +
+                            CodePushConstants.RELATIVE_BUNDLE_PATH_KEY + " to value " + relativeBundlePath +
                             " in update package.", e);
                 }
 
@@ -285,7 +273,7 @@ public class CodePushPackage {
     }
 
     public void installPackage(ReadableMap updatePackage, boolean removePendingUpdate) {
-        String packageHash = CodePushUtils.tryGetString(updatePackage, PACKAGE_HASH_KEY);
+        String packageHash = CodePushUtils.tryGetString(updatePackage, CodePushConstants.PACKAGE_HASH_KEY);
         WritableMap info = getCurrentPackageInfo();
         if (removePendingUpdate) {
             String currentPackageFolderPath = getCurrentPackageFolderPath();
@@ -298,10 +286,10 @@ public class CodePushPackage {
                 FileUtils.deleteDirectoryAtPath(getPackageFolderPath(previousPackageHash));
             }
 
-            info.putString(PREVIOUS_PACKAGE_KEY, CodePushUtils.tryGetString(info, CURRENT_PACKAGE_KEY));
+            info.putString(CodePushConstants.PREVIOUS_PACKAGE_KEY, CodePushUtils.tryGetString(info, CodePushConstants.CURRENT_PACKAGE_KEY));
         }
 
-        info.putString(CURRENT_PACKAGE_KEY, packageHash);
+        info.putString(CodePushConstants.CURRENT_PACKAGE_KEY, packageHash);
         updateCurrentPackageInfo(info);
     }
 
@@ -309,8 +297,8 @@ public class CodePushPackage {
         WritableMap info = getCurrentPackageInfo();
         String currentPackageFolderPath = getCurrentPackageFolderPath();
         FileUtils.deleteDirectoryAtPath(currentPackageFolderPath);
-        info.putString(CURRENT_PACKAGE_KEY, CodePushUtils.tryGetString(info, PREVIOUS_PACKAGE_KEY));
-        info.putNull(PREVIOUS_PACKAGE_KEY);
+        info.putString(CodePushConstants.CURRENT_PACKAGE_KEY, CodePushUtils.tryGetString(info, CodePushConstants.PREVIOUS_PACKAGE_KEY));
+        info.putNull(CodePushConstants.PREVIOUS_PACKAGE_KEY);
         updateCurrentPackageInfo(info);
     }
 
@@ -327,10 +315,10 @@ public class CodePushPackage {
             File downloadFile = new File(getCurrentPackageBundlePath(bundleFileName));
             downloadFile.delete();
             fos = new FileOutputStream(downloadFile);
-            bout = new BufferedOutputStream(fos, DOWNLOAD_BUFFER_SIZE);
-            byte[] data = new byte[DOWNLOAD_BUFFER_SIZE];
+            bout = new BufferedOutputStream(fos, CodePushConstants.DOWNLOAD_BUFFER_SIZE);
+            byte[] data = new byte[CodePushConstants.DOWNLOAD_BUFFER_SIZE];
             int numBytesRead = 0;
-            while ((numBytesRead = bin.read(data, 0, DOWNLOAD_BUFFER_SIZE)) >= 0) {
+            while ((numBytesRead = bin.read(data, 0, CodePushConstants.DOWNLOAD_BUFFER_SIZE)) >= 0) {
                 bout.write(data, 0, numBytesRead);
             }
         } catch (MalformedURLException e) {
