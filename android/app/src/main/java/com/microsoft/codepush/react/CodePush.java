@@ -9,8 +9,6 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ViewManager;
 import com.facebook.soloader.SoLoader;
 
-import android.app.Activity;
-import android.app.Application;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -49,43 +47,30 @@ public class CodePush implements ReactPackage {
     private final String serverUrl = "https://codepush.azurewebsites.net/";
 
     private Context context;
-    private Context applicationContext;
     private final boolean isDebugMode;
 
     private static CodePush currentInstance;
 
-    public CodePush(String deploymentKey, Activity mainActivity) {
-        this(deploymentKey, mainActivity, false);
+    public CodePush(String deploymentKey, Context context) {
+        this(deploymentKey, context, false);
     }
 
-    public CodePush(String deploymentKey, Application reactApplication) {
-        this(deploymentKey, reactApplication, false);
-    }
-
-    public CodePush(String deploymentKey, Activity mainActivity, boolean isDebugMode) {
-        this(deploymentKey, (Context)mainActivity, isDebugMode);
-    }
-
-    public CodePush(String deploymentKey, Application reactApplication, boolean isDebugMode) {
-        this(deploymentKey, (Context)reactApplication, isDebugMode);
-    }
-
-    private CodePush(String deploymentKey, Context context, boolean isDebugMode) {
+    public CodePush(String deploymentKey, Context context, boolean isDebugMode) {
         SoLoader.init(context, false);
-        this.applicationContext = context.getApplicationContext();
+        this.context = context.getApplicationContext();
+
         this.codePushPackage = new CodePushPackage(context.getFilesDir().getAbsolutePath());
-        this.codePushTelemetryManager = new CodePushTelemetryManager(this.applicationContext, CodePushConstants.CODE_PUSH_PREFERENCES);
-        this.context = context;
+        this.codePushTelemetryManager = new CodePushTelemetryManager(this.context, CodePushConstants.CODE_PUSH_PREFERENCES);
         this.deploymentKey = deploymentKey;
         this.isDebugMode = isDebugMode;
-        this.settingsManager = new SettingsManager(this.applicationContext);
+        this.settingsManager = new SettingsManager(this.context);
 
         try {
-            PackageInfo pInfo = applicationContext.getPackageManager().getPackageInfo(applicationContext.getPackageName(), 0);
+            PackageInfo pInfo = this.context.getPackageManager().getPackageInfo(this.context.getPackageName(), 0);
             appVersion = pInfo.versionName;
             buildVersion = pInfo.versionCode;
         } catch (PackageManager.NameNotFoundException e) {
-            throw new CodePushUnknownException("Unable to get package info for " + applicationContext.getPackageName(), e);
+            throw new CodePushUnknownException("Unable to get package info for " + this.context.getPackageName(), e);
         }
 
         currentInstance = this;
@@ -97,7 +82,7 @@ public class CodePush implements ReactPackage {
     void clearDebugCacheIfNeeded() {
         if (isDebugMode && settingsManager.isPendingUpdate(null)) {
             // This needs to be kept in sync with https://github.com/facebook/react-native/blob/master/ReactAndroid/src/main/java/com/facebook/react/devsupport/DevSupportManager.java#L78
-            File cachedDevBundle = new File(applicationContext.getFilesDir(), "ReactNativeDevBundle.js");
+            File cachedDevBundle = new File(this.context.getFilesDir(), "ReactNativeDevBundle.js");
             if (cachedDevBundle.exists()) {
                 cachedDevBundle.delete();
             }
@@ -131,7 +116,7 @@ public class CodePush implements ReactPackage {
     long getBinaryResourcesModifiedTime() {
         ZipFile applicationFile = null;
         try {
-            ApplicationInfo ai = applicationContext.getPackageManager().getApplicationInfo(applicationContext.getPackageName(), 0);
+            ApplicationInfo ai = this.context.getPackageManager().getApplicationInfo(this.context.getPackageName(), 0);
             applicationFile = new ZipFile(ai.sourceDir);
             ZipEntry classesDexEntry = applicationFile.getEntry(CodePushConstants.RESOURCES_BUNDLE);
             return classesDexEntry.getTime();

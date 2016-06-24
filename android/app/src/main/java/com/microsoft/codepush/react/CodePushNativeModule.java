@@ -98,25 +98,34 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
 
     private void loadBundle() {
         codePush.clearDebugCacheIfNeeded();
+        Activity currentActivity = getCurrentActivity();
 
-
-        if (isReactApplication(codePush.getContext()) || ReactActivity.class.isInstance(codePush.getContext())) {
+        if (!ReactActivity.class.isInstance(currentActivity)) {
+            // Our preferred reload logic relies on the user's Activity inheriting
+            // from the core ReactActivity class, so if it doesn't, we fallback
+            // early to our legacy behavior.
+            loadBundleLegacy();
+        } else {
             try {
-                Activity currentActivity = getCurrentActivity();
+                ReactActivity reactActivity = (ReactActivity)getCurrentActivity();
+                ReactInstanceManager instanceManager;
 
                 // #1) Get the ReactInstanceManager instance, which is what includes the
-                //     logic to reload the current React context, and the current Activity
-                //     instance, which is needed to run the reload operation on its UI thread.
-                final ReactInstanceManager instanceManager;
-                if (isReactApplication(codePush.getContext())) {
+                //     logic to reload the current React context.
+                try {
+                    // In RN 0.29, the "mReactInstanceManager" field yields a null value, so we try
+                    // to get the instance manager via the ReactNativeHost, which only exists in 0.29.
+                    Method getApplicationMethod = ReactActivity.class.getMethod("getApplication");
+                    Object reactApplication = getApplicationMethod.invoke(reactActivity);
                     Class reactApplicationClass = tryGetClass(REACT_APPLICATION_CLASS_NAME);
                     Method getReactNativeHostMethod = reactApplicationClass.getMethod("getReactNativeHost");
-                    Object reactNativeHost = getReactNativeHostMethod.invoke(codePush.getContext());
+                    Object reactNativeHost = getReactNativeHostMethod.invoke(reactApplication);
                     Class reactNativeHostClass = tryGetClass(REACT_NATIVE_HOST_CLASS_NAME);
                     Method getReactInstanceManagerMethod = reactNativeHostClass.getMethod("getReactInstanceManager");
                     instanceManager = (ReactInstanceManager)getReactInstanceManagerMethod.invoke(reactNativeHost);
-                } else {
-                    ReactActivity reactActivity = (ReactActivity)codePush.getContext();
+                } catch (NoSuchMethodException e) {
+                    // The React Native version might be older than 0.29, so we try to get the
+                    // instance manager via the "mReactInstanceManager" field.
                     Field instanceManagerField = ReactActivity.class.getDeclaredField("mReactInstanceManager");
                     instanceManagerField.setAccessible(true);
                     instanceManager = (ReactInstanceManager)instanceManagerField.get(reactActivity);
@@ -132,11 +141,12 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                 // #3) Get the context creation method and fire it on the UI thread (which RN enforces)
                 final Method recreateMethod = instanceManager.getClass().getMethod("recreateReactContextInBackground");
 
-                currentActivity.runOnUiThread(new Runnable() {
+                final ReactInstanceManager finalizedInstanceManager = instanceManager;
+                reactActivity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         try {
-                            recreateMethod.invoke(instanceManager);
+                            recreateMethod.invoke(finalizedInstanceManager);
                             codePush.initializeUpdateAfterRestart();
                         }
                         catch (Exception e) {
@@ -151,11 +161,6 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                 // so fall back to restarting the Activity
                 loadBundleLegacy();
             }
-        } else {
-            // Our preferred reload logic relies on the user's Activity inheriting from the
-            // core ReactActivity or ReactApplication class, so if it doesn't, we fallback
-            // early to our legacy behavior.
-            loadBundleLegacy();
         }
     }
 
