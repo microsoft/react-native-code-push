@@ -259,7 +259,7 @@ And that's it for installation using RNPM! Continue below to the [Plugin Configu
 
 After installing the plugin and syncing your Android Studio project with Gradle, you need to configure your app to consult CodePush for the location of your JS bundle, since it will "take control" of managing the current and all future versions. To do this:
 
-**For React Native >= 0.29**
+**For React Native >= v0.29**
 
 Update the `MainApplication.java` file to use CodePush via the following changes:
 
@@ -294,7 +294,7 @@ public class MainApplication extends Application implements ReactApplication {
 }
 ```
 
-**For React Native 0.19 - 0.28**
+**For React Native v0.19 - v0.28**
 
 Update the `MainActivity.java` file to use CodePush via the following changes:
 
