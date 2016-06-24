@@ -437,7 +437,7 @@ In our [getting started](#getting-started) docs, we illustrated how to configure
 
 *NOTE: Our client-side rollback feature can help unblock users after installing a release that resulted in a crash, and server-side rollbacks (i.e. `code-push rollback`) allow you to prevent additional users from installing a bad release once it's been identified. However, it's obviously better if you can prevent an erroneous update from being broadly released in the first place.*
 
-Taking advantage of the `Staging` and `Production` deployments allows you to acheive a workflow like the following (feel free to customize!):
+Taking advantage of the `Staging` and `Production` deployments allows you to achieve a workflow like the following (feel free to customize!):
 
 1. Release a CodePush update to your `Staging` deployment using the `code-push release-react` command (or `code-push release` if you need more control)
 
@@ -483,7 +483,7 @@ To set this up, perform the following steps:
 
     *NOTE: As a reminder, you can retrieve these keys by running `code-push deployment ls <APP_NAME> -k` from your terminal.*
     
-4. Open up your `MainAtivity.java` file and change the `CodePush` constructor to pass the deployment key in via the build config you just defined, as opposed to a string literal. 
+4. Open up your `MainActivity.java` file and change the `CodePush` constructor to pass the deployment key in via the build config you just defined, as opposed to a string literal. 
 
     ```java
     new CodePush(BuildConfig.CODEPUSH_KEY, this, BuildConfig.DEBUG);
