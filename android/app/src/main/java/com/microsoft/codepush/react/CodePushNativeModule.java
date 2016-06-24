@@ -123,7 +123,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                     Class reactNativeHostClass = tryGetClass(REACT_NATIVE_HOST_CLASS_NAME);
                     Method getReactInstanceManagerMethod = reactNativeHostClass.getMethod("getReactInstanceManager");
                     instanceManager = (ReactInstanceManager)getReactInstanceManagerMethod.invoke(reactNativeHost);
-                } catch (NoSuchMethodException e) {
+                } catch (Exception e) {
                     // The React Native version might be older than 0.29, so we try to get the
                     // instance manager via the "mReactInstanceManager" field.
                     Field instanceManagerField = ReactActivity.class.getDeclaredField("mReactInstanceManager");
