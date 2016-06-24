@@ -131,7 +131,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                     instanceManager = (ReactInstanceManager)instanceManagerField.get(reactActivity);
                 }
 
-                String latestJSBundleFile = codePush.getBundleUrlInternal(codePush.getAssetsBundleFileName());
+                String latestJSBundleFile = codePush.getJSBundleFileInternal(codePush.getAssetsBundleFileName());
 
                 // #2) Update the locally stored JS bundle file path
                 Field jsBundleField = instanceManager.getClass().getDeclaredField("mJSBundleFile");

@@ -44,7 +44,7 @@ public class CodePush implements ReactPackage {
     private String appVersion;
     private int buildVersion;
     private String deploymentKey;
-    private final String serverUrl = "https://codepush.azurewebsites.net/";
+    private String serverUrl = "https://codepush.azurewebsites.net/";
 
     private Context context;
     private final boolean isDebugMode;
@@ -77,6 +77,11 @@ public class CodePush implements ReactPackage {
 
         clearDebugCacheIfNeeded();
         initializeUpdateAfterRestart();
+    }
+
+    public CodePush(String deploymentKey, Context context, boolean isDebugMode, String serverUrl) {
+        this(deploymentKey, context, isDebugMode);
+        this.serverUrl = serverUrl;
     }
 
     void clearDebugCacheIfNeeded() {
@@ -134,18 +139,34 @@ public class CodePush implements ReactPackage {
     }
 
     public static String getBundleUrl() {
-        return getBundleUrl(CodePushConstants.DEFAULT_JS_BUNDLE_NAME);
+        return getJSBundleFile();
     }
 
     public static String getBundleUrl(String assetsBundleFileName) {
+        return getJSBundleFile(assetsBundleFileName);
+    }
+
+    public String getBundleUrlInternal(String assetsBundleFileName) {
+        return getJSBundleFileInternal(assetsBundleFileName);
+    }
+
+    Context getContext() {
+        return context;
+    }
+
+    public static String getJSBundleFile() {
+        return CodePush.getBundleUrl();
+    }
+
+    public static String getJSBundleFile(String assetsBundleFileName) {
         if (currentInstance == null) {
             throw new CodePushNotInitializedException("A CodePush instance has not been created yet. Have you added it to your app's list of ReactPackages?");
         }
 
-        return currentInstance.getBundleUrlInternal(assetsBundleFileName);
+        return currentInstance.getJSBundleFileInternal(assetsBundleFileName);
     }
 
-    public String getBundleUrlInternal(String assetsBundleFileName) {
+    public String getJSBundleFileInternal(String assetsBundleFileName) {
         this.assetsBundleFileName = assetsBundleFileName;
         String binaryJsBundleUrl = CodePushConstants.ASSETS_BUNDLE_PREFIX + assetsBundleFileName;
         long binaryResourcesModifiedTime = this.getBinaryResourcesModifiedTime();
@@ -187,10 +208,6 @@ public class CodePush implements ReactPackage {
         } catch (NumberFormatException e) {
             throw new CodePushUnknownException("Error in reading binary modified date from package metadata", e);
         }
-    }
-
-    Context getContext() {
-        return context;
     }
 
     void initializeUpdateAfterRestart() {
