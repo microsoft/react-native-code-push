@@ -60,7 +60,6 @@ if (bundleGeneratedAssetFiles.length) {
                         var finalHash = crypto.createHash(HASH_ALGORITHM)
                             .update(JSON.stringify(manifest))
                             .digest("hex");
-                        console.log(finalHash);
 
                         var savedResourcesManifestPath = assetsDir + "/" + CODE_PUSH_HASH_FILE_NAME;
                         fs.writeFileSync(savedResourcesManifestPath, finalHash);
@@ -72,7 +71,6 @@ if (bundleGeneratedAssetFiles.length) {
 }
 
 function addFileToManifest(folder, assetFile, manifest, done) {
-    // Generate hash for each asset file
     var fullFilePath = path.join(folder, assetFile);
     if (!fileExists(fullFilePath)) {
         done();
@@ -90,7 +88,7 @@ function addFileToManifest(folder, assetFile, manifest, done) {
             hashStream.end();
             var buffer = hashStream.read();
             var fileHash = buffer.toString("hex");
-            manifest.push(CODE_PUSH_FOLDER_PREFIX + assetFile.replace(/\\/g, "/") + ":" + fileHash);
+            manifest.push(path.join(CODE_PUSH_FOLDER_PREFIX, assetFile).replace(/\\/g, "/") + ":" + fileHash);
             done();
         });
 }
