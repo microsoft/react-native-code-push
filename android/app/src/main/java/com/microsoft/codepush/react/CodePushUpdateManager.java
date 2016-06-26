@@ -17,11 +17,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 
-public class CodePushPackage {
+public class CodePushUpdateManager {
 
     private String documentsDirectory;
 
-    public CodePushPackage(String documentsDirectory) {
+    public CodePushUpdateManager(String documentsDirectory) {
         this.documentsDirectory = documentsDirectory;
     }
 

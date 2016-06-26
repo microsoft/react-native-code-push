@@ -11,15 +11,14 @@ import org.json.JSONObject;
 
 public class SettingsManager {
 
-    private Context applicationContext;
+    private SharedPreferences mSettings;
 
     public SettingsManager(Context applicationContext) {
-        this.applicationContext = applicationContext;
+        mSettings = applicationContext.getSharedPreferences(CodePushConstants.CODE_PUSH_PREFERENCES, 0);
     }
 
-    JSONArray getFailedUpdates() {
-        SharedPreferences settings = applicationContext.getSharedPreferences(CodePushConstants.CODE_PUSH_PREFERENCES, 0);
-        String failedUpdatesString = settings.getString(CodePushConstants.FAILED_UPDATES_KEY, null);
+    public JSONArray getFailedUpdates() {
+        String failedUpdatesString = mSettings.getString(CodePushConstants.FAILED_UPDATES_KEY, null);
         if (failedUpdatesString == null) {
             return new JSONArray();
         }
@@ -29,14 +28,13 @@ public class SettingsManager {
         } catch (JSONException e) {
             // Unrecognized data format, clear and replace with expected format.
             JSONArray emptyArray = new JSONArray();
-            settings.edit().putString(CodePushConstants.FAILED_UPDATES_KEY, emptyArray.toString()).commit();
+            mSettings.edit().putString(CodePushConstants.FAILED_UPDATES_KEY, emptyArray.toString()).commit();
             return emptyArray;
         }
     }
 
-    JSONObject getPendingUpdate() {
-        SharedPreferences settings = applicationContext.getSharedPreferences(CodePushConstants.CODE_PUSH_PREFERENCES, 0);
-        String pendingUpdateString = settings.getString(CodePushConstants.PENDING_UPDATE_KEY, null);
+    public JSONObject getPendingUpdate() {
+        String pendingUpdateString = mSettings.getString(CodePushConstants.PENDING_UPDATE_KEY, null);
         if (pendingUpdateString == null) {
             return null;
         }
@@ -52,7 +50,7 @@ public class SettingsManager {
     }
 
 
-    boolean isFailedHash(String packageHash) {
+    public boolean isFailedHash(String packageHash) {
         JSONArray failedUpdates = getFailedUpdates();
         if (packageHash != null) {
             for (int i = 0; i < failedUpdates.length(); i++) {
@@ -71,7 +69,7 @@ public class SettingsManager {
         return false;
     }
 
-    boolean isPendingUpdate(String packageHash) {
+    public boolean isPendingUpdate(String packageHash) {
         JSONObject pendingUpdate = getPendingUpdate();
 
         try {
@@ -84,19 +82,16 @@ public class SettingsManager {
         }
     }
 
-    void removeFailedUpdates() {
-        SharedPreferences settings = applicationContext.getSharedPreferences(CodePushConstants.CODE_PUSH_PREFERENCES, 0);
-        settings.edit().remove(CodePushConstants.FAILED_UPDATES_KEY).commit();
+    public void removeFailedUpdates() {
+        mSettings.edit().remove(CodePushConstants.FAILED_UPDATES_KEY).commit();
     }
 
-    void removePendingUpdate() {
-        SharedPreferences settings = applicationContext.getSharedPreferences(CodePushConstants.CODE_PUSH_PREFERENCES, 0);
-        settings.edit().remove(CodePushConstants.PENDING_UPDATE_KEY).commit();
+    public void removePendingUpdate() {
+        mSettings.edit().remove(CodePushConstants.PENDING_UPDATE_KEY).commit();
     }
 
-    void saveFailedUpdate(ReadableMap failedPackage) {
-        SharedPreferences settings = applicationContext.getSharedPreferences(CodePushConstants.CODE_PUSH_PREFERENCES, 0);
-        String failedUpdatesString = settings.getString(CodePushConstants.FAILED_UPDATES_KEY, null);
+    public void saveFailedUpdate(ReadableMap failedPackage) {
+        String failedUpdatesString = mSettings.getString(CodePushConstants.FAILED_UPDATES_KEY, null);
         JSONArray failedUpdates;
         if (failedUpdatesString == null) {
             failedUpdates = new JSONArray();
@@ -112,16 +107,15 @@ public class SettingsManager {
 
         JSONObject failedPackageJSON = CodePushUtils.convertReadableToJsonObject(failedPackage);
         failedUpdates.put(failedPackageJSON);
-        settings.edit().putString(CodePushConstants.FAILED_UPDATES_KEY, failedUpdates.toString()).commit();
+        mSettings.edit().putString(CodePushConstants.FAILED_UPDATES_KEY, failedUpdates.toString()).commit();
     }
 
-    void savePendingUpdate(String packageHash, boolean isLoading) {
-        SharedPreferences settings = applicationContext.getSharedPreferences(CodePushConstants.CODE_PUSH_PREFERENCES, 0);
+    public void savePendingUpdate(String packageHash, boolean isLoading) {
         JSONObject pendingUpdate = new JSONObject();
         try {
             pendingUpdate.put(CodePushConstants.PENDING_UPDATE_HASH_KEY, packageHash);
             pendingUpdate.put(CodePushConstants.PENDING_UPDATE_IS_LOADING_KEY, isLoading);
-            settings.edit().putString(CodePushConstants.PENDING_UPDATE_KEY, pendingUpdate.toString()).commit();
+            mSettings.edit().putString(CodePushConstants.PENDING_UPDATE_KEY, pendingUpdate.toString()).commit();
         } catch (JSONException e) {
             // Should not happen.
             throw new CodePushUnknownException("Unable to save pending update.", e);
