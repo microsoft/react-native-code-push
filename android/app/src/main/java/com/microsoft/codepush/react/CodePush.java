@@ -60,7 +60,7 @@ public class CodePush implements ReactPackage {
         mContext = context.getApplicationContext();
 
         mCodePushUpdateManager = new CodePushUpdateManager(context.getFilesDir().getAbsolutePath());
-        mCodePushTelemetryManager = new CodePushTelemetryManager(mContext, CodePushConstants.CODE_PUSH_PREFERENCES);
+        mCodePushTelemetryManager = new CodePushTelemetryManager(mContext);
         mDeploymentKey = deploymentKey;
         mIsDebugMode = isDebugMode;
         mSettingsManager = new SettingsManager(mContext);

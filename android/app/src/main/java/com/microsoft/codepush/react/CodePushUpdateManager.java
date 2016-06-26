@@ -19,10 +19,10 @@ import java.nio.ByteBuffer;
 
 public class CodePushUpdateManager {
 
-    private String documentsDirectory;
+    private String mDocumentsDirectory;
 
     public CodePushUpdateManager(String documentsDirectory) {
-        this.documentsDirectory = documentsDirectory;
+        mDocumentsDirectory = documentsDirectory;
     }
 
     private String getDownloadFilePath() {
@@ -34,7 +34,7 @@ public class CodePushUpdateManager {
     }
 
     private String getDocumentsDirectory() {
-        return documentsDirectory;
+        return mDocumentsDirectory;
     }
 
     private String getCodePushPath() {
