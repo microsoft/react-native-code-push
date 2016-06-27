@@ -143,7 +143,7 @@ public class CodePush implements ReactPackage {
     }
 
     public static String getJSBundleFile() {
-        return CodePush.getBundleUrl();
+        return CodePush.getJSBundleFile(CodePushConstants.DEFAULT_JS_BUNDLE_NAME);
     }
 
     public static String getJSBundleFile(String assetsBundleFileName) {
