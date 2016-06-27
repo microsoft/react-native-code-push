@@ -26,23 +26,22 @@ import java.util.zip.ZipFile;
 
 public class CodePush implements ReactPackage {
 
-    private static boolean mIsRunningBinaryVersion = false;
-    private static boolean mNeedToReportRollback = false;
-    private static boolean mTestConfigurationFlag = false;
+    private static boolean sIsRunningBinaryVersion = false;
+    private static boolean sNeedToReportRollback = false;
+    private static boolean sTestConfigurationFlag = false;
 
     private boolean mDidUpdate = false;
 
     private String mAssetsBundleFileName;
 
     // Helper classes.
-    private CodePushNativeModule mCodePushNativeModule;
-    private CodePushUpdateManager mCodePushUpdateManager;
-    private CodePushTelemetryManager mCodePushTelemetryManager;
+    private CodePushNativeModule mNativeModule;
+    private CodePushUpdateManager mUpdateManager;
+    private CodePushTelemetryManager mTelemetryManager;
     private SettingsManager mSettingsManager;
 
     // Config properties.
     private String mAppVersion;
-    private int mBuildVersion;
     private String mDeploymentKey;
     private String mServerUrl = "https://codepush.azurewebsites.net/";
 
@@ -59,8 +58,8 @@ public class CodePush implements ReactPackage {
         SoLoader.init(context, false);
         mContext = context.getApplicationContext();
 
-        mCodePushUpdateManager = new CodePushUpdateManager(context.getFilesDir().getAbsolutePath());
-        mCodePushTelemetryManager = new CodePushTelemetryManager(mContext);
+        mUpdateManager = new CodePushUpdateManager(context.getFilesDir().getAbsolutePath());
+        mTelemetryManager = new CodePushTelemetryManager(mContext);
         mDeploymentKey = deploymentKey;
         mIsDebugMode = isDebugMode;
         mSettingsManager = new SettingsManager(mContext);
@@ -68,7 +67,6 @@ public class CodePush implements ReactPackage {
         try {
             PackageInfo pInfo = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
             mAppVersion = pInfo.versionName;
-            mBuildVersion = pInfo.versionCode;
         } catch (PackageManager.NameNotFoundException e) {
             throw new CodePushUnknownException("Unable to get package info for " + mContext.getPackageName(), e);
         }
@@ -126,10 +124,6 @@ public class CodePush implements ReactPackage {
         }
     }
 
-    public int getBuildVersion() {
-        return mBuildVersion;
-    }
-
     @Deprecated
     public static String getBundleUrl() {
         return getJSBundleFile();
@@ -166,15 +160,15 @@ public class CodePush implements ReactPackage {
         long binaryResourcesModifiedTime = this.getBinaryResourcesModifiedTime();
 
         try {
-            String packageFilePath = mCodePushUpdateManager.getCurrentPackageBundlePath(this.mAssetsBundleFileName);
+            String packageFilePath = mUpdateManager.getCurrentPackageBundlePath(this.mAssetsBundleFileName);
             if (packageFilePath == null) {
                 // There has not been any downloaded updates.
                 CodePushUtils.logBundleUrl(binaryJsBundleUrl);
-                mIsRunningBinaryVersion = true;
+                sIsRunningBinaryVersion = true;
                 return binaryJsBundleUrl;
             }
 
-            ReadableMap packageMetadata = this.mCodePushUpdateManager.getCurrentPackage();
+            ReadableMap packageMetadata = this.mUpdateManager.getCurrentPackage();
             Long binaryModifiedDateDuringPackageInstall = null;
             String binaryModifiedDateDuringPackageInstallString = CodePushUtils.tryGetString(packageMetadata, CodePushConstants.BINARY_MODIFIED_TIME_KEY);
             if (binaryModifiedDateDuringPackageInstallString != null) {
@@ -186,7 +180,7 @@ public class CodePush implements ReactPackage {
                     binaryModifiedDateDuringPackageInstall == binaryResourcesModifiedTime &&
                     (isUsingTestConfiguration() || this.mAppVersion.equals(packageAppVersion))) {
                 CodePushUtils.logBundleUrl(packageFilePath);
-                mIsRunningBinaryVersion = false;
+                sIsRunningBinaryVersion = false;
                 return packageFilePath;
             } else {
                 // The binary version is newer.
@@ -196,7 +190,7 @@ public class CodePush implements ReactPackage {
                 }
 
                 CodePushUtils.logBundleUrl(binaryJsBundleUrl);
-                mIsRunningBinaryVersion = true;
+                sIsRunningBinaryVersion = true;
                 return binaryJsBundleUrl;
             }
         } catch (NumberFormatException e) {
@@ -221,7 +215,7 @@ public class CodePush implements ReactPackage {
                     // Pending update was initialized, but notifyApplicationReady was not called.
                     // Therefore, deduce that it is a broken update and rollback.
                     CodePushUtils.log("Update did not finish loading the last time, rolling back to a previous version.");
-                    mNeedToReportRollback = true;
+                    sNeedToReportRollback = true;
                     rollbackPackage();
                 } else {
                     // There is in fact a new update running for the first
@@ -249,35 +243,35 @@ public class CodePush implements ReactPackage {
     }
 
     boolean isRunningBinaryVersion() {
-        return mIsRunningBinaryVersion;
+        return sIsRunningBinaryVersion;
     }
 
     boolean needToReportRollback() {
-        return mNeedToReportRollback;
+        return sNeedToReportRollback;
     }
 
     private void rollbackPackage() {
-        WritableMap failedPackage = mCodePushUpdateManager.getCurrentPackage();
+        WritableMap failedPackage = mUpdateManager.getCurrentPackage();
         mSettingsManager.saveFailedUpdate(failedPackage);
-        mCodePushUpdateManager.rollbackPackage();
+        mUpdateManager.rollbackPackage();
         mSettingsManager.removePendingUpdate();
     }
 
     public void setNeedToReportRollback(boolean needToReportRollback) {
-        CodePush.mNeedToReportRollback = needToReportRollback;
+        CodePush.sNeedToReportRollback = needToReportRollback;
     }
 
     /* The below 3 methods are used for running tests.*/
     public static boolean isUsingTestConfiguration() {
-        return mTestConfigurationFlag;
+        return sTestConfigurationFlag;
     }
 
     public static void setUsingTestConfiguration(boolean shouldUseTestConfiguration) {
-        mTestConfigurationFlag = shouldUseTestConfiguration;
+        sTestConfigurationFlag = shouldUseTestConfiguration;
     }
 
     public void clearUpdates() {
-        mCodePushUpdateManager.clearUpdates();
+        mUpdateManager.clearUpdates();
         mSettingsManager.removePendingUpdate();
         mSettingsManager.removeFailedUpdates();
     }
@@ -285,10 +279,10 @@ public class CodePush implements ReactPackage {
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactApplicationContext) {
         List<NativeModule> nativeModules = new ArrayList<>();
-        mCodePushNativeModule = new CodePushNativeModule(reactApplicationContext, this, mCodePushUpdateManager, mCodePushTelemetryManager, mSettingsManager);
-        CodePushDialog dialogModule = new CodePushDialog(reactApplicationContext, mCodePushNativeModule);
+        mNativeModule = new CodePushNativeModule(reactApplicationContext, this, mUpdateManager, mTelemetryManager, mSettingsManager);
+        CodePushDialog dialogModule = new CodePushDialog(reactApplicationContext);
 
-        nativeModules.add(mCodePushNativeModule);
+        nativeModules.add(mNativeModule);
         nativeModules.add(dialogModule);
 
         return nativeModules;

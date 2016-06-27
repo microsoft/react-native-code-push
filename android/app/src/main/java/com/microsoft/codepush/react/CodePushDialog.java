@@ -11,17 +11,14 @@ import com.facebook.react.bridge.ReactMethod;
 
 public class CodePushDialog extends ReactContextBaseJavaModule{
 
-    private CodePushNativeModule mCodePushNativeModule;
-
-    public CodePushDialog(ReactApplicationContext reactContext, CodePushNativeModule codePushNativeModule) {
+    public CodePushDialog(ReactApplicationContext reactContext) {
         super(reactContext);
-        mCodePushNativeModule = codePushNativeModule;
     }
 
     @ReactMethod
     public void showDialog(String title, String message, String button1Text, String button2Text,
                       final Callback successCallback, Callback errorCallback) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(mCodePushNativeModule.getCurrentActivityPublic());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getCurrentActivity());
 
         builder.setCancelable(false);
 
