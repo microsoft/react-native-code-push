@@ -20,6 +20,7 @@ This plugin provides client-side integration for the [CodePush service](http://c
 * [Debugging / Troubleshooting](#debugging--troubleshooting)
 * [Example Apps / Starters](#example-apps--starters)
 * [Continuous Integration / Delivery](#continuous-integration--delivery)
+* [TypeScript Consumption](#typescript-consumption)
 
 ## How does it work?
 
@@ -27,7 +28,7 @@ A React Native app is composed of JavaScript files and any accompanying [images]
 
 The CodePush plugin helps get product improvements in front of your end users instantly, by keeping your JavaScript and images synchronized with updates you release to the CodePush server. This way, your app gets the benefits of an offline mobile experience, as well as the "web-like" agility of side-loading updates as soon as they are available. It's a win-win!
 
-In order to ensure that your end users always have a functioning version of your app, the CodePush plugin maintains a copy of the previous update, so that in the event that you accidentally push an update which includes a crash, it can automatically roll back. This way, you can rest assured that your newfound release agility won't result in users becoming blocked before you have a chance to [roll back](http://microsoft.github.io/code-push/docs/cli.html#link-10) on the server. It's a win-win-win! 
+In order to ensure that your end users always have a functioning version of your app, the CodePush plugin maintains a copy of the previous update, so that in the event that you accidentally push an update which includes a crash, it can automatically roll back. This way, you can rest assured that your newfound release agility won't result in users becoming blocked before you have a chance to [roll back](http://microsoft.github.io/code-push/docs/cli.html#link-10) on the server. It's a win-win-win!
 
 *Note: Any product changes which touch native code (e.g. modifying your `AppDelegate.m`/`MainActivity.java` file, adding a new plugin) cannot be distributed via CodePush, and therefore, must be updated via the appropriate store(s).*
 
@@ -51,7 +52,7 @@ We try our best to maintain backwards compatability of our plugin with previous 
 
 When using the React Native assets sytem (i.e. using the `require("./foo.png")` syntax), the following list represents the set of core components (and props) that support having their referenced images updated via CodePush:
 
-| Component                                       | Prop(s)                                  | 
+| Component                                       | Prop(s)                                  |
 |-------------------------------------------------|------------------------------------------|
 | `Image`                                         | `source`   |
 | `MapView.Marker` <br />*(Requires [react-native-maps](https://github.com/lelandrichardson/react-native-maps) `>=O.3.2`)* | `image`                             |
@@ -88,7 +89,7 @@ Once you've acquired the CodePush plugin, you need to integrate it into the Xcod
 
 In order to accommodate as many developer preferences as possible, the CodePush plugin supports iOS installation via three mechanisms:
 
-1. [**RNPM**](#plugin-installation-ios---rnpm) - [React Native Package Manager (RNPM)](https://github.com/rnpm/rnpm) is an awesome tool that provides the simplest installation experience possible for React Native plugins. If you're already using it, or you want to use it, then we recommend this approach. 
+1. [**RNPM**](#plugin-installation-ios---rnpm) - [React Native Package Manager (RNPM)](https://github.com/rnpm/rnpm) is an awesome tool that provides the simplest installation experience possible for React Native plugins. If you're already using it, or you want to use it, then we recommend this approach.
 
 2. [**CocoaPods**](#plugin-installation-ios---cocoapods) - If you're building a native iOS app that is embedding React Native into it, or you simply prefer using [CocoaPods](https://cocoapods.org), then we recommend using the Podspec file that we ship as part of our plugin.
 
@@ -99,7 +100,7 @@ In order to accommodate as many developer preferences as possible, the CodePush 
 1. Run `rnpm link react-native-code-push`
 
     *Note: If you don't already have RNPM installed, you can do so by simply running `npm i -g rnpm` and then executing the above command.*
-    
+
 And that's it! Isn't RNPM awesome? :)
 
 #### Plugin Installation (iOS - CocoaPods)
@@ -109,20 +110,20 @@ And that's it! Isn't RNPM awesome? :)
     ```ruby
     pod 'CodePush', :path => './node_modules/react-native-code-push'
     ```
-    
+
     CodePush depends on an internal copy of the `SSZipArchive` library, so if your project already includes it (either directly or via a transitive dependency), then you can install a version of CodePush which excludes it by depending specificaly on the `Core` subspec:
-    
+
     ```ruby
     pod 'CodePush', :path => './node_modules/react-native-code-push', :subspecs => ['Core']
     ```
-    
+
     *NOTE: The above paths needs to be relative to your app's `Podfile`, so adjust it as nec
     cessary.*
-    
+
 2. Run `pod install`
 
 *NOTE: The CodePush `.podspec` depends on the `React` pod, and so in order to ensure that it can correctly use the version of React Native that your app is built with, please make sure to define the `React` dependency in your app's `Podfile` as explained [here](http://facebook.github.io/react-native/docs/embedded-app-ios.html#install-react-native-using-cocoapods).*
-    
+
 #### Plugin Installation (iOS - Manual)
 
 1. Open your app's Xcode project
@@ -137,12 +138,12 @@ And that's it! Isn't RNPM awesome? :)
 
     ![Link CodePush during build](https://cloud.githubusercontent.com/assets/516559/10322221/a75ea066-6c31-11e5-9d88-ff6f6a4d6968.png)
 
-5. Click the plus sign underneath the "Link Binary With Libraries" list and select the `libz.tbd` library underneath the `iOS 9.1` node. 
+5. Click the plus sign underneath the "Link Binary With Libraries" list and select the `libz.tbd` library underneath the `iOS 9.1` node.
 
     ![Libz reference](https://cloud.githubusercontent.com/assets/116461/11605042/6f786e64-9aaa-11e5-8ca7-14b852f808b1.png)
-    
+
     *Note: Alternatively, if you prefer, you can add the `-lz` flag to the `Other Linker Flags` field in the `Linking` section of the `Build Settings`.*
-    
+
 6. Under the "Build Settings" tab of your project configuration, find the "Header Search Paths" section and edit the value.
 Add a new value, `$(SRCROOT)/../node_modules/react-native-code-push` and select "recursive" in the dropdown.
 
@@ -163,7 +164,7 @@ Once your Xcode project has been setup to build/link the CodePush plugin, you ne
     ```objective-c
     jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
     ```
-    
+
 3. Replace it with this line:
 
     ```objective-c
@@ -174,7 +175,7 @@ This change configures your app to always load the most recent version of your a
 
 *NOTE: The `bundleURL` method assumes your app's JS bundle is named `main.jsbundle`. If you have configured your app to use a different file name, simply call the `bundleURLForResource:` method (which assumes you're using the `.jsbundle` extension) or `bundleURLForResource:withExtension:` method instead, in order to overwrite that default behavior*
 
-Typically, you're only going to want to use CodePush to resolve your JS bundle location within release builds, and therefore, we recommend using the `DEBUG` pre-processor macro to dynamically switch between using the packager server and CodePush, depending on whether you are debugging or not. This will make it much simpler to ensure you get the right behavior you want in production, while still being able to use the Chrome Dev Tools, live reload, etc. at debug-time. 
+Typically, you're only going to want to use CodePush to resolve your JS bundle location within release builds, and therefore, we recommend using the `DEBUG` pre-processor macro to dynamically switch between using the packager server and CodePush, depending on whether you are debugging or not. This will make it much simpler to ensure you get the right behavior you want in production, while still being able to use the Chrome Dev Tools, live reload, etc. at debug-time.
 
 ```objective-c
 NSURL *jsCodeLocation;
@@ -185,11 +186,11 @@ NSURL *jsCodeLocation;
     jsCodeLocation = [CodePush bundleURL];
 #endif
 ```
-    
+
 To let the CodePush runtime know which deployment it should query for updates against, open your app's `Info.plist` file and add a new entry named `CodePushDeploymentKey`, whose value is the key of the deployment you want to configure this app against (e.g. the key for the `Staging` deployment for the `FooBar` app). You can retrieve this value by running `code-push deployment ls <appName> -k` in the CodePush CLI (the `-k` flag is necessary since keys aren't displayed by default) and copying the value of the `Deployment Key` column which corresponds to the deployment you want to use (see below). Note that using the deployment's name (e.g. Staging) will not work. That "friendly name" is intended only for authenticated management usage from the CLI, and not for public consumption within your app.
 
 ![Deployment list](https://cloud.githubusercontent.com/assets/116461/11601733/13011d5e-9a8a-11e5-9ce2-b100498ffb34.png)
-    
+
 In order to effectively make use of the `Staging` and `Production` deployments that were created along with your CodePush app, refer to the [multi-deployment testing](#multi-deployment-testing) docs below before actually moving your app's usage of CodePush into production.
 
 ## Android Setup
@@ -200,7 +201,7 @@ In order to integrate CodePush into your Android project, perform the following 
 
 In order to accommodate as many developer preferences as possible, the CodePush plugin supports Android installation via two mechanisms:
 
-1. [**RNPM**](#plugin-installation-android---rnpm) - [React Native Package Manager (RNPM)](https://github.com/rnpm/rnpm) is an awesome tool that provides the simplest installation experience possible for React Native plugins. If you're already using it, or you want to use it, then we recommend this approach. 
+1. [**RNPM**](#plugin-installation-android---rnpm) - [React Native Package Manager (RNPM)](https://github.com/rnpm/rnpm) is an awesome tool that provides the simplest installation experience possible for React Native plugins. If you're already using it, or you want to use it, then we recommend this approach.
 
 2. [**"Manual"**](#plugin-installation-android---manual) - If you don't want to depend on any additional tools or are fine with a few extra installation steps (it's a one-time thing), then go with this approach.
 
@@ -209,31 +210,31 @@ In order to accommodate as many developer preferences as possible, the CodePush 
 1. Run `rnpm link react-native-code-push`
 
     *Note: If you don't already have RNPM installed, you can do so by simply running `npm i -g rnpm` and then executing the above command.*
-    
+
 2. If you're using RNPM >=1.6.0, you will be prompted for the deployment key you'd like to use. If you don't already have it, you can retreive this value by running `code-push deployment ls <appName> -k`, or you can choose to ignore it (by simply hitting `<ENTER>`) and add it in later. To get started, we would recommend just using your `Staging` deployment key, so that you can test out the CodePush end-to-end.
 
 3. (Only needed in v1.8.0+ of the plugin) In your `android/app/build.gradle` file, add the `codepush.gradle` file as an additional build task definition underneath `react.gradle`:
-    
+
     ```gradle
     ...
     apply from: "../../node_modules/react-native/react.gradle"
     apply from: "../../node_modules/react-native-code-push/android/codepush.gradle"
     ...
     ```
-    
+
 And that's it for installation using RNPM! Continue below to the [Plugin Configuration](#plugin-configuration-android) section to complete the setup.
 
 #### Plugin Installation (Android - Manual)
 
 1. In your `android/settings.gradle` file, make the following additions:
-    
+
     ```gradle
     include ':app', ':react-native-code-push'
     project(':react-native-code-push').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-code-push/android/app')
     ```
-    
+
 2. In your `android/app/build.gradle` file, add the `:react-native-code-push` project as a compile-time dependency:
-    
+
     ```gradle
     ...
     dependencies {
@@ -241,9 +242,9 @@ And that's it for installation using RNPM! Continue below to the [Plugin Configu
         compile project(':react-native-code-push')
     }
     ```
-    
+
 3. (Only needed in v1.8.0+ of the plugin) In your `android/app/build.gradle` file, add the `codepush.gradle` file as an additional build task definition underneath `react.gradle`:
-    
+
     ```gradle
     ...
     apply from: "react.gradle"
@@ -339,7 +340,7 @@ Once you've acquired the CodePush plugin, you need to integrate it into the Visu
 2. Right-click the solution node in the `Solution Explorer` window and select the `Add -> Existing Project...` menu item
 
    ![Add Project](https://cloud.githubusercontent.com/assets/116461/14467164/ddf6312e-008e-11e6-8a10-44a8b44b5dfc.PNG)
-   
+
 3. Browse to the `node_modules\react-native-code-push\windows` directory, select the `CodePush.csproj` file and click `OK`
 
 4. Back in the `Solution Explorer`, right-click the project node that is named after your app, and select the `Add -> Reference...` menu item
@@ -349,23 +350,23 @@ Once you've acquired the CodePush plugin, you need to integrate it into the Visu
 5. Select the `Projects` tab on the left hand side, check the `CodePush` item and then click `OK`
 
    ![Add Reference Dialog](https://cloud.githubusercontent.com/assets/116461/14467147/cb805b6e-008e-11e6-964f-f856c59b65af.PNG)
-   
+
 ### Plugin Configuration (Windows)
 
 After installing the plugin, you need to configure your app to consult CodePush for the location of your JS bundle, since it will "take control" of managing the current and all future versions. To do this, update the `AppReactPage.cs` file to use CodePush via the following changes:
 
 ```c#
 ...
-// 1. Import the CodePush namespace 
+// 1. Import the CodePush namespace
 using CodePush.ReactNative;
 ...
 class AppReactPage : ReactPage
 {
     // 2. Declare a private instance variable for the CodePushModule instance.
     private CodePushReactPackage codePushReactPackage;
-    
+
     // 3. Update the JavaScriptBundleFile property to initalize the CodePush runtime,
-    // specifying the right deployment key, then use it to return the bundle URL from 
+    // specifying the right deployment key, then use it to return the bundle URL from
     // CodePush instead of statically from the binary. If you don't already have your
     // deployment key, you can run "code-push deployment ls <appName> -k" to retrieve it.
     public override string JavaScriptBundleFile
@@ -377,7 +378,7 @@ class AppReactPage : ReactPage
         }
     }
 
-    // 4. Add the codePushReactPackage instance to the list of existing packages. 
+    // 4. Add the codePushReactPackage instance to the list of existing packages.
     public override List<IReactPackage> Packages
     {
         get
@@ -434,7 +435,7 @@ Additionally, if you would like to display an update confirmation dialog (an "ac
 
 ## Releasing Updates
 
-Once your app has been configured and distributed to your users, and you've made some JS and/or asset changes, it's time to instantly release them! The simplest (and recommended) way to do this is to use the `release-react` command in the CodePush CLI, which will handle bundling your JavaScript and asset files and releasing the update to the CodePush server. 
+Once your app has been configured and distributed to your users, and you've made some JS and/or asset changes, it's time to instantly release them! The simplest (and recommended) way to do this is to use the `release-react` command in the CodePush CLI, which will handle bundling your JavaScript and asset files and releasing the update to the CodePush server.
 
 In it's most basic form, this command only requires two parameters: your app name and the platform you are bundling the update for (either `ios` or `android`).
 
@@ -445,7 +446,7 @@ code-push release-react MyApp ios
 code-push release-react MyApp-Android android
 ```
 
-The `release-react` command enables such a simple workflow because it provides many sensible defaults (e.g. generating a release bundle, assuming your app's entry file on iOS is either `index.ios.js` or `index.js`). However, all of these defaults can be customized to allow incremental flexibility as necessary, which makes it a good fit for most scenarios. 
+The `release-react` command enables such a simple workflow because it provides many sensible defaults (e.g. generating a release bundle, assuming your app's entry file on iOS is either `index.ios.js` or `index.js`). However, all of these defaults can be customized to allow incremental flexibility as necessary, which makes it a good fit for most scenarios.
 
 ```shell
 # Release a mandatory update with a changelog
@@ -476,7 +477,7 @@ In our [getting started](#getting-started) docs, we illustrated how to configure
 
 *NOTE: Our client-side rollback feature can help unblock users after installing a release that resulted in a crash, and server-side rollbacks (i.e. `code-push rollback`) allow you to prevent additional users from installing a bad release once it's been identified. However, it's obviously better if you can prevent an erroneous update from being broadly released in the first place.*
 
-Taking advantage of the `Staging` and `Production` deployments allows you to acheive a workflow like the following (feel free to customize!):
+Taking advantage of the `Staging` and `Production` deployments allows you to achieve a workflow like the following (feel free to customize!):
 
 1. Release a CodePush update to your `Staging` deployment using the `code-push release-react` command (or `code-push release` if you need more control)
 
@@ -499,17 +500,17 @@ To set this up, perform the following steps:
 1. Open your app's `build.gradle` file (e.g. `android/app/build.gradle` in standard React Native projects)
 
 2. Find the `android { buildTypes {} }` section and define `buildConfigField` entries for both your `debug` and `release` build types, which reference your `Staging` and `Production` deployment keys respectively. If you prefer, you can define the key literals in your `gradle.properties` file, and then reference them here. Either way will work, and it's just a matter of personal preference.
- 
+
     ```groovy
     android {
-        ... 
+        ...
         buildTypes {
             debug {
                 ...
                 buildConfigField "String", "CODEPUSH_KEY", '"<INSERT_STAGING_KEY>"'
                 ...
             }
-            
+
             release {
                 ...
                 buildConfigField "String", "CODEPUSH_KEY", '"<INSERT_PRODUCTION_KEY>"'
@@ -521,15 +522,15 @@ To set this up, perform the following steps:
     ```
 
     *NOTE: As a reminder, you can retrieve these keys by running `code-push deployment ls <APP_NAME> -k` from your terminal.*
-    
-4. Open up your `MainAtivity.java` file and change the `CodePush` constructor to pass the deployment key in via the build config you just defined, as opposed to a string literal. 
+
+4. Open up your `MainActivity.java` file and change the `CodePush` constructor to pass the deployment key in via the build config you just defined, as opposed to a string literal.
 
     ```java
     new CodePush(BuildConfig.CODEPUSH_KEY, this, BuildConfig.DEBUG);
     ```
-    
+
     *Note: If you gave your build setting a different name in your Gradle file, simply make sure to reflect that in your Java code.*
-    
+
 And that's it! Now when you run or build your app, your debug builds will automatically be configured to sync with your `Staging` deployment, and your release builds will be configured to sync with your `Production` deployment.
 
 *NOTE: By default, the `react-native run-android` command builds and deploys the debug version of your app, so if you want to test out a release/production build, simply run `react-native run-android --variant release. Refer to the [React Native docs](http://facebook.github.io/react-native/docs/signed-apk-android.html#conten) for details about how to configure and create release builds for your Android apps.*
@@ -571,7 +572,7 @@ To set this up, perform the following steps:
 4. Click the `+` button within the `Configurations` section and select `Duplicate "Release" Configuration`
 
    ![Configuration](https://cloud.githubusercontent.com/assets/116461/16101597/088714c0-331c-11e6-9504-5469d9a59d74.png)
-   
+
 5. Name the new configuration `Staging` (or whatever you prefer)
 
 6. Select the `Build Settings` tab
@@ -583,13 +584,13 @@ To set this up, perform the following steps:
 8. Name this new setting something like `CODEPUSH_KEY`, expand it, and specify your `Staging` deployment key for the `Staging` config and your `Production` deployment key for the `Release` config.
 
     ![Setting Keys](https://cloud.githubusercontent.com/assets/116461/15764230/106c245c-28de-11e6-96fe-2615f9220b07.png)
-    
+
     *NOTE: As a reminder, you can retrieve these keys by running `code-push deployment ls <APP_NAME> -k` from your terminal.*
-    
+
 9. Open your project's `Info.plist` file and change the value of your `CodePushDeploymentKey` entry to `$(CODEPUSH_KEY)`
 
     ![Infoplist](https://cloud.githubusercontent.com/assets/116461/15764252/3ac8aed2-28de-11e6-8c19-2270ae9857a7.png)
-    
+
 And that's it! Now when you run or build your app, your staging builds will automatically be configured to sync with your `Staging` deployment, and your release builds will be configured to sync with your `Production` deployment.
 
 Additionally, if you want to give them seperate names and/or icons, you can modify the `Product Name` and `Asset Catalog App Icon Set Name` build settings, which will allow your staging builds to be distinguishable from release builds when installed on the same device.
@@ -644,7 +645,7 @@ When you require `react-native-code-push`, the module object provides the follow
 
 * [allowRestart](#codepushallowrestart): Re-allows programmatic restarts to occur as a result of an update being installed, and optionally, immediately restarts the app if a pending update had attempted to restart the app while restarts were disallowed. This is an advanced API and is only necessary if your app explicitly disallowed restarts via the `disallowRestart` method.
 
-* [checkForUpdate](#codepushcheckforupdate): Asks the CodePush service whether the configured app deployment has an update available. 
+* [checkForUpdate](#codepushcheckforupdate): Asks the CodePush service whether the configured app deployment has an update available.
 
 * [disallowRestart](#codepushdisallowrestart): Temporarily disallows any programmatic restarts to occur as a result of a CodePush update being installed. This is an advanced API, and is useful when a component within your app (e.g. an onboarding process) needs to ensure that no end-user interruptions can occur during its lifetime.
 
@@ -702,13 +703,13 @@ This method returns a `Promise` which resolves to one of two possible values:
 
 2. A [`RemotePackage`](#remotepackage) instance which represents an available update that can be inspected and/or subsequently downloaded.
 
-Example Usage: 
+Example Usage:
 
 ```javascript
 codePush.checkForUpdate()
 .then((update) => {
     if (!update) {
-        console.log("The app is up to date!"); 
+        console.log("The app is up to date!");
     } else {
         console.log("An update is available! Should we download it?");
     }
@@ -735,26 +736,26 @@ This is an advanced API, and is primarily useful when individual components with
 
 As an alternative, you could also choose to simply use `InstallMode.ON_NEXT_RESTART` whenever calling `sync` (which will never attempt to programmatically restart the app), and then explicity calling `restartApp` at points in your app that you know it is "safe" to do so. `disallowRestart` provides an alternative approach to this when the code that synchronizes with the CodePush server is separate from the code/components that want to enforce a no-restart policy.
 
-Example Usage: 
+Example Usage:
 
 ```javascript
 class OnboardingProcess extends Component {
     ...
-    
+
     componentWillMount() {
         // Ensure that any CodePush updates which are
         // synchronized in the background can't trigger
         // a restart while this component is mounted.
-        codePush.disallowRestart();    
+        codePush.disallowRestart();
     }
-    
+
     componentWillUnmount() {
         // Reallow restarts, and optionally trigger
         // a restart if one was currently pending.
         codePush.allowRestart();
     }
-    
-    ...   
+
+    ...
 }
 ```
 
@@ -777,7 +778,7 @@ This method returns a `Promise` which resolves to one of two possible values:
 
 2. A [`LocalPackage`](#localpackage) instance which represents the metadata for the currently running CodePush update.
 
-Example Usage: 
+Example Usage:
 
 ```javascript
 codePush.getCurrentPackage()
@@ -804,16 +805,16 @@ This method returns a `Promise` which resolves to one of two possible values:
 1. `null` if an update with the specified state doesn't currently exist. This occurs in the following scenarios:
 
     1. The end-user hasn't installed any CodePush updates yet, and therefore, no metadata is available for any updates, regardless what you specify as the `updateState` parameter.
-    
+
     2. The end-user installed an update of the binary (e.g. from the store), which cleared away the old CodePush updates, and gave precedence back to the JS binary in the binary. Therefore, it would exhibit the same behavior as #1
-    
+
     3. The `updateState` parameter is set to `UpdateState.RUNNING`, but the app isn't currently running a CodePush update. There may be a pending update, but the app hasn't been restarted yet in order to make it active.
-    
+
     4. The `updateState` parameter is set to `UpdateState.PENDING`, but the app doesn't have any currently pending updates.
 
 2. A [`LocalPackage`](#localpackage) instance which represents the metadata for the currently requested CodePush update (either the running or pending).
 
-Example Usage: 
+Example Usage:
 
 ```javascript
 // Check if there is currently a CodePush update running, and if
@@ -828,7 +829,7 @@ codePush.getUpdateMetadata().then((update) => {
 // Check to see if there is still an update pending.
 codePush.getUpdateMetadata(UpdateState.PENDING).then((update) => {
     if (update) {
-        // There's a pending update, do we want to force a restart?   
+        // There's a pending update, do we want to force a restart?
     }
 });
 ```
@@ -845,19 +846,19 @@ If you are using the `sync` function, and doing your update check on app start, 
 
 *NOTE: This method is also aliased as `notifyApplicationReady` (for backwards compatibility).*
 
-#### codePush.restartApp		
-		
-```javascript		
-codePush.restartApp(onlyIfUpdateIsPending: Boolean = false): void;		
-```		
-		
+#### codePush.restartApp
+
+```javascript
+codePush.restartApp(onlyIfUpdateIsPending: Boolean = false): void;
+```
+
 Immediately restarts the app. If a truthy value is provided to the `onlyIfUpdateIsPending` parameter, then the app will only restart if there is actually a pending update waiting to be applied.
 
-This method is for advanced scenarios, and is primarily useful when the following conditions are true:		
-		
+This method is for advanced scenarios, and is primarily useful when the following conditions are true:
+
 1. Your app is specifying an install mode value of `ON_NEXT_RESTART` or `ON_NEXT_RESUME` when calling the `sync` or `LocalPackage.install` methods. This has the effect of not applying your update until the app has been restarted (by either the end user or OS)	or resumed, and therefore, the update won't be immediately displayed to the end user.
 
-2. You have an app-specific user event (e.g. the end user navigated back to the app's home route) that allows you to apply the update in an unobtrusive way, and potentially gets the update in front of the end user sooner then waiting until the next restart or resume.		
+2. You have an app-specific user event (e.g. the end user navigated back to the app's home route) that allows you to apply the update in an unobtrusive way, and potentially gets the update in front of the end user sooner then waiting until the next restart or resume.
 
 #### codePush.sync
 
@@ -873,11 +874,11 @@ This method provides support for two different (but customizable) "modes" to eas
 
 2. **Active mode**, which when an update is available, prompts the end user for permission before downloading it, and then immediately applies the update. If an update was released using the `mandatory` flag, the end user would still be notified about the update, but they wouldn't have the choice to ignore it.
 
-Example Usage: 
+Example Usage:
 
 ```javascript
 // Fully silent update which keeps the app in
-// sync with the server, without ever 
+// sync with the server, without ever
 // interrupting the end user
 codePush.sync();
 
@@ -898,25 +899,25 @@ While the `sync` method tries to make it easy to perform silent and active updat
 * __mandatoryInstallMode__ *(codePush.InstallMode)* - Specifies when you would like to install updates which are marked as mandatory. Defaults to `codePush.InstallMode.IMMEDIATE`. Refer to the [`InstallMode`](#installmode) enum reference for a description of the available options and what they do.
 
 * __minimumBackgroundDuration__ *(Number)* - Specifies the minimum number of seconds that the app needs to have been in the background before restarting the app. This property only applies to updates which are installed using `InstallMode.ON_NEXT_RESUME`, and can be useful for getting your update in front of end users sooner, without being too obtrusive. Defaults to `0`, which has the effect of applying the update immediately after a resume, regardless how long it was in the background.
- 
+
 * __updateDialog__ *(UpdateDialogOptions)* - An "options" object used to determine whether a confirmation dialog should be displayed to the end user when an update is available, and if so, what strings to use. Defaults to `null`, which has the effect of disabling the dialog completely. Setting this to any truthy value will enable the dialog with the default strings, and passing an object to this parameter allows enabling the dialog as well as overriding one or more of the default strings. Before enabling this option within an App Store-distributed app, please refer to [this note](#user-content-apple-note).
 
     The following list represents the available options and their defaults:
-    
+
     * __appendReleaseDescription__ *(Boolean)* - Indicates whether you would like to append the description of an available release to the notification message which is displayed to the end user. Defaults to `false`.
-    
+
     * __descriptionPrefix__ *(String)* - Indicates the string you would like to prefix the release description with, if any, when displaying the update notification to the end user. Defaults to `" Description: "`
-    
+
     * __mandatoryContinueButtonLabel__ *(String)* - The text to use for the button the end user must press in order to install a mandatory update. Defaults to `"Continue"`.
-    
+
     * __mandatoryUpdateMessage__ *(String)* - The text used as the body of an update notification, when the update is specified as mandatory. Defaults to `"An update is available that must be installed."`.
-    
+
     * __optionalIgnoreButtonLabel__ *(String)* - The text to use for the button the end user can press in order to ignore an optional update that is available. Defaults to `"Ignore"`.
-    
+
     * __optionalInstallButtonLabel__ *(String)* - The text to use for the button the end user can press in order to install an optional update. Defaults to `"Install"`.
-    
+
     * __optionalUpdateMessage__ *(String)* - The text used as the body of an update notification, when the update is optional. Defaults to `"An update is available. Would you like to install it?"`.
-    
+
     * __title__ *(String)* - The text used as the header of an update notification that is displayed to the end user. Defaults to `"Update available"`.
 
 Example Usage:
@@ -945,7 +946,7 @@ codePush.sync({ updateDialog: { title: "An update is available!" } });
 codePush.sync({
    updateDialog: {
     appendReleaseDescription: true,
-    descriptionPrefix: "\n\nChange log:\n"   
+    descriptionPrefix: "\n\nChange log:\n"
    },
    installMode: codePush.InstallMode.IMMEDIATE
 });
@@ -958,15 +959,15 @@ In addition to the options, the `sync` method also accepts two optional function
 * __downloadProgressCallback__ *((progress: DownloadProgress) => void)* - Called periodically when an available update is being downloaded from the CodePush server. The method is called with a `DownloadProgress` object, which contains the following two properties:
 
     * __totalBytes__ *(Number)* - The total number of bytes expected to be received for this update (i.e. the size of the set of files which changed from the previous release).
-   
+
     * __receivedBytes__ *(Number)* - The number of bytes downloaded thus far, which can be used to track download progress.
 
 Example Usage:
 
 ```javascript
 // Prompt the user when an update is available
-// and then display a "downloading" modal 
-codePush.sync({ updateDialog: true }, 
+// and then display a "downloading" modal
+codePush.sync({ updateDialog: true },
   (status) => {
       switch (status) {
           case codePush.SyncStatus.DOWNLOADING_PACKAGE:
@@ -977,8 +978,8 @@ codePush.sync({ updateDialog: true },
               break;
       }
   },
-  ({ receivedBytes, totalBytes, }) => { 
-    /* Update download modal progress */ 
+  ({ receivedBytes, totalBytes, }) => {
+    /* Update download modal progress */
   }
 );
 ```
@@ -1021,7 +1022,7 @@ Contains details about an update that has been downloaded locally or already ins
 
 ###### Methods
 
-- __install(installMode: codePush.InstallMode = codePush.InstallMode.ON_NEXT_RESTART, minimumBackgroundDuration = 0): Promise&lt;void&gt;__: Installs the update by saving it to the location on disk where the runtime expects to find the latest version of the app. The `installMode` parameter controls when the changes are actually presented to the end user. The default value is to wait until the next app restart to display the changes, but you can refer to the [`InstallMode`](#installmode) enum reference for a description of the available options and what they do. If the `installMode` parameter is set to `InstallMode.ON_NEXT_RESUME`, then the `minimumBackgroundDuration` parameter allows you to control how long the app must have been in the background before forcing the install after it is resumed. 
+- __install(installMode: codePush.InstallMode = codePush.InstallMode.ON_NEXT_RESTART, minimumBackgroundDuration = 0): Promise&lt;void&gt;__: Installs the update by saving it to the location on disk where the runtime expects to find the latest version of the app. The `installMode` parameter controls when the changes are actually presented to the end user. The default value is to wait until the next app restart to display the changes, but you can refer to the [`InstallMode`](#installmode) enum reference for a description of the available options and what they do. If the `installMode` parameter is set to `InstallMode.ON_NEXT_RESUME`, then the `minimumBackgroundDuration` parameter allows you to control how long the app must have been in the background before forcing the install after it is resumed.
 
 ##### RemotePackage
 
@@ -1048,7 +1049,7 @@ This enum specifies when you would like an installed update to actually be appli
 * __codePush.InstallMode.IMMEDIATE__ *(0)* - Indicates that you want to install the update and restart the app immediately. This value is appropriate for debugging scenarios as well as when displaying an update prompt to the user, since they would expect to see the changes immediately after accepting the installation. Additionally, this mode can be used to enforce mandatory updates, since it removes the potentially undesired latency between the update installation and the next time the end user restarts or resumes the app.
 
 * __codePush.InstallMode.ON_NEXT_RESTART__ *(1)* - Indicates that you want to install the update, but not forcibly restart the app. When the app is "naturally" restarted (due the OS or end user killing it), the update will be seamlessly picked up. This value is appropriate when performing silent updates, since it would likely be disruptive to the end user if the app suddenly restarted out of nowhere, since they wouldn't have realized an update was even downloaded. This is the default mode used for both the `sync` and `LocalPackage.install` methods.
- 
+
 * __codePush.InstallMode.ON_NEXT_RESUME__ *(2)* - Indicates that you want to install the update, but don't want to restart the app until the next time the end user resumes it from the background. This way, you don't disrupt their current session, but you can get the update in front of them sooner then having to wait for the next natural restart. This value is appropriate for silent installs that can be applied on resume in a non-invasive way.
 
 ##### SyncStatus
@@ -1063,7 +1064,7 @@ This enum is provided to the `syncStatusChangedCallback` function that can be pa
 * __codePush.SyncStatus.UPDATE_IGNORED__ *(5)* - The app has an optional update, which the end user chose to ignore. (This is only applicable when the `updateDialog` is used)
 * __codePush.SyncStatus.UPDATE_INSTALLED__ *(6)* - An available update has been installed and will be run either immediately after the `syncStatusChangedCallback` function returns or the next time the app resumes/restarts, depending on the `InstallMode` specified in `SyncOptions`.
 * __codePush.SyncStatus.SYNC_IN_PROGRESS__ *(7)* - There is an ongoing `sync` operation running which prevents the current call from being executed.
-* __codePush.SyncStatus.UNKNOWN_ERROR__ *(-1)* - The sync operation encountered an unknown error. 
+* __codePush.SyncStatus.UNKNOWN_ERROR__ *(-1)* - The sync operation encountered an unknown error.
 
 ##### UpdateState
 
@@ -1072,7 +1073,7 @@ This enum specifies the state that an update is currently in, and can be specifi
 * __codePush.UpdateState.RUNNING__ *(0)* - Indicates that an update represents the version of the app that is currently running. This can be useful for identifying attributes about the app, for scenarios such as displaying the release description in a "what's new?" dialog or reporting the latest version to an analytics and/or crash reporting service.
 
 * __codePush.UpdateState.PENDING__ *(1)* - Indicates than an update has been installed, but the app hasn't been restarted yet in order to apply it. This can be useful for determining whether there is a pending update, which you may want to force a programmatic restart (via `restartApp`) in order to apply.
- 
+
 * __codePush.UpdateState.LATEST__ *(2)* - Indicates than an update represents the latest available release, and can be either currently running or pending.
 
 ### Objective-C API Reference (iOS)
@@ -1081,7 +1082,7 @@ The Objective-C API is made available by importing the `CodePush.h` header into 
 
 #### CodePush
 
-Contains static methods for retreiving the `NSURL` that represents the most recent JavaScript bundle file, and can be passed to the `RCTRootView`'s `initWithBundleURL` method when bootstrapping your app in the `AppDelegate.m` file. 
+Contains static methods for retreiving the `NSURL` that represents the most recent JavaScript bundle file, and can be passed to the `RCTRootView`'s `initWithBundleURL` method when bootstrapping your app in the `AppDelegate.m` file.
 
 The `CodePush` class' methods can be thought of as composite resolvers which always load the appropriate bundle, in order to accommodate the following scenarios:
 
@@ -1093,7 +1094,7 @@ The `CodePush` class' methods can be thought of as composite resolvers which alw
 
 4. Repeat #2 and #3 as the CodePush releases and app store releases continue on into infinity (and beyond?)
 
-Because of this behavior, you can safely deploy updates to both the app store(s) and CodePush as necesary, and rest assured that your end-users will always get the most recent version.  
+Because of this behavior, you can safely deploy updates to both the app store(s) and CodePush as necesary, and rest assured that your end-users will always get the most recent version.
 
 ##### Methods
 
@@ -1120,9 +1121,9 @@ Constructs the CodePush client runtime and represents the `ReactPackage` instanc
 - __CodePush(String deploymentKey, Activity mainActivity, bool isDebugMode)__ - Equivalent to the previous constructor, but allows you to specify whether you want the CodePush runtime to be in debug mode or not. When using this constructor, the `isDebugMode` parameter should always be set to `BuildConfig.DEBUG` in order to stay synchronized with your build type. When putting CodePush into debug mode, the following behaviors are enabled:
 
     1. Old CodePush updates aren't deleted from storage whenever a new binary is deployed to the emulator/device. This behavior enables you to deploy new binaries, without bumping the version during development, and without continuously getting the same update every time your app calls `sync`.
-    
+
     2. The local cache that the React Native runtime maintains in debug mode is deleted whenever a CodePush update is installed. This ensures that when the app is restarted after an update is applied, you will see the expected changes. As soon as [this PR](https://github.com/facebook/react-native/pull/4738) is merged, we won't need to do this anymore.
-    
+
 ##### Static Methods
 
 - __getBundleUrl()__ - Returns the path to the most recent version of your app's JS bundle file, assuming that the resource name is `index.android.bundle`. If your app is using a different bundle name, then use the overloaded version of this method which allows specifying it. This method has the same resolution behavior as the Objective-C equivalent described above.
@@ -1182,6 +1183,10 @@ In addition to being able to use the CodePush CLI to "manually" release updates,
 * [Travis CI](https://github.com/mondora/code-push-travis-cli)
 
 Additionally, if you'd like more details of what a complete mobile CI/CD workflow  can look like, which includes CodePush, check out this [excellent article](https://zeemee.engineering/zeemee-engineering-and-the-quest-for-the-holy-mobile-dev-grail-1310be4953d1#.zfwaxtbco) by the [ZeeMee engineering team](https://zeemee.engineering).
+
+## TypeScript Consumption
+
+This module ships its `*.d.ts` file as part of its NPM package, which allows you to simply `import` it, and receive intellisense in supporting editors (e.g. Visual Studio Code), as well as compile-time type checking if you're using TypeScript. For the most part, this behavior should just work out of the box, however, if you've specified `es6` as the value for either the `target` or `module` [compiler option](http://www.typescriptlang.org/docs/handbook/compiler-options.html) in your [`tsconfig.json`](http://www.typescriptlang.org/docs/handbook/tsconfig-json.html) file, then just make sure that you also set the `moduleResolution` option to `node`. This ensures that the TypeScript compiler will look within the `node_modules` for the type definitions of imported modules. Otherwise, you'll get an error like the following: `error TS2307: Cannot find module 'react-native-code-push'`.
 
 ---
 
