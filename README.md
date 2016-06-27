@@ -20,7 +20,7 @@ This plugin provides client-side integration for the [CodePush service](http://c
 * [Debugging / Troubleshooting](#debugging--troubleshooting)
 * [Example Apps / Starters](#example-apps--starters)
 * [Continuous Integration / Delivery](#continuous-integration--delivery)
-* [TypeScript Consumption](#typeScript-consumption)
+* [TypeScript Consumption](#typescript-consumption)
 
 ## How does it work?
 
