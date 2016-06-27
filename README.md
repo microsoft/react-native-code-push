@@ -20,6 +20,7 @@ This plugin provides client-side integration for the [CodePush service](http://c
 * [Debugging / Troubleshooting](#debugging--troubleshooting)
 * [Example Apps / Starters](#example-apps--starters)
 * [Continuous Integration / Delivery](#continuous-integration--delivery)
+* [TypeScript Consumption](#typeScript-consumption)
 
 ## How does it work?
 
@@ -1143,6 +1144,10 @@ In addition to being able to use the CodePush CLI to "manually" release updates,
 * [Travis CI](https://github.com/mondora/code-push-travis-cli)
 
 Additionally, if you'd like more details of what a complete mobile CI/CD workflow  can look like, which includes CodePush, check out this [excellent article](https://zeemee.engineering/zeemee-engineering-and-the-quest-for-the-holy-mobile-dev-grail-1310be4953d1#.zfwaxtbco) by the [ZeeMee engineering team](https://zeemee.engineering).
+
+## TypeScript Consumption
+
+This module ships its `*.d.ts` file as part of its NPM package, which allows you to simply `import` it, and receive intellisense in supporting editors (e.g. Visual Studio Code), as well as compile-time type checking if you're using TypeScript. For the most part, this behavior should just work out of the box, however, if you've specified `es6` as the value for either the `target` or `module` [compiler option](http://www.typescriptlang.org/docs/handbook/compiler-options.html) in your [`tsconfig.json`](http://www.typescriptlang.org/docs/handbook/tsconfig-json.html) file, then just make sure that you also set the `moduleResolution` option to `node`. This ensures that the TypeScript compiler will look within the `node_modules` for the type definitions of imported modules. Otherwise, you'll get an error like the following: `error TS2307: Cannot find module 'react-native-code-push'`.
 
 ---
 
