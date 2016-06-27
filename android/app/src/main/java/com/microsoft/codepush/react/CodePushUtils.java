@@ -24,8 +24,6 @@ import java.util.Iterator;
 
 public class CodePushUtils {
 
-    public static final String REACT_NATIVE_LOG_TAG = "ReactNative";
-
     public static String appendPathComponent(String basePath, String appendPathComponent) {
         return new File(basePath, appendPathComponent).getAbsolutePath();
     }
@@ -208,7 +206,7 @@ public class CodePushUtils {
     }
 
     public static void log(String message) {
-        Log.d(REACT_NATIVE_LOG_TAG, "[CodePush] " + message);
+        Log.d(CodePushConstants.REACT_NATIVE_LOG_TAG, "[CodePush] " + message);
     }
 
     public static void logBundleUrl(String path) {
