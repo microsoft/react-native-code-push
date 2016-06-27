@@ -51,21 +51,27 @@ if (bundleGeneratedAssetFiles.length) {
         // Generate hash for each asset file
         addFileToManifest(resourcesDir, assetFile, manifest, function() {
             if (manifest.length === bundleGeneratedAssetFiles.length) {
-                // Generate hash for JS bundle
-                addFileToManifest(path.dirname(jsBundleFilePath), path.basename(jsBundleFilePath), manifest, function() {
-                    // ...and the JS bundle "meta"
-                    var jsBundleMetaFilePath = jsBundleFilePath + ".meta";
-                    addFileToManifest(path.dirname(jsBundleMetaFilePath), path.basename(jsBundleMetaFilePath), manifest, function() {
-                        manifest = manifest.sort();
-                        var finalHash = crypto.createHash(HASH_ALGORITHM)
-                            .update(JSON.stringify(manifest))
-                            .digest("hex");
-
-                        var savedResourcesManifestPath = assetsDir + "/" + CODE_PUSH_HASH_FILE_NAME;
-                        fs.writeFileSync(savedResourcesManifestPath, finalHash);
-                    });
-                });
+                addJsBundleAndMetaToManifest();
             }
+        });
+    });
+} else {
+    addJsBundleAndMetaToManifest();
+}
+
+function addJsBundleAndMetaToManifest() {
+    addFileToManifest(path.dirname(jsBundleFilePath), path.basename(jsBundleFilePath), manifest, function() {
+        var jsBundleMetaFilePath = jsBundleFilePath + ".meta";
+        addFileToManifest(path.dirname(jsBundleMetaFilePath), path.basename(jsBundleMetaFilePath), manifest, function() {
+            manifest = manifest.sort();
+            var finalHash = crypto.createHash(HASH_ALGORITHM)
+                .update(JSON.stringify(manifest))
+                .digest("hex");
+
+            console.log(finalHash);
+
+            var savedResourcesManifestPath = assetsDir + "/" + CODE_PUSH_HASH_FILE_NAME;
+            fs.writeFileSync(savedResourcesManifestPath, finalHash);
         });
     });
 }
