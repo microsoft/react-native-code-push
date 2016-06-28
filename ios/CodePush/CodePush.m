@@ -91,7 +91,7 @@ static NSString *bundleResourceName = @"main";
     NSURL *binaryBundleURL = [self binaryBundleURL];
 
     if (error || !packageFile) {
-        NSLog(logMessageFormat, binaryBundleURL);
+        CPLog(logMessageFormat, binaryBundleURL);
         isRunningBinaryVersion = YES;
         return binaryBundleURL;
     }
@@ -99,7 +99,7 @@ static NSString *bundleResourceName = @"main";
     NSString *binaryAppVersion = [[CodePushConfig current] appVersion];
     NSDictionary *currentPackageMetadata = [CodePushPackage getCurrentPackage:&error];
     if (error || !currentPackageMetadata) {
-        NSLog(logMessageFormat, binaryBundleURL);
+        CPLog(logMessageFormat, binaryBundleURL);
         isRunningBinaryVersion = YES;
         return binaryBundleURL;
     }
@@ -110,7 +110,7 @@ static NSString *bundleResourceName = @"main";
     if ([[CodePushUpdateUtils modifiedDateStringOfFileAtURL:binaryBundleURL] isEqualToString:packageDate] && ([CodePush isUsingTestConfiguration] ||[binaryAppVersion isEqualToString:packageAppVersion])) {
         // Return package file because it is newer than the app store binary's JS bundle
         NSURL *packageUrl = [[NSURL alloc] initFileURLWithPath:packageFile];
-        NSLog(logMessageFormat, packageUrl);
+        CPLog(logMessageFormat, packageUrl);
         isRunningBinaryVersion = NO;
         return packageUrl;
     } else {
@@ -123,7 +123,7 @@ static NSString *bundleResourceName = @"main";
             [CodePush clearUpdates];
         }
 
-        NSLog(logMessageFormat, binaryBundleURL);
+        CPLog(logMessageFormat, binaryBundleURL);
         isRunningBinaryVersion = YES;
         return binaryBundleURL;
     }
@@ -310,7 +310,7 @@ static NSString *bundleResourceName = @"main";
         if (updateIsLoading) {
             // Pending update was initialized, but notifyApplicationReady was not called.
             // Therefore, deduce that it is a broken update and rollback.
-            NSLog(@"Update did not finish loading the last time, rolling back to a previous version.");
+            CPLog(@"Update did not finish loading the last time, rolling back to a previous version.");
             needToReportRollback = YES;
             [self rollbackPackage];
         } else {
@@ -582,7 +582,7 @@ RCT_EXPORT_METHOD(getConfiguration:(RCTPromiseResolveBlock)resolve
         // isRunningBinaryVersion will not get set to "YES" if running against the packager.
         NSString *binaryHash = [CodePushUpdateUtils getHashForBinaryContents:[CodePush binaryBundleURL] error:&error];
         if (error) {
-            NSLog(@"Error obtaining hash for binary contents: %@", error);
+            CPLog(@"Error obtaining hash for binary contents: %@", error);
             resolve(configuration);
             return;
         }
