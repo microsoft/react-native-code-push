@@ -34,10 +34,10 @@ const RestartManager = (() => {
             _restartQueue.push(onlyIfUpdateIsPending);
         } else {
             _restartInProgress = true;
-            log("Restarting app");
             if (await NativeCodePush.restartApp(onlyIfUpdateIsPending)) {
                 // The app has already restarted, so there is no need to
                 // process the remaining queued restarts.
+                log("Restarting app");
                 return;
             }
 
