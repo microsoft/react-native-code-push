@@ -21,8 +21,6 @@ import java.util.Collections;
 
 public class CodePushUpdateUtils {
 
-    private static final String CODE_PUSH_HASH_FILE_NAME = "CodePushHash.json";
-
     private static void addContentsOfFolderToManifest(String folderPath, String pathPrefix, ArrayList<String> manifest) {
         File folder = new File(folderPath);
         File[] folderFiles = folder.listFiles();
@@ -102,7 +100,7 @@ public class CodePushUpdateUtils {
 
     public static String getHashForBinaryContents(Activity mainActivity, boolean isDebugMode) {
         try {
-            return CodePushUtils.getStringFromInputStream(mainActivity.getAssets().open(CODE_PUSH_HASH_FILE_NAME));
+            return CodePushUtils.getStringFromInputStream(mainActivity.getAssets().open(CodePushConstants.CODE_PUSH_HASH_FILE_NAME));
         } catch (IOException e) {
             if (!isDebugMode) {
                 // Only print this message in "Release" mode. In "Debug", we may not have the

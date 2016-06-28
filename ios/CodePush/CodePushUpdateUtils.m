@@ -40,6 +40,16 @@ NSString * const ManifestFolderPrefix = @"CodePush";
     }
 }
 
++ (void)addFileToManifest:(NSURL *)fileURL
+                 manifest:(NSMutableArray *)manifest
+{
+    if ([[NSFileManager defaultManager] fileExistsAtPath:[fileURL path]]) {
+        NSData *fileContents = [NSData dataWithContentsOfURL:fileURL];
+        NSString *fileContentsHash = [self computeHashForData:fileContents];
+        [manifest addObject:[NSString stringWithFormat:@"%@/%@:%@", [self manifestFolderPrefix], [fileURL lastPathComponent], fileContentsHash]];
+    }
+}
+
 + (NSString *)computeFinalHashFromManifest:(NSMutableArray *)manifest
                                      error:(NSError **)error
 {
@@ -190,9 +200,9 @@ NSString * const ManifestFolderPrefix = @"CodePush";
         }
     }
     
-    NSData *jsBundleContents = [NSData dataWithContentsOfURL:binaryBundleUrl];
-    NSString *jsBundleContentsHash = [self computeHashForData:jsBundleContents];
-    [manifest addObject:[[NSString stringWithFormat:@"%@/%@:", [self manifestFolderPrefix], [binaryBundleUrl lastPathComponent]] stringByAppendingString:jsBundleContentsHash]];
+    [self addFileToManifest:binaryBundleUrl manifest:manifest];
+    [self addFileToManifest:[binaryBundleUrl URLByAppendingPathExtension:@"meta"] manifest:manifest];
+
     binaryHash = [self computeFinalHashFromManifest:manifest error:error];
     
     // Cache the hash in user preferences. This assumes that the modified date for the

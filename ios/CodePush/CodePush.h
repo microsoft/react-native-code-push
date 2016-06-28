@@ -143,6 +143,8 @@ failCallback:(void (^)(NSError *err))failCallback;
 
 @end
 
+void CPLog(NSString *formatString, ...);
+
 typedef NS_ENUM(NSInteger, CodePushInstallMode) {
     CodePushInstallModeImmediate,
     CodePushInstallModeOnNextRestart,

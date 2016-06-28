@@ -11,10 +11,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class CodePushTelemetryManager {
-
-    private Context applicationContext;
+    private SharedPreferences mSettings;
     private final String APP_VERSION_KEY = "appVersion";
-    private final String CODE_PUSH_PREFERENCES;
     private final String DEPLOYMENT_FAILED_STATUS = "DeploymentFailed";
     private final String DEPLOYMENT_KEY_KEY = "deploymentKey";
     private final String DEPLOYMENT_SUCCEEDED_STATUS = "DeploymentSucceeded";
@@ -26,9 +24,8 @@ public class CodePushTelemetryManager {
     private final String RETRY_DEPLOYMENT_REPORT_KEY = "CODE_PUSH_RETRY_DEPLOYMENT_REPORT";
     private final String STATUS_KEY = "status";
 
-    public CodePushTelemetryManager(Context applicationContext, String codePushPreferencesKey) {
-        this.applicationContext = applicationContext;
-        this.CODE_PUSH_PREFERENCES = codePushPreferencesKey;
+    public CodePushTelemetryManager(Context applicationContext) {
+        mSettings = applicationContext.getSharedPreferences(CodePushConstants.CODE_PUSH_PREFERENCES, 0);
     }
 
     public WritableMap getBinaryUpdateReport(String appVersion) {
@@ -58,8 +55,7 @@ public class CodePushTelemetryManager {
     }
 
     public WritableMap getRetryStatusReport() {
-        SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
-        String retryStatusReportString = settings.getString(RETRY_DEPLOYMENT_REPORT_KEY, null);
+        String retryStatusReportString = mSettings.getString(RETRY_DEPLOYMENT_REPORT_KEY, null);
         if (retryStatusReportString != null) {
             clearRetryStatusReport();
             try {
@@ -127,14 +123,12 @@ public class CodePushTelemetryManager {
     }
 
     public void saveStatusReportForRetry(ReadableMap statusReport) {
-        SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
         JSONObject statusReportJSON = CodePushUtils.convertReadableToJsonObject(statusReport);
-        settings.edit().putString(RETRY_DEPLOYMENT_REPORT_KEY, statusReportJSON.toString()).commit();
+        mSettings.edit().putString(RETRY_DEPLOYMENT_REPORT_KEY, statusReportJSON.toString()).commit();
     }
 
     private void clearRetryStatusReport() {
-        SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
-        settings.edit().remove(RETRY_DEPLOYMENT_REPORT_KEY).commit();
+        mSettings.edit().remove(RETRY_DEPLOYMENT_REPORT_KEY).commit();
     }
 
     private String getDeploymentKeyFromStatusReportIdentifier(String statusReportIdentifier) {
@@ -159,8 +153,7 @@ public class CodePushTelemetryManager {
     }
 
     private String getPreviousStatusReportIdentifier() {
-        SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
-        return settings.getString(LAST_DEPLOYMENT_REPORT_KEY, null);
+        return mSettings.getString(LAST_DEPLOYMENT_REPORT_KEY, null);
     }
 
     private String getVersionLabelFromStatusReportIdentifier(String statusReportIdentifier) {
@@ -177,7 +170,6 @@ public class CodePushTelemetryManager {
     }
 
     private void saveStatusReportedForIdentifier(String appVersionOrPackageIdentifier) {
-        SharedPreferences settings = applicationContext.getSharedPreferences(CODE_PUSH_PREFERENCES, 0);
-        settings.edit().putString(LAST_DEPLOYMENT_REPORT_KEY, appVersionOrPackageIdentifier).commit();
+        mSettings.edit().putString(LAST_DEPLOYMENT_REPORT_KEY, appVersionOrPackageIdentifier).commit();
     }
 }

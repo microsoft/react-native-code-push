@@ -11,30 +11,20 @@ import com.facebook.react.bridge.ReactMethod;
 
 public class CodePushDialog extends ReactContextBaseJavaModule{
 
-    private Activity mainActivity;
-
-    public CodePushDialog(ReactApplicationContext reactContext, Activity mainActivity) {
+    public CodePushDialog(ReactApplicationContext reactContext) {
         super(reactContext);
-        this.mainActivity = mainActivity;
     }
 
     @ReactMethod
     public void showDialog(String title, String message, String button1Text, String button2Text,
                       final Callback successCallback, Callback errorCallback) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(mainActivity);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getCurrentActivity());
 
         builder.setCancelable(false);
 
         DialogInterface.OnClickListener clickListener = new DialogInterface.OnClickListener() {
-            private boolean callbackConsumed = false;
-
             @Override
-            public synchronized void onClick(DialogInterface dialog, int which) {
-                if (callbackConsumed) {
-                    return;
-                }
-
-                callbackConsumed = true;
+            public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
                 switch (which) {
                     case DialogInterface.BUTTON_POSITIVE:

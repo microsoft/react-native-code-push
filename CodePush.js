@@ -173,7 +173,7 @@ const notifyApplicationReady = (() => {
 async function notifyApplicationReadyInternal() {
   await NativeCodePush.notifyApplicationReady();
   const statusReport = await NativeCodePush.getNewStatusReport();
-  tryReportStatus(statusReport); // Don't wait for this to complete.
+  statusReport && tryReportStatus(statusReport); // Don't wait for this to complete.
 
   return statusReport;
 }
