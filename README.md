@@ -99,7 +99,7 @@ In order to accommodate as many developer preferences as possible, the CodePush 
 
 1. Run `rnpm link react-native-code-push`
 
-    *Note: If you don't already have RNPM installed, you can do so by simply running `npm i -g rnpm` and then executing the above command.*
+    *Note: If you don't already have RNPM installed, you can do so by simply running `npm i -g rnpm` and then executing the above command. If you already have RNPM installed, make sure you have v1.9.0+ in order to benefit from this one step install.*
 
 And that's it! Isn't RNPM awesome? :)
 
