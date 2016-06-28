@@ -3,6 +3,7 @@ const NativeCodePush = require("react-native").NativeModules.CodePush;
 
 const RestartManager = (() => {
     let _allowed = true;
+    let _restartInProgress = false;
     let _restartQueue = [];
 
     function allow() {
