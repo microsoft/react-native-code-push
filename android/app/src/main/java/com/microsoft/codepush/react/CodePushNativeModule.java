@@ -452,7 +452,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
     public void restartApp(boolean onlyIfUpdateIsPending, Promise promise) {
         // If this is an unconditional restart request, or there
         // is current pending update, then reload the app.
-        if (!onlyIfUpdateIsPending || CodePush.this.isPendingUpdate(null)) {
+        if (!onlyIfUpdateIsPending || mSettingsManager.isPendingUpdate(null)) {
             loadBundle();
             promise.resolve(true);
             return;
