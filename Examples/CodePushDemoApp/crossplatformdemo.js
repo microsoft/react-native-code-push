@@ -57,7 +57,7 @@ let CodePushDemoApp = React.createClass({
               break;
             case CodePush.SyncStatus.UPDATE_INSTALLED:
               self.setState({
-                syncMessage: "Update installed and will be run when the app next resumes.",
+                syncMessage: "Update installed.",
                 progress: false
               });
               break;

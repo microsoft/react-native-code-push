@@ -61,8 +61,7 @@ apply from: "react.gradle"
 apply from: "../../node_modules/react-native-code-push/android/codepush.gradle"
 
 /**
- * Set this to true to create three separate APKs instead of one:
- *   - A universal APK that works on all devices
+ * Set this to true to create two separate APKs instead of one:
  *   - An APK that only works on ARM devices
  *   - An APK that only works on x86 devices
  * The advantage is the size of the APK is reduced by about 4MB.
@@ -93,7 +92,7 @@ android {
     splits {
         abi {
             enable enableSeparateBuildPerCPUArchitecture
-            universalApk true
+            universalApk false  // Also generate an universal APK
             reset()
             include "armeabi-v7a", "x86"
         }
