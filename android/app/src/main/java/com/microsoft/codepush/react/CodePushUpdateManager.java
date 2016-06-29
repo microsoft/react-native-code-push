@@ -275,6 +275,13 @@ public class CodePushUpdateManager {
     public void installPackage(ReadableMap updatePackage, boolean removePendingUpdate) {
         String packageHash = CodePushUtils.tryGetString(updatePackage, CodePushConstants.PACKAGE_HASH_KEY);
         WritableMap info = getCurrentPackageInfo();
+
+        String currentPackageHash = CodePushUtils.tryGetString(info, CodePushConstants.CURRENT_PACKAGE_KEY);
+        if (packageHash != null && packageHash.equals(currentPackageHash)) {
+            // The current package is already the one being installed, so we should no-op.
+            return;
+        }
+
         if (removePendingUpdate) {
             String currentPackageFolderPath = getCurrentPackageFolderPath();
             if (currentPackageFolderPath != null) {
