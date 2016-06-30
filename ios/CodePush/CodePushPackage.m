@@ -454,6 +454,11 @@ static NSString *const UnzippedFolderName = @"unzipped";
         return;
     }
     
+    if (packageHash && [packageHash isEqualToString:info[@"currentPackage"]]) {
+        // The current package is already the one being installed, so we should no-op.
+        return;
+    }
+
     if (removePendingUpdate) {
         NSString *currentPackageFolderPath = [self getCurrentPackageFolderPath:error];
         if (!*error && currentPackageFolderPath) {
