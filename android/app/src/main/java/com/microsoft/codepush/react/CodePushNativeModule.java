@@ -79,13 +79,13 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         return false;
     }
 
-    private void loadBundleLegacy(final Activity activity) {
+    private void loadBundleLegacy(final Activity currentActivity) {
         mCodePush.invalidateCurrentInstance();
 
-        activity.runOnUiThread(new Runnable() {
+        currentActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                activity.recreate();
+                currentActivity.recreate();
             }
         });
     }
