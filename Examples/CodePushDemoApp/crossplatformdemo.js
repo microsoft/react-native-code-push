@@ -10,7 +10,6 @@ import React, {
   View,
 } from "react-native";
 
-import Button from "react-native-button";
 import CodePush from "react-native-code-push";
 
 let CodePushDemoApp = React.createClass({
@@ -106,9 +105,9 @@ let CodePushDemoApp = React.createClass({
       );
     } else {
       syncButton = (
-        <Button style={{color: 'green'}} onPress={this.sync}>
-          Start Sync!
-        </Button>
+        <TouchableOpacity onPress={this.sync}>
+          <Text style={{color: 'green', fontSize: 17}}>Start Sync!</Text>
+        </TouchableOpacity>
       );
     }
 
@@ -127,9 +126,9 @@ let CodePushDemoApp = React.createClass({
         {syncView}
         {progressView}
         <Image style={styles.image} resizeMode={Image.resizeMode.contain} source={require('./images/laptop_phone_howitworks.png')}/>
-        <Button onPress={this.toggleAllowRestart}>
-          Restart { this.state.restartAllowed ? "allowed" : "forbidden"}
-        </Button>
+        <TouchableOpacity onPress={this.toggleAllowRestart}>
+          <Text style={{color: 'blue', fontSize: 17}}>Restart { this.state.restartAllowed ? "allowed" : "forbidden"}</Text>
+        </TouchableOpacity>
       </View>
     );
   }
