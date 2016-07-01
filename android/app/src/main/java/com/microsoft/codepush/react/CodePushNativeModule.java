@@ -79,24 +79,26 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         return false;
     }
 
-    private void loadBundleLegacy() {
-        Activity currentActivity = getCurrentActivity();
-        Intent intent = currentActivity.getIntent();
-        currentActivity.finish();
-        currentActivity.startActivity(intent);
-
+    private void loadBundleLegacy(final Activity currentActivity) {
         mCodePush.invalidateCurrentInstance();
+
+        currentActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                currentActivity.recreate();
+            }
+        });
     }
 
     private void loadBundle() {
         mCodePush.clearDebugCacheIfNeeded();
-        Activity currentActivity = getCurrentActivity();
+        final Activity currentActivity = getCurrentActivity();
 
         if (!ReactActivity.class.isInstance(currentActivity)) {
             // Our preferred reload logic relies on the user's Activity inheriting
             // from the core ReactActivity class, so if it doesn't, we fallback
             // early to our legacy behavior.
-            loadBundleLegacy();
+            loadBundleLegacy(currentActivity);
         } else {
             try {
                 ReactActivity reactActivity = (ReactActivity)currentActivity;
@@ -144,14 +146,14 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                         catch (Exception e) {
                             // The recreation method threw an unknown exception
                             // so just simply fallback to restarting the Activity
-                            loadBundleLegacy();
+                            loadBundleLegacy(currentActivity);
                         }
                     }
                 });
             } catch (Exception e) {
                 // Our reflection logic failed somewhere
                 // so fall back to restarting the Activity
-                loadBundleLegacy();
+                loadBundleLegacy(currentActivity);
             }
         }
     }
