@@ -80,8 +80,6 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
     }
 
     private void loadBundleLegacy(final Activity currentActivity) {
-        CodePushUtils.log("Legacy restart logic being used");
-
         mCodePush.invalidateCurrentInstance();
 
         currentActivity.runOnUiThread(new Runnable() {
