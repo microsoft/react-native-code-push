@@ -32,22 +32,30 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CodePushNativeModule extends ReactContextBaseJavaModule {
+    private String mBinaryContentsHash = null;
+    private String mClientUniqueId = null;    
     private LifecycleEventListener mLifecycleEventListener = null;
     private int mMinimumBackgroundDuration = 0;
+    
     private CodePush mCodePush;
-    private CodePushUpdateManager mUpdateManager;
-    private CodePushTelemetryManager mTelemetryManager;
     private SettingsManager mSettingsManager;
+    private CodePushTelemetryManager mTelemetryManager;
+    private CodePushUpdateManager mUpdateManager;
 
     private static final String REACT_APPLICATION_CLASS_NAME = "com.facebook.react.ReactApplication";
     private static final String REACT_NATIVE_HOST_CLASS_NAME = "com.facebook.react.ReactNativeHost";
 
     public CodePushNativeModule(ReactApplicationContext reactContext, CodePush codePush, CodePushUpdateManager codePushUpdateManager, CodePushTelemetryManager codePushTelemetryManager, SettingsManager settingsManager) {
         super(reactContext);
+
         mCodePush = codePush;
-        mUpdateManager = codePushUpdateManager;
-        mTelemetryManager = codePushTelemetryManager;
         mSettingsManager = settingsManager;
+        mTelemetryManager = codePushTelemetryManager;
+        mUpdateManager = codePushUpdateManager;
+
+        // Initialize module state while we have a reference to the current context.
+        mBinaryContentsHash = CodePushUpdateUtils.getHashForBinaryContents(reactContext, mCodePush.isDebugMode());
+        mClientUniqueId = Settings.Secure.getString(reactContext.getContentResolver(), Settings.Secure.ANDROID_ID);
     }
 
     @Override
@@ -240,19 +248,15 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void getConfiguration(Promise promise) {
-        Activity currentActivity = getCurrentActivity();
         WritableNativeMap configMap = new WritableNativeMap();
         configMap.putString("appVersion", mCodePush.getAppVersion());
+        configMap.putString("clientUniqueId", mClientUniqueId);
         configMap.putString("deploymentKey", mCodePush.getDeploymentKey());
         configMap.putString("serverUrl", mCodePush.getServerUrl());
-        configMap.putString("clientUniqueId",
-                Settings.Secure.getString(currentActivity.getContentResolver(),
-                        android.provider.Settings.Secure.ANDROID_ID));
-        String binaryHash = CodePushUpdateUtils.getHashForBinaryContents(currentActivity, mCodePush.isDebugMode());
-        if (binaryHash != null) {
-            // binaryHash will be null if the React Native assets were not bundled into the APK
-            // (e.g. in Debug builds)
-            configMap.putString(CodePushConstants.PACKAGE_HASH_KEY, binaryHash);
+
+        // The binary hash may be null in debug builds
+        if (mBinaryContentsHash != null) {
+            configMap.putString(CodePushConstants.PACKAGE_HASH_KEY, mBinaryContentsHash);
         }
 
         promise.resolve(configMap);
