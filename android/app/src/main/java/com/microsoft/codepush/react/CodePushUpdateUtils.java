@@ -1,6 +1,6 @@
 package com.microsoft.codepush.react;
 
-import android.app.Activity;
+import android.content.Context;
 
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.WritableMap;
@@ -98,9 +98,9 @@ public class CodePushUpdateUtils {
         return null;
     }
 
-    public static String getHashForBinaryContents(Activity mainActivity, boolean isDebugMode) {
+    public static String getHashForBinaryContents(Context context, boolean isDebugMode) {
         try {
-            return CodePushUtils.getStringFromInputStream(mainActivity.getAssets().open(CodePushConstants.CODE_PUSH_HASH_FILE_NAME));
+            return CodePushUtils.getStringFromInputStream(context.getAssets().open(CodePushConstants.CODE_PUSH_HASH_FILE_NAME));
         } catch (IOException e) {
             if (!isDebugMode) {
                 // Only print this message in "Release" mode. In "Debug", we may not have the

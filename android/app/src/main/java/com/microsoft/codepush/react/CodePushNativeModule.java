@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CodePushNativeModule extends ReactContextBaseJavaModule {
+    private String mBinaryContentsHash = null;
     private String mClientUniqueId = null;    
     private LifecycleEventListener mLifecycleEventListener = null;
     private int mMinimumBackgroundDuration = 0;
@@ -52,6 +53,8 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         mTelemetryManager = codePushTelemetryManager;
         mUpdateManager = codePushUpdateManager;
 
+        // Initialize module state while we have a reference to the current context.
+        mBinaryContentsHash = CodePushUpdateUtils.getHashForBinaryContents(reactContext, mCodePush.isDebugMode());
         mClientUniqueId = Settings.Secure.getString(reactContext.getContentResolver(), Settings.Secure.ANDROID_ID);
     }
 
@@ -251,14 +254,9 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         configMap.putString("deploymentKey", mCodePush.getDeploymentKey());
         configMap.putString("serverUrl", mCodePush.getServerUrl());
 
-        Activity currentActivity = getCurrentActivity();
-        if (currentActivity != null) {
-            String binaryHash = CodePushUpdateUtils.getHashForBinaryContents(currentActivity, mCodePush.isDebugMode());
-            if (binaryHash != null) {
-                // binaryHash will be null if the React Native assets were not bundled into the APK
-                // (e.g. in Debug builds)
-                configMap.putString(CodePushConstants.PACKAGE_HASH_KEY, binaryHash);
-            }
+        // The binary hash may be null in debug builds
+        if (mBinaryContentsHash != null) {
+            configMap.putString(CodePushConstants.PACKAGE_HASH_KEY, mBinaryContentsHash);
         }
 
         promise.resolve(configMap);
