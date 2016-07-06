@@ -35,7 +35,6 @@ public class CodePush implements ReactPackage {
     private String mAssetsBundleFileName;
 
     // Helper classes.
-    private CodePushNativeModule mNativeModule;
     private CodePushUpdateManager mUpdateManager;
     private CodePushTelemetryManager mTelemetryManager;
     private SettingsManager mSettingsManager;
@@ -278,13 +277,12 @@ public class CodePush implements ReactPackage {
 
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactApplicationContext) {
-        List<NativeModule> nativeModules = new ArrayList<>();
-        mNativeModule = new CodePushNativeModule(reactApplicationContext, this, mUpdateManager, mTelemetryManager, mSettingsManager);
+        CodePushNativeModule codePushModule = new CodePushNativeModule(reactApplicationContext, this, mUpdateManager, mTelemetryManager, mSettingsManager);
         CodePushDialog dialogModule = new CodePushDialog(reactApplicationContext);
 
-        nativeModules.add(mNativeModule);
+        List<NativeModule> nativeModules = new ArrayList<>();        
+        nativeModules.add(codePushModule);
         nativeModules.add(dialogModule);
-
         return nativeModules;
     }
 
