@@ -80,6 +80,8 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
     }
 
     private void loadBundleLegacy(final Activity currentActivity) {
+        CodePushUtils.log("Legacy restart logic being used");
+
         mCodePush.invalidateCurrentInstance();
 
         currentActivity.runOnUiThread(new Runnable() {
@@ -240,19 +242,23 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void getConfiguration(Promise promise) {
-        Activity currentActivity = getCurrentActivity();
         WritableNativeMap configMap = new WritableNativeMap();
         configMap.putString("appVersion", mCodePush.getAppVersion());
         configMap.putString("deploymentKey", mCodePush.getDeploymentKey());
         configMap.putString("serverUrl", mCodePush.getServerUrl());
-        configMap.putString("clientUniqueId",
-                Settings.Secure.getString(currentActivity.getContentResolver(),
-                        android.provider.Settings.Secure.ANDROID_ID));
-        String binaryHash = CodePushUpdateUtils.getHashForBinaryContents(currentActivity, mCodePush.isDebugMode());
-        if (binaryHash != null) {
-            // binaryHash will be null if the React Native assets were not bundled into the APK
-            // (e.g. in Debug builds)
-            configMap.putString(CodePushConstants.PACKAGE_HASH_KEY, binaryHash);
+
+        Activity currentActivity = getCurrentActivity();
+        if (currentActivity != null) {
+            configMap.putString("clientUniqueId",
+                    Settings.Secure.getString(currentActivity.getContentResolver(),
+                            android.provider.Settings.Secure.ANDROID_ID));
+
+            String binaryHash = CodePushUpdateUtils.getHashForBinaryContents(currentActivity, mCodePush.isDebugMode());
+            if (binaryHash != null) {
+                // binaryHash will be null if the React Native assets were not bundled into the APK
+                // (e.g. in Debug builds)
+                configMap.putString(CodePushConstants.PACKAGE_HASH_KEY, binaryHash);
+            }
         }
 
         promise.resolve(configMap);
