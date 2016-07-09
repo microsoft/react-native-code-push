@@ -79,7 +79,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
     }
 
     private boolean isReactApplication(Context context) {
-        Class reactApplicationClass = tryGetClass(REACT_APPLICATION_CLASS_NAME);
+        Class<?> reactApplicationClass = tryGetClass(REACT_APPLICATION_CLASS_NAME);
         if (reactApplicationClass != null && reactApplicationClass.isInstance(context)) {
             return true;
         }
@@ -119,10 +119,10 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                     // to get the instance manager via the ReactNativeHost, which only exists in 0.29.
                     Method getApplicationMethod = ReactActivity.class.getMethod("getApplication");
                     Object reactApplication = getApplicationMethod.invoke(reactActivity);
-                    Class reactApplicationClass = tryGetClass(REACT_APPLICATION_CLASS_NAME);
+                    Class<?> reactApplicationClass = tryGetClass(REACT_APPLICATION_CLASS_NAME);
                     Method getReactNativeHostMethod = reactApplicationClass.getMethod("getReactNativeHost");
                     Object reactNativeHost = getReactNativeHostMethod.invoke(reactApplication);
-                    Class reactNativeHostClass = tryGetClass(REACT_NATIVE_HOST_CLASS_NAME);
+                    Class<?> reactNativeHostClass = tryGetClass(REACT_NATIVE_HOST_CLASS_NAME);
                     Method getReactInstanceManagerMethod = reactNativeHostClass.getMethod("getReactInstanceManager");
                     instanceManager = (ReactInstanceManager)getReactInstanceManagerMethod.invoke(reactNativeHost);
                 } catch (Exception e) {
