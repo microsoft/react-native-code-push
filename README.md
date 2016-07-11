@@ -34,7 +34,7 @@ In order to ensure that your end users always have a functioning version of your
 
 ## Supported React Native platforms
 
-- iOS (8+)
+- iOS (7+)
 - Android (4.1+)
 - Windows (UWP)
 
