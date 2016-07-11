@@ -248,7 +248,7 @@ And that's it for installation using RNPM! Continue below to the [Plugin Configu
 
     ```gradle
     ...
-    apply from: "react.gradle"
+    apply from: "../../node_modules/react-native/react.gradle"
     apply from: "../../node_modules/react-native-code-push/android/codepush.gradle"
     ...
     ```
