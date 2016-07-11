@@ -388,7 +388,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                     // if the current activity is backgrounded, we want to reload the bundle when
                     // it comes back into the foreground.
                     installMode == CodePushInstallMode.IMMEDIATE.getValue()) {
-                    
+
                     // Store the minimum duration on the native module as an instance
                     // variable instead of relying on a closure below, so that any
                     // subsequent resume-based installs could override it.
@@ -401,15 +401,19 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
 
                             @Override
                             public void onHostResume() {
-                                // Determine how long the app was in the background and ensure
-                                // that it meets the minimum duration amount of time.
-                                long durationInBackground = 0;
-                                if (lastPausedDate != null) {
-                                    durationInBackground = (new Date().getTime() - lastPausedDate.getTime()) / 1000;
-                                }
-
-                                if (durationInBackground >= CodePushNativeModule.this.mMinimumBackgroundDuration) {
+                                if (installMode == CodePushInstallMode.IMMEDIATE.getValue()) {
                                     loadBundle();
+                                } else {
+                                    // Determine how long the app was in the background and ensure
+                                    // that it meets the minimum duration amount of time.
+                                    long durationInBackground = 0;
+                                    if (lastPausedDate != null) {
+                                        durationInBackground = (new Date().getTime() - lastPausedDate.getTime()) / 1000;
+                                    }
+
+                                    if (durationInBackground >= CodePushNativeModule.this.mMinimumBackgroundDuration) {
+                                        loadBundle();
+                                    }
                                 }
                             }
 
