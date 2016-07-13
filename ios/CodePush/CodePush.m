@@ -76,7 +76,8 @@ static NSString *bundleResourceSubdirectory = nil;
 {
     bundleResourceName = resourceName;
     return [self bundleURLForResource:resourceName
-                        withExtension:bundleResourceExtension];
+                        withExtension:bundleResourceExtension
+                         subdirectory:bundleResourceSubdirectory];
 }
 
 + (NSURL *)bundleURLForResource:(NSString *)resourceName
@@ -84,7 +85,7 @@ static NSString *bundleResourceSubdirectory = nil;
 {
     return [self bundleURLForResource:resourceName
                         withExtension:resourceExtension
-                         subdirectory:nil];
+                         subdirectory:bundleResourceSubdirectory];
 }
 
 + (NSURL *)bundleURLForResource:(NSString *)resourceName
