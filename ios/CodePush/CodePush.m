@@ -95,7 +95,7 @@ static NSString *bundleResourceSubdirectory = nil;
     bundleResourceName = resourceName;
     bundleResourceExtension = resourceExtension;
     bundleResourceSubdirectory = resourceSubdirectory;
-    
+
     [self ensureBinaryBundleExists];
 
     NSString *logMessageFormat = @"Loading JS bundle from %@";
