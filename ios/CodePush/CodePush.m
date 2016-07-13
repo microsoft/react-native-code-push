@@ -56,12 +56,15 @@ static BOOL testConfigurationFlag = NO;
 // in the binary.
 static NSString *bundleResourceExtension = @"jsbundle";
 static NSString *bundleResourceName = @"main";
+static NSString *bundleResourceSubdirectory = nil;
 
 #pragma mark - Public Obj-C API
 
 + (NSURL *)binaryBundleURL
 {
-    return [[NSBundle mainBundle] URLForResource:bundleResourceName withExtension:bundleResourceExtension];
+    return [[NSBundle mainBundle] URLForResource:bundleResourceName
+                                   withExtension:bundleResourceExtension
+                                    subdirectory:bundleResourceSubdirectory];
 }
 
 + (NSURL *)bundleURL
@@ -79,9 +82,19 @@ static NSString *bundleResourceName = @"main";
 + (NSURL *)bundleURLForResource:(NSString *)resourceName
                   withExtension:(NSString *)resourceExtension
 {
+    return [self bundleURLForResource:resourceName
+                        withExtension:resourceExtension
+                         subdirectory:nil];
+}
+
++ (NSURL *)bundleURLForResource:(NSString *)resourceName
+                  withExtension:(NSString *)resourceExtension
+                   subdirectory:(NSString *)resourceSubdirectory
+{
     bundleResourceName = resourceName;
     bundleResourceExtension = resourceExtension;
-
+    bundleResourceSubdirectory = resourceSubdirectory;
+    
     [self ensureBinaryBundleExists];
 
     NSString *logMessageFormat = @"Loading JS bundle from %@";
