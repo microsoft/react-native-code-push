@@ -584,7 +584,7 @@ To set this up, perform the following steps:
 
 8. Name this new setting something like `CODEPUSH_KEY`, expand it, and specify your `Staging` deployment key for the `Staging` config and your `Production` deployment key for the `Release` config.
 
-    ![Setting Keys](https://cloud.githubusercontent.com/assets/8598682/16821854/857cc55e-490d-11e6-9e79-def8d93db7b0.png)
+    ![Setting Keys](https://cloud.githubusercontent.com/assets/8598682/16821919/fc1eac4a-490d-11e6-9b11-128129c24b80.png)
 
     *NOTE: As a reminder, you can retrieve these keys by running `code-push deployment ls <APP_NAME> -k` from your terminal.*
 
