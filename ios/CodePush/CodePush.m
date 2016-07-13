@@ -52,8 +52,8 @@ static BOOL isRunningBinaryVersion = NO;
 static BOOL needToReportRollback = NO;
 static BOOL testConfigurationFlag = NO;
 
-// These values are used to save the bundleURL and extension for the JS bundle
-// in the binary.
+// These values are used to save the bundleURL, extension and subdirectory
+// for the JS bundle in the binary.
 static NSString *bundleResourceExtension = @"jsbundle";
 static NSString *bundleResourceName = @"main";
 static NSString *bundleResourceSubdirectory = nil;
