@@ -67,6 +67,16 @@ static NSString *bundleResourceSubdirectory = nil;
                                     subdirectory:bundleResourceSubdirectory];
 }
 
++ (NSString *)bundleAssetsPath
+{
+    NSString *resourcePath = [[NSBundle mainBundle] resourcePath];
+    if (bundleResourceSubdirectory) {
+        resourcePath = [resourcePath stringByAppendingPathComponent:bundleResourceSubdirectory];
+    }
+    
+    return [resourcePath stringByAppendingPathComponent:[CodePushUpdateUtils assetsFolderName]];
+}
+
 + (NSURL *)bundleURL
 {
     return [self bundleURLForResource:bundleResourceName];

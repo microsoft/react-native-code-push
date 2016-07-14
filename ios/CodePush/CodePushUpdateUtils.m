@@ -189,7 +189,7 @@ NSString * const ManifestFolderPrefix = @"CodePush";
     
     // If the app is using assets, then add
     // them to the generated content manifest.
-    NSString *assetsPath = [CodePushPackage getBinaryAssetsPath];
+    NSString *assetsPath = [CodePush bundleAssetsPath];
     if ([[NSFileManager defaultManager] fileExistsAtPath:assetsPath]) {
         [self addContentsOfFolderToManifest:assetsPath
                                  pathPrefix:[NSString stringWithFormat:@"%@/%@", [self manifestFolderPrefix], @"assets"]

@@ -128,7 +128,7 @@ static NSString *const UnzippedFolderName = @"unzipped";
                                                                     return;
                                                                 }
                                                                 
-                                                                [[NSFileManager defaultManager] copyItemAtPath:[self getBinaryAssetsPath]
+                                                                [[NSFileManager defaultManager] copyItemAtPath:[CodePush bundleAssetsPath]
                                                                                                         toPath:[newUpdateCodePushPath stringByAppendingPathComponent:[CodePushUpdateUtils assetsFolderName]]
                                                                                                          error:&error];
                                                                 if (error) {
@@ -278,11 +278,6 @@ static NSString *const UnzippedFolderName = @"unzipped";
                                                 failCallback:failCallback];
     
     [downloadHandler download:updatePackage[@"downloadUrl"]];
-}
-
-+ (NSString *)getBinaryAssetsPath
-{
-    return [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:[CodePushUpdateUtils assetsFolderName]];
 }
 
 + (NSString *)getCodePushPath
