@@ -27,6 +27,8 @@
 
 + (NSString *)getApplicationSupportDirectory;
 
++ (NSString *)bundleAssetsPath;
+
 /*
  * This methods allows dynamically setting the app's
  * deployment key, in addition to setting it via
@@ -89,7 +91,6 @@ failCallback:(void (^)(NSError *err))failCallback;
            doneCallback:(void (^)())doneCallback
            failCallback:(void (^)(NSError *err))failCallback;
 
-+ (NSString *)getBinaryAssetsPath;
 + (NSDictionary *)getCurrentPackage:(NSError **)error;
 + (NSDictionary *)getPreviousPackage:(NSError **)error;
 + (NSString *)getCurrentPackageFolderPath:(NSError **)error;
