@@ -410,6 +410,9 @@ function codePushify(options = {}) {
     if (!React) {
       try { React = ReactNative.React; } catch (e) { }
       if (!React) {
+        throw new Error("Unable to find the 'React' module.");
+      }
+      if (!React.Component) {
         throw new Error(
 `Unable to find the 'Component' class, please either:
 1. Upgrade to a newer version of React Native that supports it, or
@@ -423,8 +426,7 @@ function codePushify(options = {}) {
         let rootComponentInstance = this.refs.rootComponent;
         let syncStatusCallback = rootComponentInstance && rootComponentInstance.codePushStatusDidChange;
         let downloadProgressCallback = rootComponentInstance && rootComponentInstance.codePushDownloadDidProgress;
-
-        CodePush.sync(options, syncStatusCallback, downloadProgressCallback);
+        CodePush.sync(options, syncStatusCallback, downloadProgressCallback)
         if (options.syncMode === CodePush.SyncMode.ON_APP_RESUME) {
           ReactNative.AppState.addEventListener("change", (newState) => {
             newState === "active" && CodePush.sync(options, syncStatusCallback, downloadProgressCallback);
