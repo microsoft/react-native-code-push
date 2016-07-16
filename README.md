@@ -406,59 +406,59 @@ With the CodePush plugin downloaded and linked, and your app asking CodePush whe
 
 The simplest way to do this is to "CodePush-ify" your app's root component. To do so, you can choose one of the following three options:
 
-1. Use the [ES7 decorator](https://github.com/wycats/javascript-decorators) syntax:
+**Option 1: Use the [ES7 decorator](https://github.com/wycats/javascript-decorators) syntax:**
 
-    ```javascript
-    import codePush, { codePushify } from "react-native-code-push";
+```javascript
+import codePush, { codePushify } from "react-native-code-push";
+
+let codePushOptions;
+
+@codePushify(codePushOptions)
+class MyApp extends Component {
+}
+```
+
+*NOTE: Decorators are not yet supported in Babel 6.x pending proposal update.* You may need to enable it by doing the following:
+- Install the [`babel-preset-react-native-stage-0` package](https://github.com/skevy/babel-preset-react-native-stage-0)
     
-    let codePushOptions;
-
-    @codePushify(CodePushOptions)
-    class MyApp extends Component {
+    ```
+    npm install babel-preset-react-native-stage-0 --save-dev
+    ```
+    
+- In your `.babelrc` file, include the following:
+    
+    ```
+    {
+        "presets": ["react-native-stage-0/decorator-support"]
     }
     ```
 
-    *NOTE: Decorators are not yet supported in Babel 6.x pending proposal update.* You may need to enable it by doing the following:
-    - Install the [`babel-preset-react-native-stage-0` package](https://github.com/skevy/babel-preset-react-native-stage-0)
-        
-        ```
-        npm install babel-preset-react-native-stage-0 --save-dev
-        ```
-        
-    - In your `.babelrc` file, include the following:
-        
-        ```
-        {
-            "presets": ["react-native-stage-0/decorator-support"]
-        }
-        ```
-
-2. Call `codePushify` on your root component and assign the result to itself after the component declaration:
+**Option 2: Call `codePushify` on your root component and assign the result to itself after the component declaration:**
     
-    ```javascript
-    import codePush, { codePushify } from "react-native-code-push";
+```javascript
+import codePush, { codePushify } from "react-native-code-push";
 
-    let codePushOptions;
-    
-    class MyApp extends Component {
+let codePushOptions;
+
+class MyApp extends Component {
+}
+
+MyApp = codePushify(codePushOptions)(MyApp);
+```
+
+**Option 3: Manually call the `sync` method from within the `componentDidMount` lifecycle event, to initiate a background update on each app start:**
+
+```javascript
+import codePush from "react-native-code-push";
+
+class MyApp extends Component {
+    componentDidMount() {
+        let syncOptions;
+        
+        codePush.sync(syncOptions);
     }
-
-    MyApp = codePushify(codePushOptions)(MyApp);
-    ```
-
-3. Manually call the `sync` method from within the `componentDidMount` lifecycle event, to initiate a background update on each app start:
-
-    ```javascript
-    import codePush from "react-native-code-push";
-
-    class MyApp extends Component {
-        componentDidMount() {
-            let syncOptions;
-            
-            codePush.sync(CodePushOptions);
-        }
-    }
-    ```
+}
+```
 
 If an update is available, it will be silently downloaded, and installed the next time the app is restarted (either explicitly by the end user or by the OS), which ensures the least invasive experience for your end users. If an available update is mandatory, then it will be installed immediately, ensuring that the end user gets it as soon as possible.
 
