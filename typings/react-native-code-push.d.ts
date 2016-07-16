@@ -20,6 +20,14 @@ interface Promise<T> {
 export type DowloadProgressCallback = (progress: DownloadProgress) => void;
 export type SyncStatusChangedCallback = (status: CodePush.SyncStatus) => void;
 
+export interface CodePushOptions extends SyncOptions {
+    /**
+     * Specifies when you would like to synchronize updates with the CodePush server.
+     * Defaults to codePush.SyncMode.ON_APP_START.
+     */
+    syncMode: CodePush.SyncMode;
+}
+
 export interface DownloadProgress {
     /**
      * The total number of bytes expected to be received for this update.
@@ -234,6 +242,13 @@ declare namespace CodePush {
     function checkForUpdate(deploymentKey?: string): Promise<RemotePackage>;
 
     /**
+     * Decorates a React Component configuring it to sync for updates with the CodePush server.
+     *
+     * @param options Options used to configure the end-user sync and update experience (e.g. when to check for updates?, show an prompt?, install the update immediately?).
+     */
+    function CodePushify(options?: CodePushOptions): Function;
+
+    /**
      * Retrieves the metadata for an installed update (e.g. description, mandatory).
      *
      * @param updateState The state of the update you want to retrieve the metadata for. Defaults to UpdateState.RUNNING.
@@ -382,6 +397,21 @@ declare namespace CodePush {
          * The deployment succeeded.
          */
         SUCCEEDED
+    }
+
+    /**
+     * Indicates when you would like to synchronize updates with the CodePush server.
+     */
+    enum SyncMode {
+        /**
+         * When the app is fully initialized (or more specifically, when the root component is mounted).
+         */
+        ON_APP_START,
+
+        /**
+         * When the app re-enters the foreground.
+         */
+        ON_APP_RESUME
     }
 }
 
