@@ -467,7 +467,7 @@ If you would like your app to discover updates more quickly, you can also choose
 If you are using the `codePushify` decorator function:
 
  ```javascript
- let codePushOptions = { syncMode: codePush.SyncMode.ON_APP_START };
+ let codePushOptions = { syncMode: codePush.SyncMode.ON_APP_RESUME };
  
  @codePushify(CodePushOptions)
  class MyApp extends Component {
@@ -814,6 +814,8 @@ This decorator provides support for letting you customize its behaviour to easil
 4. **Log/display progress**. While the app is syncing with the server for updates, make use of the `codePushStatusDidChange` and/or `codePushDownloadDidProgress` event hooks to log down the different stages of this process, or even display a progress bar to the user.
 
     ```javascript
+    // Make use of the event hooks to keep track of 
+    // the different stages of the sync process.
     @codePushify()
     class MyApp extends Component {
         codePushStatusDidChange(status) {
