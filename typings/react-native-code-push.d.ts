@@ -246,7 +246,7 @@ declare namespace CodePush {
      *
      * @param options Options used to configure the end-user sync and update experience (e.g. when to check for updates?, show an prompt?, install the update immediately?).
      */
-    function CodePushify(options?: CodePushOptions): Function;
+    function codePushify(options?: CodePushOptions): Function;
 
     /**
      * Retrieves the metadata for an installed update (e.g. description, mandatory).
