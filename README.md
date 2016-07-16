@@ -404,33 +404,87 @@ With the CodePush plugin downloaded and linked, and your app asking CodePush whe
 
 2. When an update is available, how to present it to the end user?
 
-The simplest way to do this is to perform the following in your app's root component:
+The simplest way to do this is to "CodePush-ify" your app's root component. To do so, you can choose one of the following three options:
 
-1. Import the JavaScript module for CodePush:
+1. Use the [ES7 decorator](https://github.com/wycats/javascript-decorators) syntax:
+
+    ```javascript
+    import codePush, { codePushify } from "react-native-code-push";
+    
+    let codePushOptions;
+
+    @codePushify(CodePushOptions)
+    class MyApp extends Component {
+    }
+    ```
+
+    *NOTE: Decorators are not yet supported in Babel 6.x pending proposal update.* You may need to enable it by doing the following:
+    - Install the [`babel-preset-react-native-stage-0` package](https://github.com/skevy/babel-preset-react-native-stage-0)
+        
+        ```
+        npm install babel-preset-react-native-stage-0 --save-dev
+        ```
+        
+    - In your `.babelrc` file, include the following:
+        
+        ```
+        {
+            "presets": ["react-native-stage-0/decorator-support"]
+        }
+        ```
+
+2. Call `codePushify` on your root component and assign the result to itself after the component declaration:
+    
+    ```javascript
+    import codePush, { codePushify } from "react-native-code-push";
+
+    let codePushOptions;
+    
+    class MyApp extends Component {
+    }
+
+    MyApp = codePushify(codePushOptions)(MyApp);
+    ```
+
+3. Manually call the `sync` method from within the `componentDidMount` lifecycle event, to initiate a background update on each app start:
 
     ```javascript
     import codePush from "react-native-code-push";
-    ```
 
-2. Call the `sync` method from within the `componentDidMount` lifecycle event, to initiate a background update on each app start:
-
-    ```javascript
-    codePush.sync();
+    class MyApp extends Component {
+        componentDidMount() {
+            let syncOptions;
+            
+            codePush.sync(CodePushOptions);
+        }
+    }
     ```
 
 If an update is available, it will be silently downloaded, and installed the next time the app is restarted (either explicitly by the end user or by the OS), which ensures the least invasive experience for your end users. If an available update is mandatory, then it will be installed immediately, ensuring that the end user gets it as soon as possible.
 
-If you would like your app to discover updates more quickly, you can also choose to call `sync` every time the app resumes from the background, by adding the following code (or something equivalent) as part of your app's startup behavior (e.g. your root component's `componentDidMount` method). You can call `sync` as frequently as you would like, so when and where you call it just depends on your personal preference.
+If you would like your app to discover updates more quickly, you can also choose to sync up with the CodePush server every time the app resumes from the background.
 
-```javascript
-AppState.addEventListener("change", (newState) => {
-    newState === "active" && codePush.sync();
-});
-```
+If you are using the `codePushify` decorator function:
 
-*NOTE: If you are using [Redux](http://redux.js.org) and [Redux Saga](http://yelouafi.github.io/redux-saga/), you can alternatively use the [react-native-code-push-saga](http://github.com/lostintangent/react-native-code-push-saga) module, which allows you to customize when `sync` is called in simpler/more idiomatic way.*
+ ```javascript
+ let codePushOptions = { syncMode: codePush.SyncMode.ON_APP_START };
+ 
+ @codePushify(CodePushOptions)
+ class MyApp extends Component {
+ }
+ ```
 
-Additionally, if you would like to display an update confirmation dialog (an "active install"), configure when an available update is installed (e.g. force an immediate restart) or customize the update experience in any way, refer to the `sync` method's [API reference](#codepushsync) for information on how to tweak this default behavior.
+If you are calling `sync` directly:
+ 
+ ```javascript
+ AppState.addEventListener("change", (newState) => {
+     newState === "active" && codePush.sync();
+ });
+ ```
+
+*NOTE: If you are using [Redux](http://redux.js.org) and [Redux Saga](http://yelouafi.github.io/redux-saga/), you can alternatively use the [react-native-code-push-saga](http://github.com/lostintangent/react-native-code-push-saga) module, which allows you to customize when `sync` is called in a perhaps simpler/more idiomatic way.*
+
+Additionally, if you would like to display an update confirmation dialog (an "active install"), configure when an available update is installed (e.g. force an immediate restart) or customize the update experience in any other way, refer to the [`codePush.codePushify()`](#codepushcodepushify) or [`codePush.sync()`](#codepushsync) API reference for information on how to tweak this default behavior.
 
 <a id="apple-note">*NOTE: While [Apple's developer agreement](https://developer.apple.com/programs/ios/information/iOS_Program_Information_4_3_15.pdf) fully allows performing over-the-air updates of JavaScript and assets (which is what enables CodePush!), it is against their policy for an app to display an update prompt. Because of this, we recommend that App Store-distributed apps don't enable the `updateDialog` option when calling `sync`, whereas Google Play and internally distributed apps (e.g. Enterprise, Fabric, HockeyApp) can choose to enable/customize it.*</a>
 
@@ -648,6 +702,8 @@ When you require `react-native-code-push`, the module object provides the follow
 
 * [checkForUpdate](#codepushcheckforupdate): Asks the CodePush service whether the configured app deployment has an update available.
 
+* [codePushify](#codepushcodepushify): Returns a function that wraps a React component inside a "higher order" React component configured to call [`codePush.sync()`](#codepushsync) when it is mounted. This allows you to declaratively specify the behaviour of how and when your app checks for an update, downloads it and installs it.
+
 * [disallowRestart](#codepushdisallowrestart): Temporarily disallows any programmatic restarts to occur as a result of a CodePush update being installed. This is an advanced API, and is useful when a component within your app (e.g. an onboarding process) needs to ensure that no end-user interruptions can occur during its lifetime.
 
 * [getCurrentPackage](#codepushgetcurrentpackage): Retrieves the metadata about the currently installed update (e.g. description, installation time, size). *NOTE: As of `v1.10.3-beta` of the CodePush module, this method is deprecated in favor of [`getUpdateMetadata`](#codepushgetupdatemetadata)*.
@@ -716,6 +772,103 @@ codePush.checkForUpdate()
     }
 });
 ```
+
+#### codePush.codePushify
+
+```javascript
+codePush.codePushify(options: CodePushOptions)(rootComponent: React.Component): React.Component;
+```
+
+Used as a decorator to wrap a React component inside a "higher order" React component that knows how to synchronize your app's JavaScript bundle and image assets with the latest release to the configured deployment when it is mounted. Internally, the wrapper component calls [`sync`](#codepushsync) inside its `componentDidMount` lifecycle handle, which in turns performs an update check, downloads the update if it exists and installs the update for you.
+
+This decorator provides support for letting you customize its behaviour to easily enable apps with different requirements. Below are some examples of ways you can use it (you can pick one or even use a combination):
+
+1. **Silent sync on app start** *(the simplest, default behavior)*. Your app will automatically download available updates, and apply them the next time the app restarts (e.g. the OS or end user killed it, or the device was restarted). This way, the entire update experience is "silent" to the end user, since they don't see any update prompt and/or "synthetic" app restarts.
+
+    ```javascript
+    // Fully silent update which keeps the app in
+    // sync with the server, without ever
+    // interrupting the end user
+    @codePushify()
+    class MyApp extends Component {}
+    ```
+
+2. **Silent sync everytime the app resumes**. Same as 1, except we check for updates, or apply an update if one exists every time the app returns to the foreground after being "backgrounded".
+
+    ```javascript
+    // Sync for updates everytime the app resumes.
+    @codePushify({ syncMode: codePush.SyncMode.ON_APP_RESUME, installMode: codePush.InstallMode.ON_NEXT_RESUME })
+    class MyApp extends Component {}
+    ```
+
+3. **Interactive**. When an update is available, prompt the end user for permission before downloading it, and then immediately apply the update. If an update was released using the `mandatory` flag, the end user would still be notified about the update, but they wouldn't have the choice to ignore it.
+
+    ```javascript
+    // Active update, which lets the end user know
+    // about each update, and displays it to them
+    // immediately after downloading it
+    @codePushify({ updateDialog: true, installMode: codePush.InstallMode.IMMEDIATE })
+    class MyApp extends Component {}
+    ```
+
+4. **Log/display progress**. While the app is syncing with the server for updates, make use of the `codePushStatusDidChange` and/or `codePushDownloadDidProgress` event hooks to log down the different stages of this process, or even display a progress bar to the user.
+
+    ```javascript
+    @codePushify()
+    class MyApp extends Component {
+        codePushStatusDidChange(status) {
+            switch(syncStatus) {
+                case codePush.SyncStatus.CHECKING_FOR_UPDATE:
+                    console.log("Checking for updates.");
+                    break;
+                case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
+                    console.log("Downloading package.");
+                    break;
+                case CodePush.SyncStatus.INSTALLING_UPDATE:
+                    console.log("Installing update.");
+                    break;
+                case CodePush.SyncStatus.UP_TO_DATE:
+                    console.log("Installing update.");
+                    break;
+                case CodePush.SyncStatus.UPDATE_INSTALLED:
+                    console.log("Update installed.");
+                    break;
+            }
+        }
+        
+        codePushDownloadDidProgress(progress) {
+            console.log(progess.receivedBytes + " of " + progress.totalBytes + " received.");
+        }
+    }
+    ```
+
+##### CodePushOptions
+
+The `codePushify` decorator accepts an "options" object that allows you to customize numerous aspects of the default behavior mentioned above:
+
+* __syncMode__ *(codePush.SyncMode)* - Specifies when you would like to check for updates. Defaults to `codePush.SyncMode.ON_APP_START`. Refer to the [`SyncMode`](#syncmode) enum reference for a description of the available options and what they do.
+
+* __deploymentKey__ *(String)* - Refer to [`SyncOptions`](#syncoptions).
+
+* __installMode__ *(codePush.InstallMode)* - Refer to [`SyncOptions`](#syncoptions).
+
+* __mandatoryInstallMode__ *(codePush.InstallMode)* - Refer to [`SyncOptions`](#syncoptions).
+
+* __minimumBackgroundDuration__ *(Number)* - Refer to [`SyncOptions`](#syncoptions).
+
+* __updateDialog__ *(UpdateDialogOptions)* - Refer to [`SyncOptions`](#syncoptions).
+
+##### codePushStatusDidChange (event hook)
+
+Called when the sync process moves from one stage to another in the overall update process. The event hook is called with a status code which represents the current state, and can be any of the [`SyncStatus`](#syncstatus) values.
+
+##### codePushDownloadDidProgress (event hook)
+
+Called periodically when an available update is being downloaded from the CodePush server. The method is called with a `DownloadProgress` object, which contains the following two properties:
+
+* __totalBytes__ *(Number)* - The total number of bytes expected to be received for this update (i.e. the size of the set of files which changed from the previous release).
+
+* __receivedBytes__ *(Number)* - The number of bytes downloaded thus far, which can be used to track download progress.
 
 #### codePush.disallowRestart
 
@@ -891,6 +1044,8 @@ codePush.sync({ updateDialog: true, installMode: codePush.InstallMode.IMMEDIATE 
 
 *Note: If you want to decide whether you check and/or download an available update based on the end user's device battery level, network conditions, etc. then simply wrap the call to `sync` in a condition that ensures you only call it when desired.*
 
+##### SyncOptions
+
 While the `sync` method tries to make it easy to perform silent and active updates with little configuration, it accepts an "options" object that allows you to customize numerous aspects of the default behavior mentioned above:
 
 * __deploymentKey__ *(String)* - Specifies the deployment key you want to query for an update against. By default, this value is derived from the `Info.plist` file (iOS) and `MainActivity.java` file (Android), but this option allows you to override it from the script-side if you need to dynamically use a different deployment for a specific call to `sync`.
@@ -1052,6 +1207,14 @@ This enum specifies when you would like an installed update to actually be appli
 * __codePush.InstallMode.ON_NEXT_RESTART__ *(1)* - Indicates that you want to install the update, but not forcibly restart the app. When the app is "naturally" restarted (due the OS or end user killing it), the update will be seamlessly picked up. This value is appropriate when performing silent updates, since it would likely be disruptive to the end user if the app suddenly restarted out of nowhere, since they wouldn't have realized an update was even downloaded. This is the default mode used for both the `sync` and `LocalPackage.install` methods.
 
 * __codePush.InstallMode.ON_NEXT_RESUME__ *(2)* - Indicates that you want to install the update, but don't want to restart the app until the next time the end user resumes it from the background. This way, you don't disrupt their current session, but you can get the update in front of them sooner then having to wait for the next natural restart. This value is appropriate for silent installs that can be applied on resume in a non-invasive way.
+
+##### SyncMode
+
+This enum specifies when you would like your app to sync with the server for updates, and can be passed to the `codePushify` decorator. It includes the following values:
+
+* __codePush.SyncMode.ON_APP_START__ *(0)* - Indicates that you want to check for updates whenever the app's process is started.
+
+* __codePush.InstallMode.ON_APP_RESUME__ *(1)* - Indicates that you want to check for updates whenever the app is brought back to the foreground after being "backgrounded" (user pressed the home button, app launches a seperate payment process, etc).
 
 ##### SyncStatus
 
