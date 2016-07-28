@@ -24,13 +24,10 @@ public class CodePushDialog extends ReactContextBaseJavaModule{
             // If getCurrentActivity is null, it could be because the app is backgrounded,
             // so we show the dialog when the app resumes)
             getReactApplicationContext().addLifecycleEventListener(new LifecycleEventListener() {
-                private boolean shown = false;
-
                 @Override
                 public void onHostResume() {
                     Activity currentActivity = getCurrentActivity();
-                    if (!shown && currentActivity != null) {
-                        shown = true;
+                    if (currentActivity != null) {
                         getReactApplicationContext().removeLifecycleEventListener(this);
                         showDialogInternal(title, message, button1Text, button2Text, successCallback, currentActivity);
                     }
