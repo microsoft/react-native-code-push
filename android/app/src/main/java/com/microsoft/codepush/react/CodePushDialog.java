@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 
 import com.facebook.react.bridge.Callback;
+import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
@@ -16,9 +17,40 @@ public class CodePushDialog extends ReactContextBaseJavaModule{
     }
 
     @ReactMethod
-    public void showDialog(String title, String message, String button1Text, String button2Text,
-                      final Callback successCallback, Callback errorCallback) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getCurrentActivity());
+    public void showDialog(final String title, final String message, final String button1Text,
+                           final String button2Text, final Callback successCallback, Callback errorCallback) {
+        Activity currentActivity = getCurrentActivity();
+        if (currentActivity == null) {
+            // If getCurrentActivity is null, it could be because the app is backgrounded,
+            // so we show the dialog when the app resumes)
+            getReactApplicationContext().addLifecycleEventListener(new LifecycleEventListener() {
+                @Override
+                public void onHostResume() {
+                    Activity currentActivity = getCurrentActivity();
+                    if (currentActivity != null) {
+                        getReactApplicationContext().removeLifecycleEventListener(this);
+                        showDialogInternal(title, message, button1Text, button2Text, successCallback, currentActivity);
+                    }
+                }
+
+                @Override
+                public void onHostPause() {
+
+                }
+
+                @Override
+                public void onHostDestroy() {
+
+                }
+            });
+        } else {
+            showDialogInternal(title, message, button1Text, button2Text, successCallback, currentActivity);
+        }
+    }
+
+    private void showDialogInternal(String title, String message, String button1Text,
+                                    String button2Text, final Callback successCallback, Activity currentActivity) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(currentActivity);
 
         builder.setCancelable(false);
 
