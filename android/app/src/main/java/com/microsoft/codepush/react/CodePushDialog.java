@@ -16,8 +16,6 @@ public class CodePushDialog extends ReactContextBaseJavaModule{
         super(reactContext);
     }
 
-    private LifecycleEventListener mLifecycleEventListener = null;
-
     @ReactMethod
     public void showDialog(final String title, final String message, final String button1Text,
                            final String button2Text, final Callback successCallback, Callback errorCallback) {
@@ -25,7 +23,7 @@ public class CodePushDialog extends ReactContextBaseJavaModule{
         if (currentActivity == null) {
             // If getCurrentActivity is null, it could be because the app is backgrounded,
             // so we show the dialog when the app resumes)
-            mLifecycleEventListener = new LifecycleEventListener() {
+            getReactApplicationContext().addLifecycleEventListener(new LifecycleEventListener() {
                 private boolean shown = false;
 
                 @Override
@@ -33,10 +31,7 @@ public class CodePushDialog extends ReactContextBaseJavaModule{
                     Activity currentActivity = getCurrentActivity();
                     if (!shown && currentActivity != null) {
                         shown = true;
-
-                        // Set to null to allow GC.
-                        mLifecycleEventListener = null;
-
+                        getReactApplicationContext().removeLifecycleEventListener(this);
                         showDialogInternal(title, message, button1Text, button2Text, successCallback, currentActivity);
                     }
                 }
@@ -50,7 +45,7 @@ public class CodePushDialog extends ReactContextBaseJavaModule{
                 public void onHostDestroy() {
 
                 }
-            };
+            });
         } else {
             showDialogInternal(title, message, button1Text, button2Text, successCallback, currentActivity);
         }
