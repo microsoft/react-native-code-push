@@ -86,9 +86,7 @@ public class FileUtils {
                 if (fileEntry.isDirectory()) {
                     deleteFileOrFolderSilently(fileEntry);
                 } else {
-                    if (!file.delete()) {
-                        fileEntry.delete();
-                    }
+                    fileEntry.delete();
                 }
             }
         }
