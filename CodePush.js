@@ -430,7 +430,7 @@ function codePushify(options = {}) {
           let rootComponentInstance = this.refs.rootComponent;
           let syncStatusCallback = rootComponentInstance && rootComponentInstance.codePushStatusDidChange;
           let downloadProgressCallback = rootComponentInstance && rootComponentInstance.codePushDownloadDidProgress;
-          CodePush.sync(options, syncStatusCallback, downloadProgressCallback)
+          CodePush.sync(options, syncStatusCallback, downloadProgressCallback);
           if (options.checkFrequency === CodePush.CheckFrequency.ON_APP_RESUME) {
             ReactNative.AppState.addEventListener("change", (newState) => {
               newState === "active" && CodePush.sync(options, syncStatusCallback, downloadProgressCallback);
