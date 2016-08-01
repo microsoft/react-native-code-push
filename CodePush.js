@@ -423,14 +423,18 @@ function codePushify(options = {}) {
 
     return class CodePushComponent extends React.Component {
       componentDidMount() {
-        let rootComponentInstance = this.refs.rootComponent;
-        let syncStatusCallback = rootComponentInstance && rootComponentInstance.codePushStatusDidChange;
-        let downloadProgressCallback = rootComponentInstance && rootComponentInstance.codePushDownloadDidProgress;
-        CodePush.sync(options, syncStatusCallback, downloadProgressCallback)
-        if (options.syncMode === CodePush.SyncMode.ON_APP_RESUME) {
-          ReactNative.AppState.addEventListener("change", (newState) => {
-            newState === "active" && CodePush.sync(options, syncStatusCallback, downloadProgressCallback);
-          });
+        if (options.checkFrequency === CodePush.CheckFrequency.MANUAL) {
+          CodePush.notifyAppReady();
+        } else {
+          let rootComponentInstance = this.refs.rootComponent;
+          let syncStatusCallback = rootComponentInstance && rootComponentInstance.codePushStatusDidChange;
+          let downloadProgressCallback = rootComponentInstance && rootComponentInstance.codePushDownloadDidProgress;
+          CodePush.sync(options, syncStatusCallback, downloadProgressCallback)
+          if (options.checkFrequency === CodePush.CheckFrequency.ON_APP_RESUME) {
+            ReactNative.AppState.addEventListener("change", (newState) => {
+              newState === "active" && CodePush.sync(options, syncStatusCallback, downloadProgressCallback);
+            });
+          }
         }
       }
 
@@ -446,7 +450,8 @@ function codePushify(options = {}) {
 // and therefore, it doesn't make sense initializing
 // the JS interface when it wouldn't work anyways.
 if (NativeCodePush) {
-  CodePush = {
+  CodePush = codePushify;
+  Object.assign(CodePush, {
     AcquisitionSdk: Sdk,
     checkForUpdate,
     codePushify,
@@ -477,9 +482,10 @@ if (NativeCodePush) {
       DOWNLOADING_PACKAGE: 7,
       INSTALLING_UPDATE: 8
     },
-    SyncMode: {
+    CheckFrequency: {
       ON_APP_START: 0,
       ON_APP_RESUME: 1,
+      MANUAL: 2
     },
     UpdateState: {
       RUNNING: NativeCodePush.codePushUpdateStateRunning,
@@ -500,7 +506,7 @@ if (NativeCodePush) {
       optionalUpdateMessage: "An update is available. Would you like to install it?",
       title: "Update available"
     }
-  };
+  });
 } else {
   log("The CodePush module doesn't appear to be properly installed. Please double-check that everything is setup correctly.");
 }
