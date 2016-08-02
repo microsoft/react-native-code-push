@@ -404,7 +404,7 @@ With the CodePush plugin downloaded and linked, and your app asking CodePush whe
 
 2. When an update is available, how to present it to the end user?
 
-The simplest way to do this is to "CodePush-ify" your app's root component. To do so, you can choose one of the following three options:
+The simplest way to do this is to "CodePush-ify" your app's root component. To do so, you can choose one of the following two options:
 
 **Option 1: Wrap your root component using the `codePush` decorator function:**
 
