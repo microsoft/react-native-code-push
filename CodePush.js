@@ -75,7 +75,7 @@ async function checkForUpdate(deploymentKey = null) {
       localPackage && (update.packageHash === localPackage.packageHash) ||
       (!localPackage || localPackage._isDebugOnly) && config.packageHash === update.packageHash) {
     if (update && update.updateAppVersion) {
-      log("An update is available but it is targeting a newer binary version than you are currently running.");
+      log("An update is available but it is not targeting the binary version of your app.");
     }
 
     return null;
