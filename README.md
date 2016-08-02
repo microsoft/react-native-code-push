@@ -406,32 +406,32 @@ With the CodePush plugin downloaded and linked, and your app asking CodePush whe
 
 The simplest way to do this is to "CodePush-ify" your app's root component. To do so, you can choose one of the following two options:
 
-**Option 1: Wrap your root component using the `codePush` decorator function:**
+* **Option 1: Wrap your root component using the `codePush` decorator function:**
 
-```javascript
-import codePush from "react-native-code-push";
+    ```javascript
+    import codePush from "react-native-code-push";
+    
+    let codePushOptions;
+    
+    class MyApp extends Component {
+    }
+    
+    MyApp = codePush(codePushOptions)(MyApp);
+    ```
 
-let codePushOptions;
+* **Option 2: Use the [ES7 decorator](https://github.com/wycats/javascript-decorators) syntax:**
 
-class MyApp extends Component {
-}
+    ```javascript
+    import codePush from "react-native-code-push";
 
-MyApp = codePush(codePushOptions)(MyApp);
-```
+    let codePushOptions;
 
-**Option 2: Use the [ES7 decorator](https://github.com/wycats/javascript-decorators) syntax:**
+    @codePush(codePushOptions)
+    class MyApp extends Component {
+    }
+    ```
 
-```javascript
-import codePush from "react-native-code-push";
-
-let codePushOptions;
-
-@codePush(codePushOptions)
-class MyApp extends Component {
-}
-```
-
-*NOTE: Decorators are not yet supported in Babel 6.x pending proposal update.* You may need to enable it by installing and using [babel-preset-react-native-stage-0](https://github.com/skevy/babel-preset-react-native-stage-0#babel-preset-react-native-stage-0).
+    *NOTE: Decorators are not yet supported in Babel 6.x pending proposal update.* You may need to enable it by installing and using [babel-preset-react-native-stage-0](https://github.com/skevy/babel-preset-react-native-stage-0#babel-preset-react-native-stage-0).
 
 If an update is available, it will be silently downloaded, and installed the next time the app is restarted (either explicitly by the end user or by the OS), which ensures the least invasive experience for your end users. If an available update is mandatory, then it will be installed immediately, ensuring that the end user gets it as soon as possible.
 
