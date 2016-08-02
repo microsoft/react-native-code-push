@@ -98,7 +98,7 @@ In order to accommodate as many developer preferences as possible, the CodePush 
 
 #### Plugin Installation (iOS - RNPM)
 
-1. In v0.27+ of React Native, RNPM has already been merged into the React Native CLI. Simply run:
+1. As of v0.27 of React Native, `rnpm link` has already been merged into the React Native CLI. Simply run:
     ```
     react-native link react-native-code-push
     ```
@@ -216,7 +216,7 @@ In order to accommodate as many developer preferences as possible, the CodePush 
 
 #### Plugin Installation (Android - RNPM)
 
-1. In v0.27+ of React Native, RNPM has already been merged into the React Native CLI. Simply run:
+1. As of v0.27 of React Native, `rnpm link` has already been merged into the React Native CLI. Simply run:
     ```
     react-native link react-native-code-push
     ```
