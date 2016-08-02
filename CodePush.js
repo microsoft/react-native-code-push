@@ -455,7 +455,6 @@ if (NativeCodePush) {
   Object.assign(CodePush, {
     AcquisitionSdk: Sdk,
     checkForUpdate,
-    codePushify,
     getConfiguration,
     getCurrentPackage,
     getUpdateMetadata,
