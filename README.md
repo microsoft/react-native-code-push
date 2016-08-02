@@ -433,7 +433,7 @@ The simplest way to do this is to "CodePush-ify" your app's root component. To d
     }
     ```
 
-With the default options, CodePush will check for updates on every app start. If an update is available, it will be silently downloaded, and installed the next time the app is restarted (either explicitly by the end user or by the OS), which ensures the least invasive experience for your end users. If an available update is mandatory, then it will be installed immediately, ensuring that the end user gets it as soon as possible.
+By default, CodePush will check for updates on every app start. If an update is available, it will be silently downloaded, and installed the next time the app is restarted (either explicitly by the end user or by the OS), which ensures the least invasive experience for your end users. If an available update is mandatory, then it will be installed immediately, ensuring that the end user gets it as soon as possible.
 
 If you would like your app to discover updates more quickly, you can also choose to sync up with the CodePush server every time the app resumes from the background.
 
@@ -446,7 +446,7 @@ class MyApp extends Component {
 MyApp = codePush(CodePushOptions)(MyApp);
 ```
 
-Alternatively, if you don't want CodePush to trigger checking for updates automatically for you, but want to trigger it manually in app code in response to some event (e.g. a button press), you can specify a `MANUAL` `checkFrequency` and call [`CodePush.sync()`](#codepushsync) with your desired `SyncOptions`:
+Alternatively, if you don't want CodePush to trigger checking for updates automatically for you, but want to trigger it manually in app code in response to some event (e.g. a button press), you can specify a manual `checkFrequency` and call [`CodePush.sync()`](#codepushsync) with your desired `SyncOptions`:
 
 ```javascript
 let codePushOptions = { checkFrequency: codePush.CheckFrequency.MANUAL };
@@ -473,7 +473,7 @@ MyApp = codePush(CodePushOptions)(MyApp);
 
 *NOTE: If you are using [Redux](http://redux.js.org) and [Redux Saga](http://yelouafi.github.io/redux-saga/), you can alternatively use the [react-native-code-push-saga](http://github.com/lostintangent/react-native-code-push-saga) module, which allows you to customize when `sync` is called in a perhaps simpler/more idiomatic way.*
 
-Additionally, if you would like to display an update confirmation dialog (an "active install"), configure when an available update is installed (e.g. force an immediate restart) or customize the update experience in any other way, refer to the [`codePush()`](#codepush) API reference for information on how to tweak this default behavior.
+If you would like to display an update confirmation dialog (an "active install"), configure when an available update is installed (e.g. force an immediate restart) or customize the update experience in any other way, refer to the [`codePush()`](#codepush) API reference for information on how to tweak this default behavior.
 
 <a id="apple-note">*NOTE: While [Apple's developer agreement](https://developer.apple.com/programs/ios/information/iOS_Program_Information_4_3_15.pdf) fully allows performing over-the-air updates of JavaScript and assets (which is what enables CodePush!), it is against their policy for an app to display an update prompt. Because of this, we recommend that App Store-distributed apps don't enable the `updateDialog` option when calling `sync`, whereas Google Play and internally distributed apps (e.g. Enterprise, Fabric, HockeyApp) can choose to enable/customize it.*</a>
 
