@@ -406,7 +406,7 @@ With the CodePush plugin downloaded and linked, and your app asking CodePush whe
 
 The simplest way to do this is to "CodePush-ify" your app's root component. To do so, you can choose one of the following three options:
 
-**Option 1: Call `codePush` on your root component and assign the result to itself after the component declaration:**
+**Option 1: Wrap your root component using the `codePush` decorator function:**
 
 ```javascript
 import codePush from "react-native-code-push";
@@ -459,14 +459,17 @@ class MyApp extends Component {
 MyApp = codePush(CodePushOptions)(MyApp);
 ```
 
-Alternatively, if you don't want CodePush to trigger checking for updates automatically for you, but want to trigger it manually in app code in response to some event (e.g. a button press), you can specify a `MANUAL` check frequency and do the following:
+Alternatively, if you don't want CodePush to trigger checking for updates automatically for you, but want to trigger it manually in app code in response to some event (e.g. a button press), you can specify a `MANUAL` `checkFrequency` and call [`CodePush.sync()`](#codepushsync) with your desired `SyncOptions`:
 
 ```javascript
 let codePushOptions = { checkFrequency: codePush.CheckFrequency.MANUAL };
 
 class MyApp extends Component {
     onButtonPress() {
-        codePush.sync();
+        codePush.sync({
+            updateDialog: true,
+            installMode: codePush.installMode.IMMEDIATE
+        });
     }
 
     render() {
