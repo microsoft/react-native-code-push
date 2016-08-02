@@ -73,7 +73,7 @@ static NSString *bundleResourceSubdirectory = nil;
     if (bundleResourceSubdirectory) {
         resourcePath = [resourcePath stringByAppendingPathComponent:bundleResourceSubdirectory];
     }
-    
+
     return [resourcePath stringByAppendingPathComponent:[CodePushUpdateUtils assetsFolderName]];
 }
 
@@ -157,6 +157,11 @@ static NSString *bundleResourceSubdirectory = nil;
 {
     NSString *applicationSupportDirectory = [NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) objectAtIndex:0];
     return applicationSupportDirectory;
+}
+
++ (void)overrideAppVersion:(NSString *)appVersion
+{
+    [CodePushConfig current].appVersion = appVersion;
 }
 
 + (void)setDeploymentKey:(NSString *)deploymentKey
