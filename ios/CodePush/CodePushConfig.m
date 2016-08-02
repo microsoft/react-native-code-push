@@ -86,6 +86,11 @@ static NSString * const ServerURLConfigKey = @"serverUrl";
     return [_configDictionary objectForKey:ClientUniqueIDConfigKey];
 }
 
+- (void)setAppVersion:(NSString *)appVersion
+{
+    [_configDictionary setValue:appVersion forKey:AppVersionConfigKey];
+}
+
 - (void)setDeploymentKey:(NSString *)deploymentKey
 {
     [_configDictionary setValue:deploymentKey forKey:DeploymentKeyConfigKey];

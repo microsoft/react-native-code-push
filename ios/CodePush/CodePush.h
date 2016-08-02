@@ -30,7 +30,14 @@
 + (NSString *)bundleAssetsPath;
 
 /*
- * This methods allows dynamically setting the app's
+ * This method allows the version of the app's binary interface
+ * to be specified, which would otherwise default to the
+ * App Store version of the app.
+ */
++ (void)overrideAppVersion:(NSString *)deploymentKey;
+
+/*
+ * This method allows dynamically setting the app's
  * deployment key, in addition to setting it via
  * the Info.plist file's CodePushDeploymentKey setting.
  */
@@ -45,7 +52,7 @@
 
 @interface CodePushConfig : NSObject
 
-@property (readonly) NSString *appVersion;
+@property (copy) NSString *appVersion;
 @property (readonly) NSString *buildVersion;
 @property (readonly) NSDictionary *configuration;
 @property (copy) NSString *deploymentKey;
