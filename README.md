@@ -431,20 +431,7 @@ class MyApp extends Component {
 }
 ```
 
-*NOTE: Decorators are not yet supported in Babel 6.x pending proposal update.* You may need to enable it by doing the following:
-- Install the [`babel-preset-react-native-stage-0` package](https://github.com/skevy/babel-preset-react-native-stage-0)
-
-    ```
-    npm install babel-preset-react-native-stage-0 --save-dev
-    ```
-
-- In your `.babelrc` file, include the following:
-
-    ```
-    {
-        "presets": ["react-native-stage-0/decorator-support"]
-    }
-    ```
+*NOTE: Decorators are not yet supported in Babel 6.x pending proposal update.* You may need to enable it by installing and using [babel-preset-react-native-stage-0](https://github.com/skevy/babel-preset-react-native-stage-0#babel-preset-react-native-stage-0).
 
 If an update is available, it will be silently downloaded, and installed the next time the app is restarted (either explicitly by the end user or by the OS), which ensures the least invasive experience for your end users. If an available update is mandatory, then it will be installed immediately, ensuring that the end user gets it as soon as possible.
 
