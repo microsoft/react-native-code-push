@@ -98,7 +98,15 @@ In order to accommodate as many developer preferences as possible, the CodePush 
 
 #### Plugin Installation (iOS - RNPM)
 
-1. Run `rnpm link react-native-code-push`
+1. As of v0.27 of React Native, `rnpm link` has already been merged into the React Native CLI. Simply run:
+    ```
+    react-native link react-native-code-push
+    ```
+    
+    If your app uses a version of React Native that is lower than v0.27, run the following:
+    ```
+    rnpm link react-native-code-push
+    ``` 
 
     *Note: If you don't already have RNPM installed, you can do so by simply running `npm i -g rnpm` and then executing the above command. If you already have RNPM installed, make sure you have v1.9.0+ in order to benefit from this one step install.*
 
@@ -208,10 +216,18 @@ In order to accommodate as many developer preferences as possible, the CodePush 
 
 #### Plugin Installation (Android - RNPM)
 
-1. Run `rnpm link react-native-code-push`
-
+1. As of v0.27 of React Native, `rnpm link` has already been merged into the React Native CLI. Simply run:
+    ```
+    react-native link react-native-code-push
+    ```
+    
+    If your app uses a version of React Native that is lower than v0.27, run the following:
+    ```
+    rnpm link react-native-code-push
+    ``` 
+    
     *Note: If you don't already have RNPM installed, you can do so by simply running `npm i -g rnpm` and then executing the above command.*
-
+    
 2. If you're using RNPM >=1.6.0, you will be prompted for the deployment key you'd like to use. If you don't already have it, you can retreive this value by running `code-push deployment ls <appName> -k`, or you can choose to ignore it (by simply hitting `<ENTER>`) and add it in later. To get started, we would recommend just using your `Staging` deployment key, so that you can test out the CodePush end-to-end.
 
 3. (Only needed in v1.8.0+ of the plugin) In your `android/app/build.gradle` file, add the `codepush.gradle` file as an additional build task definition underneath `react.gradle`:
