@@ -227,6 +227,13 @@ export interface StatusReport {
     previousLabelOrAppVersion?: string;
 }
 
+/**
+ * Decorates a React Component configuring it to sync for updates with the CodePush server.
+ *
+ * @param options Options used to configure the end-user sync and update experience (e.g. when to check for updates?, show an prompt?, install the update immediately?).
+ */
+declare function CodePush(options?: CodePushOptions): Function;
+
 declare namespace CodePush {
     /**
      * Represents the default settings that will be used by the sync method if
@@ -240,13 +247,6 @@ declare namespace CodePush {
      * @param deploymentKey The deployment key to use to query the CodePush server for an update.
      */
     function checkForUpdate(deploymentKey?: string): Promise<RemotePackage>;
-
-    /**
-     * Decorates a React Component configuring it to sync for updates with the CodePush server.
-     *
-     * @param options Options used to configure the end-user sync and update experience (e.g. when to check for updates?, show an prompt?, install the update immediately?).
-     */
-    function codePushify(options?: CodePushOptions): Function;
 
     /**
      * Retrieves the metadata for an installed update (e.g. description, mandatory).
