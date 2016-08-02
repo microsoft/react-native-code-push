@@ -406,7 +406,7 @@ With the CodePush plugin downloaded and linked, and your app asking CodePush whe
 
 The simplest way to do this is to "CodePush-ify" your app's root component. To do so, you can choose one of the following two options:
 
-* **Option 1: Wrap your root component using the `codePush` decorator function:**
+* **Option 1: Wrap your root component with the `codePush` higher-order component:**
 
     ```javascript
     import codePush from "react-native-code-push";
