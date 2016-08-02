@@ -29,7 +29,7 @@ public class CodePush implements ReactPackage {
     private static boolean sIsRunningBinaryVersion = false;
     private static boolean sNeedToReportRollback = false;
     private static boolean sTestConfigurationFlag = false;
-    private static String sAppVersionOverride = null;
+    private static String sAppVersion = null;
 
     private boolean mDidUpdate = false;
 
@@ -41,7 +41,6 @@ public class CodePush implements ReactPackage {
     private SettingsManager mSettingsManager;
 
     // Config properties.
-    private String mPListAppVersion;
     private String mDeploymentKey;
     private String mServerUrl = "https://codepush.azurewebsites.net/";
 
@@ -64,11 +63,13 @@ public class CodePush implements ReactPackage {
         mIsDebugMode = isDebugMode;
         mSettingsManager = new SettingsManager(mContext);
 
-        try {
-            PackageInfo pInfo = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
-            mPListAppVersion = pInfo.versionName;
-        } catch (PackageManager.NameNotFoundException e) {
-            throw new CodePushUnknownException("Unable to get package info for " + mContext.getPackageName(), e);
+        if (sAppVersion == null) {
+            try {
+                PackageInfo pInfo = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
+                sAppVersion = pInfo.versionName;
+            } catch (PackageManager.NameNotFoundException e) {
+                throw new CodePushUnknownException("Unable to get package info for " + mContext.getPackageName(), e);
+            }
         }
 
         mCurrentInstance = this;
@@ -97,7 +98,7 @@ public class CodePush implements ReactPackage {
     }
 
     public String getAppVersion() {
-        return sAppVersionOverride == null ? mPListAppVersion : sAppVersionOverride;
+        return sAppVersion;
     }
 
     public String getAssetsBundleFileName() {
@@ -178,14 +179,14 @@ public class CodePush implements ReactPackage {
             String packageAppVersion = CodePushUtils.tryGetString(packageMetadata, "appVersion");
             if (binaryModifiedDateDuringPackageInstall != null &&
                     binaryModifiedDateDuringPackageInstall == binaryResourcesModifiedTime &&
-                    (isUsingTestConfiguration() || this.getAppVersion().equals(packageAppVersion))) {
+                    (isUsingTestConfiguration() || sAppVersion.equals(packageAppVersion))) {
                 CodePushUtils.logBundleUrl(packageFilePath);
                 sIsRunningBinaryVersion = false;
                 return packageFilePath;
             } else {
                 // The binary version is newer.
                 this.mDidUpdate = false;
-                if (!this.mIsDebugMode || !this.getAppVersion().equals(packageAppVersion)) {
+                if (!this.mIsDebugMode || !sAppVersion.equals(packageAppVersion)) {
                     this.clearUpdates();
                 }
 
@@ -251,7 +252,7 @@ public class CodePush implements ReactPackage {
     }
 
     public static void overrideAppVersion(String appVersionOverride) {
-        sAppVersionOverride = appVersionOverride;
+        sAppVersion = appVersionOverride;
     }
 
     private void rollbackPackage() {
