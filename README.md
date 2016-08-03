@@ -721,7 +721,8 @@ When you require `react-native-code-push`, the module object provides the follow
 // Wrapper function
 codePush(rootComponent: React.Component): React.Component;
 codePush(options: CodePushOptions)(rootComponent: React.Component): React.Component;
-
+```
+```javascript
 // Decorator; Requires ES7 support
 @codePush
 @codePush(options: CodePushOptions)
