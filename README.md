@@ -718,11 +718,11 @@ When you require `react-native-code-push`, the module object provides the follow
 #### codePush
 
 ```javascript
-// Wrapper functions
+// Wrapper function
 codePush(rootComponent: React.Component): React.Component;
 codePush(options: CodePushOptions)(rootComponent: React.Component): React.Component;
 
-// Decorators; Requires ES7 support
+// Decorator; Requires ES7 support
 @codePush
 @codePush(options: CodePushOptions)
 ```
@@ -738,7 +738,7 @@ This decorator provides support for letting you customize its behaviour to easil
     // sync with the server, without ever
     // interrupting the end user
     class MyApp extends Component {}
-    codePush(MyApp);
+    MyApp = codePush(MyApp);
     ```
 
 2. **Silent sync everytime the app resumes**. Same as 1, except we check for updates, or apply an update if one exists every time the app returns to the foreground after being "backgrounded".
@@ -746,7 +746,7 @@ This decorator provides support for letting you customize its behaviour to easil
     ```javascript
     // Sync for updates everytime the app resumes.
     class MyApp extends Component {}
-    codePush({ checkFrequency: codePush.CheckFrequency.ON_APP_RESUME, installMode: codePush.InstallMode.ON_NEXT_RESUME })(MyApp);
+    MyApp = codePush({ checkFrequency: codePush.CheckFrequency.ON_APP_RESUME, installMode: codePush.InstallMode.ON_NEXT_RESUME })(MyApp);
     ```
 
 3. **Interactive**. When an update is available, prompt the end user for permission before downloading it, and then immediately apply the update. If an update was released using the `mandatory` flag, the end user would still be notified about the update, but they wouldn't have the choice to ignore it.
@@ -756,7 +756,7 @@ This decorator provides support for letting you customize its behaviour to easil
     // about each update, and displays it to them
     // immediately after downloading it
     class MyApp extends Component {}
-    codePush({ updateDialog: true, installMode: codePush.InstallMode.IMMEDIATE })(MyApp);
+    MyApp = codePush({ updateDialog: true, installMode: codePush.InstallMode.IMMEDIATE })(MyApp);
     ```
 
 4. **Log/display progress**. While the app is syncing with the server for updates, make use of the `codePushStatusDidChange` and/or `codePushDownloadDidProgress` event hooks to log down the different stages of this process, or even display a progress bar to the user.
@@ -789,7 +789,7 @@ This decorator provides support for letting you customize its behaviour to easil
             console.log(progess.receivedBytes + " of " + progress.totalBytes + " received.");
         }
     }
-    codePush(MyApp);
+    MyApp = codePush(MyApp);
     ```
 
 ##### CodePushOptions

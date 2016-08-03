@@ -446,6 +446,7 @@ function codePushify(options = {}) {
   }
 
   if (typeof options === "function") {
+    // Infer that the root component was directly passed to us.
     return decorator(options);
   } else {
     return decorator;
