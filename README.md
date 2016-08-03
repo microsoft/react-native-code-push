@@ -102,11 +102,11 @@ In order to accommodate as many developer preferences as possible, the CodePush 
     ```
     react-native link react-native-code-push
     ```
-    
+
     If your app uses a version of React Native that is lower than v0.27, run the following:
     ```
     rnpm link react-native-code-push
-    ``` 
+    ```
 
     *Note: If you don't already have RNPM installed, you can do so by simply running `npm i -g rnpm` and then executing the above command. If you already have RNPM installed, make sure you have v1.9.0+ in order to benefit from this one step install.*
 
@@ -220,14 +220,14 @@ In order to accommodate as many developer preferences as possible, the CodePush 
     ```
     react-native link react-native-code-push
     ```
-    
+
     If your app uses a version of React Native that is lower than v0.27, run the following:
     ```
     rnpm link react-native-code-push
-    ``` 
-    
+    ```
+
     *Note: If you don't already have RNPM installed, you can do so by simply running `npm i -g rnpm` and then executing the above command.*
-    
+
 2. If you're using RNPM >=1.6.0, you will be prompted for the deployment key you'd like to use. If you don't already have it, you can retreive this value by running `code-push deployment ls <appName> -k`, or you can choose to ignore it (by simply hitting `<ENTER>`) and add it in later. To get started, we would recommend just using your `Staging` deployment key, so that you can test out the CodePush end-to-end.
 
 3. (Only needed in v1.8.0+ of the plugin) In your `android/app/build.gradle` file, add the `codepush.gradle` file as an additional build task definition underneath `react.gradle`:
@@ -426,13 +426,11 @@ The simplest way to do this is to "CodePush-ify" your app's root component. To d
 
     ```javascript
     import codePush from "react-native-code-push";
-    
-    let codePushOptions;
-    
+
     class MyApp extends Component {
     }
-    
-    MyApp = codePush(codePushOptions)(MyApp);
+
+    MyApp = codePush(MyApp);
     ```
 
 * **Option 2: Use the [ES7 decorator](https://github.com/wycats/javascript-decorators) syntax:**
@@ -442,9 +440,7 @@ The simplest way to do this is to "CodePush-ify" your app's root component. To d
     ```javascript
     import codePush from "react-native-code-push";
 
-    let codePushOptions;
-
-    @codePush(codePushOptions)
+    @codePush
     class MyApp extends Component {
     }
     ```
@@ -724,6 +720,7 @@ When you require `react-native-code-push`, the module object provides the follow
 #### codePush
 
 ```javascript
+codePush(rootComponent: React.Component): React.Component;
 codePush(options: CodePushOptions)(rootComponent: React.Component): React.Component;
 ```
 
@@ -737,7 +734,7 @@ This decorator provides support for letting you customize its behaviour to easil
     // Fully silent update which keeps the app in
     // sync with the server, without ever
     // interrupting the end user
-    @codePush()
+    @codePush
     class MyApp extends Component {}
     ```
 
@@ -764,7 +761,7 @@ This decorator provides support for letting you customize its behaviour to easil
     ```javascript
     // Make use of the event hooks to keep track of
     // the different stages of the sync process.
-    @codePush()
+    @codePush
     class MyApp extends Component {
         codePushStatusDidChange(status) {
             switch(syncStatus) {
