@@ -102,11 +102,11 @@ In order to accommodate as many developer preferences as possible, the CodePush 
     ```
     react-native link react-native-code-push
     ```
-    
+
     If your app uses a version of React Native that is lower than v0.27, run the following:
     ```
     rnpm link react-native-code-push
-    ``` 
+    ```
 
     *Note: If you don't already have RNPM installed, you can do so by simply running `npm i -g rnpm` and then executing the above command. If you already have RNPM installed, make sure you have v1.9.0+ in order to benefit from this one step install.*
 
@@ -220,14 +220,14 @@ In order to accommodate as many developer preferences as possible, the CodePush 
     ```
     react-native link react-native-code-push
     ```
-    
+
     If your app uses a version of React Native that is lower than v0.27, run the following:
     ```
     rnpm link react-native-code-push
-    ``` 
-    
+    ```
+
     *Note: If you don't already have RNPM installed, you can do so by simply running `npm i -g rnpm` and then executing the above command.*
-    
+
 2. If you're using RNPM >=1.6.0, you will be prompted for the deployment key you'd like to use. If you don't already have it, you can retreive this value by running `code-push deployment ls <appName> -k`, or you can choose to ignore it (by simply hitting `<ENTER>`) and add it in later. To get started, we would recommend just using your `Staging` deployment key, so that you can test out the CodePush end-to-end.
 
 3. (Only needed in v1.8.0+ of the plugin) In your `android/app/build.gradle` file, add the `codepush.gradle` file as an additional build task definition underneath `react.gradle`:
@@ -426,13 +426,11 @@ The simplest way to do this is to "CodePush-ify" your app's root component. To d
 
     ```javascript
     import codePush from "react-native-code-push";
-    
-    let codePushOptions;
-    
+
     class MyApp extends Component {
     }
-    
-    MyApp = codePush(codePushOptions)(MyApp);
+
+    MyApp = codePush(MyApp);
     ```
 
 * **Option 2: Use the [ES7 decorator](https://github.com/wycats/javascript-decorators) syntax:**
@@ -442,9 +440,7 @@ The simplest way to do this is to "CodePush-ify" your app's root component. To d
     ```javascript
     import codePush from "react-native-code-push";
 
-    let codePushOptions;
-
-    @codePush(codePushOptions)
+    @codePush
     class MyApp extends Component {
     }
     ```
@@ -722,9 +718,13 @@ When you require `react-native-code-push`, the module object provides the follow
 #### codePush
 
 ```javascript
-codePush(options: CodePushOptions)(rootComponent: React.Component): React.Component; // Wrapper function
+// Wrapper function
+codePush(rootComponent: React.Component): React.Component;
+codePush(options: CodePushOptions)(rootComponent: React.Component): React.Component;
 
-@codePush(options: CodePushOptions) // Decorator; Requires ES7 support
+// Decorator; Requires ES7 support
+@codePush
+@codePush(options: CodePushOptions)
 ```
 
 Used to wrap a React component inside a "higher order" React component that knows how to synchronize your app's JavaScript bundle and image assets when it is mounted. Internally, the higher-order component calls [`sync`](#codepushsync) inside its `componentDidMount` lifecycle handle, which in turns performs an update check, downloads the update if it exists and installs the update for you.
@@ -738,7 +738,7 @@ This decorator provides support for letting you customize its behaviour to easil
     // sync with the server, without ever
     // interrupting the end user
     class MyApp extends Component {}
-    codePush()(MyApp);
+    MyApp = codePush(MyApp);
     ```
 
 2. **Silent sync everytime the app resumes**. Same as 1, except we check for updates, or apply an update if one exists every time the app returns to the foreground after being "backgrounded".
@@ -746,7 +746,7 @@ This decorator provides support for letting you customize its behaviour to easil
     ```javascript
     // Sync for updates everytime the app resumes.
     class MyApp extends Component {}
-    codePush({ checkFrequency: codePush.CheckFrequency.ON_APP_RESUME, installMode: codePush.InstallMode.ON_NEXT_RESUME })(MyApp);
+    MyApp = codePush({ checkFrequency: codePush.CheckFrequency.ON_APP_RESUME, installMode: codePush.InstallMode.ON_NEXT_RESUME })(MyApp);
     ```
 
 3. **Interactive**. When an update is available, prompt the end user for permission before downloading it, and then immediately apply the update. If an update was released using the `mandatory` flag, the end user would still be notified about the update, but they wouldn't have the choice to ignore it.
@@ -756,7 +756,7 @@ This decorator provides support for letting you customize its behaviour to easil
     // about each update, and displays it to them
     // immediately after downloading it
     class MyApp extends Component {}
-    codePush({ updateDialog: true, installMode: codePush.InstallMode.IMMEDIATE })(MyApp);
+    MyApp = codePush({ updateDialog: true, installMode: codePush.InstallMode.IMMEDIATE })(MyApp);
     ```
 
 4. **Log/display progress**. While the app is syncing with the server for updates, make use of the `codePushStatusDidChange` and/or `codePushDownloadDidProgress` event hooks to log down the different stages of this process, or even display a progress bar to the user.
@@ -789,7 +789,7 @@ This decorator provides support for letting you customize its behaviour to easil
             console.log(progess.receivedBytes + " of " + progress.totalBytes + " received.");
         }
     }
-    codePush()(MyApp);
+    MyApp = codePush(MyApp);
     ```
 
 ##### CodePushOptions

@@ -402,26 +402,26 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
 let CodePush;
 
 function codePushify(options = {}) {
-  return (RootComponent) => {
-    let React;
-    let ReactNative = require("react-native");
+  let React;
+  let ReactNative = require("react-native");
 
-    try { React = require("react"); } catch (e) { }
+  try { React = require("react"); } catch (e) { }
+  if (!React) {
+    try { React = ReactNative.React; } catch (e) { }
     if (!React) {
-      try { React = ReactNative.React; } catch (e) { }
-      if (!React) {
-        throw new Error("Unable to find the 'React' module.");
-      }
+      throw new Error("Unable to find the 'React' module.");
     }
+  }
 
-    if (!React.Component) {
-      throw new Error(
+  if (!React.Component) {
+    throw new Error(
 `Unable to find the "Component" class, please either:
 1. Upgrade to a newer version of React Native that supports it, or
 2. Call the codePush.sync API in your component instead of using the @codePush decorator`
-      );
-    }
+    );
+  }
 
+  var decorator = (RootComponent) => {
     return class CodePushComponent extends React.Component {
       componentDidMount() {
         if (options.checkFrequency === CodePush.CheckFrequency.MANUAL) {
@@ -443,6 +443,13 @@ function codePushify(options = {}) {
         return <RootComponent {...this.props} ref={"rootComponent"} />
       }
     }
+  }
+
+  if (typeof options === "function") {
+    // Infer that the root component was directly passed to us.
+    return decorator(options);
+  } else {
+    return decorator;
   }
 }
 
