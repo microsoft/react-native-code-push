@@ -697,13 +697,11 @@ The following sections describe the shape and behavior of these APIs in detail:
 
 ### JavaScript API Reference
 
-When you require `react-native-code-push`, the module object provides the following top-level methods:
+When you require `react-native-code-push`, the module object provides the following top-level methods in addition to the root-level [component decorator](#codepush):
 
 * [allowRestart](#codepushallowrestart): Re-allows programmatic restarts to occur as a result of an update being installed, and optionally, immediately restarts the app if a pending update had attempted to restart the app while restarts were disallowed. This is an advanced API and is only necessary if your app explicitly disallowed restarts via the `disallowRestart` method.
 
 * [checkForUpdate](#codepushcheckforupdate): Asks the CodePush service whether the configured app deployment has an update available.
-
-* [codePushify](#codepushcodepushify): Returns a function that wraps a React component inside a "higher order" React component configured to call [`codePush.sync()`](#codepushsync) when it is mounted. This allows you to declaratively specify the behaviour of how and when your app checks for an update, downloads it and installs it.
 
 * [disallowRestart](#codepushdisallowrestart): Temporarily disallows any programmatic restarts to occur as a result of a CodePush update being installed. This is an advanced API, and is useful when a component within your app (e.g. an onboarding process) needs to ensure that no end-user interruptions can occur during its lifetime.
 
@@ -720,11 +718,16 @@ When you require `react-native-code-push`, the module object provides the follow
 #### codePush
 
 ```javascript
+// Wrapper functions
 codePush(rootComponent: React.Component): React.Component;
 codePush(options: CodePushOptions)(rootComponent: React.Component): React.Component;
+
+// Decorators; Requires ES7 support
+@codePush
+@codePush(options: CodePushOptions)
 ```
 
-Used as a decorator to wrap a React component inside a "higher order" React component that knows how to synchronize your app's JavaScript bundle and image assets with the latest release to the configured deployment when it is mounted. Internally, the wrapper component calls [`sync`](#codepushsync) inside its `componentDidMount` lifecycle handle, which in turns performs an update check, downloads the update if it exists and installs the update for you.
+Used to wrap a React component inside a "higher order" React component that knows how to synchronize your app's JavaScript bundle and image assets when it is mounted. Internally, the higher-order component calls [`sync`](#codepushsync) inside its `componentDidMount` lifecycle handle, which in turns performs an update check, downloads the update if it exists and installs the update for you.
 
 This decorator provides support for letting you customize its behaviour to easily enable apps with different requirements. Below are some examples of ways you can use it (you can pick one or even use a combination):
 
@@ -734,16 +737,16 @@ This decorator provides support for letting you customize its behaviour to easil
     // Fully silent update which keeps the app in
     // sync with the server, without ever
     // interrupting the end user
-    @codePush
     class MyApp extends Component {}
+    codePush(MyApp);
     ```
 
 2. **Silent sync everytime the app resumes**. Same as 1, except we check for updates, or apply an update if one exists every time the app returns to the foreground after being "backgrounded".
 
     ```javascript
     // Sync for updates everytime the app resumes.
-    @codePush({ checkFrequency: codePush.CheckFrequency.ON_APP_RESUME, installMode: codePush.InstallMode.ON_NEXT_RESUME })
     class MyApp extends Component {}
+    codePush({ checkFrequency: codePush.CheckFrequency.ON_APP_RESUME, installMode: codePush.InstallMode.ON_NEXT_RESUME })(MyApp);
     ```
 
 3. **Interactive**. When an update is available, prompt the end user for permission before downloading it, and then immediately apply the update. If an update was released using the `mandatory` flag, the end user would still be notified about the update, but they wouldn't have the choice to ignore it.
@@ -752,8 +755,8 @@ This decorator provides support for letting you customize its behaviour to easil
     // Active update, which lets the end user know
     // about each update, and displays it to them
     // immediately after downloading it
-    @codePush({ updateDialog: true, installMode: codePush.InstallMode.IMMEDIATE })
     class MyApp extends Component {}
+    codePush({ updateDialog: true, installMode: codePush.InstallMode.IMMEDIATE })(MyApp);
     ```
 
 4. **Log/display progress**. While the app is syncing with the server for updates, make use of the `codePushStatusDidChange` and/or `codePushDownloadDidProgress` event hooks to log down the different stages of this process, or even display a progress bar to the user.
@@ -761,7 +764,6 @@ This decorator provides support for letting you customize its behaviour to easil
     ```javascript
     // Make use of the event hooks to keep track of
     // the different stages of the sync process.
-    @codePush
     class MyApp extends Component {
         codePushStatusDidChange(status) {
             switch(syncStatus) {
@@ -787,6 +789,7 @@ This decorator provides support for letting you customize its behaviour to easil
             console.log(progess.receivedBytes + " of " + progress.totalBytes + " received.");
         }
     }
+    codePush(MyApp);
     ```
 
 ##### CodePushOptions
