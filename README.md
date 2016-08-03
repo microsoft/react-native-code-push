@@ -701,13 +701,11 @@ The following sections describe the shape and behavior of these APIs in detail:
 
 ### JavaScript API Reference
 
-When you require `react-native-code-push`, the module object provides the following top-level methods:
+When you require `react-native-code-push`, the module object provides the following top-level methods in addition to the root-level [component decorator](#codepush):
 
 * [allowRestart](#codepushallowrestart): Re-allows programmatic restarts to occur as a result of an update being installed, and optionally, immediately restarts the app if a pending update had attempted to restart the app while restarts were disallowed. This is an advanced API and is only necessary if your app explicitly disallowed restarts via the `disallowRestart` method.
 
 * [checkForUpdate](#codepushcheckforupdate): Asks the CodePush service whether the configured app deployment has an update available.
-
-* [codePushify](#codepushcodepushify): Returns a function that wraps a React component inside a "higher order" React component configured to call [`codePush.sync()`](#codepushsync) when it is mounted. This allows you to declaratively specify the behaviour of how and when your app checks for an update, downloads it and installs it.
 
 * [disallowRestart](#codepushdisallowrestart): Temporarily disallows any programmatic restarts to occur as a result of a CodePush update being installed. This is an advanced API, and is useful when a component within your app (e.g. an onboarding process) needs to ensure that no end-user interruptions can occur during its lifetime.
 
