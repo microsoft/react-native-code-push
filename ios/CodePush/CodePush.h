@@ -34,7 +34,7 @@
  * to be specified, which would otherwise default to the
  * App Store version of the app.
  */
-+ (void)overrideAppVersion:(NSString *)deploymentKey;
++ (void)overrideAppVersion:(NSString *)appVersion;
 
 /*
  * This method allows dynamically setting the app's
