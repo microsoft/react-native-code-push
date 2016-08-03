@@ -722,10 +722,12 @@ When you require `react-native-code-push`, the module object provides the follow
 #### codePush
 
 ```javascript
-codePush(options: CodePushOptions)(rootComponent: React.Component): React.Component;
+codePush(options: CodePushOptions)(rootComponent: React.Component): React.Component; // Wrapper function
+
+@codePush(options: CodePushOptions) // Decorator; Requires ES7 support
 ```
 
-Used as a decorator to wrap a React component inside a "higher order" React component that knows how to synchronize your app's JavaScript bundle and image assets with the latest release to the configured deployment when it is mounted. Internally, the wrapper component calls [`sync`](#codepushsync) inside its `componentDidMount` lifecycle handle, which in turns performs an update check, downloads the update if it exists and installs the update for you.
+Used to wrap a React component inside a "higher order" React component that knows how to synchronize your app's JavaScript bundle and image assets when it is mounted. Internally, the higher-order component calls [`sync`](#codepushsync) inside its `componentDidMount` lifecycle handle, which in turns performs an update check, downloads the update if it exists and installs the update for you.
 
 This decorator provides support for letting you customize its behaviour to easily enable apps with different requirements. Below are some examples of ways you can use it (you can pick one or even use a combination):
 
