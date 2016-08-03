@@ -3,7 +3,7 @@ import { Alert } from "./AlertAdapter";
 import requestFetchAdapter from "./request-fetch-adapter";
 import { AppState, Platform } from "react-native";
 import RestartManager from "./RestartManager";
-import log from './logging';
+import log from "./logging";
 
 let NativeCodePush = require("react-native").NativeModules.CodePush;
 const PackageMixins = require("./package-mixins")(NativeCodePush);
@@ -75,7 +75,7 @@ async function checkForUpdate(deploymentKey = null) {
       localPackage && (update.packageHash === localPackage.packageHash) ||
       (!localPackage || localPackage._isDebugOnly) && config.packageHash === update.packageHash) {
     if (update && update.updateAppVersion) {
-      log("An update is available but it is targeting a newer binary version than you are currently running.");
+      log("An update is available but it is not targeting the binary version of your app.");
     }
 
     return null;
@@ -401,12 +401,65 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
 
 let CodePush;
 
+function codePushify(options = {}) {
+  let React;
+  let ReactNative = require("react-native");
+
+  try { React = require("react"); } catch (e) { }
+  if (!React) {
+    try { React = ReactNative.React; } catch (e) { }
+    if (!React) {
+      throw new Error("Unable to find the 'React' module.");
+    }
+  }
+
+  if (!React.Component) {
+    throw new Error(
+`Unable to find the "Component" class, please either:
+1. Upgrade to a newer version of React Native that supports it, or
+2. Call the codePush.sync API in your component instead of using the @codePush decorator`
+    );
+  }
+
+  var decorator = (RootComponent) => {
+    return class CodePushComponent extends React.Component {
+      componentDidMount() {
+        if (options.checkFrequency === CodePush.CheckFrequency.MANUAL) {
+          CodePush.notifyAppReady();
+        } else {
+          let rootComponentInstance = this.refs.rootComponent;
+          let syncStatusCallback = rootComponentInstance && rootComponentInstance.codePushStatusDidChange;
+          let downloadProgressCallback = rootComponentInstance && rootComponentInstance.codePushDownloadDidProgress;
+          CodePush.sync(options, syncStatusCallback, downloadProgressCallback);
+          if (options.checkFrequency === CodePush.CheckFrequency.ON_APP_RESUME) {
+            ReactNative.AppState.addEventListener("change", (newState) => {
+              newState === "active" && CodePush.sync(options, syncStatusCallback, downloadProgressCallback);
+            });
+          }
+        }
+      }
+
+      render() {
+        return <RootComponent {...this.props} ref={"rootComponent"} />
+      }
+    }
+  }
+
+  if (typeof options === "function") {
+    // Infer that the root component was directly passed to us.
+    return decorator(options);
+  } else {
+    return decorator;
+  }
+}
+
 // If the "NativeCodePush" variable isn't defined, then
 // the app didn't properly install the native module,
 // and therefore, it doesn't make sense initializing
 // the JS interface when it wouldn't work anyways.
 if (NativeCodePush) {
-  CodePush = {
+  CodePush = codePushify;
+  Object.assign(CodePush, {
     AcquisitionSdk: Sdk,
     checkForUpdate,
     getConfiguration,
@@ -436,6 +489,11 @@ if (NativeCodePush) {
       DOWNLOADING_PACKAGE: 7,
       INSTALLING_UPDATE: 8
     },
+    CheckFrequency: {
+      ON_APP_START: 0,
+      ON_APP_RESUME: 1,
+      MANUAL: 2
+    },
     UpdateState: {
       RUNNING: NativeCodePush.codePushUpdateStateRunning,
       PENDING: NativeCodePush.codePushUpdateStatePending,
@@ -455,7 +513,7 @@ if (NativeCodePush) {
       optionalUpdateMessage: "An update is available. Would you like to install it?",
       title: "Update available"
     }
-  };
+  });
 } else {
   log("The CodePush module doesn't appear to be properly installed. Please double-check that everything is setup correctly.");
 }
