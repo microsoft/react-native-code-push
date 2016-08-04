@@ -1,1 +1,1 @@
-import "./crossplatformdemo.js";
+require("./demo");
