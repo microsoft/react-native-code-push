@@ -18,8 +18,8 @@
   },
   "dependencies": {
     "code-push": "1.8.0-beta",
-    "inquirer": "^1.1.2",
-    "plist": "^1.2.0"
+    "inquirer": "1.1.2",
+    "plist": "1.2.0"
   },
   "devDependencies": {
     "archiver": "latest",
