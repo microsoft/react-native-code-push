@@ -455,7 +455,7 @@ let codePushOptions = { checkFrequency: codePush.CheckFrequency.ON_APP_RESUME };
 class MyApp extends Component {
 }
 
-MyApp = codePush(CodePushOptions)(MyApp);
+MyApp = codePush(codePushOptions)(MyApp);
 ```
 
 Alternatively, if you want fine-grained control over when the check happens (e.g. a button press or timer interval), you can call [`CodePush.sync()`](#codepushsync) at any time with your desired `SyncOptions`, and optionally turn off CodePush's automatic checking by specifying a manual `checkFrequency`:
@@ -480,7 +480,7 @@ class MyApp extends Component {
     }
 }
 
-MyApp = codePush(CodePushOptions)(MyApp);
+MyApp = codePush(codePushOptions)(MyApp);
 ```
 
 If you would like to display an update confirmation dialog (an "active install"), configure when an available update is installed (e.g. force an immediate restart) or customize the update experience in any other way, refer to the [`codePush()`](#codepush) API reference for information on how to tweak this default behavior.
