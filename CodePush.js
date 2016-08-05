@@ -428,8 +428,15 @@ function codePushify(options = {}) {
           CodePush.notifyAppReady();
         } else {
           let rootComponentInstance = this.refs.rootComponent;
-          let syncStatusCallback = rootComponentInstance && rootComponentInstance.codePushStatusDidChange.bind(rootComponentInstance);
-          let downloadProgressCallback = rootComponentInstance && rootComponentInstance.codePushDownloadDidProgress.bind(rootComponentInstance);
+          if (rootComponentInstance && rootComponentInstance.codePushStatusDidChange) {
+            syncStatusCallback = rootComponentInstance.codePushStatusDidChange.bind(rootComponentInstance);
+          }
+
+          let downloadProgressCallback;
+          if (rootComponentInstance && rootComponentInstance.codePushDownloadDidProgress) {
+            downloadProgressCallback = rootComponentInstance.codePushDownloadDidProgress.bind(rootComponentInstance);
+          }
+          
           CodePush.sync(options, syncStatusCallback, downloadProgressCallback);
           if (options.checkFrequency === CodePush.CheckFrequency.ON_APP_RESUME) {
             ReactNative.AppState.addEventListener("change", (newState) => {
