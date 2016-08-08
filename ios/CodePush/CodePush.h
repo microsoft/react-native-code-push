@@ -1,6 +1,7 @@
+#import "RCTEventEmitter.h"
 #import <Foundation/Foundation.h>
 
-@interface CodePush : NSObject
+@interface CodePush : RCTEventEmitter
 
 + (NSURL *)binaryBundleURL;
 /*
