@@ -579,13 +579,25 @@ To set this up, perform the following steps:
 
     *NOTE: As a reminder, you can retrieve these keys by running `code-push deployment ls <APP_NAME> -k` from your terminal.*
 
-4. Open up your `MainActivity.java` file and change the `CodePush` constructor to pass the deployment key in via the build config you just defined, as opposed to a string literal.
+4. Pass the deployment key to the `CodePush` constructor via the build config you just defined, as opposed to a string literal.
 
-    ```java
-    new CodePush(BuildConfig.CODEPUSH_KEY, this, BuildConfig.DEBUG);
-    ```
+**For React Native >= v0.29**
 
-    *Note: If you gave your build setting a different name in your Gradle file, simply make sure to reflect that in your Java code.*
+Open up your `MainApplication.java` file and make the following changes:
+
+ ```java
+ new CodePush(BuildConfig.CODEPUSH_KEY, MainApplication.this, BuildConfig.DEBUG);
+ ```
+
+**For React Native v0.19 - v0.28** 
+
+Open up your `MainActivity.java` file and make the following changes:
+
+ ```java
+ new CodePush(BuildConfig.CODEPUSH_KEY, this, BuildConfig.DEBUG);
+ ```
+
+*Note: If you gave your build setting a different name in your Gradle file, simply make sure to reflect that in your Java code.*
 
 And that's it! Now when you run or build your app, your debug builds will automatically be configured to sync with your `Staging` deployment, and your release builds will be configured to sync with your `Production` deployment.
 
