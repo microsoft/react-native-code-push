@@ -583,15 +583,15 @@ To set this up, perform the following steps:
 
 **For React Native >= v0.29**
 
-    ```java
-    new CodePush(BuildConfig.CODEPUSH_KEY, MainApplication.this, BuildConfig.DEBUG);
-    ```
-    
+ ```java
+ new CodePush(BuildConfig.CODEPUSH_KEY, MainApplication.this, BuildConfig.DEBUG);
+ ```
+
 **For React Native v0.19 - v0.28** 
 
-    ```java
-    new CodePush(BuildConfig.CODEPUSH_KEY, this, BuildConfig.DEBUG);
-    ```
+ ```java
+ new CodePush(BuildConfig.CODEPUSH_KEY, this, BuildConfig.DEBUG);
+ ```
 
 
     *Note: If you gave your build setting a different name in your Gradle file, simply make sure to reflect that in your Java code.*
