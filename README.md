@@ -579,15 +579,19 @@ To set this up, perform the following steps:
 
     *NOTE: As a reminder, you can retrieve these keys by running `code-push deployment ls <APP_NAME> -k` from your terminal.*
 
-4. Open up your `MainActivity.java` file and change the `CodePush` constructor to pass the deployment key in via the build config you just defined, as opposed to a string literal.
+4. Pass the deployment key to the `CodePush` constructor via the build config you just defined, as opposed to a string literal.
 
 **For React Native >= v0.29**
+
+Open up your `MainApplication.java` file and make the following changes:
 
  ```java
  new CodePush(BuildConfig.CODEPUSH_KEY, MainApplication.this, BuildConfig.DEBUG);
  ```
 
 **For React Native v0.19 - v0.28** 
+
+Open up your `MainActivity.java` file and make the following changes:
 
  ```java
  new CodePush(BuildConfig.CODEPUSH_KEY, this, BuildConfig.DEBUG);
