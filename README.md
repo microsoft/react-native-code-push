@@ -593,8 +593,7 @@ To set this up, perform the following steps:
  new CodePush(BuildConfig.CODEPUSH_KEY, this, BuildConfig.DEBUG);
  ```
 
-
-    *Note: If you gave your build setting a different name in your Gradle file, simply make sure to reflect that in your Java code.*
+*Note: If you gave your build setting a different name in your Gradle file, simply make sure to reflect that in your Java code.*
 
 And that's it! Now when you run or build your app, your debug builds will automatically be configured to sync with your `Staging` deployment, and your release builds will be configured to sync with your `Production` deployment.
 
