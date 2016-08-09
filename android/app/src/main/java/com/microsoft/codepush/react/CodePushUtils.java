@@ -94,11 +94,6 @@ public class CodePushUtils {
         return map;
     }
 
-    public static WritableMap convertReadableMapToWritableMap(ReadableMap map) {
-        JSONObject mapJSON = convertReadableToJsonObject(map);
-        return convertJsonObjectToWritable(mapJSON);
-    }
-
     public static JSONArray convertReadableToJsonArray(ReadableArray arr) {
         JSONArray jsonArr = new JSONArray();
         for (int i=0; i<arr.size(); i++) {
@@ -194,11 +189,10 @@ public class CodePushUtils {
         }
     }
 
-    public static WritableMap getWritableMapFromFile(String filePath) throws IOException {
+    public static JSONObject getJsonObjectFromFile(String filePath) throws IOException {
         String content = FileUtils.readFileToString(filePath);
         try {
-            JSONObject json = new JSONObject(content);
-            return convertJsonObjectToWritable(json);
+            return new JSONObject(content);
         } catch (JSONException jsonException) {
             // Should not happen
             throw new CodePushMalformedDataException(filePath, jsonException);
@@ -213,6 +207,14 @@ public class CodePushUtils {
         log("Loading JS bundle from \"" + path + "\"");
     }
 
+    public static void setJSONValueForKey(JSONObject json, String key, Object value) {
+        try {
+            json.put(key, value);
+        } catch (JSONException e) {
+            throw new CodePushUnknownException("Unable to set value " + value + " for key " + key + " to JSONObject");
+        }
+    }
+
     public static String tryGetString(ReadableMap map, String key) {
         try {
             return map.getString(key);
@@ -221,8 +223,7 @@ public class CodePushUtils {
         }
     }
 
-    public static void writeReadableMapToFile(ReadableMap map, String filePath) throws IOException {
-        JSONObject json = CodePushUtils.convertReadableToJsonObject(map);
+    public static void writeJsonToFile(JSONObject json, String filePath) throws IOException {
         String jsonString = json.toString();
         FileUtils.writeStringToFile(jsonString, filePath);
     }

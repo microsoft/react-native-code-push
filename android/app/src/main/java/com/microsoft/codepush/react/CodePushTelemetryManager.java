@@ -3,9 +3,9 @@ package com.microsoft.codepush.react;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.bridge.WritableNativeMap;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,14 +30,14 @@ public class CodePushTelemetryManager {
 
     public WritableMap getBinaryUpdateReport(String appVersion) {
         String previousStatusReportIdentifier = this.getPreviousStatusReportIdentifier();
-        WritableNativeMap reportMap = null;
+        WritableMap reportMap = null;
         if (previousStatusReportIdentifier == null) {
             this.clearRetryStatusReport();
-            reportMap = new WritableNativeMap();
+            reportMap = Arguments.createMap();
             reportMap.putString(APP_VERSION_KEY, appVersion);
         } else if (!previousStatusReportIdentifier.equals(appVersion)) {
             this.clearRetryStatusReport();
-            reportMap = new WritableNativeMap();
+            reportMap = Arguments.createMap();
             if (this.isStatusReportIdentifierCodePushLabel(previousStatusReportIdentifier)) {
                 String previousDeploymentKey = this.getDeploymentKeyFromStatusReportIdentifier(previousStatusReportIdentifier);
                 String previousLabel = this.getVersionLabelFromStatusReportIdentifier(previousStatusReportIdentifier);
@@ -70,7 +70,7 @@ public class CodePushTelemetryManager {
     }
 
     public WritableMap getRollbackReport(WritableMap lastFailedPackage) {
-        WritableNativeMap reportMap = new WritableNativeMap();
+        WritableMap reportMap =  Arguments.createMap();
         reportMap.putMap(PACKAGE_KEY, lastFailedPackage);
         reportMap.putString(STATUS_KEY, DEPLOYMENT_FAILED_STATUS);
         return reportMap;
@@ -79,16 +79,16 @@ public class CodePushTelemetryManager {
     public WritableMap getUpdateReport(WritableMap currentPackage) {
         String currentPackageIdentifier = this.getPackageStatusReportIdentifier(currentPackage);
         String previousStatusReportIdentifier = this.getPreviousStatusReportIdentifier();
-        WritableNativeMap reportMap = null;
+        WritableMap reportMap = null;
         if (currentPackageIdentifier != null) {
             if (previousStatusReportIdentifier == null) {
                 this.clearRetryStatusReport();
-                reportMap = new WritableNativeMap();
+                reportMap = Arguments.createMap();
                 reportMap.putMap(PACKAGE_KEY, currentPackage);
                 reportMap.putString(STATUS_KEY, DEPLOYMENT_SUCCEEDED_STATUS);
             } else if (!previousStatusReportIdentifier.equals(currentPackageIdentifier)) {
                 this.clearRetryStatusReport();
-                reportMap = new WritableNativeMap();
+                reportMap = Arguments.createMap();
                 if (this.isStatusReportIdentifierCodePushLabel(previousStatusReportIdentifier)) {
                     String previousDeploymentKey = this.getDeploymentKeyFromStatusReportIdentifier(previousStatusReportIdentifier);
                     String previousLabel = this.getVersionLabelFromStatusReportIdentifier(previousStatusReportIdentifier);

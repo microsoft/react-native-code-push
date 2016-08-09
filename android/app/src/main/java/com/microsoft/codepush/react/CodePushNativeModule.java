@@ -2,13 +2,13 @@ package com.microsoft.codepush.react;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.provider.Settings;
 import android.view.Choreographer;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactInstanceManager;
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -16,7 +16,6 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.bridge.WritableNativeMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.uimanager.ReactChoreographer;
 
@@ -184,8 +183,8 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             @Override
             protected Void doInBackground(Void... params) {
                 try {
-                    WritableMap mutableUpdatePackage = CodePushUtils.convertReadableMapToWritableMap(updatePackage);
-                    mutableUpdatePackage.putString(CodePushConstants.BINARY_MODIFIED_TIME_KEY, "" + mCodePush.getBinaryResourcesModifiedTime());
+                    JSONObject mutableUpdatePackage = CodePushUtils.convertReadableToJsonObject(updatePackage);
+                    CodePushUtils.setJSONValueForKey(mutableUpdatePackage, CodePushConstants.BINARY_MODIFIED_TIME_KEY, "" + mCodePush.getBinaryResourcesModifiedTime());
                     mUpdateManager.downloadPackage(mutableUpdatePackage, mCodePush.getAssetsBundleFileName(), new DownloadProgressCallback() {
                         private boolean hasScheduledNextFrame = false;
                         private DownloadProgress latestDownloadProgress = null;
@@ -232,14 +231,14 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                         }
                     });
 
-                    WritableMap newPackage = mUpdateManager.getPackage(CodePushUtils.tryGetString(updatePackage, CodePushConstants.PACKAGE_HASH_KEY));
-                    promise.resolve(newPackage);
+                    JSONObject newPackage = mUpdateManager.getPackage(CodePushUtils.tryGetString(updatePackage, CodePushConstants.PACKAGE_HASH_KEY));
+                    promise.resolve(CodePushUtils.convertJsonObjectToWritable(newPackage));
                 } catch (IOException e) {
                     e.printStackTrace();
                     promise.reject(e);
                 } catch (CodePushInvalidUpdateException e) {
                     e.printStackTrace();
-                    mSettingsManager.saveFailedUpdate(updatePackage);
+                    mSettingsManager.saveFailedUpdate(CodePushUtils.convertReadableToJsonObject(updatePackage));
                     promise.reject(e);
                 }
 
@@ -252,7 +251,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void getConfiguration(Promise promise) {
-        WritableNativeMap configMap = new WritableNativeMap();
+        WritableMap configMap =  Arguments.createMap();
         configMap.putString("appVersion", mCodePush.getAppVersion());
         configMap.putString("clientUniqueId", mClientUniqueId);
         configMap.putString("deploymentKey", mCodePush.getDeploymentKey());
@@ -271,7 +270,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                WritableMap currentPackage = mUpdateManager.getCurrentPackage();
+                JSONObject currentPackage = mUpdateManager.getCurrentPackage();
 
                 if (currentPackage == null) {
                     promise.resolve("");
@@ -280,8 +279,8 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
 
                 Boolean currentUpdateIsPending = false;
 
-                if (currentPackage.hasKey(CodePushConstants.PACKAGE_HASH_KEY)) {
-                    String currentHash = currentPackage.getString(CodePushConstants.PACKAGE_HASH_KEY);
+                if (currentPackage.has(CodePushConstants.PACKAGE_HASH_KEY)) {
+                    String currentHash = currentPackage.optString(CodePushConstants.PACKAGE_HASH_KEY, null);
                     currentUpdateIsPending = mSettingsManager.isPendingUpdate(currentHash);
                 }
 
@@ -292,7 +291,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                 } else if (updateState == CodePushUpdateState.RUNNING.getValue() && currentUpdateIsPending) {
                     // The caller wants the running update, but the current
                     // one is pending, so we need to grab the previous.
-                    promise.resolve(mUpdateManager.getPreviousPackage());
+                    promise.resolve(CodePushUtils.convertJsonObjectToWritable(mUpdateManager.getPreviousPackage()));
                 } else {
                     // The current package satisfies the request:
                     // 1) Caller wanted a pending, and there is a pending update
@@ -302,12 +301,12 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                         // This only matters in Debug builds. Since we do not clear "outdated" updates,
                         // we need to indicate to the JS side that somehow we have a current update on
                         // disk that is not actually running.
-                        currentPackage.putBoolean("_isDebugOnly", true);
+                        CodePushUtils.setJSONValueForKey(currentPackage, "_isDebugOnly", true);
                     }
 
                     // Enable differentiating pending vs. non-pending updates
-                    currentPackage.putBoolean("isPending", currentUpdateIsPending);
-                    promise.resolve(currentPackage);
+                    CodePushUtils.setJSONValueForKey(currentPackage, "isPending", currentUpdateIsPending);
+                    promise.resolve(CodePushUtils.convertJsonObjectToWritable(currentPackage));
                 }
 
                 return null;
@@ -339,9 +338,9 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                         }
                     }
                 } else if (mCodePush.didUpdate()) {
-                    WritableMap currentPackage = mUpdateManager.getCurrentPackage();
+                    JSONObject currentPackage = mUpdateManager.getCurrentPackage();
                     if (currentPackage != null) {
-                        WritableMap newPackageStatusReport = mTelemetryManager.getUpdateReport(currentPackage);
+                        WritableMap newPackageStatusReport = mTelemetryManager.getUpdateReport(CodePushUtils.convertJsonObjectToWritable(currentPackage));
                         if (newPackageStatusReport != null) {
                             promise.resolve(newPackageStatusReport);
                             return null;
@@ -374,7 +373,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                mUpdateManager.installPackage(updatePackage, mSettingsManager.isPendingUpdate(null));
+                mUpdateManager.installPackage(CodePushUtils.convertReadableToJsonObject(updatePackage), mSettingsManager.isPendingUpdate(null));
 
                 String pendingHash = CodePushUtils.tryGetString(updatePackage, CodePushConstants.PACKAGE_HASH_KEY);
                 if (pendingHash == null) {

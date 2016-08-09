@@ -4,10 +4,7 @@ import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ViewManager;
-import com.facebook.soloader.SoLoader;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -54,7 +51,6 @@ public class CodePush implements ReactPackage {
     }
 
     public CodePush(String deploymentKey, Context context, boolean isDebugMode) {
-        SoLoader.init(context, false);
         mContext = context.getApplicationContext();
 
         mUpdateManager = new CodePushUpdateManager(context.getFilesDir().getAbsolutePath());
@@ -169,14 +165,14 @@ public class CodePush implements ReactPackage {
                 return binaryJsBundleUrl;
             }
 
-            ReadableMap packageMetadata = this.mUpdateManager.getCurrentPackage();
+            JSONObject packageMetadata = this.mUpdateManager.getCurrentPackage();
             Long binaryModifiedDateDuringPackageInstall = null;
-            String binaryModifiedDateDuringPackageInstallString = CodePushUtils.tryGetString(packageMetadata, CodePushConstants.BINARY_MODIFIED_TIME_KEY);
+            String binaryModifiedDateDuringPackageInstallString = packageMetadata.optString(CodePushConstants.BINARY_MODIFIED_TIME_KEY, null);
             if (binaryModifiedDateDuringPackageInstallString != null) {
                 binaryModifiedDateDuringPackageInstall = Long.parseLong(binaryModifiedDateDuringPackageInstallString);
             }
 
-            String packageAppVersion = CodePushUtils.tryGetString(packageMetadata, "appVersion");
+            String packageAppVersion = packageMetadata.optString("appVersion", null);
             if (binaryModifiedDateDuringPackageInstall != null &&
                     binaryModifiedDateDuringPackageInstall == binaryResourcesModifiedTime &&
                     (isUsingTestConfiguration() || sAppVersion.equals(packageAppVersion))) {
@@ -256,7 +252,7 @@ public class CodePush implements ReactPackage {
     }
 
     private void rollbackPackage() {
-        WritableMap failedPackage = mUpdateManager.getCurrentPackage();
+        JSONObject failedPackage = mUpdateManager.getCurrentPackage();
         mSettingsManager.saveFailedUpdate(failedPackage);
         mUpdateManager.rollbackPackage();
         mSettingsManager.removePendingUpdate();
