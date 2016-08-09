@@ -581,9 +581,18 @@ To set this up, perform the following steps:
 
 4. Open up your `MainActivity.java` file and change the `CodePush` constructor to pass the deployment key in via the build config you just defined, as opposed to a string literal.
 
+**For React Native >= v0.29**
+
+    ```java
+    new CodePush(BuildConfig.CODEPUSH_KEY, MainApplication.this, BuildConfig.DEBUG);
+    ```
+    
+**For React Native v0.19 - v0.28** 
+
     ```java
     new CodePush(BuildConfig.CODEPUSH_KEY, this, BuildConfig.DEBUG);
     ```
+
 
     *Note: If you gave your build setting a different name in your Gradle file, simply make sure to reflect that in your Java code.*
 
