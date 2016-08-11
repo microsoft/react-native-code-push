@@ -51,11 +51,6 @@
                BlueprintName = "CodePushDemoAppTests"
                ReferencedContainer = "container:CodePushDemoApp.xcodeproj">
             </BuildableReference>
-            <SkippedTests>
-               <Test
-                  Identifier = "CodePushTests">
-               </Test>
-            </SkippedTests>
          </TestableReference>
       </Testables>
       <MacroExpansion>

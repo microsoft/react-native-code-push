@@ -1,3 +1,0 @@
--pushd Examples/CodePushDemoApp		
--react-native bundle		
--popd

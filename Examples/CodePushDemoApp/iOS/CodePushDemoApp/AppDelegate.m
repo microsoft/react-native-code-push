@@ -1,17 +1,7 @@
-/**
- * Copyright (c) 2015-present, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
 #import "AppDelegate.h"
-
-#import "RCTRootView.h"
-
 #import "CodePush.h"
+#import "RCTBundleURLProvider.h"
+#import "RCTRootView.h"
 
 @implementation AppDelegate
 
@@ -19,41 +9,20 @@
 {
   NSURL *jsCodeLocation;
 
-  /**
-   * Loading JavaScript code - uncomment the one you want.
-   *
-   * OPTION 1
-   * Load from development server. Start the server from the repository root:
-   *
-   * $ npm start
-   *
-   * To run on device, change `localhost` to the IP address of your computer
-   * (you can get this by typing `ifconfig` into the terminal and selecting the
-   * `inet` value under `en0:`) and make sure your computer and iOS device are
-   * on the same Wi-Fi network.
-   */
-
-  //jsCodeLocation = [NSURL URLWithString:@"http://localhost:8081/index.ios.includeRequire.runModule.bundle?dev=true&platform=ios"];
-
-  /**
-   * OPTION 2
-   * Load from pre-bundled file on disk. To re-generate the static bundle
-   * from the root of your project directory, run
-   *
-   * $ react-native bundle --minify
-   *
-   * see http://facebook.github.io/react-native/docs/runningondevice.html
-   */
-
+  // Use React Native's RCTBundleURLProvider to resolve your JS bundle location, so that your app will load the JS bundle from the packager server during development.
+  //jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
+  
+  // Use CodePush to resolve your JS bundle location, so that your app will run the version of the code distributed via CodePush
   jsCodeLocation = [CodePush bundleURL];
 
   RCTRootView *rootView = [[RCTRootView alloc] initWithBundleURL:jsCodeLocation
                                                       moduleName:@"CodePushDemoApp"
                                                initialProperties:nil
                                                    launchOptions:launchOptions];
+  rootView.backgroundColor = [[UIColor alloc] initWithRed:1.0f green:1.0f blue:1.0f alpha:1];
 
   self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-  UIViewController *rootViewController = [[UIViewController alloc] init];
+  UIViewController *rootViewController = [UIViewController new];
   rootViewController.view = rootView;
   self.window.rootViewController = rootViewController;
   [self.window makeKeyAndVisible];
