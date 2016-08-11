@@ -2,10 +2,9 @@ package com.microsoft.codepush.react;
 
 import android.content.Context;
 
-import com.facebook.react.bridge.ReadableArray;
-import com.facebook.react.bridge.WritableMap;
-
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -66,14 +65,18 @@ public class CodePushUpdateUtils {
 
     public static void copyNecessaryFilesFromCurrentPackage(String diffManifestFilePath, String currentPackageFolderPath, String newPackageFolderPath) throws IOException{
         FileUtils.copyDirectoryContents(currentPackageFolderPath, newPackageFolderPath);
-        WritableMap diffManifest = CodePushUtils.getWritableMapFromFile(diffManifestFilePath);
-        ReadableArray deletedFiles = diffManifest.getArray("deletedFiles");
-        for (int i = 0; i < deletedFiles.size(); i++) {
-            String fileNameToDelete = deletedFiles.getString(i);
-            File fileToDelete = new File(newPackageFolderPath, fileNameToDelete);
-            if (fileToDelete.exists()) {
-                fileToDelete.delete();
+        JSONObject diffManifest = CodePushUtils.getJsonObjectFromFile(diffManifestFilePath);
+        try {
+            JSONArray deletedFiles = diffManifest.getJSONArray("deletedFiles");
+            for (int i = 0; i < deletedFiles.length(); i++) {
+                String fileNameToDelete = deletedFiles.getString(i);
+                File fileToDelete = new File(newPackageFolderPath, fileNameToDelete);
+                if (fileToDelete.exists()) {
+                    fileToDelete.delete();
+                }
             }
+        } catch (JSONException e) {
+            throw new CodePushUnknownException("Unable to copy files from current package during diff update", e);
         }
     }
 

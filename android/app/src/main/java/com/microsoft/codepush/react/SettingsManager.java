@@ -3,8 +3,6 @@ package com.microsoft.codepush.react;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.facebook.react.bridge.ReadableMap;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -90,7 +88,7 @@ public class SettingsManager {
         mSettings.edit().remove(CodePushConstants.PENDING_UPDATE_KEY).commit();
     }
 
-    public void saveFailedUpdate(ReadableMap failedPackage) {
+    public void saveFailedUpdate(JSONObject failedPackage) {
         String failedUpdatesString = mSettings.getString(CodePushConstants.FAILED_UPDATES_KEY, null);
         JSONArray failedUpdates;
         if (failedUpdatesString == null) {
@@ -105,8 +103,7 @@ public class SettingsManager {
             }
         }
 
-        JSONObject failedPackageJSON = CodePushUtils.convertReadableToJsonObject(failedPackage);
-        failedUpdates.put(failedPackageJSON);
+        failedUpdates.put(failedPackage);
         mSettings.edit().putString(CodePushConstants.FAILED_UPDATES_KEY, failedUpdates.toString()).commit();
     }
 

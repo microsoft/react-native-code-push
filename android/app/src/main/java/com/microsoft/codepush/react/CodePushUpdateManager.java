@@ -1,10 +1,5 @@
 package com.microsoft.codepush.react;
 
-import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.bridge.WritableNativeMap;
-
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
@@ -50,23 +45,23 @@ public class CodePushUpdateManager {
         return CodePushUtils.appendPathComponent(getCodePushPath(), CodePushConstants.STATUS_FILE);
     }
 
-    public WritableMap getCurrentPackageInfo() {
+    public JSONObject getCurrentPackageInfo() {
         String statusFilePath = getStatusFilePath();
         if (!FileUtils.fileAtPathExists(statusFilePath)) {
-            return new WritableNativeMap();
+            return new JSONObject();
         }
 
         try {
-            return CodePushUtils.getWritableMapFromFile(statusFilePath);
+            return CodePushUtils.getJsonObjectFromFile(statusFilePath);
         } catch (IOException e) {
             // Should not happen.
             throw new CodePushUnknownException("Error getting current package info" , e);
         }
     }
 
-    public void updateCurrentPackageInfo(ReadableMap packageInfo) {
+    public void updateCurrentPackageInfo(JSONObject packageInfo) {
         try {
-            CodePushUtils.writeReadableMapToFile(packageInfo, getStatusFilePath());
+            CodePushUtils.writeJsonToFile(packageInfo, getStatusFilePath());
         } catch (IOException e) {
             // Should not happen.
             throw new CodePushUnknownException("Error updating current package info" , e);
@@ -74,8 +69,8 @@ public class CodePushUpdateManager {
     }
 
     public String getCurrentPackageFolderPath() {
-        WritableMap info = getCurrentPackageInfo();
-        String packageHash = CodePushUtils.tryGetString(info, CodePushConstants.CURRENT_PACKAGE_KEY);
+        JSONObject info = getCurrentPackageInfo();
+        String packageHash = info.optString(CodePushConstants.CURRENT_PACKAGE_KEY, null);
         if (packageHash == null) {
             return null;
         }
@@ -89,12 +84,12 @@ public class CodePushUpdateManager {
             return null;
         }
 
-        WritableMap currentPackage = getCurrentPackage();
+        JSONObject currentPackage = getCurrentPackage();
         if (currentPackage == null) {
             return null;
         }
 
-        String relativeBundlePath = CodePushUtils.tryGetString(currentPackage, CodePushConstants.RELATIVE_BUNDLE_PATH_KEY);
+        String relativeBundlePath = currentPackage.optString(CodePushConstants.RELATIVE_BUNDLE_PATH_KEY, null);
         if (relativeBundlePath == null) {
             return CodePushUtils.appendPathComponent(packageFolder, bundleFileName);
         } else {
@@ -107,16 +102,16 @@ public class CodePushUpdateManager {
     }
 
     public String getCurrentPackageHash() {
-        WritableMap info = getCurrentPackageInfo();
-        return CodePushUtils.tryGetString(info, CodePushConstants.CURRENT_PACKAGE_KEY);
+        JSONObject info = getCurrentPackageInfo();
+        return info.optString(CodePushConstants.CURRENT_PACKAGE_KEY, null);
     }
 
     public String getPreviousPackageHash() {
-        WritableMap info = getCurrentPackageInfo();
-        return CodePushUtils.tryGetString(info, CodePushConstants.PREVIOUS_PACKAGE_KEY);
+        JSONObject info = getCurrentPackageInfo();
+        return info.optString(CodePushConstants.PREVIOUS_PACKAGE_KEY, null);
     }
 
-    public WritableMap getCurrentPackage() {
+    public JSONObject getCurrentPackage() {
         String packageHash = getCurrentPackageHash();
         if (packageHash == null) {
             return null;
@@ -125,7 +120,7 @@ public class CodePushUpdateManager {
         return getPackage(packageHash);
     }
     
-    public WritableMap getPreviousPackage() {
+    public JSONObject getPreviousPackage() {
         String packageHash = getPreviousPackageHash();
         if (packageHash == null) {
             return null;
@@ -134,19 +129,19 @@ public class CodePushUpdateManager {
         return getPackage(packageHash);
     }
 
-    public WritableMap getPackage(String packageHash) {
+    public JSONObject getPackage(String packageHash) {
         String folderPath = getPackageFolderPath(packageHash);
         String packageFilePath = CodePushUtils.appendPathComponent(folderPath, CodePushConstants.PACKAGE_FILE_NAME);
         try {
-            return CodePushUtils.getWritableMapFromFile(packageFilePath);
+            return CodePushUtils.getJsonObjectFromFile(packageFilePath);
         } catch (IOException e) {
             return null;
         }
     }
 
-    public void downloadPackage(ReadableMap updatePackage, String expectedBundleFileName,
+    public void downloadPackage(JSONObject updatePackage, String expectedBundleFileName,
                                 DownloadProgressCallback progressCallback) throws IOException {
-        String newUpdateHash = CodePushUtils.tryGetString(updatePackage, CodePushConstants.PACKAGE_HASH_KEY);
+        String newUpdateHash = updatePackage.optString(CodePushConstants.PACKAGE_HASH_KEY, null);
         String newUpdateFolderPath = getPackageFolderPath(newUpdateHash);
         String newUpdateMetadataPath = CodePushUtils.appendPathComponent(newUpdateFolderPath, CodePushConstants.PACKAGE_FILE_NAME);
         if (FileUtils.fileAtPathExists(newUpdateFolderPath)) {
@@ -155,7 +150,7 @@ public class CodePushUpdateManager {
             FileUtils.deleteDirectoryAtPath(newUpdateFolderPath);
         }
 
-        String downloadUrlString = CodePushUtils.tryGetString(updatePackage, CodePushConstants.DOWNLOAD_URL_KEY);
+        String downloadUrlString = updatePackage.optString(CodePushConstants.DOWNLOAD_URL_KEY, null);
         HttpURLConnection connection = null;
         BufferedInputStream bin = null;
         FileOutputStream fos = null;
@@ -252,16 +247,7 @@ public class CodePushUpdateManager {
                     CodePushUpdateUtils.verifyHashForDiffUpdate(newUpdateFolderPath, newUpdateHash);
                 }
 
-                JSONObject updatePackageJSON = CodePushUtils.convertReadableToJsonObject(updatePackage);
-                try {
-                    updatePackageJSON.put(CodePushConstants.RELATIVE_BUNDLE_PATH_KEY, relativeBundlePath);
-                } catch (JSONException e) {
-                    throw new CodePushUnknownException("Unable to set key " +
-                            CodePushConstants.RELATIVE_BUNDLE_PATH_KEY + " to value " + relativeBundlePath +
-                            " in update package.", e);
-                }
-
-                updatePackage = CodePushUtils.convertJsonObjectToWritable(updatePackageJSON);
+                CodePushUtils.setJSONValueForKey(updatePackage, CodePushConstants.RELATIVE_BUNDLE_PATH_KEY, relativeBundlePath);
             }
         } else {
             // File is a jsbundle, move it to a folder with the packageHash as its name
@@ -269,14 +255,14 @@ public class CodePushUpdateManager {
         }
 
         // Save metadata to the folder.
-        CodePushUtils.writeReadableMapToFile(updatePackage, newUpdateMetadataPath);
+        CodePushUtils.writeJsonToFile(updatePackage, newUpdateMetadataPath);
     }
 
-    public void installPackage(ReadableMap updatePackage, boolean removePendingUpdate) {
-        String packageHash = CodePushUtils.tryGetString(updatePackage, CodePushConstants.PACKAGE_HASH_KEY);
-        WritableMap info = getCurrentPackageInfo();
+    public void installPackage(JSONObject updatePackage, boolean removePendingUpdate) {
+        String packageHash = updatePackage.optString(CodePushConstants.PACKAGE_HASH_KEY, null);
+        JSONObject info = getCurrentPackageInfo();
 
-        String currentPackageHash = CodePushUtils.tryGetString(info, CodePushConstants.CURRENT_PACKAGE_KEY);
+        String currentPackageHash = info.optString(CodePushConstants.CURRENT_PACKAGE_KEY, null);
         if (packageHash != null && packageHash.equals(currentPackageHash)) {
             // The current package is already the one being installed, so we should no-op.
             return;
@@ -293,19 +279,19 @@ public class CodePushUpdateManager {
                 FileUtils.deleteDirectoryAtPath(getPackageFolderPath(previousPackageHash));
             }
 
-            info.putString(CodePushConstants.PREVIOUS_PACKAGE_KEY, CodePushUtils.tryGetString(info, CodePushConstants.CURRENT_PACKAGE_KEY));
+            CodePushUtils.setJSONValueForKey(info, CodePushConstants.PREVIOUS_PACKAGE_KEY, info.optString(CodePushConstants.CURRENT_PACKAGE_KEY, null));
         }
 
-        info.putString(CodePushConstants.CURRENT_PACKAGE_KEY, packageHash);
+        CodePushUtils.setJSONValueForKey(info, CodePushConstants.CURRENT_PACKAGE_KEY, packageHash);
         updateCurrentPackageInfo(info);
     }
 
     public void rollbackPackage() {
-        WritableMap info = getCurrentPackageInfo();
+        JSONObject info = getCurrentPackageInfo();
         String currentPackageFolderPath = getCurrentPackageFolderPath();
         FileUtils.deleteDirectoryAtPath(currentPackageFolderPath);
-        info.putString(CodePushConstants.CURRENT_PACKAGE_KEY, CodePushUtils.tryGetString(info, CodePushConstants.PREVIOUS_PACKAGE_KEY));
-        info.putNull(CodePushConstants.PREVIOUS_PACKAGE_KEY);
+        CodePushUtils.setJSONValueForKey(info, CodePushConstants.CURRENT_PACKAGE_KEY, info.optString(CodePushConstants.PREVIOUS_PACKAGE_KEY, null));
+        CodePushUtils.setJSONValueForKey(info, CodePushConstants.PREVIOUS_PACKAGE_KEY, null);
         updateCurrentPackageInfo(info);
     }
 
