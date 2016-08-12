@@ -36,7 +36,7 @@
   },
   "rnpm": {
     "android": {
-      "packageInstance": "new CodePush(${androidDeploymentKey}, this, BuildConfig.DEBUG)"
+      "packageInstance": "new CodePush(${androidDeploymentKey}, (android.content.Context)(this.getClass().equals(android.app.Activity.class) ? this : MainApplication.this), BuildConfig.DEBUG)"
     },
     "ios": {
       "sharedLibraries": [
