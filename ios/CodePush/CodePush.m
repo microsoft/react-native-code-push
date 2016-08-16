@@ -52,24 +52,31 @@ static BOOL isRunningBinaryVersion = NO;
 static BOOL needToReportRollback = NO;
 static BOOL testConfigurationFlag = NO;
 
-// These values are used to save the bundleURL, extension and subdirectory
+// These values are used to save the NS bundle, name, extension and subdirectory
 // for the JS bundle in the binary.
+static NSBundle *bundleResourceBundle = nil;
 static NSString *bundleResourceExtension = @"jsbundle";
 static NSString *bundleResourceName = @"main";
 static NSString *bundleResourceSubdirectory = nil;
+
++ (void)initialize
+{
+    // Use the mainBundle by default.
+    bundleResourceBundle = [NSBundle mainBundle];
+}
 
 #pragma mark - Public Obj-C API
 
 + (NSURL *)binaryBundleURL
 {
-    return [[NSBundle mainBundle] URLForResource:bundleResourceName
-                                   withExtension:bundleResourceExtension
-                                    subdirectory:bundleResourceSubdirectory];
+    return [bundleResourceBundle URLForResource:bundleResourceName
+                                  withExtension:bundleResourceExtension
+                                   subdirectory:bundleResourceSubdirectory];
 }
 
 + (NSString *)bundleAssetsPath
 {
-    NSString *resourcePath = [[NSBundle mainBundle] resourcePath];
+    NSString *resourcePath = [bundleResourceBundle resourcePath];
     if (bundleResourceSubdirectory) {
         resourcePath = [resourcePath stringByAppendingPathComponent:bundleResourceSubdirectory];
     }
@@ -79,15 +86,18 @@ static NSString *bundleResourceSubdirectory = nil;
 
 + (NSURL *)bundleURL
 {
-    return [self bundleURLForResource:bundleResourceName];
+    return [self bundleURLForResource:bundleResourceName
+                        withExtension:bundleResourceExtension
+                         subdirectory:bundleResourceSubdirectory
+                               bundle:bundleResourceBundle];
 }
 
 + (NSURL *)bundleURLForResource:(NSString *)resourceName
 {
-    bundleResourceName = resourceName;
     return [self bundleURLForResource:resourceName
                         withExtension:bundleResourceExtension
-                         subdirectory:bundleResourceSubdirectory];
+                         subdirectory:bundleResourceSubdirectory
+                               bundle:bundleResourceBundle];
 }
 
 + (NSURL *)bundleURLForResource:(NSString *)resourceName
@@ -95,31 +105,44 @@ static NSString *bundleResourceSubdirectory = nil;
 {
     return [self bundleURLForResource:resourceName
                         withExtension:resourceExtension
-                         subdirectory:bundleResourceSubdirectory];
+                         subdirectory:bundleResourceSubdirectory
+                               bundle:bundleResourceBundle];
 }
 
 + (NSURL *)bundleURLForResource:(NSString *)resourceName
                   withExtension:(NSString *)resourceExtension
                    subdirectory:(NSString *)resourceSubdirectory
 {
+    return [self bundleURLForResource:resourceName
+                        withExtension:resourceExtension
+                         subdirectory:resourceSubdirectory
+                               bundle:bundleResourceBundle];
+}
+
++ (NSURL *)bundleURLForResource:(NSString *)resourceName
+                  withExtension:(NSString *)resourceExtension
+                   subdirectory:(NSString *)resourceSubdirectory
+                         bundle:(NSBundle *)resourceBundle
+{
     bundleResourceName = resourceName;
     bundleResourceExtension = resourceExtension;
     bundleResourceSubdirectory = resourceSubdirectory;
-
+    bundleResourceBundle = resourceBundle;
+    
     [self ensureBinaryBundleExists];
-
+    
     NSString *logMessageFormat = @"Loading JS bundle from %@";
-
+    
     NSError *error;
     NSString *packageFile = [CodePushPackage getCurrentPackageBundlePath:&error];
     NSURL *binaryBundleURL = [self binaryBundleURL];
-
+    
     if (error || !packageFile) {
         CPLog(logMessageFormat, binaryBundleURL);
         isRunningBinaryVersion = YES;
         return binaryBundleURL;
     }
-
+    
     NSString *binaryAppVersion = [[CodePushConfig current] appVersion];
     NSDictionary *currentPackageMetadata = [CodePushPackage getCurrentPackage:&error];
     if (error || !currentPackageMetadata) {
@@ -127,10 +150,10 @@ static NSString *bundleResourceSubdirectory = nil;
         isRunningBinaryVersion = YES;
         return binaryBundleURL;
     }
-
+    
     NSString *packageDate = [currentPackageMetadata objectForKey:BinaryBundleDateKey];
     NSString *packageAppVersion = [currentPackageMetadata objectForKey:AppVersionKey];
-
+    
     if ([[CodePushUpdateUtils modifiedDateStringOfFileAtURL:binaryBundleURL] isEqualToString:packageDate] && ([CodePush isUsingTestConfiguration] ||[binaryAppVersion isEqualToString:packageAppVersion])) {
         // Return package file because it is newer than the app store binary's JS bundle
         NSURL *packageUrl = [[NSURL alloc] initFileURLWithPath:packageFile];
@@ -142,11 +165,11 @@ static NSString *bundleResourceSubdirectory = nil;
 #ifndef DEBUG
         isRelease = YES;
 #endif
-
+        
         if (isRelease || ![binaryAppVersion isEqualToString:packageAppVersion]) {
             [CodePush clearUpdates];
         }
-
+        
         CPLog(logMessageFormat, binaryBundleURL);
         isRunningBinaryVersion = YES;
         return binaryBundleURL;
