@@ -128,21 +128,21 @@ static NSString *bundleResourceSubdirectory = nil;
     bundleResourceExtension = resourceExtension;
     bundleResourceSubdirectory = resourceSubdirectory;
     bundleResourceBundle = resourceBundle;
-    
+
     [self ensureBinaryBundleExists];
-    
+
     NSString *logMessageFormat = @"Loading JS bundle from %@";
-    
+
     NSError *error;
     NSString *packageFile = [CodePushPackage getCurrentPackageBundlePath:&error];
     NSURL *binaryBundleURL = [self binaryBundleURL];
-    
+
     if (error || !packageFile) {
         CPLog(logMessageFormat, binaryBundleURL);
         isRunningBinaryVersion = YES;
         return binaryBundleURL;
     }
-    
+
     NSString *binaryAppVersion = [[CodePushConfig current] appVersion];
     NSDictionary *currentPackageMetadata = [CodePushPackage getCurrentPackage:&error];
     if (error || !currentPackageMetadata) {
@@ -150,10 +150,10 @@ static NSString *bundleResourceSubdirectory = nil;
         isRunningBinaryVersion = YES;
         return binaryBundleURL;
     }
-    
+
     NSString *packageDate = [currentPackageMetadata objectForKey:BinaryBundleDateKey];
     NSString *packageAppVersion = [currentPackageMetadata objectForKey:AppVersionKey];
-    
+
     if ([[CodePushUpdateUtils modifiedDateStringOfFileAtURL:binaryBundleURL] isEqualToString:packageDate] && ([CodePush isUsingTestConfiguration] ||[binaryAppVersion isEqualToString:packageAppVersion])) {
         // Return package file because it is newer than the app store binary's JS bundle
         NSURL *packageUrl = [[NSURL alloc] initFileURLWithPath:packageFile];
@@ -165,11 +165,11 @@ static NSString *bundleResourceSubdirectory = nil;
 #ifndef DEBUG
         isRelease = YES;
 #endif
-        
+
         if (isRelease || ![binaryAppVersion isEqualToString:packageAppVersion]) {
             [CodePush clearUpdates];
         }
-        
+
         CPLog(logMessageFormat, binaryBundleURL);
         isRunningBinaryVersion = YES;
         return binaryBundleURL;
