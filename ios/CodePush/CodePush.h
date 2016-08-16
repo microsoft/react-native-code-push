@@ -25,6 +25,11 @@
                   withExtension:(NSString *)resourceExtension
                    subdirectory:(NSString *)resourceSubdirectory;
 
++ (NSURL *)bundleURLForResource:(NSString *)resourceName
+                  withExtension:(NSString *)resourceExtension
+                   subdirectory:(NSString *)resourceSubdirectory
+                         bundle:(NSBundle *)resourceBundle;
+
 + (NSString *)getApplicationSupportDirectory;
 
 + (NSString *)bundleAssetsPath;
