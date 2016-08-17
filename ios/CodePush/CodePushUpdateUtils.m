@@ -20,6 +20,11 @@ NSString * const ManifestFolderPrefix = @"CodePush";
     }
     
     for (NSString *fileName in folderFiles) {
+        // We must skip the macOS generated files.
+        if ([fileName isEqualToString:@".DS_Store"] || [fileName isEqualToString:@"__MACOSX"]) {
+            continue;
+        }
+
         NSString *fullFilePath = [folderPath stringByAppendingPathComponent:fileName];
         NSString *relativePath = [pathPrefix stringByAppendingPathComponent:fileName];
         BOOL isDir = NO;
