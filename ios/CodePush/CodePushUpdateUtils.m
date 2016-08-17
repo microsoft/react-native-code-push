@@ -20,6 +20,14 @@ NSString * const ManifestFolderPrefix = @"CodePush";
     }
     
     for (NSString *fileName in folderFiles) {
+#if TARGET_IPHONE_SIMULATOR
+        // If the user is running this in a simulator, there is a chance
+        // that the .DS_Store file will mess up the calculated hash
+        // We must skip this file.
+        if ([fileName isEqualToString:@".DS_Store"]) {
+            continue;
+        }
+#endif
         NSString *fullFilePath = [folderPath stringByAppendingPathComponent:fileName];
         NSString *relativePath = [pathPrefix stringByAppendingPathComponent:fileName];
         BOOL isDir = NO;
