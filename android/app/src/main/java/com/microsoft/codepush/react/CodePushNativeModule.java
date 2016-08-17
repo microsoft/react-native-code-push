@@ -105,67 +105,61 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             // The currentActivity can be null if it is backgrounded / destroyed, so we simply
             // no-op to prevent any null pointer exceptions.
             return;
-        } else if (!ReactActivity.class.isInstance(currentActivity)) {
-            // Our preferred reload logic relies on the user's Activity inheriting
-            // from the core ReactActivity class, so if it doesn't, we fallback
-            // early to our legacy behavior.
-            loadBundleLegacy(currentActivity);
-        } else {
+        }
+
+        try {
+            ReactInstanceManager instanceManager;
+            // #1) Get the ReactInstanceManager instance, which is what includes the
+            //     logic to reload the current React context.
             try {
-                ReactActivity reactActivity = (ReactActivity)currentActivity;
-                ReactInstanceManager instanceManager;
-
-                // #1) Get the ReactInstanceManager instance, which is what includes the
-                //     logic to reload the current React context.
-                try {
-                    // In RN 0.29, the "mReactInstanceManager" field yields a null value, so we try
-                    // to get the instance manager via the ReactNativeHost, which only exists in 0.29.
-                    Method getApplicationMethod = ReactActivity.class.getMethod("getApplication");
-                    Object reactApplication = getApplicationMethod.invoke(reactActivity);
-                    Class<?> reactApplicationClass = tryGetClass(REACT_APPLICATION_CLASS_NAME);
-                    Method getReactNativeHostMethod = reactApplicationClass.getMethod("getReactNativeHost");
-                    Object reactNativeHost = getReactNativeHostMethod.invoke(reactApplication);
-                    Class<?> reactNativeHostClass = tryGetClass(REACT_NATIVE_HOST_CLASS_NAME);
-                    Method getReactInstanceManagerMethod = reactNativeHostClass.getMethod("getReactInstanceManager");
-                    instanceManager = (ReactInstanceManager)getReactInstanceManagerMethod.invoke(reactNativeHost);
-                } catch (Exception e) {
-                    // The React Native version might be older than 0.29, so we try to get the
-                    // instance manager via the "mReactInstanceManager" field.
-                    Field instanceManagerField = ReactActivity.class.getDeclaredField("mReactInstanceManager");
-                    instanceManagerField.setAccessible(true);
-                    instanceManager = (ReactInstanceManager)instanceManagerField.get(reactActivity);
-                }
-
-                String latestJSBundleFile = mCodePush.getJSBundleFileInternal(mCodePush.getAssetsBundleFileName());
-
-                // #2) Update the locally stored JS bundle file path
-                Field jsBundleField = instanceManager.getClass().getDeclaredField("mJSBundleFile");
-                jsBundleField.setAccessible(true);
-                jsBundleField.set(instanceManager, latestJSBundleFile);
-
-                // #3) Get the context creation method and fire it on the UI thread (which RN enforces)
-                final Method recreateMethod = instanceManager.getClass().getMethod("recreateReactContextInBackground");
-
-                final ReactInstanceManager finalizedInstanceManager = instanceManager;
-                reactActivity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            recreateMethod.invoke(finalizedInstanceManager);
-                            mCodePush.initializeUpdateAfterRestart();
-                        }
-                        catch (Exception e) {
-                            // The recreation method threw an unknown exception
-                            // so just simply fallback to restarting the Activity
-                            loadBundleLegacy(currentActivity);
-                        }
-                    }
-                });
+                // In RN >=0.29, the "mReactInstanceManager" field yields a null value, so we try
+                // to get the instance manager via the ReactNativeHost, which only exists in 0.29.
+                Method getApplicationMethod = ReactActivity.class.getMethod("getApplication");
+                Object reactApplication = getApplicationMethod.invoke(currentActivity);
+                Class<?> reactApplicationClass = tryGetClass(REACT_APPLICATION_CLASS_NAME);
+                Method getReactNativeHostMethod = reactApplicationClass.getMethod("getReactNativeHost");
+                Object reactNativeHost = getReactNativeHostMethod.invoke(reactApplication);
+                Class<?> reactNativeHostClass = tryGetClass(REACT_NATIVE_HOST_CLASS_NAME);
+                Method getReactInstanceManagerMethod = reactNativeHostClass.getMethod("getReactInstanceManager");
+                instanceManager = (ReactInstanceManager)getReactInstanceManagerMethod.invoke(reactNativeHost);
             } catch (Exception e) {
-                // Our reflection logic failed somewhere
-                // so fall back to restarting the Activity
-                loadBundleLegacy(currentActivity);
+                // The React Native version might be older than 0.29, or the activity does not
+                // extend ReactActivity, so we try to get the instance manager via the
+                // "mReactInstanceManager" field.
+                Field instanceManagerField = currentActivity.getClass().getDeclaredField("mReactInstanceManager");
+                instanceManagerField.setAccessible(true);
+                instanceManager = (ReactInstanceManager)instanceManagerField.get(currentActivity);
             }
+
+            String latestJSBundleFile = mCodePush.getJSBundleFileInternal(mCodePush.getAssetsBundleFileName());
+
+            // #2) Update the locally stored JS bundle file path
+            Field jsBundleField = instanceManager.getClass().getDeclaredField("mJSBundleFile");
+            jsBundleField.setAccessible(true);
+            jsBundleField.set(instanceManager, latestJSBundleFile);
+
+            // #3) Get the context creation method and fire it on the UI thread (which RN enforces)
+            final Method recreateMethod = instanceManager.getClass().getMethod("recreateReactContextInBackground");
+
+            final ReactInstanceManager finalizedInstanceManager = instanceManager;
+            currentActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        recreateMethod.invoke(finalizedInstanceManager);
+                        mCodePush.initializeUpdateAfterRestart();
+                    }
+                    catch (Exception e) {
+                        // The recreation method threw an unknown exception
+                        // so just simply fallback to restarting the Activity
+                        loadBundleLegacy(currentActivity);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            // Our reflection logic failed somewhere
+            // so fall back to restarting the Activity
+            loadBundleLegacy(currentActivity);
         }
     }
 
