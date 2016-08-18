@@ -430,12 +430,12 @@ function codePushify(options = {}) {
           let rootComponentInstance = this.refs.rootComponent;
 
           let syncStatusCallback;
-          if (rootComponentInstance && rootComponentInstance.codePushStatusDidChange) {
+          if (rootComponentInstance && rootComponentInstance.codePushStatusDidChange && rootComponentInstance instanceof React.Component) {
             syncStatusCallback = rootComponentInstance.codePushStatusDidChange.bind(rootComponentInstance);
           }
 
           let downloadProgressCallback;
-          if (rootComponentInstance && rootComponentInstance.codePushDownloadDidProgress) {
+          if (rootComponentInstance && rootComponentInstance.codePushDownloadDidProgress && rootComponentInstance instanceof React.Component) {
             downloadProgressCallback = rootComponentInstance.codePushDownloadDidProgress.bind(rootComponentInstance);
           }
 
