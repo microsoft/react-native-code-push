@@ -19,7 +19,6 @@ class CodePushDemoApp extends Component {
   }
 
   codePushStatusDidChange(syncStatus) {
-    console.log(this.setState);
     switch(syncStatus) {
       case CodePush.SyncStatus.CHECKING_FOR_UPDATE:
         this.setState({ syncMessage: "Checking for update." });
