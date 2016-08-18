@@ -126,7 +126,10 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                 // The React Native version might be older than 0.29, or the activity does not
                 // extend ReactActivity, so we try to get the instance manager via the
                 // "mReactInstanceManager" field.
-                Field instanceManagerField = currentActivity.getClass().getDeclaredField("mReactInstanceManager");
+                Class instanceManagerHolderClass = currentActivity instanceof ReactActivity
+                        ? ReactActivity.class
+                        : currentActivity.getClass();
+                Field instanceManagerField = instanceManagerHolderClass.getDeclaredField("mReactInstanceManager");
                 instanceManagerField.setAccessible(true);
                 instanceManager = (ReactInstanceManager)instanceManagerField.get(currentActivity);
             }
