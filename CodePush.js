@@ -431,12 +431,18 @@ function codePushify(options = {}) {
 
           let syncStatusCallback;
           if (rootComponentInstance && rootComponentInstance.codePushStatusDidChange) {
-            syncStatusCallback = rootComponentInstance.codePushStatusDidChange.bind(rootComponentInstance);
+            syncStatusCallback = rootComponentInstance.codePushStatusDidChange;
+            if (rootComponentInstance instanceof React.Component) {
+              syncStatusCallback = syncStatusCallback.bind(rootComponentInstance);
+            }
           }
 
           let downloadProgressCallback;
           if (rootComponentInstance && rootComponentInstance.codePushDownloadDidProgress) {
-            downloadProgressCallback = rootComponentInstance.codePushDownloadDidProgress.bind(rootComponentInstance);
+            downloadProgressCallback = rootComponentInstance.codePushDownloadDidProgress;
+            if (rootComponentInstance instanceof React.Component) {
+              downloadProgressCallback = downloadProgressCallback.bind(rootComponentInstance);
+            }
           }
 
           CodePush.sync(options, syncStatusCallback, downloadProgressCallback);
