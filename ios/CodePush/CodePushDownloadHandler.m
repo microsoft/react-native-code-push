@@ -48,6 +48,20 @@ failCallback:(void (^)(NSError *err))failCallback {
 }
 
 - (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
+    if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+        NSInteger statusCode = [(NSHTTPURLResponse *)response statusCode];
+        if (statusCode >= 400) {
+            [self.outputFileStream close];
+            [connection cancel];
+            
+            NSError *err = [NSError errorWithDomain:@"http download error"
+                                               code:statusCode
+                                           userInfo:nil];
+            self.failCallback(err);
+            return;
+        }
+    }
+    
     self.expectedContentLength = response.expectedContentLength;
     [self.outputFileStream open];
 }
@@ -98,13 +112,24 @@ failCallback:(void (^)(NSError *err))failCallback {
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
+    [self.outputFileStream close];
+    
+    // MUST have received bytes from remote server. do not do this, we will get a 0 bytes file of download.zip in download directory,
+    // the variable isZip is FALSE and download.zip will be renamed app.bundle that occurring by self.doneCallback(isZip) method.
+    if (self.receivedContentLength < 1) {
+        NSError *err = [NSError errorWithDomain:@"received nothing"
+                                           code:-1
+                                       userInfo:nil];
+        self.failCallback(err);
+        return;
+    }
+    
     // expectedContentLength might be -1 when NSURLConnection don't know the length(e.g. response encode with gzip)
     if (self.expectedContentLength > 0) {
         // We should have received all of the bytes if this is called.
         assert(self.receivedContentLength == self.expectedContentLength);
     }
 
-    [self.outputFileStream close];
     BOOL isZip = _header[0] == 'P' && _header[1] == 'K' && _header[2] == 3 && _header[3] == 4;
     self.doneCallback(isZip);
 }
