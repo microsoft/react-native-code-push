@@ -20,7 +20,8 @@ failCallback:(void (^)(NSError *err))failCallback {
     return self;
 }
 
-- (void)download:(NSString*)url {
+- (void)download:(NSString *)url {
+    self.downloadUrl = url;
     NSURLRequest *request = [NSURLRequest requestWithURL:[NSURL URLWithString:url]
                                              cachePolicy:NSURLRequestUseProtocolCachePolicy
                                          timeoutInterval:60.0];
@@ -53,10 +54,7 @@ failCallback:(void (^)(NSError *err))failCallback {
         if (statusCode >= 400) {
             [self.outputFileStream close];
             [connection cancel];
-            
-            NSError *err = [NSError errorWithDomain:@"http download error"
-                                               code:statusCode
-                                           userInfo:nil];
+            NSError *err = [CodePushErrorUtils errorWithMessage:[NSString stringWithFormat: @"Received %ld response from %@", (long)statusCode, self.downloadUrl]];
             self.failCallback(err);
             return;
         }
@@ -113,13 +111,8 @@ failCallback:(void (^)(NSError *err))failCallback {
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection {
     [self.outputFileStream close];
-    
-    // MUST have received bytes from remote server. do not do this, we will get a 0 bytes file of download.zip in download directory,
-    // the variable isZip is FALSE and download.zip will be renamed app.bundle that occurring by self.doneCallback(isZip) method.
     if (self.receivedContentLength < 1) {
-        NSError *err = [NSError errorWithDomain:@"received nothing"
-                                           code:-1
-                                       userInfo:nil];
+        NSError *err = [CodePushErrorUtils errorWithMessage:[NSString stringWithFormat:@"Received empty response from %@", self.downloadUrl]];
         self.failCallback(err);
         return;
     }

@@ -76,6 +76,7 @@
 @property (copy) void (^progressCallback)(long long, long long);
 @property (copy) void (^doneCallback)(BOOL);
 @property (copy) void (^failCallback)(NSError *err);
+@property NSString *downloadUrl;
 
 - (id)init:(NSString *)downloadFilePath
 operationQueue:(dispatch_queue_t)operationQueue
