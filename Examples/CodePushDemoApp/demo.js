@@ -71,19 +71,7 @@ class CodePushDemoApp extends Component {
   }
 
   render() {
-    let syncView, syncButton, progressView;
-
-    if (this.state.syncMessage) {
-      syncView = (
-        <Text style={styles.messages}>{this.state.syncMessage}</Text>
-      );
-    } else {
-      syncButton = (
-        <TouchableOpacity onPress={this.sync.bind(this)}>
-          <Text style={styles.syncButton}>Start Sync!</Text>
-        </TouchableOpacity>
-      );
-    }
+    let progressView;
 
     if (this.state.progress) {
       progressView = (
@@ -96,8 +84,10 @@ class CodePushDemoApp extends Component {
         <Text style={styles.welcome}>
           Welcome to CodePush!
         </Text>
-        {syncButton}
-        {syncView}
+        <TouchableOpacity onPress={this.sync.bind(this)}>
+          <Text style={styles.syncButton}>Start Sync!</Text>
+        </TouchableOpacity>
+        <Text style={styles.messages}>{this.state.syncMessage || ""}</Text>
         {progressView}
         <Image style={styles.image} resizeMode={Image.resizeMode.contain} source={require("./images/laptop_phone_howitworks.png")}/>
         <TouchableOpacity onPress={this.toggleAllowRestart.bind(this)}>
