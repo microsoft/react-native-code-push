@@ -1,5 +1,5 @@
 {
-  "name": "react-native-code-push",
+  "name": "@joltup/react-native-code-push",
   "version": "1.14.5-beta",
   "description": "React Native plugin for the CodePush service",
   "main": "CodePush.js",
