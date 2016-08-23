@@ -40,7 +40,7 @@ gradle.projectsEvaluated {
             def recordFilesBeforeBundleCommand = tasks.create(
                     name: "recordFilesBeforeBundleCommand${targetName}",
                     type: Exec) {
-                commandLine "node", "../../node_modules/react-native-code-push/scripts/recordFilesBeforeBundleCommand.js", resourcesDir
+                commandLine "node", "../../node_modules/@joltup/react-native-code-push/scripts/recordFilesBeforeBundleCommand.js", resourcesDir
             }
             
             recordFilesBeforeBundleCommand.dependsOn("merge${targetName}Resources")
@@ -51,7 +51,7 @@ gradle.projectsEvaluated {
             def generateBundledResourcesHash = tasks.create(
                     name: "generateBundledResourcesHash${targetName}",
                     type: Exec) {
-                commandLine "node", "../../node_modules/react-native-code-push/scripts/generateBundledResourcesHash.js", resourcesDir, "$jsBundleDir/$bundleAssetName", assetsDir
+                commandLine "node", "../../node_modules/@joltup/react-native-code-push/scripts/generateBundledResourcesHash.js", resourcesDir, "$jsBundleDir/$bundleAssetName", assetsDir
             }
 
             generateBundledResourcesHash.dependsOn("bundle${targetName}JsAndAssets")
