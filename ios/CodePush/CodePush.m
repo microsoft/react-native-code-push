@@ -378,7 +378,7 @@ static NSString *bundleResourceSubdirectory = nil;
  * This method checks to see whether a specific package hash
  * has previously failed installation.
  */
-- (BOOL)isFailedHash:(NSString*)packageHash
++ (BOOL)isFailedHash:(NSString*)packageHash
 {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSMutableArray *failedUpdates = [preferences objectForKey:FailedUpdatesKey];
@@ -408,7 +408,7 @@ static NSString *bundleResourceSubdirectory = nil;
  * represents a downloaded and installed update, that hasn't
  * been applied yet via an app restart.
  */
-- (BOOL)isPendingUpdate:(NSString*)packageHash
++ (BOOL)isPendingUpdate:(NSString*)packageHash
 {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];
@@ -676,7 +676,7 @@ RCT_EXPORT_METHOD(getUpdateMetadata:(CodePushUpdateState)updateState
     }
 
     // We have a CodePush update, so let's see if it's currently in a pending state.
-    BOOL currentUpdateIsPending = [self isPendingUpdate:[package objectForKey:PackageHashKey]];
+    BOOL currentUpdateIsPending = [[self class] isPendingUpdate:[package objectForKey:PackageHashKey]];
 
     if (updateState == CodePushUpdateStatePending && !currentUpdateIsPending) {
         // The caller wanted a pending update
@@ -715,7 +715,7 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
 {
     NSError *error;
     [CodePushPackage installPackage:updatePackage
-                removePendingUpdate:[self isPendingUpdate:nil]
+                removePendingUpdate:[[self class] isPendingUpdate:nil]
                               error:&error];
 
     if (error) {
@@ -758,7 +758,7 @@ RCT_EXPORT_METHOD(isFailedUpdate:(NSString *)packageHash
                          resolve:(RCTPromiseResolveBlock)resolve
                           reject:(RCTPromiseRejectBlock)reject)
 {
-    BOOL isFailedHash = [self isFailedHash:packageHash];
+    BOOL isFailedHash = [[self class] isFailedHash:packageHash];
     resolve(@(isFailedHash));
 }
 
@@ -798,7 +798,7 @@ RCT_EXPORT_METHOD(restartApp:(BOOL)onlyIfUpdateIsPending
 {
     // If this is an unconditional restart request, or there
     // is current pending update, then reload the app.
-    if (!onlyIfUpdateIsPending || [self isPendingUpdate:nil]) {
+    if (!onlyIfUpdateIsPending || [[self class] isPendingUpdate:nil]) {
         [self loadBundle];
         resolve(@(YES));
         return;
