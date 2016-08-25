@@ -14,6 +14,10 @@ android {
     lintOptions {
         abortOnError false
     }
+
+    defaultConfig {
+        consumerProguardFiles 'proguard-rules.pro'
+    }
 }
 
 dependencies {
