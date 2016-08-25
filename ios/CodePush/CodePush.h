@@ -48,6 +48,19 @@
  */
 + (void)setDeploymentKey:(NSString *)deploymentKey;
 
+/*
+ * This method checks to see whether a specific package hash
+ * has previously failed installation.
+ */
+- (BOOL)isFailedHash:(NSString*)packageHash;
+
+/*
+ * This method checks to see whether a specific package hash
+ * represents a downloaded and installed update, that hasn't
+ * been applied yet via an app restart.
+ */
+- (BOOL)isPendingUpdate:(NSString*)packageHash;
+
 // The below methods are only used during tests.
 + (BOOL)isUsingTestConfiguration;
 + (void)setUsingTestConfiguration:(BOOL)shouldUseTestConfiguration;
