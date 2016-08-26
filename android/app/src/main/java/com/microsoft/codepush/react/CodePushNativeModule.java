@@ -147,7 +147,6 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                 bundleLoaderField.setAccessible(true);
                 bundleLoaderField.set(instanceManager, latestJSBundleLoader);
             } catch (Exception e) {
-                e.printStackTrace();
                 // RN <= v0.30
                 Field jsBundleField = instanceManager.getClass().getDeclaredField("mJSBundleFile");
                 jsBundleField.setAccessible(true);
