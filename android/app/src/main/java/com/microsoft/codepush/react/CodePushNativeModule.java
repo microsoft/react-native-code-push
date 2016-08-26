@@ -9,6 +9,7 @@ import android.view.Choreographer;
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.JSBundleLoader;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -137,9 +138,21 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             String latestJSBundleFile = mCodePush.getJSBundleFileInternal(mCodePush.getAssetsBundleFileName());
 
             // #2) Update the locally stored JS bundle file path
-            Field jsBundleField = instanceManager.getClass().getDeclaredField("mJSBundleFile");
-            jsBundleField.setAccessible(true);
-            jsBundleField.set(instanceManager, latestJSBundleFile);
+            try {
+                // RN >= v0.30
+                Field bundleLoaderField = instanceManager.getClass().getDeclaredField("mBundleLoader");
+                Class<?> jsBundleLoaderClass = Class.forName("com.facebook.react.cxxbridge.JSBundleLoader");
+                Method createFileLoaderMethod = jsBundleLoaderClass.getDeclaredMethod("createFileLoader", Context.class, String.class);
+                Object latestJSBundleLoader = createFileLoaderMethod.invoke(jsBundleLoaderClass, getReactApplicationContext(), latestJSBundleFile);
+                bundleLoaderField.setAccessible(true);
+                bundleLoaderField.set(instanceManager, latestJSBundleLoader);
+            } catch (Exception e) {
+                e.printStackTrace();
+                // RN <= v0.30
+                Field jsBundleField = instanceManager.getClass().getDeclaredField("mJSBundleFile");
+                jsBundleField.setAccessible(true);
+                jsBundleField.set(instanceManager, latestJSBundleFile);
+            }
 
             // #3) Get the context creation method and fire it on the UI thread (which RN enforces)
             final Method recreateMethod = instanceManager.getClass().getMethod("recreateReactContextInBackground");

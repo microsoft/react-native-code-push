@@ -20,3 +20,7 @@
 -keepclassmembers class com.facebook.react.ReactInstanceManagerImpl {
     void recreateReactContextInBackground();
 }
+
+-keepclassmembers class com.facebook.react.XReactInstanceManagerImpl {
+    void recreateReactContextInBackground();
+}
