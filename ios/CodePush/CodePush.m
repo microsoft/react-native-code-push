@@ -455,9 +455,12 @@ static NSString *bundleResourceSubdirectory = nil;
 {
     NSError *error;
     NSDictionary *failedPackage = [CodePushPackage getCurrentPackage:&error];
-
-    // Write the current package's metadata to the "failed list"
-    [self saveFailedUpdate:failedPackage];
+    if (error) {
+        CPLog(@"Error getting current update metadata during rollback: %@", error);
+    } else if (failedPackage) {
+        // Write the current package's metadata to the "failed list"
+        [self saveFailedUpdate:failedPackage];
+    }
 
     // Rollback to the previous version and de-register the new update
     [CodePushPackage rollbackPackage];
