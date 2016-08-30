@@ -491,11 +491,13 @@ static NSString *const UnzippedFolderName = @"unzipped";
     NSError *error;
     NSMutableDictionary *info = [self getCurrentPackageInfo:&error];
     if (error) {
+        CPLog(@"Error getting current package info: %@", error);
         return;
     }
     
     NSString *currentPackageFolderPath = [self getCurrentPackageFolderPath:&error];
     if (error) {
+        CPLog(@"Error getting current package folder path: %@", error);
         return;
     }
     
@@ -515,11 +517,9 @@ static NSString *const UnzippedFolderName = @"unzipped";
 + (void)updateCurrentPackageInfo:(NSDictionary *)packageInfo
                            error:(NSError **)error
 {
-    
     NSData *packageInfoData = [NSJSONSerialization dataWithJSONObject:packageInfo
                                                               options:0
                                                                 error:error];
-    
     NSString *packageInfoString = [[NSString alloc] initWithData:packageInfoData
                                                         encoding:NSUTF8StringEncoding];
     [packageInfoString writeToFile:[self getStatusFilePath]
