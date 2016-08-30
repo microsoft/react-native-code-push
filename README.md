@@ -343,6 +343,57 @@ public class MainActivity extends ReactActivity {
 }
 ```
 
+#### Background React Instances ####
+
+**This section is only necessary if you're *explicitly* launching a React Native instance without an `Activity` (for example, from within a native push notification receiver). For these situations, CodePush must be told how to find your React Native instance.**
+
+In order to update/restart your React Native instance, CodePush must be configured with a `ReactInstanceHolder` before attempting to restart an instance in the background. This is usually done in your `Application` implementation.
+
+**For React Native >= v0.29**
+
+Update the `MainApplication.java` file to use CodePush via the following changes:
+
+```java
+...
+// 1. Declare your ReactNativeHost to extend ReactInstanceHolder. ReactInstanceHolder is a subset of ReactNativeHost, so no additional implementation is needed.
+import com.microsoft.codepush.react.ReactInstanceHolder;
+
+public class MyReactNativeHost extends ReactNativeHost implements ReactInstanceHolder {
+  // ... usual overrides
+}
+
+// 2. Provide your ReactNativeHost to CodePush.
+
+public class MainApplication extends Application implements ReactApplication {
+
+   private final MyReactNativeHost mReactNativeHost = new MyReactNativeHost(this);
+   
+   @Override
+   public void onCreate() {
+     CodePush.setReactInstanceHolder(mReactNativeHost);
+     super.onCreate();
+  }
+}
+```
+
+**For React Native v0.19 - v0.28**
+
+Before v0.29, React Native did not provide a `ReactNativeHost` abstraction. If you're launching a background instance, you'll likely have built your own, which should now implement `ReactInstanceHolder`. Once that's done...
+
+```java
+// 1. Provide your ReactInstanceHolder to CodePush.
+
+public class MainApplication extends Application {
+   
+   @Override
+   public void onCreate() {
+     // ... initialize your instance holder
+     CodePush.setReactInstanceHolder(myInstanceHolder);
+     super.onCreate();
+  }
+}
+```
+
 In order to effectively make use of the `Staging` and `Production` deployments that were created along with your CodePush app, refer to the [multi-deployment testing](#multi-deployment-testing) docs below before actually moving your app's usage of CodePush into production.
 
 ## Windows Setup

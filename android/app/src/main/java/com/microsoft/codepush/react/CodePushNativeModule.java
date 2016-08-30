@@ -1,8 +1,9 @@
 package com.microsoft.codepush.react;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.view.Choreographer;
 
@@ -36,7 +37,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
     private String mClientUniqueId = null;    
     private LifecycleEventListener mLifecycleEventListener = null;
     private int mMinimumBackgroundDuration = 0;
-    
+
     private CodePush mCodePush;
     private SettingsManager mSettingsManager;
     private CodePushTelemetryManager mTelemetryManager;
@@ -78,16 +79,13 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         return "CodePush";
     }
 
-    private boolean isReactApplication(Context context) {
-        Class<?> reactApplicationClass = tryGetClass(REACT_APPLICATION_CLASS_NAME);
-        if (reactApplicationClass != null && reactApplicationClass.isInstance(context)) {
-            return true;
+    private void loadBundleLegacy() {
+        final Activity currentActivity = getCurrentActivity();
+        if (currentActivity == null) {
+            // The currentActivity can be null if it is backgrounded / destroyed, so we simply
+            // no-op to prevent any null pointer exceptions.
+            return;
         }
-
-        return false;
-    }
-
-    private void loadBundleLegacy(final Activity currentActivity) {
         mCodePush.invalidateCurrentInstance();
 
         currentActivity.runOnUiThread(new Runnable() {
@@ -100,41 +98,14 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
 
     private void loadBundle() {
         mCodePush.clearDebugCacheIfNeeded();
-        final Activity currentActivity = getCurrentActivity();
-
-        if (currentActivity == null) {
-            // The currentActivity can be null if it is backgrounded / destroyed, so we simply
-            // no-op to prevent any null pointer exceptions.
-            return;
-        }
-
         try {
-            ReactInstanceManager instanceManager;
             // #1) Get the ReactInstanceManager instance, which is what includes the
             //     logic to reload the current React context.
-            try {
-                // In RN >=0.29, the "mReactInstanceManager" field yields a null value, so we try
-                // to get the instance manager via the ReactNativeHost, which only exists in 0.29.
-                Method getApplicationMethod = ReactActivity.class.getMethod("getApplication");
-                Object reactApplication = getApplicationMethod.invoke(currentActivity);
-                Class<?> reactApplicationClass = tryGetClass(REACT_APPLICATION_CLASS_NAME);
-                Method getReactNativeHostMethod = reactApplicationClass.getMethod("getReactNativeHost");
-                Object reactNativeHost = getReactNativeHostMethod.invoke(reactApplication);
-                Class<?> reactNativeHostClass = tryGetClass(REACT_NATIVE_HOST_CLASS_NAME);
-                Method getReactInstanceManagerMethod = reactNativeHostClass.getMethod("getReactInstanceManager");
-                instanceManager = (ReactInstanceManager)getReactInstanceManagerMethod.invoke(reactNativeHost);
-            } catch (Exception e) {
-                // The React Native version might be older than 0.29, or the activity does not
-                // extend ReactActivity, so we try to get the instance manager via the
-                // "mReactInstanceManager" field.
-                Class instanceManagerHolderClass = currentActivity instanceof ReactActivity
-                        ? ReactActivity.class
-                        : currentActivity.getClass();
-                Field instanceManagerField = instanceManagerHolderClass.getDeclaredField("mReactInstanceManager");
-                instanceManagerField.setAccessible(true);
-                instanceManager = (ReactInstanceManager)instanceManagerField.get(currentActivity);
+            final ReactInstanceManager instanceManager = resolveInstanceManager();
+            if (instanceManager == null) {
+                return;
             }
-
+            
             String latestJSBundleFile = mCodePush.getJSBundleFileInternal(mCodePush.getAssetsBundleFileName());
 
             // #2) Update the locally stored JS bundle file path
@@ -155,27 +126,60 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
 
             // #3) Get the context creation method and fire it on the UI thread (which RN enforces)
             final Method recreateMethod = instanceManager.getClass().getMethod("recreateReactContextInBackground");
-
-            final ReactInstanceManager finalizedInstanceManager = instanceManager;
-            currentActivity.runOnUiThread(new Runnable() {
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        recreateMethod.invoke(finalizedInstanceManager);
+                        recreateMethod.invoke(instanceManager);
                         mCodePush.initializeUpdateAfterRestart();
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         // The recreation method threw an unknown exception
-                        // so just simply fallback to restarting the Activity
-                        loadBundleLegacy(currentActivity);
+                        // so just simply fallback to restarting the Activity (if it exists)
+                        loadBundleLegacy();
                     }
                 }
             });
+
         } catch (Exception e) {
             // Our reflection logic failed somewhere
-            // so fall back to restarting the Activity
-            loadBundleLegacy(currentActivity);
+            // so fall back to restarting the Activity (if it exists)
+            loadBundleLegacy();
         }
+    }
+    
+    private ReactInstanceManager resolveInstanceManager() throws NoSuchFieldException, IllegalAccessException {
+        ReactInstanceManager instanceManager = CodePush.getReactInstanceManager();
+        if (instanceManager != null) {
+            return instanceManager;
+        }
+
+        final Activity currentActivity = getCurrentActivity();
+        if (currentActivity == null) {
+            return null;
+        }
+        try {
+            // In RN >=0.29, the "mReactInstanceManager" field yields a null value, so we try
+            // to get the instance manager via the ReactNativeHost, which only exists in 0.29.
+            Method getApplicationMethod = ReactActivity.class.getMethod("getApplication");
+            Object reactApplication = getApplicationMethod.invoke(currentActivity);
+            Class<?> reactApplicationClass = tryGetClass(REACT_APPLICATION_CLASS_NAME);
+            Method getReactNativeHostMethod = reactApplicationClass.getMethod("getReactNativeHost");
+            Object reactNativeHost = getReactNativeHostMethod.invoke(reactApplication);
+            Class<?> reactNativeHostClass = tryGetClass(REACT_NATIVE_HOST_CLASS_NAME);
+            Method getReactInstanceManagerMethod = reactNativeHostClass.getMethod("getReactInstanceManager");
+            instanceManager = (ReactInstanceManager)getReactInstanceManagerMethod.invoke(reactNativeHost);
+        } catch (Exception e) {
+            // The React Native version might be older than 0.29, or the activity does not
+            // extend ReactActivity, so we try to get the instance manager via the
+            // "mReactInstanceManager" field.
+            Class instanceManagerHolderClass = currentActivity instanceof ReactActivity
+                    ? ReactActivity.class
+                    : currentActivity.getClass();
+            Field instanceManagerField = instanceManagerHolderClass.getDeclaredField("mReactInstanceManager");
+            instanceManagerField.setAccessible(true);
+            instanceManager = (ReactInstanceManager)instanceManagerField.get(currentActivity);
+        }
+        return instanceManager;
     }
 
     private Class tryGetClass(String className) {
