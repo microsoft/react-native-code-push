@@ -343,9 +343,9 @@ public class MainActivity extends ReactActivity {
 }
 ```
 
-#### Background React Instances ####
+#### Background React Instances
 
-**This section is only necessary if you're *explicitly* launching a React Native instance without an `Activity` (for example, from within a native push notification receiver). For these situations, CodePush must be told how to find your React Native instance.**
+*This section is only necessary if you're **explicitly** launching a React Native instance without an `Activity` (for example, from within a native push notification receiver). For these situations, CodePush must be told how to find your React Native instance.*
 
 In order to update/restart your React Native instance, CodePush must be configured with a `ReactInstanceHolder` before attempting to restart an instance in the background. This is usually done in your `Application` implementation.
 
@@ -367,7 +367,7 @@ public class MyReactNativeHost extends ReactNativeHost implements ReactInstanceH
 public class MainApplication extends Application implements ReactApplication {
 
    private final MyReactNativeHost mReactNativeHost = new MyReactNativeHost(this);
-   
+
    @Override
    public void onCreate() {
      CodePush.setReactInstanceHolder(mReactNativeHost);
@@ -378,13 +378,13 @@ public class MainApplication extends Application implements ReactApplication {
 
 **For React Native v0.19 - v0.28**
 
-Before v0.29, React Native did not provide a `ReactNativeHost` abstraction. If you're launching a background instance, you'll likely have built your own, which should now implement `ReactInstanceHolder`. Once that's done...
+Before v0.29, React Native did not provide a `ReactNativeHost` abstraction. If you're launching a background instance, you'll likely have built your own, which should now implement `ReactInstanceHolder`. Once that's done:
 
 ```java
 // 1. Provide your ReactInstanceHolder to CodePush.
 
 public class MainApplication extends Application {
-   
+
    @Override
    public void onCreate() {
      // ... initialize your instance holder
@@ -639,7 +639,7 @@ Open up your `MainApplication.java` file and make the following changes:
  new CodePush(BuildConfig.CODEPUSH_KEY, MainApplication.this, BuildConfig.DEBUG);
  ```
 
-**For React Native v0.19 - v0.28** 
+**For React Native v0.19 - v0.28**
 
 Open up your `MainActivity.java` file and make the following changes:
 
