@@ -128,7 +128,7 @@ failCallback:(void (^)(NSError *err))failCallback;
 
 + (NSString *)getPackageFolderPath:(NSString *)packageHash;
 
-+ (void)installPackage:(NSDictionary *)updatePackage
++ (BOOL)installPackage:(NSDictionary *)updatePackage
    removePendingUpdate:(BOOL)removePendingUpdate
                  error:(NSError **)error;
 
@@ -153,7 +153,7 @@ failCallback:(void (^)(NSError *err))failCallback;
 
 @interface CodePushUpdateUtils : NSObject
 
-+ (void)copyEntriesInFolder:(NSString *)sourceFolder
++ (BOOL)copyEntriesInFolder:(NSString *)sourceFolder
                  destFolder:(NSString *)destFolder
                       error:(NSError **)error;
 
