@@ -61,8 +61,10 @@ static NSString *bundleResourceSubdirectory = nil;
 
 + (void)initialize
 {
-    // Use the mainBundle by default.
-    bundleResourceBundle = [NSBundle mainBundle];
+    if (self == [CodePush class]) {
+        // Use the mainBundle by default.
+        bundleResourceBundle = [NSBundle mainBundle];
+    }
 }
 
 #pragma mark - Public Obj-C API
