@@ -20,7 +20,9 @@ static NSString * const ServerURLConfigKey = @"serverUrl";
 
 + (void)initialize
 {
-    _currentConfig = [[CodePushConfig alloc] init];
+    if (self == [CodePushConfig class]) {
+        _currentConfig = [[CodePushConfig alloc] init];
+    }
 }
 
 - (instancetype)init
