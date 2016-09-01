@@ -158,10 +158,6 @@ NSString * const ManifestFolderPrefix = @"CodePush";
             NSString *mainBundlePathInFolder = [self findMainBundleInFolder:fullFilePath
                                                            expectedFileName:expectedFileName
                                                                       error:error];
-            if (!mainBundlePathInFolder) {
-                return nil;
-            }
-            
             if (mainBundlePathInFolder) {
                 return [fileName stringByAppendingPathComponent:mainBundlePathInFolder];
             }
