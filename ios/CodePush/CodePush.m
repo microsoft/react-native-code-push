@@ -294,15 +294,15 @@ static NSString *bundleResourceSubdirectory = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-- (void)dispatchDownloadProgressEvent
-{
-    // Notify the script-side about the progress
-    [self.bridge.eventDispatcher
-     sendDeviceEventWithName:@"CodePushDownloadProgress"
-     body:@{
-            @"totalBytes":[NSNumber numberWithLongLong:_latestExpectedContentLength],
-            @"receivedBytes":[NSNumber numberWithLongLong:_latestReceivedConentLength]
-            }];
+- (void)dispatchDownloadProgressEvent {
+  // Notify the script-side about the progress
+  [self sendEventWithName:@"CodePushDownloadProgress"
+                     body:@{
+                       @"totalBytes" : [NSNumber
+                           numberWithLongLong:_latestExpectedContentLength],
+                       @"receivedBytes" : [NSNumber
+                           numberWithLongLong:_latestReceivedConentLength]
+                     }];
 }
 
 /*
