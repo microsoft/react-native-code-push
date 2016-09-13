@@ -17,7 +17,7 @@
     "url": "https://github.com/Microsoft/react-native-code-push"
   },
   "dependencies": {
-    "@joltup/code-push-sdk-jolt": "1.10.0-beta.0",
+    "@joltup/code-push-sdk-jolt": "^1.10.0-beta.1",
     "glob": "^5.0.15",
     "inquirer": "1.1.2",
     "plist": "1.2.0"
