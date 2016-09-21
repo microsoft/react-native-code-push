@@ -1,4 +1,4 @@
-import { AcquisitionManager as Sdk } from "@joltup/code-push-sdk-jolt/script/acquisition-sdk";
+import { AcquisitionManager as Sdk } from "@joltup/jolt-code-push-sdk/script/acquisition-sdk";
 import { Alert } from "./AlertAdapter";
 import requestFetchAdapter from "./request-fetch-adapter";
 import { AppState, Platform } from "react-native";
