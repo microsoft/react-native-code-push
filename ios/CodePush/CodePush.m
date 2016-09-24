@@ -26,6 +26,9 @@ RCT_EXPORT_MODULE()
 
 #pragma mark - Private constants
 
+// These constants represent emitted events
+static NSString *const DownloadProgressEvent = @"CodePushDownloadProgress";
+
 // These constants represent valid deployment statuses
 static NSString *const DeploymentFailed = @"DeploymentFailed";
 static NSString *const DeploymentSucceeded = @"DeploymentSucceeded";
@@ -296,7 +299,7 @@ static NSString *bundleResourceSubdirectory = nil;
 
 - (void)dispatchDownloadProgressEvent {
   // Notify the script-side about the progress
-  [self sendEventWithName:@"CodePushDownloadProgress"
+  [self sendEventWithName:DownloadProgressEvent
                      body:@{
                        @"totalBytes" : [NSNumber
                            numberWithLongLong:_latestExpectedContentLength],
@@ -535,6 +538,10 @@ static NSString *bundleResourceSubdirectory = nil;
 
     [preferences setObject:pendingUpdate forKey:PendingUpdateKey];
     [preferences synchronize];
+}
+
+- (NSArray<NSString *> *)supportedEvents {
+    return @[DownloadProgressEvent];
 }
 
 #pragma mark - Application lifecycle event handlers
