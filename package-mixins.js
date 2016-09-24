@@ -1,5 +1,5 @@
 import { AcquisitionManager as Sdk } from "code-push/script/acquisition-sdk";
-import { DeviceEventEmitter } from "react-native";
+import { NativeEventEmitter } from "react-native";
 import RestartManager from "./RestartManager";
 
 // This function is used to augment remote and local
@@ -15,8 +15,9 @@ module.exports = (NativeCodePush) => {
 
         let downloadProgressSubscription;
         if (downloadProgressCallback) {
+          const codePushEventEmitter = new NativeEventEmitter(NativeCodePush);
           // Use event subscription to obtain download progress.
-          downloadProgressSubscription = DeviceEventEmitter.addListener(
+          downloadProgressSubscription = codePushEventEmitter.addListener(
             "CodePushDownloadProgress",
             downloadProgressCallback
           );
