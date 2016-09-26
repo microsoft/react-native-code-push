@@ -829,7 +829,7 @@ This decorator provides support for letting you customize its behaviour to easil
     // the different stages of the sync process.
     class MyApp extends Component {
         codePushStatusDidChange(status) {
-            switch(syncStatus) {
+            switch(status) {
                 case codePush.SyncStatus.CHECKING_FOR_UPDATE:
                     console.log("Checking for updates.");
                     break;
