@@ -849,7 +849,7 @@ This decorator provides support for letting you customize its behaviour to easil
         }
 
         codePushDownloadDidProgress(progress) {
-            console.log(progess.receivedBytes + " of " + progress.totalBytes + " received.");
+            console.log(progress.receivedBytes + " of " + progress.totalBytes + " received.");
         }
     }
     MyApp = codePush(MyApp);
