@@ -34,7 +34,7 @@ import java.util.Map;
 
 public class CodePushNativeModule extends ReactContextBaseJavaModule {
     private String mBinaryContentsHash = null;
-    private String mClientUniqueId = null;    
+    private String mClientUniqueId = null;
     private LifecycleEventListener mLifecycleEventListener = null;
     private int mMinimumBackgroundDuration = 0;
 
@@ -105,7 +105,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             if (instanceManager == null) {
                 return;
             }
-            
+
             String latestJSBundleFile = mCodePush.getJSBundleFileInternal(mCodePush.getAssetsBundleFileName());
 
             // #2) Update the locally stored JS bundle file path
@@ -146,7 +146,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             loadBundleLegacy();
         }
     }
-    
+
     private ReactInstanceManager resolveInstanceManager() throws NoSuchFieldException, IllegalAccessException {
         ReactInstanceManager instanceManager = CodePush.getReactInstanceManager();
         if (instanceManager != null) {
@@ -304,7 +304,14 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                 } else if (updateState == CodePushUpdateState.RUNNING.getValue() && currentUpdateIsPending) {
                     // The caller wants the running update, but the current
                     // one is pending, so we need to grab the previous.
-                    promise.resolve(CodePushUtils.convertJsonObjectToWritable(mUpdateManager.getPreviousPackage()));
+                    JSONObject previousPackage = mUpdateManager.getPreviousPackage();
+
+                    if (previousPackage == null) {
+                        promise.resolve("");
+                        return null;
+                    }
+
+                    promise.resolve(CodePushUtils.convertJsonObjectToWritable(previousPackage));
                 } else {
                     // The current package satisfies the request:
                     // 1) Caller wanted a pending, and there is a pending update
