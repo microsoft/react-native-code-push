@@ -106,7 +106,7 @@ class CodePushDemoApp extends Component {
           Welcome to CodePush!
         </Text>
         <TouchableOpacity onPress={this.sync.bind(this)}>
-          <Text style={styles.syncButton}>Press for silent sync</Text>
+          <Text style={styles.syncButton}>Press for background sync</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={this.syncImmediate.bind(this)}>
           <Text style={styles.syncButton}>Press for dialog-driven sync</Text>
