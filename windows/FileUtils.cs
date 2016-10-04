@@ -6,7 +6,7 @@ namespace CodePush.ReactNative
 {
     internal class FileUtils
     {
-        internal async static Task MergeFolders(StorageFolder source, StorageFolder target)
+        internal async static Task MergeFoldersAsync(StorageFolder source, StorageFolder target)
         {
             foreach (StorageFile sourceFile in await source.GetFilesAsync())
             {
@@ -16,7 +16,7 @@ namespace CodePush.ReactNative
             foreach (StorageFolder sourceDirectory in await source.GetFoldersAsync())
             {
                 StorageFolder nextTargetSubDir = await target.CreateFolderAsync(sourceDirectory.Name, CreationCollisionOption.OpenIfExists);
-                await MergeFolders(sourceDirectory, nextTargetSubDir);
+                await MergeFoldersAsync(sourceDirectory, nextTargetSubDir);
             }
         }
     }
