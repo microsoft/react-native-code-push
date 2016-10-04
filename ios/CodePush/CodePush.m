@@ -64,6 +64,7 @@ static NSString *bundleResourceSubdirectory = nil;
 
 + (void)initialize
 {
+    [super initialize];
     if (self == [CodePush class]) {
         // Use the mainBundle by default.
         bundleResourceBundle = [NSBundle mainBundle];
@@ -231,7 +232,6 @@ static NSString *bundleResourceSubdirectory = nil;
 
 #pragma mark - Private API methods
 
-@synthesize bridge = _bridge;
 @synthesize methodQueue = _methodQueue;
 @synthesize pauseCallback = _pauseCallback;
 @synthesize paused = _paused;
@@ -255,7 +255,7 @@ static NSString *bundleResourceSubdirectory = nil;
 - (void)clearDebugUpdates
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        if ([_bridge.bundleURL.scheme hasPrefix:@"http"]) {
+        if ([super.bridge.bundleURL.scheme hasPrefix:@"http"]) {
             NSError *error;
             NSString *binaryAppVersion = [[CodePushConfig current] appVersion];
             NSDictionary *currentPackageMetadata = [CodePushPackage getCurrentPackage:&error];
@@ -434,18 +434,18 @@ static NSString *bundleResourceSubdirectory = nil;
  */
 - (void)loadBundle
 {
-    // This needs to be async dispatched because the _bridge is not set on init
+    // This needs to be async dispatched because the bridge is not set on init
     // when the app first starts, therefore rollbacks will not take effect.
     dispatch_async(dispatch_get_main_queue(), ^{
         // If the current bundle URL is using http(s), then assume the dev
         // is debugging and therefore, shouldn't be redirected to a local
         // file (since Chrome wouldn't support it). Otherwise, update
         // the current bundle URL to point at the latest update
-        if ([CodePush isUsingTestConfiguration] || ![_bridge.bundleURL.scheme hasPrefix:@"http"]) {
-            [_bridge setValue:[CodePush bundleURL] forKey:@"bundleURL"];
+        if ([CodePush isUsingTestConfiguration] || ![super.bridge.bundleURL.scheme hasPrefix:@"http"]) {
+            [super.bridge setValue:[CodePush bundleURL] forKey:@"bundleURL"];
         }
 
-        [_bridge reload];
+        [super.bridge reload];
     });
 }
 
