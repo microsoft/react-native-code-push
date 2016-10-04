@@ -39,7 +39,6 @@ namespace CodePush.ReactNative
             // TODO implement telemetryManager 
             // _codePushTelemetryManager = new CodePushTelemetryManager(this.applicationContext, CODE_PUSH_PREFERENCES);
 
-            InitializeUpdateAfterRestart();
             if (CurrentInstance != null)
             {
                 CodePushUtils.Log("More than one CodePush instance has been initialized. Please use the instance method codePush.getBundleUrlInternal() to get the correct bundleURL for a particular instance.");
