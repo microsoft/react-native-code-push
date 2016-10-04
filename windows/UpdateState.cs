@@ -4,6 +4,6 @@
     {
         Running,
         Pending,
-        Lastest
+        Latest
     }
 }
