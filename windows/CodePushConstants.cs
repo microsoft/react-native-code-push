@@ -21,7 +21,7 @@
         internal const string PendingUpdateKey = "CODE_PUSH_PENDING_UPDATE";
         internal const string PendingUpdateIsLoadingKey = "isLoading";
         internal const string PreviousPackageKey = "previousPackage";
-        // This needs to be kept in sync with https://github.com/facebook/react-native/blob/master/ReactAndroid/src/main/java/com/facebook/react/devsupport/DevSupportManager.java#L78
+        // This needs to be kept in sync with https://github.com/ReactWindows/react-native-windows/blob/master/ReactWindows/ReactNative/DevSupport/DevSupportManager.cs#L22
         internal const string ReactDevBundleCacheFileName = "ReactNativeDevBundle.js";
         internal const string ReactNativeLogCategory = "ReactNative";
         internal const string RelativeBundlePathKey = "bundlePath";

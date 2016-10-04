@@ -15,17 +15,17 @@ namespace CodePush.ReactNative
     {
         #region Internal methods
 
-        internal async Task ClearUpdates()
+        internal async Task ClearUpdatesAsync()
         {
-            await (await GetCodePushFolder()).DeleteAsync();
+            await (await GetCodePushFolderAsync()).DeleteAsync();
         }
 
-        internal async Task DownloadPackage(JObject updatePackage, string expectedBundleFileName, Progress<HttpProgress> downloadProgress)
+        internal async Task DownloadPackageAsync(JObject updatePackage, string expectedBundleFileName, Progress<HttpProgress> downloadProgress)
         {
             // Using its hash, get the folder where the new update will be saved 
-            StorageFolder codePushFolder = await GetCodePushFolder();
+            StorageFolder codePushFolder = await GetCodePushFolderAsync();
             var newUpdateHash = (string)updatePackage[CodePushConstants.PackageHashKey];
-            StorageFolder newUpdateFolder = await GetPackageFolder(newUpdateHash, false);
+            StorageFolder newUpdateFolder = await GetPackageFolderAsync(newUpdateHash, false);
             if (newUpdateFolder != null)
             {
                 // This removes any stale data in newPackageFolderPath that could have been left
@@ -33,24 +33,27 @@ namespace CodePush.ReactNative
                 await newUpdateFolder.DeleteAsync();
             }
 
-            newUpdateFolder = await GetPackageFolder(newUpdateHash, true);
+            newUpdateFolder = await GetPackageFolderAsync(newUpdateHash, true);
             StorageFile newUpdateMetadataFile = await newUpdateFolder.CreateFileAsync(CodePushConstants.PackageFileName);
             var downloadUrlString = (string)updatePackage[CodePushConstants.DownloadUrlKey];
-            StorageFile downloadFile = await GetDownloadFile();
+            StorageFile downloadFile = await GetDownloadFileAsync();
             var downloadUri = new Uri(downloadUrlString);
 
             // Download the file and send progress event asynchronously
             var request = new HttpRequestMessage(HttpMethod.Get, downloadUri);
             var client = new HttpClient();
             var cancellationTokenSource = new CancellationTokenSource();
-            HttpResponseMessage response = await client.SendRequestAsync(request).AsTask(cancellationTokenSource.Token, downloadProgress);
-            IInputStream inputStream = await response.Content.ReadAsInputStreamAsync();
-            Stream downloadFileStream = await downloadFile.OpenStreamForWriteAsync();
-            await RandomAccessStream.CopyAndCloseAsync(inputStream, downloadFileStream.AsOutputStream());
+            using (HttpResponseMessage response = await client.SendRequestAsync(request).AsTask(cancellationTokenSource.Token, downloadProgress))
+            using (IInputStream inputStream = await response.Content.ReadAsInputStreamAsync())
+            using (IRandomAccessStream downloadFileStream = await downloadFile.OpenAsync(FileAccessMode.ReadWrite))
+            {
+                await RandomAccessStream.CopyAsync(inputStream, downloadFileStream);
+            }
+
             try
             {
                 // Unzip the downloaded file and then delete the zip
-                StorageFolder unzippedFolder = await GetUnzippedFolder();
+                StorageFolder unzippedFolder = await GetUnzippedFolderAsync();
                 ZipFile.ExtractToDirectory(downloadFile.Path, unzippedFolder.Path);
                 await downloadFile.DeleteAsync();
 
@@ -58,7 +61,7 @@ namespace CodePush.ReactNative
                 StorageFile diffManifestFile = (StorageFile)await unzippedFolder.TryGetItemAsync(CodePushConstants.DiffManifestFileName);
                 if (diffManifestFile != null)
                 {
-                    StorageFolder currentPackageFolder = await GetCurrentPackageFolder();
+                    StorageFolder currentPackageFolder = await GetCurrentPackageFolderAsync();
                     if (currentPackageFolder == null)
                     {
                         throw new InvalidDataException("Received a diff update, but there is no current version to diff against.");
@@ -100,21 +103,21 @@ namespace CodePush.ReactNative
             await FileIO.WriteTextAsync(newUpdateMetadataFile, JsonConvert.SerializeObject(updatePackage));
         }
 
-        internal async Task<JObject> GetCurrentPackage()
+        internal async Task<JObject> GetCurrentPackageAsync()
         {
-            string packageHash = await GetCurrentPackageHash();
-            return packageHash == null ? null : await GetPackage(packageHash);
+            string packageHash = await GetCurrentPackageHashAsync();
+            return packageHash == null ? null : await GetPackageAsync(packageHash);
         }
 
-        internal async Task<StorageFile> GetCurrentPackageBundle(string bundleFileName)
+        internal async Task<StorageFile> GetCurrentPackageBundleAsync(string bundleFileName)
         {
-            StorageFolder packageFolder = await GetCurrentPackageFolder();
+            StorageFolder packageFolder = await GetCurrentPackageFolderAsync();
             if (packageFolder == null)
             {
                 return null;
             }
 
-            JObject currentPackage = await GetCurrentPackage();
+            JObject currentPackage = await GetCurrentPackageAsync();
             var relativeBundlePath = (string)currentPackage[CodePushConstants.RelativeBundlePathKey];
 
             return relativeBundlePath == null 
@@ -122,22 +125,22 @@ namespace CodePush.ReactNative
                 : await packageFolder.GetFileAsync(relativeBundlePath);
         }
 
-        internal async Task<string> GetCurrentPackageHash()
+        internal async Task<string> GetCurrentPackageHashAsync()
         {
-            JObject info = await GetCurrentPackageInfo();
+            JObject info = await GetCurrentPackageInfoAsync();
             string currentPackageShortHash = (string)info[CodePushConstants.CurrentPackageKey];
             if (currentPackageShortHash == null)
             {
                 return null;
             }
 
-            JObject currentPackageMetadata = await GetPackage(currentPackageShortHash);
+            JObject currentPackageMetadata = await GetPackageAsync(currentPackageShortHash);
             return currentPackageMetadata == null ? null : (string)currentPackageMetadata[CodePushConstants.PackageHashKey];
         }
 
-        internal async Task<JObject> GetPackage(string packageHash)
+        internal async Task<JObject> GetPackageAsync(string packageHash)
         {
-            StorageFolder packageFolder = await GetPackageFolder(packageHash, false);
+            StorageFolder packageFolder = await GetPackageFolderAsync(packageHash, false);
             if (packageFolder == null)
             {
                 return null;
@@ -154,9 +157,9 @@ namespace CodePush.ReactNative
             }
         }
 
-        internal async Task<StorageFolder> GetPackageFolder(string packageHash, bool createIfNotExists)
+        internal async Task<StorageFolder> GetPackageFolderAsync(string packageHash, bool createIfNotExists)
         {
-            StorageFolder codePushFolder = await GetCodePushFolder();
+            StorageFolder codePushFolder = await GetCodePushFolderAsync();
             try
             {
                 packageHash = ShortenPackageHash(packageHash);
@@ -170,34 +173,34 @@ namespace CodePush.ReactNative
             }
         }
 
-        internal async Task<JObject> GetPreviousPackage()
+        internal async Task<JObject> GetPreviousPackageAsync()
         {
-            string packageHash = await GetPreviousPackageHash();
-            return packageHash == null ? null : await GetPackage(packageHash);
+            string packageHash = await GetPreviousPackageHashAsync();
+            return packageHash == null ? null : await GetPackageAsync(packageHash);
         }
 
-        internal async Task<string> GetPreviousPackageHash()
+        internal async Task<string> GetPreviousPackageHashAsync()
         {
-            JObject info = await GetCurrentPackageInfo();
+            JObject info = await GetCurrentPackageInfoAsync();
             string previousPackageShortHash = (string)info[CodePushConstants.PreviousPackageKey];
             if (previousPackageShortHash == null)
             {
                 return null;
             }
 
-            JObject previousPackageMetadata = await GetPackage(previousPackageShortHash);
+            JObject previousPackageMetadata = await GetPackageAsync(previousPackageShortHash);
             return previousPackageMetadata == null ? null : (string)previousPackageMetadata[CodePushConstants.PackageHashKey];
         }
 
-        internal async Task InstallPackage(JObject updatePackage, bool currentUpdateIsPending)
+        internal async Task InstallPackageAsync(JObject updatePackage, bool currentUpdateIsPending)
         {
             var packageHash = (string)updatePackage[CodePushConstants.PackageHashKey];
-            JObject info = await GetCurrentPackageInfo();
+            JObject info = await GetCurrentPackageInfoAsync();
             if (currentUpdateIsPending)
             {
                 // Don't back up current update to the "previous" position because
                 // it is an unverified update which should not be rolled back to.
-                StorageFolder currentPackageFolder = await GetCurrentPackageFolder();
+                StorageFolder currentPackageFolder = await GetCurrentPackageFolderAsync();
                 if (currentPackageFolder != null)
                 {
                     await currentPackageFolder.DeleteAsync();
@@ -205,10 +208,10 @@ namespace CodePush.ReactNative
             }
             else
             {
-                string previousPackageHash = await GetPreviousPackageHash();
+                string previousPackageHash = await GetPreviousPackageHashAsync();
                 if (previousPackageHash != null && !previousPackageHash.Equals(packageHash))
                 {
-                    StorageFolder previousPackageFolder = await GetPackageFolder(previousPackageHash, false);
+                    StorageFolder previousPackageFolder = await GetPackageFolderAsync(previousPackageHash, false);
                     if (previousPackageFolder != null)
                     {
                         await previousPackageFolder.DeleteAsync();
@@ -219,13 +222,13 @@ namespace CodePush.ReactNative
             }
 
             info[CodePushConstants.CurrentPackageKey] = packageHash;
-            await UpdateCurrentPackageInfo(info);
+            await UpdateCurrentPackageInfoAsync(info);
         }
 
-        internal async Task RollbackPackage()
+        internal async Task RollbackPackageAsync()
         {
-            JObject info = await GetCurrentPackageInfo();
-            StorageFolder currentPackageFolder = await GetCurrentPackageFolder();
+            JObject info = await GetCurrentPackageInfoAsync();
+            StorageFolder currentPackageFolder = await GetCurrentPackageFolderAsync();
             if (currentPackageFolder != null)
             {
                 await currentPackageFolder.DeleteAsync();
@@ -233,46 +236,46 @@ namespace CodePush.ReactNative
 
             info[CodePushConstants.CurrentPackageKey] = info[CodePushConstants.PreviousPackageKey];
             info[CodePushConstants.PreviousPackageKey] = null;
-            await UpdateCurrentPackageInfo(info);
+            await UpdateCurrentPackageInfoAsync(info);
         }
 
         #endregion
 
         #region Private methods
 
-        private async Task<StorageFolder> GetCodePushFolder()
+        private async Task<StorageFolder> GetCodePushFolderAsync()
         {
             return await ApplicationData.Current.LocalFolder.CreateFolderAsync(CodePushConstants.CodePushFolderPrefix, CreationCollisionOption.OpenIfExists);
         }
 
-        private async Task<StorageFolder> GetCurrentPackageFolder()
+        private async Task<StorageFolder> GetCurrentPackageFolderAsync()
         {
-            JObject info = await GetCurrentPackageInfo();
+            JObject info = await GetCurrentPackageInfoAsync();
             var packageHash = (string)info[CodePushConstants.CurrentPackageKey];
-            return packageHash == null ? null : await GetPackageFolder(packageHash, false);
+            return packageHash == null ? null : await GetPackageFolderAsync(packageHash, false);
         }
 
-        private async Task<JObject> GetCurrentPackageInfo()
+        private async Task<JObject> GetCurrentPackageInfoAsync()
         {
-            StorageFile statusFile = await GetStatusFile();
+            StorageFile statusFile = await GetStatusFileAsync();
             return await CodePushUtils.GetJObjectFromFile(statusFile);
         }
 
-        private async Task<StorageFile> GetDownloadFile()
+        private async Task<StorageFile> GetDownloadFileAsync()
         {
-            var codePushFolder = await GetCodePushFolder();
+            var codePushFolder = await GetCodePushFolderAsync();
             return await codePushFolder.CreateFileAsync(CodePushConstants.DownloadFileName, CreationCollisionOption.OpenIfExists);
         }
 
-        private async Task<StorageFile> GetStatusFile()
+        private async Task<StorageFile> GetStatusFileAsync()
         {
-            StorageFolder codePushFolder = await GetCodePushFolder();
+            StorageFolder codePushFolder = await GetCodePushFolderAsync();
             return await codePushFolder.CreateFileAsync(CodePushConstants.StatusFileName, CreationCollisionOption.OpenIfExists);
         }
 
-        private async Task<StorageFolder> GetUnzippedFolder()
+        private async Task<StorageFolder> GetUnzippedFolderAsync()
         {
-            StorageFolder codePushFolder = await GetCodePushFolder();
+            StorageFolder codePushFolder = await GetCodePushFolderAsync();
             return await codePushFolder.CreateFolderAsync(CodePushConstants.UnzippedFolderName, CreationCollisionOption.OpenIfExists);
         }
 
@@ -281,9 +284,9 @@ namespace CodePush.ReactNative
             return longPackageHash.Substring(0, 8);
         }
 
-        private async Task UpdateCurrentPackageInfo(JObject packageInfo)
+        private async Task UpdateCurrentPackageInfoAsync(JObject packageInfo)
         {
-            await FileIO.WriteTextAsync(await GetStatusFile(), JsonConvert.SerializeObject(packageInfo));
+            await FileIO.WriteTextAsync(await GetStatusFileAsync(), JsonConvert.SerializeObject(packageInfo));
         }
 
         #endregion
