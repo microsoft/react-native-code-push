@@ -46,13 +46,13 @@ We try our best to maintain backwards compatability of our plugin with previous 
 
 | React Native version(s) | Supporting CodePush version(s)                 |
 |-------------------------|------------------------------------------------|
-| <0.14.0                 | **Unsupported**                                |
-| v0.14.*                 | v1.3.0 *(introduced Android support)*          |
-| v0.15.0-v0.18.*         | v1.4.0-v1.6.0 *(introduced iOS asset support)* |
-| v0.19.0-v0.28.*         | v1.7.0+ *(introduced Android asset support)*   |
-| v0.29.0-v0.31.*         | v1.13.0+ *(RN refactored native hosting code)* |
-| v0.32.0-v0.33.*         | v1.14.6+ *(RN refactored native hosting code)* |
-| v0.34.0+                | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
+| <0.14                   | **Unsupported**                                |
+| v0.14                   | v1.3.0 *(introduced Android support)*          |
+| v0.15-v0.18             | v1.4.0-v1.6.0 *(introduced iOS asset support)* |
+| v0.19-v0.28             | v1.7.0+ *(introduced Android asset support)*   |
+| v0.29-v0.31             | v1.13.0+ *(RN refactored native hosting code)* |
+| v0.32-v0.33             | v1.14.6+ *(RN refactored native hosting code)* |
+| v0.34+                  | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
 
 ## Supported Components
 
