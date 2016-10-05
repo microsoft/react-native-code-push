@@ -10,19 +10,19 @@ namespace CodePush.ReactNative
     {
         internal async static Task CopyNecessaryFilesFromCurrentPackageAsync(StorageFile diffManifestFile, StorageFolder currentPackageFolder, StorageFolder newPackageFolder)
         {
-            await FileUtils.MergeFoldersAsync(currentPackageFolder, newPackageFolder);
-            JObject diffManifest = await CodePushUtils.GetJObjectFromFileAsync(diffManifestFile);
+            await FileUtils.MergeFoldersAsync(currentPackageFolder, newPackageFolder).ConfigureAwait(false);
+            JObject diffManifest = await CodePushUtils.GetJObjectFromFileAsync(diffManifestFile).ConfigureAwait(false);
             var deletedFiles = (JArray)diffManifest["deletedFiles"];
             foreach (string fileNameToDelete in deletedFiles)
             {
-                StorageFile fileToDelete = await newPackageFolder.GetFileAsync(fileNameToDelete);
-                await fileToDelete.DeleteAsync();
+                StorageFile fileToDelete = await newPackageFolder.GetFileAsync(fileNameToDelete).AsTask().ConfigureAwait(false);
+                await fileToDelete.DeleteAsync().AsTask().ConfigureAwait(false);
             }
         }
 
         internal async static Task<string> FindJSBundleInUpdateContentsAsync(StorageFolder updateFolder, string expectedFileName)
         {
-            foreach (StorageFile file in await updateFolder.GetFilesAsync())
+            foreach (StorageFile file in await updateFolder.GetFilesAsync().AsTask().ConfigureAwait(false))
             {
                 string fileName = file.Name;
                 if (fileName.Equals(expectedFileName))
@@ -31,9 +31,9 @@ namespace CodePush.ReactNative
                 }
             }
 
-            foreach (StorageFolder folder in await updateFolder.GetFoldersAsync())
+            foreach (StorageFolder folder in await updateFolder.GetFoldersAsync().AsTask().ConfigureAwait(false))
             {
-                string mainBundlePathInSubFolder = await FindJSBundleInUpdateContentsAsync(folder, expectedFileName);
+                string mainBundlePathInSubFolder = await FindJSBundleInUpdateContentsAsync(folder, expectedFileName).ConfigureAwait(false);
                 if (mainBundlePathInSubFolder != null)
                 {
                     return Path.Combine(folder.Name, mainBundlePathInSubFolder);

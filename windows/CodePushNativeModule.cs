@@ -57,7 +57,7 @@ namespace CodePush.ReactNative
         {
             try
             {
-                updatePackage[CodePushConstants.BinaryModifiedTimeKey] = "" + await _codePush.GetBinaryResourcesModifiedTimeAsync();
+                updatePackage[CodePushConstants.BinaryModifiedTimeKey] = "" + await _codePush.GetBinaryResourcesModifiedTimeAsync().ConfigureAwait(false);
                 await _codePush.UpdateManager.DownloadPackageAsync(
                     updatePackage,
                     _codePush.AssetsBundleFileName,
@@ -80,9 +80,9 @@ namespace CodePush.ReactNative
                                 .emit(CodePushConstants.DownloadProgressEventName, downloadProgress);
                         }
                     )
-                );
+                ).ConfigureAwait(false);
 
-                JObject newPackage = await _codePush.UpdateManager.GetPackageAsync((string)updatePackage[CodePushConstants.PackageHashKey]);
+                JObject newPackage = await _codePush.UpdateManager.GetPackageAsync((string)updatePackage[CodePushConstants.PackageHashKey]).ConfigureAwait(false);
                 promise.Resolve(newPackage);
             }
             catch (InvalidDataException e)
@@ -121,7 +121,7 @@ namespace CodePush.ReactNative
         [ReactMethod]
         public async void getUpdateMetadata(UpdateState updateState, IPromise promise)
         {
-            JObject currentPackage = await _codePush.UpdateManager.GetCurrentPackageAsync();
+            JObject currentPackage = await _codePush.UpdateManager.GetCurrentPackageAsync().ConfigureAwait(false);
             if (currentPackage == null)
             {
                 promise.Resolve("");
@@ -146,7 +146,7 @@ namespace CodePush.ReactNative
             {
                 // The caller wants the running update, but the current
                 // one is pending, so we need to grab the previous.
-                promise.Resolve(await _codePush.UpdateManager.GetPreviousPackageAsync());
+                promise.Resolve(await _codePush.UpdateManager.GetPreviousPackageAsync().ConfigureAwait(false));
             }
             else
             {
@@ -179,7 +179,7 @@ namespace CodePush.ReactNative
         [ReactMethod]
         public async void installUpdate(JObject updatePackage, InstallMode installMode, int minimumBackgroundDuration, IPromise promise)
         {
-            await _codePush.UpdateManager.InstallPackageAsync(updatePackage, SettingsManager.IsPendingUpdate(null));
+            await _codePush.UpdateManager.InstallPackageAsync(updatePackage, SettingsManager.IsPendingUpdate(null)).ConfigureAwait(false);
             var pendingHash = (string)updatePackage[CodePushConstants.PackageHashKey];
             SettingsManager.SavePendingUpdate(pendingHash, /* isLoading */false);
             if (installMode == InstallMode.OnNextResume)
@@ -191,7 +191,7 @@ namespace CodePush.ReactNative
                     {
                         Context.RunOnNativeModulesQueueThread(async () =>
                         {
-                            await LoadBundleAsync();
+                            await LoadBundleAsync().ConfigureAwait(false);
                         });
                     };
                         
@@ -219,7 +219,7 @@ namespace CodePush.ReactNative
             bool isFirstRun = _codePush.DidUpdate
                 && packageHash != null
                 && packageHash.Length > 0
-                && packageHash.Equals(await _codePush.UpdateManager.GetCurrentPackageHashAsync());
+                && packageHash.Equals(await _codePush.UpdateManager.GetCurrentPackageHashAsync().ConfigureAwait(false));
             promise.Resolve(isFirstRun);
         }
 
@@ -237,7 +237,7 @@ namespace CodePush.ReactNative
             // is current pending update, then reload the app.
             if (!onlyIfUpdateIsPending || SettingsManager.IsPendingUpdate(null))
             {
-                await LoadBundleAsync();
+                await LoadBundleAsync().ConfigureAwait(false);
             }
         }
         
@@ -254,7 +254,7 @@ namespace CodePush.ReactNative
 
             // #2) Update the locally stored JS bundle file path
             Type reactInstanceManagerType = typeof(ReactInstanceManager);
-            string latestJSBundleFile = await _codePush.GetJavaScriptBundleFileAsync(_codePush.AssetsBundleFileName);
+            string latestJSBundleFile = await _codePush.GetJavaScriptBundleFileAsync(_codePush.AssetsBundleFileName).ConfigureAwait(false);
             reactInstanceManagerType
                 .GetField("_jsBundleFile", BindingFlags.NonPublic | BindingFlags.Instance)
                 .SetValue(reactInstanceManager, latestJSBundleFile);

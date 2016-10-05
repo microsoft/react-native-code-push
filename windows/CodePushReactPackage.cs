@@ -85,8 +85,8 @@ namespace CodePush.ReactNative
         {
             AssetsBundleFileName = assetsBundleFileName;
             string binaryJsBundleUrl = CodePushConstants.AssetsBundlePrefix + assetsBundleFileName;
-            var binaryResourcesModifiedTime = await GetBinaryResourcesModifiedTimeAsync();
-            var packageFile = await UpdateManager.GetCurrentPackageBundleAsync(AssetsBundleFileName);
+            var binaryResourcesModifiedTime = await GetBinaryResourcesModifiedTimeAsync().ConfigureAwait(false);
+            var packageFile = await UpdateManager.GetCurrentPackageBundleAsync(AssetsBundleFileName).ConfigureAwait(false);
             if (packageFile == null)
             {
                 // There has not been any downloaded updates.
@@ -95,7 +95,7 @@ namespace CodePush.ReactNative
                 return binaryJsBundleUrl;
             }
 
-            var packageMetadata = await UpdateManager.GetCurrentPackageAsync();
+            var packageMetadata = await UpdateManager.GetCurrentPackageAsync().ConfigureAwait(false);
             long? binaryModifiedDateDuringPackageInstall = null;
             var binaryModifiedDateDuringPackageInstallString = (string)packageMetadata[CodePushConstants.BinaryModifiedTimeKey];
             if (binaryModifiedDateDuringPackageInstallString != null)
@@ -119,7 +119,7 @@ namespace CodePush.ReactNative
                 DidUpdate = false;
                 if (!MainPage.UseDeveloperSupport || !AppVersion.Equals(packageAppVersion))
                 {
-                    await ClearUpdatesAsync();
+                    await ClearUpdatesAsync().ConfigureAwait(false);
                 }
 
                 CodePushUtils.LogBundleUrl(binaryJsBundleUrl);
@@ -134,8 +134,8 @@ namespace CodePush.ReactNative
 
         internal async Task<long> GetBinaryResourcesModifiedTimeAsync()
         {
-            var assetJSBundleFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri(CodePushConstants.AssetsBundlePrefix + AssetsBundleFileName));
-            var fileProperties = await assetJSBundleFile.GetBasicPropertiesAsync();
+            var assetJSBundleFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri(CodePushConstants.AssetsBundlePrefix + AssetsBundleFileName)).AsTask().ConfigureAwait(false);
+            var fileProperties = await assetJSBundleFile.GetBasicPropertiesAsync().AsTask().ConfigureAwait(false);
             return fileProperties.DateModified.ToUnixTimeMilliseconds();
         }
         
@@ -170,7 +170,7 @@ namespace CodePush.ReactNative
 
         internal async Task ClearUpdatesAsync()
         {
-            await UpdateManager.ClearUpdatesAsync();
+            await UpdateManager.ClearUpdatesAsync().ConfigureAwait(false);
             SettingsManager.RemovePendingUpdate();
             SettingsManager.RemoveFailedUpdates();
         }
@@ -181,18 +181,18 @@ namespace CodePush.ReactNative
 
         private async Task ClearReactDevBundleCacheAsync()
         {
-            var devBundleCacheFile = (StorageFile) await ApplicationData.Current.LocalFolder.TryGetItemAsync(CodePushConstants.ReactDevBundleCacheFileName);
+            var devBundleCacheFile = (StorageFile)await ApplicationData.Current.LocalFolder.TryGetItemAsync(CodePushConstants.ReactDevBundleCacheFileName).AsTask().ConfigureAwait(false);
             if (devBundleCacheFile != null)
             {
-                await devBundleCacheFile.DeleteAsync();
+                await devBundleCacheFile.DeleteAsync().AsTask().ConfigureAwait(false);
             }
         }
 
         private async Task RollbackPackageAsync()
         {
-            JObject failedPackage = await UpdateManager.GetCurrentPackageAsync();
+            JObject failedPackage = await UpdateManager.GetCurrentPackageAsync().ConfigureAwait(false);
             SettingsManager.SaveFailedUpdate(failedPackage);
-            await UpdateManager.RollbackPackageAsync();
+            await UpdateManager.RollbackPackageAsync().ConfigureAwait(false);
             SettingsManager.RemovePendingUpdate();
         }
 
