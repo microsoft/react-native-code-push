@@ -67,16 +67,16 @@ namespace CodePush.ReactNative
                         throw new InvalidDataException("Received a diff update, but there is no current version to diff against.");
                     }
 
-                    await UpdateUtils.CopyNecessaryFilesFromCurrentPackage(diffManifestFile, currentPackageFolder, newUpdateFolder);
+                    await UpdateUtils.CopyNecessaryFilesFromCurrentPackageAsync(diffManifestFile, currentPackageFolder, newUpdateFolder);
                     await diffManifestFile.DeleteAsync();
                 }
 
-                await FileUtils.MergeFolders(unzippedFolder, newUpdateFolder);
+                await FileUtils.MergeFoldersAsync(unzippedFolder, newUpdateFolder);
                 await unzippedFolder.DeleteAsync();
 
                 // For zip updates, we need to find the relative path to the jsBundle and save it in the
                 // metadata so that we can find and run it easily the next time.
-                string relativeBundlePath = await UpdateUtils.FindJSBundleInUpdateContents(newUpdateFolder, expectedBundleFileName);
+                string relativeBundlePath = await UpdateUtils.FindJSBundleInUpdateContentsAsync(newUpdateFolder, expectedBundleFileName);
                 if (relativeBundlePath == null)
                 {
                     throw new InvalidDataException("Update is invalid - A JS bundle file named \"" + expectedBundleFileName + "\" could not be found within the downloaded contents. Please check that you are releasing your CodePush updates using the exact same JS bundle file name that was shipped with your app's binary.");
@@ -149,7 +149,7 @@ namespace CodePush.ReactNative
             try
             {
                 StorageFile packageFile = await packageFolder.GetFileAsync(CodePushConstants.PackageFileName);
-                return await CodePushUtils.GetJObjectFromFile(packageFile);
+                return await CodePushUtils.GetJObjectFromFileAsync(packageFile);
             }
             catch (IOException)
             {
@@ -258,7 +258,7 @@ namespace CodePush.ReactNative
         private async Task<JObject> GetCurrentPackageInfoAsync()
         {
             StorageFile statusFile = await GetStatusFileAsync();
-            return await CodePushUtils.GetJObjectFromFile(statusFile);
+            return await CodePushUtils.GetJObjectFromFileAsync(statusFile);
         }
 
         private async Task<StorageFile> GetDownloadFileAsync()

@@ -8,10 +8,10 @@ namespace CodePush.ReactNative
 {
     internal class UpdateUtils
     {
-        internal async static Task CopyNecessaryFilesFromCurrentPackage(StorageFile diffManifestFile, StorageFolder currentPackageFolder, StorageFolder newPackageFolder)
+        internal async static Task CopyNecessaryFilesFromCurrentPackageAsync(StorageFile diffManifestFile, StorageFolder currentPackageFolder, StorageFolder newPackageFolder)
         {
-            await FileUtils.MergeFolders(currentPackageFolder, newPackageFolder);
-            JObject diffManifest = await CodePushUtils.GetJObjectFromFile(diffManifestFile);
+            await FileUtils.MergeFoldersAsync(currentPackageFolder, newPackageFolder);
+            JObject diffManifest = await CodePushUtils.GetJObjectFromFileAsync(diffManifestFile);
             var deletedFiles = (JArray)diffManifest["deletedFiles"];
             foreach (string fileNameToDelete in deletedFiles)
             {
@@ -20,7 +20,7 @@ namespace CodePush.ReactNative
             }
         }
 
-        internal async static Task<string> FindJSBundleInUpdateContents(StorageFolder updateFolder, string expectedFileName)
+        internal async static Task<string> FindJSBundleInUpdateContentsAsync(StorageFolder updateFolder, string expectedFileName)
         {
             foreach (StorageFile file in await updateFolder.GetFilesAsync())
             {
@@ -33,7 +33,7 @@ namespace CodePush.ReactNative
 
             foreach (StorageFolder folder in await updateFolder.GetFoldersAsync())
             {
-                string mainBundlePathInSubFolder = await FindJSBundleInUpdateContents(folder, expectedFileName);
+                string mainBundlePathInSubFolder = await FindJSBundleInUpdateContentsAsync(folder, expectedFileName);
                 if (mainBundlePathInSubFolder != null)
                 {
                     return Path.Combine(folder.Name, mainBundlePathInSubFolder);

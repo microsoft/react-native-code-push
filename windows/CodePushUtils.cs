@@ -10,7 +10,7 @@ namespace CodePush.ReactNative
 {
     internal class CodePushUtils
     {
-        internal async static Task<JObject> GetJObjectFromFile(StorageFile file)
+        internal async static Task<JObject> GetJObjectFromFileAsync(StorageFile file)
         {
             string jsonString = await FileIO.ReadTextAsync(file);
             if (jsonString.Length == 0)
