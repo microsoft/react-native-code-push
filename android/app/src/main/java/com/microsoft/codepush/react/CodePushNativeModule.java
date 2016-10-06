@@ -96,6 +96,49 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         });
     }
 
+    // Use reflection to find and set the appropriate fields on ReactInstanceManager. See #556 for a proposal for a less brittle way
+    // to approach this.
+    private void setJSBundle(ReactInstanceManager instanceManager, String latestJSBundleFile) throws NoSuchFieldException, IllegalAccessException {
+        try {
+            Field bundleLoaderField = instanceManager.getClass().getDeclaredField("mBundleLoader");
+            Class<?> jsBundleLoaderClass = Class.forName("com.facebook.react.cxxbridge.JSBundleLoader");
+            Method createFileLoaderMethod = null;
+
+            Method[] methods = jsBundleLoaderClass.getDeclaredMethods();
+            for (Method method : methods) {
+                if (method.getName() == "createFileLoader") {
+                    createFileLoaderMethod = method;
+                    break;
+                }
+            }
+
+            if (createFileLoaderMethod == null) {
+                throw new NoSuchMethodException("Could not find a recognized 'createFileLoader' method");
+            }
+
+            int numParameters = createFileLoaderMethod.getGenericParameterTypes().length;
+            Object latestJSBundleLoader;
+
+            if (numParameters == 1) {
+                // RN >= v0.34
+                latestJSBundleLoader = createFileLoaderMethod.invoke(jsBundleLoaderClass, latestJSBundleFile);
+            } else if (numParameters == 2) {
+                // RN >= v0.31 && RN < v0.34
+                latestJSBundleLoader = createFileLoaderMethod.invoke(jsBundleLoaderClass, getReactApplicationContext(), latestJSBundleFile);
+            } else {
+                throw new NoSuchMethodException("Could not find a recognized 'createFileLoader' method");
+            }
+
+            bundleLoaderField.setAccessible(true);
+            bundleLoaderField.set(instanceManager, latestJSBundleLoader);
+        } catch (Exception e) {
+            // RN < v0.31
+            Field jsBundleField = instanceManager.getClass().getDeclaredField("mJSBundleFile");
+            jsBundleField.setAccessible(true);
+            jsBundleField.set(instanceManager, latestJSBundleFile);
+        }
+    }
+
     private void loadBundle() {
         mCodePush.clearDebugCacheIfNeeded();
         try {
@@ -109,20 +152,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             String latestJSBundleFile = mCodePush.getJSBundleFileInternal(mCodePush.getAssetsBundleFileName());
 
             // #2) Update the locally stored JS bundle file path
-            try {
-                // RN >= v0.30
-                Field bundleLoaderField = instanceManager.getClass().getDeclaredField("mBundleLoader");
-                Class<?> jsBundleLoaderClass = Class.forName("com.facebook.react.cxxbridge.JSBundleLoader");
-                Method createFileLoaderMethod = jsBundleLoaderClass.getDeclaredMethod("createFileLoader", Context.class, String.class);
-                Object latestJSBundleLoader = createFileLoaderMethod.invoke(jsBundleLoaderClass, getReactApplicationContext(), latestJSBundleFile);
-                bundleLoaderField.setAccessible(true);
-                bundleLoaderField.set(instanceManager, latestJSBundleLoader);
-            } catch (Exception e) {
-                // RN <= v0.30
-                Field jsBundleField = instanceManager.getClass().getDeclaredField("mJSBundleFile");
-                jsBundleField.setAccessible(true);
-                jsBundleField.set(instanceManager, latestJSBundleFile);
-            }
+            setJSBundle(instanceManager, latestJSBundleFile);
 
             // #3) Get the context creation method and fire it on the UI thread (which RN enforces)
             final Method recreateMethod = instanceManager.getClass().getMethod("recreateReactContextInBackground");
@@ -147,6 +177,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         }
     }
 
+    // Use reflection to find the ReactInstanceManager. See #556 for a proposal for a less brittle way to approach this.
     private ReactInstanceManager resolveInstanceManager() throws NoSuchFieldException, IllegalAccessException {
         ReactInstanceManager instanceManager = CodePush.getReactInstanceManager();
         if (instanceManager != null) {
