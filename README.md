@@ -50,9 +50,10 @@ We try our best to maintain backwards compatability of our plugin with previous 
 | v0.14                   | v1.3.0 *(introduced Android support)*          |
 | v0.15-v0.18             | v1.4.0-v1.6.0 *(introduced iOS asset support)* |
 | v0.19-v0.28             | v1.7.0+ *(introduced Android asset support)*   |
-| v0.29-v0.31             | v1.13.0+ *(RN refactored native hosting code)* |
-| v0.32-v0.33             | v1.14.6+ *(RN refactored native hosting code)* |
-| v0.34+                  | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
+| v0.29-v0.30             | v1.13.0+ *(RN refactored native hosting code)* |
+| v0.31-v0.33             | v1.14.6+ *(RN refactored native hosting code)* |
+| v0.34                   | v1.15.0+ *(RN refactored native hosting code)* |
+| v0.35+                  | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
 
 ## Supported Components
 
@@ -83,7 +84,7 @@ Once you've followed the general-purpose ["getting started"](http://codepush.too
 npm install --save react-native-code-push@latest
 ```
 
-As with all other React Native plugins, the integration experience is different for iOS and Android, so perform the following setup steps depending on which platform(s) you are targeting. Note, if you are targeting both platforms it is recommended to create separate CodePush applications for each platform. 
+As with all other React Native plugins, the integration experience is different for iOS and Android, so perform the following setup steps depending on which platform(s) you are targeting. Note, if you are targeting both platforms it is recommended to create separate CodePush applications for each platform.
 
 If you want to see how other projects have integrated with CodePush, you can check out the excellent [example apps](#example-apps--starters) provided by the community. Additionally, if you'd like to quickly familiarize yourself with CodePush + React Native, you can check out the awesome getting started videos produced by [Bilal Budhani](https://www.youtube.com/watch?v=uN0FRWk-YW8&feature=youtu.be) and/or [Deepak Sisodiya ](https://www.youtube.com/watch?v=f6I9y7V-Ibk).
 
