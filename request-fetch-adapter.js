@@ -1,3 +1,5 @@
+const packageJson = require("./package.json");
+
 module.exports = {
   async request(verb, url, requestBody, callback) {
     if (typeof requestBody === "function") {
@@ -8,7 +10,9 @@ module.exports = {
     const headers = {
       "Accept": "application/json",
       "Content-Type": "application/json",
-      "X-CodePush-SDK-Version": getSDKVersion()
+      "X-CodePush-Plugin-Name": packageJson.name,
+      "X-CodePush-Plugin-Version": packageJson.version,
+      "X-CodePush-SDK-Version": packageJson.dependencies["code-push"]
     };
 
     if (requestBody && typeof requestBody === "object") {
@@ -30,10 +34,6 @@ module.exports = {
     }
   }
 };
-
-function getSDKVersion() {
-  return require("./package.json").dependencies["code-push"];
-}
 
 function getHttpMethodName(verb) {
   // Note: This should stay in sync with the enum definition in
