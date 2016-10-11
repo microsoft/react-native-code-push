@@ -52,8 +52,8 @@ We try our best to maintain backwards compatability of our plugin with previous 
 | v0.19-v0.28             | v1.7.0+ *(introduced Android asset support)*   |
 | v0.29-v0.30             | v1.13.0+ *(RN refactored native hosting code)* |
 | v0.31-v0.33             | v1.14.6+ *(RN refactored native hosting code)* |
-| v0.34                   | v1.15.0+ *(RN refactored native hosting code)* |
-| v0.35+                  | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
+| v0.34-v0.35             | v1.15.0+ *(RN refactored native hosting code)* |
+| v0.36+                  | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
 
 ## Supported Components
 
