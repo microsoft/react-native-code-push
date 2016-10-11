@@ -24,9 +24,13 @@ public class CodePushUpdateUtils {
         File folder = new File(folderPath);
         File[] folderFiles = folder.listFiles();
         for (File file : folderFiles) {
+            String fileName = file.getName();
             String fullFilePath = file.getAbsolutePath();
-            String relativePath = (pathPrefix.isEmpty() ? "" : (pathPrefix + "/")) + file.getName();
-            if (file.isDirectory()) {
+            String relativePath = (pathPrefix.isEmpty() ? "" : (pathPrefix + "/")) + fileName;
+
+            if (fileName.equals(".DS_Store") || fileName.equals("__MACOSX")) {
+                continue;
+            } else if (file.isDirectory()) {
                 addContentsOfFolderToManifest(fullFilePath, relativePath, manifest);
             } else {
                 try {
