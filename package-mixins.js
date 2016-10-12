@@ -41,7 +41,8 @@ module.exports = (NativeCodePush) => {
   const local = {
     async install(installMode = NativeCodePush.codePushInstallModeOnNextRestart, minimumBackgroundDuration = 0, updateInstalledCallback) {
       const localPackage = this;
-      await NativeCodePush.installUpdate(this, installMode, minimumBackgroundDuration);
+      const localPackageCopy = Object.assign({}, localPackage); // In dev mode, React Native deep freezes any object queued over the bridge
+      await NativeCodePush.installUpdate(localPackageCopy, installMode, minimumBackgroundDuration);
       updateInstalledCallback && updateInstalledCallback();
       if (installMode == NativeCodePush.codePushInstallModeImmediate) {
         RestartManager.restartApp(false);
