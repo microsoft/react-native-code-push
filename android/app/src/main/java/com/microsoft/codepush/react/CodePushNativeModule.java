@@ -106,7 +106,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
 
             Method[] methods = jsBundleLoaderClass.getDeclaredMethods();
             for (Method method : methods) {
-                if (method.getName() == "createFileLoader") {
+                if (method.getName().equals("createFileLoader")) {
                     createFileLoaderMethod = method;
                     break;
                 }
