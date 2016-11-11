@@ -139,7 +139,7 @@ And that's it! Isn't RNPM awesome? :)
 
 2. Run `pod install`
 
-*NOTE: The CodePush `.podspec` depends on the `React` pod, and so in order to ensure that it can correctly use the version of React Native that your app is built with, please make sure to define the `React` dependency in your app's `Podfile` as explained [here](http://facebook.github.io/react-native/docs/embedded-app-ios.html#install-react-native-using-cocoapods).*
+*NOTE: The CodePush `.podspec` depends on the `React` pod, and so in order to ensure that it can correctly use the version of React Native that your app is built with, please make sure to define the `React` dependency in your app's `Podfile` as explained [here](https://facebook.github.io/react-native/docs/integration-with-existing-apps.html#podfile).*
 
 #### Plugin Installation (iOS - Manual)
 
