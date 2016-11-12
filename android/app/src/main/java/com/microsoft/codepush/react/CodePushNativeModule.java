@@ -451,17 +451,13 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
 
                             @Override
                             public void onHostResume() {
-                                if (installMode == CodePushInstallMode.IMMEDIATE.getValue()) {
-                                    loadBundle();
-                                } else {
-                                    // Determine how long the app was in the background and ensure
-                                    // that it meets the minimum duration amount of time.
-                                    long durationInBackground = 0;
-                                    if (lastPausedDate != null) {
-                                        durationInBackground = (new Date().getTime() - lastPausedDate.getTime()) / 1000;
-                                    }
-
-                                    if (durationInBackground >= CodePushNativeModule.this.mMinimumBackgroundDuration) {
+                                // As of RN 36, the resume handler fires immediately if the app is in
+                                // the foreground, so explicitly wait for it to be backgrounded first
+                                if (lastPausedDate != null) {
+                                    long durationInBackground = (new Date().getTime() - lastPausedDate.getTime()) / 1000;
+                                    if (installMode == CodePushInstallMode.IMMEDIATE.getValue()
+                                            || durationInBackground >= CodePushNativeModule.this.mMinimumBackgroundDuration) {
+                                        CodePushUtils.log("Loading bundle on resume");
                                         loadBundle();
                                     }
                                 }
