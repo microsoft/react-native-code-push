@@ -80,6 +80,8 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
     }
 
     private void loadBundleLegacy() {
+        CodePushUtils.log("Error - doing loadbundlelegacy");
+
         final Activity currentActivity = getCurrentActivity();
         if (currentActivity == null) {
             // The currentActivity can be null if it is backgrounded / destroyed, so we simply
@@ -120,18 +122,25 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             Object latestJSBundleLoader;
 
             if (numParameters == 1) {
+                CodePushUtils.log("RN >= 0.34");
                 // RN >= v0.34
                 latestJSBundleLoader = createFileLoaderMethod.invoke(jsBundleLoaderClass, latestJSBundleFile);
             } else if (numParameters == 2) {
+                CodePushUtils.log("RN < 0.34");
+
                 // RN >= v0.31 && RN < v0.34
                 latestJSBundleLoader = createFileLoaderMethod.invoke(jsBundleLoaderClass, getReactApplicationContext(), latestJSBundleFile);
             } else {
+                CodePushUtils.log("RN < 0.34");
+
                 throw new NoSuchMethodException("Could not find a recognized 'createFileLoader' method");
             }
 
             bundleLoaderField.setAccessible(true);
             bundleLoaderField.set(instanceManager, latestJSBundleLoader);
         } catch (Exception e) {
+            CodePushUtils.log("Exception 2");
+
             // RN < v0.31
             Field jsBundleField = instanceManager.getClass().getDeclaredField("mJSBundleFile");
             jsBundleField.setAccessible(true);
@@ -142,10 +151,13 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
     private void loadBundle() {
         mCodePush.clearDebugCacheIfNeeded();
         try {
+            CodePushUtils.log("Loading bundle");
             // #1) Get the ReactInstanceManager instance, which is what includes the
             //     logic to reload the current React context.
             final ReactInstanceManager instanceManager = resolveInstanceManager();
             if (instanceManager == null) {
+                CodePushUtils.log("Instance manager is null");
+
                 return;
             }
 
@@ -156,13 +168,21 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
 
             // #3) Get the context creation method and fire it on the UI thread (which RN enforces)
             final Method recreateMethod = instanceManager.getClass().getMethod("recreateReactContextInBackground");
+            if (recreateMethod == null) {
+                CodePushUtils.log("recreate method is null");
+            }
+
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
                     try {
+                        CodePushUtils.log("Executing recreate method");
+
                         recreateMethod.invoke(instanceManager);
                         mCodePush.initializeUpdateAfterRestart();
                     } catch (Exception e) {
+                        CodePushUtils.log("Recreate method failed");
+
                         // The recreation method threw an unknown exception
                         // so just simply fallback to restarting the Activity (if it exists)
                         loadBundleLegacy();
@@ -171,6 +191,8 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             });
 
         } catch (Exception e) {
+            CodePushUtils.log("Exception");
+
             // Our reflection logic failed somewhere
             // so fall back to restarting the Activity (if it exists)
             loadBundleLegacy();
@@ -290,6 +312,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             }
         };
 
+        CodePushUtils.log("Executing download background task");
         asyncTask.execute();
     }
 
@@ -364,6 +387,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             }
         };
 
+        CodePushUtils.log("Executing metadata background task");
         asyncTask.execute();
     }
 
@@ -416,6 +440,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             }
         };
 
+        CodePushUtils.log("Executing report status background task");
         asyncTask.execute();
     }
 
@@ -433,6 +458,25 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                     mSettingsManager.savePendingUpdate(pendingHash, /* isLoading */false);
                 }
 
+                /**
+                 * From LifeCycleEventListener.java:
+                 * Called either when the host activity receives a resume event or if the native module that implements this is
+                 * initialized while the host activity is already resumed. Always called for the most current activity.
+                 *
+                 * Not sure, but looks like this might have changed. It seems like the RESUME might be triggered after we kill the thread.
+                 * This means:
+                 * 1. We are calling loadBundle() twice for IMMEDIATE
+                 * 2. We might be restarting at the wrong moment for ON_NEXT_RESUME
+                 * 3. React Native might be queuing more stuff onto the UI thread after it's already been killed
+                 *
+                 * Does this make sense? I'm not sure if "the native module that implements this (LifeCycleEventListener) is initialized
+                 * while the host activity is already resumed". TODO: Look at the actual changes to LifeCycleEventListener, and what implements it.
+                 *
+                 * Observed behavior:
+                 * 1. Rollbacks when we leave the resume handler uncommented (and app crash?)
+                 * 2. No rollback when we comment it out
+                 * 3. Stack trace either way
+                 */
                 if (installMode == CodePushInstallMode.ON_NEXT_RESUME.getValue() ||
                     // We also add the resume listener if the installMode is IMMEDIATE, because
                     // if the current activity is backgrounded, we want to reload the bundle when
@@ -451,17 +495,15 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
 
                             @Override
                             public void onHostResume() {
-                                if (installMode == CodePushInstallMode.IMMEDIATE.getValue()) {
-                                    loadBundle();
-                                } else {
-                                    // Determine how long the app was in the background and ensure
-                                    // that it meets the minimum duration amount of time.
-                                    long durationInBackground = 0;
-                                    if (lastPausedDate != null) {
-                                        durationInBackground = (new Date().getTime() - lastPausedDate.getTime()) / 1000;
-                                    }
-
-                                    if (durationInBackground >= CodePushNativeModule.this.mMinimumBackgroundDuration) {
+                                CodePushUtils.log("Resume handler");
+                                // As of RN 36, the resume handler fires immediately if the app is in
+                                // the foreground, so explicitly wait for it to be backgrounded first
+                                if (lastPausedDate != null) {
+                                    CodePushUtils.log("Real resume");
+                                    long durationInBackground = (new Date().getTime() - lastPausedDate.getTime()) / 1000;
+                                    if (installMode == CodePushInstallMode.IMMEDIATE.getValue()
+                                            || durationInBackground >= CodePushNativeModule.this.mMinimumBackgroundDuration) {
+                                        CodePushUtils.log("Loading bundle on resume");
                                         loadBundle();
                                     }
                                 }
@@ -489,6 +531,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             }
         };
 
+        CodePushUtils.log("Executing install background task");
         asyncTask.execute();
     }
 
@@ -521,7 +564,9 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
     public void restartApp(boolean onlyIfUpdateIsPending, Promise promise) {
         // If this is an unconditional restart request, or there
         // is current pending update, then reload the app.
+        CodePushUtils.log("Restart attempt");
         if (!onlyIfUpdateIsPending || mSettingsManager.isPendingUpdate(null)) {
+            CodePushUtils.log("On restart");
             loadBundle();
             promise.resolve(true);
             return;
