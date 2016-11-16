@@ -843,7 +843,7 @@ This decorator provides support for letting you customize its behaviour to easil
                     console.log("Installing update.");
                     break;
                 case codePush.SyncStatus.UP_TO_DATE:
-                    console.log("Installing update.");
+                    console.log("Up-to-date.");
                     break;
                 case codePush.SyncStatus.UPDATE_INSTALLED:
                     console.log("Update installed.");
