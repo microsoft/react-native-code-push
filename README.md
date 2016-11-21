@@ -224,6 +224,8 @@ In order to accommodate as many developer preferences as possible, the CodePush 
 
 2. [**"Manual"**](#plugin-installation-android---manual) - If you don't want to depend on any additional tools or are fine with a few extra installation steps (it's a one-time thing), then go with this approach.
 
+*Note: Due to a code change from the React Native repository, if your installed React Native version ranges from 0.29 to 0.32, we recommend following the manual steps to set up correctly. *
+
 #### Plugin Installation (Android - RNPM)
 
 1. As of v0.27 of React Native, `rnpm link` has already been merged into the React Native CLI. Simply run:
