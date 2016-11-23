@@ -126,13 +126,13 @@ And that's it! Isn't RNPM awesome? :)
 1. Add the CodePush plugin dependency to your `Podfile`, pointing at the path where NPM installed it
 
     ```ruby
-    pod 'CodePush', :path => './node_modules/react-native-code-push'
+    pod 'CodePush', :path => '../node_modules/react-native-code-push'
     ```
 
     CodePush depends on an internal copy of the `SSZipArchive` library, so if your project already includes it (either directly or via a transitive dependency), then you can install a version of CodePush which excludes it by depending specifically on the `Core` subspec:
 
     ```ruby
-    pod 'CodePush', :path => './node_modules/react-native-code-push', :subspecs => ['Core']
+    pod 'CodePush', :path => '../node_modules/react-native-code-push', :subspecs => ['Core']
     ```
 
     *NOTE: The above paths needs to be relative to your app's `Podfile`, so adjust it as nec
