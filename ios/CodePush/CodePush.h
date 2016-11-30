@@ -1,4 +1,9 @@
+#if __has_include("RCTEventEmitter.h")
 #import "RCTEventEmitter.h"
+#else
+#import "React/RCTEventEmitter.h"   // Required when used as a Pod in a Swift project
+#endif
+
 #import <Foundation/Foundation.h>
 
 @interface CodePush : RCTEventEmitter
