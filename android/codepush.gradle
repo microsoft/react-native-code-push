@@ -18,6 +18,12 @@ gradle.projectsEvaluated {
     def buildTypes = android.buildTypes.collect { type -> type.name }
     def productFlavors = android.productFlavors.collect { flavor -> flavor.name }
     if (!productFlavors) productFlavors.add('')
+    def nodeModulesPath;
+    if (project.hasProperty('nodeModulesPath')) {
+        nodeModulesPath = project.nodeModulesPath
+    } else {
+        nodeModulesPath = "../../node_modules";
+    }
 
     productFlavors.each { productFlavorName ->
         buildTypes.each { buildTypeName ->
@@ -40,9 +46,9 @@ gradle.projectsEvaluated {
             def recordFilesBeforeBundleCommand = tasks.create(
                     name: "recordFilesBeforeBundleCommand${targetName}",
                     type: Exec) {
-                commandLine "node", "../../node_modules/@joltup/react-native-code-push/scripts/recordFilesBeforeBundleCommand.js", resourcesDir
+                commandLine "node", "${nodeModulesPath}/react-native-code-push/scripts/recordFilesBeforeBundleCommand.js", resourcesDir
             }
-            
+
             recordFilesBeforeBundleCommand.dependsOn("merge${targetName}Resources")
             recordFilesBeforeBundleCommand.dependsOn("merge${targetName}Assets")
             runBefore("bundle${targetName}JsAndAssets", recordFilesBeforeBundleCommand)
@@ -51,7 +57,7 @@ gradle.projectsEvaluated {
             def generateBundledResourcesHash = tasks.create(
                     name: "generateBundledResourcesHash${targetName}",
                     type: Exec) {
-                commandLine "node", "../../node_modules/@joltup/react-native-code-push/scripts/generateBundledResourcesHash.js", resourcesDir, "$jsBundleDir/$bundleAssetName", assetsDir
+                commandLine "node", "${nodeModulesPath}/react-native-code-push/scripts/generateBundledResourcesHash.js", resourcesDir, "$jsBundleDir/$bundleAssetName", assetsDir
             }
 
             generateBundledResourcesHash.dependsOn("bundle${targetName}JsAndAssets")

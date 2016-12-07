@@ -15,3 +15,12 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+# Invoked via reflection, when forcing javascript restarts.
+-keepclassmembers class com.facebook.react.ReactInstanceManagerImpl {
+    void recreateReactContextInBackground();
+}
+
+-keepclassmembers class com.facebook.react.XReactInstanceManagerImpl {
+    void recreateReactContextInBackground();
+}

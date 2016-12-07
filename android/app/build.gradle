@@ -14,8 +14,12 @@ android {
     lintOptions {
         abortOnError false
     }
+
+    defaultConfig {
+        consumerProguardFiles 'proguard-rules.pro'
+    }
 }
 
 dependencies {
-    compile "com.facebook.react:react-native:0.19.+"
+    compile "com.facebook.react:react-native:+"
 }

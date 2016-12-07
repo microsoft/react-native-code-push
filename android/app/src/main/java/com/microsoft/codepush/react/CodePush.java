@@ -1,5 +1,6 @@
 package com.microsoft.codepush.react;
 
+import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.NativeModule;
@@ -44,6 +45,7 @@ public class CodePush implements ReactPackage {
     private Context mContext;
     private final boolean mIsDebugMode;
 
+    private static ReactInstanceHolder mReactInstanceHolder;
     private static CodePush mCurrentInstance;
 
     public CodePush(String deploymentKey, Context context) {
@@ -277,6 +279,17 @@ public class CodePush implements ReactPackage {
         mSettingsManager.removeFailedUpdates();
     }
 
+    public static void setReactInstanceHolder(ReactInstanceHolder reactInstanceHolder) {
+        mReactInstanceHolder = reactInstanceHolder;
+    }
+
+    static ReactInstanceManager getReactInstanceManager() {
+        if (mReactInstanceHolder == null) {
+            return null;
+        }
+        return mReactInstanceHolder.getReactInstanceManager();
+    }
+    
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactApplicationContext) {
         CodePushNativeModule codePushModule = new CodePushNativeModule(reactApplicationContext, this, mUpdateManager, mTelemetryManager, mSettingsManager);
