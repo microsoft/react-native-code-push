@@ -1,6 +1,12 @@
+#if __has_include("RCTEventEmitter.h")
+#import "RCTEventEmitter.h"
+#else
+#import "React/RCTEventEmitter.h"   // Required when used as a Pod in a Swift project
+#endif
+
 #import <Foundation/Foundation.h>
 
-@interface CodePush : NSObject
+@interface CodePush : RCTEventEmitter
 
 + (NSURL *)binaryBundleURL;
 /*
@@ -47,6 +53,19 @@
  * the Info.plist file's CodePushDeploymentKey setting.
  */
 + (void)setDeploymentKey:(NSString *)deploymentKey;
+
+/*
+ * This method checks to see whether a specific package hash
+ * has previously failed installation.
+ */
++ (BOOL)isFailedHash:(NSString*)packageHash;
+
+/*
+ * This method checks to see whether a specific package hash
+ * represents a downloaded and installed update, that hasn't
+ * been applied yet via an app restart.
+ */
++ (BOOL)isPendingUpdate:(NSString*)packageHash;
 
 // The below methods are only used during tests.
 + (BOOL)isUsingTestConfiguration;
@@ -115,7 +134,7 @@ failCallback:(void (^)(NSError *err))failCallback;
 
 + (NSString *)getPackageFolderPath:(NSString *)packageHash;
 
-+ (void)installPackage:(NSDictionary *)updatePackage
++ (BOOL)installPackage:(NSDictionary *)updatePackage
    removePendingUpdate:(BOOL)removePendingUpdate
                  error:(NSError **)error;
 
@@ -140,7 +159,7 @@ failCallback:(void (^)(NSError *err))failCallback;
 
 @interface CodePushUpdateUtils : NSObject
 
-+ (void)copyEntriesInFolder:(NSString *)sourceFolder
++ (BOOL)copyEntriesInFolder:(NSString *)sourceFolder
                  destFolder:(NSString *)destFolder
                       error:(NSError **)error;
 

@@ -10,8 +10,8 @@
   NSURL *jsCodeLocation;
 
   // Use React Native's RCTBundleURLProvider to resolve your JS bundle location, so that your app will load the JS bundle from the packager server during development.
-  //jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
-  
+  //jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
+
   // Use CodePush to resolve your JS bundle location, so that your app will run the version of the code distributed via CodePush
   jsCodeLocation = [CodePush bundleURL];
 

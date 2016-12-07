@@ -46,16 +46,19 @@ We try our best to maintain backwards compatability of our plugin with previous 
 
 | React Native version(s) | Supporting CodePush version(s)                 |
 |-------------------------|------------------------------------------------|
-| <0.14.0                 | **Unsupported**                                |
-| v0.14.0                 | v1.3.0 *(introduced Android support)*          |
-| v0.15.0-v0.18.0         | v1.4.0-v1.6.0 *(introduced iOS asset support)* |
-| v0.19.0-v0.28.0         | v1.7.0+ *(introduced Android asset support)*   |
-| v0.29.0-v0.31.0         | v1.13.0+ *(RN refactored native hosting code)* |
-| v0.32.0+                | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
+| <0.14                   | **Unsupported**                                |
+| v0.14                   | v1.3.0 *(introduced Android support)*          |
+| v0.15-v0.18             | v1.4.0-v1.6.0 *(introduced iOS asset support)* |
+| v0.19-v0.28             | v1.7.0+ *(introduced Android asset support)*   |
+| v0.29-v0.30             | v1.13.0+ *(RN refactored native hosting code)* |
+| v0.31-v0.33             | v1.14.6+ *(RN refactored native hosting code)* |
+| v0.34-v0.35             | v1.15.0+ *(RN refactored native hosting code)* |
+| v0.36-v0.39             | v1.16.0+ *(RN refactored resume handler)*      |
+| v0.40+                  | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
 
 ## Supported Components
 
-When using the React Native assets sytem (i.e. using the `require("./foo.png")` syntax), the following list represents the set of core components (and props) that support having their referenced images updated via CodePush:
+When using the React Native assets system (i.e. using the `require("./foo.png")` syntax), the following list represents the set of core components (and props) that support having their referenced images updated via CodePush:
 
 | Component                                       | Prop(s)                                  |
 |-------------------------------------------------|------------------------------------------|
@@ -82,7 +85,7 @@ Once you've followed the general-purpose ["getting started"](http://codepush.too
 npm install --save react-native-code-push@latest
 ```
 
-As with all other React Native plugins, the integration experience is different for iOS and Android, so perform the following setup steps depending on which platform(s) you are targetting.
+As with all other React Native plugins, the integration experience is different for iOS and Android, so perform the following setup steps depending on which platform(s) you are targeting. Note, if you are targeting both platforms it is recommended to create separate CodePush applications for each platform.
 
 If you want to see how other projects have integrated with CodePush, you can check out the excellent [example apps](#example-apps--starters) provided by the community. Additionally, if you'd like to quickly familiarize yourself with CodePush + React Native, you can check out the awesome getting started videos produced by [Bilal Budhani](https://www.youtube.com/watch?v=uN0FRWk-YW8&feature=youtu.be) and/or [Deepak Sisodiya ](https://www.youtube.com/watch?v=f6I9y7V-Ibk).
 
@@ -123,13 +126,13 @@ And that's it! Isn't RNPM awesome? :)
 1. Add the CodePush plugin dependency to your `Podfile`, pointing at the path where NPM installed it
 
     ```ruby
-    pod 'CodePush', :path => './node_modules/react-native-code-push'
+    pod 'CodePush', :path => '../node_modules/react-native-code-push'
     ```
 
-    CodePush depends on an internal copy of the `SSZipArchive` library, so if your project already includes it (either directly or via a transitive dependency), then you can install a version of CodePush which excludes it by depending specificaly on the `Core` subspec:
+    CodePush depends on an internal copy of the `SSZipArchive` library, so if your project already includes it (either directly or via a transitive dependency), then you can install a version of CodePush which excludes it by depending specifically on the `Core` subspec:
 
     ```ruby
-    pod 'CodePush', :path => './node_modules/react-native-code-push', :subspecs => ['Core']
+    pod 'CodePush', :path => '../node_modules/react-native-code-push', :subspecs => ['Core']
     ```
 
     *NOTE: The above paths needs to be relative to your app's `Podfile`, so adjust it as nec
@@ -137,7 +140,7 @@ And that's it! Isn't RNPM awesome? :)
 
 2. Run `pod install`
 
-*NOTE: The CodePush `.podspec` depends on the `React` pod, and so in order to ensure that it can correctly use the version of React Native that your app is built with, please make sure to define the `React` dependency in your app's `Podfile` as explained [here](http://facebook.github.io/react-native/docs/embedded-app-ios.html#install-react-native-using-cocoapods).*
+*NOTE: The CodePush `.podspec` depends on the `React` pod, and so in order to ensure that it can correctly use the version of React Native that your app is built with, please make sure to define the `React` dependency in your app's `Podfile` as explained [here](https://facebook.github.io/react-native/docs/integration-with-existing-apps.html#podfile).*
 
 #### Plugin Installation (iOS - Manual)
 
@@ -160,9 +163,9 @@ And that's it! Isn't RNPM awesome? :)
     *Note: Alternatively, if you prefer, you can add the `-lz` flag to the `Other Linker Flags` field in the `Linking` section of the `Build Settings`.*
 
 6. Under the "Build Settings" tab of your project configuration, find the "Header Search Paths" section and edit the value.
-Add a new value, `$(SRCROOT)/../node_modules/react-native-code-push` and select "recursive" in the dropdown.
+Add a new value, `$(SRCROOT)/../node_modules/react-native-code-push/ios` and select "recursive" in the dropdown.
 
-    ![Add CodePush library reference](https://cloud.githubusercontent.com/assets/516559/10322038/b8157962-6c30-11e5-9264-494d65fd2626.png)
+    ![Add CodePush library reference](https://cloud.githubusercontent.com/assets/78585/20584750/bd58fd80-b230-11e6-9955-e624f12e500b.png)
 
 ### Plugin Configuration (iOS)
 
@@ -221,6 +224,8 @@ In order to accommodate as many developer preferences as possible, the CodePush 
 1. [**RNPM**](#plugin-installation-android---rnpm) - [React Native Package Manager (RNPM)](https://github.com/rnpm/rnpm) is an awesome tool that provides the simplest installation experience possible for React Native plugins. If you're already using it, or you want to use it, then we recommend this approach.
 
 2. [**"Manual"**](#plugin-installation-android---manual) - If you don't want to depend on any additional tools or are fine with a few extra installation steps (it's a one-time thing), then go with this approach.
+
+*Note: Due to a code change from the React Native repository, if your installed React Native version ranges from 0.29 to 0.32, we recommend following the manual steps to set up correctly. *
 
 #### Plugin Installation (Android - RNPM)
 
@@ -340,6 +345,57 @@ public class MainActivity extends ReactActivity {
     }
 
     ...
+}
+```
+
+#### Background React Instances
+
+*This section is only necessary if you're <b>explicitly</b> launching a React Native instance without an `Activity` (for example, from within a native push notification receiver). For these situations, CodePush must be told how to find your React Native instance.*
+
+In order to update/restart your React Native instance, CodePush must be configured with a `ReactInstanceHolder` before attempting to restart an instance in the background. This is usually done in your `Application` implementation.
+
+**For React Native >= v0.29**
+
+Update the `MainApplication.java` file to use CodePush via the following changes:
+
+```java
+...
+// 1. Declare your ReactNativeHost to extend ReactInstanceHolder. ReactInstanceHolder is a subset of ReactNativeHost, so no additional implementation is needed.
+import com.microsoft.codepush.react.ReactInstanceHolder;
+
+public class MyReactNativeHost extends ReactNativeHost implements ReactInstanceHolder {
+  // ... usual overrides
+}
+
+// 2. Provide your ReactNativeHost to CodePush.
+
+public class MainApplication extends Application implements ReactApplication {
+
+   private final MyReactNativeHost mReactNativeHost = new MyReactNativeHost(this);
+
+   @Override
+   public void onCreate() {
+     CodePush.setReactInstanceHolder(mReactNativeHost);
+     super.onCreate();
+  }
+}
+```
+
+**For React Native v0.19 - v0.28**
+
+Before v0.29, React Native did not provide a `ReactNativeHost` abstraction. If you're launching a background instance, you'll likely have built your own, which should now implement `ReactInstanceHolder`. Once that's done:
+
+```java
+// 1. Provide your ReactInstanceHolder to CodePush.
+
+public class MainApplication extends Application {
+
+   @Override
+   public void onCreate() {
+     // ... initialize your instance holder
+     CodePush.setReactInstanceHolder(myInstanceHolder);
+     super.onCreate();
+  }
 }
 ```
 
@@ -497,7 +553,7 @@ In it's most basic form, this command only requires two parameters: your app nam
 ```shell
 code-push release-react <appName> <platform>
 
-code-push release-react MyApp ios
+code-push release-react MyApp-iOS ios
 code-push release-react MyApp-Android android
 ```
 
@@ -505,11 +561,11 @@ The `release-react` command enables such a simple workflow because it provides m
 
 ```shell
 # Release a mandatory update with a changelog
-code-push release-react MyApp ios -m --description "Modified the header color"
+code-push release-react MyApp-iOS ios -m --description "Modified the header color"
 
 # Release an update for an app that uses a non-standard entry file name, and also capture
 # the sourcemap file generated by react-native bundle
-code-push release-react MyApp ios --entryFile MyApp.js --sourcemapOutput ../maps/MyApp.map
+code-push release-react MyApp-iOS ios --entryFile MyApp.js --sourcemapOutput ../maps/MyApp.map
 
 # Release a dev Android build to just 1/4 of your end users
 code-push release-react MyApp-Android android --rollout 25% --dev true
@@ -588,7 +644,7 @@ Open up your `MainApplication.java` file and make the following changes:
  new CodePush(BuildConfig.CODEPUSH_KEY, MainApplication.this, BuildConfig.DEBUG);
  ```
 
-**For React Native v0.19 - v0.28** 
+**For React Native v0.19 - v0.28**
 
 Open up your `MainActivity.java` file and make the following changes:
 
@@ -778,7 +834,7 @@ This decorator provides support for letting you customize its behaviour to easil
     // the different stages of the sync process.
     class MyApp extends Component {
         codePushStatusDidChange(status) {
-            switch(syncStatus) {
+            switch(status) {
                 case codePush.SyncStatus.CHECKING_FOR_UPDATE:
                     console.log("Checking for updates.");
                     break;
@@ -789,7 +845,7 @@ This decorator provides support for letting you customize its behaviour to easil
                     console.log("Installing update.");
                     break;
                 case codePush.SyncStatus.UP_TO_DATE:
-                    console.log("Installing update.");
+                    console.log("Up-to-date.");
                     break;
                 case codePush.SyncStatus.UPDATE_INSTALLED:
                     console.log("Update installed.");
@@ -798,7 +854,7 @@ This decorator provides support for letting you customize its behaviour to easil
         }
 
         codePushDownloadDidProgress(progress) {
-            console.log(progess.receivedBytes + " of " + progress.totalBytes + " received.");
+            console.log(progress.receivedBytes + " of " + progress.totalBytes + " received.");
         }
     }
     MyApp = codePush(MyApp);
@@ -1191,7 +1247,7 @@ Contains details about an update that has been downloaded locally or already ins
 - __isFirstRun__: Indicates whether this is the first time the update has been run after being installed. This is useful for determining whether you would like to show a "What's New?" UI to the end user after installing an update. *(Boolean)*
 - __isMandatory__: Indicates whether the update is considered mandatory.  This is the value that was specified in the CLI when the update was released. *(Boolean)*
 - __isPending__: Indicates whether this update is in a "pending" state. When `true`, that means the update has been downloaded and installed, but the app restart needed to apply it hasn't occurred yet, and therefore, it's changes aren't currently visible to the end-user. *(Boolean)*
-- __label__: The internal label automatically given to the update by the CodePush server. This value uniquely identifies the update within it's deployment. *(String)*
+- __label__: The internal label automatically given to the update by the CodePush server, such as `v5`. This value uniquely identifies the update within it's deployment. *(String)*
 - __packageHash__: The SHA hash value of the update. *(String)*
 - __packageSize__: The size of the code contained within the update, in bytes. *(Number)*
 
@@ -1327,7 +1383,6 @@ The React Native community has graciously created some awesome open source apps 
 * [Feline for Product Hunt](https://github.com/arjunkomath/Feline-for-Product-Hunt) - An Android client for Product Hunt.
 * [GeoEncoding](https://github.com/LynxITDigital/GeoEncoding) - An app by [Lynx IT Digital](https://digital.lynxit.com.au) which demonstrates how to use numerous React Native components and modules.
 * [Math Facts](https://github.com/Khan/math-facts) - An app by Khan Academy to help memorize math facts more easily.
-* [MoveIt!](https://github.com/multunus/moveit-react-native) - An app by [Multunus](http://www.multunus.com) that allows employees within a company to track their work-outs.
 
 Additionally, if you're looking to get started with React Native + CodePush, and are looking for an awesome starter kit, you should check out the following:
 

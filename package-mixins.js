@@ -1,5 +1,5 @@
-import { AcquisitionManager as Sdk } from "@joltup/jolt-code-push-sdk/script/acquisition-sdk";
-import { DeviceEventEmitter } from "react-native";
+import { AcquisitionManager as Sdk } from "code-push/script/acquisition-sdk";
+import { NativeEventEmitter } from "react-native";
 import RestartManager from "./RestartManager";
 
 // This function is used to augment remote and local
@@ -15,8 +15,9 @@ module.exports = (NativeCodePush) => {
 
         let downloadProgressSubscription;
         if (downloadProgressCallback) {
+          const codePushEventEmitter = new NativeEventEmitter(NativeCodePush);
           // Use event subscription to obtain download progress.
-          downloadProgressSubscription = DeviceEventEmitter.addListener(
+          downloadProgressSubscription = codePushEventEmitter.addListener(
             "CodePushDownloadProgress",
             downloadProgressCallback
           );
@@ -40,7 +41,8 @@ module.exports = (NativeCodePush) => {
   const local = {
     async install(installMode = NativeCodePush.codePushInstallModeOnNextRestart, minimumBackgroundDuration = 0, updateInstalledCallback) {
       const localPackage = this;
-      await NativeCodePush.installUpdate(this, installMode, minimumBackgroundDuration);
+      const localPackageCopy = Object.assign({}, localPackage); // In dev mode, React Native deep freezes any object queued over the bridge
+      await NativeCodePush.installUpdate(localPackageCopy, installMode, minimumBackgroundDuration);
       updateInstalledCallback && updateInstalledCallback();
       if (installMode == NativeCodePush.codePushInstallModeImmediate) {
         RestartManager.restartApp(false);

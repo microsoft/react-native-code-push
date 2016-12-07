@@ -5,7 +5,7 @@ namespace CodePush.ReactNative
 {
     internal class MinimumBackgroundListener : ILifecycleEventListener
     {
-        private DateTime? _lastSuspendDate;
+        private DateTimeOffset? _lastSuspendDate;
         private Action _resumeAction;
 
         internal int MinimumBackgroundDuration { get; set; }
@@ -26,7 +26,7 @@ namespace CodePush.ReactNative
             {
                 // Determine how long the app was in the background and ensure
                 // that it meets the minimum duration amount of time.
-                double durationInBackground = (new DateTime() - (DateTime)_lastSuspendDate).TotalSeconds;
+                double durationInBackground = (DateTimeOffset.Now - _lastSuspendDate.Value).TotalSeconds;
                 if (durationInBackground >= MinimumBackgroundDuration)
                 {
                     _resumeAction.Invoke();
@@ -38,7 +38,7 @@ namespace CodePush.ReactNative
         {
             // Save the current time so that when the app is later
             // resumed, we can detect how long it was in the background.
-            _lastSuspendDate = new DateTime();
+            _lastSuspendDate = DateTimeOffset.Now;
         }
     }
 }

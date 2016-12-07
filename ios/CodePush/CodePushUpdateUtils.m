@@ -7,16 +7,16 @@ NSString * const AssetsFolderName = @"assets";
 NSString * const BinaryHashKey = @"CodePushBinaryHash";
 NSString * const ManifestFolderPrefix = @"CodePush";
 
-+ (void)addContentsOfFolderToManifest:(NSString *)folderPath
++ (BOOL)addContentsOfFolderToManifest:(NSString *)folderPath
                            pathPrefix:(NSString *)pathPrefix
                              manifest:(NSMutableArray *)manifest
                                 error:(NSError **)error
 {
-    NSArray* folderFiles = [[NSFileManager defaultManager]
+    NSArray *folderFiles = [[NSFileManager defaultManager]
                             contentsOfDirectoryAtPath:folderPath
                             error:error];
-    if (*error) {
-        return;
+    if (!folderFiles) {
+        return NO;
     }
     
     for (NSString *fileName in folderFiles) {
@@ -30,12 +30,12 @@ NSString * const ManifestFolderPrefix = @"CodePush";
         BOOL isDir = NO;
         if ([[NSFileManager defaultManager] fileExistsAtPath:fullFilePath
                                                  isDirectory:&isDir] && isDir) {
-            [self addContentsOfFolderToManifest:fullFilePath
-                                     pathPrefix:relativePath
-                                       manifest:manifest
-                                          error:error];
-            if (*error) {
-                return;
+            BOOL result = [self addContentsOfFolderToManifest:fullFilePath
+                                                   pathPrefix:relativePath
+                                                     manifest:manifest
+                                                        error:error];
+            if (!result) {
+                return NO;
             }
         } else {
             NSData *fileContents = [NSData dataWithContentsOfFile:fullFilePath];
@@ -43,6 +43,7 @@ NSString * const ManifestFolderPrefix = @"CodePush";
             [manifest addObject:[[relativePath stringByAppendingString:@":"] stringByAppendingString:fileContentsHash]];
         }
     }
+    return YES;
 }
 
 + (void)addFileToManifest:(NSURL *)fileURL
@@ -62,7 +63,7 @@ NSString * const ManifestFolderPrefix = @"CodePush";
     NSData *manifestData = [NSJSONSerialization dataWithJSONObject:sortedManifest
                                                            options:kNilOptions
                                                              error:error];
-    if (*error) {
+    if (!manifestData) {
         return nil;
     }
     
@@ -77,7 +78,7 @@ NSString * const ManifestFolderPrefix = @"CodePush";
 + (NSString *)computeHashForData:(NSData *)inputData
 {
     uint8_t digest[CC_SHA256_DIGEST_LENGTH];
-    CC_SHA256(inputData.bytes, inputData.length, digest);
+    CC_SHA256(inputData.bytes, (CC_LONG)inputData.length, digest);
     NSMutableString* inputHash = [NSMutableString stringWithCapacity:CC_SHA256_DIGEST_LENGTH * 2];
     for (int i = 0; i < CC_SHA256_DIGEST_LENGTH; i++) {
         [inputHash appendFormat:@"%02x", digest[i]];
@@ -86,15 +87,15 @@ NSString * const ManifestFolderPrefix = @"CodePush";
     return inputHash;
 }
 
-+ (void)copyEntriesInFolder:(NSString *)sourceFolder
++ (BOOL)copyEntriesInFolder:(NSString *)sourceFolder
                  destFolder:(NSString *)destFolder
                       error:(NSError **)error
 {
-    NSArray* files = [[NSFileManager defaultManager]
+    NSArray *files = [[NSFileManager defaultManager]
                       contentsOfDirectoryAtPath:sourceFolder
                       error:error];
-    if (*error) {
-        return;
+    if (!files) {
+        return NO;
     }
     
     for (NSString *fileName in files) {
@@ -103,33 +104,39 @@ NSString * const ManifestFolderPrefix = @"CodePush";
         if ([[NSFileManager defaultManager] fileExistsAtPath:fullFilePath
                                                  isDirectory:&isDir] && isDir) {
             NSString *nestedDestFolder = [destFolder stringByAppendingPathComponent:fileName];
-            [self copyEntriesInFolder:fullFilePath
-                           destFolder:nestedDestFolder
-                                error:error];
+            BOOL result = [self copyEntriesInFolder:fullFilePath
+                                         destFolder:nestedDestFolder
+                                              error:error];
+
+            if (!result) {
+                return NO;
+            }
+
         } else {
             NSString *destFileName = [destFolder stringByAppendingPathComponent:fileName];
             if ([[NSFileManager defaultManager] fileExistsAtPath:destFileName]) {
-                [[NSFileManager defaultManager] removeItemAtPath:destFileName error:error];
-                if (*error) {
-                    return;
+                BOOL result = [[NSFileManager defaultManager] removeItemAtPath:destFileName error:error];
+                if (!result) {
+                    return NO;
                 }
             }
             if (![[NSFileManager defaultManager] fileExistsAtPath:destFolder]) {
-                [[NSFileManager defaultManager] createDirectoryAtPath:destFolder
+                BOOL result = [[NSFileManager defaultManager] createDirectoryAtPath:destFolder
                                           withIntermediateDirectories:YES
                                                            attributes:nil
                                                                 error:error];
-                if (*error) {
-                    return;
+                if (!result) {
+                    return NO;
                 }
             }
             
-            [[NSFileManager defaultManager] copyItemAtPath:fullFilePath toPath:destFileName error:error];
-            if (*error) {
-                return;
+            BOOL result = [[NSFileManager defaultManager] copyItemAtPath:fullFilePath toPath:destFileName error:error];
+            if (!result) {
+                return NO;
             }
         }
     }
+    return YES;
 }
 
 + (NSString *)findMainBundleInFolder:(NSString *)folderPath
@@ -139,7 +146,7 @@ NSString * const ManifestFolderPrefix = @"CodePush";
     NSArray* folderFiles = [[NSFileManager defaultManager]
                             contentsOfDirectoryAtPath:folderPath
                             error:error];
-    if (*error) {
+    if (!folderFiles) {
         return nil;
     }
     
@@ -151,10 +158,6 @@ NSString * const ManifestFolderPrefix = @"CodePush";
             NSString *mainBundlePathInFolder = [self findMainBundleInFolder:fullFilePath
                                                            expectedFileName:expectedFileName
                                                                       error:error];
-            if (*error) {
-                return nil;
-            }
-            
             if (mainBundlePathInFolder) {
                 return [fileName stringByAppendingPathComponent:mainBundlePathInFolder];
             }
@@ -196,11 +199,11 @@ NSString * const ManifestFolderPrefix = @"CodePush";
     // them to the generated content manifest.
     NSString *assetsPath = [CodePush bundleAssetsPath];
     if ([[NSFileManager defaultManager] fileExistsAtPath:assetsPath]) {
-        [self addContentsOfFolderToManifest:assetsPath
-                                 pathPrefix:[NSString stringWithFormat:@"%@/%@", [self manifestFolderPrefix], @"assets"]
-                                   manifest:manifest
-                                      error:error];
-        if (*error) {
+        BOOL result = [self addContentsOfFolderToManifest:assetsPath
+                                               pathPrefix:[NSString stringWithFormat:@"%@/%@", [self manifestFolderPrefix], @"assets"]
+                                                 manifest:manifest
+                                                    error:error];
+        if (!result) {
             return nil;
         }
     }
@@ -239,17 +242,17 @@ NSString * const ManifestFolderPrefix = @"CodePush";
                           error:(NSError **)error
 {
     NSMutableArray *updateContentsManifest = [NSMutableArray array];
-    [self addContentsOfFolderToManifest:finalUpdateFolder
-                             pathPrefix:@""
-                               manifest:updateContentsManifest
-                                  error:error];
-    if (*error) {
+    BOOL result = [self addContentsOfFolderToManifest:finalUpdateFolder
+                                           pathPrefix:@""
+                                             manifest:updateContentsManifest
+                                                error:error];
+    if (!result) {
         return NO;
     }
-    
+
     NSString *updateContentsManifestHash = [self computeFinalHashFromManifest:updateContentsManifest
                                                                         error:error];
-    if (*error || updateContentsManifestHash == nil) {
+    if (!updateContentsManifestHash) {
         return NO;
     }
     

@@ -26,6 +26,9 @@ RCT_EXPORT_MODULE()
 
 #pragma mark - Private constants
 
+// These constants represent emitted events
+static NSString *const DownloadProgressEvent = @"CodePushDownloadProgress";
+
 // These constants represent valid deployment statuses
 static NSString *const DeploymentFailed = @"DeploymentFailed";
 static NSString *const DeploymentSucceeded = @"DeploymentSucceeded";
@@ -61,8 +64,11 @@ static NSString *bundleResourceSubdirectory = nil;
 
 + (void)initialize
 {
-    // Use the mainBundle by default.
-    bundleResourceBundle = [NSBundle mainBundle];
+    [super initialize];
+    if (self == [CodePush class]) {
+        // Use the mainBundle by default.
+        bundleResourceBundle = [NSBundle mainBundle];
+    }
 }
 
 #pragma mark - Public Obj-C API
@@ -226,7 +232,6 @@ static NSString *bundleResourceSubdirectory = nil;
 
 #pragma mark - Private API methods
 
-@synthesize bridge = _bridge;
 @synthesize methodQueue = _methodQueue;
 @synthesize pauseCallback = _pauseCallback;
 @synthesize paused = _paused;
@@ -250,7 +255,7 @@ static NSString *bundleResourceSubdirectory = nil;
 - (void)clearDebugUpdates
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        if ([_bridge.bundleURL.scheme hasPrefix:@"http"]) {
+        if ([super.bridge.bundleURL.scheme hasPrefix:@"http"]) {
             NSError *error;
             NSString *binaryAppVersion = [[CodePushConfig current] appVersion];
             NSDictionary *currentPackageMetadata = [CodePushPackage getCurrentPackage:&error];
@@ -292,15 +297,15 @@ static NSString *bundleResourceSubdirectory = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-- (void)dispatchDownloadProgressEvent
-{
-    // Notify the script-side about the progress
-    [self.bridge.eventDispatcher
-     sendDeviceEventWithName:@"CodePushDownloadProgress"
-     body:@{
-            @"totalBytes":[NSNumber numberWithLongLong:_latestExpectedContentLength],
-            @"receivedBytes":[NSNumber numberWithLongLong:_latestReceivedConentLength]
-            }];
+- (void)dispatchDownloadProgressEvent {
+  // Notify the script-side about the progress
+  [self sendEventWithName:DownloadProgressEvent
+                     body:@{
+                       @"totalBytes" : [NSNumber
+                           numberWithLongLong:_latestExpectedContentLength],
+                       @"receivedBytes" : [NSNumber
+                           numberWithLongLong:_latestReceivedConentLength]
+                     }];
 }
 
 /*
@@ -378,7 +383,7 @@ static NSString *bundleResourceSubdirectory = nil;
  * This method checks to see whether a specific package hash
  * has previously failed installation.
  */
-- (BOOL)isFailedHash:(NSString*)packageHash
++ (BOOL)isFailedHash:(NSString*)packageHash
 {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSMutableArray *failedUpdates = [preferences objectForKey:FailedUpdatesKey];
@@ -408,7 +413,7 @@ static NSString *bundleResourceSubdirectory = nil;
  * represents a downloaded and installed update, that hasn't
  * been applied yet via an app restart.
  */
-- (BOOL)isPendingUpdate:(NSString*)packageHash
++ (BOOL)isPendingUpdate:(NSString*)packageHash
 {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];
@@ -429,18 +434,18 @@ static NSString *bundleResourceSubdirectory = nil;
  */
 - (void)loadBundle
 {
-    // This needs to be async dispatched because the _bridge is not set on init
+    // This needs to be async dispatched because the bridge is not set on init
     // when the app first starts, therefore rollbacks will not take effect.
     dispatch_async(dispatch_get_main_queue(), ^{
         // If the current bundle URL is using http(s), then assume the dev
         // is debugging and therefore, shouldn't be redirected to a local
         // file (since Chrome wouldn't support it). Otherwise, update
         // the current bundle URL to point at the latest update
-        if ([CodePush isUsingTestConfiguration] || ![_bridge.bundleURL.scheme hasPrefix:@"http"]) {
-            [_bridge setValue:[CodePush bundleURL] forKey:@"bundleURL"];
+        if ([CodePush isUsingTestConfiguration] || ![super.bridge.bundleURL.scheme hasPrefix:@"http"]) {
+            [super.bridge setValue:[CodePush bundleURL] forKey:@"bundleURL"];
         }
 
-        [_bridge reload];
+        [super.bridge reload];
     });
 }
 
@@ -455,9 +460,16 @@ static NSString *bundleResourceSubdirectory = nil;
 {
     NSError *error;
     NSDictionary *failedPackage = [CodePushPackage getCurrentPackage:&error];
-
-    // Write the current package's metadata to the "failed list"
-    [self saveFailedUpdate:failedPackage];
+    if (!failedPackage) {
+        if (error) {
+            CPLog(@"Error getting current update metadata during rollback: %@", error);
+        } else {
+            CPLog(@"Attempted to perform a rollback when there is no current update");
+        }
+    } else {
+        // Write the current package's metadata to the "failed list"
+        [self saveFailedUpdate:failedPackage];
+    }
 
     // Rollback to the previous version and de-register the new update
     [CodePushPackage rollbackPackage];
@@ -526,6 +538,10 @@ static NSString *bundleResourceSubdirectory = nil;
 
     [preferences setObject:pendingUpdate forKey:PendingUpdateKey];
     [preferences synchronize];
+}
+
+- (NSArray<NSString *> *)supportedEvents {
+    return @[DownloadProgressEvent];
 }
 
 #pragma mark - Application lifecycle event handlers
@@ -676,7 +692,7 @@ RCT_EXPORT_METHOD(getUpdateMetadata:(CodePushUpdateState)updateState
     }
 
     // We have a CodePush update, so let's see if it's currently in a pending state.
-    BOOL currentUpdateIsPending = [self isPendingUpdate:[package objectForKey:PackageHashKey]];
+    BOOL currentUpdateIsPending = [[self class] isPendingUpdate:[package objectForKey:PackageHashKey]];
 
     if (updateState == CodePushUpdateStatePending && !currentUpdateIsPending) {
         // The caller wanted a pending update
@@ -715,7 +731,7 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
 {
     NSError *error;
     [CodePushPackage installPackage:updatePackage
-                removePendingUpdate:[self isPendingUpdate:nil]
+                removePendingUpdate:[[self class] isPendingUpdate:nil]
                               error:&error];
 
     if (error) {
@@ -758,7 +774,7 @@ RCT_EXPORT_METHOD(isFailedUpdate:(NSString *)packageHash
                          resolve:(RCTPromiseResolveBlock)resolve
                           reject:(RCTPromiseRejectBlock)reject)
 {
-    BOOL isFailedHash = [self isFailedHash:packageHash];
+    BOOL isFailedHash = [[self class] isFailedHash:packageHash];
     resolve(@(isFailedHash));
 }
 
@@ -798,7 +814,7 @@ RCT_EXPORT_METHOD(restartApp:(BOOL)onlyIfUpdateIsPending
 {
     // If this is an unconditional restart request, or there
     // is current pending update, then reload the app.
-    if (!onlyIfUpdateIsPending || [self isPendingUpdate:nil]) {
+    if (!onlyIfUpdateIsPending || [[self class] isPendingUpdate:nil]) {
         [self loadBundle];
         resolve(@(YES));
         return;

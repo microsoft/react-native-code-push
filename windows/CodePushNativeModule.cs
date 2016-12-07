@@ -42,7 +42,7 @@ namespace CodePush.ReactNative
                     { "codePushInstallModeOnNextRestart", InstallMode.OnNextRestart },
                     { "codePushUpdateStateRunning", UpdateState.Running },
                     { "codePushUpdateStatePending", UpdateState.Pending },
-                    { "codePushUpdateStateLatest", UpdateState.Lastest },
+                    { "codePushUpdateStateLatest", UpdateState.Latest },
                 };
             }
         }
@@ -53,54 +53,49 @@ namespace CodePush.ReactNative
         }
 
         [ReactMethod]
-        public void downloadUpdate(JObject updatePackage, bool notifyProgress, IPromise promise)
+        public async void downloadUpdate(JObject updatePackage, bool notifyProgress, IPromise promise)
         {
-            Action downloadAction = async () =>
+            try
             {
-                try
-                {
-                    updatePackage[CodePushConstants.BinaryModifiedTimeKey] = "" + await _codePush.GetBinaryResourcesModifiedTime();
-                    await _codePush.UpdateManager.DownloadPackage(
-                        updatePackage,
-                        _codePush.AssetsBundleFileName,
-                        new Progress<HttpProgress>(
-                            (HttpProgress progress) =>
+                updatePackage[CodePushConstants.BinaryModifiedTimeKey] = "" + await _codePush.GetBinaryResourcesModifiedTimeAsync().ConfigureAwait(false);
+                await _codePush.UpdateManager.DownloadPackageAsync(
+                    updatePackage,
+                    _codePush.AssetsBundleFileName,
+                    new Progress<HttpProgress>(
+                        (HttpProgress progress) =>
+                        {
+                            if (!notifyProgress)
                             {
-                                if (!notifyProgress)
-                                {
-                                    return;
-                                }
-
-                                var downloadProgress = new JObject()
-                                {
-                                    { "totalBytes", progress.TotalBytesToReceive },
-                                    { "receivedBytes", progress.BytesReceived }
-                                };
-
-                                _reactContext
-                                    .GetJavaScriptModule<RCTDeviceEventEmitter>()
-                                    .emit(CodePushConstants.DownloadProgressEventName, downloadProgress);
+                                return;
                             }
-                        )
-                    );
 
-                    JObject newPackage = await _codePush.UpdateManager.GetPackage((string)updatePackage[CodePushConstants.PackageHashKey]);
-                    promise.Resolve(newPackage);
-                }
-                catch (InvalidDataException e)
-                {
-                    CodePushUtils.Log(e.ToString());
-                    SettingsManager.SaveFailedUpdate(updatePackage);
-                    promise.Reject(e);
-                }
-                catch (Exception e)
-                {
-                    CodePushUtils.Log(e.ToString());
-                    promise.Reject(e);
-                }
-            };
+                            var downloadProgress = new JObject()
+                            {
+                                { "totalBytes", progress.TotalBytesToReceive },
+                                { "receivedBytes", progress.BytesReceived }
+                            };
 
-            Context.RunOnNativeModulesQueueThread(downloadAction);
+                            _reactContext
+                                .GetJavaScriptModule<RCTDeviceEventEmitter>()
+                                .emit(CodePushConstants.DownloadProgressEventName, downloadProgress);
+                        }
+                    )
+                ).ConfigureAwait(false);
+
+                JObject newPackage = await _codePush.UpdateManager.GetPackageAsync((string)updatePackage[CodePushConstants.PackageHashKey]).ConfigureAwait(false);
+                promise.Resolve(newPackage);
+            }
+            catch (InvalidDataException e)
+            {
+                CodePushUtils.Log(e.ToString());
+                SettingsManager.SaveFailedUpdate(updatePackage);
+                promise.Reject(e);
+            }
+            catch (Exception e)
+            {
+                CodePushUtils.Log(e.ToString());
+                promise.Reject(e);
+            }
         }
 
         [ReactMethod]
@@ -124,58 +119,53 @@ namespace CodePush.ReactNative
         }
 
         [ReactMethod]
-        public void getUpdateMetadata(UpdateState updateState, IPromise promise)
+        public async void getUpdateMetadata(UpdateState updateState, IPromise promise)
         {
-            Action getCurrentPackageAction = async () =>
+            JObject currentPackage = await _codePush.UpdateManager.GetCurrentPackageAsync().ConfigureAwait(false);
+            if (currentPackage == null)
             {
-                JObject currentPackage = await _codePush.UpdateManager.GetCurrentPackage();
-                if (currentPackage == null)
+                promise.Resolve("");
+                return;
+            }
+
+            var currentUpdateIsPending = false;
+
+            if (currentPackage[CodePushConstants.PackageHashKey] != null)
+            {
+                var currentHash = (string)currentPackage[CodePushConstants.PackageHashKey];
+                currentUpdateIsPending = SettingsManager.IsPendingUpdate(currentHash);
+            }
+
+            if (updateState == UpdateState.Pending && !currentUpdateIsPending)
+            {
+                // The caller wanted a pending update
+                // but there isn't currently one.
+                promise.Resolve("");
+            }
+            else if (updateState == UpdateState.Running && currentUpdateIsPending)
+            {
+                // The caller wants the running update, but the current
+                // one is pending, so we need to grab the previous.
+                promise.Resolve(await _codePush.UpdateManager.GetPreviousPackageAsync().ConfigureAwait(false));
+            }
+            else
+            {
+                // The current package satisfies the request:
+                // 1) Caller wanted a pending, and there is a pending update
+                // 2) Caller wanted the running update, and there isn't a pending
+                // 3) Caller wants the latest update, regardless if it's pending or not
+                if (_codePush.IsRunningBinaryVersion)
                 {
-                    promise.Resolve("");
-                    return;
+                    // This only matters in Debug builds. Since we do not clear "outdated" updates,
+                    // we need to indicate to the JS side that somehow we have a current update on
+                    // disk that is not actually running.
+                    currentPackage["_isDebugOnly"] = true;
                 }
 
-                var currentUpdateIsPending = false;
-
-                if (currentPackage[CodePushConstants.PackageHashKey] != null)
-                {
-                    var currentHash = (string)currentPackage[CodePushConstants.PackageHashKey];
-                    currentUpdateIsPending = SettingsManager.IsPendingUpdate(currentHash);
-                }
-
-                if (updateState == UpdateState.Pending && !currentUpdateIsPending)
-                {
-                    // The caller wanted a pending update
-                    // but there isn't currently one.
-                    promise.Resolve("");
-                }
-                else if (updateState == UpdateState.Running && currentUpdateIsPending)
-                {
-                    // The caller wants the running update, but the current
-                    // one is pending, so we need to grab the previous.
-                    promise.Resolve(await _codePush.UpdateManager.GetPreviousPackage());
-                }
-                else
-                {
-                    // The current package satisfies the request:
-                    // 1) Caller wanted a pending, and there is a pending update
-                    // 2) Caller wanted the running update, and there isn't a pending
-                    // 3) Caller wants the latest update, regardless if it's pending or not
-                    if (_codePush.IsRunningBinaryVersion)
-                    {
-                        // This only matters in Debug builds. Since we do not clear "outdated" updates,
-                        // we need to indicate to the JS side that somehow we have a current update on
-                        // disk that is not actually running.
-                        currentPackage["_isDebugOnly"] = true;
-                    }
-
-                    // Enable differentiating pending vs. non-pending updates
-                    currentPackage["isPending"] = currentUpdateIsPending;
-                    promise.Resolve(currentPackage);
-                }
-            };
-
-            Context.RunOnNativeModulesQueueThread(getCurrentPackageAction);
+                // Enable differentiating pending vs. non-pending updates
+                currentPackage["isPending"] = currentUpdateIsPending;
+                promise.Resolve(currentPackage);
+            }
         }
 
 
@@ -187,39 +177,34 @@ namespace CodePush.ReactNative
         }
 
         [ReactMethod]
-        public void installUpdate(JObject updatePackage, InstallMode installMode, int minimumBackgroundDuration, IPromise promise)
+        public async void installUpdate(JObject updatePackage, InstallMode installMode, int minimumBackgroundDuration, IPromise promise)
         {
-            Action installUpdateAction = async () =>
+            await _codePush.UpdateManager.InstallPackageAsync(updatePackage, SettingsManager.IsPendingUpdate(null)).ConfigureAwait(false);
+            var pendingHash = (string)updatePackage[CodePushConstants.PackageHashKey];
+            SettingsManager.SavePendingUpdate(pendingHash, /* isLoading */false);
+            if (installMode == InstallMode.OnNextResume)
             {
-                await _codePush.UpdateManager.InstallPackage(updatePackage, SettingsManager.IsPendingUpdate(null));
-                var pendingHash = (string)updatePackage[CodePushConstants.PackageHashKey];
-                SettingsManager.SavePendingUpdate(pendingHash, /* isLoading */false);
-                if (installMode == InstallMode.OnNextResume)
+                if (_minimumBackgroundListener == null)
                 {
-                    if (_minimumBackgroundListener == null)
+                    // Ensure we do not add the listener twice.
+                    Action loadBundleAction = () =>
                     {
-                        // Ensure we do not add the listener twice.
-                        Action loadBundleAction = () =>
+                        Context.RunOnNativeModulesQueueThread(async () =>
                         {
-                            Context.RunOnNativeModulesQueueThread(async () =>
-                            {
-                                await LoadBundle();
-                            });
-                        };
+                            await LoadBundleAsync().ConfigureAwait(false);
+                        });
+                    };
                         
-                        _minimumBackgroundListener = new MinimumBackgroundListener(loadBundleAction, minimumBackgroundDuration);
-                        _reactContext.AddLifecycleEventListener(_minimumBackgroundListener);
-                    }
-                    else
-                    {
-                        _minimumBackgroundListener.MinimumBackgroundDuration = minimumBackgroundDuration;
-                    }
+                    _minimumBackgroundListener = new MinimumBackgroundListener(loadBundleAction, minimumBackgroundDuration);
+                    _reactContext.AddLifecycleEventListener(_minimumBackgroundListener);
                 }
+                else
+                {
+                    _minimumBackgroundListener.MinimumBackgroundDuration = minimumBackgroundDuration;
+                }
+            }
 
-                promise.Resolve("");
-            };
-
-            Context.RunOnNativeModulesQueueThread(installUpdateAction);
+            promise.Resolve("");
         }
 
         [ReactMethod]
@@ -229,18 +214,13 @@ namespace CodePush.ReactNative
         }
 
         [ReactMethod]
-        public void isFirstRun(string packageHash, IPromise promise)
+        public async void isFirstRun(string packageHash, IPromise promise)
         {
-            Action isFirstRunAction = async () =>
-            {
-                bool isFirstRun = _codePush.DidUpdate
-                    && packageHash != null
-                    && packageHash.Length > 0
-                    && packageHash.Equals(await _codePush.UpdateManager.GetCurrentPackageHash());
-                promise.Resolve(isFirstRun);
-            };
-
-            Context.RunOnNativeModulesQueueThread(isFirstRunAction);
+            bool isFirstRun = _codePush.DidUpdate
+                && packageHash != null
+                && packageHash.Length > 0
+                && packageHash.Equals(await _codePush.UpdateManager.GetCurrentPackageHashAsync().ConfigureAwait(false));
+            promise.Resolve(isFirstRun);
         }
 
         [ReactMethod]
@@ -251,22 +231,17 @@ namespace CodePush.ReactNative
         }
 
         [ReactMethod]
-        public void restartApp(bool onlyIfUpdateIsPending)
+        public async void restartApp(bool onlyIfUpdateIsPending)
         {
-            Action restartAppAction = async () =>
+            // If this is an unconditional restart request, or there
+            // is current pending update, then reload the app.
+            if (!onlyIfUpdateIsPending || SettingsManager.IsPendingUpdate(null))
             {
-                // If this is an unconditional restart request, or there
-                // is current pending update, then reload the app.
-                if (!onlyIfUpdateIsPending || SettingsManager.IsPendingUpdate(null))
-                {
-                    await LoadBundle();
-                }
-            };
-
-            Context.RunOnNativeModulesQueueThread(restartAppAction);
+                await LoadBundleAsync().ConfigureAwait(false);
+            }
         }
         
-        internal async Task LoadBundle()
+        internal async Task LoadBundleAsync()
         {
             // #1) Get the private ReactInstanceManager, which is what includes
             //     the logic to reload the current React context.
@@ -279,7 +254,7 @@ namespace CodePush.ReactNative
 
             // #2) Update the locally stored JS bundle file path
             Type reactInstanceManagerType = typeof(ReactInstanceManager);
-            string latestJSBundleFile = await _codePush.GetJavaScriptBundleFileAsync(_codePush.AssetsBundleFileName);
+            string latestJSBundleFile = await _codePush.GetJavaScriptBundleFileAsync(_codePush.AssetsBundleFileName).ConfigureAwait(false);
             reactInstanceManagerType
                 .GetField("_jsBundleFile", BindingFlags.NonPublic | BindingFlags.Instance)
                 .SetValue(reactInstanceManager, latestJSBundleFile);

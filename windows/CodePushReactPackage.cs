@@ -39,7 +39,6 @@ namespace CodePush.ReactNative
             // TODO implement telemetryManager 
             // _codePushTelemetryManager = new CodePushTelemetryManager(this.applicationContext, CODE_PUSH_PREFERENCES);
 
-            InitializeUpdateAfterRestart();
             if (CurrentInstance != null)
             {
                 CodePushUtils.Log("More than one CodePush instance has been initialized. Please use the instance method codePush.getBundleUrlInternal() to get the correct bundleURL for a particular instance.");
@@ -86,8 +85,8 @@ namespace CodePush.ReactNative
         {
             AssetsBundleFileName = assetsBundleFileName;
             string binaryJsBundleUrl = CodePushConstants.AssetsBundlePrefix + assetsBundleFileName;
-            var binaryResourcesModifiedTime = await GetBinaryResourcesModifiedTime();
-            var packageFile = await UpdateManager.GetCurrentPackageBundle(AssetsBundleFileName);
+            var binaryResourcesModifiedTime = await GetBinaryResourcesModifiedTimeAsync().ConfigureAwait(false);
+            var packageFile = await UpdateManager.GetCurrentPackageBundleAsync(AssetsBundleFileName).ConfigureAwait(false);
             if (packageFile == null)
             {
                 // There has not been any downloaded updates.
@@ -96,7 +95,7 @@ namespace CodePush.ReactNative
                 return binaryJsBundleUrl;
             }
 
-            var packageMetadata = await UpdateManager.GetCurrentPackage();
+            var packageMetadata = await UpdateManager.GetCurrentPackageAsync().ConfigureAwait(false);
             long? binaryModifiedDateDuringPackageInstall = null;
             var binaryModifiedDateDuringPackageInstallString = (string)packageMetadata[CodePushConstants.BinaryModifiedTimeKey];
             if (binaryModifiedDateDuringPackageInstallString != null)
@@ -120,7 +119,7 @@ namespace CodePush.ReactNative
                 DidUpdate = false;
                 if (!MainPage.UseDeveloperSupport || !AppVersion.Equals(packageAppVersion))
                 {
-                    await ClearUpdates();
+                    await ClearUpdatesAsync().ConfigureAwait(false);
                 }
 
                 CodePushUtils.LogBundleUrl(binaryJsBundleUrl);
@@ -133,10 +132,10 @@ namespace CodePush.ReactNative
 
         #region Internal methods
 
-        internal async Task<long> GetBinaryResourcesModifiedTime()
+        internal async Task<long> GetBinaryResourcesModifiedTimeAsync()
         {
-            var assetJSBundleFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri(CodePushConstants.AssetsBundlePrefix + AssetsBundleFileName));
-            var fileProperties = await assetJSBundleFile.GetBasicPropertiesAsync();
+            var assetJSBundleFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri(CodePushConstants.AssetsBundlePrefix + AssetsBundleFileName)).AsTask().ConfigureAwait(false);
+            var fileProperties = await assetJSBundleFile.GetBasicPropertiesAsync().AsTask().ConfigureAwait(false);
             return fileProperties.DateModified.ToUnixTimeMilliseconds();
         }
         
@@ -152,7 +151,7 @@ namespace CodePush.ReactNative
                     // Therefore, deduce that it is a broken update and rollback.
                     CodePushUtils.Log("Update did not finish loading the last time, rolling back to a previous version.");
                     NeedToReportRollback = true;
-                    RollbackPackage().Wait();
+                    RollbackPackageAsync().Wait();
                 }
                 else
                 {
@@ -160,7 +159,7 @@ namespace CodePush.ReactNative
                     // Clear the React dev bundle cache so that new updates can be loaded.
                     if (MainPage.UseDeveloperSupport)
                     {
-                        ClearReactDevBundleCache().Wait();
+                        ClearReactDevBundleCacheAsync().Wait();
                     }
                     // Mark that we tried to initialize the new update, so that if it crashes,
                     // we will know that we need to rollback when the app next starts.
@@ -169,9 +168,9 @@ namespace CodePush.ReactNative
             }
         }
 
-        internal async Task ClearUpdates()
+        internal async Task ClearUpdatesAsync()
         {
-            await UpdateManager.ClearUpdates();
+            await UpdateManager.ClearUpdatesAsync().ConfigureAwait(false);
             SettingsManager.RemovePendingUpdate();
             SettingsManager.RemoveFailedUpdates();
         }
@@ -180,20 +179,20 @@ namespace CodePush.ReactNative
 
         #region Private methods
 
-        private async Task ClearReactDevBundleCache()
+        private async Task ClearReactDevBundleCacheAsync()
         {
-            var devBundleCacheFile = (StorageFile) await ApplicationData.Current.LocalFolder.TryGetItemAsync(CodePushConstants.ReactDevBundleCacheFileName);
+            var devBundleCacheFile = (StorageFile)await ApplicationData.Current.LocalFolder.TryGetItemAsync(CodePushConstants.ReactDevBundleCacheFileName).AsTask().ConfigureAwait(false);
             if (devBundleCacheFile != null)
             {
-                await devBundleCacheFile.DeleteAsync();
+                await devBundleCacheFile.DeleteAsync().AsTask().ConfigureAwait(false);
             }
         }
 
-        private async Task RollbackPackage()
+        private async Task RollbackPackageAsync()
         {
-            JObject failedPackage = await UpdateManager.GetCurrentPackage();
+            JObject failedPackage = await UpdateManager.GetCurrentPackageAsync().ConfigureAwait(false);
             SettingsManager.SaveFailedUpdate(failedPackage);
-            await UpdateManager.RollbackPackage();
+            await UpdateManager.RollbackPackageAsync().ConfigureAwait(false);
             SettingsManager.RemovePendingUpdate();
         }
 
