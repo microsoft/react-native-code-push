@@ -1,4 +1,4 @@
-import { AcquisitionManager as Sdk } from "code-push/script/acquisition-sdk";
+import { AcquisitionManager as Sdk } from "@joltup/jolt-code-push-sdk/script/acquisition-sdk";
 import { NativeEventEmitter } from "react-native";
 import RestartManager from "./RestartManager";
 
