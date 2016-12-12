@@ -163,7 +163,12 @@ And that's it! Isn't RNPM awesome? :)
     *Note: Alternatively, if you prefer, you can add the `-lz` flag to the `Other Linker Flags` field in the `Linking` section of the `Build Settings`.*
 
 6. Under the "Build Settings" tab of your project configuration, find the "Header Search Paths" section and edit the value.
-Add a new value, `$(SRCROOT)/../node_modules/react-native-code-push/ios` and select "recursive" in the dropdown.
+Add two new values:
+
+  - `$(SRCROOT)/../node_modules/react-native-code-push/ios`
+  - `"$(BUILT_PRODUCTS_DIR)/usr/local/include"`
+
+  and select "recursive" in the dropdowns.
 
     ![Add CodePush library reference](https://cloud.githubusercontent.com/assets/78585/20584750/bd58fd80-b230-11e6-9955-e624f12e500b.png)
 
