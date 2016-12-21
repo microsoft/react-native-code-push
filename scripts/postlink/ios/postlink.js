@@ -6,7 +6,7 @@ var plist = require("plist");
 var package = require('../../../../../package.json');
 
 var ignoreNodeModules = { ignore: "node_modules/**" };
-var appDelegatePaths = glob.sync("**/AppDelegate.m", ignoreNodeModules);
+var appDelegatePaths = glob.sync("**/AppDelegate.+(mm|m)", ignoreNodeModules);
 
 // Fix for https://github.com/Microsoft/react-native-code-push/issues/477
 // Typical location of AppDelegate.m for newer RN versions: $PROJECT_ROOT/ios/<project_name>/AppDelegate.m
@@ -14,11 +14,14 @@ var appDelegatePaths = glob.sync("**/AppDelegate.m", ignoreNodeModules);
 // If we can't find it there, play dumb and pray it is the first path we find.
 var appDelegatePath = findFileByAppName(appDelegatePaths, package ? package.name : null) || appDelegatePaths[0];
 
-// Glob only allows foward slashes in patterns: https://www.npmjs.com/package/glob#windows
-var plistPath = glob.sync(path.join(path.dirname(appDelegatePath), "*Info.plist").replace(/\\/g, "/"), ignoreNodeModules)[0];
+if (!appDelegatePath) {
+    console.log(`Couldn't find AppDelegate. You might need to update it manually \
+Please refer to plugin configuration section for iOS at \
+https://github.com/microsoft/react-native-code-push#plugin-configuration-ios`);
+    return;
+}
 
 var appDelegateContents = fs.readFileSync(appDelegatePath, "utf8");
-var plistContents = fs.readFileSync(plistPath, "utf8");
 
 // 1. Add the header import statement
 var codePushHeaderImportStatement = `#import "CodePush.h"`;
@@ -45,6 +48,14 @@ if (~appDelegateContents.indexOf(newJsCodeLocationAssignmentStatement)) {
     appDelegateContents = appDelegateContents.replace(oldJsCodeLocationAssignmentStatement,
         jsCodeLocationPatch);
 }
+
+var plistPath = glob.sync(`**/${package.name}/*Info.plist`, ignoreNodeModules)[0];
+if (!plistPath) {
+    console.log("Couldn't find .plist file");
+    return;
+}
+
+var plistContents = fs.readFileSync(plistPath, "utf8");
 
 // 3. Add CodePushDeploymentKey to plist file
 var parsedInfoPlist = plist.parse(plistContents);
