@@ -40,6 +40,14 @@ gradle.projectsEvaluated {
             def resourcesDirConfigName = "jsBundleDir${targetName}"
             def resourcesDir = elvisFile(config."${resourcesDirConfigName}") ?:
                     file("$buildDir/intermediates/res/merged/${targetPath}")
+
+            // In case version of 'Android Plugin for Gradle'' is lower than 1.3.0 
+            // '$buildDir' has slightly different structure - 'merged' folder
+            // does not exists so '${targetPath}' folder contains directly in 'res' folder.
+            if (!resourcesDir.exists() && file("$buildDir/intermediates/res/${targetPath}").exists()) {
+                resourcesDir = file("$buildDir/intermediates/res/${targetPath}")
+            }
+            
             def jsBundleFile = file("$jsBundleDir/$bundleAssetName")
 
             // Make this task run right before the bundle task
