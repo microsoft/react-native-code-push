@@ -32,6 +32,7 @@ public class CodePush implements ReactPackage {
     private boolean mDidUpdate = false;
 
     private String mAssetsBundleFileName;
+    private static long mBuildTimestamp;
 
     // Helper classes.
     private CodePushUpdateManager mUpdateManager;
@@ -103,7 +104,15 @@ public class CodePush implements ReactPackage {
         return mAssetsBundleFileName;
     }
 
+    public static void setBuildTimestamp(long timestamp) {
+        mBuildTimestamp = timestamp;
+    }
+
     long getBinaryResourcesModifiedTime() {
+        if (mBuildTimestamp != 0) {
+            return mBuildTimestamp;
+        }
+ 
         ZipFile applicationFile = null;
         try {
             ApplicationInfo ai = this.mContext.getPackageManager().getApplicationInfo(this.mContext.getPackageName(), 0);

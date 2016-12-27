@@ -11,6 +11,7 @@ var buildGradlePath = path.join("android", "app", "build.gradle");
 var getJSBundleFileOverride = `
     @Override
     protected String getJSBundleFile() {
+      CodePush.setBuildTimestamp(BuildConfig.CODE_PUSH_APK_BUILD_TIME);
       return CodePush.getJSBundleFile();
     }
 `;
