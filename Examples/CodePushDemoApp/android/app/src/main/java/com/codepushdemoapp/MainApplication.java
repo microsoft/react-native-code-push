@@ -39,7 +39,7 @@ public class MainApplication extends Application implements ReactApplication {
   public ReactNativeHost getReactNativeHost() {
     return mReactNativeHost;
   }
-  
+
   @Override
   public void onCreate() {
     super.onCreate();
