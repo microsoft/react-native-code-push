@@ -21,7 +21,7 @@ var appDelegateContents = fs.readFileSync(appDelegatePath, "utf8");
 var plistContents = fs.readFileSync(plistPath, "utf8");
 
 // 1. Add the header import statement
-var codePushHeaderImportStatement = `#import "CodePush.h"`;
+var codePushHeaderImportStatement = `#import <CodePush/CodePush.h>`;
 if (~appDelegateContents.indexOf(codePushHeaderImportStatement)) {
     console.log(`"CodePush.h" header already imported.`);
 } else {
