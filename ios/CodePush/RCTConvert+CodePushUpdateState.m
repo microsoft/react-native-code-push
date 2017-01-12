@@ -1,5 +1,5 @@
 #import "CodePush.h"
-#import "RCTConvert.h"
+#import <React/RCTConvert.h>
 
 // Extending the RCTConvert class allows the React Native
 // bridge to handle args of type "CodePushUpdateState"

@@ -1,5 +1,5 @@
 #if __has_include("RCTEventEmitter.h")
-#import "RCTEventEmitter.h"
+#import <React/RCTEventEmitter.h>
 #else
 #import "React/RCTEventEmitter.h"   // Required when used as a Pod in a Swift project
 #endif
