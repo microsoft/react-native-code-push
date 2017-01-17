@@ -162,10 +162,6 @@ And that's it! Isn't RNPM awesome? :)
 
     *Note: Alternatively, if you prefer, you can add the `-lz` flag to the `Other Linker Flags` field in the `Linking` section of the `Build Settings`.*
 
-6. Under the "Build Settings" tab of your project configuration, find the "Header Search Paths" section and edit the value.
-Add a new value, `$(SRCROOT)/../node_modules/react-native-code-push/ios` and select "recursive" in the dropdown.
-
-    ![Add CodePush library reference](https://cloud.githubusercontent.com/assets/78585/20584750/bd58fd80-b230-11e6-9955-e624f12e500b.png)
 
 ### Plugin Configuration (iOS)
 
@@ -176,7 +172,7 @@ Once your Xcode project has been setup to build/link the CodePush plugin, you ne
 1. Open up the `AppDelegate.m` file, and add an import statement for the CodePush headers:
 
     ```objective-c
-    #import "CodePush.h"
+    #import <CodePush/CodePush.h>
     ```
 
 2. Find the following line of code, which loads your JS Bundle from the app binary for production releases:
