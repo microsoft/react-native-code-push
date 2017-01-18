@@ -7,6 +7,7 @@ import log from "./logging";
 
 let NativeCodePush = require("react-native").NativeModules.CodePush;
 const PackageMixins = require("./package-mixins")(NativeCodePush);
+const NativeSourceCode = require("react-native").NativeModules.SourceCode;
 
 async function checkForUpdate(deploymentKey = null) {
   /*
@@ -113,6 +114,16 @@ async function getUpdateMetadata(updateState) {
     updateMetadata.isFirstRun = await NativeCodePush.isFirstRun(updateMetadata.packageHash);
   }
   return updateMetadata;
+}
+
+// This helper method is used to determine if React Native dev bundle 
+// currently is in use. In case `jsCodeLocation` variable value equals to 
+// [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil];
+// React Native dev bundle is loaded each time app starts although CodePush updated is installed.
+async function isUsingReactNativeBundle() {
+  const updateMetadata = await getUpdateMetadata();
+  const codePushMainJsBundlePath = `${updateMetadata.packageHash}/${updateMetadata.bundlePath}`;
+  return NativeSourceCode.scriptURL.indexOf(codePushMainJsBundlePath) === -1;
 }
 
 function getPromisifiedSdk(requestFetchAdapter, config) {
@@ -480,6 +491,7 @@ if (NativeCodePush) {
     getConfiguration,
     getCurrentPackage,
     getUpdateMetadata,
+    isUsingReactNativeBundle,
     log,
     notifyAppReady: notifyApplicationReady,
     notifyApplicationReady,
