@@ -9,6 +9,10 @@
     "babel-preset-react-native-stage-0": "1.0.1",
     "react": "15.4.0",
     "react-native": "0.39.0",
-    "react-native-code-push": "file:../../"
+    "react-native-code-push": "file:../../",
+    "react-native-windows": "^0.39.1"
+  },
+  "devDependencies": {
+    "rnpm-plugin-windows": "^0.2.3"
   }
 }
