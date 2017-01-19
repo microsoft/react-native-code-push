@@ -16,7 +16,15 @@ var TEMP_FILE_PATH = path.join(require("os").tmpdir(), "CodePushResourcesMap.jso
 var resourcesDir = process.argv[2];
 var resourceFiles = [];
 
-getFilesInFolder(resourcesDir, resourceFiles);
+try {
+    getFilesInFolder(resourcesDir, resourceFiles);
+} catch(error) {
+    var targetPathNotFoundExceptionMessage = "\nResources directory path does not exist.\n";
+    targetPathNotFoundExceptionMessage += "Unable to find '" + resourcesDir;
+    targetPathNotFoundExceptionMessage += "' directory. Please check version of Android Plugin for Gradle.";
+    error.message += targetPathNotFoundExceptionMessage;
+    throw error;
+}
 
 var fileToModifiedTimeMap = {};
 
