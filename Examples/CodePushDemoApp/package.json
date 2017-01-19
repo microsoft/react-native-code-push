@@ -10,7 +10,7 @@
     "react": "15.4.0",
     "react-native": "0.39.0",
     "react-native-code-push": "file:../../",
-    "react-native-windows": "^0.39.1"
+    "react-native-windows": "git://github.com/ReactWindows/react-native-windows.git"
   },
   "devDependencies": {
     "rnpm-plugin-windows": "^0.2.3"
