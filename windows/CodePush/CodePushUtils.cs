@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Windows.ApplicationModel;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.System.Profile;
@@ -48,6 +49,18 @@ namespace CodePush.ReactNative
             dataReader.ReadBytes(bytes);
 
             return BitConverter.ToString(bytes);
+        }
+
+        internal static string GetAppVersion()
+        {
+            //TODO: remove after check: 1.0.0
+            return Package.Current.Id.Version.Major + "." + Package.Current.Id.Version.Minor + "." + Package.Current.Id.Version.Build;
+        }
+
+        internal static string GetAppFolder()
+        {
+            //TODO: remove after check:
+            return ApplicationData.Current.LocalFolder.Path;
         }
     }
 }

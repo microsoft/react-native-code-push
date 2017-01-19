@@ -19,5 +19,23 @@ namespace CodePush.ReactNative
                 await MergeFoldersAsync(sourceDirectory, nextTargetSubDir).ConfigureAwait(false);
             }
         }
+        internal async static Task ClearReactDevBundleCacheAsync()
+        {
+            //TODO: remove after check
+            var devBundleCacheFile = (StorageFile)await ApplicationData.Current.LocalFolder.TryGetItemAsync(CodePushConstants.ReactDevBundleCacheFileName).AsTask().ConfigureAwait(false);
+            if (devBundleCacheFile != null)
+            {
+                await devBundleCacheFile.DeleteAsync().AsTask().ConfigureAwait(false);
+            }
+        }
+
+        internal async static Task<long> GetBinaryResourcesModifiedTimeAsync(string fileName)
+        {
+            //TODO: remove after check
+            var assetJSBundleFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri(CodePushConstants.AssetsBundlePrefix + fileName)).AsTask().ConfigureAwait(false);
+            var fileProperties = await assetJSBundleFile.GetBasicPropertiesAsync().AsTask().ConfigureAwait(false);
+            return fileProperties.DateModified.ToUnixTimeMilliseconds();
+        }
+
     }
 }

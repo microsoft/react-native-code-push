@@ -1,13 +1,11 @@
 ﻿using Newtonsoft.Json.Linq;
 using ReactNative;
 using ReactNative.Bridge;
-using ReactNative.Modules.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
-using Windows.Web.Http;
 
 namespace CodePush.ReactNative
 {
@@ -57,30 +55,9 @@ namespace CodePush.ReactNative
         {
             try
             {
-                updatePackage[CodePushConstants.BinaryModifiedTimeKey] = "" + await _codePush.GetBinaryResourcesModifiedTimeAsync().ConfigureAwait(false);
-                await _codePush.UpdateManager.DownloadPackageAsync(
-                    updatePackage,
-                    _codePush.AssetsBundleFileName,
-                    new Progress<HttpProgress>(
-                        (HttpProgress progress) =>
-                        {
-                            if (!notifyProgress)
-                            {
-                                return;
-                            }
+                updatePackage[CodePushConstants.BinaryModifiedTimeKey] = "" + await FileUtils.GetBinaryResourcesModifiedTimeAsync(_codePush.AssetsBundleFileName).ConfigureAwait(false);
 
-                            var downloadProgress = new JObject()
-                            {
-                                { "totalBytes", progress.TotalBytesToReceive },
-                                { "receivedBytes", progress.BytesReceived }
-                            };
-
-                            _reactContext
-                                .GetJavaScriptModule<RCTDeviceEventEmitter>()
-                                .emit(CodePushConstants.DownloadProgressEventName, downloadProgress);
-                        }
-                    )
-                ).ConfigureAwait(false);
+                await CodePushNativeModuleImpl.downloadUpdateImplAsync(updatePackage, notifyProgress, _codePush, _reactContext);
 
                 JObject newPackage = await _codePush.UpdateManager.GetPackageAsync((string)updatePackage[CodePushConstants.PackageHashKey]).ConfigureAwait(false);
                 promise.Resolve(newPackage);
@@ -194,7 +171,7 @@ namespace CodePush.ReactNative
                             await LoadBundleAsync().ConfigureAwait(false);
                         });
                     };
-                        
+
                     _minimumBackgroundListener = new MinimumBackgroundListener(loadBundleAction, minimumBackgroundDuration);
                     _reactContext.AddLifecycleEventListener(_minimumBackgroundListener);
                 }
@@ -240,7 +217,7 @@ namespace CodePush.ReactNative
                 await LoadBundleAsync().ConfigureAwait(false);
             }
         }
-        
+
         internal async Task LoadBundleAsync()
         {
             // #1) Get the private ReactInstanceManager, which is what includes
