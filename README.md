@@ -776,6 +776,8 @@ When you require `react-native-code-push`, the module object provides the follow
 
 * [getUpdateMetadata](#codepushgetupdatemetadata): Retrieves the metadata for an installed update (e.g. description, mandatory).
 
+* [isUsingReactNativeBundle](#codepushisusingreactnativebundle): Retrieves `true/false` flag indicates if React Native js bundle is in use. In case `jsCodeLocation` variable value (`AppDelegate.m` file) equals to `[[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index.ios" fallbackResource:nil]` this method returns `true` due to js bundle downloaded via React Native packager. In case `jsCodeLocation` variable value equals to `[CodePush bundleURL]` this method returns `true` if there is no CodePush update is running and returns `false` if there is an CodePush update is installed and running. *NOTE: This method returns `true` although [`getUpdateMetadata`](#codepushgetupdatemetadata) method returns metadata for an installed updated due to React Native app configured to use packager to download js bundle on each app restart.*
+
 * [notifyAppReady](#codepushnotifyappready): Notifies the CodePush runtime that an installed update is considered successful. If you are manually checking for and installing updates (i.e. not using the [sync](#codepushsync) method to handle it all for you), then this method **MUST** be called; otherwise CodePush will treat the update as failed and rollback to the previous version when the app next restarts.
 
 * [restartApp](#codepushrestartapp): Immediately restarts the app. If there is an update pending, it will be immediately displayed to the end user. Otherwise, calling this method simply has the same behavior as the end user killing and restarting the process.
