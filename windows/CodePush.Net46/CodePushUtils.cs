@@ -70,7 +70,7 @@ namespace CodePush.ReactNative
             return _deviceId;
         }
 
-    internal static string GetAppVersion()
+        internal static string GetAppVersion()
         {
             return FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs()[0]).ProductVersion;
         }
