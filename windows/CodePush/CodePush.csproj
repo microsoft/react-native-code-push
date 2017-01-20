@@ -107,13 +107,11 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CodePushNativeModuleImpl.cs" />
     <Compile Include="UpdateManager.cs" />
     <Compile Include="UpdateUtils.cs" />
     <Compile Include="CodePushUtils.cs" />
     <Compile Include="FileUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SettingsManager.cs" />
     <EmbeddedResource Include="Properties\CodePush.rd.xml" />
   </ItemGroup>
   <ItemGroup>

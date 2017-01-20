@@ -1,11 +1,17 @@
 ﻿using Newtonsoft.Json.Linq;
 using ReactNative;
 using ReactNative.Bridge;
+using ReactNative.Modules.Core;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+#if WINDOWS_UWP
+using Windows.Web.Http;
+#else
+using CodePush.Net46.Adapters.Http;
+#endif
 
 namespace CodePush.ReactNative
 {
@@ -56,8 +62,29 @@ namespace CodePush.ReactNative
             try
             {
                 updatePackage[CodePushConstants.BinaryModifiedTimeKey] = "" + await FileUtils.GetBinaryResourcesModifiedTimeAsync(_codePush.AssetsBundleFileName).ConfigureAwait(false);
+                await _codePush.UpdateManager.DownloadPackageAsync(
+                    updatePackage,
+                    _codePush.AssetsBundleFileName,
+                    new Progress<HttpProgress>(
+                        (HttpProgress progress) =>
+                         {
+                             if (!notifyProgress)
+                             {
+                                 return;
+                             }
 
-                await CodePushNativeModuleImpl.downloadUpdateImplAsync(updatePackage, notifyProgress, _codePush, _reactContext);
+                             var downloadProgress = new JObject()
+                             {
+                                                { "totalBytes", progress.TotalBytesToReceive },
+                                                { "receivedBytes", progress.BytesReceived }
+                             };
+
+                             _reactContext
+                                 .GetJavaScriptModule<RCTDeviceEventEmitter>()
+                                 .emit(CodePushConstants.DownloadProgressEventName, downloadProgress);
+                         }
+                    )
+                ).ConfigureAwait(false);
 
                 JObject newPackage = await _codePush.UpdateManager.GetPackageAsync((string)updatePackage[CodePushConstants.PackageHashKey]).ConfigureAwait(false);
                 promise.Resolve(newPackage);

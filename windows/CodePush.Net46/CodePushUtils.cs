@@ -1,70 +1,83 @@
-﻿using CodePush.Net46.Adapters.Storage;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
+using PCLStorage;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Management;
 using System.Threading.Tasks;
 
 namespace CodePush.ReactNative
 {
     internal class CodePushUtils
     {
-        internal async static Task<JObject> GetJObjectFromFileAsync(StorageFile file)
+        internal async static Task<JObject> GetJObjectFromFileAsync(IFile file)
         {
-            if (!File.Exists(file.Path))
+            string jsonString = await file.ReadAllTextAsync().ConfigureAwait(false);
+            if (jsonString.Length == 0)
+            {
                 return new JObject();
+            }
+
             try
             {
-                using (var reader = File.OpenText(file.Path))
-                {
-                    var jsonString = await reader.ReadToEndAsync();
-
-                    if (jsonString.Length == 0)
-                    {
-                        return new JObject();
-                    }
-
-                    return JObject.Parse(jsonString);
-                }
+                return JObject.Parse(jsonString);
             }
             catch (Exception)
             {
                 return null;
             }
+
         }
-        /*
-                internal static void Log(string message)
-                {
-                    Debug.WriteLine("[CodePush] " + message, CodePushConstants.ReactNativeLogCategory);
-                }
 
-                internal static void LogBundleUrl(string path)
-                {
-                    Log("Loading JS bundle from \"" + path + "\"");
-                }
+        internal static void Log(string message)
+        {
+            Debug.WriteLine("[CodePush] " + message, CodePushConstants.ReactNativeLogCategory);
+        }
 
-                internal static string GetDeviceId()
-                {
-                    HardwareToken token = HardwareIdentification.GetPackageSpecificToken(null);
-                    IBuffer hardwareId = token.Id;
-                    var dataReader = DataReader.FromBuffer(hardwareId);
+        internal static void LogBundleUrl(string path)
+        {
+            Log("Loading JS bundle from \"" + path + "\"");
+        }
 
-                    var bytes = new byte[hardwareId.Length];
-                    dataReader.ReadBytes(bytes);
+        static string _deviceId = String.Empty;
+        internal static string GetDeviceId()
+        {
+            if (!String.IsNullOrEmpty(_deviceId))
+                return _deviceId;
 
-                    return BitConverter.ToString(bytes);
-                }
+            //It's quite long operation, will cache it
 
-                internal static string GetAppVersion()
-                {
-                    //TODO: remove after check: 1.0.0
-                    return Package.Current.Id.Version.Major + "." + Package.Current.Id.Version.Minor + "." + Package.Current.Id.Version.Build;
-                }
+            ManagementObjectSearcher mos = new ManagementObjectSearcher("SELECT * FROM Win32_BaseBoard");
+            ManagementObjectCollection moc = mos.Get();
+            string mbId = String.Empty;
+            foreach (ManagementObject mo in moc)
+            {
+                mbId = (string)mo["SerialNumber"];
+                break;
+            }
 
-                internal static string GetAppFolder()
-                {
-                    //TODO: remove after check:
-                    return ApplicationData.Current.LocalFolder.Path;
-                }*/
+            ManagementObjectCollection mbsList = null;
+            ManagementObjectSearcher mbs = new ManagementObjectSearcher("Select * From Win32_processor");
+            mbsList = mbs.Get();
+            string procId = string.Empty;
+            foreach (ManagementObject mo in mbsList)
+            {
+                procId = mo["ProcessorID"].ToString();
+                break;
+            }
+
+            _deviceId = procId + "-" + mbId;
+            return _deviceId;
+        }
+
+    internal static string GetAppVersion()
+        {
+            return FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs()[0]).ProductVersion;
+        }
+
+        internal static string GetAppFolder()
+        {
+            return FileSystem.Current.LocalStorage.Path;
+        }
     }
 }
