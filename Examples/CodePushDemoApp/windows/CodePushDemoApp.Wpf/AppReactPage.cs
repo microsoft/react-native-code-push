@@ -1,16 +1,14 @@
+﻿using CodePush.ReactNative;
 using ReactNative;
 using ReactNative.Modules.Core;
 using ReactNative.Shell;
-using System.Collections.Generic;
-using CodePush.ReactNative;
 using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 
-namespace CodePushDemoApp
+namespace CodePushDemoApp.Wpf
 {
-    class MainPage : ReactPage
+    internal class AppReactPage : ReactPage
     {
-
         public override string MainComponentName
         {
             get
@@ -69,5 +67,4 @@ namespace CodePushDemoApp
             }
         }
     }
-
 }
