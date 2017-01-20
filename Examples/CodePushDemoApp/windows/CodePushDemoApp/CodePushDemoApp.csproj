@@ -202,7 +202,7 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\windows\CodePush.csproj">
+    <ProjectReference Include="..\..\..\..\windows\CodePush\CodePush.csproj">
       <Project>{446a85d9-55eb-4c7d-8b9d-448306c833d6}</Project>
       <Name>CodePush</Name>
     </ProjectReference>
