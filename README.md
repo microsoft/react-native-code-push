@@ -637,7 +637,14 @@ To set this up, perform the following steps:
 Open up your `MainApplication.java` file and make the following changes:
 
  ```java
- new CodePush(BuildConfig.CODEPUSH_KEY, MainApplication.this, BuildConfig.DEBUG);
+@Override
+protected List<ReactPackage> getPackages() {
+     return Arrays.<ReactPackage>asList(
+         ...
+         new CodePush(BuildConfig.CODEPUSH_KEY, MainApplication.this, BuildConfig.DEBUG), // Add/change this line.
+         ...
+     );
+}
  ```
 
 **For React Native v0.19 - v0.28**
@@ -645,7 +652,14 @@ Open up your `MainApplication.java` file and make the following changes:
 Open up your `MainActivity.java` file and make the following changes:
 
  ```java
- new CodePush(BuildConfig.CODEPUSH_KEY, this, BuildConfig.DEBUG);
+ @Override
+ protected List<ReactPackage> getPackages() {
+     return Arrays.<ReactPackage>asList(
+         ...
+         new CodePush(BuildConfig.CODEPUSH_KEY, this, BuildConfig.DEBUG), // Add/change this line.
+         ...
+     );
+ }
  ```
 
 *Note: If you gave your build setting a different name in your Gradle file, simply make sure to reflect that in your Java code.*
