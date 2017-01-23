@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.IO;
+using System.IO.Compression;
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 using System;
@@ -9,6 +10,7 @@ using Windows.Web.Http;
 #else
 using CodePush.Net46.Adapters.Http;
 using PCLStorage;
+
 #endif
 
 [assembly: InternalsVisibleTo("CodePush.Net46.UnitTest")]
@@ -26,59 +28,56 @@ namespace CodePush.ReactNative
 
         internal async Task DownloadPackageAsync(JObject updatePackage, string expectedBundleFileName, Progress<HttpProgress> downloadProgress)
         {
-            throw new NotImplementedException();
-            /*
             // Using its hash, get the folder where the new update will be saved 
-            StorageFolder codePushFolder = await GetCodePushFolderAsync().ConfigureAwait(false);
+            var codePushFolder = await GetCodePushFolderAsync().ConfigureAwait(false);
             var newUpdateHash = (string)updatePackage[CodePushConstants.PackageHashKey];
-            StorageFolder newUpdateFolder = await GetPackageFolderAsync(newUpdateHash, false).ConfigureAwait(false);
+            var newUpdateFolder = await GetPackageFolderAsync(newUpdateHash, false).ConfigureAwait(false);
             if (newUpdateFolder != null)
             {
                 // This removes any stale data in newPackageFolderPath that could have been left
                 // uncleared due to a crash or error during the download or install process.
-                await newUpdateFolder.DeleteAsync().AsTask().ConfigureAwait(false);
+                await newUpdateFolder.DeleteAsync().ConfigureAwait(false);
             }
 
             newUpdateFolder = await GetPackageFolderAsync(newUpdateHash, true).ConfigureAwait(false);
-            StorageFile newUpdateMetadataFile = await newUpdateFolder.CreateFileAsync(CodePushConstants.PackageFileName).AsTask().ConfigureAwait(false);
+            var newUpdateMetadataFile = await newUpdateFolder.CreateFileAsync(CodePushConstants.PackageFileName, CreationCollisionOption.ReplaceExisting).ConfigureAwait(false);
             var downloadUrlString = (string)updatePackage[CodePushConstants.DownloadUrlKey];
-            StorageFile downloadFile = await GetDownloadFileAsync().ConfigureAwait(false);
-            var downloadUri = new Uri(downloadUrlString);
+            var downloadFile = await GetDownloadFileAsync().ConfigureAwait(false);
 
-            // Download the file and send progress event asynchronously
-            var request = new HttpRequestMessage(HttpMethod.Get, downloadUri);
-            var client = new HttpClient();
-            var cancellationTokenSource = new CancellationTokenSource();
-            using (HttpResponseMessage response = await client.SendRequestAsync(request).AsTask(cancellationTokenSource.Token, downloadProgress).ConfigureAwait(false))
-            using (IInputStream inputStream = await response.Content.ReadAsInputStreamAsync().AsTask().ConfigureAwait(false))
-            using (IRandomAccessStream downloadFileStream = await downloadFile.OpenAsync(FileAccessMode.ReadWrite).AsTask().ConfigureAwait(false))
-            {
-                await RandomAccessStream.CopyAsync(inputStream, downloadFileStream).AsTask().ConfigureAwait(false);
-            }
-
+            await UpdateUtils.DownloadBundleAsync(downloadUrlString, downloadFile.Path, downloadProgress);
+            
             try
             {
                 // Unzip the downloaded file and then delete the zip
-                StorageFolder unzippedFolder = await GetUnzippedFolderAsync().ConfigureAwait(false);
+                var unzippedFolder = await GetUnzippedFolderAsync().ConfigureAwait(false);
                 ZipFile.ExtractToDirectory(downloadFile.Path, unzippedFolder.Path);
-                await downloadFile.DeleteAsync().AsTask().ConfigureAwait(false);
+                //await UpdateUtils.UnzipBundleAsync(downloadFile.Path, unzippedFolder.Path); //cant use standardSystem.IO.Compression.ZipFile due to path lenght limitation 
+                await downloadFile.DeleteAsync().ConfigureAwait(false);
 
                 // Merge contents with current update based on the manifest
-                StorageFile diffManifestFile = (StorageFile)await unzippedFolder.TryGetItemAsync(CodePushConstants.DiffManifestFileName).AsTask().ConfigureAwait(false);
+                IFile diffManifestFile = null;
+                try
+                {
+                    diffManifestFile = await unzippedFolder.GetFileAsync(CodePushConstants.DiffManifestFileName).ConfigureAwait(false);
+                }
+                catch(FileNotFoundException)
+                {
+                    //file may not be present in folder just skip it
+                }
                 if (diffManifestFile != null)
                 {
-                    StorageFolder currentPackageFolder = await GetCurrentPackageFolderAsync().ConfigureAwait(false);
+                    var currentPackageFolder = await GetCurrentPackageFolderAsync().ConfigureAwait(false);
                     if (currentPackageFolder == null)
                     {
                         throw new InvalidDataException("Received a diff update, but there is no current version to diff against.");
                     }
 
                     await UpdateUtils.CopyNecessaryFilesFromCurrentPackageAsync(diffManifestFile, currentPackageFolder, newUpdateFolder).ConfigureAwait(false);
-                    await diffManifestFile.DeleteAsync().AsTask().ConfigureAwait(false);
+                    await diffManifestFile.DeleteAsync().ConfigureAwait(false);
                 }
 
                 await FileUtils.MergeFoldersAsync(unzippedFolder, newUpdateFolder).ConfigureAwait(false);
-                await unzippedFolder.DeleteAsync().AsTask().ConfigureAwait(false);
+                await unzippedFolder.DeleteAsync().ConfigureAwait(false);
 
                 // For zip updates, we need to find the relative path to the jsBundle and save it in the
                 // metadata so that we can find and run it easily the next time.
@@ -101,12 +100,16 @@ namespace CodePush.ReactNative
             catch (InvalidDataException)
             {
                 // Downloaded file is not a zip, assume it is a jsbundle
-                await downloadFile.RenameAsync(expectedBundleFileName).AsTask().ConfigureAwait(false);
-                await downloadFile.MoveAsync(newUpdateFolder).AsTask().ConfigureAwait(false);
+                await downloadFile.RenameAsync(expectedBundleFileName).ConfigureAwait(false);
+                await downloadFile.MoveAsync(newUpdateFolder.Path, NameCollisionOption.ReplaceExisting).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                throw e;
             }
 
             // Save metadata to the folder
-            await FileIO.WriteTextAsync(newUpdateMetadataFile, JsonConvert.SerializeObject(updatePackage)).AsTask().ConfigureAwait(false);*/
+            await newUpdateMetadataFile.WriteAllTextAsync(JsonConvert.SerializeObject(updatePackage)).ConfigureAwait(false);
         }
         
         internal async Task<JObject> GetCurrentPackageAsync()
@@ -174,6 +177,10 @@ namespace CodePush.ReactNative
                     : await codePushFolder.GetFolderAsync(packageHash).ConfigureAwait(false);
             }
             catch (FileNotFoundException)
+            {
+                return null;
+            }
+            catch (DirectoryNotFoundException)
             {
                 return null;
             }
@@ -251,7 +258,8 @@ namespace CodePush.ReactNative
 
         private async Task<IFolder> GetCodePushFolderAsync()
         {
-            return await FileSystem.Current.LocalStorage.CreateFolderAsync(CodePushConstants.CodePushFolderPrefix, CreationCollisionOption.OpenIfExists).ConfigureAwait(false);
+            var pathToCodePush = Path.Combine(CodePushUtils.GetAppFolder(), CodePushConstants.CodePushFolderPrefix);
+            return await FileSystem.Current.LocalStorage.CreateFolderAsync(pathToCodePush, CreationCollisionOption.OpenIfExists).ConfigureAwait(false);
         }
 
         private async Task<IFolder> GetCurrentPackageFolderAsync()

@@ -251,10 +251,15 @@ namespace CodePush.ReactNative
             //     the logic to reload the current React context.
             FieldInfo info = typeof(ReactPage)
                 .GetField("_reactInstanceManager", BindingFlags.NonPublic | BindingFlags.Instance);
-
+#if WINDOWS_UWP
             var reactInstanceManager = (ReactInstanceManager)typeof(ReactPage)
                 .GetField("_reactInstanceManager", BindingFlags.NonPublic | BindingFlags.Instance)
                 .GetValue(_codePush.MainPage);
+#else
+            var reactInstanceManager = ((Lazy<IReactInstanceManager>)typeof(ReactPage)
+                .GetField("_reactInstanceManager", BindingFlags.NonPublic | BindingFlags.Instance)
+                .GetValue(_codePush.MainPage)).Value as ReactInstanceManager;
+#endif
 
             // #2) Update the locally stored JS bundle file path
             Type reactInstanceManagerType = typeof(ReactInstanceManager);

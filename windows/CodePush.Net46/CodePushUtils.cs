@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Management;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace CodePush.ReactNative
@@ -72,12 +73,16 @@ namespace CodePush.ReactNative
 
         internal static string GetAppVersion()
         {
-            return FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs()[0]).ProductVersion;
+            //return FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs()[0]).ProductVersion;
+            return "1.0.0"; //TODO: need return SemVer
         }
 
         internal static string GetAppFolder()
         {
-            return FileSystem.Current.LocalStorage.Path;
+            var assembly = Assembly.GetAssembly(typeof(CodePushUtils));
+            var assemblyName = assembly.GetName();
+
+            return new Uri(Path.GetDirectoryName(assemblyName.CodeBase)).LocalPath;
         }
     }
 }
