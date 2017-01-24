@@ -33,17 +33,17 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>$(SolutionDir)\packages\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>$(SolutionDir)\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="PCLStorage, Version=1.0.2.0, Culture=neutral, PublicKeyToken=286fe515a2c35b64, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(SolutionDir)\packages\packages\PCLStorage.1.0.2\lib\net45\PCLStorage.dll</HintPath>
+      <HintPath>$(SolutionDir)\packages\PCLStorage.1.0.2\lib\net45\PCLStorage.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="PCLStorage.Abstractions, Version=1.0.2.0, Culture=neutral, PublicKeyToken=286fe515a2c35b64, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(SolutionDir)\packages\packages\PCLStorage.1.0.2\lib\net45\PCLStorage.Abstractions.dll</HintPath>
+      <HintPath>$(SolutionDir)\packages\PCLStorage.1.0.2\lib\net45\PCLStorage.Abstractions.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
