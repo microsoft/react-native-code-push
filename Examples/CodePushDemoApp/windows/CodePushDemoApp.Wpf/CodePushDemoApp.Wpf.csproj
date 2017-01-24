@@ -38,11 +38,21 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'DebugCodePush|x86'">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'DebugBundle|x86' ">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x86\DebugCodePush\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;CODE_PUSH</DefineConstants>
+    <OutputPath>bin\x86\DebugBundle\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;BUNDLE</DefineConstants>
     <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseBundle|x86'">
+    <OutputPath>bin\x86\ReleaseBundle\</OutputPath>
+    <DefineConstants>TRACE;BUNDLE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>

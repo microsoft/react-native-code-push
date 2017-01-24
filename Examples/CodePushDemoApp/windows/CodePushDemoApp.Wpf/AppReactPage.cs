@@ -22,17 +22,14 @@ namespace CodePushDemoApp.Wpf
         {
             get
             {
-#if CODE_PUSH
-                codePushReactPackage = new CodePushReactPackage("v6chCZ69IGmYpSD7hTubJw0WBY-8VkBuREd8z", this);
-#else
-                codePushReactPackage = new CodePushReactPackage("http://localhost:8081/index.windows.bundle?platform=windows&dev=true&host=false", this);
-#endif
+                codePushReactPackage = new CodePushReactPackage("deployment-key-here", this);
+
                 try
                 {
-#if (!BUNDLE && !CODE_PUSH)
-                    return null;
-#else
+#if BUNDLE
                     return codePushReactPackage.GetJavaScriptBundleFile();
+#else
+                    return null;
 #endif
                 }
                 catch (Exception)
@@ -59,7 +56,7 @@ namespace CodePushDemoApp.Wpf
         {
             get
             {
-#if (!BUNDLE && !CODE_PUSH) || DEBUG
+#if !BUNDLE || DEBUG
                 return true;
 #else
                 return false;
