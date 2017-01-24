@@ -79,10 +79,25 @@ namespace CodePush.ReactNative
 
         internal static string GetAppFolder()
         {
-            var assembly = Assembly.GetAssembly(typeof(CodePushUtils));
-            var assemblyName = assembly.GetName();
+            return AppDomain.CurrentDomain.BaseDirectory;
+        }
 
-            return new Uri(Path.GetDirectoryName(assemblyName.CodeBase)).LocalPath;
+        internal static string GetAssetsBundlePrefix()
+        {
+#if WINDOWS_UWP
+            return CodePushConstants.AssetsBundlePrefix;
+#else
+            return Path.Combine(GetAppFolder(), CodePushConstants.AssetsBundlePrefix);
+#endif
+        }
+
+        internal static string GetFileBundlePrefix()
+        {
+#if WINDOWS_UWP
+            return CodePushConstants.FileBundlePrefix;
+#else
+            return GetAppFolder();
+#endif
         }
     }
 }

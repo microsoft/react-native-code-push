@@ -5,6 +5,7 @@ using ReactNative.Modules.Core;
 using ReactNative.UIManager;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 
 
@@ -80,7 +81,8 @@ namespace CodePush.ReactNative
         public async Task<string> GetJavaScriptBundleFileAsync(string assetsBundleFileName)
         {
             AssetsBundleFileName = assetsBundleFileName;
-            string binaryJsBundleUrl = CodePushConstants.AssetsBundlePrefix + assetsBundleFileName;
+            string binaryJsBundleUrl = CodePushUtils.GetAssetsBundlePrefix() + assetsBundleFileName;
+
             var binaryResourcesModifiedTime = await FileUtils.GetBinaryResourcesModifiedTimeAsync(AssetsBundleFileName).ConfigureAwait(false);
             var packageFile = await UpdateManager.GetCurrentPackageBundleAsync(AssetsBundleFileName).ConfigureAwait(false);
             if (packageFile == null)
@@ -107,7 +109,7 @@ namespace CodePush.ReactNative
             {
                 CodePushUtils.LogBundleUrl(packageFile.Path);
                 IsRunningBinaryVersion = false;
-                return CodePushConstants.FileBundlePrefix + packageFile.Path.Replace(CodePushUtils.GetAppFolder(), "").Replace("\\", "/");
+                return CodePushUtils.GetFileBundlePrefix() + packageFile.Path.Replace(CodePushUtils.GetAppFolder(), "").Replace("\\", "/");
             }
             else
             {
@@ -124,9 +126,9 @@ namespace CodePush.ReactNative
             }
         }
 
-        #endregion
+#endregion
 
-        #region Internal methods
+#region Internal methods
 
         internal void InitializeUpdateAfterRestart()
         {
@@ -164,9 +166,9 @@ namespace CodePush.ReactNative
             SettingsManager.RemoveFailedUpdates();
         }
 
-        #endregion
+#endregion
 
-        #region Private methods
+#region Private methods
 
         private async Task RollbackPackageAsync()
         {
@@ -176,6 +178,6 @@ namespace CodePush.ReactNative
             SettingsManager.RemovePendingUpdate();
         }
 
-        #endregion
+#endregion
     }
 }

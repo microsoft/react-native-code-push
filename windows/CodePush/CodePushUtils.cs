@@ -60,5 +60,25 @@ namespace CodePush.ReactNative
         {
             return ApplicationData.Current.LocalFolder.Path;
         }
+
+        internal static string GetAssetsBundlePrefix()
+        {
+#if WINDOWS_UWP
+            return CodePushConstants.AssetsBundlePrefix;
+#else
+            return Path.Combine(GetAppFolder(), CodePushConstants.AssetsBundlePrefix);
+#endif
+        }
+
+        internal static string GetFileBundlePrefix()
+        {
+#if WINDOWS_UWP
+            return CodePushConstants.FileBundlePrefix;
+#else
+            //return Path.Combine(GetAppFolder(), CodePushConstants.AssetsBundlePrefix);
+            return GetAppFolder();
+#endif
+        }
+
     }
 }
