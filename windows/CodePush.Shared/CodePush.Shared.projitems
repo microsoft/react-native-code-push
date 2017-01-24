@@ -12,6 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)CodePushConstants.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CodePushNativeModule.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CodePushReactPackage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodePushUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)InstallMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MinimumBackgroundListener.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SettingsManager.cs" />

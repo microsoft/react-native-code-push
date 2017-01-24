@@ -9,7 +9,7 @@ using Windows.System.Profile;
 
 namespace CodePush.ReactNative
 {
-    internal class CodePushUtils
+    internal partial class CodePushUtils
     {
         internal async static Task<JObject> GetJObjectFromFileAsync(StorageFile file)
         {
@@ -28,57 +28,5 @@ namespace CodePush.ReactNative
                 return null;
             }
         }
-
-        internal static void Log(string message)
-        {
-            Debug.WriteLine("[CodePush] " + message, CodePushConstants.ReactNativeLogCategory);
-        }
-
-        internal static void LogBundleUrl(string path)
-        {
-            Log("Loading JS bundle from \"" + path + "\"");
-        }
-
-        internal static string GetDeviceId()
-        {
-            HardwareToken token = HardwareIdentification.GetPackageSpecificToken(null);
-            IBuffer hardwareId = token.Id;
-            var dataReader = DataReader.FromBuffer(hardwareId);
-
-            var bytes = new byte[hardwareId.Length];
-            dataReader.ReadBytes(bytes);
-
-            return BitConverter.ToString(bytes);
-        }
-
-        internal static string GetAppVersion()
-        {
-            return Package.Current.Id.Version.Major + "." + Package.Current.Id.Version.Minor + "." + Package.Current.Id.Version.Build;
-        }
-
-        internal static string GetAppFolder()
-        {
-            return ApplicationData.Current.LocalFolder.Path;
-        }
-
-        internal static string GetAssetsBundlePrefix()
-        {
-#if WINDOWS_UWP
-            return CodePushConstants.AssetsBundlePrefix;
-#else
-            return Path.Combine(GetAppFolder(), CodePushConstants.AssetsBundlePrefix);
-#endif
-        }
-
-        internal static string GetFileBundlePrefix()
-        {
-#if WINDOWS_UWP
-            return CodePushConstants.FileBundlePrefix;
-#else
-            //return Path.Combine(GetAppFolder(), CodePushConstants.AssetsBundlePrefix);
-            return GetAppFolder();
-#endif
-        }
-
     }
 }

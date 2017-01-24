@@ -98,6 +98,15 @@ namespace CodePush.ReactNative
                 await downloadFile.RenameAsync(expectedBundleFileName).AsTask().ConfigureAwait(false);
                 await downloadFile.MoveAsync(newUpdateFolder).AsTask().ConfigureAwait(false);
             }
+            catch (Exception e)
+            {
+				/*TODO: ZipFile.ExtractToDirectory is nor relible and throws exceptions if:
+				 	- folder exists already
+					 - path too long
+					it needs to be handled			 
+				 */
+                throw e;
+            }
 
             // Save metadata to the folder
             await FileIO.WriteTextAsync(newUpdateMetadataFile, JsonConvert.SerializeObject(updatePackage)).AsTask().ConfigureAwait(false);
