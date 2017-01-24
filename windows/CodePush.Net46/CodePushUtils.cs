@@ -46,7 +46,7 @@ namespace CodePush.ReactNative
             if (!String.IsNullOrEmpty(_deviceId))
                 return _deviceId;
 
-            //It's quite long operation, will cache it
+            //It's quite long operation, cache it
 
             ManagementObjectSearcher mos = new ManagementObjectSearcher("SELECT * FROM Win32_BaseBoard");
             ManagementObjectCollection moc = mos.Get();
@@ -73,8 +73,8 @@ namespace CodePush.ReactNative
 
         internal static string GetAppVersion()
         {
-            //return FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs()[0]).ProductVersion;
-            return "1.0.0"; //TODO: need return SemVer
+            var version = FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs()[0]);
+            return $"{version.FileMajorPart}.{version.FileMinorPart}.{version.FileBuildPart}";
         }
 
         internal static string GetAppFolder()
