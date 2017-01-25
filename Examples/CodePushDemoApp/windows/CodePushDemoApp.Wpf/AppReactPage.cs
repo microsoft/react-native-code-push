@@ -24,18 +24,11 @@ namespace CodePushDemoApp.Wpf
             {
                 codePushReactPackage = new CodePushReactPackage("deployment-key-here", this);
 
-                try
-                {
 #if BUNDLE
                     return codePushReactPackage.GetJavaScriptBundleFile();
 #else
                     return null;
 #endif
-                }
-                catch (Exception)
-                {
-                    return null;
-                }
             }
         }
 
