@@ -25,18 +25,12 @@ namespace CodePushDemoApp
             {
 
                 codePushReactPackage = new CodePushReactPackage("deployment-key-here", this);
-                try
-                {
+
 #if BUNDLE
-                    return codePushReactPackage.GetJavaScriptBundleFile();
+                return codePushReactPackage.GetJavaScriptBundleFile();
 #else
-                    return null;
+                return null;
 #endif
-                }
-                catch (Exception)
-                {
-                    return null;
-                }
             }
         }
 
