@@ -24,7 +24,7 @@ https://github.com/microsoft/react-native-code-push#plugin-configuration-ios`);
 var appDelegateContents = fs.readFileSync(appDelegatePath, "utf8");
 
 // 1. Add the header import statement
-var codePushHeaderImportStatement = `#import "CodePush.h"`;
+var codePushHeaderImportStatement = `#import <CodePush/CodePush.h>`;
 if (~appDelegateContents.indexOf(codePushHeaderImportStatement)) {
     console.log(`"CodePush.h" header already imported.`);
 } else {
