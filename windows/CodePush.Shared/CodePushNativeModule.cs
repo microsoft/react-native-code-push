@@ -67,22 +67,22 @@ namespace CodePush.ReactNative
                     _codePush.AssetsBundleFileName,
                     new Progress<HttpProgress>(
                         (HttpProgress progress) =>
-                         {
-                             if (!notifyProgress)
-                             {
-                                 return;
-                             }
+                        {
+                            if (!notifyProgress)
+                            {
+                                return;
+                            }
 
-                             var downloadProgress = new JObject()
-                             {
-                                                { "totalBytes", progress.TotalBytesToReceive },
-                                                { "receivedBytes", progress.BytesReceived }
-                             };
+                            var downloadProgress = new JObject()
+                            {
+                                { "totalBytes", progress.TotalBytesToReceive },
+                                { "receivedBytes", progress.BytesReceived }
+                            };
 
-                             _reactContext
-                                 .GetJavaScriptModule<RCTDeviceEventEmitter>()
-                                 .emit(CodePushConstants.DownloadProgressEventName, downloadProgress);
-                         }
+                            _reactContext
+                                .GetJavaScriptModule<RCTDeviceEventEmitter>()
+                                .emit(CodePushConstants.DownloadProgressEventName, downloadProgress);
+                        }
                     )
                 ).ConfigureAwait(false);
 
