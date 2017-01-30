@@ -2,12 +2,6 @@
 {
     internal class CodePushConstants
     {
-#if WINDOWS_UWP
-        internal const string AssetsBundlePrefix = "ms-appx:///ReactAssets/";
-        internal const string FileBundlePrefix = "ms-appdata:///local";
-#else
-        internal const string AssetsBundlePrefix = "ReactAssets/";
-#endif
         internal const string BinaryModifiedTimeKey = "binaryModifiedTime";
         internal const string CodePushServerUrl = "https://codepush.azurewebsites.net/";
         internal const string CodePushFolderPrefix = "CodePush";
@@ -31,5 +25,11 @@
         internal const string RelativeBundlePathKey = "bundlePath";
         internal const string StatusFileName = "codepush.json";
         internal const string UnzippedFolderName = "unzipped";
+#if WINDOWS_UWP
+        internal const string AssetsBundlePrefix = "ms-appx:///ReactAssets/";
+        internal const string FileBundlePrefix = "ms-appdata:///local";
+#else
+        internal const string AssetsBundlePrefix = "ReactAssets/";
+#endif
     }
 }
