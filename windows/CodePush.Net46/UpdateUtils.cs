@@ -64,18 +64,11 @@ namespace CodePush.ReactNative
 
         //internal async static Task UnzipBundleAsync(string zipFileName, string targetDir)
         //{
-        //    await Task.Run( () =>
-        //    {
-        //        using (var zip = new ZipFile(zipFileName))
-        //        {
-        //            foreach (var entry in zip)
-        //            {
-        //                entry.Extract(targetDir);
-        //            }
-        //        }
-
-        //        return Task.CompletedTask;
-        //    });
+        //    await Task.Run(() =>
+        //   {
+        //       ZipFile.ExtractToDirectory(zipFileName, targetDir)
+        //       return Task.CompletedTask;
+        //   });
         //}
     }
 }

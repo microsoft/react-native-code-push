@@ -2,6 +2,12 @@
 {
     internal class CodePushConstants
     {
+#if WINDOWS_UWP
+        internal const string AssetsBundlePrefix = "ms-appx:///ReactAssets/";
+        internal const string FileBundlePrefix = "ms-appdata:///local";
+#else
+        internal const string AssetsBundlePrefix = "ReactAssets/";
+#endif
         internal const string BinaryModifiedTimeKey = "binaryModifiedTime";
         internal const string CodePushServerUrl = "https://codepush.azurewebsites.net/";
         internal const string CodePushFolderPrefix = "CodePush";
@@ -13,12 +19,6 @@
         internal const string DownloadProgressEventName = "CodePushDownloadProgress";
         internal const string DownloadUrlKey = "downloadUrl";
         internal const string FailedUpdatesKey = "CODE_PUSH_FAILED_UPDATES";
-#if WINDOWS_UWP
-        internal const string AssetsBundlePrefix = "ms-appx:///ReactAssets/";
-        internal const string FileBundlePrefix = "ms-appdata:///local";
-#else
-        internal const string AssetsBundlePrefix = "ReactAssets/";
-#endif
         internal const string PackageFileName = "app.json";
         internal const string PackageHashKey = "packageHash";
         internal const string PendingUpdateHashKey = "hash";
