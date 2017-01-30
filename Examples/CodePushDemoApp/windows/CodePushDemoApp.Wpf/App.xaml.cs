@@ -49,7 +49,7 @@ namespace CodePushDemoApp.Wpf
                 {
                     ShowActivated = true,
                     ShowInTaskbar = true,
-                    Title = "Blue",
+                    Title = "CodePushDemoApp.WPF",
                     Height = 768,
                     Width = 1024,
                     WindowStartupLocation = WindowStartupLocation.CenterScreen
