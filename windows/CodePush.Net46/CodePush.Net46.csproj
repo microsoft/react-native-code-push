@@ -86,7 +86,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Examples\CodePushDemoApp\node_modules\react-native-windows\ReactWindows\ReactNative.Net46\ReactNative.Net46.csproj">
+	<ProjectReference Include="..\..\react-native-windows\ReactWindows\ReactNative.Net46\ReactNative.Net46.csproj">
       <Project>{22cbff9c-fe36-43e8-a246-266c7635e662}</Project>
       <Name>ReactNative.Net46</Name>
     </ProjectReference>
