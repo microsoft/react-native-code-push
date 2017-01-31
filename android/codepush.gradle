@@ -16,6 +16,9 @@ void runBefore(String dependentTaskName, Task task) {
 
 gradle.projectsEvaluated {
     def buildTypes = android.buildTypes.collect { type -> type.name }
+    android.buildTypes.each {
+        it.resValue 'string', "CODE_PUSH_APK_BUILD_TIME", Long.toString(System.currentTimeMillis())
+    }
     def productFlavors = android.productFlavors.collect { flavor -> flavor.name }
     if (!productFlavors) productFlavors.add('')
     def nodeModulesPath;
