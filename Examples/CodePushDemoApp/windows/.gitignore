@@ -87,4 +87,3 @@ packages/
 *.DotSettings
 .vs/
 *project.lock.json
-assets/
