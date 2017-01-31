@@ -3,11 +3,8 @@ using System.Diagnostics;
 #if WINDOWS_UWP
 using Windows.ApplicationModel;
 using Windows.Storage;
-using Windows.Storage.Streams;
-using Windows.System.Profile;
 #else
 using System.IO;
-using System.Management;
 #endif
 
 namespace CodePush.ReactNative
@@ -28,43 +25,12 @@ namespace CodePush.ReactNative
 
         internal static string GetDeviceId()
         {
+            //It's quite long operation, cache it
             if (!String.IsNullOrEmpty(_deviceId))
                 return _deviceId;
-#if WINDOWS_UWP
-            HardwareToken token = HardwareIdentification.GetPackageSpecificToken(null);
-            IBuffer hardwareId = token.Id;
-            var dataReader = DataReader.FromBuffer(hardwareId);
 
-            var bytes = new byte[hardwareId.Length];
-            dataReader.ReadBytes(bytes);
-
-            return BitConverter.ToString(bytes);
-#else
-
-            //It's quite long operation, cache it
-
-            ManagementObjectSearcher mos = new ManagementObjectSearcher("SELECT * FROM Win32_BaseBoard");
-            ManagementObjectCollection moc = mos.Get();
-            string mbId = String.Empty;
-            foreach (ManagementObject mo in moc)
-            {
-                mbId = (string)mo["SerialNumber"];
-                break;
-            }
-
-            ManagementObjectCollection mbsList = null;
-            ManagementObjectSearcher mbs = new ManagementObjectSearcher("Select * From Win32_processor");
-            mbsList = mbs.Get();
-            string procId = string.Empty;
-            foreach (ManagementObject mo in mbsList)
-            {
-                procId = mo["ProcessorID"].ToString();
-                break;
-            }
-
-            _deviceId = procId + "-" + mbId;
+            _deviceId = GetDeviceIdImpl();
             return _deviceId;
-#endif
         }
 
         internal static string GetAppVersion()

@@ -28,5 +28,17 @@ namespace CodePush.ReactNative
                 return null;
             }
         }
+
+        static string GetDeviceIdImpl()
+        {
+            HardwareToken token = HardwareIdentification.GetPackageSpecificToken(null);
+            IBuffer hardwareId = token.Id;
+            var dataReader = DataReader.FromBuffer(hardwareId);
+
+            var bytes = new byte[hardwareId.Length];
+            dataReader.ReadBytes(bytes);
+
+            return BitConverter.ToString(bytes);
+        }
     }
 }

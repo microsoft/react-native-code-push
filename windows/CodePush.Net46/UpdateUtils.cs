@@ -1,10 +1,10 @@
-﻿using Newtonsoft.Json.Linq;
-using System.IO;
-using System.Threading.Tasks;
+﻿using CodePush.Net46.Adapters.Http;
+using Newtonsoft.Json.Linq;
 using PCLStorage;
 using System;
-using CodePush.Net46.Adapters.Http;
+using System.IO;
 using System.Net;
+using System.Threading.Tasks;
 
 
 namespace CodePush.ReactNative
@@ -61,14 +61,5 @@ namespace CodePush.ReactNative
 
             await client.DownloadFileTaskAsync(uri, fileName);
         }
-
-        //internal async static Task UnzipBundleAsync(string zipFileName, string targetDir)
-        //{
-        //    await Task.Run(() =>
-        //   {
-        //       ZipFile.ExtractToDirectory(zipFileName, targetDir)
-        //       return Task.CompletedTask;
-        //   });
-        //}
     }
 }

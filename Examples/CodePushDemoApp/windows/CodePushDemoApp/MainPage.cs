@@ -1,9 +1,8 @@
+using CodePush.ReactNative;
 using ReactNative;
 using ReactNative.Modules.Core;
 using ReactNative.Shell;
 using System.Collections.Generic;
-using CodePush.ReactNative;
-using System;
 
 namespace CodePushDemoApp
 {

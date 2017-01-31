@@ -1,8 +1,7 @@
-﻿using System;
-using System.Threading.Tasks;
-using PCLStorage;
+﻿using PCLStorage;
+using System;
 using System.IO;
-using System.Reflection;
+using System.Threading.Tasks;
 
 namespace CodePush.ReactNative
 {
@@ -50,9 +49,9 @@ namespace CodePush.ReactNative
 
         internal async static Task CopyFileAsync(string sourcePath, string destinationPath)
         {
-            using (Stream source = File.Open(sourcePath, FileMode.Open, System.IO.FileAccess.Read))
+            using (var source = File.Open(sourcePath, FileMode.Open, System.IO.FileAccess.Read))
             {
-                using (Stream destination = File.Create(destinationPath)) // Replace if exists
+                using (var destination = File.Create(destinationPath)) // Replace if exists
                 {
                     await source.CopyToAsync(destination);
                 }

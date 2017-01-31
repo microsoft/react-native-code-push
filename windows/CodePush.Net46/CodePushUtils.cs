@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using PCLStorage;
 using System;
+using System.Management;
 using System.Threading.Tasks;
 
 namespace CodePush.ReactNative
@@ -23,6 +24,30 @@ namespace CodePush.ReactNative
             {
                 return null;
             }
+        }
+
+        static string GetDeviceIdImpl()
+        {
+            ManagementObjectSearcher mos = new ManagementObjectSearcher("SELECT * FROM Win32_BaseBoard");
+            ManagementObjectCollection moc = mos.Get();
+            string mbId = String.Empty;
+            foreach (ManagementObject mo in moc)
+            {
+                mbId = (string)mo["SerialNumber"];
+                break;
+            }
+
+            ManagementObjectCollection mbsList = null;
+            ManagementObjectSearcher mbs = new ManagementObjectSearcher("Select * From Win32_processor");
+            mbsList = mbs.Get();
+            string procId = string.Empty;
+            foreach (ManagementObject mo in mbsList)
+            {
+                procId = mo["ProcessorID"].ToString();
+                break;
+            }
+
+            return procId + "-" + mbId;
         }
     }
 }

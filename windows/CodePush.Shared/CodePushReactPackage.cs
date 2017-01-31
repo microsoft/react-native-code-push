@@ -5,7 +5,6 @@ using ReactNative.Modules.Core;
 using ReactNative.UIManager;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 
 
@@ -14,9 +13,6 @@ namespace CodePush.ReactNative
     public sealed class CodePushReactPackage : IReactPackage
     {
         private static CodePushReactPackage CurrentInstance;
-        //private static bool NeedToReportRollback = false;
-
-        //private CodePushNativeModule _codePushNativeModule;
 
         internal string AppVersion { get; private set; }
         internal string DeploymentKey { get; private set; }
@@ -141,7 +137,6 @@ namespace CodePush.ReactNative
                     // Pending update was initialized, but notifyApplicationReady was not called.
                     // Therefore, deduce that it is a broken update and rollback.
                     CodePushUtils.Log("Update did not finish loading the last time, rolling back to a previous version.");
-                    //NeedToReportRollback = true;
                     RollbackPackageAsync().Wait();
                 }
                 else
