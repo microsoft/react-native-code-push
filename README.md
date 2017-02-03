@@ -54,7 +54,8 @@ We try our best to maintain backwards compatability of our plugin with previous 
 | v0.31-v0.33             | v1.14.6+ *(RN refactored native hosting code)* |
 | v0.34-v0.35             | v1.15.0+ *(RN refactored native hosting code)* |
 | v0.36-v0.39             | v1.16.0+ *(RN refactored resume handler)*      |
-| v0.40+                  | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
+| v0.40             	  | v1.17.0+ *(RN refactored iOS header files)*    |
+| v0.41+                  | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
 
 ## Supported Components
 
@@ -162,10 +163,6 @@ And that's it! Isn't RNPM awesome? :)
 
     *Note: Alternatively, if you prefer, you can add the `-lz` flag to the `Other Linker Flags` field in the `Linking` section of the `Build Settings`.*
 
-6. Under the "Build Settings" tab of your project configuration, find the "Header Search Paths" section and edit the value.
-Add a new value, `$(SRCROOT)/../node_modules/react-native-code-push/ios` and select "recursive" in the dropdown.
-
-    ![Add CodePush library reference](https://cloud.githubusercontent.com/assets/78585/20584750/bd58fd80-b230-11e6-9955-e624f12e500b.png)
 
 ### Plugin Configuration (iOS)
 
@@ -176,7 +173,7 @@ Once your Xcode project has been setup to build/link the CodePush plugin, you ne
 1. Open up the `AppDelegate.m` file, and add an import statement for the CodePush headers:
 
     ```objective-c
-    #import "CodePush.h"
+    #import <CodePush/CodePush.h>
     ```
 
 2. Find the following line of code, which loads your JS Bundle from the app binary for production releases:
@@ -641,7 +638,14 @@ To set this up, perform the following steps:
 Open up your `MainApplication.java` file and make the following changes:
 
  ```java
- new CodePush(BuildConfig.CODEPUSH_KEY, MainApplication.this, BuildConfig.DEBUG);
+@Override
+protected List<ReactPackage> getPackages() {
+     return Arrays.<ReactPackage>asList(
+         ...
+         new CodePush(BuildConfig.CODEPUSH_KEY, MainApplication.this, BuildConfig.DEBUG), // Add/change this line.
+         ...
+     );
+}
  ```
 
 **For React Native v0.19 - v0.28**
@@ -649,7 +653,14 @@ Open up your `MainApplication.java` file and make the following changes:
 Open up your `MainActivity.java` file and make the following changes:
 
  ```java
- new CodePush(BuildConfig.CODEPUSH_KEY, this, BuildConfig.DEBUG);
+ @Override
+ protected List<ReactPackage> getPackages() {
+     return Arrays.<ReactPackage>asList(
+         ...
+         new CodePush(BuildConfig.CODEPUSH_KEY, this, BuildConfig.DEBUG), // Add/change this line.
+         ...
+     );
+ }
  ```
 
 *Note: If you gave your build setting a different name in your Gradle file, simply make sure to reflect that in your Java code.*
@@ -715,6 +726,8 @@ To set this up, perform the following steps:
     ![Infoplist](https://cloud.githubusercontent.com/assets/116461/15764252/3ac8aed2-28de-11e6-8c19-2270ae9857a7.png)
 
 And that's it! Now when you run or build your app, your staging builds will automatically be configured to sync with your `Staging` deployment, and your release builds will be configured to sync with your `Production` deployment.
+
+*Note: If you encounter the error message `ld: library not found for ...`, please consult [this issue](https://github.com/Microsoft/react-native-code-push/issues/426) for a possible solution.*
 
 Additionally, if you want to give them seperate names and/or icons, you can modify the `Product Name` and `Asset Catalog App Icon Set Name` build settings, which will allow your staging builds to be distinguishable from release builds when installed on the same device.
 
