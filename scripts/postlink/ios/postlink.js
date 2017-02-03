@@ -4,6 +4,7 @@ var inquirer = require('inquirer');
 var path = require("path");
 var plist = require("plist");
 var xcode = require("xcode");
+
 var package = require('../../../../../package.json');
 
 var ignoreNodeModules = { ignore: "node_modules/**" };
@@ -104,6 +105,32 @@ function getDefaultPlistPath() {
     return glob.sync(`**/${package.name}/*Info.plist`, ignoreNodeModules)[0];
 }
 
+// This is enhanced version of standard implementation of xcode 'getBuildProperty' function  
+// but allows us to narrow results by PRODUCT_NAME property also. 
+// So we suppose that proj name should be the same as package name, otherwise fallback to default plist path searching logic
+function getBuildSettingsPropertyMatchingTargetProductName(parsedXCodeProj, prop, targetProductName, build){
+    var target;
+    var COMMENT_KEY = /_comment$/
+    var PRODUCT_NAME_PROJECT_KEY = 'PRODUCT_NAME';
+
+    if (!targetProductName){
+        return target;
+    }
+
+    var configs = parsedXCodeProj.pbxXCBuildConfigurationSection();
+    for (var configName in configs) {
+        if (!COMMENT_KEY.test(configName)) {
+            var config = configs[configName];
+            if ( (build && config.name === build) || (build === undefined) ) {
+                if (config.buildSettings[prop] !== undefined && config.buildSettings[PRODUCT_NAME_PROJECT_KEY] == targetProductName) {
+                    target = config.buildSettings[prop];
+                }
+            }
+        }
+    }
+    return target;
+}
+
 function getPlistPath(){
     var xcodeProjectPaths = glob.sync(`**/*.xcodeproj/project.pbxproj`, ignoreNodeModules);
     if (!xcodeProjectPaths){
@@ -129,11 +156,13 @@ function getPlistPath(){
     }
 
     var INFO_PLIST_PROJECT_KEY = 'INFOPLIST_FILE';
-    var plistPathValue = parsedXCodeProj.getBuildProperty(INFO_PLIST_PROJECT_KEY);
+    var targetProductName = package ? package.name : null;
+
+    var plistPathValue = getBuildSettingsPropertyMatchingTargetProductName(parsedXCodeProj, INFO_PLIST_PROJECT_KEY, targetProductName);
 
     if (!plistPathValue){
         return getDefaultPlistPath();
     }
 
-    return path.resolve(path.dirname(xcodeProjectPath), '../..', plistPathValue);    
+    return path.resolve(path.dirname(xcodeProjectPath), '..', plistPathValue);    
 }
