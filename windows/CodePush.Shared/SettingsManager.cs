@@ -5,6 +5,7 @@ using System;
 using Windows.Storage;
 #else
 using CodePush.Net46.Adapters.Storage;
+using System.IO;
 #endif
 
 namespace CodePush.ReactNative
@@ -14,7 +15,7 @@ namespace CodePush.ReactNative
 #if WINDOWS_UWP
         private static ApplicationDataContainer Settings = ApplicationData.Current.LocalSettings.CreateContainer(CodePushConstants.CodePushPreferences, ApplicationDataCreateDisposition.Always);
 #else
-        private static ApplicationDataContainer Settings = new ApplicationDataContainer();
+        private static ApplicationDataContainer Settings = new ApplicationDataContainer(Path.Combine(CodePushUtils.GetAppFolder(), CodePushConstants.CodePushFolderPrefix, CodePushConstants.CodePushPreferences));
 #endif
 
         public static JArray GetFailedUpdates()
