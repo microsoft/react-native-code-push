@@ -32,6 +32,7 @@ var mainApplicationPath = findMainApplication() || glob.sync("**/MainApplication
 var getJSBundleFileOverride = `
     @Override
     protected String getJSBundleFile() {
+      CodePush.setBuildTimestamp(BuildConfig.CODE_PUSH_APK_BUILD_TIME);
       return CodePush.getJSBundleFile();
     }
 `;

@@ -291,9 +291,11 @@ public class MainApplication extends Application implements ReactApplication {
         ...
         // 2. Override the getJSBundleFile method in order to let
         // the CodePush runtime determine where to get the JS
-        // bundle location from on each app start
+        // bundle location from on each app start. Set manually apk built time
+        // since gradle zeroes built timestamps
         @Override
         protected String getJSBundleFile() {
+            CodePush.setBuildTimestamp(BuildConfig.CODE_PUSH_APK_BUILD_TIME);
             return CodePush.getJSBundleFile();
         }
 
@@ -324,9 +326,11 @@ import com.microsoft.codepush.react.CodePush;
 public class MainActivity extends ReactActivity {
     // 2. Override the getJSBundleFile method in order to let
     // the CodePush runtime determine where to get the JS
-    // bundle location from on each app start
+    // bundle location from on each app start. Set manually apk built time
+    // since gradle zeroes built timestamps
     @Override
     protected String getJSBundleFile() {
+        CodePush.setBuildTimestamp(BuildConfig.CODE_PUSH_APK_BUILD_TIME);
         return CodePush.getJSBundleFile();
     }
 
