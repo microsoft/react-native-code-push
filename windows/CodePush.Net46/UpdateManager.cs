@@ -1,16 +1,13 @@
-﻿using Newtonsoft.Json;
+﻿using CodePush.Net46.Adapters.Http;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using PCLStorage;
+using System;
 using System.IO;
 using System.IO.Compression;
-using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
-using System;
-#if WINDOWS_UWP
-using Windows.Web.Http;
-#else
-using CodePush.Net46.Adapters.Http;
-using PCLStorage;
-#endif
+using System.Threading.Tasks;
+
 
 [assembly: InternalsVisibleTo("CodePush.Net46.UnitTest")]
 
@@ -33,7 +30,7 @@ namespace CodePush.ReactNative
             var newUpdateFolder = await GetPackageFolderAsync(newUpdateHash, false).ConfigureAwait(false);
             if (newUpdateFolder != null)
             {
-                // This removes any stale data in newPackageFolderPath that could have been left
+                // This removes any stale data in newUpdateFolder that could have been left
                 // uncleared due to a crash or error during the download or install process.
                 await newUpdateFolder.DeleteAsync().ConfigureAwait(false);
             }
@@ -44,14 +41,14 @@ namespace CodePush.ReactNative
             var downloadFile = await GetDownloadFileAsync().ConfigureAwait(false);
 
             await UpdateUtils.DownloadBundleAsync(downloadUrlString, downloadFile.Path, downloadProgress);
-
+            
             try
             {
                 // Unzip the downloaded file and then delete the zip
                 var unzippedFolder = await GetUnzippedFolderAsync().ConfigureAwait(false);
                 /**
                  * TODO:
-                 *  1) ZipFile.ExtractToDirectory is nor reliable and throws exception if:
+                 *  1) ZipFile.ExtractToDirectory is not reliable and throws exception if:
                  *      - folder exists already
                  *      - path is too long (> 250 chars)
                  *  
@@ -99,7 +96,7 @@ namespace CodePush.ReactNative
 
                 // For zip updates, we need to find the relative path to the jsBundle and save it in the
                 // metadata so that we can find and run it easily the next time.
-                string relativeBundlePath = await UpdateUtils.FindJSBundleInUpdateContentsAsync(newUpdateFolder, expectedBundleFileName).ConfigureAwait(false);
+                var relativeBundlePath = await UpdateUtils.FindJSBundleInUpdateContentsAsync(newUpdateFolder, expectedBundleFileName).ConfigureAwait(false);
                 if (relativeBundlePath == null)
                 {
                     throw new InvalidDataException("Update is invalid - A JS bundle file named \"" + expectedBundleFileName + "\" could not be found within the downloaded contents. Please check that you are releasing your CodePush updates using the exact same JS bundle file name that was shipped with your app's binary.");
@@ -132,7 +129,7 @@ namespace CodePush.ReactNative
 
         internal async Task<JObject> GetCurrentPackageAsync()
         {
-            string packageHash = await GetCurrentPackageHashAsync().ConfigureAwait(false);
+            var packageHash = await GetCurrentPackageHashAsync().ConfigureAwait(false);
             return packageHash == null ? null : await GetPackageAsync(packageHash).ConfigureAwait(false);
         }
 
@@ -144,7 +141,7 @@ namespace CodePush.ReactNative
                 return null;
             }
 
-            JObject currentPackage = await GetCurrentPackageAsync().ConfigureAwait(false);
+            var currentPackage = await GetCurrentPackageAsync().ConfigureAwait(false);
             var relativeBundlePath = (string)currentPackage[CodePushConstants.RelativeBundlePathKey];
 
             return relativeBundlePath == null
@@ -154,14 +151,14 @@ namespace CodePush.ReactNative
 
         internal async Task<string> GetCurrentPackageHashAsync()
         {
-            JObject info = await GetCurrentPackageInfoAsync().ConfigureAwait(false);
-            string currentPackageShortHash = (string)info[CodePushConstants.CurrentPackageKey];
+            var info = await GetCurrentPackageInfoAsync().ConfigureAwait(false);
+            var currentPackageShortHash = (string)info[CodePushConstants.CurrentPackageKey];
             if (currentPackageShortHash == null)
             {
                 return null;
             }
 
-            JObject currentPackageMetadata = await GetPackageAsync(currentPackageShortHash).ConfigureAwait(false);
+            var currentPackageMetadata = await GetPackageAsync(currentPackageShortHash).ConfigureAwait(false);
             return currentPackageMetadata == null ? null : (string)currentPackageMetadata[CodePushConstants.PackageHashKey];
         }
 
@@ -206,14 +203,14 @@ namespace CodePush.ReactNative
 
         internal async Task<JObject> GetPreviousPackageAsync()
         {
-            string packageHash = await GetPreviousPackageHashAsync().ConfigureAwait(false);
+            var packageHash = await GetPreviousPackageHashAsync().ConfigureAwait(false);
             return packageHash == null ? null : await GetPackageAsync(packageHash).ConfigureAwait(false);
         }
 
         internal async Task<string> GetPreviousPackageHashAsync()
         {
             var info = await GetCurrentPackageInfoAsync().ConfigureAwait(false);
-            string previousPackageShortHash = (string)info[CodePushConstants.PreviousPackageKey];
+            var previousPackageShortHash = (string)info[CodePushConstants.PreviousPackageKey];
             if (previousPackageShortHash == null)
             {
                 return null;
@@ -239,7 +236,7 @@ namespace CodePush.ReactNative
             }
             else
             {
-                string previousPackageHash = await GetPreviousPackageHashAsync().ConfigureAwait(false);
+                var previousPackageHash = await GetPreviousPackageHashAsync().ConfigureAwait(false);
                 if (previousPackageHash != null && !previousPackageHash.Equals(packageHash))
                 {
                     var previousPackageFolder = await GetPackageFolderAsync(previousPackageHash, false).ConfigureAwait(false);

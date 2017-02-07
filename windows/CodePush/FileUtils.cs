@@ -19,6 +19,7 @@ namespace CodePush.ReactNative
                 await MergeFoldersAsync(sourceDirectory, nextTargetSubDir).ConfigureAwait(false);
             }
         }
+
         internal async static Task ClearReactDevBundleCacheAsync()
         {
             var devBundleCacheFile = (StorageFile)await ApplicationData.Current.LocalFolder.TryGetItemAsync(CodePushConstants.ReactDevBundleCacheFileName).AsTask().ConfigureAwait(false);

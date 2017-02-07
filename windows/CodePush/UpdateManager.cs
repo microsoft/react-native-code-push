@@ -28,7 +28,7 @@ namespace CodePush.ReactNative
             StorageFolder newUpdateFolder = await GetPackageFolderAsync(newUpdateHash, false).ConfigureAwait(false);
             if (newUpdateFolder != null)
             {
-                // This removes any stale data in newPackageFolderPath that could have been left
+                // This removes any stale data in newUpdateFolder that could have been left
                 // uncleared due to a crash or error during the download or install process.
                 await newUpdateFolder.DeleteAsync().AsTask().ConfigureAwait(false);
             }
@@ -100,9 +100,9 @@ namespace CodePush.ReactNative
             }
             catch (Exception e)
             {
-				/*TODO: ZipFile.ExtractToDirectory is nor relible and throws exceptions if:
+				/*TODO: ZipFile.ExtractToDirectory is not reliable and throws exceptions if:
 				 	- folder exists already
-					 - path too long
+					- path is too long
 					it needs to be handled			 
 				 */
                 throw e;

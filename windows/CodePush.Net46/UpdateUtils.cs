@@ -6,7 +6,6 @@ using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 
-
 namespace CodePush.ReactNative
 {
     internal class UpdateUtils
@@ -54,8 +53,8 @@ namespace CodePush.ReactNative
             {
                 downloadProgress.Report(new HttpProgress
                 {
-                    BytesReceived = (UInt64)e.BytesReceived,           //conversion ulong to long is safe
-                    TotalBytesToReceive = (UInt64)e.TotalBytesToReceive //because size can't be negative
+                    BytesReceived = (ulong)e.BytesReceived,            //conversion long to ulong is safe
+                    TotalBytesToReceive = (ulong)e.TotalBytesToReceive //because size can't be negative
                 });
             };
 

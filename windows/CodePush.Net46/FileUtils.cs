@@ -20,28 +20,21 @@ namespace CodePush.ReactNative
                 await MergeFoldersAsync(sourceDirectory, nextTargetSubDir).ConfigureAwait(false);
             }
         }
+
         internal async static Task ClearReactDevBundleCacheAsync()
         {
-            try
-            {
 
-                var devBundleCacheFile = await FileSystem.Current.LocalStorage.GetFileAsync(CodePushConstants.ReactDevBundleCacheFileName).ConfigureAwait(false);
+            if (await FileSystem.Current.LocalStorage.CheckExistsAsync(CodePushConstants.ReactDevBundleCacheFileName).ConfigureAwait(false) != ExistenceCheckResult.FileExists)
+                return;
 
-                if (devBundleCacheFile != null)
-                {
-                    await devBundleCacheFile.DeleteAsync().ConfigureAwait(false);
-                }
-            }
-            catch (FileNotFoundException)
-            {
-                //no files do nothing
-            }
+            var devBundleCacheFile = await FileSystem.Current.LocalStorage.GetFileAsync(CodePushConstants.ReactDevBundleCacheFileName).ConfigureAwait(false);
+            await devBundleCacheFile.DeleteAsync().ConfigureAwait(false);
         }
 
         internal static Task<long> GetBinaryResourcesModifiedTimeAsync(string fileName)
         {
             var pathToAssembly = CodePushUtils.GetAppFolder();
-            var pathToAssemblyResource = Path.Combine(pathToAssembly, CodePushConstants.AssetsBundlePrefix.Replace("ms-appx:///", String.Empty), fileName);
+            var pathToAssemblyResource = Path.Combine(pathToAssembly, CodePushConstants.AssetsBundlePrefix, fileName);
             var lastUpdateTime = File.GetCreationTime(pathToAssemblyResource);
 
             return Task.FromResult(new DateTimeOffset(lastUpdateTime).ToUnixTimeMilliseconds());
