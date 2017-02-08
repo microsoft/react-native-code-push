@@ -12,11 +12,18 @@ namespace CodePush.ReactNative
 {
     internal class SettingsManager
     {
+        private static ApplicationDataContainer Settings = null;
+
+        static SettingsManager ()
+        {
+
 #if WINDOWS_UWP
-        private static ApplicationDataContainer Settings = ApplicationData.Current.LocalSettings.CreateContainer(CodePushConstants.CodePushPreferences, ApplicationDataCreateDisposition.Always);
+            Settings = ApplicationData.Current.LocalSettings.CreateContainer(CodePushConstants.CodePushPreferences, ApplicationDataCreateDisposition.Always);
 #else
-        private static ApplicationDataContainer Settings = new ApplicationDataContainer(Path.Combine(CodePushUtils.GetAppFolder(), CodePushConstants.CodePushFolderPrefix, CodePushConstants.CodePushPreferences));
+            var folder = UpdateUtils.GetCodePushFolderAsync().Result;
+            Settings = new ApplicationDataContainer(Path.Combine(folder.Path, CodePushConstants.CodePushPreferences));
 #endif
+        }
 
         public static JArray GetFailedUpdates()
         {

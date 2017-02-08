@@ -19,13 +19,13 @@ namespace CodePush.ReactNative
 
         internal async Task ClearUpdatesAsync()
         {
-            await (await GetCodePushFolderAsync().ConfigureAwait(false)).DeleteAsync().ConfigureAwait(false);
+            await (await UpdateUtils.GetCodePushFolderAsync().ConfigureAwait(false)).DeleteAsync().ConfigureAwait(false);
         }
 
         internal async Task DownloadPackageAsync(JObject updatePackage, string expectedBundleFileName, Progress<HttpProgress> downloadProgress)
         {
             // Using its hash, get the folder where the new update will be saved 
-            var codePushFolder = await GetCodePushFolderAsync().ConfigureAwait(false);
+            var codePushFolder = await UpdateUtils.GetCodePushFolderAsync().ConfigureAwait(false);
             var newUpdateHash = (string)updatePackage[CodePushConstants.PackageHashKey];
             var newUpdateFolder = await GetPackageFolderAsync(newUpdateHash, false).ConfigureAwait(false);
             if (newUpdateFolder != null)
@@ -183,7 +183,7 @@ namespace CodePush.ReactNative
 
         internal async Task<IFolder> GetPackageFolderAsync(string packageHash, bool createIfNotExists)
         {
-            var codePushFolder = await GetCodePushFolderAsync().ConfigureAwait(false);
+            var codePushFolder = await UpdateUtils.GetCodePushFolderAsync().ConfigureAwait(false);
             try
             {
                 packageHash = ShortenPackageHash(packageHash);
@@ -271,12 +271,6 @@ namespace CodePush.ReactNative
 
         #region Private methods
 
-        private async Task<IFolder> GetCodePushFolderAsync()
-        {
-            var pathToCodePush = Path.Combine(CodePushUtils.GetAppFolder(), CodePushConstants.CodePushFolderPrefix);
-            return await FileSystem.Current.LocalStorage.CreateFolderAsync(pathToCodePush, CreationCollisionOption.OpenIfExists).ConfigureAwait(false);
-        }
-
         private async Task<IFolder> GetCurrentPackageFolderAsync()
         {
             var info = await GetCurrentPackageInfoAsync().ConfigureAwait(false);
@@ -292,19 +286,19 @@ namespace CodePush.ReactNative
 
         private async Task<IFile> GetDownloadFileAsync()
         {
-            var codePushFolder = await GetCodePushFolderAsync().ConfigureAwait(false);
+            var codePushFolder = await UpdateUtils.GetCodePushFolderAsync().ConfigureAwait(false);
             return await codePushFolder.CreateFileAsync(CodePushConstants.DownloadFileName, CreationCollisionOption.OpenIfExists).ConfigureAwait(false);
         }
 
         private async Task<IFile> GetStatusFileAsync()
         {
-            var codePushFolder = await GetCodePushFolderAsync().ConfigureAwait(false);
+            var codePushFolder = await UpdateUtils.GetCodePushFolderAsync().ConfigureAwait(false);
             return await codePushFolder.CreateFileAsync(CodePushConstants.StatusFileName, CreationCollisionOption.OpenIfExists).ConfigureAwait(false);
         }
 
         private async Task<IFolder> GetUnzippedFolderAsync()
         {
-            var codePushFolder = await GetCodePushFolderAsync().ConfigureAwait(false);
+            var codePushFolder = await UpdateUtils.GetCodePushFolderAsync().ConfigureAwait(false);
             return await codePushFolder.CreateFolderAsync(CodePushConstants.UnzippedFolderName, CreationCollisionOption.OpenIfExists).ConfigureAwait(false);
         }
 
