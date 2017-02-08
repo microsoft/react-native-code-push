@@ -100,6 +100,11 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Facebook.Yoga, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Facebook.Yoga.1.0.1-pre\lib\netstandard\Facebook.Yoga.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -166,7 +171,9 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Microsoft.ChakraCore.1.4.1-preview-00010-42060\build\netstandard1.0\Microsoft.ChakraCore.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.ChakraCore.1.4.1-preview-00010-42060\build\netstandard1.0\Microsoft.ChakraCore.props'))" />
+    <Error Condition="!Exists('..\packages\Facebook.Yoga.1.0.1-pre\build\netstandard\Facebook.Yoga.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Facebook.Yoga.1.0.1-pre\build\netstandard\Facebook.Yoga.targets'))" />
   </Target>
+  <Import Project="..\packages\Facebook.Yoga.1.0.1-pre\build\netstandard\Facebook.Yoga.targets" Condition="Exists('..\packages\Facebook.Yoga.1.0.1-pre\build\netstandard\Facebook.Yoga.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

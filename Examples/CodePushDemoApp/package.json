@@ -10,6 +10,6 @@
     "react": "15.4.0",
     "react-native": "0.40.0",
     "react-native-code-push": "file:../../",
-    "react-native-windows": "git://github.com/ReactWindows/react-native-windows.git"
+    "react-native-windows": "0.40.0-rc.1"
   }
 }
