@@ -104,22 +104,13 @@ public class CodePush implements ReactPackage {
     }
 
     long getBinaryResourcesModifiedTime() {
-        ZipFile applicationFile = null;
         try {
-            ApplicationInfo ai = this.mContext.getPackageManager().getApplicationInfo(this.mContext.getPackageName(), 0);
-            applicationFile = new ZipFile(ai.sourceDir);
-            ZipEntry classesDexEntry = applicationFile.getEntry(CodePushConstants.RESOURCES_BUNDLE);
-            return classesDexEntry.getTime();
-        } catch (PackageManager.NameNotFoundException | IOException e) {
-            throw new CodePushUnknownException("Error in getting file information about compiled resources", e);
-        } finally {
-            if (applicationFile != null) {
-                try {
-                    applicationFile.close();
-                } catch (IOException e) {
-                    throw new CodePushUnknownException("Error in closing application file.", e);
-                }
-            }
+            String packageName = this.mContext.getPackageName();
+            int codePushApkBuildTimeId = this.mContext.getResources().getIdentifier(CodePushConstants.CODE_PUSH_APK_BUILD_TIME_KEY, "string", packageName);
+            String codePushApkBuildTime = this.mContext.getResources().getString(codePushApkBuildTimeId);
+            return Long.parseLong(codePushApkBuildTime);
+        } catch (Exception e)  {
+            throw new CodePushUnknownException("Error in getting binary resources modified time", e);
         }
     }
 
