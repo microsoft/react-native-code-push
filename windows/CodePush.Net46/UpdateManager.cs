@@ -24,7 +24,7 @@ namespace CodePush.ReactNative
 
         internal async Task DownloadPackageAsync(JObject updatePackage, string expectedBundleFileName, Progress<HttpProgress> downloadProgress)
         {
-            // Using its hash, get the folder where the new update will be saved 
+            // Using its hash, get the folder where the new update will be saved
             var codePushFolder = await UpdateUtils.GetCodePushFolderAsync().ConfigureAwait(false);
             var newUpdateHash = (string)updatePackage[CodePushConstants.PackageHashKey];
             var newUpdateFolder = await GetPackageFolderAsync(newUpdateHash, false).ConfigureAwait(false);
@@ -41,7 +41,7 @@ namespace CodePush.ReactNative
             var downloadFile = await GetDownloadFileAsync().ConfigureAwait(false);
 
             await UpdateUtils.DownloadBundleAsync(downloadUrlString, downloadFile.Path, downloadProgress);
-            
+
             try
             {
                 // Unzip the downloaded file and then delete the zip
@@ -51,12 +51,12 @@ namespace CodePush.ReactNative
                  *  1) ZipFile.ExtractToDirectory is not reliable and throws exception if:
                  *      - folder exists already
                  *      - path is too long (> 250 chars)
-                 *  
+                 *
                  *  2) Un-zipping is quite long operation. Does it make sense for async?
                  *  await UpdateUtils.UnzipBundleAsync(downloadFile.Path, unzippedFolder.Path);
-                 *  
+                 *
                  *  Possible implementation
-                 * 
+                 *
                  *  internal async static Task UnzipBundleAsync(string zipFileName, string targetDir)
                  *  {
                  *    await Task.Run(() =>
@@ -117,10 +117,6 @@ namespace CodePush.ReactNative
                 // Downloaded file is not a zip, assume it is a jsbundle
                 await downloadFile.RenameAsync(expectedBundleFileName).ConfigureAwait(false);
                 await downloadFile.MoveAsync(newUpdateFolder.Path, NameCollisionOption.ReplaceExisting).ConfigureAwait(false);
-            }
-            catch (Exception e)
-            {
-                throw e;    //left here for debug purposes to see the reason of ZipFile failure.
             }
 
             // Save metadata to the folder

@@ -22,7 +22,7 @@ namespace CodePush.ReactNative
 
         internal async Task DownloadPackageAsync(JObject updatePackage, string expectedBundleFileName, Progress<HttpProgress> downloadProgress)
         {
-            // Using its hash, get the folder where the new update will be saved 
+            // Using its hash, get the folder where the new update will be saved
             StorageFolder codePushFolder = await GetCodePushFolderAsync().ConfigureAwait(false);
             var newUpdateHash = (string)updatePackage[CodePushConstants.PackageHashKey];
             StorageFolder newUpdateFolder = await GetPackageFolderAsync(newUpdateHash, false).ConfigureAwait(false);
@@ -98,15 +98,11 @@ namespace CodePush.ReactNative
                 await downloadFile.RenameAsync(expectedBundleFileName).AsTask().ConfigureAwait(false);
                 await downloadFile.MoveAsync(newUpdateFolder).AsTask().ConfigureAwait(false);
             }
-            catch (Exception e)
-            {
-				/*TODO: ZipFile.ExtractToDirectory is not reliable and throws exceptions if:
-				 	- folder exists already
-					- path is too long
-					it needs to be handled			 
-				 */
-                throw e;
-            }
+            /*TODO: ZipFile.ExtractToDirectory is not reliable and throws exceptions if:
+            - folder exists already
+            - path is too long
+            it needs to be handled
+            */
 
             // Save metadata to the folder
             await FileIO.WriteTextAsync(newUpdateMetadataFile, JsonConvert.SerializeObject(updatePackage)).AsTask().ConfigureAwait(false);
