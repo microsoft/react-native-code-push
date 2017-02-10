@@ -419,6 +419,13 @@ code-push release-react [APP_NAME] ios -d test-variant-one
 *NOTE: The total user count that is reported in your deployment's "Install Metrics" will take into account users that have "switched" from one deployment to another. For example, if your `Production` deployment currently reports having 1 total user, but you dynamically switch that user to `Staging`, then the `Production` deployment would report 0 total users, while `Staging` would report 1 (the user that just switched). This behavior allows you to accurately track your release adoption, even in the event of using a runtime-based deployment redirection solution.*
 
 ---
+
+## API Reference
+
+* [JavaScript API](docs/api-js.md)
+* [Objective-C API Reference (iOS)](docs/api-ios.md)
+* [Java API Reference (Android)](docs/api-android.md)
+
 ## Example Apps / Starters
 
 The React Native community has graciously created some awesome open source apps that can serve as examples for developers that are getting started. The following is a list of OSS React Native apps that are also using CodePush, and can therefore be used to see how others are using the service:
