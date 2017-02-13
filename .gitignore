@@ -150,3 +150,6 @@ captures/
 
 # Remove after this framework is published on NPM
 code-push-plugin-testing-framework/node_modules
+
+# RN New Version App Generation
+Examples/testapp_rn
