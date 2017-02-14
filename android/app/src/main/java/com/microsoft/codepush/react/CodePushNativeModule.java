@@ -290,7 +290,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             }
         };
 
-        asyncTask.execute();
+        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @ReactMethod
@@ -364,7 +364,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             }
         };
 
-        asyncTask.execute();
+        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @ReactMethod
@@ -416,7 +416,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             }
         };
 
-        asyncTask.execute();
+        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @ReactMethod
@@ -485,7 +485,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             }
         };
 
-        asyncTask.execute();
+        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     @ReactMethod

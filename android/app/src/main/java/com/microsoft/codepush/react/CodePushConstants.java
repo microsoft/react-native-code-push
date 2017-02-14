@@ -25,4 +25,5 @@ public class CodePushConstants {
     public static final String RESOURCES_BUNDLE = "resources.arsc";
     public static final String STATUS_FILE = "codepush.json";
     public static final String UNZIPPED_FOLDER_NAME = "unzipped";
+    public static final String CODE_PUSH_APK_BUILD_TIME_KEY = "CODE_PUSH_APK_BUILD_TIME";
 }
