@@ -7,7 +7,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+#if WINDOWS_UWP
 using Windows.Web.Http;
+#else
+using CodePush.Net46.Adapters.Http;
+#endif
 
 namespace CodePush.ReactNative
 {
@@ -57,7 +61,7 @@ namespace CodePush.ReactNative
         {
             try
             {
-                updatePackage[CodePushConstants.BinaryModifiedTimeKey] = "" + await _codePush.GetBinaryResourcesModifiedTimeAsync().ConfigureAwait(false);
+                updatePackage[CodePushConstants.BinaryModifiedTimeKey] = "" + await FileUtils.GetBinaryResourcesModifiedTimeAsync(_codePush.AssetsBundleFileName).ConfigureAwait(false);
                 await _codePush.UpdateManager.DownloadPackageAsync(
                     updatePackage,
                     _codePush.AssetsBundleFileName,
@@ -194,7 +198,7 @@ namespace CodePush.ReactNative
                             await LoadBundleAsync().ConfigureAwait(false);
                         });
                     };
-                        
+
                     _minimumBackgroundListener = new MinimumBackgroundListener(loadBundleAction, minimumBackgroundDuration);
                     _reactContext.AddLifecycleEventListener(_minimumBackgroundListener);
                 }
@@ -240,17 +244,22 @@ namespace CodePush.ReactNative
                 await LoadBundleAsync().ConfigureAwait(false);
             }
         }
-        
+
         internal async Task LoadBundleAsync()
         {
             // #1) Get the private ReactInstanceManager, which is what includes
             //     the logic to reload the current React context.
             FieldInfo info = typeof(ReactPage)
                 .GetField("_reactInstanceManager", BindingFlags.NonPublic | BindingFlags.Instance);
-
+#if WINDOWS_UWP
             var reactInstanceManager = (ReactInstanceManager)typeof(ReactPage)
                 .GetField("_reactInstanceManager", BindingFlags.NonPublic | BindingFlags.Instance)
                 .GetValue(_codePush.MainPage);
+#else
+            var reactInstanceManager = ((Lazy<IReactInstanceManager>)typeof(ReactPage)
+                .GetField("_reactInstanceManager", BindingFlags.NonPublic | BindingFlags.Instance)
+                .GetValue(_codePush.MainPage)).Value as ReactInstanceManager;
+#endif
 
             // #2) Update the locally stored JS bundle file path
             Type reactInstanceManagerType = typeof(ReactInstanceManager);

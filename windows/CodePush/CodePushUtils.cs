@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Windows.Storage;
 using Windows.Storage.Streams;
@@ -8,7 +7,7 @@ using Windows.System.Profile;
 
 namespace CodePush.ReactNative
 {
-    internal class CodePushUtils
+    internal partial class CodePushUtils
     {
         internal async static Task<JObject> GetJObjectFromFileAsync(StorageFile file)
         {
@@ -28,17 +27,7 @@ namespace CodePush.ReactNative
             }
         }
 
-        internal static void Log(string message)
-        {
-            Debug.WriteLine("[CodePush] " + message, CodePushConstants.ReactNativeLogCategory);
-        }
-
-        internal static void LogBundleUrl(string path)
-        {
-            Log("Loading JS bundle from \"" + path + "\"");
-        }
-
-        internal static string GetDeviceId()
+        static string GetDeviceIdImpl()
         {
             HardwareToken token = HardwareIdentification.GetPackageSpecificToken(null);
             IBuffer hardwareId = token.Id;
