@@ -99,7 +99,6 @@ namespace CodePush.ReactNative
                 await downloadFile.MoveAsync(newUpdateFolder).AsTask().ConfigureAwait(false);
             }
             /*TODO: ZipFile.ExtractToDirectory is not reliable and throws exceptions if:
-            - folder exists already
             - path is too long
             it needs to be handled
             */

@@ -49,7 +49,6 @@ namespace CodePush.ReactNative
                 /**
                  * TODO:
                  *  1) ZipFile.ExtractToDirectory is not reliable and throws exception if:
-                 *      - folder exists already
                  *      - path is too long (> 250 chars)
                  *
                  *  2) Un-zipping is quite long operation. Does it make sense for async?
