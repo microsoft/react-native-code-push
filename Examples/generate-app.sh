@@ -10,18 +10,11 @@
 # The goal of this script is to automate the testing of react-native, react-native-code-push and 
 # their internal compatibility. Run **./run.sh** to create an app and test it. 
 
-# You can configure below variables in the bash. 
-
-# 1. `code_push_version`
-# 2. `react_native_code_push_version`
-# 3. `react_native_version`
-# 4. `mobile_env`
-
 # If you use other libs or packages, and fail to run this test, welcome to modify this script 
 # so that we can reproduce any issues that you have.
 
 
-echo 'Automate synchronization testing between React Native and React Native Code Push';
+echo 'CodePush + RN sample app generation script';
 echo
 
 rm -rf testapp_rn
@@ -29,11 +22,6 @@ rm -rf testapp_rn
 # Please make sure you installed react native in your mac machine
 
 echo '************************ Configuration ***********************************';
-
-####################  Code Push Config  #########################W#########################
-
-code_push_cli_version=`code-push --version`;
-echo 'Code Push CLI version: ' + ${code_push_cli_version};
 
 ####################  React Native Config  #################################################
 
@@ -57,7 +45,6 @@ if [ ! $react_native_code_push_version ]; then
 fi
 echo 'React Native Code Push version: ' + $react_native_code_push_version
 echo
-
 
 ####################  Start Testing  #########################################################
 
@@ -83,16 +70,13 @@ cp ../CodePushDemoApp/*js .
 mkdir images
 cp ../CodePushDemoApp/images/* images
 
-echo '********************* Running IOS ***************************************';
+sed -i.bak '162s/AppRegistry.registerComponent("CodePushDemoApp", () => CodePushDemoApp);/AppRegistry.registerComponent("testapp_rn", () => CodePushDemoApp);/' demo.js
+rm -f demo.js.bak
 
-react-native run-ios
+perl -i -p0e 's/#ifdef DEBUG.*?#endif/jsCodeLocation = [CodePush bundleURL];/s' ios/testapp_rn/AppDelegate.m
 
-echo '********************* Running Android ***************************************';
+sed -i.bak '17,20d' node_modules/react-native/packager/react-native-xcode.sh
+rm -f node_modules/react-native/packager/react-native-xcode.sh.bak
 
-read -p "you need to open the android simulator manually before continue running this script. Enter [Enter] to continue" 
-
-react-native run-android
-
-# cd ..
-# rm -rf testapp
-# exit;
+sed -i.bak '90s/targetName.toLowerCase().contains("release")/true/' node_modules/react-native/react.gradle
+rm -f node_modules/react-native/react.gradle.bak
