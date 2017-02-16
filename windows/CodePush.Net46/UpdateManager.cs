@@ -45,7 +45,7 @@ namespace CodePush.ReactNative
             try
             {
                 // Unzip the downloaded file and then delete the zip
-                var unzippedFolder = await InitUnzippedFolderAsync().ConfigureAwait(false);
+                var unzippedFolder = await CreateUnzippedFolderAsync().ConfigureAwait(false);
                 /**
                  * TODO:
                  *  1) ZipFile.ExtractToDirectory is not reliable and throws exception if:
@@ -291,14 +291,14 @@ namespace CodePush.ReactNative
             return await codePushFolder.CreateFileAsync(CodePushConstants.StatusFileName, CreationCollisionOption.OpenIfExists).ConfigureAwait(false);
         }
 
-        private async Task<IFolder> InitUnzippedFolderAsync()
+        private async Task<IFolder> CreateUnzippedFolderAsync()
         {
             var codePushFolder = await UpdateUtils.GetCodePushFolderAsync().ConfigureAwait(false);
             var isUnzippedFolderExists = await codePushFolder.CheckExistsAsync(CodePushConstants.UnzippedFolderName).ConfigureAwait(false);
 
             if (isUnzippedFolderExists != ExistenceCheckResult.NotFound)
             {
-                await codePushFolder.GetFolderAsync(CodePushConstants.UnzippedFolderName).ContinueWith((getFolder) => getFolder.Result.DeleteAsync());
+                await codePushFolder.GetFolderAsync(CodePushConstants.UnzippedFolderName).ContinueWith((existingFolder) => existingFolder.Result.DeleteAsync());
             }
 
             return await codePushFolder.CreateFolderAsync(CodePushConstants.UnzippedFolderName, CreationCollisionOption.OpenIfExists).ConfigureAwait(false);
