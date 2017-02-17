@@ -7,20 +7,11 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 
-# The goal of this script is to automate the testing of react-native, react-native-code-push and 
-# their internal compatibility. Run **./run.sh** to create an app and test it. 
-
-# If you use other libs or packages, and fail to run this test, welcome to modify this script 
-# so that we can reproduce any issues that you have.
-
-
 echo 'CodePush + RN sample app generation script';
 echo
 
 rm -rf testapp_rn
  
-# Please make sure you installed react native in your mac machine
-
 echo '************************ Configuration ***********************************';
 
 ####################  React Native Config  #################################################

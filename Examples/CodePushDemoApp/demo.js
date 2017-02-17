@@ -11,11 +11,6 @@ import {
 
 import CodePush from "react-native-code-push";
 
-/**
- * Configured with a MANUAL check frequency for easy testing. For production apps, it is recommended to configure a
- * different check frequency, such as ON_APP_START, for a 'hands-off' approach where CodePush.sync() does not
- * need to be explicitly called. All options of CodePush.sync() are also available in this decorator.
- */
 class CodePushDemoApp extends Component {
   constructor() {
     super();
@@ -155,6 +150,11 @@ const styles = StyleSheet.create({
   },
 });
 
+/**
+ * Configured with a MANUAL check frequency for easy testing. For production apps, it is recommended to configure a
+ * different check frequency, such as ON_APP_START, for a 'hands-off' approach where CodePush.sync() does not
+ * need to be explicitly called. All options of CodePush.sync() are also available in this decorator.
+ */
 let codePushOptions = { checkFrequency: CodePush.CheckFrequency.MANUAL };
 
 CodePushDemoApp = new CodePush(codePushOptions)(CodePushDemoApp);
