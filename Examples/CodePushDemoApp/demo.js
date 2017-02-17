@@ -157,6 +157,6 @@ const styles = StyleSheet.create({
  */
 let codePushOptions = { checkFrequency: CodePush.CheckFrequency.MANUAL };
 
-CodePushDemoApp = new CodePush(codePushOptions)(CodePushDemoApp);
+CodePushDemoApp = CodePush(codePushOptions)(CodePushDemoApp);
 
 AppRegistry.registerComponent("CodePushDemoApp", () => CodePushDemoApp);

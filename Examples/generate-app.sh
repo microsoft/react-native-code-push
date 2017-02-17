@@ -14,22 +14,17 @@ rm -rf testapp_rn
  
 echo '************************ Configuration ***********************************';
 
-####################  React Native Config  #################################################
+####################  Configure versions  #################################################
 
-echo "list all react native versions: npm show react-native versions --json" 
-read -p "Enter react native version, [default] is the latest version:" react_native_version
+read -p "Enter React Native version (default: latest):" react_native_version
+read -p "Enter CodePush version (default: latest): " react_native_code_push_version
+
+echo
 
 if [ ! $react_native_version]; then
 	react_native_version=`npm view react-native version`
 fi
 echo 'React Native version: ' + $react_native_version
-
-npm list -g rninit
-
-####################  React Native Code Push Config  ######################################
-
-echo "list all react native versions: npm show react-native-code-push versions --json"
-read -p "Enter react native code push version, [default] is the latest version: " react_native_code_push_version
 
 if [ ! $react_native_code_push_version ]; then
 	react_native_code_push_version=`npm view react-native-code-push version`
@@ -37,9 +32,9 @@ fi
 echo 'React Native Code Push version: ' + $react_native_code_push_version
 echo
 
-####################  Start Testing  #########################################################
+####################  Create app  #########################################################
 
-echo '********************* Yo, start to test ***************************************';
+echo '********************* Creating app ***************************************';
 
 current_dir=`pwd`;
 echo 'Current directory: ' + $current_dir;
@@ -61,13 +56,8 @@ cp ../CodePushDemoApp/*js .
 mkdir images
 cp ../CodePushDemoApp/images/* images
 
-sed -i.bak '162s/AppRegistry.registerComponent("CodePushDemoApp", () => CodePushDemoApp);/AppRegistry.registerComponent("testapp_rn", () => CodePushDemoApp);/' demo.js
-rm -f demo.js.bak
-
+# Make changes required to test CodePush in debug mode (see OneNote)
+sed -ie '162s/AppRegistry.registerComponent("CodePushDemoApp", () => CodePushDemoApp);/AppRegistry.registerComponent("testapp_rn", () => CodePushDemoApp);/' demo.js
 perl -i -p0e 's/#ifdef DEBUG.*?#endif/jsCodeLocation = [CodePush bundleURL];/s' ios/testapp_rn/AppDelegate.m
-
-sed -i.bak '17,20d' node_modules/react-native/packager/react-native-xcode.sh
-rm -f node_modules/react-native/packager/react-native-xcode.sh.bak
-
-sed -i.bak '90s/targetName.toLowerCase().contains("release")/true/' node_modules/react-native/react.gradle
-rm -f node_modules/react-native/react.gradle.bak
+sed -ie '17,20d' node_modules/react-native/packager/react-native-xcode.sh
+sed -ie '90s/targetName.toLowerCase().contains("release")/true/' node_modules/react-native/react.gradle
