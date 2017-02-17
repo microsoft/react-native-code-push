@@ -1,4 +1,3 @@
-
 ### Java API Reference (Android)
 
 The Java API is made available by importing the `com.microsoft.codepush.react.CodePush` class into your `MainActivity.java` file, and consists of a single public class named `CodePush`.

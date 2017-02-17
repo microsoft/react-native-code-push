@@ -1,4 +1,3 @@
-
 ## API Reference
 
 The CodePush plugin is made up of two components:

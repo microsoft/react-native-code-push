@@ -1,4 +1,3 @@
-
 ## Android Setup
 
 In order to integrate CodePush into your Android project, perform the following steps:

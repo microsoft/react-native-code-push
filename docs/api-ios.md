@@ -1,4 +1,3 @@
-
 ### Objective-C API Reference (iOS)
 
 The Objective-C API is made available by importing the `CodePush.h` header into your `AppDelegate.m` file, and consists of a single public class named `CodePush`.
