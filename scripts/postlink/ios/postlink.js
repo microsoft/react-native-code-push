@@ -110,7 +110,7 @@ function getDefaultPlistPath() {
 // So we suppose that proj name should be the same as package name, otherwise fallback to default plist path searching logic
 function getBuildSettingsPropertyMatchingTargetProductName(parsedXCodeProj, prop, targetProductName, build){
     var target;
-    var COMMENT_KEY = /_comment$/
+    var COMMENT_KEY = /_comment$/;
     var PRODUCT_NAME_PROJECT_KEY = 'PRODUCT_NAME';
 
     if (!targetProductName){
@@ -156,9 +156,14 @@ function getPlistPath(){
     }
 
     var INFO_PLIST_PROJECT_KEY = 'INFOPLIST_FILE';
+    var RELEASE_BUILD_PROPERTY_NAME = "Release";
     var targetProductName = package ? package.name : null;
 
-    var plistPathValue = getBuildSettingsPropertyMatchingTargetProductName(parsedXCodeProj, INFO_PLIST_PROJECT_KEY, targetProductName);
+    //Try to get 'Release' build of ProductName matching the package name first and if it doesn't exist then try to get any other if existing
+    var plistPathValue = getBuildSettingsPropertyMatchingTargetProductName(parsedXCodeProj, INFO_PLIST_PROJECT_KEY, targetProductName, RELEASE_BUILD_PROPERTY_NAME) || 
+        getBuildSettingsPropertyMatchingTargetProductName(parsedXCodeProj, INFO_PLIST_PROJECT_KEY, targetProductName) ||
+         parsedXCodeProj.getBuildProperty(INFO_PLIST_PROJECT_KEY, RELEASE_BUILD_PROPERTY_NAME) || 
+         parsedXCodeProj.getBuildProperty(INFO_PLIST_PROJECT_KEY);
 
     if (!plistPathValue){
         return getDefaultPlistPath();
