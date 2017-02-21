@@ -20,7 +20,8 @@
     "code-push": "1.8.0-beta",
     "glob": "^5.0.15",
     "inquirer": "1.1.2",
-    "plist": "1.2.0"
+    "plist": "1.2.0",
+    "xcode": "0.9.1"
   },
   "devDependencies": {
     "archiver": "latest",

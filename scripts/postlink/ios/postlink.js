@@ -3,6 +3,8 @@ var glob = require("glob");
 var inquirer = require('inquirer');
 var path = require("path");
 var plist = require("plist");
+var xcode = require("xcode");
+
 var package = require('../../../../../package.json');
 
 var ignoreNodeModules = { ignore: "node_modules/**" };
@@ -49,9 +51,12 @@ if (~appDelegateContents.indexOf(newJsCodeLocationAssignmentStatement)) {
         jsCodeLocationPatch);
 }
 
-var plistPath = glob.sync(`**/${package.name}/*Info.plist`, ignoreNodeModules)[0];
+var plistPath = getPlistPath();
+
 if (!plistPath) {
-    console.log("Couldn't find .plist file");
+    console.log(`Couldn't find .plist file. You might need to update it manually \
+Please refer to plugin configuration section for iOS at \
+https://github.com/microsoft/react-native-code-push#plugin-configuration-ios`);
     return;
 }
 
@@ -93,4 +98,76 @@ function findFileByAppName(array, appName) {
     }
 
     return null;
+}
+
+function getDefaultPlistPath() {
+    //this is old logic in case we are unable to find PLIST from xcode/pbxproj - at least we can fallback to default solution
+    return glob.sync(`**/${package.name}/*Info.plist`, ignoreNodeModules)[0];
+}
+
+// This is enhanced version of standard implementation of xcode 'getBuildProperty' function  
+// but allows us to narrow results by PRODUCT_NAME property also. 
+// So we suppose that proj name should be the same as package name, otherwise fallback to default plist path searching logic
+function getBuildSettingsPropertyMatchingTargetProductName(parsedXCodeProj, prop, targetProductName, build){
+    var target;
+    var COMMENT_KEY = /_comment$/;
+    var PRODUCT_NAME_PROJECT_KEY = 'PRODUCT_NAME';
+
+    if (!targetProductName){
+        return target;
+    }
+
+    var configs = parsedXCodeProj.pbxXCBuildConfigurationSection();
+    for (var configName in configs) {
+        if (!COMMENT_KEY.test(configName)) {
+            var config = configs[configName];
+            if ( (build && config.name === build) || (build === undefined) ) {
+                if (config.buildSettings[prop] !== undefined && config.buildSettings[PRODUCT_NAME_PROJECT_KEY] == targetProductName) {
+                    target = config.buildSettings[prop];
+                }
+            }
+        }
+    }
+    return target;
+}
+
+function getPlistPath(){
+    var xcodeProjectPaths = glob.sync(`**/*.xcodeproj/project.pbxproj`, ignoreNodeModules);
+    if (!xcodeProjectPaths){
+        return getDefaultPlistPath();
+    }
+
+    if (xcodeProjectPaths.length !== 1) {
+        console.log('Could not determine correct xcode proj path to retrieve related plist file, there are multiple xcodeproj under the solution.');
+        return getDefaultPlistPath();
+    }
+
+    var xcodeProjectPath = xcodeProjectPaths[0];
+    var parsedXCodeProj;
+
+    try {
+        var proj = xcode.project(xcodeProjectPath);      
+        //use sync version because there are some problems with async version of xcode lib as of current version
+        parsedXCodeProj = proj.parseSync();
+    }
+    catch(e) {
+        console.log('Couldn\'t read info.plist path from xcode project - error: ' + e.message);
+        return getDefaultPlistPath();
+    }
+
+    var INFO_PLIST_PROJECT_KEY = 'INFOPLIST_FILE';
+    var RELEASE_BUILD_PROPERTY_NAME = "Release";
+    var targetProductName = package ? package.name : null;
+
+    //Try to get 'Release' build of ProductName matching the package name first and if it doesn't exist then try to get any other if existing
+    var plistPathValue = getBuildSettingsPropertyMatchingTargetProductName(parsedXCodeProj, INFO_PLIST_PROJECT_KEY, targetProductName, RELEASE_BUILD_PROPERTY_NAME) || 
+        getBuildSettingsPropertyMatchingTargetProductName(parsedXCodeProj, INFO_PLIST_PROJECT_KEY, targetProductName) ||
+         parsedXCodeProj.getBuildProperty(INFO_PLIST_PROJECT_KEY, RELEASE_BUILD_PROPERTY_NAME) || 
+         parsedXCodeProj.getBuildProperty(INFO_PLIST_PROJECT_KEY);
+
+    if (!plistPathValue){
+        return getDefaultPlistPath();
+    }
+
+    return path.resolve(path.dirname(xcodeProjectPath), '..', plistPathValue);    
 }
