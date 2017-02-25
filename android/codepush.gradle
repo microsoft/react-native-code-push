@@ -36,9 +36,8 @@ gradle.projectsEvaluated {
                     "${buildTypeName}"
 
             def jsBundleDirConfigName = "jsBundleDir${targetName}"
-            def assetsDir = "$buildDir/intermediates/assets/${targetPath}"
             def jsBundleDir = elvisFile(config."$jsBundleDirConfigName") ?:
-                    file(assetsDir)
+                    file("$buildDir/intermediates/assets/${targetPath}")
 
             def resourcesDirConfigName = "jsBundleDir${targetName}"
             def resourcesDir = elvisFile(config."${resourcesDirConfigName}") ?:
@@ -68,7 +67,7 @@ gradle.projectsEvaluated {
             def generateBundledResourcesHash = tasks.create(
                     name: "generateBundledResourcesHash${targetName}",
                     type: Exec) {
-                commandLine "node", "${nodeModulesPath}/react-native-code-push/scripts/generateBundledResourcesHash.js", resourcesDir, "$jsBundleDir/$bundleAssetName", assetsDir
+                commandLine "node", "${nodeModulesPath}/react-native-code-push/scripts/generateBundledResourcesHash.js", resourcesDir, "$jsBundleDir/$bundleAssetName", jsBundleDir
             }
 
             generateBundledResourcesHash.dependsOn("bundle${targetName}JsAndAssets")
