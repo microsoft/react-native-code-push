@@ -300,7 +300,7 @@ static NSString *const UnzippedFolderName = @"unzipped";
     return [CodePushPackage getPackage:packageHash error:error];
 }
 
-+ (NSString *)getCurrentPackageBundlePath:(NSError **)error
++ (NSString *)getCurrentPackageBundlePath:(NSError **)error withPath:(NSString *)withPath
 {
     NSString *packageFolder = [self getCurrentPackageFolderPath:error];
     
@@ -315,11 +315,16 @@ static NSString *const UnzippedFolderName = @"unzipped";
     }
     
     NSString *relativeBundlePath = [currentPackage objectForKey:RelativeBundlePathKey];
+    NSString *pathResult=nil;
     if (relativeBundlePath) {
-        return [packageFolder stringByAppendingPathComponent:relativeBundlePath];
+        pathResult= [packageFolder stringByAppendingPathComponent:relativeBundlePath];
     } else {
-        return [packageFolder stringByAppendingPathComponent:UpdateBundleFileName];
+        pathResult= [packageFolder stringByAppendingPathComponent:UpdateBundleFileName];
     }
+    if(pathResult && withPath && !([pathResult rangeOfString:withPath].location==NSNotFound)){
+        return nil;
+    }
+    return pathResult;
 }
 
 + (NSString *)getCurrentPackageHash:(NSError **)error
