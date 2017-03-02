@@ -53,7 +53,7 @@ namespace CodePush.ReactNative
             try
             {
                 // Unzip the downloaded file and then delete the zip
-                StorageFolder unzippedFolder = await GetUnzippedFolderAsync().ConfigureAwait(false);
+                StorageFolder unzippedFolder = await CreateUnzippedFolderAsync().ConfigureAwait(false);
                 ZipFile.ExtractToDirectory(downloadFile.Path, unzippedFolder.Path);
                 await downloadFile.DeleteAsync().AsTask().ConfigureAwait(false);
 
@@ -99,7 +99,6 @@ namespace CodePush.ReactNative
                 await downloadFile.MoveAsync(newUpdateFolder).AsTask().ConfigureAwait(false);
             }
             /*TODO: ZipFile.ExtractToDirectory is not reliable and throws exceptions if:
-            - folder exists already
             - path is too long
             it needs to be handled
             */
@@ -278,9 +277,16 @@ namespace CodePush.ReactNative
             return await codePushFolder.CreateFileAsync(CodePushConstants.StatusFileName, CreationCollisionOption.OpenIfExists).AsTask().ConfigureAwait(false);
         }
 
-        private async Task<StorageFolder> GetUnzippedFolderAsync()
+        private async Task<StorageFolder> CreateUnzippedFolderAsync()
         {
             StorageFolder codePushFolder = await GetCodePushFolderAsync().ConfigureAwait(false);
+            var unzippedFolder = await codePushFolder.TryGetItemAsync(CodePushConstants.UnzippedFolderName).AsTask().ConfigureAwait(false);
+
+            if (unzippedFolder != null)
+            {
+                await unzippedFolder.DeleteAsync();
+            }
+
             return await codePushFolder.CreateFolderAsync(CodePushConstants.UnzippedFolderName, CreationCollisionOption.OpenIfExists).AsTask().ConfigureAwait(false);
         }
 
