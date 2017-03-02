@@ -5,7 +5,7 @@ package = JSON.parse(File.read(File.join(__dir__, 'package.json')))
 Pod::Spec.new do |s|
 
   s.name           = 'CodePush'
-  s.version        = package['version'].sub('-beta', '')
+  s.version        = package['version'].gsub(/v|-beta/, '')
   s.summary        = package['description']
   s.author         = package['author']
   s.license        = package['license']
