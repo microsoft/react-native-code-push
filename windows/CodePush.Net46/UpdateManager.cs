@@ -45,11 +45,10 @@ namespace CodePush.ReactNative
             try
             {
                 // Unzip the downloaded file and then delete the zip
-                var unzippedFolder = await GetUnzippedFolderAsync().ConfigureAwait(false);
+                var unzippedFolder = await CreateUnzippedFolderAsync().ConfigureAwait(false);
                 /**
                  * TODO:
                  *  1) ZipFile.ExtractToDirectory is not reliable and throws exception if:
-                 *      - folder exists already
                  *      - path is too long (> 250 chars)
                  *
                  *  2) Un-zipping is quite long operation. Does it make sense for async?
@@ -292,9 +291,16 @@ namespace CodePush.ReactNative
             return await codePushFolder.CreateFileAsync(CodePushConstants.StatusFileName, CreationCollisionOption.OpenIfExists).ConfigureAwait(false);
         }
 
-        private async Task<IFolder> GetUnzippedFolderAsync()
+        private async Task<IFolder> CreateUnzippedFolderAsync()
         {
             var codePushFolder = await UpdateUtils.GetCodePushFolderAsync().ConfigureAwait(false);
+            var isUnzippedFolderExists = await codePushFolder.CheckExistsAsync(CodePushConstants.UnzippedFolderName).ConfigureAwait(false);
+
+            if (isUnzippedFolderExists != ExistenceCheckResult.NotFound)
+            {
+                await codePushFolder.GetFolderAsync(CodePushConstants.UnzippedFolderName).ContinueWith((existingFolder) => existingFolder.Result.DeleteAsync());
+            }
+
             return await codePushFolder.CreateFolderAsync(CodePushConstants.UnzippedFolderName, CreationCollisionOption.OpenIfExists).ConfigureAwait(false);
         }
 
