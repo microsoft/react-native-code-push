@@ -256,7 +256,8 @@ To set this up, perform the following steps:
         buildTypes {
             debug {
                 ...
-                // CodePush updates should not be tested in Debug mode
+                // CodePush updates should not be tested in Debug mode. Because CodePush checks for updates in all modes, we must supply a blank key. At runtime, when CodePush checks for updates it will fail and log errors, which can be ignored.
+                buildConfigField "String", "CODEPUSH_KEY", '""'
                 ...
             }
 
