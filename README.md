@@ -256,7 +256,8 @@ To set this up, perform the following steps:
         buildTypes {
             debug {
                 ...
-                // CodePush updates should not be tested in Debug mode
+                // Note: CodePush updates should not be tested in Debug mode as they are overriden by the RN packager. However, because CodePush checks for updates in all modes, we must supply a key.
+                buildConfigField "String", "CODEPUSH_KEY", '""'
                 ...
             }
 
