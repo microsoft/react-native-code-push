@@ -58,8 +58,8 @@ We try our best to maintain backwards compatability of our plugin with previous 
 | v0.31-v0.33             | v1.14.6+ *(RN refactored native hosting code)* |
 | v0.34-v0.35             | v1.15.0+ *(RN refactored native hosting code)* |
 | v0.36-v0.39             | v1.16.0+ *(RN refactored resume handler)*      |
-| v0.40-v0.41             | v1.17.0+ *(RN refactored iOS header files)*    |
-| v0.42+                  | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
+| v0.40-v0.42             | v1.17.0+ *(RN refactored iOS header files)*    |
+| v0.43+                  | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
 
 ### Supported Components
 
@@ -149,7 +149,7 @@ class MyApp extends Component {
 MyApp = codePush(codePushOptions)(MyApp);
 ```
 
-Alternatively, if you want fine-grained control over when the check happens (e.g. a button press or timer interval), you can call [`CodePush.sync()`](docs/api-js#codepushsync) at any time with your desired `SyncOptions`, and optionally turn off CodePush's automatic checking by specifying a manual `checkFrequency`:
+Alternatively, if you want fine-grained control over when the check happens (e.g. a button press or timer interval), you can call [`CodePush.sync()`](docs/api-js.md#codepushsync) at any time with your desired `SyncOptions`, and optionally turn off CodePush's automatic checking by specifying a manual `checkFrequency`:
 
 ```javascript
 let codePushOptions = { checkFrequency: codePush.CheckFrequency.MANUAL };
@@ -174,7 +174,7 @@ class MyApp extends Component {
 MyApp = codePush(codePushOptions)(MyApp);
 ```
 
-If you would like to display an update confirmation dialog (an "active install"), configure when an available update is installed (e.g. force an immediate restart) or customize the update experience in any other way, refer to the [`codePush()`](docs/api-js#codepush) API reference for information on how to tweak this default behavior.
+If you would like to display an update confirmation dialog (an "active install"), configure when an available update is installed (e.g. force an immediate restart) or customize the update experience in any other way, refer to the [`codePush()`](docs/api-js.md#codepush) API reference for information on how to tweak this default behavior.
 
 *NOTE: If you are using [Redux](http://redux.js.org) and [Redux Saga](http://yelouafi.github.io/redux-saga/), you can alternatively use the [react-native-code-push-saga](http://github.com/lostintangent/react-native-code-push-saga) module, which allows you to customize when `sync` is called in a perhaps simpler/more idiomatic way.*
 
@@ -256,7 +256,8 @@ To set this up, perform the following steps:
         buildTypes {
             debug {
                 ...
-                // CodePush updates should not be tested in Debug mode
+                // Note: CodePush updates should not be tested in Debug mode as they are overriden by the RN packager. However, because CodePush checks for updates in all modes, we must supply a key.
+                buildConfigField "String", "CODEPUSH_KEY", '""'
                 ...
             }
 
