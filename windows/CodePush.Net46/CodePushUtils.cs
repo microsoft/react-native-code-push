@@ -28,26 +28,70 @@ namespace CodePush.ReactNative
 
         static string GetDeviceIdImpl()
         {
-            ManagementObjectSearcher mos = new ManagementObjectSearcher("SELECT * FROM Win32_BaseBoard");
-            ManagementObjectCollection moc = mos.Get();
-            string mbId = String.Empty;
+            var mbId = GetSerialNumber();
+            var procId = GetProcId();
+
+            if (string.IsNullOrEmpty(procId))
+            {
+                procId = GetMAC();
+            }
+
+            return procId + '-' + mbId;
+        }
+
+        static string GetSerialNumber()
+        {
+            var mos = new ManagementObjectSearcher("SELECT * FROM Win32_BaseBoard");
+            var moc = mos.Get();
+            var mbId = String.Empty;
+
             foreach (ManagementObject mo in moc)
             {
                 mbId = (string)mo["SerialNumber"];
-                break;
+                if (!string.IsNullOrEmpty(mbId))
+                    break;
             }
 
-            ManagementObjectCollection mbsList = null;
-            ManagementObjectSearcher mbs = new ManagementObjectSearcher("Select * From Win32_processor");
-            mbsList = mbs.Get();
-            string procId = string.Empty;
-            foreach (ManagementObject mo in mbsList)
+            return mbId;
+        }
+
+        static string GetProcId()
+        {
+            var mos = new ManagementObjectSearcher("Select * From Win32_processor");
+            var moc = mos.Get();
+            var procId = string.Empty;
+
+            foreach (ManagementObject mo in moc)
             {
-                procId = mo["ProcessorID"].ToString();
-                break;
+                procId = (string)mo["ProcessorID"];
+                if (!string.IsNullOrEmpty(procId))
+                    break;
+            }
+            return procId;
+        }
+
+        static string GetMAC()
+        {
+            var mos = new ManagementObjectSearcher("Select * From Win32_NetworkAdapterConfiguration");
+            var moc = mos.Get();
+            var mac = string.Empty;
+
+            foreach (ManagementObject mo in moc)
+            {
+                try
+                {
+                    if ((bool)mo["IPEnabled"])
+                    {
+                        mac = (string)mo["MacAddress"];
+                        break;
+                    }
+                }
+                catch (Exception)
+                {
+                }
             }
 
-            return procId + "-" + mbId;
+            return mac;
         }
     }
 }
