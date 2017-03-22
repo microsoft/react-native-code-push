@@ -1,6 +1,6 @@
 {
   "name": "react-native-code-push",
-  "version": "1.17.2-beta",
+  "version": "1.17.3-beta",
   "description": "React Native plugin for the CodePush service",
   "main": "CodePush.js",
   "typings": "typings/react-native-code-push.d.ts",
@@ -15,6 +15,9 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/Microsoft/react-native-code-push"
+  },
+  "peerDependencies": {
+    "react-native": "0.19 - 0.42"
   },
   "dependencies": {
     "code-push": "1.8.0-beta",
