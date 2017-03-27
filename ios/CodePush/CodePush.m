@@ -24,6 +24,8 @@
     BOOL _isFirstRunAfterUpdate;
     int _minimumBackgroundDuration;
     NSDate *_lastResignedDate;
+    CodePushInstallMode *_installMode;
+    NSTimer *_suspendTimer;
 
     // Used to coordinate the dispatching of download progress events to JS.
     long long _latestExpectedContentLength;
@@ -292,6 +294,7 @@ static NSString *bundleResourceSubdirectory = nil;
              @"codePushInstallModeOnNextRestart":@(CodePushInstallModeOnNextRestart),
              @"codePushInstallModeImmediate": @(CodePushInstallModeImmediate),
              @"codePushInstallModeOnNextResume": @(CodePushInstallModeOnNextResume),
+             @"codePushInstallModeOnNextSuspend": @(CodePushInstallModeOnNextSuspend),
 
              @"codePushUpdateStateRunning": @(CodePushUpdateStateRunning),
              @"codePushUpdateStatePending": @(CodePushUpdateStatePending),
@@ -559,6 +562,10 @@ static NSString *bundleResourceSubdirectory = nil;
 // a resume-based update still pending installation.
 - (void)applicationWillEnterForeground
 {
+    if (_suspendTimer) {
+        [_suspendTimer invalidate];
+        _suspendTimer = nil;
+    }
     // Determine how long the app was in the background and ensure
     // that it meets the minimum duration amount of time.
     int durationInBackground = 0;
@@ -576,6 +583,20 @@ static NSString *bundleResourceSubdirectory = nil;
     // Save the current time so that when the app is later
     // resumed, we can detect how long it was in the background.
     _lastResignedDate = [NSDate date];
+    
+    if (_installMode == CodePushInstallModeOnNextSuspend) {
+        _suspendTimer = [NSTimer scheduledTimerWithTimeInterval:_minimumBackgroundDuration
+                                                      target:self
+                                                    selector:@selector(onAppSuspend:)
+                                                    userInfo:nil
+                                                     repeats:NO];
+    }
+}
+
+-(void)onAppSuspend:(NSTimer *)timer {
+    if ([[self class] isPendingUpdate:nil]) {
+        [self loadBundle];
+    }
 }
 
 #pragma mark - JavaScript-exported module methods (Public)
@@ -749,7 +770,8 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
         [self savePendingUpdate:updatePackage[PackageHashKey]
                       isLoading:NO];
 
-        if (installMode == CodePushInstallModeOnNextResume) {
+        _installMode = installMode;
+        if (_installMode == CodePushInstallModeOnNextResume || _installMode == CodePushInstallModeOnNextSuspend) {
             _minimumBackgroundDuration = minimumBackgroundDuration;
 
             if (!_hasResumeListener) {

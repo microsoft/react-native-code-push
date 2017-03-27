@@ -491,7 +491,10 @@ if (NativeCodePush) {
     InstallMode: {
       IMMEDIATE: NativeCodePush.codePushInstallModeImmediate, // Restart the app immediately
       ON_NEXT_RESTART: NativeCodePush.codePushInstallModeOnNextRestart, // Don't artificially restart the app. Allow the update to be "picked up" on the next app restart
-      ON_NEXT_RESUME: NativeCodePush.codePushInstallModeOnNextResume // Restart the app the next time it is resumed from the background
+      ON_NEXT_RESUME: NativeCodePush.codePushInstallModeOnNextResume, // Restart the app the next time it is resumed from the background
+      ON_NEXT_SUSPEND: NativeCodePush.codePushInstallModeOnNextSuspend // Restart the app _while_ it is in the background,
+      // but only after it has been in the background for "minimumBackgroundDuration" seconds (0 by default),
+      // so that user context isn't lost unless the app suspension is long enough to not matter
     },
     SyncStatus: {
       UP_TO_DATE: 0, // The running app is up-to-date
