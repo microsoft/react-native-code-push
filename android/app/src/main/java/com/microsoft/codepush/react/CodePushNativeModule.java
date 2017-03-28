@@ -38,8 +38,6 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
     private String mClientUniqueId = null;
     private LifecycleEventListener mLifecycleEventListener = null;
     private int mMinimumBackgroundDuration = 0;
-    private Handler pauseHandler;
-    private Runnable pauseRunnable;
 
     private CodePush mCodePush;
     private SettingsManager mSettingsManager;
@@ -425,17 +423,6 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void installUpdate(final ReadableMap updatePackage, final int installMode, final int minimumBackgroundDuration, final Promise promise) {
-        pauseHandler = new Handler();
-        pauseRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (mSettingsManager.isPendingUpdate(null)) {
-                    CodePushUtils.log("Loading bundle on suspend");
-                    loadBundle();
-                }
-            }
-        };
-
         AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
@@ -464,10 +451,18 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                         // Ensure we do not add the listener twice.
                         mLifecycleEventListener = new LifecycleEventListener() {
                             private Date lastPausedDate = null;
+                            private Handler appSuspendHandler = new Handler(Looper.getMainLooper());
+                            private Runnable loadBundleRunnable = new Runnable() {
+                                @Override
+                                public void run() {
+                                    CodePushUtils.log("Loading bundle on suspend");
+                                    loadBundle();
+                                }
+                            };
 
                             @Override
                             public void onHostResume() {
-                                pauseHandler.removeCallbacks(pauseRunnable);
+                                appSuspendHandler.removeCallbacks(loadBundleRunnable);
                                 // As of RN 36, the resume handler fires immediately if the app is in
                                 // the foreground, so explicitly wait for it to be backgrounded first
                                 if (lastPausedDate != null) {
@@ -486,8 +481,8 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                                 // resumed, we can detect how long it was in the background.
                                 lastPausedDate = new Date();
 
-                                if (installMode == CodePushInstallMode.ON_NEXT_SUSPEND.getValue()) {
-                                    pauseHandler.postDelayed(pauseRunnable, minimumBackgroundDuration * 1000);
+                                if (installMode == CodePushInstallMode.ON_NEXT_SUSPEND.getValue() && mSettingsManager.isPendingUpdate(null)) {
+                                    appSuspendHandler.postDelayed(loadBundleRunnable, minimumBackgroundDuration * 1000);
                                 }
                             }
 
