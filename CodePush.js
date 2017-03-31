@@ -342,8 +342,14 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
           log("An update is available, but it is being ignored due to having been previously rolled back.");
       }
 
-      syncStatusChangeCallback(CodePush.SyncStatus.UP_TO_DATE);
-      return CodePush.SyncStatus.UP_TO_DATE;
+      const currentPackage = await CodePush.getCurrentPackage();
+      if (currentPackage.isPending) {
+        syncStatusChangeCallback(CodePush.SyncStatus.UPDATE_INSTALLED);
+        return CodePush.SyncStatus.UPDATE_INSTALLED;
+      } else {
+        syncStatusChangeCallback(CodePush.SyncStatus.UP_TO_DATE);
+        return CodePush.SyncStatus.UP_TO_DATE;
+      }
     } else if (syncOptions.updateDialog) {
       // updateDialog supports any truthy value (e.g. true, "goo", 12),
       // but we should treat a non-object value as just the default dialog
