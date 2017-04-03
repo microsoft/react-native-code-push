@@ -21,7 +21,7 @@
     "glob": "^5.0.15",
     "inquirer": "1.1.2",
     "plist": "1.2.0",
-    "xcode": "0.9.1"
+    "xcode": "0.9.2"
   },
   "devDependencies": {
     "archiver": "latest",
