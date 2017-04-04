@@ -343,7 +343,7 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
       }
 
       const currentPackage = await CodePush.getCurrentPackage();
-      if (currentPackage.isPending) {
+      if (currentPackage && currentPackage.isPending) {
         syncStatusChangeCallback(CodePush.SyncStatus.UPDATE_INSTALLED);
         return CodePush.SyncStatus.UPDATE_INSTALLED;
       } else {
