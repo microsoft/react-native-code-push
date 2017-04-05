@@ -48,18 +48,19 @@ In order to ensure that your end users always have a functioning version of your
 
 We try our best to maintain backwards compatability of our plugin with previous versions of React Native, but due to the nature of the platform, and the existence of breaking changes between releases, it is possible that you need to use a specific version of the CodePush plugin in order to support the exact version of React Native you are using. The following table outlines which CodePush plugin versions officially support the respective React Native versions:
 
-| React Native version(s) | Supporting CodePush version(s)                 |
-|-------------------------|------------------------------------------------|
-| <0.14                   | **Unsupported**                                |
-| v0.14                   | v1.3.0 *(introduced Android support)*          |
-| v0.15-v0.18             | v1.4.0-v1.6.0 *(introduced iOS asset support)* |
-| v0.19-v0.28             | v1.7.0+ *(introduced Android asset support)*   |
-| v0.29-v0.30             | v1.13.0+ *(RN refactored native hosting code)* |
-| v0.31-v0.33             | v1.14.6+ *(RN refactored native hosting code)* |
-| v0.34-v0.35             | v1.15.0+ *(RN refactored native hosting code)* |
-| v0.36-v0.39             | v1.16.0+ *(RN refactored resume handler)*      |
-| v0.40-v0.42             | v1.17.0+ *(RN refactored iOS header files)*    |
-| v0.43+                  | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
+| React Native version(s) | Supporting CodePush version(s)                  |
+|-------------------------|-------------------------------------------------|
+| <0.14                   | **Unsupported**                                 |
+| v0.14                   | v1.3.0 *(introduced Android support)*           |
+| v0.15-v0.18             | v1.4.0-v1.6.0 *(introduced iOS asset support)*  |
+| v0.19-v0.28             | v1.7.0+ *(introduced Android asset support)*    |
+| v0.29-v0.30             | v1.13.0+ *(RN refactored native hosting code)*  |
+| v0.31-v0.33             | v1.14.6+ *(RN refactored native hosting code)*  |
+| v0.34-v0.35             | v1.15.0+ *(RN refactored native hosting code)*  |
+| v0.36-v0.39             | v1.16.0+ *(RN refactored resume handler)*       |
+| v0.40-v0.42             | v1.17.0+ *(RN refactored iOS header files)*     |
+| v0.43                   | v2.0.0+ *(RN refactored uimanager dependencies)*|
+| v0.44+                  | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
 
 ### Supported Components
 
