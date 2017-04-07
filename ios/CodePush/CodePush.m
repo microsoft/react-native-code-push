@@ -759,12 +759,12 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
                 [[NSNotificationCenter defaultCenter] addObserver:self
                                                          selector:@selector(applicationWillEnterForeground)
                                                              name:UIApplicationWillEnterForegroundNotification
-                                                           object:[UIApplication sharedApplication]];
+                                                           object:RCTSharedApplication()];
 
                 [[NSNotificationCenter defaultCenter] addObserver:self
                                                          selector:@selector(applicationWillResignActive)
                                                              name:UIApplicationWillResignActiveNotification
-                                                           object:[UIApplication sharedApplication]];
+                                                           object:RCTSharedApplication()];
 
                 _hasResumeListener = YES;
             }
