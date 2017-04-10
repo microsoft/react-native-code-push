@@ -238,15 +238,36 @@ const sync = (() => {
   const setSyncCompleted = () => { syncInProgress = false; };
 
   return (options = {}, syncStatusChangeCallback, downloadProgressCallback) => {
+    let syncStatusCallbackWithTryCatch, downloadProgressCallbackkWithTryCatch;
+    if (typeof syncStatusChangeCallback === "function") {
+      syncStatusCallbackWithTryCatch = (...args) => {
+        try {
+          syncStatusChangeCallback(...args);
+        } catch (error) {
+          log(`An error has occurred : ${error.stack}`);
+        }
+      }
+    }
+
+    if (typeof downloadProgressCallback === "function") {
+      downloadProgressCallbackkWithTryCatch = (...args) => {
+        try {
+          downloadProgressCallback(...args);
+        } catch (error) {
+          log(`An error has occurred: ${error.stack}`);
+        }
+      }
+    }
+
     if (syncInProgress) {
-      typeof syncStatusChangeCallback === "function"
-        ? syncStatusChangeCallback(CodePush.SyncStatus.SYNC_IN_PROGRESS)
+      typeof syncStatusCallbackWithTryCatch === "function"
+        ? syncStatusCallbackWithTryCatch(CodePush.SyncStatus.SYNC_IN_PROGRESS)
         : log("Sync already in progress.");
       return Promise.resolve(CodePush.SyncStatus.SYNC_IN_PROGRESS);
     }
 
     syncInProgress = true;
-    const syncPromise = syncInternal(options, syncStatusChangeCallback, downloadProgressCallback);
+    const syncPromise = syncInternal(options, syncStatusCallbackWithTryCatch, downloadProgressCallbackkWithTryCatch);
     syncPromise
       .then(setSyncCompleted)
       .catch(setSyncCompleted);
