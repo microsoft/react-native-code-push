@@ -187,7 +187,8 @@ void CPLog(NSString *formatString, ...);
 typedef NS_ENUM(NSInteger, CodePushInstallMode) {
     CodePushInstallModeImmediate,
     CodePushInstallModeOnNextRestart,
-    CodePushInstallModeOnNextResume
+    CodePushInstallModeOnNextResume,
+    CodePushInstallModeOnNextSuspend
 };
 
 typedef NS_ENUM(NSInteger, CodePushUpdateState) {
