@@ -33,6 +33,32 @@
 		81D51F3A1B6181C2000DA084 /* CodePushConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 81D51F391B6181C2000DA084 /* CodePushConfig.m */; };
 		8482F84C1E24C58300F793DB /* CodePush.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 13BE3DEC1AC21097009241FE /* CodePush.h */; };
 		8482F84E1E24C66300F793DB /* CodePush.h in Headers */ = {isa = PBXBuildFile; fileRef = 13BE3DEC1AC21097009241FE /* CodePush.h */; };
+		A33989961EA6355500C77FA7 /* aeskey.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0024D1C0E2880004C3CEC /* aeskey.c */; };
+		A33989971EA6355500C77FA7 /* CodePushUpdateUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 540D20111C7684FE00D6EF41 /* CodePushUpdateUtils.m */; };
+		A33989981EA6355500C77FA7 /* aestab.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0024F1C0E2880004C3CEC /* aestab.c */; };
+		A33989991EA6355500C77FA7 /* mztools.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002641C0E2880004C3CEC /* mztools.c */; };
+		A339899A1EA6355500C77FA7 /* RCTConvert+CodePushUpdateState.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BCC09A61CC19EB700DDC0DD /* RCTConvert+CodePushUpdateState.m */; };
+		A339899B1EA6355500C77FA7 /* zip.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002681C0E2880004C3CEC /* zip.c */; };
+		A339899C1EA6355500C77FA7 /* SSZipArchive.m in Sources */ = {isa = PBXBuildFile; fileRef = 54A0026B1C0E2880004C3CEC /* SSZipArchive.m */; };
+		A339899D1EA6355500C77FA7 /* RCTConvert+CodePushInstallMode.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B23B9131BF9267B000BB2F0 /* RCTConvert+CodePushInstallMode.m */; };
+		A339899E1EA6355500C77FA7 /* CodePushConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 81D51F391B6181C2000DA084 /* CodePushConfig.m */; };
+		A339899F1EA6355500C77FA7 /* sha1.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0025D1C0E2880004C3CEC /* sha1.c */; };
+		A33989A01EA6355500C77FA7 /* CodePushDownloadHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 54FFEDDF1BF550630061DD23 /* CodePushDownloadHandler.m */; };
+		A33989A11EA6355500C77FA7 /* hmac.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002571C0E2880004C3CEC /* hmac.c */; };
+		A33989A21EA6355500C77FA7 /* prng.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002591C0E2880004C3CEC /* prng.c */; };
+		A33989A31EA6355500C77FA7 /* CodePushTelemetryManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 5421FE301C58AD5A00986A55 /* CodePushTelemetryManager.m */; };
+		A33989A41EA6355500C77FA7 /* pwd2key.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0025B1C0E2880004C3CEC /* pwd2key.c */; };
+		A33989A51EA6355500C77FA7 /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002621C0E2880004C3CEC /* ioapi.c */; };
+		A33989A61EA6355500C77FA7 /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002661C0E2880004C3CEC /* unzip.c */; };
+		A33989A71EA6355500C77FA7 /* entropy.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002531C0E2880004C3CEC /* entropy.c */; };
+		A33989A81EA6355500C77FA7 /* CodePush.m in Sources */ = {isa = PBXBuildFile; fileRef = 13BE3DED1AC21097009241FE /* CodePush.m */; };
+		A33989A91EA6355500C77FA7 /* aescrypt.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0024C1C0E2880004C3CEC /* aescrypt.c */; };
+		A33989AA1EA6355500C77FA7 /* CodePushErrorUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B762E8F1C9A5E9A006EF800 /* CodePushErrorUtils.m */; };
+		A33989AB1EA6355500C77FA7 /* fileenc.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002551C0E2880004C3CEC /* fileenc.c */; };
+		A33989AC1EA6355500C77FA7 /* CodePushUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 5498D8F51D21F14100B5EB43 /* CodePushUtils.m */; };
+		A33989AD1EA6355500C77FA7 /* CodePushPackage.m in Sources */ = {isa = PBXBuildFile; fileRef = 810D4E6C1B96935000B397E9 /* CodePushPackage.m */; };
+		A33989B01EA6355500C77FA7 /* CodePush.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 13BE3DEC1AC21097009241FE /* CodePush.h */; };
+		A33989B21EA6355500C77FA7 /* CodePush.h in Headers */ = {isa = PBXBuildFile; fileRef = 13BE3DEC1AC21097009241FE /* CodePush.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -43,6 +69,16 @@
 			dstSubfolderSpec = 16;
 			files = (
 				8482F84C1E24C58300F793DB /* CodePush.h in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A33989AF1EA6355500C77FA7 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = include/CodePush;
+			dstSubfolderSpec = 16;
+			files = (
+				A33989B01EA6355500C77FA7 /* CodePush.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -94,10 +130,18 @@
 		54FFEDDF1BF550630061DD23 /* CodePushDownloadHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CodePushDownloadHandler.m; path = CodePush/CodePushDownloadHandler.m; sourceTree = "<group>"; };
 		810D4E6C1B96935000B397E9 /* CodePushPackage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CodePushPackage.m; path = CodePush/CodePushPackage.m; sourceTree = "<group>"; };
 		81D51F391B6181C2000DA084 /* CodePushConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CodePushConfig.m; path = CodePush/CodePushConfig.m; sourceTree = "<group>"; };
+		A33989B61EA6355500C77FA7 /* libCodePush-tvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libCodePush-tvOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		58B511D81A9E6C8500147676 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A33989AE1EA6355500C77FA7 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -188,6 +232,7 @@
 				1BCC09A61CC19EB700DDC0DD /* RCTConvert+CodePushUpdateState.m */,
 				54A002481C0E2880004C3CEC /* SSZipArchive */,
 				134814211AA4EA7D00B7C361 /* Products */,
+				A33989B61EA6355500C77FA7 /* libCodePush-tvOS.a */,
 			);
 			sourceTree = "<group>";
 		};
@@ -199,6 +244,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				8482F84E1E24C66300F793DB /* CodePush.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A33989B11EA6355500C77FA7 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A33989B21EA6355500C77FA7 /* CodePush.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -221,6 +274,24 @@
 			name = CodePush;
 			productName = RCTDataManager;
 			productReference = 134814201AA4EA6300B7C361 /* libCodePush.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		A33989941EA6355500C77FA7 /* CodePush-tvOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A33989B31EA6355500C77FA7 /* Build configuration list for PBXNativeTarget "CodePush-tvOS" */;
+			buildPhases = (
+				A33989951EA6355500C77FA7 /* Sources */,
+				A33989AE1EA6355500C77FA7 /* Frameworks */,
+				A33989AF1EA6355500C77FA7 /* CopyFiles */,
+				A33989B11EA6355500C77FA7 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "CodePush-tvOS";
+			productName = RCTDataManager;
+			productReference = A33989B61EA6355500C77FA7 /* libCodePush-tvOS.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -250,6 +321,7 @@
 			projectRoot = "";
 			targets = (
 				58B511DA1A9E6C8500147676 /* CodePush */,
+				A33989941EA6355500C77FA7 /* CodePush-tvOS */,
 			);
 		};
 /* End PBXProject section */
@@ -283,6 +355,37 @@
 				54A002701C0E2880004C3CEC /* fileenc.c in Sources */,
 				5498D8F61D21F14100B5EB43 /* CodePushUtils.m in Sources */,
 				810D4E6D1B96935000B397E9 /* CodePushPackage.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A33989951EA6355500C77FA7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A33989961EA6355500C77FA7 /* aeskey.c in Sources */,
+				A33989971EA6355500C77FA7 /* CodePushUpdateUtils.m in Sources */,
+				A33989981EA6355500C77FA7 /* aestab.c in Sources */,
+				A33989991EA6355500C77FA7 /* mztools.c in Sources */,
+				A339899A1EA6355500C77FA7 /* RCTConvert+CodePushUpdateState.m in Sources */,
+				A339899B1EA6355500C77FA7 /* zip.c in Sources */,
+				A339899C1EA6355500C77FA7 /* SSZipArchive.m in Sources */,
+				A339899D1EA6355500C77FA7 /* RCTConvert+CodePushInstallMode.m in Sources */,
+				A339899E1EA6355500C77FA7 /* CodePushConfig.m in Sources */,
+				A339899F1EA6355500C77FA7 /* sha1.c in Sources */,
+				A33989A01EA6355500C77FA7 /* CodePushDownloadHandler.m in Sources */,
+				A33989A11EA6355500C77FA7 /* hmac.c in Sources */,
+				A33989A21EA6355500C77FA7 /* prng.c in Sources */,
+				A33989A31EA6355500C77FA7 /* CodePushTelemetryManager.m in Sources */,
+				A33989A41EA6355500C77FA7 /* pwd2key.c in Sources */,
+				A33989A51EA6355500C77FA7 /* ioapi.c in Sources */,
+				A33989A61EA6355500C77FA7 /* unzip.c in Sources */,
+				A33989A71EA6355500C77FA7 /* entropy.c in Sources */,
+				A33989A81EA6355500C77FA7 /* CodePush.m in Sources */,
+				A33989A91EA6355500C77FA7 /* aescrypt.c in Sources */,
+				A33989AA1EA6355500C77FA7 /* CodePushErrorUtils.m in Sources */,
+				A33989AB1EA6355500C77FA7 /* fileenc.c in Sources */,
+				A33989AC1EA6355500C77FA7 /* CodePushUtils.m in Sources */,
+				A33989AD1EA6355500C77FA7 /* CodePushPackage.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -399,6 +502,44 @@
 			};
 			name = Release;
 		};
+		A33989B41EA6355500C77FA7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					"$(SRCROOT)/../../react-native/React/**",
+				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-lz",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		A33989B51EA6355500C77FA7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					"$(SRCROOT)/../../react-native/React/**",
+				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-lz",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -416,6 +557,15 @@
 			buildConfigurations = (
 				58B511F01A9E6C8500147676 /* Debug */,
 				58B511F11A9E6C8500147676 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A33989B31EA6355500C77FA7 /* Build configuration list for PBXNativeTarget "CodePush-tvOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A33989B41EA6355500C77FA7 /* Debug */,
+				A33989B51EA6355500C77FA7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
