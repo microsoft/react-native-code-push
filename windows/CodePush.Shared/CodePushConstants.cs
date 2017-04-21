@@ -27,7 +27,7 @@
         internal const string UnzippedFolderName = "unzipped";
 #if WINDOWS_UWP
         internal const string AssetsBundlePrefix = "ms-appx:///ReactAssets/";
-        internal const string FileBundlePrefix = "ms-appdata:///local";
+        internal const string FileBundlePrefix = "ms-appdata:///local/";
 #else
         internal const string AssetsBundlePrefix = "ReactAssets/";
 #endif

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
+using System.IO;
 #if WINDOWS_UWP
 using Windows.ApplicationModel;
 using Windows.Storage;
-#else
-using System.IO;
 #endif
 
 namespace CodePush.ReactNative
@@ -66,8 +66,14 @@ namespace CodePush.ReactNative
 #if WINDOWS_UWP
             return CodePushConstants.FileBundlePrefix;
 #else
-            return GetAppFolder();
+            return "C:\\ProgramData\\BlueJeans\\"; //TODO: make it smarter can be GetAppFolder for localUser
 #endif
+        }
+
+        internal static string ExtractSubFolder(string fullPath)
+        {
+            var codePushSubPathArray = fullPath.Split(Path.DirectorySeparatorChar);
+            return String.Join("/", codePushSubPathArray.SkipWhile((value, index) => codePushSubPathArray.Length - index > 4).ToArray());
         }
 
     }

@@ -105,7 +105,8 @@ namespace CodePush.ReactNative
             {
                 CodePushUtils.LogBundleUrl(packageFile.Path);
                 IsRunningBinaryVersion = false;
-                return CodePushUtils.GetFileBundlePrefix() + packageFile.Path.Replace(CodePushUtils.GetAppFolder(), "").Replace("\\", "/");
+
+                return CodePushUtils.GetFileBundlePrefix() + CodePushUtils.ExtractSubFolder(packageFile.Path);
             }
             else
             {
