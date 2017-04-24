@@ -38,8 +38,7 @@ namespace CodePush.ReactNative
 #if WINDOWS_UWP
             return Package.Current.Id.Version.Major + "." + Package.Current.Id.Version.Minor + "." + Package.Current.Id.Version.Build;
 #else
-            var version = FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs()[0]);
-            return $"{version.FileMajorPart}.{version.FileMinorPart}.{version.FileBuildPart}";
+            return applicationInfo.Version;
 #endif
         }
 
@@ -58,15 +57,6 @@ namespace CodePush.ReactNative
             return CodePushConstants.AssetsBundlePrefix;
 #else
             return Path.Combine(GetAppFolder(), CodePushConstants.AssetsBundlePrefix);
-#endif
-        }
-
-        internal static string GetFileBundlePrefix()
-        {
-#if WINDOWS_UWP
-            return CodePushConstants.FileBundlePrefix;
-#else
-            return "C:\\ProgramData\\BlueJeans\\"; //TODO: make it smarter can be GetAppFolder for localUser
 #endif
         }
 
