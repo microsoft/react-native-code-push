@@ -9,7 +9,8 @@
   "dependencies": {
     "react": "16.0.0-alpha.6",
     "react-native": "^0.43.2",
-    "react-native-code-push": "file:../../"
+    "react-native-code-push": "file:../../",
+    "react-native-windows": "0.40.0-rc.1"
   },
   "devDependencies": {
     "babel-jest": "19.0.0",
