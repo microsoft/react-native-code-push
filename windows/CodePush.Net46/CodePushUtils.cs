@@ -38,7 +38,7 @@ namespace CodePush.ReactNative
             // unique for the user.
             // - Program Files folder, in this case the application is unique for the system and will be shared
             // amoung all users of the system, the bundle should be unique for the system as well.
-            // Commonly, user has no write access to Program Files folder or at least admin privelegies have to been requiested.
+            // Commonly, user has no write access to Program Files folder or at least admin privileges have to been requested.
             // In this case the bundle will be stored in ProgramData folder as it is recommended by MS.
 
             if (!string.IsNullOrEmpty(_bundlePath))
