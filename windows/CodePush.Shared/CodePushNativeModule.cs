@@ -175,8 +175,23 @@ namespace CodePush.ReactNative
 
 
         [ReactMethod]
-        public void getNewStatusReport(IPromise promise)
+        public async void getNewStatusReport(IPromise promise)
         {
+
+            if (_codePush.DidUpdate)
+            {
+                var currentPackage = await _codePush.UpdateManager.GetCurrentPackageAsync().ConfigureAwait(false);
+                if (currentPackage != null)
+                {
+                    var newPackageStatusReport = TelemetryManager.getUpdateReport(currentPackage);
+                    if (newPackageStatusReport != null)
+                    {
+                        promise.Resolve(newPackageStatusReport);
+                        return;
+                    }
+                }
+            }
+
             // TODO implement this
             var report = new JObject();
             report.Add("appVersion", "1.0.0");
