@@ -21,7 +21,8 @@ namespace CodePush.ReactNative
         private MinimumBackgroundListener _minimumBackgroundListener;
         private ReactContext _reactContext;
 
-        public CodePushNativeModule(ReactContext reactContext, CodePushReactPackage codePush) : base(reactContext)
+        public CodePushNativeModule(ReactContext reactContext, CodePushReactPackage codePush)
+            : base(reactContext)
         {
             _reactContext = reactContext;
             _codePush = codePush;
@@ -177,7 +178,11 @@ namespace CodePush.ReactNative
         public void getNewStatusReport(IPromise promise)
         {
             // TODO implement this
-            promise.Resolve("");
+            var report = new JObject();
+            report.Add("appVersion", "1.0.0");
+
+            promise.Resolve(report);
+            //promise.Resolve("");
         }
 
         [ReactMethod]
@@ -243,6 +248,12 @@ namespace CodePush.ReactNative
             {
                 await LoadBundleAsync().ConfigureAwait(false);
             }
+        }
+
+        [ReactMethod]
+        public void saveStatusReportForRetry(JObject statusReport)
+        {
+            //TODO: implement it!
         }
 
         internal async Task LoadBundleAsync()
