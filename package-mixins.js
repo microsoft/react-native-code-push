@@ -26,7 +26,10 @@ module.exports = (NativeCodePush) => {
         // Use the downloaded package info. Native code will save the package info
         // so that the client knows what the current package version is.
         try {
-          const downloadedPackage = await NativeCodePush.downloadUpdate(this, !!downloadProgressCallback);
+          const updatePackageCopy = Object.assign({}, this);
+          Object.keys(updatePackageCopy).forEach((key) => (typeof updatePackageCopy[key] === 'function') && delete updatePackageCopy[key]);
+
+          const downloadedPackage = await NativeCodePush.downloadUpdate(updatePackageCopy, !!downloadProgressCallback);
           reportStatusDownload && reportStatusDownload(this);
           return { ...downloadedPackage, ...local };
         } finally {
