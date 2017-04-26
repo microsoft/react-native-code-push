@@ -45,7 +45,7 @@ namespace CodePush.ReactNative
 
             var previousStatusReportIdentifier = getPreviousStatusReportIdentifier();
 
-            if (previousStatusReportIdentifier != null)
+            if (previousStatusReportIdentifier == null)
             {
                 clearRetryStatusReport();
 
