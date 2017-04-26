@@ -115,5 +115,50 @@ namespace CodePush.Net46.Test
             inputNoKey.Add(LABEL_KEY, "labelParam");
             Assert.IsNull(TelemetryManager.getUpdateReport(inputNoKey));
         }
+
+        [TestMethod]
+        public void TestRecordStatusReportWithRollback()
+        {
+            var report = new JObject();
+            report.Add(STATUS_KEY, DEPLOYMENT_FAILED_STATUS);
+
+            TelemetryManager.recordStatusReported(report);
+            Assert.IsTrue(true);
+        }
+
+        [TestMethod]
+        public void TestRecordStatusReportWithoutRollback()
+        {
+            var reportSuccess = new JObject();
+            reportSuccess.Add(STATUS_KEY, DEPLOYMENT_SUCCEEDED_STATUS);
+            TelemetryManager.recordStatusReported(reportSuccess);
+
+            var reportNoStatus = new JObject();
+            TelemetryManager.recordStatusReported(reportNoStatus);
+
+            Assert.IsTrue(true);
+        }
+
+        [TestMethod]
+        public void TestStatusReportForRetrySerialization()
+        {
+            SettingsManager.RemoveString(RETRY_DEPLOYMENT_REPORT_KEY);
+            var original = new JObject();
+            original.Add("keyString", "stringValue");
+            original.Add("keyInt", 42);
+            original.Add("keyBool", true);
+
+            TelemetryManager.saveStatusReportForRetry(original);
+
+            var stringified = SettingsManager.GetString(RETRY_DEPLOYMENT_REPORT_KEY);
+            SettingsManager.RemoveString(RETRY_DEPLOYMENT_REPORT_KEY);
+
+            Assert.IsNotNull(stringified);
+            var result = JObject.Parse(stringified);
+
+            Assert.IsTrue((bool)result.GetValue("keyBool"));
+            Assert.AreEqual(42, (int)result.GetValue("keyInt"));
+            Assert.AreEqual("stringValue", (string)result.GetValue("keyString"));
+        }
     }
 }

@@ -295,9 +295,15 @@ namespace CodePush.ReactNative
         }
 
         [ReactMethod]
+        public void recordStatusReported(JObject statusReport)
+        {
+            TelemetryManager.recordStatusReported(statusReport);
+        }
+
+        [ReactMethod]
         public void saveStatusReportForRetry(JObject statusReport)
         {
-            //TODO: implement it!
+            TelemetryManager.saveStatusReportForRetry(statusReport);
         }
 
         internal async Task LoadBundleAsync()

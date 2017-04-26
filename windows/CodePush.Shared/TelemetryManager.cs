@@ -166,16 +166,38 @@ namespace CodePush.ReactNative
             return null;
         }
 
-        internal void recordStatusReported(JObject statusReport)
+        internal static void recordStatusReported(JObject statusReport)
         {
-            // TODO: Implement me!
             Trace.WriteLine($"called recordStatusReported({statusReport.ToString(Formatting.None)})", "[TelemetryManager]");
+            // We don't need to record rollback reports, so exit early if that's what was specified.
+            var status = (string)statusReport.GetValue(STATUS_KEY);
+            if ((!string.IsNullOrEmpty(status)) && DEPLOYMENT_FAILED_STATUS.Equals(status))
+            {
+                return;
+            }
+
+            var appVersion = (string)statusReport.GetValue(APP_VERSION_KEY);
+            if (!string.IsNullOrEmpty(appVersion))
+            {
+                saveStatusReportedForIdentifier(appVersion);
+            }
+            else
+            {
+                var package = (JObject)statusReport.GetValue(PACKAGE_KEY);
+                if (package == null)
+                {
+                    return;
+                }
+
+                var packageIdentifier = getPackageStatusReportIdentifier(package);
+                saveStatusReportedForIdentifier(packageIdentifier);
+            }
         }
 
-        internal void saveStatusReportForRetry(JObject statusReport)
+        internal static void saveStatusReportForRetry(JObject statusReport)
         {
-            // TODO: Implement me!
             Trace.WriteLine($"called saveStatusReportForRetry({statusReport.ToString(Formatting.None)})", "[TelemetryManager]");
+            SettingsManager.SetString(RETRY_DEPLOYMENT_REPORT_KEY, statusReport.ToString(Formatting.None));
         }
 
         #endregion
@@ -241,6 +263,11 @@ namespace CodePush.ReactNative
             {
                 return null;
             }
+        }
+
+        static void saveStatusReportedForIdentifier(string appVersionOrPackageIdentifier)
+        {
+            SettingsManager.SetString(LAST_DEPLOYMENT_REPORT_KEY, appVersionOrPackageIdentifier);
         }
         #endregion
     }
