@@ -19,7 +19,7 @@ namespace CodePush.ReactNative
         internal string AssetsBundleFileName { get; private set; }
         internal bool NeedToReportRollback { get; private set; } = false;
         internal bool DidUpdate { get; private set; } = false;
-        internal bool IsRunningBinaryVersion { get; set; }
+        internal bool IsRunningBinaryVersion { get; private set; } = false;
         internal ReactPage MainPage { get; private set; }
         internal UpdateManager UpdateManager { get; private set; }
         internal TelemetryManager TelemetryManager { get; private set; }
@@ -30,7 +30,6 @@ namespace CodePush.ReactNative
             DeploymentKey = deploymentKey;
             MainPage = mainPage;
             UpdateManager = new UpdateManager();
-            IsRunningBinaryVersion = false;
             
             TelemetryManager = new TelemetryManager(/*this.applicationContext, CODE_PUSH_PREFERENCES*/);
 

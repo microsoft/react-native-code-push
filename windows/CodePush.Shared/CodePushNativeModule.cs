@@ -201,11 +201,17 @@ namespace CodePush.ReactNative
                 if (newAppVersionStatusReport != null)
                 {
                     promise.Resolve(newAppVersionStatusReport);
+                    return;
                 }
             }
             else
             {
-                Trace.WriteLine("called getNewStatusReport.else", "[NativeModule]");
+                var retryStatusReport = TelemetryManager.getRetryStatusReport();
+                if (retryStatusReport != null)
+                {
+                    promise.Resolve(retryStatusReport);
+                    return;       
+                }
             }
 
             promise.Resolve("");

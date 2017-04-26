@@ -2,10 +2,11 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text;
-
+#if !WINDOWS_UWP
+using System.Diagnostics;
+#endif
 [assembly: InternalsVisibleTo("CodePush.Net46.Test")]
 
 namespace CodePush.ReactNative
@@ -79,14 +80,29 @@ namespace CodePush.ReactNative
 
             return null;
         }
-
-        internal JObject getRetryStatusReport()
+  
+        internal static JObject getRetryStatusReport()
         {
-            // TODO: Implement me!
             Trace.WriteLine($"called getRetryStatusReport()", "[TelemetryManager]");
+            var retryStatusReportString = SettingsManager.GetString(RETRY_DEPLOYMENT_REPORT_KEY);
 
-            var report = new JObject();
-            return report;
+            if (retryStatusReportString != null)
+            {
+                clearRetryStatusReport();
+                try
+                {
+                    var report = JObject.Parse(retryStatusReportString);
+                    Trace.WriteLine($"returned getRetryStatusReport: {report.ToString(Formatting.None)}", "[TelemetryManager]");
+                    return report;
+                }
+                catch (Exception e)
+                {
+                    //TODO: should be reported error
+                    Trace.WriteLine(e.ToString(), "[CodePush.Telemetry]");
+                }
+            }
+
+            return null;
         }
 
         internal JObject getRollbackReportReport(JObject lastFailedPackage)
