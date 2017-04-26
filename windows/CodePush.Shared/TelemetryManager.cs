@@ -22,21 +22,21 @@ namespace CodePush.ReactNative
 
     internal class TelemetryManager
     {
-#region Constants
+        #region Constants
         //private static readonly string APP_VERSION_KEY = "appVersion";
         //private static readonly string DEPLOYMENT_FAILED_STATUS = "DeploymentFailed";
         private static readonly string DEPLOYMENT_KEY_KEY = "deploymentKey";
-        //private static readonly string DEPLOYMENT_SUCCEEDED_STATUS = "DeploymentSucceeded";
+        private static readonly string DEPLOYMENT_SUCCEEDED_STATUS = "DeploymentSucceeded";
         private static readonly string LABEL_KEY = "label";
-        //private static readonly string LAST_DEPLOYMENT_REPORT_KEY = "CODE_PUSH_LAST_DEPLOYMENT_REPORT";
-        //private static readonly string PACKAGE_KEY = "package";
-        //private static readonly string PREVIOUS_DEPLOYMENT_KEY_KEY = "previousDeploymentKey";
-        //private static readonly string PREVIOUS_LABEL_OR_APP_VERSION_KEY = "previousLabelOrAppVersion";
-        //private static readonly string RETRY_DEPLOYMENT_REPORT_KEY = "CODE_PUSH_RETRY_DEPLOYMENT_REPORT";
-        //private static readonly string STATUS_KEY = "status";
-#endregion
+        private static readonly string LAST_DEPLOYMENT_REPORT_KEY = "CODE_PUSH_LAST_DEPLOYMENT_REPORT";
+        private static readonly string PACKAGE_KEY = "package";
+        private static readonly string PREVIOUS_DEPLOYMENT_KEY_KEY = "previousDeploymentKey";
+        private static readonly string PREVIOUS_LABEL_OR_APP_VERSION_KEY = "previousLabelOrAppVersion";
+        private static readonly string RETRY_DEPLOYMENT_REPORT_KEY = "CODE_PUSH_RETRY_DEPLOYMENT_REPORT";
+        private static readonly string STATUS_KEY = "status";
+        #endregion
 
-#region Internal methods
+        #region Internal methods
         internal JObject getBinaryUpdateReport(string appVersion)
         {
             // TODO: Implement me!
@@ -66,7 +66,6 @@ namespace CodePush.ReactNative
 
         internal static JObject getUpdateReport(JObject currentPackage)
         {
-            // TODO: Implement me!
             Trace.WriteLine($"called getUpdateReport({currentPackage.ToString(Formatting.None)})", "[TelemetryManager]");
 
             var currentPackageIdentifier = getPackageStatusReportIdentifier(currentPackage);
@@ -74,11 +73,44 @@ namespace CodePush.ReactNative
             {
                 return null;
             }
-            
 
-            var report = new JObject();
-            Trace.WriteLine($"returned getUpdateReport: {report.ToString(Formatting.None)}", "[TelemetryManager]");
-            return report;
+            clearRetryStatusReport();
+
+            var previousStatusReportIdentifier = getPreviousStatusReportIdentifier();
+            if (previousStatusReportIdentifier == null)
+            {
+                var report = new JObject();
+                report.Add(PACKAGE_KEY, currentPackage);
+                report.Add(STATUS_KEY, DEPLOYMENT_SUCCEEDED_STATUS);
+                Trace.WriteLine($"returned getUpdateReport1: {report.ToString(Formatting.None)}", "[TelemetryManager]");
+                return report;
+            }
+
+            if (!previousStatusReportIdentifier.Equals(currentPackageIdentifier))
+            {
+                var report = new JObject();
+                report.Add(PACKAGE_KEY, currentPackage);
+                report.Add(STATUS_KEY, DEPLOYMENT_SUCCEEDED_STATUS);
+
+                if (isStatusReportIdentifierCodePushLabel(previousStatusReportIdentifier))
+                {
+                    var previousDeploymentKey = getDeploymentKeyFromStatusReportIdentifier(previousStatusReportIdentifier);
+                    var previousLabel = getVersionLabelFromStatusReportIdentifier(previousStatusReportIdentifier);
+
+                    report.Add(PREVIOUS_DEPLOYMENT_KEY_KEY, previousDeploymentKey);
+                    report.Add(PREVIOUS_LABEL_OR_APP_VERSION_KEY, previousLabel);
+                }
+                else
+                {
+                    // Previous status report was with a binary app version.
+                    report.Add(PREVIOUS_LABEL_OR_APP_VERSION_KEY, previousStatusReportIdentifier);
+                }
+
+                Trace.WriteLine($"returned getUpdateReport2: {report.ToString(Formatting.None)}", "[TelemetryManager]");
+                return report;
+            }
+
+            return null;
         }
 
         internal void recordStatusReported(JObject statusReport)
@@ -93,9 +125,9 @@ namespace CodePush.ReactNative
             Trace.WriteLine($"called saveStatusReportForRetry({statusReport.ToString(Formatting.None)})", "[TelemetryManager]");
         }
 
-#endregion
+        #endregion
 
-#region Private methods
+        #region Private methods
         static string getPackageStatusReportIdentifier(JObject updatePackage)
         {
             // Because deploymentKeys can be dynamically switched, we use a
@@ -116,6 +148,47 @@ namespace CodePush.ReactNative
                 return null;
             }
         }
-#endregion
+
+        static string getPreviousStatusReportIdentifier()
+        {
+            return SettingsManager.GetString(LAST_DEPLOYMENT_REPORT_KEY);
+        }
+
+        static private void clearRetryStatusReport()
+        {
+            SettingsManager.RemoveString(RETRY_DEPLOYMENT_REPORT_KEY);
+        }
+
+        static bool isStatusReportIdentifierCodePushLabel(string statusReportIdentifier)
+        {
+            return (!string.IsNullOrEmpty(statusReportIdentifier)) && statusReportIdentifier.Contains(":");
+        }
+
+        static string getDeploymentKeyFromStatusReportIdentifier(string statusReportIdentifier)
+        {
+            string[] parsedIdentifier = statusReportIdentifier.Split(':');
+            if (parsedIdentifier.Length > 0)
+            {
+                return parsedIdentifier[0];
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        static string getVersionLabelFromStatusReportIdentifier(string statusReportIdentifier)
+        {
+            string[] parsedIdentifier = statusReportIdentifier.Split(':');
+            if (parsedIdentifier.Length > 1)
+            {
+                return parsedIdentifier[1];
+            }
+            else
+            {
+                return null;
+            }
+        }
+        #endregion
     }
 }
