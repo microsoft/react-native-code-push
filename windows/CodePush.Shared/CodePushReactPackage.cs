@@ -22,7 +22,7 @@ namespace CodePush.ReactNative
         internal bool IsRunningBinaryVersion { get; private set; } = false;
         internal ReactPage MainPage { get; private set; }
         internal UpdateManager UpdateManager { get; private set; }
-        internal TelemetryManager TelemetryManager { get; private set; }
+        //internal TelemetryManager TelemetryManager { get; private set; }
 
         public CodePushReactPackage(string deploymentKey, ReactPage mainPage)
         {
@@ -31,7 +31,7 @@ namespace CodePush.ReactNative
             MainPage = mainPage;
             UpdateManager = new UpdateManager();
             
-            TelemetryManager = new TelemetryManager(/*this.applicationContext, CODE_PUSH_PREFERENCES*/);
+          //  TelemetryManager = new TelemetryManager(/*this.applicationContext, CODE_PUSH_PREFERENCES*/);
 
             if (CurrentInstance != null)
             {
