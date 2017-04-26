@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Diagnostics;
 #if WINDOWS_UWP
 using Windows.Web.Http;
 #else
@@ -177,8 +178,11 @@ namespace CodePush.ReactNative
         [ReactMethod]
         public async void getNewStatusReport(IPromise promise)
         {
-
-            if (_codePush.DidUpdate)
+            if (_codePush.NeedToReportRollback)
+            {
+                Trace.WriteLine("called getNewStatusReport.NeedToReportRollback", "[NativeModule]");
+            }
+            else if (_codePush.DidUpdate)
             {
                 var currentPackage = await _codePush.UpdateManager.GetCurrentPackageAsync().ConfigureAwait(false);
                 if (currentPackage != null)
@@ -191,13 +195,20 @@ namespace CodePush.ReactNative
                     }
                 }
             }
+            else if (_codePush.IsRunningBinaryVersion)
+            {
+                var newAppVersionStatusReport = TelemetryManager.getBinaryUpdateReport(_codePush.AppVersion);
+                if (newAppVersionStatusReport != null)
+                {
+                    promise.Resolve(newAppVersionStatusReport);
+                }
+            }
+            else
+            {
+                Trace.WriteLine("called getNewStatusReport.else", "[NativeModule]");
+            }
 
-            // TODO implement this
-            var report = new JObject();
-            report.Add("appVersion", "1.0.0");
-
-            promise.Resolve(report);
-            //promise.Resolve("");
+            promise.Resolve("");
         }
 
         [ReactMethod]

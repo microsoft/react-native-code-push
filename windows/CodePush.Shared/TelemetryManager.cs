@@ -23,8 +23,8 @@ namespace CodePush.ReactNative
     internal class TelemetryManager
     {
         #region Constants
-        //private static readonly string APP_VERSION_KEY = "appVersion";
-        //private static readonly string DEPLOYMENT_FAILED_STATUS = "DeploymentFailed";
+        private static readonly string APP_VERSION_KEY = "appVersion";
+        private static readonly string DEPLOYMENT_FAILED_STATUS = "DeploymentFailed";
         private static readonly string DEPLOYMENT_KEY_KEY = "deploymentKey";
         private static readonly string DEPLOYMENT_SUCCEEDED_STATUS = "DeploymentSucceeded";
         private static readonly string LABEL_KEY = "label";
@@ -37,13 +37,47 @@ namespace CodePush.ReactNative
         #endregion
 
         #region Internal methods
-        internal JObject getBinaryUpdateReport(string appVersion)
+
+        internal static JObject getBinaryUpdateReport(string appVersion)
         {
-            // TODO: Implement me!
             Trace.WriteLine($"called getBinaryUpdateReport({appVersion})", "[TelemetryManager]");
 
-            var report = new JObject();
-            return report;
+            var previousStatusReportIdentifier = getPreviousStatusReportIdentifier();
+
+            if (previousStatusReportIdentifier != null)
+            {
+                clearRetryStatusReport();
+
+                var report = new JObject();
+                report.Add(APP_VERSION_KEY, appVersion);
+                Trace.WriteLine($"returned getBinaryUpdateReport1: {report.ToString(Formatting.None)}", "[TelemetryManager]");
+                return report;
+            }
+
+            if (!previousStatusReportIdentifier.Equals(appVersion))
+            {
+                clearRetryStatusReport();
+
+                var report = new JObject();
+                report.Add(APP_VERSION_KEY, appVersion);
+                if (isStatusReportIdentifierCodePushLabel(previousStatusReportIdentifier))
+                {
+                    var previousDeploymentKey = getDeploymentKeyFromStatusReportIdentifier(previousStatusReportIdentifier);
+                    var previousLabel = getVersionLabelFromStatusReportIdentifier(previousStatusReportIdentifier);
+
+                    report.Add(PREVIOUS_DEPLOYMENT_KEY_KEY, previousDeploymentKey);
+                    report.Add(PREVIOUS_LABEL_OR_APP_VERSION_KEY, previousLabel);
+                }
+                else
+                {
+                    // Previous status report was with a binary app version.
+                    report.Add(PREVIOUS_LABEL_OR_APP_VERSION_KEY, previousStatusReportIdentifier);
+                }
+                Trace.WriteLine($"returned getBinaryUpdateReport2: {report.ToString(Formatting.None)}", "[TelemetryManager]");
+                return report;
+            }
+
+            return null;
         }
 
         internal JObject getRetryStatusReport()
@@ -74,11 +108,10 @@ namespace CodePush.ReactNative
                 return null;
             }
 
-            clearRetryStatusReport();
-
             var previousStatusReportIdentifier = getPreviousStatusReportIdentifier();
             if (previousStatusReportIdentifier == null)
             {
+                clearRetryStatusReport();
                 var report = new JObject();
                 report.Add(PACKAGE_KEY, currentPackage);
                 report.Add(STATUS_KEY, DEPLOYMENT_SUCCEEDED_STATUS);
@@ -88,6 +121,7 @@ namespace CodePush.ReactNative
 
             if (!previousStatusReportIdentifier.Equals(currentPackageIdentifier))
             {
+                clearRetryStatusReport();
                 var report = new JObject();
                 report.Add(PACKAGE_KEY, currentPackage);
                 report.Add(STATUS_KEY, DEPLOYMENT_SUCCEEDED_STATUS);
