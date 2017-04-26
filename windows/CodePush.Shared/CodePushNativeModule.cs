@@ -180,7 +180,19 @@ namespace CodePush.ReactNative
         {
             if (_codePush.NeedToReportRollback)
             {
-                Trace.WriteLine("called getNewStatusReport.NeedToReportRollback", "[NativeModule]");
+                _codePush.NeedToReportRollback = false;
+
+                var failedUpdates = SettingsManager.GetFailedUpdates();
+                if (failedUpdates != null && failedUpdates.Count > 0)
+                {
+                    var lastFailedPackage = (JObject)failedUpdates[failedUpdates.Count - 1];
+                    var failedStatusReport = TelemetryManager.getRollbackReport(lastFailedPackage);
+                    if(failedStatusReport != null)
+                    {
+                        promise.Resolve(failedStatusReport);
+                        return;
+                    }
+                }
             }
             else if (_codePush.DidUpdate)
             {
@@ -210,7 +222,7 @@ namespace CodePush.ReactNative
                 if (retryStatusReport != null)
                 {
                     promise.Resolve(retryStatusReport);
-                    return;       
+                    return;
                 }
             }
 

@@ -80,7 +80,7 @@ namespace CodePush.ReactNative
 
             return null;
         }
-  
+
         internal static JObject getRetryStatusReport()
         {
             Trace.WriteLine($"called getRetryStatusReport()", "[TelemetryManager]");
@@ -105,12 +105,15 @@ namespace CodePush.ReactNative
             return null;
         }
 
-        internal JObject getRollbackReportReport(JObject lastFailedPackage)
+        internal static JObject getRollbackReport(JObject lastFailedPackage)
         {
-            // TODO: Implement me!
-            Trace.WriteLine($"called getRollbackReportReport({lastFailedPackage.ToString(Formatting.None)})", "[TelemetryManager]");
+            Trace.WriteLine($"called getRollbackReport({lastFailedPackage.ToString(Formatting.None)})", "[TelemetryManager]");
 
             var report = new JObject();
+            report.Add(STATUS_KEY, DEPLOYMENT_FAILED_STATUS);
+            report.Add(PACKAGE_KEY, lastFailedPackage);
+            Trace.WriteLine($"returned getRollbackReport({report.ToString(Formatting.None)})", "[TelemetryManager]");
+
             return report;
         }
 

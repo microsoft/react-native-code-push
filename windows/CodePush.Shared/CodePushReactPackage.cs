@@ -17,7 +17,7 @@ namespace CodePush.ReactNative
         internal string AppVersion { get; private set; }
         internal string DeploymentKey { get; private set; }
         internal string AssetsBundleFileName { get; private set; }
-        internal bool NeedToReportRollback { get; private set; } = false;
+        internal bool NeedToReportRollback { get; set; } = false;
         internal bool DidUpdate { get; private set; } = false;
         internal bool IsRunningBinaryVersion { get; private set; } = false;
         internal ReactPage MainPage { get; private set; }
