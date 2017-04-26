@@ -346,7 +346,7 @@ static NSString *bundleResourceSubdirectory = nil;
             errorMessage = [NSString stringWithFormat:@"The specified JS bundle file wasn't found within the app's binary. Is \"%@\" the correct file name?", [bundleResourceName stringByAppendingPathExtension:bundleResourceExtension]];
         #endif
     #else
-        errorMessage = @"Something went wrong. Please verify if generated JS bundle is correct. "
+        errorMessage = @"Something went wrong. Please verify if generated JS bundle is correct. ";
     #endif
 
         RCTFatal([CodePushErrorUtils errorWithMessage:errorMessage]);
