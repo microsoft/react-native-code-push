@@ -297,15 +297,15 @@ namespace CodePush.ReactNative
         }
 
         [ReactMethod]
-        public void recordStatusReported(JObject statusReport)
+        public async void recordStatusReported(JObject statusReport)
         {
-            Task.Run(() => TelemetryManager.RecordStatusReported(statusReport)).ConfigureAwait(false);
+            await Task.Run(() => TelemetryManager.RecordStatusReported(statusReport)).ConfigureAwait(false);
         }
 
         [ReactMethod]
-        public void saveStatusReportForRetry(JObject statusReport)
+        public async void saveStatusReportForRetry(JObject statusReport)
         {
-            Task.Run(() => TelemetryManager.SaveStatusReportForRetry(statusReport)).ConfigureAwait(false);
+            await Task.Run(() => TelemetryManager.SaveStatusReportForRetry(statusReport)).ConfigureAwait(false);
         }
 
         internal async Task LoadBundleAsync()
