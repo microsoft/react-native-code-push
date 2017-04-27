@@ -178,55 +178,58 @@ namespace CodePush.ReactNative
         [ReactMethod]
         public async void getNewStatusReport(IPromise promise)
         {
-            if (_codePush.NeedToReportRollback)
+            await Task.Run(() =>
             {
-                _codePush.NeedToReportRollback = false;
-
-                var failedUpdates = SettingsManager.GetFailedUpdates();
-                if (failedUpdates != null && failedUpdates.Count > 0)
+                if (_codePush.NeedToReportRollback)
                 {
-                    var lastFailedPackage = (JObject)failedUpdates[failedUpdates.Count - 1];
-                    var failedStatusReport = TelemetryManager.getRollbackReport(lastFailedPackage);
-                    if(failedStatusReport != null)
+                    _codePush.NeedToReportRollback = false;
+
+                    var failedUpdates = SettingsManager.GetFailedUpdates();
+                    if (failedUpdates != null && failedUpdates.Count > 0)
                     {
-                        promise.Resolve(failedStatusReport);
+                        var lastFailedPackage = (JObject)failedUpdates[failedUpdates.Count - 1];
+                        var failedStatusReport = TelemetryManager.getRollbackReport(lastFailedPackage);
+                        if (failedStatusReport != null)
+                        {
+                            promise.Resolve(failedStatusReport);
+                            return;
+                        }
+                    }
+                }
+                else if (_codePush.DidUpdate)
+                {
+                    var currentPackage = _codePush.UpdateManager.GetCurrentPackageAsync().Result;
+                    if (currentPackage != null)
+                    {
+                        var newPackageStatusReport = TelemetryManager.getUpdateReport(currentPackage);
+                        if (newPackageStatusReport != null)
+                        {
+                            promise.Resolve(newPackageStatusReport);
+                            return;
+                        }
+                    }
+                }
+                else if (_codePush.IsRunningBinaryVersion)
+                {
+                    var newAppVersionStatusReport = TelemetryManager.getBinaryUpdateReport(_codePush.AppVersion);
+                    if (newAppVersionStatusReport != null)
+                    {
+                        promise.Resolve(newAppVersionStatusReport);
                         return;
                     }
                 }
-            }
-            else if (_codePush.DidUpdate)
-            {
-                var currentPackage = await _codePush.UpdateManager.GetCurrentPackageAsync().ConfigureAwait(false);
-                if (currentPackage != null)
+                else
                 {
-                    var newPackageStatusReport = TelemetryManager.getUpdateReport(currentPackage);
-                    if (newPackageStatusReport != null)
+                    var retryStatusReport = TelemetryManager.getRetryStatusReport();
+                    if (retryStatusReport != null)
                     {
-                        promise.Resolve(newPackageStatusReport);
+                        promise.Resolve(retryStatusReport);
                         return;
                     }
                 }
-            }
-            else if (_codePush.IsRunningBinaryVersion)
-            {
-                var newAppVersionStatusReport = TelemetryManager.getBinaryUpdateReport(_codePush.AppVersion);
-                if (newAppVersionStatusReport != null)
-                {
-                    promise.Resolve(newAppVersionStatusReport);
-                    return;
-                }
-            }
-            else
-            {
-                var retryStatusReport = TelemetryManager.getRetryStatusReport();
-                if (retryStatusReport != null)
-                {
-                    promise.Resolve(retryStatusReport);
-                    return;
-                }
-            }
 
-            promise.Resolve("");
+                promise.Resolve("");
+            }).ConfigureAwait(false);
         }
 
         [ReactMethod]
@@ -297,13 +300,13 @@ namespace CodePush.ReactNative
         [ReactMethod]
         public void recordStatusReported(JObject statusReport)
         {
-            TelemetryManager.recordStatusReported(statusReport);
+            Task.Run(() => TelemetryManager.recordStatusReported(statusReport)).ConfigureAwait(false);
         }
 
         [ReactMethod]
         public void saveStatusReportForRetry(JObject statusReport)
         {
-            TelemetryManager.saveStatusReportForRetry(statusReport);
+            Task.Run(() => TelemetryManager.saveStatusReportForRetry(statusReport)).ConfigureAwait(false);
         }
 
         internal async Task LoadBundleAsync()
