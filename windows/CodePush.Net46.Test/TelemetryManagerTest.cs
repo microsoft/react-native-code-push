@@ -1,15 +1,15 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
+﻿using CodePush.ReactNative;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json.Linq;
-using CodePush.ReactNative;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace CodePush.Net46.Test
 {
     /// <summary>
-    /// Summary description for TelemetryManagerTest
+    /// Some tests for telemetry manager
+    /// As implementation of TelemetryManager was ported from android version, we do not test logic here.
+    /// Here are tests for some tricky parts of implementation, or check some data transformation that
+    /// has no full equvalent in C#
     /// </summary>
     [TestClass]
     public class TelemetryManagerTest
@@ -28,53 +28,6 @@ namespace CodePush.Net46.Test
         private static readonly string STATUS_KEY = "status";
         #endregion
 
-        public TelemetryManagerTest()
-        {
-            //
-            // TODO: Add constructor logic here
-            //
-        }
-
-        private TestContext testContextInstance;
-
-        /// <summary>
-        ///Gets or sets the test context which provides
-        ///information about and functionality for the current test run.
-        ///</summary>
-        public TestContext TestContext
-        {
-            get
-            {
-                return testContextInstance;
-            }
-            set
-            {
-                testContextInstance = value;
-            }
-        }
-
-        #region Additional test attributes
-        //
-        // You can use the following additional attributes as you write your tests:
-        //
-        // Use ClassInitialize to run code before running the first test in the class
-        // [ClassInitialize()]
-        // public static void MyClassInitialize(TestContext testContext) { }
-        //
-        // Use ClassCleanup to run code after all tests in a class have run
-        // [ClassCleanup()]
-        // public static void MyClassCleanup() { }
-        //
-        // Use TestInitialize to run code before running each test 
-        // [TestInitialize()]
-        // public void MyTestInitialize() { }
-        //
-        // Use TestCleanup to run code after each test has run
-        // [TestCleanup()]
-        // public void MyTestCleanup() { }
-        //
-        #endregion
-
         [TestMethod]
         public void TestGetUpdateReportNoPreviousUpdate()
         {
@@ -82,7 +35,7 @@ namespace CodePush.Net46.Test
             input.Add(DEPLOYMENT_KEY_KEY, "depKeyParam");
             input.Add(LABEL_KEY, "labelParam");
 
-            var output = TelemetryManager.getUpdateReport(input);
+            var output = TelemetryManager.GetUpdateReport(input);
             Assert.IsNotNull(output);
             Assert.IsTrue(output.ToString(Formatting.None).Contains("\"status\":\"DeploymentSucceeded\""));
         }
@@ -95,7 +48,7 @@ namespace CodePush.Net46.Test
             input.Add(DEPLOYMENT_KEY_KEY, "depKeyParam");
             input.Add(LABEL_KEY, "labelParam");
 
-            var output = TelemetryManager.getUpdateReport(input);
+            var output = TelemetryManager.GetUpdateReport(input);
             Assert.IsNotNull(output);
             Assert.IsTrue(output.ToString(Formatting.None).Contains("\"status\":\"DeploymentSucceeded\""));
             Assert.IsTrue(output.ToString(Formatting.None).Contains("\"previousDeploymentKey\":\"prevKey\",\"previousLabelOrAppVersion\":\"prevLabel\""));
@@ -109,11 +62,11 @@ namespace CodePush.Net46.Test
         {
             var inputNoLabel = new JObject();
             inputNoLabel.Add(DEPLOYMENT_KEY_KEY, "depKeyParam");
-            Assert.IsNull(TelemetryManager.getUpdateReport(inputNoLabel));
+            Assert.IsNull(TelemetryManager.GetUpdateReport(inputNoLabel));
 
             var inputNoKey = new JObject();
             inputNoKey.Add(LABEL_KEY, "labelParam");
-            Assert.IsNull(TelemetryManager.getUpdateReport(inputNoKey));
+            Assert.IsNull(TelemetryManager.GetUpdateReport(inputNoKey));
         }
 
         [TestMethod]
@@ -122,7 +75,7 @@ namespace CodePush.Net46.Test
             var report = new JObject();
             report.Add(STATUS_KEY, DEPLOYMENT_FAILED_STATUS);
 
-            TelemetryManager.recordStatusReported(report);
+            TelemetryManager.RecordStatusReported(report);
             Assert.IsTrue(true);
         }
 
@@ -131,10 +84,10 @@ namespace CodePush.Net46.Test
         {
             var reportSuccess = new JObject();
             reportSuccess.Add(STATUS_KEY, DEPLOYMENT_SUCCEEDED_STATUS);
-            TelemetryManager.recordStatusReported(reportSuccess);
+            TelemetryManager.RecordStatusReported(reportSuccess);
 
             var reportNoStatus = new JObject();
-            TelemetryManager.recordStatusReported(reportNoStatus);
+            TelemetryManager.RecordStatusReported(reportNoStatus);
 
             Assert.IsTrue(true);
         }
@@ -148,7 +101,7 @@ namespace CodePush.Net46.Test
             original.Add("keyInt", 42);
             original.Add("keyBool", true);
 
-            TelemetryManager.saveStatusReportForRetry(original);
+            TelemetryManager.SaveStatusReportForRetry(original);
 
             var stringified = SettingsManager.GetString(RETRY_DEPLOYMENT_REPORT_KEY);
             SettingsManager.RemoveString(RETRY_DEPLOYMENT_REPORT_KEY);

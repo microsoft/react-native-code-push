@@ -1,25 +1,17 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Text;
-#if !WINDOWS_UWP
-using System.Diagnostics;
-#endif
+
 [assembly: InternalsVisibleTo("CodePush.Net46.Test")]
 
 namespace CodePush.ReactNative
 {
-
-#if WINDOWS_UWP
-    internal class Trace
-    {
-        public static void WriteLine(string message, string category)
-        {
-        }
-    }
-#endif
+    /// <summary>
+    /// Implementation is ported from 
+    /// android\app\src\main\java\com\microsoft\codepush\react\CodePushTelemetry.java
+    /// I've tried to leave all logic, comments and structure without significant modification.
+    /// </summary>
 
     internal class TelemetryManager
     {
@@ -39,32 +31,29 @@ namespace CodePush.ReactNative
 
         #region Internal methods
 
-        internal static JObject getBinaryUpdateReport(string appVersion)
+        internal static JObject GetBinaryUpdateReport(string appVersion)
         {
-            Trace.WriteLine($"called getBinaryUpdateReport({appVersion})", "[TelemetryManager]");
-
-            var previousStatusReportIdentifier = getPreviousStatusReportIdentifier();
+            var previousStatusReportIdentifier = GetPreviousStatusReportIdentifier();
 
             if (previousStatusReportIdentifier == null)
             {
-                clearRetryStatusReport();
+                ClearRetryStatusReport();
 
                 var report = new JObject();
                 report.Add(APP_VERSION_KEY, appVersion);
-                Trace.WriteLine($"returned getBinaryUpdateReport1: {report.ToString(Formatting.None)}", "[TelemetryManager]");
                 return report;
             }
 
             if (!previousStatusReportIdentifier.Equals(appVersion))
             {
-                clearRetryStatusReport();
+                ClearRetryStatusReport();
 
                 var report = new JObject();
                 report.Add(APP_VERSION_KEY, appVersion);
-                if (isStatusReportIdentifierCodePushLabel(previousStatusReportIdentifier))
+                if (IsStatusReportIdentifierCodePushLabel(previousStatusReportIdentifier))
                 {
-                    var previousDeploymentKey = getDeploymentKeyFromStatusReportIdentifier(previousStatusReportIdentifier);
-                    var previousLabel = getVersionLabelFromStatusReportIdentifier(previousStatusReportIdentifier);
+                    var previousDeploymentKey = GetDeploymentKeyFromStatusReportIdentifier(previousStatusReportIdentifier);
+                    var previousLabel = GetVersionLabelFromStatusReportIdentifier(previousStatusReportIdentifier);
 
                     report.Add(PREVIOUS_DEPLOYMENT_KEY_KEY, previousDeploymentKey);
                     report.Add(PREVIOUS_LABEL_OR_APP_VERSION_KEY, previousLabel);
@@ -74,81 +63,71 @@ namespace CodePush.ReactNative
                     // Previous status report was with a binary app version.
                     report.Add(PREVIOUS_LABEL_OR_APP_VERSION_KEY, previousStatusReportIdentifier);
                 }
-                Trace.WriteLine($"returned getBinaryUpdateReport2: {report.ToString(Formatting.None)}", "[TelemetryManager]");
                 return report;
             }
 
             return null;
         }
 
-        internal static JObject getRetryStatusReport()
+        internal static JObject GetRetryStatusReport()
         {
-            Trace.WriteLine($"called getRetryStatusReport()", "[TelemetryManager]");
             var retryStatusReportString = SettingsManager.GetString(RETRY_DEPLOYMENT_REPORT_KEY);
 
             if (retryStatusReportString != null)
             {
-                clearRetryStatusReport();
+                ClearRetryStatusReport();
                 try
                 {
                     var report = JObject.Parse(retryStatusReportString);
-                    Trace.WriteLine($"returned getRetryStatusReport: {report.ToString(Formatting.None)}", "[TelemetryManager]");
                     return report;
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     //TODO: should be reported error
-                    Trace.WriteLine(e.ToString(), "[CodePush.Telemetry]");
                 }
             }
 
             return null;
         }
 
-        internal static JObject getRollbackReport(JObject lastFailedPackage)
+        internal static JObject GetRollbackReport(JObject lastFailedPackage)
         {
-            Trace.WriteLine($"called getRollbackReport({lastFailedPackage.ToString(Formatting.None)})", "[TelemetryManager]");
-
             var report = new JObject();
             report.Add(STATUS_KEY, DEPLOYMENT_FAILED_STATUS);
             report.Add(PACKAGE_KEY, lastFailedPackage);
-            Trace.WriteLine($"returned getRollbackReport({report.ToString(Formatting.None)})", "[TelemetryManager]");
 
             return report;
         }
 
-        internal static JObject getUpdateReport(JObject currentPackage)
+        internal static JObject GetUpdateReport(JObject currentPackage)
         {
-            Trace.WriteLine($"called getUpdateReport({currentPackage.ToString(Formatting.None)})", "[TelemetryManager]");
-
-            var currentPackageIdentifier = getPackageStatusReportIdentifier(currentPackage);
+            var currentPackageIdentifier = GetPackageStatusReportIdentifier(currentPackage);
             if (currentPackageIdentifier == null)
             {
                 return null;
             }
 
-            var previousStatusReportIdentifier = getPreviousStatusReportIdentifier();
+            var previousStatusReportIdentifier = GetPreviousStatusReportIdentifier();
             if (previousStatusReportIdentifier == null)
             {
-                clearRetryStatusReport();
+                ClearRetryStatusReport();
                 var report = new JObject();
                 report.Add(PACKAGE_KEY, currentPackage);
                 report.Add(STATUS_KEY, DEPLOYMENT_SUCCEEDED_STATUS);
-                Trace.WriteLine($"returned getUpdateReport1: {report.ToString(Formatting.None)}", "[TelemetryManager]");
                 return report;
             }
 
             if (!previousStatusReportIdentifier.Equals(currentPackageIdentifier))
             {
-                clearRetryStatusReport();
+                ClearRetryStatusReport();
                 var report = new JObject();
                 report.Add(PACKAGE_KEY, currentPackage);
                 report.Add(STATUS_KEY, DEPLOYMENT_SUCCEEDED_STATUS);
 
-                if (isStatusReportIdentifierCodePushLabel(previousStatusReportIdentifier))
+                if (IsStatusReportIdentifierCodePushLabel(previousStatusReportIdentifier))
                 {
-                    var previousDeploymentKey = getDeploymentKeyFromStatusReportIdentifier(previousStatusReportIdentifier);
-                    var previousLabel = getVersionLabelFromStatusReportIdentifier(previousStatusReportIdentifier);
+                    var previousDeploymentKey = GetDeploymentKeyFromStatusReportIdentifier(previousStatusReportIdentifier);
+                    var previousLabel = GetVersionLabelFromStatusReportIdentifier(previousStatusReportIdentifier);
 
                     report.Add(PREVIOUS_DEPLOYMENT_KEY_KEY, previousDeploymentKey);
                     report.Add(PREVIOUS_LABEL_OR_APP_VERSION_KEY, previousLabel);
@@ -159,16 +138,14 @@ namespace CodePush.ReactNative
                     report.Add(PREVIOUS_LABEL_OR_APP_VERSION_KEY, previousStatusReportIdentifier);
                 }
 
-                Trace.WriteLine($"returned getUpdateReport2: {report.ToString(Formatting.None)}", "[TelemetryManager]");
                 return report;
             }
 
             return null;
         }
 
-        internal static void recordStatusReported(JObject statusReport)
+        internal static void RecordStatusReported(JObject statusReport)
         {
-            Trace.WriteLine($"called recordStatusReported({statusReport.ToString(Formatting.None)})", "[TelemetryManager]");
             // We don't need to record rollback reports, so exit early if that's what was specified.
             var status = (string)statusReport.GetValue(STATUS_KEY);
             if ((!string.IsNullOrEmpty(status)) && DEPLOYMENT_FAILED_STATUS.Equals(status))
@@ -179,7 +156,7 @@ namespace CodePush.ReactNative
             var appVersion = (string)statusReport.GetValue(APP_VERSION_KEY);
             if (!string.IsNullOrEmpty(appVersion))
             {
-                saveStatusReportedForIdentifier(appVersion);
+                SaveStatusReportedForIdentifier(appVersion);
             }
             else
             {
@@ -189,21 +166,20 @@ namespace CodePush.ReactNative
                     return;
                 }
 
-                var packageIdentifier = getPackageStatusReportIdentifier(package);
-                saveStatusReportedForIdentifier(packageIdentifier);
+                var packageIdentifier = GetPackageStatusReportIdentifier(package);
+                SaveStatusReportedForIdentifier(packageIdentifier);
             }
         }
 
-        internal static void saveStatusReportForRetry(JObject statusReport)
+        internal static void SaveStatusReportForRetry(JObject statusReport)
         {
-            Trace.WriteLine($"called saveStatusReportForRetry({statusReport.ToString(Formatting.None)})", "[TelemetryManager]");
             SettingsManager.SetString(RETRY_DEPLOYMENT_REPORT_KEY, statusReport.ToString(Formatting.None));
         }
 
         #endregion
 
         #region Private methods
-        static string getPackageStatusReportIdentifier(JObject updatePackage)
+        static string GetPackageStatusReportIdentifier(JObject updatePackage)
         {
             // Because deploymentKeys can be dynamically switched, we use a
             // combination of the deploymentKey and label as the packageIdentifier.
@@ -224,22 +200,22 @@ namespace CodePush.ReactNative
             }
         }
 
-        static string getPreviousStatusReportIdentifier()
+        static string GetPreviousStatusReportIdentifier()
         {
             return SettingsManager.GetString(LAST_DEPLOYMENT_REPORT_KEY);
         }
 
-        static private void clearRetryStatusReport()
+        static private void ClearRetryStatusReport()
         {
             SettingsManager.RemoveString(RETRY_DEPLOYMENT_REPORT_KEY);
         }
 
-        static bool isStatusReportIdentifierCodePushLabel(string statusReportIdentifier)
+        static bool IsStatusReportIdentifierCodePushLabel(string statusReportIdentifier)
         {
             return (!string.IsNullOrEmpty(statusReportIdentifier)) && statusReportIdentifier.Contains(":");
         }
 
-        static string getDeploymentKeyFromStatusReportIdentifier(string statusReportIdentifier)
+        static string GetDeploymentKeyFromStatusReportIdentifier(string statusReportIdentifier)
         {
             string[] parsedIdentifier = statusReportIdentifier.Split(':');
             if (parsedIdentifier.Length > 0)
@@ -252,7 +228,7 @@ namespace CodePush.ReactNative
             }
         }
 
-        static string getVersionLabelFromStatusReportIdentifier(string statusReportIdentifier)
+        static string GetVersionLabelFromStatusReportIdentifier(string statusReportIdentifier)
         {
             string[] parsedIdentifier = statusReportIdentifier.Split(':');
             if (parsedIdentifier.Length > 1)
@@ -265,7 +241,7 @@ namespace CodePush.ReactNative
             }
         }
 
-        static void saveStatusReportedForIdentifier(string appVersionOrPackageIdentifier)
+        static void SaveStatusReportedForIdentifier(string appVersionOrPackageIdentifier)
         {
             SettingsManager.SetString(LAST_DEPLOYMENT_REPORT_KEY, appVersionOrPackageIdentifier);
         }

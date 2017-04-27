@@ -188,7 +188,7 @@ namespace CodePush.ReactNative
                     if (failedUpdates != null && failedUpdates.Count > 0)
                     {
                         var lastFailedPackage = (JObject)failedUpdates[failedUpdates.Count - 1];
-                        var failedStatusReport = TelemetryManager.getRollbackReport(lastFailedPackage);
+                        var failedStatusReport = TelemetryManager.GetRollbackReport(lastFailedPackage);
                         if (failedStatusReport != null)
                         {
                             promise.Resolve(failedStatusReport);
@@ -201,7 +201,7 @@ namespace CodePush.ReactNative
                     var currentPackage = _codePush.UpdateManager.GetCurrentPackageAsync().Result;
                     if (currentPackage != null)
                     {
-                        var newPackageStatusReport = TelemetryManager.getUpdateReport(currentPackage);
+                        var newPackageStatusReport = TelemetryManager.GetUpdateReport(currentPackage);
                         if (newPackageStatusReport != null)
                         {
                             promise.Resolve(newPackageStatusReport);
@@ -211,7 +211,7 @@ namespace CodePush.ReactNative
                 }
                 else if (_codePush.IsRunningBinaryVersion)
                 {
-                    var newAppVersionStatusReport = TelemetryManager.getBinaryUpdateReport(_codePush.AppVersion);
+                    var newAppVersionStatusReport = TelemetryManager.GetBinaryUpdateReport(_codePush.AppVersion);
                     if (newAppVersionStatusReport != null)
                     {
                         promise.Resolve(newAppVersionStatusReport);
@@ -220,7 +220,7 @@ namespace CodePush.ReactNative
                 }
                 else
                 {
-                    var retryStatusReport = TelemetryManager.getRetryStatusReport();
+                    var retryStatusReport = TelemetryManager.GetRetryStatusReport();
                     if (retryStatusReport != null)
                     {
                         promise.Resolve(retryStatusReport);
@@ -300,13 +300,13 @@ namespace CodePush.ReactNative
         [ReactMethod]
         public void recordStatusReported(JObject statusReport)
         {
-            Task.Run(() => TelemetryManager.recordStatusReported(statusReport)).ConfigureAwait(false);
+            Task.Run(() => TelemetryManager.RecordStatusReported(statusReport)).ConfigureAwait(false);
         }
 
         [ReactMethod]
         public void saveStatusReportForRetry(JObject statusReport)
         {
-            Task.Run(() => TelemetryManager.saveStatusReportForRetry(statusReport)).ConfigureAwait(false);
+            Task.Run(() => TelemetryManager.SaveStatusReportForRetry(statusReport)).ConfigureAwait(false);
         }
 
         internal async Task LoadBundleAsync()
