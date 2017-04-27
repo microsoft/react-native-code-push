@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
-using System.Diagnostics;
 #if WINDOWS_UWP
 using Windows.Web.Http;
 #else
