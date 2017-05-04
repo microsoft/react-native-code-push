@@ -147,6 +147,6 @@ If you want to change the default HTTP security configuration for any of these d
 </plist>
 ```
 
-Before doing anything, plese [read the docs][ats] first.
+Before doing anything, please [read the docs][ats] first.
 
 [ats]: https://developer.apple.com/library/content/documentation/General/Reference/InfoPlistKeyReference/Articles/CocoaKeys.html#//apple_ref/doc/uid/TP40009251-SW33
