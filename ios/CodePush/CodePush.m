@@ -329,21 +329,25 @@ static NSString *bundleResourceSubdirectory = nil;
     if (![self binaryBundleURL]) {
         NSString *errorMessage;
 
-#if TARGET_IPHONE_SIMULATOR
-        errorMessage = @"React Native doesn't generate your app's JS bundle by default when deploying to the simulator. "
-        "If you'd like to test CodePush using the simulator, you can do one of three things depending on your React "
-        "Native version and/or preferred workflow:\n\n"
+    #ifdef DEBUG
+        #if TARGET_IPHONE_SIMULATOR
+            errorMessage = @"React Native doesn't generate your app's JS bundle by default when deploying to the simulator. "
+            "If you'd like to test CodePush using the simulator, you can do one of three things depending on your React "
+            "Native version and/or preferred workflow:\n\n"
 
-        "1. Update your AppDelegate.m file to load the JS bundle from the packager instead of from CodePush. "
-        "You can still test your CodePush update experience using this workflow (debug builds only).\n\n"
+            "1. Update your AppDelegate.m file to load the JS bundle from the packager instead of from CodePush. "
+            "You can still test your CodePush update experience using this workflow (debug builds only).\n\n"
 
-        "2. Force the JS bundle to be generated in simulator builds by removing the if block that echoes "
-        "\"Skipping bundling for Simulator platform\" in the \"node_modules/react-native/packager/react-native-xcode.sh\" file.\n\n"
+            "2. Force the JS bundle to be generated in simulator builds by removing the if block that echoes "
+            "\"Skipping bundling for Simulator platform\" in the \"node_modules/react-native/packager/react-native-xcode.sh\" file.\n\n"
 
-        "3. Deploy a release build to the simulator, which unlike debug builds, will generate the JS bundle (React Native >=0.22.0 only).";
-#else
-        errorMessage = [NSString stringWithFormat:@"The specified JS bundle file wasn't found within the app's binary. Is \"%@\" the correct file name?", [bundleResourceName stringByAppendingPathExtension:bundleResourceExtension]];
-#endif
+            "3. Deploy a release build to the simulator, which unlike debug builds, will generate the JS bundle (React Native >=0.22.0 only).";
+        #else
+            errorMessage = [NSString stringWithFormat:@"The specified JS bundle file wasn't found within the app's binary. Is \"%@\" the correct file name?", [bundleResourceName stringByAppendingPathExtension:bundleResourceExtension]];
+        #endif
+    #else
+        errorMessage = @"Something went wrong. Please verify if generated JS bundle is correct. ";
+    #endif
 
         RCTFatal([CodePushErrorUtils errorWithMessage:errorMessage]);
     }
@@ -583,7 +587,7 @@ static NSString *bundleResourceSubdirectory = nil;
     // Save the current time so that when the app is later
     // resumed, we can detect how long it was in the background.
     _lastResignedDate = [NSDate date];
-    
+
     if (_installMode == CodePushInstallModeOnNextSuspend && [[self class] isPendingUpdate:nil]) {
         _appSuspendTimer = [NSTimer scheduledTimerWithTimeInterval:_minimumBackgroundDuration
                                                          target:self
