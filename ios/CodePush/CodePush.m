@@ -711,6 +711,15 @@ RCT_EXPORT_METHOD(getUpdateMetadata:(CodePushUpdateState)updateState
                            resolver:(RCTPromiseResolveBlock)resolve
                            rejecter:(RCTPromiseRejectBlock)reject)
 {
+    if (isRunningBinaryVersion && ![self isPendingUpdate:nil]) {
+        // If the binary version was booted up, and there is no pending update, we return
+        // `nil` right away to indicate that there is no currently installed CodePush package.
+        // This also prevents "outdated" packages that are older than the binary version from
+        // being returned, as they are not cleared away in debug builds.
+        resolve(nil);
+        return;
+    }
+    
     NSError *error;
     NSMutableDictionary *package = [[CodePushPackage getCurrentPackage:&error] mutableCopy];
 
