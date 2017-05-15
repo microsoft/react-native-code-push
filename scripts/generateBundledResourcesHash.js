@@ -21,16 +21,18 @@ var CODE_PUSH_FOLDER_PREFIX = "CodePush";
 var CODE_PUSH_HASH_FILE_NAME = "CodePushHash";
 var CODE_PUSH_HASH_OLD_FILE_NAME = "CodePushHash.json";
 var HASH_ALGORITHM = "sha256";
-var TEMP_FILE_PATH = path.join(require("os").tmpdir(), "CodePushResourcesMap.json");
 
 var resourcesDir = process.argv[2];
 var jsBundleFilePath = process.argv[3];
 var assetsDir = process.argv[4];
+var tempFileName = process.argv[5];
+
+var tempFileLocalPath = path.join(require("os").tmpdir(), tempFileName);
 var resourceFiles = [];
 
 getFilesInFolder(resourcesDir, resourceFiles);
 
-var oldFileToModifiedTimeMap = require(TEMP_FILE_PATH);
+var oldFileToModifiedTimeMap = require(tempFileLocalPath);
 var newFileToModifiedTimeMap = {};
 
 resourceFiles.forEach(function(resourceFile) {
@@ -114,4 +116,4 @@ function fileExists(file) {
     catch (e) { return false; }
 }
 
-fs.unlinkSync(TEMP_FILE_PATH);
+fs.unlinkSync(tempFileLocalPath);
