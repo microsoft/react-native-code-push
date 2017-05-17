@@ -105,8 +105,8 @@ function getDefaultPlistPath() {
     return glob.sync(`**/${package.name}/*Info.plist`, ignoreNodeModules)[0];
 }
 
-// This is enhanced version of standard implementation of xcode 'getBuildProperty' function  
-// but allows us to narrow results by PRODUCT_NAME property also. 
+// This is enhanced version of standard implementation of xcode 'getBuildProperty' function
+// but allows us to narrow results by PRODUCT_NAME property also.
 // So we suppose that proj name should be the same as package name, otherwise fallback to default plist path searching logic
 function getBuildSettingsPropertyMatchingTargetProductName(parsedXCodeProj, prop, targetProductName, build){
     var target;
@@ -146,7 +146,7 @@ function getPlistPath(){
     var parsedXCodeProj;
 
     try {
-        var proj = xcode.project(xcodeProjectPath);      
+        var proj = xcode.project(xcodeProjectPath);
         //use sync version because there are some problems with async version of xcode lib as of current version
         parsedXCodeProj = proj.parseSync();
     }
@@ -160,14 +160,16 @@ function getPlistPath(){
     var targetProductName = package ? package.name : null;
 
     //Try to get 'Release' build of ProductName matching the package name first and if it doesn't exist then try to get any other if existing
-    var plistPathValue = getBuildSettingsPropertyMatchingTargetProductName(parsedXCodeProj, INFO_PLIST_PROJECT_KEY, targetProductName, RELEASE_BUILD_PROPERTY_NAME) || 
+    var plistPathValue = getBuildSettingsPropertyMatchingTargetProductName(parsedXCodeProj, INFO_PLIST_PROJECT_KEY, targetProductName, RELEASE_BUILD_PROPERTY_NAME) ||
         getBuildSettingsPropertyMatchingTargetProductName(parsedXCodeProj, INFO_PLIST_PROJECT_KEY, targetProductName) ||
-         parsedXCodeProj.getBuildProperty(INFO_PLIST_PROJECT_KEY, RELEASE_BUILD_PROPERTY_NAME) || 
+         parsedXCodeProj.getBuildProperty(INFO_PLIST_PROJECT_KEY, RELEASE_BUILD_PROPERTY_NAME) ||
          parsedXCodeProj.getBuildProperty(INFO_PLIST_PROJECT_KEY);
 
     if (!plistPathValue){
         return getDefaultPlistPath();
     }
 
-    return path.resolve(path.dirname(xcodeProjectPath), '..', plistPathValue);    
+    //also remove surrounding quotes from plistPathValue to get correct path resolved
+    //(see https://github.com/Microsoft/react-native-code-push/issues/534#issuecomment-302069326 for details)
+    return path.resolve(path.dirname(xcodeProjectPath), '..', plistPathValue.replace(/^"(.*)"$/, '$1'));
 }
