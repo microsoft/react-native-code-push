@@ -54,11 +54,14 @@ gradle.projectsEvaluated {
 
             def resourcesMapTempFileName = "CodePushResourcesMap-" + java.util.UUID.randomUUID().toString().substring(0,8) + ".json"
 
+            // Additional node commandline arguments
+            def nodeExecutableAndArgs = config.nodeExecutableAndArgs ?: ["node"]
+
             // Make this task run right before the bundle task
             def recordFilesBeforeBundleCommand = tasks.create(
                     name: "recordFilesBeforeBundleCommand${targetName}",
                     type: Exec) {
-                commandLine "node", "${nodeModulesPath}/react-native-code-push/scripts/recordFilesBeforeBundleCommand.js", resourcesDir, resourcesMapTempFileName
+                commandLine (*nodeExecutableAndArgs, "${nodeModulesPath}/react-native-code-push/scripts/recordFilesBeforeBundleCommand.js", resourcesDir, resourcesMapTempFileName)
             }
 
             recordFilesBeforeBundleCommand.dependsOn("merge${targetName}Resources")
@@ -69,7 +72,7 @@ gradle.projectsEvaluated {
             def generateBundledResourcesHash = tasks.create(
                     name: "generateBundledResourcesHash${targetName}",
                     type: Exec) {
-                commandLine "node", "${nodeModulesPath}/react-native-code-push/scripts/generateBundledResourcesHash.js", resourcesDir, "$jsBundleDir/$bundleAssetName", jsBundleDir, resourcesMapTempFileName
+                commandLine (*nodeExecutableAndArgs, "${nodeModulesPath}/react-native-code-push/scripts/generateBundledResourcesHash.js", resourcesDir, "$jsBundleDir/$bundleAssetName", jsBundleDir, resourcesMapTempFileName)
             }
 
             generateBundledResourcesHash.dependsOn("bundle${targetName}JsAndAssets")
