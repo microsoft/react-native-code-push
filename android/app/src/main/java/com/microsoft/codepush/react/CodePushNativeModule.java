@@ -319,7 +319,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                 JSONObject currentPackage = mUpdateManager.getCurrentPackage();
 
                 if (currentPackage == null) {
-                    promise.resolve("");
+                    promise.resolve(null);
                     return null;
                 }
 
@@ -333,14 +333,14 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                 if (updateState == CodePushUpdateState.PENDING.getValue() && !currentUpdateIsPending) {
                     // The caller wanted a pending update
                     // but there isn't currently one.
-                    promise.resolve("");
+                    promise.resolve(null);
                 } else if (updateState == CodePushUpdateState.RUNNING.getValue() && currentUpdateIsPending) {
                     // The caller wants the running update, but the current
                     // one is pending, so we need to grab the previous.
                     JSONObject previousPackage = mUpdateManager.getPreviousPackage();
 
                     if (previousPackage == null) {
-                        promise.resolve("");
+                        promise.resolve(null);
                         return null;
                     }
 
