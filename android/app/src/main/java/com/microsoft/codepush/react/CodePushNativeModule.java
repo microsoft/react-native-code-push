@@ -105,11 +105,11 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             Field bundleLoaderField = instanceManager.getClass().getDeclaredField("mBundleLoader");
             Class<?> jsBundleLoaderClass = Class.forName("com.facebook.react.cxxbridge.JSBundleLoader");
             Method createFileLoaderMethod = null;
+            String createFileLoaderMethodName = latestJSBundleFile.toLowerCase().startsWith("assets://")
+                        ? "createAssetLoader" : "createFileLoader";
 
             Method[] methods = jsBundleLoaderClass.getDeclaredMethods();
-            for (Method method : methods) {
-                String createFileLoaderMethodName = latestJSBundleFile.toLowerCase().startsWith("assets://")
-                        ? "createAssetLoader" : "createFileLoader";
+            for (Method method : methods) {               
                 if (method.getName().equals(createFileLoaderMethodName)) {
                     createFileLoaderMethod = method;
                     break;
@@ -321,7 +321,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                 JSONObject currentPackage = mUpdateManager.getCurrentPackage();
 
                 if (currentPackage == null) {
-                    promise.resolve(null);
+                    promise.resolve("");
                     return null;
                 }
 
@@ -335,14 +335,14 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                 if (updateState == CodePushUpdateState.PENDING.getValue() && !currentUpdateIsPending) {
                     // The caller wanted a pending update
                     // but there isn't currently one.
-                    promise.resolve(null);
+                    promise.resolve("");
                 } else if (updateState == CodePushUpdateState.RUNNING.getValue() && currentUpdateIsPending) {
                     // The caller wants the running update, but the current
                     // one is pending, so we need to grab the previous.
                     JSONObject previousPackage = mUpdateManager.getPreviousPackage();
 
                     if (previousPackage == null) {
-                        promise.resolve(null);
+                        promise.resolve("");
                         return null;
                     }
 
