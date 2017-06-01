@@ -105,10 +105,12 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             Field bundleLoaderField = instanceManager.getClass().getDeclaredField("mBundleLoader");
             Class<?> jsBundleLoaderClass = Class.forName("com.facebook.react.cxxbridge.JSBundleLoader");
             Method createFileLoaderMethod = null;
+            String createFileLoaderMethodName = latestJSBundleFile.toLowerCase().startsWith("assets://")
+                        ? "createAssetLoader" : "createFileLoader";
 
             Method[] methods = jsBundleLoaderClass.getDeclaredMethods();
-            for (Method method : methods) {
-                if (method.getName().equals("createFileLoader")) {
+            for (Method method : methods) {               
+                if (method.getName().equals(createFileLoaderMethodName)) {
                     createFileLoaderMethod = method;
                     break;
                 }
@@ -125,7 +127,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                 // RN >= v0.34
                 latestJSBundleLoader = createFileLoaderMethod.invoke(jsBundleLoaderClass, latestJSBundleFile);
             } else if (numParameters == 2) {
-                // RN >= v0.31 && RN < v0.34
+                // RN >= v0.31 && RN < v0.34 or AssetLoader instance
                 latestJSBundleLoader = createFileLoaderMethod.invoke(jsBundleLoaderClass, getReactApplicationContext(), latestJSBundleFile);
             } else {
                 throw new NoSuchMethodException("Could not find a recognized 'createFileLoader' method");
