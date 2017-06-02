@@ -55,6 +55,10 @@ public class FileUtils {
     }
 
     public static void deleteDirectoryAtPath(String directoryPath) {
+        if (directoryPath == null) {
+            CodePushUtils.log("deleteDirectoryAtPath attempted with null directoryPath");
+            return;
+        }
         File file = new File(directoryPath);
         if (file.exists()) {
             deleteFileOrFolderSilently(file);
