@@ -1,5 +1,7 @@
 // Adapted from https://raw.githubusercontent.com/facebook/react-native/master/local-cli/generator-android/templates/src/app/react.gradle
 
+import java.nio.file.Paths;
+
 def config = project.hasProperty("react") ? project.react : [];
 def bundleAssetName = config.bundleAssetName ?: "index.android.bundle"
 
@@ -22,7 +24,10 @@ gradle.projectsEvaluated {
     def productFlavors = android.productFlavors.collect { flavor -> flavor.name }
     if (!productFlavors) productFlavors.add('')
     def nodeModulesPath;
-    if (project.hasProperty('nodeModulesPath')) {
+    if (config.root) {
+        nodeModulesPath = Paths.get(config.root, "/node_modules");
+    }
+    else if (project.hasProperty('nodeModulesPath')) {
         nodeModulesPath = project.nodeModulesPath
     } else {
         nodeModulesPath = "../../node_modules";
