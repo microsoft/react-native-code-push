@@ -1,14 +1,12 @@
 package com.microsoft.codepush.react;
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
-import android.view.Choreographer;
 
-import com.facebook.react.ReactActivity;
+import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -18,8 +16,8 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.modules.core.ChoreographerCompat;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.modules.core.ReactChoreographer;
 
 import org.json.JSONArray;
@@ -43,9 +41,6 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
     private SettingsManager mSettingsManager;
     private CodePushTelemetryManager mTelemetryManager;
     private CodePushUpdateManager mUpdateManager;
-
-    private static final String REACT_APPLICATION_CLASS_NAME = "com.facebook.react.ReactApplication";
-    private static final String REACT_NATIVE_HOST_CLASS_NAME = "com.facebook.react.ReactNativeHost";
 
     public CodePushNativeModule(ReactApplicationContext reactContext, CodePush codePush, CodePushUpdateManager codePushUpdateManager, CodePushTelemetryManager codePushTelemetryManager, SettingsManager settingsManager) {
         super(reactContext);
@@ -100,7 +95,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
 
     // Use reflection to find and set the appropriate fields on ReactInstanceManager. See #556 for a proposal for a less brittle way
     // to approach this.
-    private void setJSBundle(ReactInstanceManager instanceManager, String latestJSBundleFile) throws NoSuchFieldException, IllegalAccessException {
+    private void setJSBundle(ReactInstanceManager instanceManager, String latestJSBundleFile) throws IllegalAccessException {
         try {
             Field bundleLoaderField = instanceManager.getClass().getDeclaredField("mBundleLoader");
             Class<?> jsBundleLoaderClass = Class.forName("com.facebook.react.cxxbridge.JSBundleLoader");
@@ -109,7 +104,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                         ? "createAssetLoader" : "createFileLoader";
 
             Method[] methods = jsBundleLoaderClass.getDeclaredMethods();
-            for (Method method : methods) {               
+            for (Method method : methods) {
                 if (method.getName().equals(createFileLoaderMethodName)) {
                     createFileLoaderMethod = method;
                     break;
@@ -127,7 +122,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                 // RN >= v0.34
                 latestJSBundleLoader = createFileLoaderMethod.invoke(jsBundleLoaderClass, latestJSBundleFile);
             } else if (numParameters == 2) {
-                // RN >= v0.31 && RN < v0.34 or AssetLoader instance
+                // AssetLoader instance
                 latestJSBundleLoader = createFileLoaderMethod.invoke(jsBundleLoaderClass, getReactApplicationContext(), latestJSBundleFile);
             } else {
                 throw new NoSuchMethodException("Could not find a recognized 'createFileLoader' method");
@@ -136,14 +131,13 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             bundleLoaderField.setAccessible(true);
             bundleLoaderField.set(instanceManager, latestJSBundleLoader);
         } catch (Exception e) {
-            // RN < v0.31
-            Field jsBundleField = instanceManager.getClass().getDeclaredField("mJSBundleFile");
-            jsBundleField.setAccessible(true);
-            jsBundleField.set(instanceManager, latestJSBundleFile);
+            CodePushUtils.log("Unable to set JSBundle - CodePush may not support this version of React Native");
+            throw new IllegalAccessException("Could not setJSBundle");
         }
     }
 
     private void loadBundle() {
+        clearLifecycleEventListener();
         mCodePush.clearDebugCacheIfNeeded();
         try {
             // #1) Get the ReactInstanceManager instance, which is what includes the
@@ -159,12 +153,11 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             setJSBundle(instanceManager, latestJSBundleFile);
 
             // #3) Get the context creation method and fire it on the UI thread (which RN enforces)
-            final Method recreateMethod = instanceManager.getClass().getMethod("recreateReactContextInBackground");
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        recreateMethod.invoke(instanceManager);
+                        instanceManager.recreateReactContextInBackground();
                         mCodePush.initializeUpdateAfterRestart();
                     } catch (Exception e) {
                         // The recreation method threw an unknown exception
@@ -181,6 +174,14 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         }
     }
 
+    private void clearLifecycleEventListener() {
+        // Remove LifecycleEventListener to prevent infinite restart loop
+        if (mLifecycleEventListener != null) {
+            getReactApplicationContext().removeLifecycleEventListener(mLifecycleEventListener);
+            mLifecycleEventListener = null;
+        }
+    }
+
     // Use reflection to find the ReactInstanceManager. See #556 for a proposal for a less brittle way to approach this.
     private ReactInstanceManager resolveInstanceManager() throws NoSuchFieldException, IllegalAccessException {
         ReactInstanceManager instanceManager = CodePush.getReactInstanceManager();
@@ -192,37 +193,11 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         if (currentActivity == null) {
             return null;
         }
-        try {
-            // In RN >=0.29, the "mReactInstanceManager" field yields a null value, so we try
-            // to get the instance manager via the ReactNativeHost, which only exists in 0.29.
-            Method getApplicationMethod = ReactActivity.class.getMethod("getApplication");
-            Object reactApplication = getApplicationMethod.invoke(currentActivity);
-            Class<?> reactApplicationClass = tryGetClass(REACT_APPLICATION_CLASS_NAME);
-            Method getReactNativeHostMethod = reactApplicationClass.getMethod("getReactNativeHost");
-            Object reactNativeHost = getReactNativeHostMethod.invoke(reactApplication);
-            Class<?> reactNativeHostClass = tryGetClass(REACT_NATIVE_HOST_CLASS_NAME);
-            Method getReactInstanceManagerMethod = reactNativeHostClass.getMethod("getReactInstanceManager");
-            instanceManager = (ReactInstanceManager)getReactInstanceManagerMethod.invoke(reactNativeHost);
-        } catch (Exception e) {
-            // The React Native version might be older than 0.29, or the activity does not
-            // extend ReactActivity, so we try to get the instance manager via the
-            // "mReactInstanceManager" field.
-            Class instanceManagerHolderClass = currentActivity instanceof ReactActivity
-                    ? ReactActivity.class
-                    : currentActivity.getClass();
-            Field instanceManagerField = instanceManagerHolderClass.getDeclaredField("mReactInstanceManager");
-            instanceManagerField.setAccessible(true);
-            instanceManager = (ReactInstanceManager)instanceManagerField.get(currentActivity);
-        }
-        return instanceManager;
-    }
 
-    private Class tryGetClass(String className) {
-        try {
-            return Class.forName(className);
-        } catch (ClassNotFoundException e) {
-            return null;
-        }
+        ReactApplication reactApplication = (ReactApplication) currentActivity.getApplication();
+        instanceManager = reactApplication.getReactNativeHost().getReactInstanceManager();
+
+        return instanceManager;
     }
 
     @ReactMethod
