@@ -117,7 +117,7 @@ The simplest way to do this is to "CodePush-ify" your app's root component. To d
 * **Option 1: Wrap your root component with the `codePush` higher-order component:**
 
     ```javascript
-    import codePush from "react-native-code-push";
+    import CodePush from "react-native-code-push";
 
     class MyApp extends Component {
     }
@@ -130,7 +130,7 @@ The simplest way to do this is to "CodePush-ify" your app's root component. To d
     *NOTE: Decorators are not yet supported in Babel 6.x pending proposal update.* You may need to enable it by installing and using [babel-preset-react-native-stage-0](https://github.com/skevy/babel-preset-react-native-stage-0#babel-preset-react-native-stage-0).
 
     ```javascript
-    import codePush from "react-native-code-push";
+    import CodePush from "react-native-code-push";
 
     @codePush
     class MyApp extends Component {
