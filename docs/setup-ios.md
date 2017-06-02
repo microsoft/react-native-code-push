@@ -117,3 +117,36 @@ To let the CodePush runtime know which deployment it should query for updates ag
 ![Deployment list](https://cloud.githubusercontent.com/assets/116461/11601733/13011d5e-9a8a-11e5-9ce2-b100498ffb34.png)
 
 In order to effectively make use of the `Staging` and `Production` deployments that were created along with your CodePush app, refer to the [multi-deployment testing](../README.md#multi-deployment-testing) docs below before actually moving your app's usage of CodePush into production.
+
+### HTTP exception domains configuration (iOS)
+
+CodePush plugin makes HTTPS requests to the following domains:
+
+- codepush.azurewebsites.net
+- codepush.blob.core.windows.net
+- codepushupdates.azureedge.net
+
+If you want to change the default HTTP security configuration for any of these domains, you have to define the [`NSAppTransportSecurity` (ATS)][ats] configuration inside your __Info.plist__ file:
+
+```xml
+<plist version="1.0">
+  <dict>
+    <!-- ...other configs... -->
+
+    <key>NSAppTransportSecurity</key>
+    <dict>
+      <key>NSExceptionDomains</key>
+      <dict>
+        <key>codepush.azurewebsites.net</key>
+        <dict><!-- read the ATS Apple Docs for available options --></dict>
+      </dict>
+    </dict>
+
+    <!-- ...other configs... -->
+  </dict>
+</plist>
+```
+
+Before doing anything, please [read the docs][ats] first.
+
+[ats]: https://developer.apple.com/library/content/documentation/General/Reference/InfoPlistKeyReference/Articles/CocoaKeys.html#//apple_ref/doc/uid/TP40009251-SW33
