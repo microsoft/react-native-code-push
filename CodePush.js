@@ -482,7 +482,15 @@ function codePushify(options = {}) {
       }
 
       render() {
-        return <RootComponent {...this.props} ref={"rootComponent"} />
+        const props = {...this.props};
+
+        // we can set ref property on class components only (not stateless)
+        // check it by render method
+        if (RootComponent.prototype.render) {
+          props.ref = "rootComponent";
+        }
+
+        return <RootComponent {...props} />
       }
     }
   }
