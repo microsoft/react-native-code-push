@@ -40,11 +40,15 @@ gradle.projectsEvaluated {
                     "${productFlavorName}/${buildTypeName}" :
                     "${buildTypeName}"
 
+            def assetsDirConfigName = "assetsDir${targetName}"
+            def assetsDir = elvisFile(config."$assetsDirConfigName") ?:
+                    "$buildDir/intermediates/assets/${targetPath}"
+
             def jsBundleDirConfigName = "jsBundleDir${targetName}"
             def jsBundleDir = elvisFile(config."$jsBundleDirConfigName") ?:
                     file("$buildDir/intermediates/assets/${targetPath}")
 
-            def resourcesDirConfigName = "jsBundleDir${targetName}"
+            def resourcesDirConfigName = "resourcesDir${targetName}"
             def resourcesDir = elvisFile(config."${resourcesDirConfigName}") ?:
                     file("$buildDir/intermediates/res/merged/${targetPath}")
 
