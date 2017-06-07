@@ -151,7 +151,7 @@ static NSString *bundleResourceSubdirectory = nil;
     NSString *logMessageFormat = @"Loading JS bundle from %@";
 
     NSError *error;
-    NSString *packageFile = [CodePushPackage getCurrentPackageBundlePath:&error];
+    NSString *packageFile = [CodePushPackage getCurrentPackageBundlePath:&error withPath:bundleResourceName];
     NSURL *binaryBundleURL = [self binaryBundleURL];
 
     if (error || !packageFile) {

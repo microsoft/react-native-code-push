@@ -128,7 +128,7 @@ failCallback:(void (^)(NSError *err))failCallback;
 + (NSDictionary *)getCurrentPackage:(NSError **)error;
 + (NSDictionary *)getPreviousPackage:(NSError **)error;
 + (NSString *)getCurrentPackageFolderPath:(NSError **)error;
-+ (NSString *)getCurrentPackageBundlePath:(NSError **)error;
++ (NSString *)getCurrentPackageBundlePath:(NSError **)error withPath:(NSString *)withPath;
 + (NSString *)getCurrentPackageHash:(NSError **)error;
 
 + (NSDictionary *)getPackage:(NSString *)packageHash
