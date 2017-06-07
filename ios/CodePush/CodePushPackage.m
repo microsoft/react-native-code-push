@@ -258,6 +258,7 @@ static NSString *const UnzippedFolderName = @"unzipped";
                                                         }
                                                     }
                                                     
+                                                    [mutableUpdatePackage removeObjectForKey:@"download"];
                                                     NSData *updateSerializedData = [NSJSONSerialization dataWithJSONObject:mutableUpdatePackage
                                                                                                                    options:0
                                                                                                                      error:&error];
