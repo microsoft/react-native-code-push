@@ -400,6 +400,8 @@ In order to achieve this kind of workflow, all you need to do is specify the dep
 codePush.sync({ deploymentKey: userProfile.CODEPUSH_KEY });
 ```
 
+*NOTE: Deployment key specified by `codePush.sync({ deploymentKey: key })` will not persist across app restarts (user kills app process and launch it again) and will be taken from native-side on next app launch. In case app restarts programmatically (while using IMMEDIATE installation mode) deployment key will persists.*
+
 With that change in place, now it's just a matter of choosing how your app determines the right deployment key for the current user. In practice, there are typically two solutions for this:
 
 1. Expose a user-visible mechanism for changing deployments at any time. For example, your settings page could have a toggle for enabling "beta" access. This model works well if you're not concerned with the privacy of your pre-production updates, and you have power users that may want to opt-in to earlier (and potentially buggy) updates at their own will (kind of like Chrome channels). However, this solution puts the decision in the hands of your users, which doesn't help you perform A/B tests transparently.
