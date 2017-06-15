@@ -456,7 +456,7 @@ Additionally, you can also use any of the platform-specific tools to view the Co
 
 Note that by default, React Native logs are disabled on iOS in release builds, so if you want to view them in a release build, you need to make the following changes to your `AppDelegate.m` file:
 
-1. Add an `#import "RCTLog.h"` statement
+1. Add an `#import <React/RCTLog.h>` statement. For RN < v0.40 use: `#import "RCTLog.h"`
 
 2. Add the following statement to the top of your `application:didFinishLaunchingWithOptions` method:
 
