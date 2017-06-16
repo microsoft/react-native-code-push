@@ -42,7 +42,7 @@ namespace CodePush.Net46.Adapters.Storage
             }
         }
 
-        public bool Remove(TKey key)
+        public new bool Remove(TKey key)
         {
             var found = base.Remove(key);
             if (found)
