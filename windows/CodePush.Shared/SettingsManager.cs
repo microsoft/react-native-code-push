@@ -129,5 +129,20 @@ namespace CodePush.ReactNative
 
             Settings.Values[CodePushConstants.PendingUpdateKey] = JsonConvert.SerializeObject(pendingUpdate);
         }
+
+        internal static void SetString(string key, string value)
+        {
+            Settings.Values[key] = value;
+        }
+
+        internal static string GetString(string key)
+        {
+            return (string)Settings.Values[key];
+        }
+
+        internal static void RemoveString(string key)
+        {
+            Settings.Values.Remove(key);
+        }
     }
 }

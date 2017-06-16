@@ -16,6 +16,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)InstallMode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MinimumBackgroundListener.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SettingsManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TelemetryManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UpdateState.cs" />
   </ItemGroup>
 </Project>
