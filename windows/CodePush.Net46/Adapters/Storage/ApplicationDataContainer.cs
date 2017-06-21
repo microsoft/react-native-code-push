@@ -91,7 +91,7 @@ namespace CodePush.Net46.Adapters.Storage
         {
             await mutex.WaitAsync().ConfigureAwait(false);
             var jobject = JObject.FromObject(Values);
-            var storageFile = FileSystem.Current.LocalStorage.CreateFileAsync(storageFileName, CreationCollisionOption.OpenIfExists).Result;
+            var storageFile = await FileSystem.Current.LocalStorage.CreateFileAsync(storageFileName, CreationCollisionOption.OpenIfExists).ConfigureAwait(false);
             await storageFile.WriteAllTextAsync(JsonConvert.SerializeObject(jobject)).ConfigureAwait(false);
             mutex.Release();
         }
@@ -99,8 +99,8 @@ namespace CodePush.Net46.Adapters.Storage
         public async Task DeleteAsync()
         {
             Values.Clear();
-            var storageFile = FileSystem.Current.LocalStorage.CreateFileAsync(storageFileName, CreationCollisionOption.OpenIfExists).Result;
-            await storageFile.DeleteAsync();
+            var storageFile = await FileSystem.Current.LocalStorage.CreateFileAsync(storageFileName, CreationCollisionOption.OpenIfExists).ConfigureAwait(false);
+            await storageFile.DeleteAsync().ConfigureAwait(false);
         }
     }
 }
