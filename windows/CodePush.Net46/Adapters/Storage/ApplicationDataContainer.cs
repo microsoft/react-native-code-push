@@ -62,11 +62,12 @@ namespace CodePush.Net46.Adapters.Storage
         private readonly SemaphoreSlim mutex = new SemaphoreSlim(1, 1);
 
         const string STORAGE_NAME = "AppStorage.data";
-        IFile storageFile = null;
+        string storageFileName = null;
 
         public ApplicationDataContainer(string name = STORAGE_NAME)
         {
-            storageFile = FileSystem.Current.LocalStorage.CreateFileAsync(name, CreationCollisionOption.OpenIfExists).Result;
+            storageFileName = name;
+            var storageFile = FileSystem.Current.LocalStorage.CreateFileAsync(storageFileName, CreationCollisionOption.OpenIfExists).Result;
             var data = CodePushUtils.GetJObjectFromFileAsync(storageFile).Result;
 
             if (data != null)
@@ -90,6 +91,7 @@ namespace CodePush.Net46.Adapters.Storage
         {
             await mutex.WaitAsync().ConfigureAwait(false);
             var jobject = JObject.FromObject(Values);
+            var storageFile = FileSystem.Current.LocalStorage.CreateFileAsync(storageFileName, CreationCollisionOption.OpenIfExists).Result;
             await storageFile.WriteAllTextAsync(JsonConvert.SerializeObject(jobject)).ConfigureAwait(false);
             mutex.Release();
         }
@@ -97,6 +99,7 @@ namespace CodePush.Net46.Adapters.Storage
         public async Task DeleteAsync()
         {
             Values.Clear();
+            var storageFile = FileSystem.Current.LocalStorage.CreateFileAsync(storageFileName, CreationCollisionOption.OpenIfExists).Result;
             await storageFile.DeleteAsync();
         }
     }
