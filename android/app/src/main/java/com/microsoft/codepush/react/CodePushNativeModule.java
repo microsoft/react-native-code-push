@@ -11,7 +11,6 @@ import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactRootView;
 import com.facebook.react.bridge.Arguments;
-import com.facebook.react.bridge.JSBundleLoader;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -29,6 +28,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -100,14 +100,37 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
     // to approach this.
     private void setJSBundle(ReactInstanceManager instanceManager, String latestJSBundleFile) throws IllegalAccessException {
         try {
-            JSBundleLoader latestJSBundleLoader;
-            if (latestJSBundleFile.toLowerCase().startsWith("assets://")) {
-                latestJSBundleLoader = JSBundleLoader.createAssetLoader(getReactApplicationContext(), latestJSBundleFile, false);
-            } else {
-                latestJSBundleLoader = JSBundleLoader.createFileLoader(latestJSBundleFile);
+            Field bundleLoaderField = instanceManager.getClass().getDeclaredField("mBundleLoader");
+            Class<?> jsBundleLoaderClass = Class.forName("com.facebook.react.cxxbridge.JSBundleLoader");
+            Method createFileLoaderMethod = null;
+            String createFileLoaderMethodName = latestJSBundleFile.toLowerCase().startsWith("assets://")
+                    ? "createAssetLoader" : "createFileLoader";
+
+            Method[] methods = jsBundleLoaderClass.getDeclaredMethods();
+            for (Method method : methods) {
+                if (method.getName().equals(createFileLoaderMethodName)) {
+                    createFileLoaderMethod = method;
+                    break;
+                }
             }
 
-            Field bundleLoaderField = instanceManager.getClass().getDeclaredField("mBundleLoader");
+            if (createFileLoaderMethod == null) {
+                throw new NoSuchMethodException("Could not find a recognized 'createFileLoader' method");
+            }
+
+            int numParameters = createFileLoaderMethod.getGenericParameterTypes().length;
+            Object latestJSBundleLoader;
+
+            if (numParameters == 1) {
+                // RN >= v0.34
+                latestJSBundleLoader = createFileLoaderMethod.invoke(jsBundleLoaderClass, latestJSBundleFile);
+            } else if (numParameters == 2) {
+                // AssetLoader instance
+                latestJSBundleLoader = createFileLoaderMethod.invoke(jsBundleLoaderClass, getReactApplicationContext(), latestJSBundleFile);
+            } else {
+                throw new NoSuchMethodException("Could not find a recognized 'createFileLoader' method");
+            }
+
             bundleLoaderField.setAccessible(true);
             bundleLoaderField.set(instanceManager, latestJSBundleLoader);
         } catch (Exception e) {
