@@ -144,9 +144,6 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
 
                         instanceManager.recreateReactContextInBackground();
                         mCodePush.initializeUpdateAfterRestart();
-
-                        instanceManager.recreateReactContextInBackground();
-                        mCodePush.initializeUpdateAfterRestart();
                     } catch (Exception e) {
                         // The recreation method threw an unknown exception
                         // so just simply fallback to restarting the Activity (if it exists)
