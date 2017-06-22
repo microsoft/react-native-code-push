@@ -5,9 +5,11 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.view.View;
 
 import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactInstanceManager;
+import com.facebook.react.ReactRootView;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.JSBundleLoader;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -27,9 +29,9 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CodePushNativeModule extends ReactContextBaseJavaModule {
