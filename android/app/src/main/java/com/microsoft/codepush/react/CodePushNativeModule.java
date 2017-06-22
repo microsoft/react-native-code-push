@@ -97,37 +97,14 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
     // to approach this.
     private void setJSBundle(ReactInstanceManager instanceManager, String latestJSBundleFile) throws IllegalAccessException {
         try {
-            Field bundleLoaderField = instanceManager.getClass().getDeclaredField("mBundleLoader");
-            Class<?> jsBundleLoaderClass = Class.forName("com.facebook.react.cxxbridge.JSBundleLoader");
-            Method createFileLoaderMethod = null;
-            String createFileLoaderMethodName = latestJSBundleFile.toLowerCase().startsWith("assets://")
-                        ? "createAssetLoader" : "createFileLoader";
-
-            Method[] methods = jsBundleLoaderClass.getDeclaredMethods();
-            for (Method method : methods) {
-                if (method.getName().equals(createFileLoaderMethodName)) {
-                    createFileLoaderMethod = method;
-                    break;
-                }
-            }
-
-            if (createFileLoaderMethod == null) {
-                throw new NoSuchMethodException("Could not find a recognized 'createFileLoader' method");
-            }
-
-            int numParameters = createFileLoaderMethod.getGenericParameterTypes().length;
-            Object latestJSBundleLoader;
-
-            if (numParameters == 1) {
-                // RN >= v0.34
-                latestJSBundleLoader = createFileLoaderMethod.invoke(jsBundleLoaderClass, latestJSBundleFile);
-            } else if (numParameters == 2) {
-                // AssetLoader instance
-                latestJSBundleLoader = createFileLoaderMethod.invoke(jsBundleLoaderClass, getReactApplicationContext(), latestJSBundleFile);
+            JSBundleLoader latestJSBundleLoader;
+            if (latestJSBundleFile.toLowerCase().startsWith("assets://")) {
+                latestJSBundleLoader = JSBundleLoader.createAssetLoader(getReactApplicationContext(), latestJSBundleFile, false);
             } else {
-                throw new NoSuchMethodException("Could not find a recognized 'createFileLoader' method");
+                latestJSBundleLoader = JSBundleLoader.createFileLoader(latestJSBundleFile);
             }
 
+            Field bundleLoaderField = instanceManager.getClass().getDeclaredField("mBundleLoader");
             bundleLoaderField.setAccessible(true);
             bundleLoaderField.set(instanceManager, latestJSBundleLoader);
         } catch (Exception e) {
@@ -157,6 +134,14 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                 @Override
                 public void run() {
                     try {
+                        // This workaround has been implemented in order to fix https://github.com/facebook/react-native/issues/14533
+                        // resetReactRootViews allows to call recreateReactContextInBackground without any exceptions
+                        // This fix also relates to https://github.com/Microsoft/react-native-code-push/issues/878
+                        resetReactRootViews(instanceManager);
+
+                        instanceManager.recreateReactContextInBackground();
+                        mCodePush.initializeUpdateAfterRestart();
+
                         instanceManager.recreateReactContextInBackground();
                         mCodePush.initializeUpdateAfterRestart();
                     } catch (Exception e) {
@@ -172,6 +157,17 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             // so fall back to restarting the Activity (if it exists)
             loadBundleLegacy();
         }
+    }
+
+    private void resetReactRootViews(ReactInstanceManager instanceManager) throws NoSuchFieldException, IllegalAccessException {
+        Field mAttachedRootViewsField = instanceManager.getClass().getDeclaredField("mAttachedRootViews");
+        mAttachedRootViewsField.setAccessible(true);
+        List<ReactRootView> mAttachedRootViews = (List<ReactRootView>)mAttachedRootViewsField.get(instanceManager);
+        for (ReactRootView reactRootView : mAttachedRootViews) {
+            reactRootView.removeAllViews();
+            reactRootView.setId(View.NO_ID);
+        }
+        mAttachedRootViewsField.set(instanceManager, mAttachedRootViews);
     }
 
     private void clearLifecycleEventListener() {
