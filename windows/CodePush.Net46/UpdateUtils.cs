@@ -63,7 +63,7 @@ namespace CodePush.ReactNative
 
         internal static async Task<IFolder> GetCodePushFolderAsync()
         {
-            var pathToCodePush = Path.Combine(CodePushUtils.GetAppFolder(), CodePushConstants.CodePushFolderPrefix);
+            var pathToCodePush = Path.Combine(CodePushUtils.GetFileBundlePrefix(), CodePushConstants.CodePushFolderPrefix);
             return await FileSystem.Current.LocalStorage.CreateFolderAsync(pathToCodePush, CreationCollisionOption.OpenIfExists).ConfigureAwait(false);
         }
     }

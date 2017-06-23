@@ -8,9 +8,6 @@ using System.IO.Compression;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-
-[assembly: InternalsVisibleTo("CodePush.Net46.UnitTest")]
-
 namespace CodePush.ReactNative
 {
     internal class UpdateManager
