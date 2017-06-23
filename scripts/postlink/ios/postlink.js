@@ -112,19 +112,27 @@ function getBuildSettingsPropertyMatchingTargetProductName(parsedXCodeProj, prop
     var target;
     var COMMENT_KEY = /_comment$/;
     var PRODUCT_NAME_PROJECT_KEY = 'PRODUCT_NAME';
-
-    if (!targetProductName){
-        return target;
-    }
+    var TV_OS_DEPLOYMENT_TARGET_PROPERTY_NAME = 'TVOS_DEPLOYMENT_TARGET';
+    var TEST_HOST_PROPERTY_NAME = 'TEST_HOST';
 
     var configs = parsedXCodeProj.pbxXCBuildConfigurationSection();
     for (var configName in configs) {
         if (!COMMENT_KEY.test(configName)) {
             var config = configs[configName];
             if ( (build && config.name === build) || (build === undefined) ) {
-                if (config.buildSettings[prop] !== undefined && config.buildSettings[PRODUCT_NAME_PROJECT_KEY] == targetProductName) {
-                    target = config.buildSettings[prop];
-                }
+                if (targetProductName) {
+                    if (config.buildSettings[prop] !== undefined && config.buildSettings[PRODUCT_NAME_PROJECT_KEY] == targetProductName) {
+                        target = config.buildSettings[prop];
+                    }       
+                } else {
+                    if (config.buildSettings[prop] !== undefined  &&
+                    //exclude tvOS projects
+                     config.buildSettings[TV_OS_DEPLOYMENT_TARGET_PROPERTY_NAME] == undefined &&
+                     //exclude test app
+                     config.buildSettings[TEST_HOST_PROPERTY_NAME] == undefined) {
+                        target = config.buildSettings[prop];
+                    }
+                }              
             }
         }
     }
@@ -162,6 +170,8 @@ function getPlistPath(){
     //Try to get 'Release' build of ProductName matching the package name first and if it doesn't exist then try to get any other if existing
     var plistPathValue = getBuildSettingsPropertyMatchingTargetProductName(parsedXCodeProj, INFO_PLIST_PROJECT_KEY, targetProductName, RELEASE_BUILD_PROPERTY_NAME) ||
         getBuildSettingsPropertyMatchingTargetProductName(parsedXCodeProj, INFO_PLIST_PROJECT_KEY, targetProductName) ||
+        getBuildSettingsPropertyMatchingTargetProductName(parsedXCodeProj, INFO_PLIST_PROJECT_KEY, null, RELEASE_BUILD_PROPERTY_NAME) ||
+        getBuildSettingsPropertyMatchingTargetProductName(parsedXCodeProj, INFO_PLIST_PROJECT_KEY) ||
          parsedXCodeProj.getBuildProperty(INFO_PLIST_PROJECT_KEY, RELEASE_BUILD_PROPERTY_NAME) ||
          parsedXCodeProj.getBuildProperty(INFO_PLIST_PROJECT_KEY);
 
