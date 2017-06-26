@@ -5,9 +5,11 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.view.View;
 
 import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactInstanceManager;
+import com.facebook.react.ReactRootView;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.Promise;
@@ -29,6 +31,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CodePushNativeModule extends ReactContextBaseJavaModule {
@@ -101,7 +104,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             Class<?> jsBundleLoaderClass = Class.forName("com.facebook.react.cxxbridge.JSBundleLoader");
             Method createFileLoaderMethod = null;
             String createFileLoaderMethodName = latestJSBundleFile.toLowerCase().startsWith("assets://")
-                        ? "createAssetLoader" : "createFileLoader";
+                    ? "createAssetLoader" : "createFileLoader";
 
             Method[] methods = jsBundleLoaderClass.getDeclaredMethods();
             for (Method method : methods) {
@@ -157,6 +160,11 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                 @Override
                 public void run() {
                     try {
+                        // This workaround has been implemented in order to fix https://github.com/facebook/react-native/issues/14533
+                        // resetReactRootViews allows to call recreateReactContextInBackground without any exceptions
+                        // This fix also relates to https://github.com/Microsoft/react-native-code-push/issues/878
+                        resetReactRootViews(instanceManager);
+
                         instanceManager.recreateReactContextInBackground();
                         mCodePush.initializeUpdateAfterRestart();
                     } catch (Exception e) {
@@ -172,6 +180,17 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             // so fall back to restarting the Activity (if it exists)
             loadBundleLegacy();
         }
+    }
+
+    private void resetReactRootViews(ReactInstanceManager instanceManager) throws NoSuchFieldException, IllegalAccessException {
+        Field mAttachedRootViewsField = instanceManager.getClass().getDeclaredField("mAttachedRootViews");
+        mAttachedRootViewsField.setAccessible(true);
+        List<ReactRootView> mAttachedRootViews = (List<ReactRootView>)mAttachedRootViewsField.get(instanceManager);
+        for (ReactRootView reactRootView : mAttachedRootViews) {
+            reactRootView.removeAllViews();
+            reactRootView.setId(View.NO_ID);
+        }
+        mAttachedRootViewsField.set(instanceManager, mAttachedRootViews);
     }
 
     private void clearLifecycleEventListener() {
