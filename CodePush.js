@@ -46,7 +46,7 @@ async function checkForUpdate(deploymentKey = null) {
     queryPackage = localPackage;
   } else {
     queryPackage = { appVersion: config.appVersion };
-    if (config.packageHash) {
+    if (Platform.OS === "ios" && config.packageHash) {
       queryPackage.packageHash = config.packageHash;
     }
   }
