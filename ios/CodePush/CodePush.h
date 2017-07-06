@@ -42,6 +42,12 @@
 
 + (NSString *)bundleAssetsPath;
 
+//this method to be used by brownfield apps from native side
+//warning: can still be unstable, use with care
+-(NSDictionary *)checkForUpdate:(NSString *)deploymentKey;
+//this method to be used by brownfield apps from native side
+-(void)sync:(NSDictionary *)syncOptions withCallback:(void(^)())callback;
+
 /*
  * This method allows the version of the app's binary interface
  * to be specified, which would otherwise default to the
@@ -73,6 +79,34 @@
 + (BOOL)isUsingTestConfiguration;
 + (void)setUsingTestConfiguration:(BOOL)shouldUseTestConfiguration;
 + (void)clearUpdates;
+
+- (BOOL)restartApp:(BOOL)onlyIfUpdateIsPending;
+
+//restart manager properties
+@property (nonatomic) BOOL restartAllowed;
+@property (nonatomic) BOOL restartInProgress;
+@property (nonatomic) NSMutableArray *restartQueue;
+
+@end
+
+@interface CodePushAquisitionSDKManager : NSObject
+
+@property (copy) NSString *appVersion;
+@property (copy) NSString *clientUniqueId;
+@property (copy) NSString *deploymentKey;
+@property (copy) NSString *ignoreAppVersion;
+@property (copy) NSString *serverURL;
+
+- (instancetype)initWithConfig:(NSDictionary *)config;
+
+- (NSDictionary *)queryUpdateWithCurrentPackage:(NSDictionary *)currentPackage;
+
+- (void)reportStatusDeploy:(NSDictionary *)package
+                          withStatus:(NSString *)status
+           previousLabelOrAppVersion:(NSString *)prevLabelOrAppVersion
+               previousDeploymentKey:(NSString *)prevDeploymentKey;
+
+- (void)reportStatusDownload:(NSDictionary *)downloadedPackage;
 
 @end
 
@@ -182,6 +216,46 @@ failCallback:(void (^)(NSError *err))failCallback;
 
 @end
 
+// Constants declarations below
+
+extern NSString *const DeploymentFailed;
+extern NSString *const DeploymentSucceeded;
+
+extern NSString *const CodePushSyncStatusChangedNotification;
+extern NSString *const StatusKey;
+extern NSString *const PreviousDeploymentKey;
+extern NSString *const PreviousLabelOrAppVersionKey;
+extern NSString *const AppVersionKey;
+extern NSString *const ServerURLConfigKey;
+extern NSString *const DeploymentKeyConfigKey;
+extern NSString *const ClientUniqueIDConfigKey;
+extern NSString *const PackageHashKey;
+extern NSString *const LabelKey;
+extern NSString *const IgonreAppVersionConfigKey;
+extern NSString *const UpdateInfoKey;
+extern NSString *const IsCompanionKey;
+extern NSString *const IsAvailableKey;
+extern NSString *const UpdateAppVersionKey;
+extern NSString *const DescriptionKey;
+extern NSString *const IsMandatoryKey;
+extern NSString *const PackageSizeKey;
+extern NSString *const DownloadUrlKey;
+extern NSString *const DownloadUrRemotePackageKey;
+extern NSString *const AppVersionConfigKey;
+extern NSString *const BuildVersionConfigKey;
+extern NSString *const BinaryBundleDateKey;
+extern NSString *const PackageIsPendingKey;
+extern NSString *const FailedInstallKey;
+extern NSString *const IsFirstRunKey;
+extern NSString *const IsDebugOnlyKey;
+extern NSString *const SyncStatusKey;
+extern NSString *const MinimumBackgroundDurationKey;
+extern NSString *const MandatoryInstallModeKey;
+extern NSString *const IgnoreFailedUpdatesKey;
+extern NSString *const InstallModeKey;
+extern NSString *const UpdateDialogKey;
+// End constants declaration
+
 void CPLog(NSString *formatString, ...);
 
 typedef NS_ENUM(NSInteger, CodePushInstallMode) {
@@ -195,4 +269,16 @@ typedef NS_ENUM(NSInteger, CodePushUpdateState) {
     CodePushUpdateStateRunning,
     CodePushUpdateStatePending,
     CodePushUpdateStateLatest
+};
+
+typedef NS_ENUM(NSInteger, CodePushSyncStatus) {
+    CodePushSyncStatusUP_TO_DATE, // The running app is up-to-date
+    CodePushSyncStatusUPDATE_INSTALLED, // The app had an optional/mandatory update that was successfully downloaded and is about to be installed.
+    CodePushSyncStatusUPDATE_IGNORED, // The app had an optional update and the end-user chose to ignore it
+    CodePushSyncStatusUNKNOWN_ERROR,
+    CodePushSyncStatusSYNC_IN_PROGRESS, // There is an ongoing "sync" operation in progress.
+    CodePushSyncStatusCHECKING_FOR_UPDATE,
+    CodePushSyncStatusAWAITING_USER_ACTION,
+    CodePushSyncStatusDOWNLOADING_PACKAGE,
+    CodePushSyncStatusINSTALLING_UPDATE
 };

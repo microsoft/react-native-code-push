@@ -18,8 +18,14 @@ android {
     defaultConfig {
         consumerProguardFiles 'proguard-rules.pro'
     }
+    sourceSets {
+        main {
+            java.srcDirs = ['src/main/java']
+        }
+    }
 }
 
 dependencies {
     compile "com.facebook.react:react-native:+"
+    compile "com.google.code.gson:gson:2.8.1"
 }

@@ -189,3 +189,5 @@ Ankh.NoLoad
 
 # RN New Version App Generation
 Examples/testapp_rn*
+Examples/CodePushDemoApp/package-lock.json
+

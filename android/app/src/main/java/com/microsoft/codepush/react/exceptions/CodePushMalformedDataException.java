@@ -1,4 +1,4 @@
-package com.microsoft.codepush.react;
+package com.microsoft.codepush.react.exceptions;
 
 import java.net.MalformedURLException;
 

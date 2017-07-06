@@ -1,7 +1,12 @@
-package com.microsoft.codepush.react;
+package com.microsoft.codepush.react.managers;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+
+import com.microsoft.codepush.react.CodePushConstants;
+import com.microsoft.codepush.react.exceptions.CodePushMalformedDataException;
+import com.microsoft.codepush.react.exceptions.CodePushUnknownException;
+import com.microsoft.codepush.react.utils.CodePushUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;

@@ -1,6 +1,12 @@
-package com.microsoft.codepush.react;
+package com.microsoft.codepush.react.utils;
 
 import android.content.Context;
+
+import com.microsoft.codepush.react.CodePushConstants;
+import com.microsoft.codepush.react.exceptions.CodePushInvalidUpdateException;
+import com.microsoft.codepush.react.exceptions.CodePushUnknownException;
+import com.microsoft.codepush.react.utils.CodePushUtils;
+import com.microsoft.codepush.react.utils.FileUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;

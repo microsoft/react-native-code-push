@@ -1,4 +1,4 @@
-package com.microsoft.codepush.react;
+package com.microsoft.codepush.react.interfaces;
 
 import com.facebook.react.ReactInstanceManager;
 

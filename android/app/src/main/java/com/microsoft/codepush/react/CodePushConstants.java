@@ -12,6 +12,7 @@ public class CodePushConstants {
     public static final String DIFF_MANIFEST_FILE_NAME = "hotcodepush.json";
     public static final int DOWNLOAD_BUFFER_SIZE = 1024 * 256;
     public static final String DOWNLOAD_FILE_NAME = "download.zip";
+    public static final String SYNC_STATUS_EVENT_NAME = "CodePushSyncStatus";
     public static final String DOWNLOAD_PROGRESS_EVENT_NAME = "CodePushDownloadProgress";
     public static final String DOWNLOAD_URL_KEY = "downloadUrl";
     public static final String FAILED_UPDATES_KEY = "CODE_PUSH_FAILED_UPDATES";
