@@ -1,7 +1,12 @@
 package com.microsoft.codepush.react.enums;
 
+import com.google.gson.annotations.SerializedName;
+
 public enum CodePushDeploymentStatus {
+    @SerializedName("DeploymentSucceeded")
     SUCCEEDED("DeploymentSucceeded"),
+
+    @SerializedName("DeploymentFailed")
     FAILED("DeploymentFailed");
 
     private final String value;

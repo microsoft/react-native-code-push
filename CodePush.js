@@ -282,10 +282,6 @@ const sync = (() => {
   const setSyncCompleted = () => { syncInProgress = false; };
 
   return (options = {}, syncStatusChangeCallback, downloadProgressCallback) => {
-    if (typeof NativeCodePush.sync === "function") {
-      return syncNative(options, syncStatusCallbackWithTryCatch, downloadProgressCallbackkWithTryCatch);
-    }
-
     let syncStatusCallbackWithTryCatch, downloadProgressCallbackkWithTryCatch;
     if (typeof syncStatusChangeCallback === "function") {
       syncStatusCallbackWithTryCatch = (...args) => {
@@ -305,6 +301,15 @@ const sync = (() => {
           log(`An error has occurred: ${error.stack}`);
         }
       }
+    }
+
+    if (typeof NativeCodePush.sync === "function") {
+      if (options.updateDialog && typeof options.updateDialog !== "object") {
+        options.updateDialog = CodePush.DEFAULT_UPDATE_DIALOG;
+      } else {
+        options.updateDialog = null;
+      }
+      return syncNative(options, syncStatusCallbackWithTryCatch, downloadProgressCallbackkWithTryCatch);
     }
 
     if (syncInProgress) {

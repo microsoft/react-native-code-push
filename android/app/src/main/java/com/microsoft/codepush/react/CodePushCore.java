@@ -3,12 +3,15 @@ package com.microsoft.codepush.react;
 import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactRootView;
+import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.ChoreographerCompat;
 import com.facebook.react.modules.core.ReactChoreographer;
+import com.microsoft.codepush.react.datacontracts.CodePushSyncOptions;
+import com.microsoft.codepush.react.enums.CodePushCheckFrequency;
 import com.microsoft.codepush.react.enums.CodePushDeploymentStatus;
 import com.microsoft.codepush.react.enums.CodePushInstallMode;
 import com.microsoft.codepush.react.datacontracts.CodePushLocalPackage;
@@ -37,6 +40,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
@@ -82,6 +86,9 @@ public class CodePushCore {
     private static ReactInstanceHolder mReactInstanceHolder;
     private static CodePushCore mCurrentInstance;
     private static ReactApplicationContext mReactApplicationContext;
+
+    private static CodePushNativeModule mCodePushModule;
+    private static CodePushDialog mDialogModule;
 
     private List<CodePushSyncStatusListener> mSyncStatusListeners = new ArrayList<>();
     private List<CodePushDownloadProgressListener> mDownloadProgressListeners = new ArrayList<>();
@@ -398,15 +405,15 @@ public class CodePushCore {
 
     public List<NativeModule> createNativeModules(ReactApplicationContext reactApplicationContext) {
         mReactApplicationContext = reactApplicationContext;
-        CodePushNativeModule codePushModule = new CodePushNativeModule(mReactApplicationContext, this);
-        CodePushDialog dialogModule = new CodePushDialog(mReactApplicationContext);
+        mCodePushModule = new CodePushNativeModule(mReactApplicationContext, this);
+        mDialogModule = new CodePushDialog(mReactApplicationContext);
 
-        addSyncStatusListener(codePushModule);
-        addDownloadProgressListener(codePushModule);
+        addSyncStatusListener(mCodePushModule);
+        addDownloadProgressListener(mCodePushModule);
 
         List<NativeModule> nativeModules = new ArrayList<>();
-        nativeModules.add(codePushModule);
-        nativeModules.add(dialogModule);
+        nativeModules.add(mCodePushModule);
+        nativeModules.add(mDialogModule);
         return nativeModules;
     }
 
@@ -573,9 +580,12 @@ public class CodePushCore {
         if (syncOptions.IgnoreFailedUpdates == null) {
             syncOptions.IgnoreFailedUpdates = true;
         }
+        if (syncOptions.CheckFrequency == null) {
+            syncOptions.CheckFrequency = CodePushCheckFrequency.ON_APP_START;
+        }
 
         CodePushConfiguration nativeConfiguration = getConfiguration();
-        CodePushConfiguration configuration = new CodePushConfiguration(
+        final CodePushConfiguration configuration = new CodePushConfiguration(
                 nativeConfiguration.AppVersion,
                 nativeConfiguration.ClientUniqueId,
                 syncOptions != null && syncOptions.DeploymentKey != null ? syncOptions.DeploymentKey : nativeConfiguration.DeploymentKey,
@@ -586,7 +596,7 @@ public class CodePushCore {
         mSyncInProgress = true;
         notifyApplicationReady();
         syncStatusChange(CodePushSyncStatus.CHECKING_FOR_UPDATE);
-        CodePushRemotePackage remotePackage = checkForUpdate(syncOptions.DeploymentKey);
+        final CodePushRemotePackage remotePackage = checkForUpdate(syncOptions.DeploymentKey);
 
         final boolean updateShouldBeIgnored = remotePackage != null && (remotePackage.FailedInstall && syncOptions.IgnoreFailedUpdates);
         if (remotePackage == null || updateShouldBeIgnored) {
@@ -604,22 +614,95 @@ public class CodePushCore {
                 mSyncInProgress = false;
                 return;
             }
-        } else {
-            syncStatusChange(CodePushSyncStatus.DOWNLOADING_PACKAGE);
-            CodePushLocalPackage localPackage = downloadUpdate(remotePackage);
-            new CodePushAcquisitionManager(configuration).reportStatusDownload(localPackage);
+        } else if (syncOptions.UpdateDialog != null) {
+            String message;
+            String button1Text;
+            String button2Text = syncOptions.UpdateDialog.OptionalIgnoreButtonLabel;
 
-            CodePushInstallMode resolvedInstallMode = localPackage.IsMandatory ? syncOptions.MandatoryInstallMode: syncOptions.InstallMode;
-            mCurrentInstallModeInProgress = resolvedInstallMode;
-            syncStatusChange(CodePushSyncStatus.INSTALLING_UPDATE);
-            installUpdate(localPackage, resolvedInstallMode, syncOptions.MinimumBackgroundDuration);
-            syncStatusChange(CodePushSyncStatus.UPDATE_INSTALLED);
-            mSyncInProgress = false;
-            if(resolvedInstallMode == CodePushInstallMode.IMMEDIATE) {
-                mRestartManager.restartApp(false);
+            if (remotePackage.IsMandatory) {
+                message = syncOptions.UpdateDialog.MandatoryUpdateMessage;
+                button1Text = syncOptions.UpdateDialog.MandatoryContinueButtonLabel;
             } else {
-                mRestartManager.clearPendingRestart();
+                message = syncOptions.UpdateDialog.OptionalUpdateMessage;
+                button1Text = syncOptions.UpdateDialog.OptionalInstallButtonLabel;
             }
+
+            if (syncOptions.UpdateDialog.AppendReleaseDescription && remotePackage.Description != null && !remotePackage.Description.isEmpty()) {
+                message = syncOptions.UpdateDialog.DescriptionPrefix + " " + remotePackage.Description;
+            }
+
+            final CodePushSyncOptions syncOptionsFinal = syncOptions;
+            final Callback successCallback = new Callback() {
+                @Override
+                public void invoke(Object... args) {
+                    String buttonNumber = args[0].toString();
+
+                    if (buttonNumber.equals("0")) {
+                        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+                            @Override
+                            protected Void doInBackground(Void... params) {
+                                try {
+                                    doDownloadAndInstall(remotePackage, syncOptionsFinal, configuration);
+                                } catch (Exception e) {
+                                    CodePushUtils.log(e.toString());
+                                }
+                                return null;
+                            }
+                        };
+                        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    } else if (buttonNumber.equals("1")) {
+                        syncStatusChange(CodePushSyncStatus.UPDATE_IGNORED);
+                    } else {
+                        throw new CodePushUnknownException("Unknown button ID pressed.");
+                    }
+                }
+            };
+
+            final Callback errorCallback = new Callback() {
+                @Override
+                public void invoke(Object... args) {
+                    syncStatusChange(CodePushSyncStatus.UNKNOWN_ERROR);
+                    throw new CodePushUnknownException(args.toString());
+                }
+            };
+
+            final String titleFinal = syncOptions.UpdateDialog.Title;
+            final String messageFinal = message;
+            final String button1TextFinal = button1Text;
+            final String button2TextFinal = button2Text;
+
+            syncStatusChange(CodePushSyncStatus.AWAITING_USER_ACTION);
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                try {
+                    mDialogModule.showDialog(titleFinal, messageFinal, button1TextFinal, button2TextFinal, successCallback, errorCallback);
+                } catch (Exception e) {
+                    syncStatusChange(CodePushSyncStatus.UNKNOWN_ERROR);
+                    CodePushUtils.log(e.toString());
+                }
+                }
+            });
+        } else {
+            doDownloadAndInstall(remotePackage, syncOptions, configuration);
+        }
+    }
+
+    private void doDownloadAndInstall(final CodePushRemotePackage remotePackage, final CodePushSyncOptions syncOptions, final CodePushConfiguration configuration) {
+        syncStatusChange(CodePushSyncStatus.DOWNLOADING_PACKAGE);
+        CodePushLocalPackage localPackage = downloadUpdate(remotePackage);
+        new CodePushAcquisitionManager(configuration).reportStatusDownload(localPackage);
+
+        CodePushInstallMode resolvedInstallMode = localPackage.IsMandatory ? syncOptions.MandatoryInstallMode : syncOptions.InstallMode;
+        mCurrentInstallModeInProgress = resolvedInstallMode;
+        syncStatusChange(CodePushSyncStatus.INSTALLING_UPDATE);
+        installUpdate(localPackage, resolvedInstallMode, syncOptions.MinimumBackgroundDuration);
+        syncStatusChange(CodePushSyncStatus.UPDATE_INSTALLED);
+        mSyncInProgress = false;
+        if (resolvedInstallMode == CodePushInstallMode.IMMEDIATE) {
+            mRestartManager.restartApp(false);
+        } else {
+            mRestartManager.clearPendingRestart();
         }
     }
 

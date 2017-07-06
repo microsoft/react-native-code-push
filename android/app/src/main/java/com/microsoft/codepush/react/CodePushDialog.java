@@ -10,6 +10,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.microsoft.codepush.react.exceptions.CodePushUnknownException;
+import com.microsoft.codepush.react.utils.CodePushUtils;
 
 public class CodePushDialog extends ReactContextBaseJavaModule{
 
@@ -88,8 +89,12 @@ public class CodePushDialog extends ReactContextBaseJavaModule{
             builder.setNegativeButton(button2Text, clickListener);
         }
 
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        try {
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        } catch (Exception e) {
+            CodePushUtils.log(e.toString());
+        }
     }
 
     @Override
