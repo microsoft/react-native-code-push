@@ -9,6 +9,7 @@ import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.microsoft.codepush.react.exceptions.CodePushUnknownException;
 
 public class CodePushDialog extends ReactContextBaseJavaModule{
 

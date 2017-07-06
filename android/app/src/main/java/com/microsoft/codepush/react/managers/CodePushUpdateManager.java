@@ -1,4 +1,15 @@
-package com.microsoft.codepush.react;
+package com.microsoft.codepush.react.managers;
+
+import com.microsoft.codepush.react.CodePushConstants;
+import com.microsoft.codepush.react.CodePushCore;
+import com.microsoft.codepush.react.exceptions.CodePushInvalidUpdateException;
+import com.microsoft.codepush.react.exceptions.CodePushMalformedDataException;
+import com.microsoft.codepush.react.exceptions.CodePushUnknownException;
+import com.microsoft.codepush.react.utils.CodePushUpdateUtils;
+import com.microsoft.codepush.react.utils.CodePushUtils;
+import com.microsoft.codepush.react.DownloadProgress;
+import com.microsoft.codepush.react.utils.FileUtils;
+import com.microsoft.codepush.react.interfaces.DownloadProgressCallback;
 
 import org.json.JSONObject;
 
@@ -34,7 +45,7 @@ public class CodePushUpdateManager {
 
     private String getCodePushPath() {
         String codePushPath = CodePushUtils.appendPathComponent(getDocumentsDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX);
-        if (CodePush.isUsingTestConfiguration()) {
+        if (CodePushCore.isUsingTestConfiguration()) {
             codePushPath = CodePushUtils.appendPathComponent(codePushPath, "TestPackages");
         }
 

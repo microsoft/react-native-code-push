@@ -1,4 +1,4 @@
-package com.microsoft.codepush.react;
+package com.microsoft.codepush.react.enums;
 
 public enum CodePushInstallMode {
     IMMEDIATE(0),

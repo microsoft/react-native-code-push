@@ -1,4 +1,4 @@
-package com.microsoft.codepush.react;
+package com.microsoft.codepush.react.utils;
 
 import android.util.Log;
 
@@ -10,6 +10,13 @@ import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.microsoft.codepush.react.CodePushConstants;
+import com.microsoft.codepush.react.exceptions.CodePushMalformedDataException;
+import com.microsoft.codepush.react.exceptions.CodePushUnknownException;
+import com.microsoft.codepush.react.utils.FileUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,9 +27,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 public class CodePushUtils {
+    private static Gson mGson = new GsonBuilder().create();
 
     public static String appendPathComponent(String basePath, String appendPathComponent) {
         return new File(basePath, appendPathComponent).getAbsolutePath();
@@ -133,6 +145,10 @@ public class CodePushUtils {
         return jsonArr;
     }
 
+    public static <T> T convertReadableToObject(ReadableMap map,  Class<T> classOfT) {
+        return convertJsonObjectToObject(convertReadableToJsonObject(map), classOfT);
+    }
+
     public static JSONObject convertReadableToJsonObject(ReadableMap map) {
         JSONObject jsonObj = new JSONObject();
         ReadableMapKeySetIterator it = map.keySetIterator();
@@ -226,5 +242,59 @@ public class CodePushUtils {
     public static void writeJsonToFile(JSONObject json, String filePath) throws IOException {
         String jsonString = json.toString();
         FileUtils.writeStringToFile(jsonString, filePath);
+    }
+
+    public static JSONObject convertObjectToJsonObject(Object object) {
+        try {
+            return new JSONObject(mGson.toJsonTree(object).toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+            throw new CodePushMalformedDataException(e.toString(), e);
+        }
+    }
+
+    public static String convertObjectToJsonString(Object object) {
+        return mGson.toJsonTree(object).toString();
+    }
+
+    public static <T> T convertJsonObjectToObject(JSONObject jsonObject,  Class<T> classOfT) {
+        return convertStringToObject(jsonObject.toString(), classOfT);
+    }
+
+    public static <T> T convertWritableMapToObject(WritableMap writableMap,  Class<T> classOfT) {
+        try {
+            JSONObject jsonObject = new JSONObject(writableMap.toString()).optJSONObject("NativeMap");
+            return convertJsonObjectToObject(jsonObject, classOfT);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            throw new CodePushMalformedDataException(e.toString(), e);
+        }
+    }
+
+    public static <T> T convertStringToObject(String stringObject,  Class<T> classOfT) {
+        return mGson.fromJson(stringObject, classOfT);
+    }
+
+    public static String getQueryStringFromObject(Object object) {
+        JsonObject updateRequestJson = mGson.toJsonTree(object).getAsJsonObject();
+        Map<String, Object> updateRequestMap = new HashMap<String, Object>();
+        updateRequestMap = (Map<String, Object>) mGson.fromJson(updateRequestJson, updateRequestMap.getClass());
+        StringBuilder sb = new StringBuilder();
+        for (HashMap.Entry<String, Object> e : updateRequestMap.entrySet()) {
+            if (sb.length() > 0) {
+                sb.append('&');
+            }
+            try {
+                sb.append(URLEncoder.encode(e.getKey(), "UTF-8")).append('=').append(URLEncoder.encode(e.getValue().toString(), "UTF-8"));
+            } catch (UnsupportedEncodingException exception) {
+                exception.printStackTrace();
+                throw new CodePushMalformedDataException(exception.toString(), exception);
+            }
+        }
+        return sb.toString();
+    }
+
+    public static WritableMap convertObjectToWritableMap(Object object) {
+        return convertJsonObjectToWritable(convertObjectToJsonObject(object));
     }
 }

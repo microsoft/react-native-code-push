@@ -1,7 +1,7 @@
 import { AcquisitionManager as Sdk } from "code-push/script/acquisition-sdk";
 import { Alert } from "./AlertAdapter";
 import requestFetchAdapter from "./request-fetch-adapter";
-import { AppState, Platform } from "react-native";
+import { AppState, Platform, NativeEventEmitter } from "react-native";
 import RestartManager from "./RestartManager";
 import log from "./logging";
 
@@ -84,6 +84,46 @@ async function checkForUpdate(deploymentKey = null) {
     remotePackage.failedInstall = await NativeCodePush.isFailedUpdate(remotePackage.packageHash);
     remotePackage.deploymentKey = deploymentKey || nativeConfig.deploymentKey;
     return remotePackage;
+  }
+}
+
+async function checkForUpdateNative(deploymentKey = null) {
+  const update = await NativeCodePush.checkForUpdate(deploymentKey);
+  if (typeof update === "object") {
+    return { ...update, ...PackageMixins.remote() };
+  } else {
+    return null;
+  }
+}
+
+async function syncNative(syncOptions = null, syncStatusChangeCallback, downloadProgressCallback) {
+  let syncStatusChangeSubscription;
+  if (typeof syncStatusChangeCallback === "function") {
+    const codePushEventEmitter = new NativeEventEmitter(NativeCodePush);
+    syncStatusChangeSubscription = codePushEventEmitter.addListener(
+      "CodePushSyncStatus",
+      syncStatusChangeCallback
+    );
+  }
+
+  let downloadProgressSubscription;
+  if (typeof downloadProgressCallback === "function") {
+    const codePushEventEmitter = new NativeEventEmitter(NativeCodePush);
+    downloadProgressSubscription = codePushEventEmitter.addListener(
+      "CodePushDownloadProgress",
+      downloadProgressCallback
+    );
+  }
+
+  try {
+    await NativeCodePush.sync(syncOptions, !!syncStatusChangeCallback, !!downloadProgressCallback);
+  } catch (error) {
+    typeof syncStatusChangeCallback === "function" && syncStatusChangeCallback(CodePush.SyncStatus.UNKNOWN_ERROR);
+    log(error.message);
+    throw error;
+  } finally {
+    syncStatusChangeSubscription && syncStatusChangeSubscription.remove();
+    downloadProgressSubscription && downloadProgressSubscription.remove();
   }
 }
 
@@ -512,6 +552,7 @@ if (NativeCodePush) {
   Object.assign(CodePush, {
     AcquisitionSdk: Sdk,
     checkForUpdate,
+    checkForUpdateNative,
     getConfiguration,
     getCurrentPackage,
     getUpdateMetadata,
@@ -521,6 +562,7 @@ if (NativeCodePush) {
     restartApp: RestartManager.restartApp,
     setUpTestDependencies,
     sync,
+    syncNative,
     disallowRestart: RestartManager.disallow,
     allowRestart: RestartManager.allow,
     InstallMode: {
@@ -532,15 +574,15 @@ if (NativeCodePush) {
       // so that user context isn't lost unless the app suspension is long enough to not matter
     },
     SyncStatus: {
-      UP_TO_DATE: 0, // The running app is up-to-date
-      UPDATE_INSTALLED: 1, // The app had an optional/mandatory update that was successfully downloaded and is about to be installed.
-      UPDATE_IGNORED: 2, // The app had an optional update and the end-user chose to ignore it
-      UNKNOWN_ERROR: 3,
-      SYNC_IN_PROGRESS: 4, // There is an ongoing "sync" operation in progress.
-      CHECKING_FOR_UPDATE: 5,
-      AWAITING_USER_ACTION: 6,
-      DOWNLOADING_PACKAGE: 7,
-      INSTALLING_UPDATE: 8
+      UP_TO_DATE: NativeCodePush.codePushSyncStatusUpToDate, // The running app is up-to-date
+      UPDATE_INSTALLED: NativeCodePush.codePushSyncStatusUpdateInstalled, // The app had an optional/mandatory update that was successfully downloaded and is about to be installed.
+      UPDATE_IGNORED: NativeCodePush.codePushSyncStatusUpdateIgnored, // The app had an optional update and the end-user chose to ignore it
+      UNKNOWN_ERROR: NativeCodePush.codePushSyncStatusUnknownError,
+      SYNC_IN_PROGRESS: NativeCodePush.codePushSyncStatusSyncInProgress, // There is an ongoing "sync" operation in progress.
+      CHECKING_FOR_UPDATE: NativeCodePush.codePushSyncStatusCheckingForUpdate,
+      AWAITING_USER_ACTION: NativeCodePush.codePushSyncStatusAwaitingUserAction,
+      DOWNLOADING_PACKAGE: NativeCodePush.codePushSyncStatusDownloadingPackage,
+      INSTALLING_UPDATE: NativeCodePush.codePushSyncStatusInstallingUpdate
     },
     CheckFrequency: {
       ON_APP_START: 0,

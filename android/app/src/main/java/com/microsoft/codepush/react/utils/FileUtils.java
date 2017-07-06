@@ -1,4 +1,6 @@
-package com.microsoft.codepush.react;
+package com.microsoft.codepush.react.utils;
+
+import com.microsoft.codepush.react.exceptions.CodePushUnknownException;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;

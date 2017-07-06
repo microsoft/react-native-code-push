@@ -1,16 +1,11 @@
 #import "CodePush.h"
 
-static NSString *const AppVersionKey = @"appVersion";
-static NSString *const DeploymentFailed = @"DeploymentFailed";
 static NSString *const DeploymentKeyKey = @"deploymentKey";
-static NSString *const DeploymentSucceeded = @"DeploymentSucceeded";
-static NSString *const LabelKey = @"label";
-static NSString *const LastDeploymentReportKey = @"CODE_PUSH_LAST_DEPLOYMENT_REPORT";
 static NSString *const PackageKey = @"package";
 static NSString *const PreviousDeploymentKeyKey = @"previousDeploymentKey";
-static NSString *const PreviousLabelOrAppVersionKey = @"previousLabelOrAppVersion";
+static NSString *const LastDeploymentReportKey = @"CODE_PUSH_LAST_DEPLOYMENT_REPORT";
 static NSString *const RetryDeploymentReportKey = @"CODE_PUSH_RETRY_DEPLOYMENT_REPORT";
-static NSString *const StatusKey = @"status";
+
 
 @implementation CodePushTelemetryManager
 
@@ -105,7 +100,7 @@ static NSString *const StatusKey = @"status";
     if ([DeploymentFailed isEqualToString:statusReport[StatusKey]]) {
         return;
     }
-    
+
     if (statusReport[AppVersionKey]) {
         [self saveStatusReportedForIdentifier:statusReport[AppVersionKey]];
     } else if (statusReport[PackageKey]) {

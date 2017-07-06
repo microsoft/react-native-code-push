@@ -1,4 +1,4 @@
-package com.microsoft.codepush.react;
+package com.microsoft.codepush.react.enums;
 
 public enum CodePushUpdateState {
     RUNNING(0),

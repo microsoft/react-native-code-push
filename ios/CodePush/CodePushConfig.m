@@ -7,12 +7,6 @@
 
 static CodePushConfig *_currentConfig;
 
-static NSString * const AppVersionConfigKey = @"appVersion";
-static NSString * const BuildVersionConfigKey = @"buildVersion";
-static NSString * const ClientUniqueIDConfigKey = @"clientUniqueId";
-static NSString * const DeploymentKeyConfigKey = @"deploymentKey";
-static NSString * const ServerURLConfigKey = @"serverUrl";
-
 + (instancetype)current
 {
     return _currentConfig;
