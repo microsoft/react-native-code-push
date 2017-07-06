@@ -9,6 +9,10 @@ let NativeCodePush = require("react-native").NativeModules.CodePush;
 const PackageMixins = require("./package-mixins")(NativeCodePush);
 
 async function checkForUpdate(deploymentKey = null) {
+  if (typeof NativeCodePush.checkForUpdate === "function") {
+    return await checkForUpdateNative(deploymentKey);
+  }
+
   /*
    * Before we ask the server if an update exists, we
    * need to retrieve three pieces of information from the
@@ -278,6 +282,10 @@ const sync = (() => {
   const setSyncCompleted = () => { syncInProgress = false; };
 
   return (options = {}, syncStatusChangeCallback, downloadProgressCallback) => {
+    if (typeof NativeCodePush.sync === "function") {
+      return syncNative(options, syncStatusCallbackWithTryCatch, downloadProgressCallbackkWithTryCatch);
+    }
+
     let syncStatusCallbackWithTryCatch, downloadProgressCallbackkWithTryCatch;
     if (typeof syncStatusChangeCallback === "function") {
       syncStatusCallbackWithTryCatch = (...args) => {
@@ -552,7 +560,6 @@ if (NativeCodePush) {
   Object.assign(CodePush, {
     AcquisitionSdk: Sdk,
     checkForUpdate,
-    checkForUpdateNative,
     getConfiguration,
     getCurrentPackage,
     getUpdateMetadata,
@@ -562,7 +569,6 @@ if (NativeCodePush) {
     restartApp: RestartManager.restartApp,
     setUpTestDependencies,
     sync,
-    syncNative,
     disallowRestart: RestartManager.disallow,
     allowRestart: RestartManager.allow,
     InstallMode: {
@@ -574,15 +580,15 @@ if (NativeCodePush) {
       // so that user context isn't lost unless the app suspension is long enough to not matter
     },
     SyncStatus: {
-      UP_TO_DATE: NativeCodePush.codePushSyncStatusUpToDate, // The running app is up-to-date
-      UPDATE_INSTALLED: NativeCodePush.codePushSyncStatusUpdateInstalled, // The app had an optional/mandatory update that was successfully downloaded and is about to be installed.
-      UPDATE_IGNORED: NativeCodePush.codePushSyncStatusUpdateIgnored, // The app had an optional update and the end-user chose to ignore it
-      UNKNOWN_ERROR: NativeCodePush.codePushSyncStatusUnknownError,
-      SYNC_IN_PROGRESS: NativeCodePush.codePushSyncStatusSyncInProgress, // There is an ongoing "sync" operation in progress.
-      CHECKING_FOR_UPDATE: NativeCodePush.codePushSyncStatusCheckingForUpdate,
-      AWAITING_USER_ACTION: NativeCodePush.codePushSyncStatusAwaitingUserAction,
-      DOWNLOADING_PACKAGE: NativeCodePush.codePushSyncStatusDownloadingPackage,
-      INSTALLING_UPDATE: NativeCodePush.codePushSyncStatusInstallingUpdate
+      UP_TO_DATE: NativeCodePush.codePushSyncStatusUpToDate || 0, // The running app is up-to-date
+      UPDATE_INSTALLED: NativeCodePush.codePushSyncStatusUpdateInstalled || 1, // The app had an optional/mandatory update that was successfully downloaded and is about to be installed.
+      UPDATE_IGNORED: NativeCodePush.codePushSyncStatusUpdateIgnored || 2, // The app had an optional update and the end-user chose to ignore it
+      UNKNOWN_ERROR: NativeCodePush.codePushSyncStatusUnknownError || 3,
+      SYNC_IN_PROGRESS: NativeCodePush.codePushSyncStatusSyncInProgress || 4, // There is an ongoing "sync" operation in progress.
+      CHECKING_FOR_UPDATE: NativeCodePush.codePushSyncStatusCheckingForUpdate || 5,
+      AWAITING_USER_ACTION: NativeCodePush.codePushSyncStatusAwaitingUserAction || 6,
+      DOWNLOADING_PACKAGE: NativeCodePush.codePushSyncStatusDownloadingPackage || 7,
+      INSTALLING_UPDATE: NativeCodePush.codePushSyncStatusInstallingUpdate || 8
     },
     CheckFrequency: {
       ON_APP_START: 0,
