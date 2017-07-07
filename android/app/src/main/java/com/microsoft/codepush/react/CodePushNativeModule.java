@@ -137,10 +137,10 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                 @Override
                 public void run() {
                     try {
-                        // This workaround has been implemented in order to fix https://github.com/facebook/react-native/issues/14533
-                        // resetReactRootViews allows to call recreateReactContextInBackground without any exceptions
-                        // This fix also relates to https://github.com/Microsoft/react-native-code-push/issues/878
-                        resetReactRootViews(instanceManager);
+                        // We don't need to resetReactRootViews anymore 
+                        // due the issue https://github.com/facebook/react-native/issues/14533
+                        // has been fixed in RN 0.46.0
+                        //resetReactRootViews(instanceManager);
 
                         instanceManager.recreateReactContextInBackground();
                         mCodePush.initializeUpdateAfterRestart();
@@ -159,6 +159,9 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         }
     }
 
+    // This workaround has been implemented in order to fix https://github.com/facebook/react-native/issues/14533
+    // resetReactRootViews allows to call recreateReactContextInBackground without any exceptions
+    // This fix also relates to https://github.com/Microsoft/react-native-code-push/issues/878
     private void resetReactRootViews(ReactInstanceManager instanceManager) throws NoSuchFieldException, IllegalAccessException {
         Field mAttachedRootViewsField = instanceManager.getClass().getDeclaredField("mAttachedRootViews");
         mAttachedRootViewsField.setAccessible(true);

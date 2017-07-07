@@ -60,7 +60,8 @@ We try our best to maintain backwards compatability of our plugin with previous 
 | v0.36-v0.39             | v1.16-v1.17 *(RN refactored resume handler)*         |
 | v0.40-v0.42             | v1.17 *(RN refactored iOS header files)*             |
 | v0.43-v0.44             | v2.0+ *(RN refactored uimanager dependencies)*       |
-| v0.45+                  | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
+| v0.45                   | v3.0+ *(RN refactored instance manager code)*        |
+| v0.46+                  | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
 
 ### Supported Components
 
@@ -90,7 +91,7 @@ As new core components are released, which support referencing assets, we'll upd
 Once you've followed the general-purpose ["getting started"](http://codepush.tools/docs/getting-started.html) instructions for setting up your CodePush account, you can start CodePush-ifying your React Native app by running the following command from within your app's root directory:
 
 ```shell
-npm install --save react-native-code-push@latest
+npm install --save react-native-code-push
 ```
 
 As with all other React Native plugins, the integration experience is different for iOS and Android, so perform the following setup steps depending on which platform(s) you are targeting. Note, if you are targeting both platforms it is recommended to create separate CodePush applications for each platform.
@@ -456,7 +457,7 @@ Additionally, you can also use any of the platform-specific tools to view the Co
 
 Note that by default, React Native logs are disabled on iOS in release builds, so if you want to view them in a release build, you need to make the following changes to your `AppDelegate.m` file:
 
-1. Add an `#import "RCTLog.h"` statement
+1. Add an `#import <React/RCTLog.h>` statement. For RN < v0.40 use: `#import "RCTLog.h"`
 
 2. Add the following statement to the top of your `application:didFinishLaunchingWithOptions` method:
 

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
+using System.IO;
 #if WINDOWS_UWP
 using Windows.ApplicationModel;
 using Windows.Storage;
-#else
-using System.IO;
 #endif
 
 namespace CodePush.ReactNative
@@ -38,8 +38,7 @@ namespace CodePush.ReactNative
 #if WINDOWS_UWP
             return Package.Current.Id.Version.Major + "." + Package.Current.Id.Version.Minor + "." + Package.Current.Id.Version.Build;
 #else
-            var version = FileVersionInfo.GetVersionInfo(Environment.GetCommandLineArgs()[0]);
-            return $"{version.FileMajorPart}.{version.FileMinorPart}.{version.FileBuildPart}";
+            return applicationInfo.Version;
 #endif
         }
 
@@ -61,13 +60,10 @@ namespace CodePush.ReactNative
 #endif
         }
 
-        internal static string GetFileBundlePrefix()
+        internal static string ExtractSubFolder(string fullPath)
         {
-#if WINDOWS_UWP
-            return CodePushConstants.FileBundlePrefix;
-#else
-            return GetAppFolder();
-#endif
+            var codePushSubPathArray = fullPath.Split(Path.DirectorySeparatorChar);
+            return String.Join("/", codePushSubPathArray.SkipWhile((value, index) => codePushSubPathArray.Length - index > 4).ToArray());
         }
 
     }

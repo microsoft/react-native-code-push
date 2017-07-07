@@ -44,7 +44,7 @@ gradle.projectsEvaluated {
             def jsBundleDir = elvisFile(config."$jsBundleDirConfigName") ?:
                     file("$buildDir/intermediates/assets/${targetPath}")
 
-            def resourcesDirConfigName = "jsBundleDir${targetName}"
+            def resourcesDirConfigName = "resourcesDir${targetName}"
             def resourcesDir = elvisFile(config."${resourcesDirConfigName}") ?:
                     file("$buildDir/intermediates/res/merged/${targetPath}")
 
@@ -79,6 +79,9 @@ gradle.projectsEvaluated {
                     type: Exec) {
                 commandLine (*nodeExecutableAndArgs, "${nodeModulesPath}/react-native-code-push/scripts/generateBundledResourcesHash.js", resourcesDir, "$jsBundleDir/$bundleAssetName", jsBundleDir, resourcesMapTempFileName)
             }
+
+            // We need to generate and record the resources map, but we use it to generate the bundle hash
+            generateBundledResourcesHash.dependsOn("recordFilesBeforeBundleCommand${targetName}")
 
             generateBundledResourcesHash.dependsOn("bundle${targetName}JsAndAssets")
             runBefore("processArmeabi-v7a${targetName}Resources", generateBundledResourcesHash)
