@@ -40,6 +40,15 @@ NSString *const IgnoreFailedUpdatesKey = @"ignoreFailedUpdates";
 NSString *const InstallModeKey = @"installMode";
 NSString *const UpdateDialogKey = @"updateDialog";
 
+// Dialog related options
+NSString *const UpdateDialogOptionalUpdateMessageKey = @"optionalUpdateMessage";
+NSString *const UpdateDialogOptionalInstallButtonLabelKey = @"optionalInstallButtonLabel";
+NSString *const UpdateDialogOptionalIgnoreButtonLabelKey = @"optionalIgnoreButtonLabel";
+NSString *const UpdateDialogMandatoryUpdateMessageKey = @"mandatoryUpdateMessage";
+NSString *const UpdateDialogMandatoryContinueButtonLabelKey = @"mandatoryContinueButtonLabel";
+NSString *const UpdateDialogAppendReleaseDescriptionKey = @"appendReleaseDescription";
+NSString *const UpdateDialogDescriptionPrefixKey = @"descriptionPrefix";
+NSString *const UpdateDialogTitleKey = @"title";
 
 NSString *const BinaryBundleDateKey = @"binaryDate";
 NSString *const StatusKey = @"status";

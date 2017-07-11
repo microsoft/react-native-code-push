@@ -94,6 +94,7 @@ async function checkForUpdate(deploymentKey = null) {
 async function checkForUpdateNative(deploymentKey = null) {
   const update = await NativeCodePush.checkForUpdate(deploymentKey);
   if (typeof update === "object") {
+    //no need to extend with sdk.reportStatusDownload because it should be called on native side
     return { ...update, ...PackageMixins.remote() };
   } else {
     return null;
@@ -304,11 +305,14 @@ const sync = (() => {
     }
 
     if (typeof NativeCodePush.sync === "function") {
-      if (options.updateDialog && typeof options.updateDialog !== "object") {
-        options.updateDialog = CodePush.DEFAULT_UPDATE_DIALOG;
-      } else {
-        options.updateDialog = null;
+      if (options.updateDialog){
+        if (typeof options.updateDialog !== "object") {
+                options.updateDialog = CodePush.DEFAULT_UPDATE_DIALOG;
+              } else {
+                options.updateDialog = { ...CodePush.DEFAULT_UPDATE_DIALOG, ...options.updateDialog };
+              }
       }
+
       return syncNative(options, syncStatusCallbackWithTryCatch, downloadProgressCallbackkWithTryCatch);
     }
 

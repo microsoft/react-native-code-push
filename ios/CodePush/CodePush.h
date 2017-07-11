@@ -8,6 +8,11 @@
 
 #import <Foundation/Foundation.h>
 
+typedef void(^CPSyncBlock)();
+typedef void(^CPInstallCompleteBlock)();
+typedef void(^CPDownloadSuccessBlock)(NSError*, NSDictionary*);
+typedef void(^CPDownloadFailBlock)(NSError*);
+
 @interface CodePush : RCTEventEmitter
 
 + (NSURL *)binaryBundleURL;
@@ -44,9 +49,12 @@
 
 //this method to be used by brownfield apps from native side
 //warning: can still be unstable, use with care
--(NSDictionary *)checkForUpdate:(NSString *)deploymentKey;
+- (NSDictionary *)checkForUpdate:(NSString *)deploymentKey;
 //this method to be used by brownfield apps from native side
--(void)sync:(NSDictionary *)syncOptions withCallback:(void(^)())callback;
+- (void)sync:(NSDictionary *)syncOptions
+            withCallback:(CPSyncBlock)callback
+            notifyClientAboutSyncStatus:(BOOL)notifySyncStatus
+            notifyProgress:(BOOL)notifyProgress;
 
 /*
  * This method allows the version of the app's binary interface
@@ -254,6 +262,14 @@ extern NSString *const MandatoryInstallModeKey;
 extern NSString *const IgnoreFailedUpdatesKey;
 extern NSString *const InstallModeKey;
 extern NSString *const UpdateDialogKey;
+extern NSString *const UpdateDialogOptionalUpdateMessageKey;
+extern NSString *const UpdateDialogOptionalInstallButtonLabelKey;
+extern NSString *const UpdateDialogOptionalIgnoreButtonLabelKey;
+extern NSString *const UpdateDialogMandatoryUpdateMessageKey;
+extern NSString *const UpdateDialogMandatoryContinueButtonLabelKey;
+extern NSString *const UpdateDialogAppendReleaseDescriptionKey;
+extern NSString *const UpdateDialogDescriptionPrefixKey;
+extern NSString *const UpdateDialogTitleKey;
 // End constants declaration
 
 void CPLog(NSString *formatString, ...);
