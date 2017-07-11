@@ -33,7 +33,7 @@
     long long _latestExpectedContentLength;
     long long _latestReceivedConentLength;
 
-    BOOL _notifyOnSyncChanged;
+    BOOL _notifyClientSideOnSyncChanged;
     BOOL _didUpdateProgress;
     BOOL _syncInProgress;
     CodePushSyncStatus _syncStatus;
@@ -220,11 +220,11 @@ static NSString *bundleResourceSubdirectory = nil;
     return NO;
 }
 
-- (void) sync:(NSDictionary *)syncOptions withCallback:(void(^)())callback
-        notifySyncStatus:(BOOL)notifySyncStatus
+- (void) sync:(NSDictionary *)syncOptions withCallback:(CPSyncBlock) callback
+        notifyClientAboutSyncStatus:(BOOL)notifySyncStatus
         notifyProgress:(BOOL)notifyProgress
 {
-    _notifyOnSyncChanged = notifySyncStatus ? YES : NO;
+    _notifyClientSideOnSyncChanged = notifySyncStatus;
 
     if (_syncInProgress){
         CPLog(@"Sync already in progress.");
@@ -235,6 +235,7 @@ static NSString *bundleResourceSubdirectory = nil;
 
     _syncInProgress = YES;
 
+    //set up default values
     NSMutableDictionary *mergedSyncOptions = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
                                     [NSNull null], DeploymentKeyConfigKey,
                                     @(YES), IgnoreFailedUpdatesKey,
@@ -246,11 +247,15 @@ static NSString *bundleResourceSubdirectory = nil;
 
     [mergedSyncOptions addEntriesFromDictionary:syncOptions]; //merge with provided options
 
+    //this is the replacement of client NotifyAppReady logic which also includes
+    //logic for sending newStatusReport
+    //TODO: send it async becuause no need to wait it to be done
     [CodePush removePendingUpdate]; // aka NotifyAppReady
     NSDictionary *newStatusReport = [self getNewStatusReport];
     if (newStatusReport){
-        [[self class] reportStatus:newStatusReport];
+        [[CodePush class] reportStatus:newStatusReport];
     }
+    //end logic for notify app ready
 
     NSString *deploymentKey = [mergedSyncOptions objectForKey:DeploymentKeyConfigKey];
     if ([deploymentKey isEqual:[NSNull null]]){
@@ -260,15 +265,15 @@ static NSString *bundleResourceSubdirectory = nil;
     [self syncStatusChanged:CodePushSyncStatusCHECKING_FOR_UPDATE];
     NSDictionary *remotePackage = [self checkForUpdate:deploymentKey];
 
-    BOOL failedInstall = (remotePackage && [[remotePackage objectForKey:FailedInstallKey]boolValue]);
-    BOOL updateShouldBeIgnored = (remotePackage && failedInstall);
+    BOOL updateShouldBeIgnored = (remotePackage && [[remotePackage objectForKey:FailedInstallKey]boolValue]
+                          && [mergedSyncOptions objectForKey:IgnoreFailedUpdatesKey]);
 
     if (!remotePackage || updateShouldBeIgnored){
         if (updateShouldBeIgnored){
             CPLog(@"An update is available, but it is being ignored due to having been previously rolled back.");
         }
 
-        NSDictionary *currentPackage = [[self class] getCurrentPackage];
+        NSDictionary *currentPackage = [[CodePush class] getCurrentPackage];
         if (currentPackage && [[currentPackage objectForKey:PackageIsPendingKey]boolValue]){
             [self syncStatusChanged:CodePushSyncStatusUPDATE_INSTALLED];
             [self syncCompleted:callback];
@@ -278,109 +283,70 @@ static NSString *bundleResourceSubdirectory = nil;
             [self syncCompleted:callback];
             return;
         }
+    } else if ([mergedSyncOptions objectForKey:UpdateDialogKey] != [NSNull null]){
+        // case for dialog, handle it
+        CPLog(@"Do download and install with dialog");
+
+        NSDictionary* updateDialog = [mergedSyncOptions objectForKey:UpdateDialogKey];
+
+        NSString* message = [updateDialog objectForKey:UpdateDialogOptionalUpdateMessageKey];
+        NSString* buttonContinueText = [updateDialog objectForKey:UpdateDialogOptionalInstallButtonLabelKey];
+        NSString* buttonIgnoreText = [updateDialog objectForKey:UpdateDialogOptionalIgnoreButtonLabelKey];
+
+        BOOL isMandatory = [[remotePackage objectForKey:IsMandatoryKey]boolValue];
+        if (isMandatory){
+            message = [updateDialog objectForKey:UpdateDialogMandatoryUpdateMessageKey];
+            buttonContinueText = [updateDialog objectForKey:UpdateDialogMandatoryContinueButtonLabelKey];
+        }
+
+        if ([updateDialog objectForKey:UpdateDialogAppendReleaseDescriptionKey] && [remotePackage objectForKey:DescriptionKey]){
+            [message stringByAppendingFormat:@" %@ %@",
+             [updateDialog objectForKey:UpdateDialogDescriptionPrefixKey],
+             [remotePackage objectForKey:DescriptionKey]];
+        }
+
+        [self syncStatusChanged:CodePushSyncStatusAWAITING_USER_ACTION];
+
+
+        UIAlertController* alert = [UIAlertController alertControllerWithTitle:[updateDialog objectForKey:UpdateDialogTitleKey]
+                                                                       message:message
+                                                                preferredStyle:UIAlertControllerStyleAlert];
+
+        UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:buttonContinueText
+                                                            style:UIAlertActionStyleDefault
+                                                            handler:^(UIAlertAction * action) {
+                                                                [self doDownloadAndInstall:remotePackage
+                                                                               syncOptions:mergedSyncOptions
+                                                                            notifyProgress:notifyProgress
+                                                                              syncCallback:callback];
+                                                            }];
+
+        [alert addAction:defaultAction];
+
+        if (!isMandatory){
+            UIAlertAction* cancelAction = [UIAlertAction actionWithTitle:buttonIgnoreText
+                                                                    style:UIAlertActionStyleDefault
+                                                                  handler:^(UIAlertAction * action) {
+                                                                      [self syncStatusChanged:CodePushSyncStatusUPDATE_IGNORED];
+                                                                      [self syncCompleted:callback];
+                                                                  }];
+            [alert addAction:cancelAction];
+        }
+
+        UIViewController *presentingController = RCTPresentedViewController();
+        if (presentingController == nil) {
+            CPLog(@"Tried to display alert view but there is no application window");
+            return;
+        }
+        [presentingController presentViewController:alert animated:YES completion:nil];
+
+    } else {
+        CPLog(@"Do download and install");
+        [self doDownloadAndInstall:remotePackage
+                    syncOptions:mergedSyncOptions
+                    notifyProgress:notifyProgress
+                      syncCallback:callback];
     }
-
-    //download remote package
-    [self syncStatusChanged:CodePushSyncStatusDOWNLOADING_PACKAGE];
-
-    //for now only copy code from downloadPackage method in order not to break anything, later remove code duplication
-    NSDictionary *mutableUpdatePackage = [remotePackage mutableCopy];
-    NSURL *binaryBundleURL = [CodePush binaryBundleURL];
-    if (binaryBundleURL != nil) {
-        [mutableUpdatePackage setValue:[CodePushUpdateUtils modifiedDateStringOfFileAtURL:binaryBundleURL]
-                                forKey:BinaryBundleDateKey];
-    }
-
-    if (notifyProgress) {
-        // Set up and unpause the frame observer so that it can emit
-        // progress events every frame if the progress is updated.
-        _didUpdateProgress = NO;
-        self.paused = NO;
-    }
-
-    if (![mutableUpdatePackage objectForKey:DownloadUrRemotePackageKey]){
-        CPLog(@"Cannot download an update without a download url");
-        [self syncStatusChanged:CodePushSyncStatusUNKNOWN_ERROR];
-        [self syncCompleted:callback];
-        return;
-    }
-
-    [CodePushPackage
-     downloadPackage:mutableUpdatePackage
-     expectedBundleFileName:[bundleResourceName stringByAppendingPathExtension:bundleResourceExtension]
-     operationQueue:_methodQueue
-     // The download is progressing forward
-     progressCallback:^(long long expectedContentLength, long long receivedContentLength) {
-         // Update the download progress so that the frame observer can notify the JS side
-         _latestExpectedContentLength = expectedContentLength;
-         _latestReceivedConentLength = receivedContentLength;
-         _didUpdateProgress = YES;
-
-         // If the download is completed, stop observing frame
-         // updates and synchronously send the last event.
-         if (expectedContentLength == receivedContentLength) {
-             _didUpdateProgress = NO;
-             self.paused = YES;
-             [self dispatchDownloadProgressEvent];
-         }
-     }
-     // The download completed
-     doneCallback:^{
-         NSError *err;
-         NSDictionary *updatePackage = [CodePushPackage getPackage:mutableUpdatePackage[PackageHashKey] error:&err];
-
-         if (err) {
-             CPLog([NSString stringWithFormat: @"%lu", (long)err.code], err.localizedDescription, err);
-             [self syncStatusChanged:CodePushSyncStatusUNKNOWN_ERROR];
-             [self syncCompleted:callback];
-             return;
-         }
-
-         //reporting logic
-         NSMutableDictionary *config = [[CodePush getConfiguration] mutableCopy];
-         CodePushAquisitionSDKManager *aquisitionSdk = [[CodePushAquisitionSDKManager alloc] initWithConfig:config];
-         [aquisitionSdk reportStatusDownload:remotePackage];
-         //end reporting logic
-
-         CodePushInstallMode resolvedInstallMode = [[updatePackage objectForKey:IsMandatoryKey] boolValue] ?
-            [[mergedSyncOptions objectForKey:MandatoryInstallModeKey] intValue] :
-            [[mergedSyncOptions objectForKey:InstallModeKey] intValue];
-
-         int resolvedMinimumBackgroundDuration = [[mergedSyncOptions objectForKey:MinimumBackgroundDurationKey] intValue];
-
-         [self syncStatusChanged:CodePushSyncStatusINSTALLING_UPDATE];
-
-         [self installUpdate:updatePackage
-                 installMode:resolvedInstallMode
-   minimumBackgroundDuration:resolvedMinimumBackgroundDuration
-                       error:&err];
-
-         if (err) {
-             CPLog([NSString stringWithFormat: @"%lu", (long)err.code], err.localizedDescription, err);
-             [self syncStatusChanged:CodePushSyncStatusUNKNOWN_ERROR];
-             [self syncCompleted:callback];
-             return;
-         } else {
-             [self syncStatusChanged:CodePushSyncStatusUPDATE_INSTALLED];
-             [self syncCompleted:callback];
-         }
-     }
-     // The download failed
-     failCallback:^(NSError *err) {
-         if ([CodePushErrorUtils isCodePushError:err]) {
-             [self saveFailedUpdate:mutableUpdatePackage];
-         }
-
-         // Stop observing frame updates if the download fails.
-         _didUpdateProgress = NO;
-         self.paused = YES;
-
-         CPLog([NSString stringWithFormat: @"%lu", (long)err.code], err.localizedDescription, err);
-         [self syncStatusChanged:CodePushSyncStatusUNKNOWN_ERROR];
-         [self syncCompleted:callback];
-     }];
-
-    // end download logic
 }
 
 - (NSDictionary *)checkForUpdate:(NSString *)deploymentKey
@@ -393,12 +359,12 @@ static NSString *bundleResourceSubdirectory = nil;
         [configuration setValue:deploymentKey forKey:DeploymentKeyConfigKey];
     }
 
-    NSMutableDictionary *localPackage = [[[self class] getCurrentPackage] mutableCopy];
+    NSMutableDictionary *localPackage = [[[CodePush class] getCurrentPackage] mutableCopy];
 
     if (localPackage){
         NSString *packageHash = [localPackage objectForKey:PackageHashKey];
 
-        BOOL isFailedInstall = [[self class] isFailedHash:packageHash];
+        BOOL isFailedInstall = [[CodePush class] isFailedHash:packageHash];
         BOOL isFirstRun = [self isFirstRun:packageHash];
 
         [localPackage setObject:[NSNumber numberWithBool:isFailedInstall] forKey:FailedInstallKey];
@@ -406,6 +372,8 @@ static NSString *bundleResourceSubdirectory = nil;
     }
 
     NSMutableDictionary *queryPackage;
+    NSString *configPackageHash = [configuration objectForKey:PackageHashKey];
+
     if (localPackage){
         queryPackage = localPackage;
     } else {
@@ -413,8 +381,8 @@ static NSString *bundleResourceSubdirectory = nil;
                         [configuration objectForKey:AppVersionKey],AppVersionKey,
                         nil];
 
-        if ([configuration objectForKey:PackageHashKey]){
-            [queryPackage setObject:[configuration objectForKey:PackageHashKey] forKey:PackageHashKey];
+        if (configPackageHash){
+            [queryPackage setObject:configPackageHash forKey:PackageHashKey];
         }
     }
 
@@ -428,7 +396,7 @@ static NSString *bundleResourceSubdirectory = nil;
     BOOL isDebugOnly = [[localPackage objectForKey:IsDebugOnlyKey]boolValue];
     NSString *updatePackageHash = [update objectForKey:PackageHashKey];
     NSString *localPackageHash = [localPackage objectForKey:PackageHashKey];
-    NSString *configPackageHash = [configuration objectForKey:PackageHashKey];
+
 
     if (!update || updateAppVersion ||
         (localPackage && ([updatePackageHash isEqualToString:localPackageHash])) ||
@@ -439,7 +407,7 @@ static NSString *bundleResourceSubdirectory = nil;
         }
         return nil;
     } else {
-        [update setObject:[NSNumber numberWithBool:[[self class] isFailedHash:PackageHashKey]]  forKey:FailedInstallKey];
+        [update setObject:[NSNumber numberWithBool:[[CodePush class] isFailedHash:PackageHashKey]]  forKey:FailedInstallKey];
         if (deploymentKey){
             [update setObject:deploymentKey forKey:DeploymentKeyConfigKey];
         } else {
@@ -583,9 +551,7 @@ static NSString *bundleResourceSubdirectory = nil;
 
 - (void)dispatchSyncChangedEvent {
     //notify the script side about sync status changed
-    [self sendEventWithName:SyncStatusChangedEvent body:@{
-                                                          @"syncStatus": [NSNumber numberWithInt:_syncStatus]
-                                                          }];
+    [self sendEventWithName:SyncStatusChangedEvent body:[NSNumber numberWithInt:_syncStatus]];
 }
 
 
@@ -661,7 +627,7 @@ static NSString *bundleResourceSubdirectory = nil;
     return self;
 }
 
-- (void) syncCompleted: (void(^)())callback
+- (void) syncCompleted: (CPSyncBlock)callback
 {
     _syncInProgress = NO;
     callback();
@@ -672,15 +638,15 @@ static NSString *bundleResourceSubdirectory = nil;
     _syncStatus = syncStatus;
 
     //notify js side
-    if (_notifyOnSyncChanged){
+    if (_notifyClientSideOnSyncChanged){
         [self dispatchSyncChangedEvent];
     }
 
     //Notify obervers about sync status changed event
-    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt: syncStatus] forKey:SyncStatusKey];
+    NSDictionary *syncStatusInfo = [NSDictionary dictionaryWithObject:[NSNumber numberWithInt: syncStatus] forKey:SyncStatusKey];
 
     [[NSNotificationCenter defaultCenter] postNotificationName:
-     CodePushSyncStatusChangedNotification object:nil userInfo:userInfo];
+     CodePushSyncStatusChangedNotification object:nil userInfo:syncStatusInfo];
 }
 
 /*
@@ -762,7 +728,7 @@ static NSString *bundleResourceSubdirectory = nil;
     return updateIsPending;
 }
 
-+ (NSDictionary *)getUpdateMetadataFor:(CodePushUpdateState)updateState
++ (NSDictionary *)getUpdateMetadataForState:(CodePushUpdateState)updateState
             currentPackageGettingError:(NSError **)error
 {
     NSError *__autoreleasing internalError;
@@ -774,7 +740,6 @@ static NSString *bundleResourceSubdirectory = nil;
     }
 
     if (package == nil){
-        // An error occured on getting package or
         // The app hasn't downloaded any CodePush updates yet,
         // so we simply return nil regardless if the user
         // wanted to retrieve the pending or running update.
@@ -812,7 +777,7 @@ static NSString *bundleResourceSubdirectory = nil;
 + (NSDictionary *)getCurrentPackage
 {
     NSError *error;
-    NSDictionary *currentPackage = [[self class] getUpdateMetadataFor:CodePushUpdateStateLatest currentPackageGettingError:&error];
+    NSDictionary *currentPackage = [[CodePush class] getUpdateMetadataForState:CodePushUpdateStateLatest currentPackageGettingError:&error];
     if (error){
         CPLog(@"An error occured: %@", [error localizedDescription]);
         return nil;
@@ -1010,22 +975,163 @@ static NSString *bundleResourceSubdirectory = nil;
     return @[DownloadProgressEvent, SyncStatusChangedEvent];
 }
 
+- (void)doDownloadAndInstall:(NSDictionary*) updatePackage
+                 syncOptions:(NSDictionary*) syncOptions
+        notifyProgress:(BOOL)notifyProgress
+          syncCallback:(CPSyncBlock)callback
+{
+    [self syncStatusChanged:CodePushSyncStatusDOWNLOADING_PACKAGE];
+
+    if (![updatePackage objectForKey:DownloadUrRemotePackageKey]){
+        CPLog(@"Cannot download an update without a download url");
+        [self syncStatusChanged:CodePushSyncStatusUNKNOWN_ERROR];
+        [self syncCompleted:callback];
+        return;
+    }
+
+    [self downloadUpdate:updatePackage
+          notifyProgress:notifyProgress
+               onSuccess:^(NSError* err, NSDictionary* package){
+                   if (err){
+                       CPLog([NSString stringWithFormat: @"%lu", (long)err.code], err.localizedDescription, err);
+                       [self syncStatusChanged:CodePushSyncStatusUNKNOWN_ERROR];
+                       [self syncCompleted:callback];
+                       return;
+                   } else {
+                       //reporting logic
+                       NSMutableDictionary *config = [[CodePush getConfiguration] mutableCopy];
+                       CodePushAquisitionSDKManager *aquisitionSdk = [[CodePushAquisitionSDKManager alloc] initWithConfig:config];
+                       [aquisitionSdk reportStatusDownload:updatePackage];
+                       //end reporting logic
+
+                       CodePushInstallMode resolvedInstallMode = [[package objectForKey:IsMandatoryKey] boolValue] ?
+                       [[syncOptions objectForKey:MandatoryInstallModeKey] intValue] :
+                       [[syncOptions objectForKey:InstallModeKey] intValue];
+
+                       int resolvedMinimumBackgroundDuration = [[syncOptions objectForKey:MinimumBackgroundDurationKey] intValue];
+
+                       [self syncStatusChanged:CodePushSyncStatusINSTALLING_UPDATE];
+
+                       NSError *installError;
+                       [self installUpdate:package
+                               installMode:resolvedInstallMode
+                 minimumBackgroundDuration:resolvedMinimumBackgroundDuration
+                                onComplete: ^{
+                                    if (_installMode == CodePushInstallModeImmediate){
+                                        [self restartApplication:NO];
+                                    } else {
+                                        [self clearPendingRestart];
+                                    }
+                                }
+                                     error:&installError];
+
+
+                       if (installError) {
+                           CPLog([NSString stringWithFormat: @"%lu", (long)err.code], err.localizedDescription, err);
+                           [self syncStatusChanged:CodePushSyncStatusUNKNOWN_ERROR];
+                           [self syncCompleted:callback];
+                           return;
+                       } else {
+                           [self syncStatusChanged:CodePushSyncStatusUPDATE_INSTALLED];
+                           [self syncCompleted:callback];
+                       }
+
+                   }
+               }
+                 onError:^(NSError* err){
+                     [self syncStatusChanged:CodePushSyncStatusUNKNOWN_ERROR];
+                     [self syncCompleted:callback];
+                 }];
+
+}
+
+- (void)downloadUpdate:(NSDictionary*) updatePackage
+        notifyProgress:(BOOL)notifyProgress
+             onSuccess:(CPDownloadSuccessBlock)successCallback
+               onError:(CPDownloadFailBlock)errorCallback
+{
+    NSDictionary *mutableUpdatePackage = [updatePackage mutableCopy];
+    NSURL *binaryBundleURL = [CodePush binaryBundleURL];
+    if (binaryBundleURL != nil) {
+        [mutableUpdatePackage setValue:[CodePushUpdateUtils modifiedDateStringOfFileAtURL:binaryBundleURL]
+                                forKey:BinaryBundleDateKey];
+    }
+
+    if (notifyProgress) {
+        // Set up and unpause the frame observer so that it can emit
+        // progress events every frame if the progress is updated.
+        _didUpdateProgress = NO;
+        self.paused = NO;
+    }
+
+    [CodePushPackage
+     downloadPackage:mutableUpdatePackage
+     expectedBundleFileName:[bundleResourceName stringByAppendingPathExtension:bundleResourceExtension]
+     operationQueue:_methodQueue
+     // The download is progressing forward
+     progressCallback:^(long long expectedContentLength, long long receivedContentLength) {
+         // Update the download progress so that the frame observer can notify the JS side
+         _latestExpectedContentLength = expectedContentLength;
+         _latestReceivedConentLength = receivedContentLength;
+         _didUpdateProgress = YES;
+
+         // If the download is completed, stop observing frame
+         // updates and synchronously send the last event.
+         if (expectedContentLength == receivedContentLength) {
+             _didUpdateProgress = NO;
+             self.paused = YES;
+             [self dispatchDownloadProgressEvent];
+         }
+     }
+     // The download completed
+     doneCallback:^{
+         NSError *err;
+         NSDictionary *newPackage = [CodePushPackage getPackage:mutableUpdatePackage[PackageHashKey] error:&err];
+
+         if (err) {
+             successCallback(err, nil);
+             return;
+         }
+         if (successCallback){
+             successCallback(nil, newPackage);
+         }
+     }
+     // The download failed
+     failCallback:^(NSError *err) {
+         if ([CodePushErrorUtils isCodePushError:err]) {
+             [self saveFailedUpdate:mutableUpdatePackage];
+         }
+
+         // Stop observing frame updates if the download fails.
+         _didUpdateProgress = NO;
+         self.paused = YES;
+
+         if (errorCallback){
+             errorCallback(err);
+         }
+    }];
+}
+
 - (BOOL)installUpdate:(NSDictionary*)updatePackage
-          installMode:(CodePushInstallMode)intallMode
+          installMode:(CodePushInstallMode)installMode
           minimumBackgroundDuration:(int)minimumBackgroundDuration
+           onComplete: (CPInstallCompleteBlock)onComplete
                 error:(NSError **)error
 {
+    NSError *__autoreleasing internalError;
+
     [CodePushPackage installPackage:updatePackage
                 removePendingUpdate:[[self class] isPendingUpdate:nil]
-                              error:error];
+                              error:&internalError];
 
-    if (error) {
+    if (internalError) {
+        error = &internalError;
         return NO;
     } else {
         [self savePendingUpdate:updatePackage[PackageHashKey]
                       isLoading:NO];
 
-        _installMode = intallMode;
+        _installMode = installMode;
         if (_installMode == CodePushInstallModeOnNextResume || _installMode == CodePushInstallModeOnNextSuspend) {
             _minimumBackgroundDuration = minimumBackgroundDuration;
 
@@ -1046,15 +1152,12 @@ static NSString *bundleResourceSubdirectory = nil;
                 _hasResumeListener = YES;
             }
         }
-        if (_installMode == CodePushInstallModeImmediate){
-            [self restartApplication:NO];
-        } else {
-            [self clearPendingRestart];
+        if (onComplete){
+            onComplete();
         }
 
         // Signal to JS that the update has been applied.
         return YES;
-
     }
 }
 
@@ -1109,60 +1212,17 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
                         resolver:(RCTPromiseResolveBlock)resolve
                         rejecter:(RCTPromiseRejectBlock)reject)
 {
-    NSDictionary *mutableUpdatePackage = [updatePackage mutableCopy];
-    NSURL *binaryBundleURL = [CodePush binaryBundleURL];
-    if (binaryBundleURL != nil) {
-        [mutableUpdatePackage setValue:[CodePushUpdateUtils modifiedDateStringOfFileAtURL:binaryBundleURL]
-                                forKey:BinaryBundleDateKey];
-    }
-
-    if (notifyProgress) {
-        // Set up and unpause the frame observer so that it can emit
-        // progress events every frame if the progress is updated.
-        _didUpdateProgress = NO;
-        self.paused = NO;
-    }
-
-    [CodePushPackage
-        downloadPackage:mutableUpdatePackage
-        expectedBundleFileName:[bundleResourceName stringByAppendingPathExtension:bundleResourceExtension]
-        operationQueue:_methodQueue
-        // The download is progressing forward
-        progressCallback:^(long long expectedContentLength, long long receivedContentLength) {
-            // Update the download progress so that the frame observer can notify the JS side
-            _latestExpectedContentLength = expectedContentLength;
-            _latestReceivedConentLength = receivedContentLength;
-            _didUpdateProgress = YES;
-
-            // If the download is completed, stop observing frame
-            // updates and synchronously send the last event.
-            if (expectedContentLength == receivedContentLength) {
-                _didUpdateProgress = NO;
-                self.paused = YES;
-                [self dispatchDownloadProgressEvent];
-            }
-        }
-        // The download completed
-        doneCallback:^{
-            NSError *err;
-            NSDictionary *newPackage = [CodePushPackage getPackage:mutableUpdatePackage[PackageHashKey] error:&err];
-
-            if (err) {
-                return reject([NSString stringWithFormat: @"%lu", (long)err.code], err.localizedDescription, err);
-            }
-            resolve(newPackage);
-        }
-        // The download failed
-        failCallback:^(NSError *err) {
-            if ([CodePushErrorUtils isCodePushError:err]) {
-                [self saveFailedUpdate:mutableUpdatePackage];
-            }
-
-            // Stop observing frame updates if the download fails.
-            _didUpdateProgress = NO;
-            self.paused = YES;
-            reject([NSString stringWithFormat: @"%lu", (long)err.code], err.localizedDescription, err);
-        }];
+    [self downloadUpdate:updatePackage
+          notifyProgress:notifyProgress
+               onSuccess:^(NSError* err, NSDictionary* package){
+                   if (err){
+                       return reject([NSString stringWithFormat: @"%lu", (long)err.code], err.localizedDescription, err);
+                   }
+                   return resolve(package);
+               }
+                 onError:^(NSError* err){
+                    return reject([NSString stringWithFormat: @"%lu", (long)err.code], err.localizedDescription, err);
+                 }];
 }
 
 /*
@@ -1174,7 +1234,7 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
 RCT_EXPORT_METHOD(getConfiguration:(RCTPromiseResolveBlock)resolve
                           rejecter:(RCTPromiseRejectBlock)reject)
 {
-    NSDictionary *configuration = [[self class] getConfiguration];
+    NSDictionary *configuration = [[CodePush class] getConfiguration];
     resolve(configuration);
 }
 
@@ -1186,7 +1246,7 @@ RCT_EXPORT_METHOD(getUpdateMetadata:(CodePushUpdateState)updateState
                            rejecter:(RCTPromiseRejectBlock)reject)
 {
     NSError *error;
-    NSDictionary *updateMetadata = [[self class] getUpdateMetadataFor:updateState currentPackageGettingError:&error];
+    NSDictionary *updateMetadata = [[CodePush class] getUpdateMetadataForState:updateState currentPackageGettingError:&error];
     if (error){
         return reject([NSString stringWithFormat: @"%lu", (long)error.code], error.localizedDescription, error);
     } else {
@@ -1204,40 +1264,20 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
                        rejecter:(RCTPromiseRejectBlock)reject)
 {
     NSError *error;
-    [CodePushPackage installPackage:updatePackage
-                removePendingUpdate:[[self class] isPendingUpdate:nil]
-                              error:&error];
+    BOOL installSucceed = @(NO);
+    installSucceed = [self installUpdate:updatePackage
+            installMode:installMode
+minimumBackgroundDuration:minimumBackgroundDuration
+             onComplete: ^{
+                 //do nothing
+             }
+                  error:&error];
 
-    if (error) {
-        reject([NSString stringWithFormat: @"%lu", (long)error.code], error.localizedDescription, error);
-    } else {
-        [self savePendingUpdate:updatePackage[PackageHashKey]
-                      isLoading:NO];
-
-        _installMode = installMode;
-        if (_installMode == CodePushInstallModeOnNextResume || _installMode == CodePushInstallModeOnNextSuspend) {
-            _minimumBackgroundDuration = minimumBackgroundDuration;
-
-            if (!_hasResumeListener) {
-                // Ensure we do not add the listener twice.
-                // Register for app resume notifications so that we
-                // can check for pending updates which support "restart on resume"
-                [[NSNotificationCenter defaultCenter] addObserver:self
-                                                         selector:@selector(applicationWillEnterForeground)
-                                                             name:UIApplicationWillEnterForegroundNotification
-                                                           object:RCTSharedApplication()];
-
-                [[NSNotificationCenter defaultCenter] addObserver:self
-                                                         selector:@selector(applicationWillResignActive)
-                                                             name:UIApplicationWillResignActiveNotification
-                                                           object:RCTSharedApplication()];
-
-                _hasResumeListener = YES;
-            }
-        }
-
+    if (installSucceed){
         // Signal to JS that the update has been applied.
         resolve(nil);
+    } else {
+        reject([NSString stringWithFormat: @"%lu", (long)error.code], error.localizedDescription, error);
     }
 }
 
@@ -1331,7 +1371,7 @@ RCT_EXPORT_METHOD(sync:(NSDictionary *)syncOptions
     [self sync:syncOptions withCallback:^{
         resolve(@(YES));
     }
-    notifySyncStatus:notifySyncStatus
+    notifyClientAboutSyncStatus:notifySyncStatus
     notifyProgress:notifyProgress];
 }
 
