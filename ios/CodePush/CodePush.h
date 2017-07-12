@@ -105,16 +105,19 @@ typedef void(^CPDownloadFailBlock)(NSError*);
 @property (copy) NSString *ignoreAppVersion;
 @property (copy) NSString *serverURL;
 
++ (NSMutableURLRequest*) addCPHeadersToRequest:(NSMutableURLRequest *)request;
+
 - (instancetype)initWithConfig:(NSDictionary *)config;
 
-- (NSDictionary *)queryUpdateWithCurrentPackage:(NSDictionary *)currentPackage;
+- (NSDictionary *)queryUpdateWithCurrentPackage:(NSDictionary *)currentPackage error:(NSError **)error;
 
 - (void)reportStatusDeploy:(NSDictionary *)package
                           withStatus:(NSString *)status
            previousLabelOrAppVersion:(NSString *)prevLabelOrAppVersion
-               previousDeploymentKey:(NSString *)prevDeploymentKey;
+               previousDeploymentKey:(NSString *)prevDeploymentKey
+                                error:(NSError **)error;
 
-- (void)reportStatusDownload:(NSDictionary *)downloadedPackage;
+- (void)reportStatusDownload:(NSDictionary *)downloadedPackage error:(NSError **)error;
 
 @end
 

@@ -27,8 +27,8 @@ NSString *const DownloadUrRemotePackageKey = @"downloadUrl"; //there is a mismat
 NSString *const SyncStatusKey = @"syncStatus";
 
 // This keys for associated CodePush config values
-NSString * const AppVersionConfigKey = @"appVersion";
-NSString * const BuildVersionConfigKey = @"buildVersion";
+NSString *const AppVersionConfigKey = @"appVersion";
+NSString *const BuildVersionConfigKey = @"buildVersion";
 NSString *const ServerURLConfigKey = @"serverUrl";
 NSString *const DeploymentKeyConfigKey = @"deploymentKey";
 NSString *const ClientUniqueIDConfigKey = @"clientUniqueId";

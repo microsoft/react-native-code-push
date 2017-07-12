@@ -16,6 +16,7 @@
 
 #import "CodePush.h"
 #import "CodePush+RestartManager.h"
+#import "CodePush+Reporting.h"
 
 @interface CodePush () <RCTBridgeModule, RCTFrameUpdateObserver>
 
@@ -247,13 +248,10 @@ static NSString *bundleResourceSubdirectory = nil;
 
     [mergedSyncOptions addEntriesFromDictionary:syncOptions]; //merge with provided options
 
-    //this is the replacement of client NotifyAppReady logic which also includes
-    //logic for sending newStatusReport
-    //TODO: send it async becuause no need to wait it to be done
     [CodePush removePendingUpdate]; // aka NotifyAppReady
     NSDictionary *newStatusReport = [self getNewStatusReport];
     if (newStatusReport){
-        [[CodePush class] reportStatus:newStatusReport];
+        [[CodePush class] reportStatusDeploy:newStatusReport withConfiguraton:[CodePush getConfiguration]];
     }
     //end logic for notify app ready
 
@@ -387,8 +385,8 @@ static NSString *bundleResourceSubdirectory = nil;
     }
 
     CodePushAquisitionSDKManager *aquisitionSdk = [[CodePushAquisitionSDKManager alloc] initWithConfig:configuration];
-
-    NSDictionary *remotePackage = [aquisitionSdk queryUpdateWithCurrentPackage:queryPackage];
+    NSError *checkForUpdateError;
+    NSDictionary *remotePackage = [aquisitionSdk queryUpdateWithCurrentPackage:queryPackage error:&checkForUpdateError];
 
     NSMutableDictionary *update = [remotePackage mutableCopy];
 
@@ -785,49 +783,6 @@ static NSString *bundleResourceSubdirectory = nil;
     return currentPackage;
 }
 
-+ (void)reportStatus:(NSDictionary *)statusReport
-{
-    NSMutableDictionary *configuration = [[CodePush getConfiguration] mutableCopy];
-    NSString *prevLabelOrAppVersion = [statusReport objectForKey:PreviousLabelOrAppVersionKey];
-    NSString *prevDeploymentKey = [statusReport objectForKey:PreviousDeploymentKey];
-
-    if (!prevDeploymentKey){
-        prevDeploymentKey = [configuration objectForKey:DeploymentKeyConfigKey];
-    }
-
-    if ([statusReport objectForKey:AppVersionKey]){
-        CPLog(@"Reporting binary update  %@", [statusReport objectForKey:AppVersionKey]);
-
-        CodePushAquisitionSDKManager *aquisitionSdk = [[CodePushAquisitionSDKManager alloc] initWithConfig:configuration];
-        [aquisitionSdk reportStatusDeploy:nil
-                               withStatus:nil
-                previousLabelOrAppVersion:prevLabelOrAppVersion
-                    previousDeploymentKey:prevDeploymentKey];
-    } else {
-        NSDictionary *package = [statusReport objectForKey:@"package"];
-        NSString *label = [package objectForKey:LabelKey];
-        NSString *reportStatus = [statusReport objectForKey:StatusKey];
-
-        if ([reportStatus  isEqual: DeploymentSucceeded]){
-            CPLog(@"Reporting CodePush update success %@", label);
-        } else {
-            CPLog(@"Reporting CodePush update rollback %@", label);
-        }
-
-        NSString *configDeploymentKey = [package objectForKey:DeploymentKeyConfigKey];
-        [configuration setObject:configDeploymentKey forKey:DeploymentKeyConfigKey];
-
-        CodePushAquisitionSDKManager *aquisitionSdk = [[CodePushAquisitionSDKManager alloc] initWithConfig:configuration];
-        [aquisitionSdk reportStatusDeploy:package
-                               withStatus:reportStatus
-                previousLabelOrAppVersion:prevLabelOrAppVersion
-                    previousDeploymentKey:prevDeploymentKey];
-
-    }
-
-    [CodePushTelemetryManager recordStatusReported:statusReport]; //aka recordStatusReported
-}
-
 - (NSDictionary *)getNewStatusReport
 {
     if (needToReportRollback) {
@@ -998,11 +953,7 @@ static NSString *bundleResourceSubdirectory = nil;
                        [self syncCompleted:callback];
                        return;
                    } else {
-                       //reporting logic
-                       NSMutableDictionary *config = [[CodePush getConfiguration] mutableCopy];
-                       CodePushAquisitionSDKManager *aquisitionSdk = [[CodePushAquisitionSDKManager alloc] initWithConfig:config];
-                       [aquisitionSdk reportStatusDownload:updatePackage];
-                       //end reporting logic
+                       [[CodePush class] reportStatusDownload:updatePackage withConfiguraton:[CodePush getConfiguration]];
 
                        CodePushInstallMode resolvedInstallMode = [[package objectForKey:IsMandatoryKey] boolValue] ?
                        [[syncOptions objectForKey:MandatoryInstallModeKey] intValue] :
@@ -1218,6 +1169,9 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
                    if (err){
                        return reject([NSString stringWithFormat: @"%lu", (long)err.code], err.localizedDescription, err);
                    }
+
+                   //report that update was downloaded and resolve
+                   [[CodePush class] reportStatusDownload:updatePackage withConfiguraton:[CodePush getConfiguration]];
                    return resolve(package);
                }
                  onError:^(NSError* err){
