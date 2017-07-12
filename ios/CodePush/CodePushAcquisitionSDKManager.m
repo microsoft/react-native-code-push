@@ -36,6 +36,18 @@ static NSString *urlEncode(id object) {
 
 @implementation CodePushAquisitionSDKManager
 
++ (NSMutableURLRequest*) addCPHeadersToRequest:(NSMutableURLRequest *)request {
+    [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+    [request setValue:@"application/json" forHTTPHeaderField:@"Accept"];
+    [request setCachePolicy:NSURLRequestReloadIgnoringCacheData];
+
+    [request setValue:@"react-native-code-push" forHTTPHeaderField:@"X-CodePush-Plugin-Name"];
+    //TODO: get out if we do really need
+    // "X-CodePush-Plugin-Version" and "X-CodePush-SDK-Version" headers?
+
+    return request;
+}
+
 - (instancetype) initWithConfig:(NSDictionary *)config
 {
     self.serverURL = [config objectForKey:ServerURLConfigKey];
@@ -50,6 +62,7 @@ static NSString *urlEncode(id object) {
 //TODO: replace this two methods below with new methods using NSURLSession plus add ability to use callbacks. Perhaps replace with httpRequester class if needed
 + (NSData *)peformHTTPPostRequest:(NSString *)requestUrl
                    withBody:(NSData *)body
+                   error:(NSError **)error
 {
 
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
@@ -57,51 +70,54 @@ static NSString *urlEncode(id object) {
     [request setHTTPBody:body];
     [request setValue:[NSString stringWithFormat:@"%lu", (unsigned long)[body length]] forHTTPHeaderField:@"Content-Length"];
     [request setURL:[NSURL URLWithString:requestUrl]];
+    request = [self addCPHeadersToRequest:request];
 
-    NSError *error = nil;
+    NSError *__autoreleasing internalError;
     NSHTTPURLResponse *responseCode = nil;
 
-    NSData *oResponseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&responseCode error:&error];
+    NSData *oResponseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&responseCode error:&internalError];
 
-    if (error){
-        NSLog(@"An Error occured getting %@, error message: %@", requestUrl, [error localizedDescription]);
+    if (internalError){
+        error = &internalError;
+        CPLog(@"An Error occured getting %@, error message: %@", requestUrl, [internalError localizedDescription]);
         return nil;
     }
 
     if([responseCode statusCode] != 200){
-        NSLog(@"Error getting %@, HTTP status code %li", requestUrl, (long)[responseCode statusCode]);
+        CPLog(@"Error getting %@, HTTP status code %li", requestUrl, (long)[responseCode statusCode]);
         return nil;
     }
 
     return oResponseData;
 }
 
-+ (NSData *)peformHTTPGetRequest:(NSString *)requestUrl
++ (NSData *)peformHTTPGetRequest:(NSString *)requestUrl error:(NSError **)error
 {
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] init];
     [request setHTTPMethod:@"GET"];
     [request setURL:[NSURL URLWithString:requestUrl]];
-    [request setCachePolicy:NSURLRequestReloadIgnoringCacheData];
+    request = [self addCPHeadersToRequest:request];
 
-    NSError *error = nil;
+    NSError *__autoreleasing internalError;
     NSHTTPURLResponse *responseCode = nil;
 
-    NSData *oResponseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&responseCode error:&error];
+    NSData *oResponseData = [NSURLConnection sendSynchronousRequest:request returningResponse:&responseCode error:&internalError];
 
-    if (error){
-        NSLog(@"An Error occured getting %@, error message: %@", requestUrl, [error localizedDescription]);
+    if (internalError){
+        error = &internalError;
+        CPLog(@"An Error occured getting %@, error message: %@", requestUrl, [internalError localizedDescription]);
         return nil;
     }
 
     if([responseCode statusCode] != 200){
-        NSLog(@"Error getting %@, HTTP status code %li", requestUrl, (long)[responseCode statusCode]);
+        CPLog(@"Error getting %@, HTTP status code %li", requestUrl, (long)[responseCode statusCode]);
         return nil;
     }
 
     return oResponseData;
 }
 
-- (NSDictionary *)queryUpdateWithCurrentPackage:(NSDictionary *)currentPackage
+- (NSDictionary *)queryUpdateWithCurrentPackage:(NSDictionary *)currentPackage error:(NSError **)error
 {
     NSDictionary *response = nil;
     if (!currentPackage || ![currentPackage objectForKey:AppVersionKey]){
@@ -121,13 +137,20 @@ static NSString *urlEncode(id object) {
     NSString *urlEncodedString = [updateRequest urlEncodedString];
     NSString *requestUrl = [NSString stringWithFormat:@"%@%@%@", [self serverURL], @"updateCheck?", urlEncodedString];
 
-    NSData *oResponseData = [[self class] peformHTTPGetRequest:requestUrl];
-    if (oResponseData){
-        NSError *error;
-        NSDictionary *dictionaryResponse = [NSJSONSerialization JSONObjectWithData:oResponseData options:0 error:&error];
+    NSError *__autoreleasing internalError;
+    NSData *oResponseData = [[self class] peformHTTPGetRequest:requestUrl error:&internalError];
+    if (internalError){
+        error = &internalError;
+        CPLog(@"An error occured on queryUpdateWithCurrentPackage");
+        return nil;
+    }
 
-        if (error){
-            CPLog(@"An error occured on deserializing data: @", [error localizedDescription]);
+    if (oResponseData){
+        NSError *serializationError;
+        NSDictionary *dictionaryResponse = [NSJSONSerialization JSONObjectWithData:oResponseData options:0 error:&serializationError];
+
+        if (serializationError){
+            CPLog(@"An error occured on deserializing data: @", [serializationError localizedDescription]);
             return nil;
         }
 
@@ -172,6 +195,7 @@ static NSString *urlEncode(id object) {
                           withStatus:(NSString *)status
            previousLabelOrAppVersion:(NSString *)prevLabelOrAppVersion
                previousDeploymentKey:(NSString *)prevDeploymentKey
+                                error:(NSError **)error
 {
     NSString *requestUrl = [NSString stringWithFormat:@"%@%@", [self serverURL], @"reportStatus/deploy"];
 
@@ -200,19 +224,26 @@ static NSString *urlEncode(id object) {
     if (prevDeploymentKey){
         [body setValue:prevDeploymentKey forKey:PreviousDeploymentKey];
     }
-    NSError *error;
-    NSData *postData = [NSJSONSerialization dataWithJSONObject:body options:0 error:&error];
+    NSError *serializationError;
+    NSData *postData = [NSJSONSerialization dataWithJSONObject:body options:0 error:&serializationError];
 
-    if (error){
-        CPLog(@"An error occured on JSON data serialization: @", [error localizedDescription]);
+    if (serializationError){
+        CPLog(@"An error occured on JSON data serialization: @", [serializationError localizedDescription]);
         return;
     }
 
-    [[self class] peformHTTPPostRequest:requestUrl withBody:postData];
+    NSError *__autoreleasing internalError;
+    [[self class] peformHTTPPostRequest:requestUrl withBody:postData error:&internalError];
+
+    if (internalError){
+        CPLog(@"An error occured on reportStatusDeploy method call");
+        error = &internalError;
+    }
+
     return;
 }
 
-- (void)reportStatusDownload:(NSDictionary *)downloadedPackage
+- (void)reportStatusDownload:(NSDictionary *)downloadedPackage error:(NSError **)error
 {
     NSString *requestUrl = [NSString stringWithFormat:@"%@%@", [self serverURL], @"reportStatus/download"];
     NSDictionary *body = [[NSDictionary alloc] initWithObjectsAndKeys:
@@ -220,15 +251,24 @@ static NSString *urlEncode(id object) {
                           [self deploymentKey ], DeploymentKeyConfigKey,
                           [downloadedPackage objectForKey:LabelKey],LabelKey,
                           nil];
-    NSError *error;
-    NSData *postData = [NSJSONSerialization dataWithJSONObject:body options:0 error:&error];
+    NSError *serializationError;
 
-    if (error){
-        CPLog(@"An error occured on JSON data serialization: @", [error localizedDescription]);
+    NSData *postData = [NSJSONSerialization dataWithJSONObject:body options:0 error:&serializationError];
+
+    if (serializationError){
+        CPLog(@"An error occured on JSON data serialization: @", [serializationError localizedDescription]);
         return;
     }
 
-    [[self class] peformHTTPPostRequest:requestUrl withBody:postData];
+    NSError *__autoreleasing internalError;
+
+    [[self class] peformHTTPPostRequest:requestUrl withBody:postData error:&internalError];
+
+    if (internalError){
+        CPLog(@"An error occured on reportStatusDownload method call");
+        error = &internalError;
+    }
+
     return;
 }
 
