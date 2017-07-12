@@ -942,7 +942,7 @@ public class CodePushCore {
         try {
             JSBundleLoader latestJSBundleLoader;
             if (latestJSBundleFile.toLowerCase().startsWith("assets://")) {
-                latestJSBundleLoader = JSBundleLoader.createAssetLoader(getReactApplicationContext(), latestJSBundleFile, false);
+                latestJSBundleLoader = JSBundleLoader.createAssetLoader(mReactApplicationContext, latestJSBundleFile, false);
             } else {
                 latestJSBundleLoader = JSBundleLoader.createFileLoader(latestJSBundleFile);
             }
