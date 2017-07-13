@@ -31,7 +31,7 @@ if (~appDelegateContents.indexOf(codePushHeaderImportStatement)) {
 }
 
 // 2. Modify jsCodeLocation value assignment
-var oldJsCodeLocationAssignmentStatement = appDelegateContents.match(/(jsCodeLocation = .*)/)[1];
+var oldJsCodeLocationAssignmentStatement = appDelegateContents.match(/(jsCodeLocation = .*)\n/)[1];
 var newJsCodeLocationAssignmentStatement = "jsCodeLocation = [CodePush bundleURL];";
 if (~appDelegateContents.indexOf(newJsCodeLocationAssignmentStatement)) {
     console.log(`"jsCodeLocation" already pointing to "[CodePush bundleURL]".`);

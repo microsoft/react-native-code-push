@@ -930,12 +930,19 @@ See [disallowRestart](#codepushdisallowrestart) for an example of how this metho
 #### codePush.checkForUpdate
 
 ```javascript
-codePush.checkForUpdate(deploymentKey: String = null): Promise<RemotePackage>;
+codePush.checkForUpdate(deploymentKey: String = null, handleBinaryVersionMismatch: (update: RemotePackage) => any): Promise<RemotePackage>;
 ```
 
 Queries the CodePush service to see whether the configured app deployment has an update available. By default, it will use the deployment key that is configured in your `Info.plist` file (iOS), or `MainActivity.java` file (Android), but you can override that by specifying a value via the optional `deploymentKey` parameter. This can be useful when you want to dynamically "redirect" a user to a specific deployment, such as allowing "early access" via an easter egg or a user setting switch.
 
-This method returns a `Promise` which resolves to one of two possible values:
+Second optional parameter `handleBinaryVersionMismatch` is a optional callback function that can be used for letting user know if there is any binary updates.
+Lets consider a use-case, where current installed binary version is 1.0.1 with label(codepush label) v1. And native code has changed in the dev cycle and binary version is changed to 1.0.2 in build.gradle. And code-push update has been triggered. The above existing code ignores any binary version mismatch, thinking the update was not targeted to the binary version of currently installed app. In our example, installed app(1.0.1) will ignore the update of 1.0.2. As codepush forces these updates to happen from respective store as native codes can not be pushed as an update via codepush. But with the parameter `handleBinaryVersionMismatch` you can provide a hook to handle such cases. [Here](Examples/CodePushDemoApp/binary-version-mismatch.js) you can see example of its usage.
+Be cautious to use this feature if you are developing iOS application, due to [App Store](https://developer.apple.com/app-store/review/guidelines/) review process: 
+> Apps must not force users to rate the app, review the app, download other apps, or other similar actions in order to access functionality, content, or use of the app.
+
+However, this option can be omitted in this case.
+
+Method `codePush.checkForUpdate` returns a `Promise` which resolves to one of two possible values:
 
 1. `null` if there is no update available. This can occur in the following scenarios:
 
