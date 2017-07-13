@@ -310,6 +310,8 @@ static NSString *bundleResourceSubdirectory = nil;
                                                                        message:message
                                                                 preferredStyle:UIAlertControllerStyleAlert];
 
+        [alert.presentingViewController dismissViewControllerAnimated:YES completion:nil];
+
         UIAlertAction* defaultAction = [UIAlertAction actionWithTitle:buttonContinueText
                                                             style:UIAlertActionStyleDefault
                                                             handler:^(UIAlertAction * action) {
@@ -336,7 +338,11 @@ static NSString *bundleResourceSubdirectory = nil;
             CPLog(@"Tried to display alert view but there is no application window");
             return;
         }
+
         [presentingController presentViewController:alert animated:YES completion:nil];
+        //https://stackoverflow.com/questions/21075540/presentviewcontrolleranimatedyes-view-will-not-appear-until-user-taps-again
+        //below fixes issue when alert was not shown until tap
+        dispatch_async(dispatch_get_main_queue(), ^{});
 
     } else {
         CPLog(@"Do download and install");
