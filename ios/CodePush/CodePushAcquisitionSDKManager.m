@@ -36,6 +36,17 @@ static NSString *urlEncode(id object) {
 
 @implementation CodePushAquisitionSDKManager
 
+- (instancetype) initWithConfig:(NSDictionary *)config
+{
+    self.serverURL = [config objectForKey:ServerURLConfigKey];
+    self.appVersion = [config objectForKey:AppVersionConfigKey];
+    self.deploymentKey = [config objectForKey:DeploymentKeyConfigKey];
+    self.clientUniqueId = [config objectForKey:ClientUniqueIDConfigKey];
+    self.ignoreAppVersion = [config objectForKey:IgonreAppVersionConfigKey] ? @"YES" : @"NO";
+
+    return self;
+}
+
 + (NSMutableURLRequest*) addCPHeadersToRequest:(NSMutableURLRequest *)request {
     [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
     [request setValue:@"application/json" forHTTPHeaderField:@"Accept"];
@@ -46,17 +57,6 @@ static NSString *urlEncode(id object) {
     // "X-CodePush-Plugin-Version" and "X-CodePush-SDK-Version" headers?
 
     return request;
-}
-
-- (instancetype) initWithConfig:(NSDictionary *)config
-{
-    self.serverURL = [config objectForKey:ServerURLConfigKey];
-    self.appVersion = [config objectForKey:AppVersionConfigKey];
-    self.deploymentKey = [config objectForKey:DeploymentKeyConfigKey];
-    self.clientUniqueId = [config objectForKey:ClientUniqueIDConfigKey];
-    self.ignoreAppVersion = [config objectForKey:IgonreAppVersionConfigKey] ? @"YES" : @"NO";
-
-    return self;
 }
 
 //TODO: replace this two methods below with new methods using NSURLSession plus add ability to use callbacks. Perhaps replace with httpRequester class if needed
