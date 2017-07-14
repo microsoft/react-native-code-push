@@ -4,7 +4,8 @@ public class CodePushConstants {
     public static final String ASSETS_BUNDLE_PREFIX = "assets://";
     public static final String BINARY_MODIFIED_TIME_KEY = "binaryModifiedTime";
     public static final String CODE_PUSH_FOLDER_PREFIX = "CodePush";
-    public static final String CODE_PUSH_HASH_FILE_NAME = "CodePushHash.json";
+    public static final String CODE_PUSH_HASH_FILE_NAME = "CodePushHash";
+    public static final String CODE_PUSH_OLD_HASH_FILE_NAME = "CodePushHash.json";
     public static final String CODE_PUSH_PREFERENCES = "CodePush";
     public static final String CURRENT_PACKAGE_KEY = "currentPackage";
     public static final String DEFAULT_JS_BUNDLE_NAME = "index.android.bundle";
@@ -25,4 +26,5 @@ public class CodePushConstants {
     public static final String RESOURCES_BUNDLE = "resources.arsc";
     public static final String STATUS_FILE = "codepush.json";
     public static final String UNZIPPED_FOLDER_NAME = "unzipped";
+    public static final String CODE_PUSH_APK_BUILD_TIME_KEY = "CODE_PUSH_APK_BUILD_TIME";
 }

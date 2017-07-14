@@ -1,13 +1,29 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+#if WINDOWS_UWP
 using Windows.Storage;
+#else
+using CodePush.Net46.Adapters.Storage;
+using System.IO;
+#endif
 
 namespace CodePush.ReactNative
 {
     internal class SettingsManager
     {
-        private static ApplicationDataContainer Settings = ApplicationData.Current.LocalSettings.CreateContainer(CodePushConstants.CodePushPreferences, ApplicationDataCreateDisposition.Always);
+        private static ApplicationDataContainer Settings = null;
+
+        static SettingsManager ()
+        {
+
+#if WINDOWS_UWP
+            Settings = ApplicationData.Current.LocalSettings.CreateContainer(CodePushConstants.CodePushPreferences, ApplicationDataCreateDisposition.Always);
+#else
+            var folder = UpdateUtils.GetCodePushFolderAsync().Result;
+            Settings = new ApplicationDataContainer(Path.Combine(folder.Path, CodePushConstants.CodePushPreferences));
+#endif
+        }
 
         public static JArray GetFailedUpdates()
         {
@@ -112,6 +128,21 @@ namespace CodePush.ReactNative
             };
 
             Settings.Values[CodePushConstants.PendingUpdateKey] = JsonConvert.SerializeObject(pendingUpdate);
+        }
+
+        internal static void SetString(string key, string value)
+        {
+            Settings.Values[key] = value;
+        }
+
+        internal static string GetString(string key)
+        {
+            return (string)Settings.Values[key];
+        }
+
+        internal static void RemoveString(string key)
+        {
+            Settings.Values.Remove(key);
         }
     }
 }

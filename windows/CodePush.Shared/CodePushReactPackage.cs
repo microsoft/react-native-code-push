@@ -1,43 +1,34 @@
 ﻿using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 using ReactNative;
 using ReactNative.Bridge;
 using ReactNative.Modules.Core;
 using ReactNative.UIManager;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Threading.Tasks;
-using Windows.ApplicationModel;
-using Windows.Storage;
-using Windows.Web.Http;
+
 
 namespace CodePush.ReactNative
 {
     public sealed class CodePushReactPackage : IReactPackage
     {
         private static CodePushReactPackage CurrentInstance;
-        private static bool NeedToReportRollback = false;
-
-        private CodePushNativeModule _codePushNativeModule;
 
         internal string AppVersion { get; private set; }
         internal string DeploymentKey { get; private set; }
         internal string AssetsBundleFileName { get; private set; }
-        internal bool DidUpdate { get; private set; }
-        internal bool IsRunningBinaryVersion { get; set; }
+        internal bool NeedToReportRollback { get; set; } = false;
+        internal bool DidUpdate { get; private set; } = false;
+        internal bool IsRunningBinaryVersion { get; private set; } = false;
         internal ReactPage MainPage { get; private set; }
         internal UpdateManager UpdateManager { get; private set; }
 
         public CodePushReactPackage(string deploymentKey, ReactPage mainPage)
         {
-            AppVersion = Package.Current.Id.Version.Major + "." + Package.Current.Id.Version.Minor + "." + Package.Current.Id.Version.Build;
+            AppVersion = CodePushUtils.GetAppVersion();
             DeploymentKey = deploymentKey;
             MainPage = mainPage;
             UpdateManager = new UpdateManager();
-            IsRunningBinaryVersion = false;
-            // TODO implement telemetryManager 
-            // _codePushTelemetryManager = new CodePushTelemetryManager(this.applicationContext, CODE_PUSH_PREFERENCES);
 
             if (CurrentInstance != null)
             {
@@ -84,8 +75,9 @@ namespace CodePush.ReactNative
         public async Task<string> GetJavaScriptBundleFileAsync(string assetsBundleFileName)
         {
             AssetsBundleFileName = assetsBundleFileName;
-            string binaryJsBundleUrl = CodePushConstants.AssetsBundlePrefix + assetsBundleFileName;
-            var binaryResourcesModifiedTime = await GetBinaryResourcesModifiedTimeAsync().ConfigureAwait(false);
+            string binaryJsBundleUrl = CodePushUtils.GetAssetsBundlePrefix() + assetsBundleFileName;
+
+            var binaryResourcesModifiedTime = await FileUtils.GetBinaryResourcesModifiedTimeAsync(AssetsBundleFileName).ConfigureAwait(false);
             var packageFile = await UpdateManager.GetCurrentPackageBundleAsync(AssetsBundleFileName).ConfigureAwait(false);
             if (packageFile == null)
             {
@@ -111,7 +103,8 @@ namespace CodePush.ReactNative
             {
                 CodePushUtils.LogBundleUrl(packageFile.Path);
                 IsRunningBinaryVersion = false;
-                return CodePushConstants.FileBundlePrefix + packageFile.Path.Replace(ApplicationData.Current.LocalFolder.Path, "").Replace("\\", "/");
+
+                return CodePushUtils.GetFileBundlePrefix() + CodePushUtils.ExtractSubFolder(packageFile.Path);
             }
             else
             {
@@ -128,19 +121,16 @@ namespace CodePush.ReactNative
             }
         }
 
-        #endregion
+#endregion
 
-        #region Internal methods
+#region Internal methods
 
-        internal async Task<long> GetBinaryResourcesModifiedTimeAsync()
-        {
-            var assetJSBundleFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri(CodePushConstants.AssetsBundlePrefix + AssetsBundleFileName)).AsTask().ConfigureAwait(false);
-            var fileProperties = await assetJSBundleFile.GetBasicPropertiesAsync().AsTask().ConfigureAwait(false);
-            return fileProperties.DateModified.ToUnixTimeMilliseconds();
-        }
-        
         internal void InitializeUpdateAfterRestart()
         {
+            // Reset the state which indicates that
+            // the app was just freshly updated.
+            DidUpdate = false;
+
             JObject pendingUpdate = SettingsManager.GetPendingUpdate();
             if (pendingUpdate != null)
             {
@@ -159,7 +149,7 @@ namespace CodePush.ReactNative
                     // Clear the React dev bundle cache so that new updates can be loaded.
                     if (MainPage.UseDeveloperSupport)
                     {
-                        ClearReactDevBundleCacheAsync().Wait();
+                        FileUtils.ClearReactDevBundleCacheAsync().Wait();
                     }
                     // Mark that we tried to initialize the new update, so that if it crashes,
                     // we will know that we need to rollback when the app next starts.
@@ -175,18 +165,9 @@ namespace CodePush.ReactNative
             SettingsManager.RemoveFailedUpdates();
         }
 
-        #endregion
+#endregion
 
-        #region Private methods
-
-        private async Task ClearReactDevBundleCacheAsync()
-        {
-            var devBundleCacheFile = (StorageFile)await ApplicationData.Current.LocalFolder.TryGetItemAsync(CodePushConstants.ReactDevBundleCacheFileName).AsTask().ConfigureAwait(false);
-            if (devBundleCacheFile != null)
-            {
-                await devBundleCacheFile.DeleteAsync().AsTask().ConfigureAwait(false);
-            }
-        }
+#region Private methods
 
         private async Task RollbackPackageAsync()
         {
@@ -196,6 +177,6 @@ namespace CodePush.ReactNative
             SettingsManager.RemovePendingUpdate();
         }
 
-        #endregion
+#endregion
     }
 }

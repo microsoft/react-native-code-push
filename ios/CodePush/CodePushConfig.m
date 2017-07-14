@@ -8,7 +8,7 @@
 static CodePushConfig *_currentConfig;
 
 static NSString * const AppVersionConfigKey = @"appVersion";
-static NSString * const BuildVdersionConfigKey = @"buildVersion";
+static NSString * const BuildVersionConfigKey = @"buildVersion";
 static NSString * const ClientUniqueIDConfigKey = @"clientUniqueId";
 static NSString * const DeploymentKeyConfigKey = @"deploymentKey";
 static NSString * const ServerURLConfigKey = @"serverUrl";
@@ -49,7 +49,7 @@ static NSString * const ServerURLConfigKey = @"serverUrl";
 
     _configDictionary = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
                             appVersion,AppVersionConfigKey,
-                            buildVersion,BuildVdersionConfigKey,
+                            buildVersion,BuildVersionConfigKey,
                             serverURL,ServerURLConfigKey,
                             clientUniqueId,ClientUniqueIDConfigKey,
                             deploymentKey,DeploymentKeyConfigKey,
@@ -65,7 +65,7 @@ static NSString * const ServerURLConfigKey = @"serverUrl";
 
 - (NSString *)buildVersion
 {
-    return [_configDictionary objectForKey:BuildVdersionConfigKey];
+    return [_configDictionary objectForKey:BuildVersionConfigKey];
 }
 
 - (NSDictionary *)configuration

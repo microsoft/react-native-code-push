@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>4ad4c826-cc26-4f1d-b60d-b97b22f52e90</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>CodePush.Shared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)CodePushConstants.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodePushNativeModule.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodePushReactPackage.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CodePushUtils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)InstallMode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MinimumBackgroundListener.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)SettingsManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TelemetryManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UpdateState.cs" />
+  </ItemGroup>
+</Project>

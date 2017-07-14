@@ -22,13 +22,13 @@ namespace CodePush.ReactNative
 
         internal async Task DownloadPackageAsync(JObject updatePackage, string expectedBundleFileName, Progress<HttpProgress> downloadProgress)
         {
-            // Using its hash, get the folder where the new update will be saved 
+            // Using its hash, get the folder where the new update will be saved
             StorageFolder codePushFolder = await GetCodePushFolderAsync().ConfigureAwait(false);
             var newUpdateHash = (string)updatePackage[CodePushConstants.PackageHashKey];
             StorageFolder newUpdateFolder = await GetPackageFolderAsync(newUpdateHash, false).ConfigureAwait(false);
             if (newUpdateFolder != null)
             {
-                // This removes any stale data in newPackageFolderPath that could have been left
+                // This removes any stale data in newUpdateFolder that could have been left
                 // uncleared due to a crash or error during the download or install process.
                 await newUpdateFolder.DeleteAsync().AsTask().ConfigureAwait(false);
             }
@@ -53,7 +53,7 @@ namespace CodePush.ReactNative
             try
             {
                 // Unzip the downloaded file and then delete the zip
-                StorageFolder unzippedFolder = await GetUnzippedFolderAsync().ConfigureAwait(false);
+                StorageFolder unzippedFolder = await CreateUnzippedFolderAsync().ConfigureAwait(false);
                 ZipFile.ExtractToDirectory(downloadFile.Path, unzippedFolder.Path);
                 await downloadFile.DeleteAsync().AsTask().ConfigureAwait(false);
 
@@ -98,6 +98,10 @@ namespace CodePush.ReactNative
                 await downloadFile.RenameAsync(expectedBundleFileName).AsTask().ConfigureAwait(false);
                 await downloadFile.MoveAsync(newUpdateFolder).AsTask().ConfigureAwait(false);
             }
+            /*TODO: ZipFile.ExtractToDirectory is not reliable and throws exceptions if:
+            - path is too long
+            it needs to be handled
+            */
 
             // Save metadata to the folder
             await FileIO.WriteTextAsync(newUpdateMetadataFile, JsonConvert.SerializeObject(updatePackage)).AsTask().ConfigureAwait(false);
@@ -273,9 +277,16 @@ namespace CodePush.ReactNative
             return await codePushFolder.CreateFileAsync(CodePushConstants.StatusFileName, CreationCollisionOption.OpenIfExists).AsTask().ConfigureAwait(false);
         }
 
-        private async Task<StorageFolder> GetUnzippedFolderAsync()
+        private async Task<StorageFolder> CreateUnzippedFolderAsync()
         {
             StorageFolder codePushFolder = await GetCodePushFolderAsync().ConfigureAwait(false);
+            var unzippedFolder = await codePushFolder.TryGetItemAsync(CodePushConstants.UnzippedFolderName).AsTask().ConfigureAwait(false);
+
+            if (unzippedFolder != null)
+            {
+                await unzippedFolder.DeleteAsync();
+            }
+
             return await codePushFolder.CreateFolderAsync(CodePushConstants.UnzippedFolderName, CreationCollisionOption.OpenIfExists).AsTask().ConfigureAwait(false);
         }
 

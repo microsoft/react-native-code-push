@@ -1,3 +1,5 @@
+# gitignore contributors: remember to update .npmignore
+
 # OSX
 #
 .DS_Store
@@ -150,3 +152,40 @@ captures/
 
 # Remove after this framework is published on NPM
 code-push-plugin-testing-framework/node_modules
+
+# Windows
+windows/.vs/
+windows/obj/
+
+#Visual Studio files
+*.[Oo]bj
+*.user
+*.aps
+*.pch
+*.vspscc
+*.vssscc
+*_i.c
+*_p.c
+*.ncb
+*.suo
+*.tlb
+*.tlh
+*.bak
+*.[Cc]ache
+*.ilk
+*.log
+*.lib
+*.sbr
+*.sdf
+*.opensdf
+*.opendb
+*.unsuccessfulbuild
+ipch/
+[Oo]bj/
+[Bb]in
+[Dd]ebug*/
+[Rr]elease*/
+Ankh.NoLoad
+
+# RN New Version App Generation
+Examples/testapp_rn

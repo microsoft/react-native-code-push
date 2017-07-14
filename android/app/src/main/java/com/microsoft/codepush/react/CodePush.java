@@ -1,5 +1,9 @@
 package com.microsoft.codepush.react;
 
+import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.JavaScriptModule;
@@ -7,20 +11,12 @@ import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.uimanager.ViewManager;
 
-import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 public class CodePush implements ReactPackage {
 
@@ -104,22 +100,13 @@ public class CodePush implements ReactPackage {
     }
 
     long getBinaryResourcesModifiedTime() {
-        ZipFile applicationFile = null;
         try {
-            ApplicationInfo ai = this.mContext.getPackageManager().getApplicationInfo(this.mContext.getPackageName(), 0);
-            applicationFile = new ZipFile(ai.sourceDir);
-            ZipEntry classesDexEntry = applicationFile.getEntry(CodePushConstants.RESOURCES_BUNDLE);
-            return classesDexEntry.getTime();
-        } catch (PackageManager.NameNotFoundException | IOException e) {
-            throw new CodePushUnknownException("Error in getting file information about compiled resources", e);
-        } finally {
-            if (applicationFile != null) {
-                try {
-                    applicationFile.close();
-                } catch (IOException e) {
-                    throw new CodePushUnknownException("Error in closing application file.", e);
-                }
-            }
+            String packageName = this.mContext.getPackageName();
+            int codePushApkBuildTimeId = this.mContext.getResources().getIdentifier(CodePushConstants.CODE_PUSH_APK_BUILD_TIME_KEY, "string", packageName);
+            String codePushApkBuildTime = this.mContext.getResources().getString(codePushApkBuildTimeId);
+            return Long.parseLong(codePushApkBuildTime);
+        } catch (Exception e)  {
+            throw new CodePushUnknownException("Error in getting binary resources modified time", e);
         }
     }
 

@@ -7,7 +7,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+#if WINDOWS_UWP
 using Windows.Web.Http;
+#else
+using CodePush.Net46.Adapters.Http;
+#endif
 
 namespace CodePush.ReactNative
 {
@@ -17,7 +21,8 @@ namespace CodePush.ReactNative
         private MinimumBackgroundListener _minimumBackgroundListener;
         private ReactContext _reactContext;
 
-        public CodePushNativeModule(ReactContext reactContext, CodePushReactPackage codePush) : base(reactContext)
+        public CodePushNativeModule(ReactContext reactContext, CodePushReactPackage codePush)
+            : base(reactContext)
         {
             _reactContext = reactContext;
             _codePush = codePush;
@@ -57,7 +62,7 @@ namespace CodePush.ReactNative
         {
             try
             {
-                updatePackage[CodePushConstants.BinaryModifiedTimeKey] = "" + await _codePush.GetBinaryResourcesModifiedTimeAsync().ConfigureAwait(false);
+                updatePackage[CodePushConstants.BinaryModifiedTimeKey] = "" + await FileUtils.GetBinaryResourcesModifiedTimeAsync(_codePush.AssetsBundleFileName).ConfigureAwait(false);
                 await _codePush.UpdateManager.DownloadPackageAsync(
                     updatePackage,
                     _codePush.AssetsBundleFileName,
@@ -170,10 +175,60 @@ namespace CodePush.ReactNative
 
 
         [ReactMethod]
-        public void getNewStatusReport(IPromise promise)
+        public async void getNewStatusReport(IPromise promise)
         {
-            // TODO implement this
-            promise.Resolve("");
+            await Task.Run(() =>
+            {
+                if (_codePush.NeedToReportRollback)
+                {
+                    _codePush.NeedToReportRollback = false;
+
+                    var failedUpdates = SettingsManager.GetFailedUpdates();
+                    if (failedUpdates != null && failedUpdates.Count > 0)
+                    {
+                        var lastFailedPackage = (JObject)failedUpdates[failedUpdates.Count - 1];
+                        var failedStatusReport = TelemetryManager.GetRollbackReport(lastFailedPackage);
+                        if (failedStatusReport != null)
+                        {
+                            promise.Resolve(failedStatusReport);
+                            return;
+                        }
+                    }
+                }
+                else if (_codePush.DidUpdate)
+                {
+                    var currentPackage = _codePush.UpdateManager.GetCurrentPackageAsync().Result;
+                    if (currentPackage != null)
+                    {
+                        var newPackageStatusReport = TelemetryManager.GetUpdateReport(currentPackage);
+                        if (newPackageStatusReport != null)
+                        {
+                            promise.Resolve(newPackageStatusReport);
+                            return;
+                        }
+                    }
+                }
+                else if (_codePush.IsRunningBinaryVersion)
+                {
+                    var newAppVersionStatusReport = TelemetryManager.GetBinaryUpdateReport(_codePush.AppVersion);
+                    if (newAppVersionStatusReport != null)
+                    {
+                        promise.Resolve(newAppVersionStatusReport);
+                        return;
+                    }
+                }
+                else
+                {
+                    var retryStatusReport = TelemetryManager.GetRetryStatusReport();
+                    if (retryStatusReport != null)
+                    {
+                        promise.Resolve(retryStatusReport);
+                        return;
+                    }
+                }
+
+                promise.Resolve("");
+            }).ConfigureAwait(false);
         }
 
         [ReactMethod]
@@ -194,7 +249,7 @@ namespace CodePush.ReactNative
                             await LoadBundleAsync().ConfigureAwait(false);
                         });
                     };
-                        
+
                     _minimumBackgroundListener = new MinimumBackgroundListener(loadBundleAction, minimumBackgroundDuration);
                     _reactContext.AddLifecycleEventListener(_minimumBackgroundListener);
                 }
@@ -240,17 +295,34 @@ namespace CodePush.ReactNative
                 await LoadBundleAsync().ConfigureAwait(false);
             }
         }
-        
+
+        [ReactMethod]
+        public async void recordStatusReported(JObject statusReport)
+        {
+            await Task.Run(() => TelemetryManager.RecordStatusReported(statusReport)).ConfigureAwait(false);
+        }
+
+        [ReactMethod]
+        public async void saveStatusReportForRetry(JObject statusReport)
+        {
+            await Task.Run(() => TelemetryManager.SaveStatusReportForRetry(statusReport)).ConfigureAwait(false);
+        }
+
         internal async Task LoadBundleAsync()
         {
             // #1) Get the private ReactInstanceManager, which is what includes
             //     the logic to reload the current React context.
             FieldInfo info = typeof(ReactPage)
                 .GetField("_reactInstanceManager", BindingFlags.NonPublic | BindingFlags.Instance);
-
+#if WINDOWS_UWP
             var reactInstanceManager = (ReactInstanceManager)typeof(ReactPage)
                 .GetField("_reactInstanceManager", BindingFlags.NonPublic | BindingFlags.Instance)
                 .GetValue(_codePush.MainPage);
+#else
+            var reactInstanceManager = ((Lazy<IReactInstanceManager>)typeof(ReactPage)
+                .GetField("_reactInstanceManager", BindingFlags.NonPublic | BindingFlags.Instance)
+                .GetValue(_codePush.MainPage)).Value as ReactInstanceManager;
+#endif
 
             // #2) Update the locally stored JS bundle file path
             Type reactInstanceManagerType = typeof(ReactInstanceManager);

@@ -1,4 +1,11 @@
+#if __has_include(<React/RCTEventEmitter.h>)
+#import <React/RCTEventEmitter.h>
+#elif __has_include("RCTEventEmitter.h")
 #import "RCTEventEmitter.h"
+#else
+#import "React/RCTEventEmitter.h"   // Required when used as a Pod in a Swift project
+#endif
+
 #import <Foundation/Foundation.h>
 
 @interface CodePush : RCTEventEmitter
@@ -180,7 +187,8 @@ void CPLog(NSString *formatString, ...);
 typedef NS_ENUM(NSInteger, CodePushInstallMode) {
     CodePushInstallModeImmediate,
     CodePushInstallModeOnNextRestart,
-    CodePushInstallModeOnNextResume
+    CodePushInstallModeOnNextResume,
+    CodePushInstallModeOnNextSuspend
 };
 
 typedef NS_ENUM(NSInteger, CodePushUpdateState) {
