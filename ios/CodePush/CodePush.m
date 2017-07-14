@@ -24,7 +24,7 @@
     BOOL _isFirstRunAfterUpdate;
     int _minimumBackgroundDuration;
     NSDate *_lastResignedDate;
-    CodePushInstallMode *_installMode;
+    CodePushInstallMode _installMode;
     NSTimer *_appSuspendTimer;
 
     // Used to coordinate the dispatching of download progress events to JS.
