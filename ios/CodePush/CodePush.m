@@ -331,17 +331,20 @@ static NSString *bundleResourceSubdirectory = nil;
 
     #ifdef DEBUG
         #if TARGET_IPHONE_SIMULATOR
-            errorMessage = @"React Native doesn't generate your app's JS bundle by default when deploying to the simulator. "
-            "If you'd like to test CodePush using the simulator, you can do one of three things depending on your React "
-            "Native version and/or preferred workflow:\n\n"
+            errorMessage = @"React Native doesn't generate your app's JS bundle by default for Debug builds. "
+            "If you'd like to test CodePush using a Debug build, you can do one of the following, depending on your "
+            "React Native version and/or preferred workflow:\n\n"
 
             "1. Update your AppDelegate.m file to load the JS bundle from the packager instead of from CodePush. "
-            "You can still test your CodePush update experience using this workflow (debug builds only).\n\n"
+            "You can still test your CodePush update experience using this workflow (Debug builds only).\n\n"
 
-            "2. Force the JS bundle to be generated in simulator builds by removing the if block that echoes "
-            "\"Skipping bundling for Simulator platform\" in the \"node_modules/react-native/packager/react-native-xcode.sh\" file.\n\n"
+            "2. Force the JS bundle to be generated in Debug builds by enabling the FORCE_BUNDLING flag under "
+            "\"Build Phases\" > \"Bundle React Native code and images\" (React Native >=0.47 only)\n\n"
 
-            "3. Deploy a release build to the simulator, which unlike debug builds, will generate the JS bundle (React Native >=0.22.0 only).";
+            "3. Force the JS bundle to be generated in Debug builds by removing the if block that echoes "
+            "\"Skipping bundling for Simulator platform\" in the \"node_modules/react-native/packager/react-native-xcode.sh\" file (React Native <=0.46 only)\n\n"
+
+            "4. Deploy a Release build, which unlike Debug builds, will generate the JS bundle (React Native >=0.22 only).";
         #else
             errorMessage = [NSString stringWithFormat:@"The specified JS bundle file wasn't found within the app's binary. Is \"%@\" the correct file name?", [bundleResourceName stringByAppendingPathExtension:bundleResourceExtension]];
         #endif
