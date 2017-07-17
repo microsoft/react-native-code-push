@@ -143,7 +143,6 @@ public class CodePush implements ReactPackage {
     public String getJSBundleFileInternal(String assetsBundleFileName) {
         this.mAssetsBundleFileName = assetsBundleFileName;
         String binaryJsBundleUrl = CodePushConstants.ASSETS_BUNDLE_PREFIX + assetsBundleFileName;
-        long binaryResourcesModifiedTime = this.getBinaryResourcesModifiedTime();
 
         try {
             String packageFilePath = mUpdateManager.getCurrentPackageBundlePath(this.mAssetsBundleFileName);
@@ -155,23 +154,14 @@ public class CodePush implements ReactPackage {
             }
 
             JSONObject packageMetadata = this.mUpdateManager.getCurrentPackage();
-            Long binaryModifiedDateDuringPackageInstall = null;
-            String binaryModifiedDateDuringPackageInstallString = packageMetadata.optString(CodePushConstants.BINARY_MODIFIED_TIME_KEY, null);
-            if (binaryModifiedDateDuringPackageInstallString != null) {
-                binaryModifiedDateDuringPackageInstall = Long.parseLong(binaryModifiedDateDuringPackageInstallString);
-            }
-
-            String packageAppVersion = packageMetadata.optString("appVersion", null);
-            if (binaryModifiedDateDuringPackageInstall != null &&
-                    binaryModifiedDateDuringPackageInstall == binaryResourcesModifiedTime &&
-                    (isUsingTestConfiguration() || sAppVersion.equals(packageAppVersion))) {
+            if (isPackageBundleLatest(packageMetadata)) {
                 CodePushUtils.logBundleUrl(packageFilePath);
                 sIsRunningBinaryVersion = false;
                 return packageFilePath;
             } else {
                 // The binary version is newer.
                 this.mDidUpdate = false;
-                if (!this.mIsDebugMode || !sAppVersion.equals(packageAppVersion)) {
+                if (!this.mIsDebugMode || hasBinaryVersionChanged(packageMetadata)) {
                     this.clearUpdates();
                 }
 
@@ -192,6 +182,12 @@ public class CodePush implements ReactPackage {
         // Reset the state which indicates that
         // the app was just freshly updated.
         mDidUpdate = false;
+
+        JSONObject packageMetadata = this.mUpdateManager.getCurrentPackage();
+        if (!isPackageBundleLatest(packageMetadata) && hasBinaryVersionChanged(packageMetadata)) {
+            CodePushUtils.log("Skipping initializeUpdateAfterRestart(), binary version is newer");
+            return;
+        }
 
         JSONObject pendingUpdate = mSettingsManager.getPendingUpdate();
         if (pendingUpdate != null) {
@@ -230,6 +226,24 @@ public class CodePush implements ReactPackage {
 
     boolean isRunningBinaryVersion() {
         return sIsRunningBinaryVersion;
+    }
+
+    private boolean isPackageBundleLatest(JSONObject packageMetadata) {
+        Long binaryModifiedDateDuringPackageInstall = null;
+        String binaryModifiedDateDuringPackageInstallString = packageMetadata.optString(CodePushConstants.BINARY_MODIFIED_TIME_KEY, null);
+        if (binaryModifiedDateDuringPackageInstallString != null) {
+            binaryModifiedDateDuringPackageInstall = Long.parseLong(binaryModifiedDateDuringPackageInstallString);
+        }
+        String packageAppVersion = packageMetadata.optString("appVersion", null);
+        long binaryResourcesModifiedTime = this.getBinaryResourcesModifiedTime();
+        return binaryModifiedDateDuringPackageInstall != null &&
+                binaryModifiedDateDuringPackageInstall == binaryResourcesModifiedTime &&
+                (isUsingTestConfiguration() || sAppVersion.equals(packageAppVersion));
+    }
+
+    private boolean hasBinaryVersionChanged(JSONObject packageMetadata) {
+        String packageAppVersion = packageMetadata.optString("appVersion", null);
+        return !sAppVersion.equals(packageAppVersion);
     }
 
     boolean needToReportRollback() {
