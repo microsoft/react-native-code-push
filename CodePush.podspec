@@ -11,7 +11,8 @@ Pod::Spec.new do |s|
   s.license        = package['license']
   s.homepage       = package['homepage']
   s.source         = { :git => 'https://github.com/Microsoft/react-native-code-push.git', :tag => "v#{s.version}-beta"}
-  s.platform       = :ios, '7.0'
+  s.ios.deployment_target = '7.0'
+  s.tvos.deployment_target = '9.0'
   s.preserve_paths = '*.js'
   s.library        = 'z'
 
