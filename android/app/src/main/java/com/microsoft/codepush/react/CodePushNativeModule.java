@@ -106,8 +106,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
             @Override
             protected Void doInBackground(Void... params) {
                 CodePushSyncOptions syncOptions = CodePushUtils.convertReadableToObject(syncOptionsMap, CodePushSyncOptions.class);
-                mCodePushCore.sync(syncOptions);
-                promise.resolve("");
+                mCodePushCore.sync(syncOptions, promise);
                 return null;
             }
         };

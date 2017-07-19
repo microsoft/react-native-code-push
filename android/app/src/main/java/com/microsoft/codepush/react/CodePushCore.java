@@ -7,6 +7,7 @@ import com.facebook.react.bridge.JSBundleLoader;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.NativeModule;
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.ChoreographerCompat;
@@ -552,10 +553,14 @@ public class CodePushCore {
     }
 
     public void sync() {
-        sync(getDefaultSyncOptions());
+        sync(getDefaultSyncOptions(), null);
     }
 
     public void sync(CodePushSyncOptions syncOptions) {
+        sync(syncOptions, null);
+    }
+
+    public void sync(CodePushSyncOptions syncOptions, final Promise promise) {
         if (mSyncInProgress) {
             syncStatusChange(CodePushSyncStatus.SYNC_IN_PROGRESS);
             CodePushUtils.log("Sync already in progress.");
@@ -608,10 +613,12 @@ public class CodePushCore {
             if (currentPackage != null && currentPackage.IsPending) {
                 syncStatusChange(CodePushSyncStatus.UPDATE_INSTALLED);
                 mSyncInProgress = false;
+                if (promise != null) promise.resolve("");
                 return;
             } else {
                 syncStatusChange(CodePushSyncStatus.UP_TO_DATE);
                 mSyncInProgress = false;
+                if (promise != null) promise.resolve("");
                 return;
             }
         } else if (syncOptions.UpdateDialog != null) {
@@ -643,7 +650,10 @@ public class CodePushCore {
                             protected Void doInBackground(Void... params) {
                                 try {
                                     doDownloadAndInstall(remotePackage, syncOptionsFinal, configuration);
+                                    if (promise != null) promise.resolve("");
                                 } catch (Exception e) {
+                                    mSyncInProgress = false;
+                                    if (promise != null) promise.resolve("");
                                     CodePushUtils.log(e.toString());
                                 }
                                 return null;
@@ -652,7 +662,11 @@ public class CodePushCore {
                         asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                     } else if (buttonNumber.equals("1")) {
                         syncStatusChange(CodePushSyncStatus.UPDATE_IGNORED);
+                        mSyncInProgress = false;
+                        if (promise != null) promise.resolve("");
                     } else {
+                        mSyncInProgress = false;
+                        if (promise != null) promise.resolve("");
                         throw new CodePushUnknownException("Unknown button ID pressed.");
                     }
                 }
@@ -662,6 +676,8 @@ public class CodePushCore {
                 @Override
                 public void invoke(Object... args) {
                     syncStatusChange(CodePushSyncStatus.UNKNOWN_ERROR);
+                    mSyncInProgress = false;
+                    if (promise != null) promise.resolve("");
                     throw new CodePushUnknownException(args.toString());
                 }
             };
@@ -679,12 +695,15 @@ public class CodePushCore {
                     mDialogModule.showDialog(titleFinal, messageFinal, button1TextFinal, button2TextFinal, successCallback, errorCallback);
                 } catch (Exception e) {
                     syncStatusChange(CodePushSyncStatus.UNKNOWN_ERROR);
+                    mSyncInProgress = false;
+                    if (promise != null) promise.resolve("");
                     CodePushUtils.log(e.toString());
                 }
                 }
             });
         } else {
             doDownloadAndInstall(remotePackage, syncOptions, configuration);
+            if (promise != null) promise.resolve("");
         }
     }
 
