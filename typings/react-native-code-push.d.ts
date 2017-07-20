@@ -19,6 +19,7 @@ interface Promise<T> {
 
 export type DowloadProgressCallback = (progress: DownloadProgress) => void;
 export type SyncStatusChangedCallback = (status: CodePush.SyncStatus) => void;
+export type HandleBinaryVersionMismatchCallback = (update: RemotePackage) => void;
 
 export interface CodePushOptions extends SyncOptions {
     /**
@@ -245,8 +246,10 @@ declare namespace CodePush {
      * Asks the CodePush service whether the configured app deployment has an update available.
      *
      * @param deploymentKey The deployment key to use to query the CodePush server for an update.
+     * 
+     * @param handleBinaryVersionMismatchCallback An optional callback for handling target binary version mismatch
      */
-    function checkForUpdate(deploymentKey?: string): Promise<RemotePackage>;
+    function checkForUpdate(deploymentKey?: string, handleBinaryVersionMismatchCallback?: HandleBinaryVersionMismatchCallback): Promise<RemotePackage>;
 
     /**
      * Retrieves the metadata for an installed update (e.g. description, mandatory).
@@ -283,8 +286,9 @@ declare namespace CodePush {
      * @param options Options used to configure the end-user update experience (e.g. show an prompt?, install the update immediately?).
      * @param syncStatusChangedCallback An optional callback that allows tracking the status of the sync operation, as opposed to simply checking the resolved state via the returned Promise.
      * @param downloadProgressCallback An optional callback that allows tracking the progress of an update while it is being downloaded.
+     * @param handleBinaryVersionMismatchCallback An optional callback for handling target binary version mismatch
      */
-    function sync(options?: SyncOptions, syncStatusChangedCallback?: SyncStatusChangedCallback, downloadProgressCallback?: DowloadProgressCallback): Promise<SyncStatus>;
+    function sync(options?: SyncOptions, syncStatusChangedCallback?: SyncStatusChangedCallback, downloadProgressCallback?: DowloadProgressCallback, handleBinaryVersionMismatchCallback?: HandleBinaryVersionMismatchCallback): Promise<SyncStatus>;
 
     /**
      * Indicates when you would like an installed update to actually be applied.
