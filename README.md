@@ -16,7 +16,7 @@ This plugin provides client-side integration for the [CodePush service](http://c
     * [Android Setup](docs/setup-android.md)
     * [Windows Setup](docs/setup-windows.md)
 * [Plugin Usage](#plugin-usage)
-    * [Compliancy with stores' rules](#compliancy-with-stores-rules)
+    * [Store Guideline Compliance](#store-guideline-compliance)
 * [Releasing Updates](#releasing-updates)
 * [Multi-Deployment Testing](#multi-deployment-testing)
 * [Dynamic Deployment Assignment](#dynamic-deployment-assignment)
@@ -182,17 +182,17 @@ If you would like to display an update confirmation dialog (an "active install")
 
 *NOTE: If you are using [Redux](http://redux.js.org) and [Redux Saga](http://yelouafi.github.io/redux-saga/), you can alternatively use the [react-native-code-push-saga](http://github.com/lostintangent/react-native-code-push-saga) module, which allows you to customize when `sync` is called in a perhaps simpler/more idiomatic way.*
 
-### Compliancy with stores' rules
+### Store Guideline Compliance
 
-While Google Play and internally distributed apps (e.g. Enterprise, Fabric, HockeyApp) have no limitations over how to integrate CodePush, use and show update promts (so that developers can choose to how enable/customize it) Apple has a more precise ruling that evolved over time to allow its usage.
+While Google Play and internally distributed apps (e.g. Enterprise, Fabric, HockeyApp) have no limitations over how to publish updates using CodePush, the iOS App Store and its corresponding guidelines have more precise rules you should be aware of before integrating the solution within your application.
 
 Paragraph **3.3.2**, since back in 2015's [Apple Developer Program License Agreement](https://developer.apple.com/programs/ios/information/iOS_Program_Information_4_3_15.pdf) fully allowed performing over-the-air updates of JavaScript and assets -  and in its latest version (20170605) [downloadable here](https://developer.apple.com/terms/) this ruling is even broader:
 
 > Interpreted code may be downloaded to an Application but only so long as such code: (a) does not change the primary purpose of the Application by providing features or functionality that are inconsistent with the intended and advertised purpose of the Application as submitted to the App Store, (b) does not create a store or storefront for other code or applications, and (c) does not bypass signing, sandbox, or other security features of the OS.
 
-And CodePush allows you do follow these rules just fine, so you should never be worried of seeing your app rejected.
+CodePush allows you to follow these rules in full compliance so long as the update you push does not significantly deviate your product from its original App Store approved intent.
 
-A side note has to be made for showing update promts: we suggest that App Store-distributed apps don't enable the `updateDialog` option when calling `sync`, since in the [App Store Review Guidelines](https://developer.apple.com/app-store/review/guidelines/) it is written that:
+To further remain in compliance with Apple's guidelines we suggest that App Store-distributed apps don't enable the `updateDialog` option when calling `sync`, since in the [App Store Review Guidelines](https://developer.apple.com/app-store/review/guidelines/) it is written that:
 
 > Apps must not force users to rate the app, review the app, download other apps, or other similar actions in order to access functionality, content, or use of the app.
 
