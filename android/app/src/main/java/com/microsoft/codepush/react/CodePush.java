@@ -40,6 +40,7 @@ public class CodePush implements ReactPackage {
 
     private Context mContext;
     private final boolean mIsDebugMode;
+    private String mPublicKeyFilePath;
 
     private static ReactInstanceHolder mReactInstanceHolder;
     private static CodePush mCurrentInstance;
@@ -75,6 +76,12 @@ public class CodePush implements ReactPackage {
     public CodePush(String deploymentKey, Context context, boolean isDebugMode, String serverUrl) {
         this(deploymentKey, context, isDebugMode);
         mServerUrl = serverUrl;
+    }
+
+    public CodePush(String deploymentKey, Context context, boolean isDebugMode, String serverUrl, String publicKeyFilePath) {
+        this(deploymentKey, context, isDebugMode, serverUrl);
+        mServerUrl = serverUrl;
+        mPublicKeyFilePath = publicKeyFilePath;
     }
 
     public void clearDebugCacheIfNeeded() {
