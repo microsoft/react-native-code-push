@@ -8,7 +8,7 @@ public class CodePushBuilder {
 
     private boolean mIsDebugMode;
     private String mServerUrl;
-    private String mPublicKeyFilePath;
+    private String mPublicKey;
 
     public CodePushBuilder(String deploymentKey, Context context) {
         this.mDeploymentKey = deploymentKey;
@@ -25,12 +25,12 @@ public class CodePushBuilder {
         return this;
     }
 
-    public CodePushBuilder setPublicKeyFilePath(String publicKeyFilePath) {
-        this.mPublicKeyFilePath = publicKeyFilePath;
+    public CodePushBuilder setPublicKey(String publicKey) {
+        this.mPublicKey = publicKey;
         return this;
     }
 
     public CodePush build() {
-        return new CodePush(this.mDeploymentKey, this.mContext, this.mIsDebugMode, this.mServerUrl, this.mPublicKeyFilePath);
+        return new CodePush(this.mDeploymentKey, this.mContext, this.mIsDebugMode, this.mServerUrl, this.mPublicKey);
     }
 }

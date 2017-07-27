@@ -22,4 +22,5 @@ android {
 
 dependencies {
     compile "com.facebook.react:react-native:+"
+    compile 'com.auth0:java-jwt:3.2.0'
 }

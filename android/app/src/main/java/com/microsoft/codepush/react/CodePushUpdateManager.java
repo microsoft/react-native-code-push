@@ -244,8 +244,11 @@ public class CodePushUpdateManager {
                 }
 
                 if (isDiffUpdate) {
-                    CodePushUpdateUtils.verifyHashForDiffUpdate(newUpdateFolderPath, newUpdateHash);
+                    CodePushUtils.log("Applying diff update.");
+                    CodePushUpdateUtils.verifyFolderHash(newUpdateFolderPath, newUpdateHash);
                 }
+
+                CodePushUpdateUtils.verifySignature(newUpdateFolderPath);
 
                 CodePushUtils.setJSONValueForKey(updatePackage, CodePushConstants.RELATIVE_BUNDLE_PATH_KEY, relativeBundlePath);
             }
