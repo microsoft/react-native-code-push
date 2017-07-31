@@ -140,7 +140,8 @@ public class CodePushUpdateManager {
     }
 
     public void downloadPackage(JSONObject updatePackage, String expectedBundleFileName,
-                                DownloadProgressCallback progressCallback) throws IOException {
+                                DownloadProgressCallback progressCallback,
+                                String stringPublicKey) throws IOException {
         String newUpdateHash = updatePackage.optString(CodePushConstants.PACKAGE_HASH_KEY, null);
         String newUpdateFolderPath = getPackageFolderPath(newUpdateHash);
         String newUpdateMetadataPath = CodePushUtils.appendPathComponent(newUpdateFolderPath, CodePushConstants.PACKAGE_FILE_NAME);
@@ -245,10 +246,10 @@ public class CodePushUpdateManager {
 
                 if (isDiffUpdate) {
                     CodePushUtils.log("Applying diff update.");
-                    CodePushUpdateUtils.verifyFolderHash(newUpdateFolderPath, newUpdateHash);
+                    //CodePushUpdateUtils.verifyFolderHash(newUpdateFolderPath, newUpdateHash);
                 }
 
-                CodePushUpdateUtils.verifySignature(newUpdateFolderPath);
+                CodePushUpdateUtils.verifySignature(newUpdateFolderPath, stringPublicKey);
 
                 CodePushUtils.setJSONValueForKey(updatePackage, CodePushConstants.RELATIVE_BUNDLE_PATH_KEY, relativeBundlePath);
             }

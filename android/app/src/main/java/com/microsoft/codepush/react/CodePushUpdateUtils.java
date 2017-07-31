@@ -3,11 +3,7 @@ package com.microsoft.codepush.react;
 import android.content.Context;
 import android.util.Base64;
 
-import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.interfaces.Claim;
-import com.auth0.jwt.interfaces.DecodedJWT;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,7 +20,6 @@ import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
-import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -158,6 +153,7 @@ public class CodePushUpdateUtils {
         CodePushUtils.log("Verifying hash for folder path: " + folderPath);
         ArrayList<String> updateContentsManifest = new ArrayList<>();
         addContentsOfFolderToManifest(folderPath, "", updateContentsManifest);
+        //sort manifest strings to make sure, that they are completely equal with manifest strings has been generated in cli!
         Collections.sort(updateContentsManifest);
         JSONArray updateContentsJSONArray = new JSONArray();
         for (String manifestEntry : updateContentsManifest) {
@@ -176,14 +172,10 @@ public class CodePushUpdateUtils {
         }
     }
 
-    public static Map<String, Claim> verifyJWT(String jwt, PublicKey publicKey) {
+    public static Map<String, Object> verifyJWT(String jwt, PublicKey publicKey) {
         try {
-            //final JWTVerifier verifier = new JWTVerifier(publicKey);
-            Algorithm algorithm = Algorithm.RSA256((RSAPublicKey) publicKey, null);
-            JWTVerifier verifier = JWT.require(algorithm)
-                    .withIssuer("auth0")
-                    .build();
-            final Map<String, Claim> claims = verifier.verify(jwt).getClaims();
+            final JWTVerifier verifier = new JWTVerifier(publicKey);
+            final Map<String, Object> claims = verifier.verify(jwt);
             CodePushUtils.log("JWT verification succeeded:\n" + claims.toString());
             return claims;
         } catch (Exception e) {
@@ -191,16 +183,13 @@ public class CodePushUpdateUtils {
         }
     }
 
-    public static PublicKey getPublicKey() {
+    public static PublicKey getPublicKey(String stringPublicKey) {
         try {
-            // final PublicKey publicKey = X509CertUtils.parse(
-            // ).getPublicKey();
-            String stringKey = "-----BEGIN PUBLIC KEY-----\n" +
-                    "keyhere" +
-                    "-----END PUBLIC KEY-----";
-            stringKey = stringKey.replace("-----BEGIN PUBLIC KEY-----\n", "");
-            stringKey = stringKey.replace("-----END PUBLIC KEY-----", "");
-            byte[] byteKey = Base64.decode(stringKey.getBytes(), Base64.DEFAULT);
+            //remove unnecessary "begin/end public key" entries from string
+            stringPublicKey = stringPublicKey
+                    .replace("-----BEGIN PUBLIC KEY-----\n", "")
+                    .replace("-----END PUBLIC KEY-----", "");
+            byte[] byteKey = Base64.decode(stringPublicKey.getBytes(), Base64.DEFAULT);
             X509EncodedKeySpec X509Key = new X509EncodedKeySpec(byteKey);
             KeyFactory kf = KeyFactory.getInstance("RSA");
 
@@ -227,12 +216,12 @@ public class CodePushUpdateUtils {
         }
     }
 
-    public static void verifySignature(String folderPath) throws CodePushInvalidUpdateException {
+    public static void verifySignature(String folderPath, String stringPublicKey) throws CodePushInvalidUpdateException {
         CodePushUtils.log("Verifying signature for folder path: " + folderPath);
 
-        final PublicKey publicKey = getPublicKey();
+        final PublicKey publicKey = getPublicKey(stringPublicKey);
         if (publicKey == null) {
-            throw new CodePushInvalidUpdateException("The update could not be verified because no certificate was found.");
+            throw new CodePushInvalidUpdateException("The update could not be verified because no public key was found.");
         }
 
         final String signature = getSignature(folderPath);
@@ -240,12 +229,12 @@ public class CodePushUpdateUtils {
             throw new CodePushInvalidUpdateException("The update could not be verified because no signature was found.");
         }
 
-        final Map<String, Claim> claims = CodePushUpdateUtils.verifyJWT(signature, publicKey);
+        final Map<String, Object> claims = CodePushUpdateUtils.verifyJWT(signature, publicKey);
         if (claims == null) {
             throw new CodePushInvalidUpdateException("The update could not be verified because it was not signed by a trusted party.");
         }
 
-        final String contentHash = claims.get("contentHash").asString();
+        final String contentHash = (String)claims.get("contentHash");
         if (contentHash == null) {
             throw new CodePushInvalidUpdateException("The update could not be verified because the signature did not specify a content hash.");
         }

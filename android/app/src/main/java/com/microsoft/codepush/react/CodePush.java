@@ -3,6 +3,8 @@ package com.microsoft.codepush.react;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.support.annotation.NonNull;
 
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactPackage;
@@ -15,6 +17,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.NotActiveException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,10 +39,12 @@ public class CodePush implements ReactPackage {
 
     // Config properties.
     private String mDeploymentKey;
-    private String mServerUrl = "https://codepush.azurewebsites.net/";
+    private static String mServerUrl = "https://codepush.azurewebsites.net/";
 
     private Context mContext;
     private final boolean mIsDebugMode;
+
+    private Integer mPublicKeyResourceDescriptor;
     private String mPublicKey;
 
     private static ReactInstanceHolder mReactInstanceHolder;
@@ -49,6 +54,11 @@ public class CodePush implements ReactPackage {
         this(deploymentKey, context, false);
     }
 
+    public static String getServiceUrl() {
+        return mServerUrl;
+    }
+
+    @Deprecated
     public CodePush(String deploymentKey, Context context, boolean isDebugMode) {
         mContext = context.getApplicationContext();
 
@@ -73,15 +83,33 @@ public class CodePush implements ReactPackage {
         initializeUpdateAfterRestart();
     }
 
-    public CodePush(String deploymentKey, Context context, boolean isDebugMode, String serverUrl) {
+    @Deprecated
+    public CodePush(String deploymentKey, Context context, boolean isDebugMode, @NonNull String serverUrl) {
         this(deploymentKey, context, isDebugMode);
         mServerUrl = serverUrl;
     }
 
-    public CodePush(String deploymentKey, Context context, boolean isDebugMode, String serverUrl, String publicKey) {
+    @Deprecated
+    public CodePush(String deploymentKey, Context context, boolean isDebugMode, @NonNull String serverUrl, Integer publicKeyResourceDescriptor) {
         this(deploymentKey, context, isDebugMode, serverUrl);
-        mServerUrl = serverUrl;
-        mPublicKey = publicKey;
+
+        mPublicKeyResourceDescriptor = publicKeyResourceDescriptor;
+
+        if (mPublicKeyResourceDescriptor != null) {
+            try {
+                mPublicKey = mContext.getString(publicKeyResourceDescriptor);
+            } catch (Resources.NotFoundException e) {
+                throw new CodePushUnknownException(
+                        "Unable to get public key, related resource descriptor " +
+                                publicKeyResourceDescriptor +
+                                " can not be found", e
+                );
+            }
+
+            if (mPublicKey.isEmpty()) {
+                throw new CodePushUnknownException("Specified public key is empty");
+            }
+        }
     }
 
     public void clearDebugCacheIfNeeded() {
@@ -104,6 +132,10 @@ public class CodePush implements ReactPackage {
 
     public String getAssetsBundleFileName() {
         return mAssetsBundleFileName;
+    }
+
+    public String getPublicKey() {
+        return mPublicKey;
     }
 
     long getBinaryResourcesModifiedTime() {

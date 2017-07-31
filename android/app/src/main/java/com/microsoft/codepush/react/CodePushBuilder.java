@@ -8,11 +8,12 @@ public class CodePushBuilder {
 
     private boolean mIsDebugMode;
     private String mServerUrl;
-    private String mPublicKey;
+    private int mPublicKeyResourceDescriptor;
 
     public CodePushBuilder(String deploymentKey, Context context) {
         this.mDeploymentKey = deploymentKey;
         this.mContext = context;
+        this.mServerUrl = CodePush.getServiceUrl();
     }
 
     public CodePushBuilder setIsDebugMode(boolean isDebugMode) {
@@ -25,12 +26,12 @@ public class CodePushBuilder {
         return this;
     }
 
-    public CodePushBuilder setPublicKey(String publicKey) {
-        this.mPublicKey = publicKey;
+    public CodePushBuilder setPublicKeyResourceDescriptor(int publicKeyResourceDescriptor) {
+        this.mPublicKeyResourceDescriptor = publicKeyResourceDescriptor;
         return this;
     }
 
     public CodePush build() {
-        return new CodePush(this.mDeploymentKey, this.mContext, this.mIsDebugMode, this.mServerUrl, this.mPublicKey);
+        return new CodePush(this.mDeploymentKey, this.mContext, this.mIsDebugMode, this.mServerUrl, this.mPublicKeyResourceDescriptor);
     }
 }
