@@ -2,16 +2,20 @@
 The script serves to generate CodePushified React Native app to reproduce issues or for testing purposes.
 
 Requirements:
-1. npm i -g react-native-cli
-2. npm i -g code-push-cli
-3. code-push register
+    1. npm i -g react-native-cli
+    2. npm i -g code-push-cli
+    3. code-push register
 
 Usage: node create-app.js <appName> <reactNativeVersion> <reactNativeCodePushVersion>
+    1. node create-app.js 
+    2. node create-app.js myapp
+    3. node create-app.js myapp react-native@0.47.1 react-native-code-push@5.0.0-beta 
+    4. node create-app.js myapp react-native@latest Microsoft/react-native-code-push
 
-Parameters (all optional):
-    <appName> - CodePushDemoAppTest
-    <reactNativeVersion> - react-native@latest
-    <reactNativeCodePushVersion> - react-native-code-push@latest
+Parameters:
+    1. <appName> - CodePushDemoAppTest
+    2. <reactNativeVersion> - react-native@latest
+    3. <reactNativeCodePushVersion> - react-native-code-push@latest
 */
 
 let fs = require('fs');
@@ -141,7 +145,7 @@ function optimizeToTestInDebugMode() {
     let rnXcodeShLocationFolder = 'scripts';
     try {
         let rnVersions = JSON.parse(execSync(`npm view react-native versions --json`));
-        let currentRNversion = reactNativeVersion.split('@')[1];
+        let currentRNversion = JSON.parse(fs.readFileSync('./package.json'))['dependencies']['react-native'];
         if (rnVersions.indexOf(currentRNversion) > -1 &&
             rnVersions.indexOf(currentRNversion) < rnVersions.indexOf("0.46.0-rc.0")) {
             rnXcodeShLocationFolder = 'packager';
