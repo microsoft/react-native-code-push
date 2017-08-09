@@ -128,7 +128,8 @@ function setupAssets() {
 
             if (!/^win/.test(process.platform)) {
                 optimizeToTestInDebugMode();
-                grantAccess();
+                process.chdir('../');
+                grantAccess(appName);
             }
             console.log(`\nReact Native app "${appName}" has been generated and CodePushified!`);
             process.exit();
@@ -137,15 +138,24 @@ function setupAssets() {
 }
 
 function optimizeToTestInDebugMode() {
+    let rnXcodeShLocationFolder = 'scripts';
+    try {
+        let rnVersions = JSON.parse(execSync(`npm view react-native versions --json`));
+        let currentRNversion = reactNativeVersion.split('@')[1];
+        if (rnVersions.indexOf(currentRNversion) > -1 &&
+            rnVersions.indexOf(currentRNversion) < rnVersions.indexOf("0.46.0-rc.0")) {
+            rnXcodeShLocationFolder = 'packager';
+        }
+    } catch(e) {}
+    
     execSync(`perl -i -p0e 's/#ifdef DEBUG.*?#endif/jsCodeLocation = [CodePush bundleURL];/s' ios/${appName}/AppDelegate.m`);
-    execSync(`sed -ie '17,20d' node_modules/react-native/scripts/react-native-xcode.sh`);
-    execSync(`sed -ie '92s/targetName.toLowerCase().contains("release")/true/' node_modules/react-native/react.gradle`);
+    execSync(`sed -ie '17,20d' node_modules/react-native/${rnXcodeShLocationFolder}/react-native-xcode.sh`);
+    execSync(`sed -ie 's/targetName.toLowerCase().contains("release")$/true/' node_modules/react-native/react.gradle`);
 }
 
-function grantAccess() {
-    process.chdir('../');
-    execSync('chown -R `whoami` ' + appName);
-    execSync('chmod -R 755 ' + appName);
+function grantAccess(folderPath) {
+    execSync('chown -R `whoami` ' + folderPath);
+    execSync('chmod -R 755 ' + folderPath);
 }
 
 function copyRecursiveSync(src, dest) {
