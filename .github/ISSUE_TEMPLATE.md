@@ -1,14 +1,25 @@
 Thanks so much for filing an issue or feature request! Please fill out the following (wherever relevant):
 
-### Description
+### Steps to Reproduce
+1.
+2. 
+3.
 
-[FILL THIS OUT: Explain what you did, what you expected to happen, and what actually happens. Also exact reproduction steps and stack trace will be much appreciated.]
+### Expected Behavior
+What you expected to happen?
 
-### Reproduction
+### Actual Behavior
+What actually happens?
+```
+  STACK TRACE AND/OR SCREENSHOTS
+```
 
-[FILL THIS OUT: If possible try to reproduce your bug on our basic sample: https://github.com/Microsoft/react-native-code-push/tree/master/Examples/CodePushDemoApp. If you can't reproduce the bug on it, provide us as much info as possible about your project.]
+### Reproducible Demo
 
-### Additional Information
+* Download https://github.com/Microsoft/react-native-code-push/archive/master.zip and unzip. From `Examples` folder run `node create-app.js appName react-native@0.47.1 react-native-code-push@5.0.0-beta` command to generate plain CodePushified React Native app. Please see description on top of `create-app.js` file content if needed
+* If you can't reproduce the bug on it, provide us as much info as possible about your project
+
+### Environment
 
 * react-native-code-push version:
 * react-native version:
@@ -17,4 +28,3 @@ Thanks so much for filing an issue or feature request! Please fill out the follo
 * Does this reproduce on a simulator, or only on a physical device?
 
 (The more info the faster we will be able to address it!)
-
