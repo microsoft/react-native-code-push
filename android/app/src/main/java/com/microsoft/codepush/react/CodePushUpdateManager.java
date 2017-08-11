@@ -55,7 +55,7 @@ public class CodePushUpdateManager {
             return CodePushUtils.getJsonObjectFromFile(statusFilePath);
         } catch (IOException e) {
             // Should not happen.
-            throw new CodePushUnknownException("Error getting current package info" , e);
+            throw new CodePushUnknownException("Error getting current package info", e);
         }
     }
 
@@ -64,7 +64,7 @@ public class CodePushUpdateManager {
             CodePushUtils.writeJsonToFile(packageInfo, getStatusFilePath());
         } catch (IOException e) {
             // Should not happen.
-            throw new CodePushUnknownException("Error updating current package info" , e);
+            throw new CodePushUnknownException("Error updating current package info", e);
         }
     }
 
@@ -116,16 +116,16 @@ public class CodePushUpdateManager {
         if (packageHash == null) {
             return null;
         }
-        
+
         return getPackage(packageHash);
     }
-    
+
     public JSONObject getPreviousPackage() {
         String packageHash = getPreviousPackageHash();
         if (packageHash == null) {
             return null;
         }
-        
+
         return getPackage(packageHash);
     }
 
@@ -180,7 +180,7 @@ public class CodePushUpdateManager {
             while ((numBytesRead = bin.read(data, 0, CodePushConstants.DOWNLOAD_BUFFER_SIZE)) >= 0) {
                 if (receivedBytes < 4) {
                     for (int i = 0; i < numBytesRead; i++) {
-                        int headerOffset = (int)(receivedBytes) + i;
+                        int headerOffset = (int) (receivedBytes) + i;
                         if (headerOffset >= 4) {
                             break;
                         }
@@ -246,10 +246,16 @@ public class CodePushUpdateManager {
 
                 if (isDiffUpdate) {
                     CodePushUtils.log("Applying diff update.");
-                    //CodePushUpdateUtils.verifyFolderHash(newUpdateFolderPath, newUpdateHash);
                 }
 
-                CodePushUpdateUtils.verifySignature(newUpdateFolderPath, stringPublicKey);
+                boolean isSignatureVerificationEnabled = (stringPublicKey != null);
+                if (isSignatureVerificationEnabled) {
+                    CodePushUpdateUtils.verifySignature(newUpdateFolderPath, stringPublicKey);
+                } else {
+                    if (isDiffUpdate) {
+                        CodePushUpdateUtils.verifyFolderHash(newUpdateFolderPath, newUpdateHash);
+                    }
+                }
 
                 CodePushUtils.setJSONValueForKey(updatePackage, CodePushConstants.RELATIVE_BUNDLE_PATH_KEY, relativeBundlePath);
             }

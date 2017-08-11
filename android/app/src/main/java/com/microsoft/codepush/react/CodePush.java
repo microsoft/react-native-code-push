@@ -44,7 +44,6 @@ public class CodePush implements ReactPackage {
     private Context mContext;
     private final boolean mIsDebugMode;
 
-    private Integer mPublicKeyResourceDescriptor;
     private String mPublicKey;
 
     private static ReactInstanceHolder mReactInstanceHolder;
@@ -58,7 +57,6 @@ public class CodePush implements ReactPackage {
         return mServerUrl;
     }
 
-    @Deprecated
     public CodePush(String deploymentKey, Context context, boolean isDebugMode) {
         mContext = context.getApplicationContext();
 
@@ -83,19 +81,15 @@ public class CodePush implements ReactPackage {
         initializeUpdateAfterRestart();
     }
 
-    @Deprecated
     public CodePush(String deploymentKey, Context context, boolean isDebugMode, @NonNull String serverUrl) {
         this(deploymentKey, context, isDebugMode);
         mServerUrl = serverUrl;
     }
 
-    @Deprecated
     public CodePush(String deploymentKey, Context context, boolean isDebugMode, @NonNull String serverUrl, Integer publicKeyResourceDescriptor) {
         this(deploymentKey, context, isDebugMode, serverUrl);
 
-        mPublicKeyResourceDescriptor = publicKeyResourceDescriptor;
-
-        if (mPublicKeyResourceDescriptor != null) {
+        if (publicKeyResourceDescriptor != null) {
             try {
                 mPublicKey = mContext.getString(publicKeyResourceDescriptor);
             } catch (Resources.NotFoundException e) {
@@ -339,11 +333,6 @@ public class CodePush implements ReactPackage {
         nativeModules.add(codePushModule);
         nativeModules.add(dialogModule);
         return nativeModules;
-    }
-
-    @Override
-    public List<Class<? extends JavaScriptModule>> createJSModules() {
-        return new ArrayList<>();
     }
 
     @Override

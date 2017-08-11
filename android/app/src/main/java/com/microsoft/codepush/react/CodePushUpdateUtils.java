@@ -183,7 +183,7 @@ public class CodePushUpdateUtils {
         }
     }
 
-    public static PublicKey getPublicKey(String stringPublicKey) {
+    public static PublicKey parsePublicKey(String stringPublicKey) {
         try {
             //remove unnecessary "begin/end public key" entries from string
             stringPublicKey = stringPublicKey
@@ -204,7 +204,7 @@ public class CodePushUpdateUtils {
     public static String getSignature(String folderPath) {
         final String signatureFilePath = CodePushUtils.appendPathComponent(
                 CodePushUtils.appendPathComponent(folderPath, CodePushConstants.CODE_PUSH_FOLDER_PREFIX),
-                ".codepushrelease"
+                CodePushConstants.BUNDLE_JWT_FILE
         );
 
         try {
@@ -219,7 +219,7 @@ public class CodePushUpdateUtils {
     public static void verifySignature(String folderPath, String stringPublicKey) throws CodePushInvalidUpdateException {
         CodePushUtils.log("Verifying signature for folder path: " + folderPath);
 
-        final PublicKey publicKey = getPublicKey(stringPublicKey);
+        final PublicKey publicKey = parsePublicKey(stringPublicKey);
         if (publicKey == null) {
             throw new CodePushInvalidUpdateException("The update could not be verified because no public key was found.");
         }
@@ -229,7 +229,7 @@ public class CodePushUpdateUtils {
             throw new CodePushInvalidUpdateException("The update could not be verified because no signature was found.");
         }
 
-        final Map<String, Object> claims = CodePushUpdateUtils.verifyJWT(signature, publicKey);
+        final Map<String, Object> claims = verifyJWT(signature, publicKey);
         if (claims == null) {
             throw new CodePushInvalidUpdateException("The update could not be verified because it was not signed by a trusted party.");
         }
