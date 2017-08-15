@@ -246,6 +246,8 @@ public class CodePushUpdateManager {
 
                 if (isDiffUpdate) {
                     CodePushUtils.log("Applying diff update.");
+                } else {
+                    CodePushUtils.log("Applying full update.");
                 }
 
                 boolean isSignatureVerificationEnabled = (stringPublicKey != null);

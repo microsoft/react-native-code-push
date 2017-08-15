@@ -44,7 +44,7 @@ public class CodePush implements ReactPackage {
     private Context mContext;
     private final boolean mIsDebugMode;
 
-    private String mPublicKey;
+    private static String mPublicKey;
 
     private static ReactInstanceHolder mReactInstanceHolder;
     private static CodePush mCurrentInstance;
@@ -93,7 +93,7 @@ public class CodePush implements ReactPackage {
             try {
                 mPublicKey = mContext.getString(publicKeyResourceDescriptor);
             } catch (Resources.NotFoundException e) {
-                throw new CodePushUnknownException(
+                throw new CodePushInvalidPublicKeyException(
                         "Unable to get public key, related resource descriptor " +
                                 publicKeyResourceDescriptor +
                                 " can not be found", e
@@ -101,7 +101,7 @@ public class CodePush implements ReactPackage {
             }
 
             if (mPublicKey.isEmpty()) {
-                throw new CodePushUnknownException("Specified public key is empty");
+                throw new CodePushInvalidPublicKeyException("Specified public key is empty");
             }
         }
     }
