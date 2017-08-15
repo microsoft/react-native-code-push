@@ -59,6 +59,40 @@
 		81D51F3A1B6181C2000DA084 /* CodePushConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 81D51F391B6181C2000DA084 /* CodePushConfig.m */; };
 		8482F84C1E24C58300F793DB /* CodePush.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 13BE3DEC1AC21097009241FE /* CodePush.h */; };
 		8482F84E1E24C66300F793DB /* CodePush.h in Headers */ = {isa = PBXBuildFile; fileRef = 13BE3DEC1AC21097009241FE /* CodePush.h */; };
+		F80C99641F43478D004D8FC5 /* JWTAlgorithm.h in Headers */ = {isa = PBXBuildFile; fileRef = F80C993B1F43478D004D8FC5 /* JWTAlgorithm.h */; };
+		F80C99651F43478D004D8FC5 /* JWTAlgorithmFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = F80C993C1F43478D004D8FC5 /* JWTAlgorithmFactory.h */; };
+		F80C99661F43478D004D8FC5 /* JWTAlgorithmFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = F80C993D1F43478D004D8FC5 /* JWTAlgorithmFactory.m */; };
+		F80C99671F43478D004D8FC5 /* JWTAlgorithmNone.h in Headers */ = {isa = PBXBuildFile; fileRef = F80C993E1F43478D004D8FC5 /* JWTAlgorithmNone.h */; };
+		F80C99681F43478D004D8FC5 /* JWTAlgorithmNone.m in Sources */ = {isa = PBXBuildFile; fileRef = F80C993F1F43478D004D8FC5 /* JWTAlgorithmNone.m */; };
+		F80C99691F43478D004D8FC5 /* JWTAlgorithmDataHolder.h in Headers */ = {isa = PBXBuildFile; fileRef = F80C99411F43478D004D8FC5 /* JWTAlgorithmDataHolder.h */; };
+		F80C996A1F43478D004D8FC5 /* JWTAlgorithmDataHolder.m in Sources */ = {isa = PBXBuildFile; fileRef = F80C99421F43478D004D8FC5 /* JWTAlgorithmDataHolder.m */; };
+		F80C996B1F43478D004D8FC5 /* JWTAlgorithmDataHolderChain.h in Headers */ = {isa = PBXBuildFile; fileRef = F80C99431F43478D004D8FC5 /* JWTAlgorithmDataHolderChain.h */; };
+		F80C996C1F43478D004D8FC5 /* JWTAlgorithmDataHolderChain.m in Sources */ = {isa = PBXBuildFile; fileRef = F80C99441F43478D004D8FC5 /* JWTAlgorithmDataHolderChain.m */; };
+		F80C996D1F43478D004D8FC5 /* JWTAlgorithmHS256.h in Headers */ = {isa = PBXBuildFile; fileRef = F80C99461F43478D004D8FC5 /* JWTAlgorithmHS256.h */; };
+		F80C996E1F43478D004D8FC5 /* JWTAlgorithmHS256.m in Sources */ = {isa = PBXBuildFile; fileRef = F80C99471F43478D004D8FC5 /* JWTAlgorithmHS256.m */; };
+		F80C996F1F43478D004D8FC5 /* JWTAlgorithmHS384.h in Headers */ = {isa = PBXBuildFile; fileRef = F80C99481F43478D004D8FC5 /* JWTAlgorithmHS384.h */; };
+		F80C99701F43478D004D8FC5 /* JWTAlgorithmHS384.m in Sources */ = {isa = PBXBuildFile; fileRef = F80C99491F43478D004D8FC5 /* JWTAlgorithmHS384.m */; };
+		F80C99711F43478D004D8FC5 /* JWTAlgorithmHS512.h in Headers */ = {isa = PBXBuildFile; fileRef = F80C994A1F43478D004D8FC5 /* JWTAlgorithmHS512.h */; };
+		F80C99721F43478D004D8FC5 /* JWTAlgorithmHS512.m in Sources */ = {isa = PBXBuildFile; fileRef = F80C994B1F43478D004D8FC5 /* JWTAlgorithmHS512.m */; };
+		F80C99731F43478D004D8FC5 /* JWTAlgorithmHSBase.h in Headers */ = {isa = PBXBuildFile; fileRef = F80C994C1F43478D004D8FC5 /* JWTAlgorithmHSBase.h */; };
+		F80C99741F43478D004D8FC5 /* JWTAlgorithmHSBase.m in Sources */ = {isa = PBXBuildFile; fileRef = F80C994D1F43478D004D8FC5 /* JWTAlgorithmHSBase.m */; };
+		F80C99751F43478D004D8FC5 /* JWTAlgorithmRSBase.h in Headers */ = {isa = PBXBuildFile; fileRef = F80C994F1F43478D004D8FC5 /* JWTAlgorithmRSBase.h */; };
+		F80C99761F43478D004D8FC5 /* JWTAlgorithmRSBase.m in Sources */ = {isa = PBXBuildFile; fileRef = F80C99501F43478D004D8FC5 /* JWTAlgorithmRSBase.m */; };
+		F80C99771F43478D004D8FC5 /* JWTRSAlgorithm.h in Headers */ = {isa = PBXBuildFile; fileRef = F80C99511F43478D004D8FC5 /* JWTRSAlgorithm.h */; };
+		F80C99781F43478D004D8FC5 /* JWTClaim.h in Headers */ = {isa = PBXBuildFile; fileRef = F80C99531F43478D004D8FC5 /* JWTClaim.h */; };
+		F80C99791F43478D004D8FC5 /* JWTClaim.m in Sources */ = {isa = PBXBuildFile; fileRef = F80C99541F43478D004D8FC5 /* JWTClaim.m */; };
+		F80C997A1F43478D004D8FC5 /* JWTClaimsSet.h in Headers */ = {isa = PBXBuildFile; fileRef = F80C99551F43478D004D8FC5 /* JWTClaimsSet.h */; };
+		F80C997B1F43478D004D8FC5 /* JWTClaimsSet.m in Sources */ = {isa = PBXBuildFile; fileRef = F80C99561F43478D004D8FC5 /* JWTClaimsSet.m */; };
+		F80C997C1F43478D004D8FC5 /* JWTClaimsSetSerializer.h in Headers */ = {isa = PBXBuildFile; fileRef = F80C99571F43478D004D8FC5 /* JWTClaimsSetSerializer.h */; };
+		F80C997D1F43478D004D8FC5 /* JWTClaimsSetSerializer.m in Sources */ = {isa = PBXBuildFile; fileRef = F80C99581F43478D004D8FC5 /* JWTClaimsSetSerializer.m */; };
+		F80C997E1F43478D004D8FC5 /* JWTClaimsSetVerifier.h in Headers */ = {isa = PBXBuildFile; fileRef = F80C99591F43478D004D8FC5 /* JWTClaimsSetVerifier.h */; };
+		F80C997F1F43478D004D8FC5 /* JWTClaimsSetVerifier.m in Sources */ = {isa = PBXBuildFile; fileRef = F80C995A1F43478D004D8FC5 /* JWTClaimsSetVerifier.m */; };
+		F80C99801F43478D004D8FC5 /* JWTCoding.h in Headers */ = {isa = PBXBuildFile; fileRef = F80C995C1F43478D004D8FC5 /* JWTCoding.h */; };
+		F80C99811F43478E004D8FC5 /* JWTCoding.m in Sources */ = {isa = PBXBuildFile; fileRef = F80C995D1F43478D004D8FC5 /* JWTCoding.m */; };
+		F80C99821F43478E004D8FC5 /* JWT.h in Headers */ = {isa = PBXBuildFile; fileRef = F80C995E1F43478D004D8FC5 /* JWT.h */; };
+		F80C99831F43478E004D8FC5 /* JWTBase64Coder.h in Headers */ = {isa = PBXBuildFile; fileRef = F80C99601F43478D004D8FC5 /* JWTBase64Coder.h */; };
+		F80C99841F43478E004D8FC5 /* JWTBase64Coder.m in Sources */ = {isa = PBXBuildFile; fileRef = F80C99611F43478D004D8FC5 /* JWTBase64Coder.m */; };
+		F80C99851F43478E004D8FC5 /* JWTDeprecations.h in Headers */ = {isa = PBXBuildFile; fileRef = F80C99621F43478D004D8FC5 /* JWTDeprecations.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -128,9 +162,44 @@
 		54A0026A1C0E2880004C3CEC /* SSZipArchive.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSZipArchive.h; sourceTree = "<group>"; };
 		54A0026B1C0E2880004C3CEC /* SSZipArchive.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSZipArchive.m; sourceTree = "<group>"; };
 		54FFEDDF1BF550630061DD23 /* CodePushDownloadHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CodePushDownloadHandler.m; path = CodePush/CodePushDownloadHandler.m; sourceTree = "<group>"; };
-		6463C8241EBA0CB60095B8CD /* libCodePush.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libCodePush.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		6463C8241EBA0CB60095B8CD /* libCodePush.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libCodePush.a; path = "/Users/akvelon/projects/testapp_rn/node_modules/react-native-code-push/ios/build/Debug-appletvos/libCodePush.a"; sourceTree = "<absolute>"; };
 		810D4E6C1B96935000B397E9 /* CodePushPackage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CodePushPackage.m; path = CodePush/CodePushPackage.m; sourceTree = "<group>"; };
 		81D51F391B6181C2000DA084 /* CodePushConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CodePushConfig.m; path = CodePush/CodePushConfig.m; sourceTree = "<group>"; };
+		F80C993B1F43478D004D8FC5 /* JWTAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JWTAlgorithm.h; sourceTree = "<group>"; };
+		F80C993C1F43478D004D8FC5 /* JWTAlgorithmFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JWTAlgorithmFactory.h; sourceTree = "<group>"; };
+		F80C993D1F43478D004D8FC5 /* JWTAlgorithmFactory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JWTAlgorithmFactory.m; sourceTree = "<group>"; };
+		F80C993E1F43478D004D8FC5 /* JWTAlgorithmNone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JWTAlgorithmNone.h; sourceTree = "<group>"; };
+		F80C993F1F43478D004D8FC5 /* JWTAlgorithmNone.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JWTAlgorithmNone.m; sourceTree = "<group>"; };
+		F80C99411F43478D004D8FC5 /* JWTAlgorithmDataHolder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JWTAlgorithmDataHolder.h; sourceTree = "<group>"; };
+		F80C99421F43478D004D8FC5 /* JWTAlgorithmDataHolder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JWTAlgorithmDataHolder.m; sourceTree = "<group>"; };
+		F80C99431F43478D004D8FC5 /* JWTAlgorithmDataHolderChain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JWTAlgorithmDataHolderChain.h; sourceTree = "<group>"; };
+		F80C99441F43478D004D8FC5 /* JWTAlgorithmDataHolderChain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JWTAlgorithmDataHolderChain.m; sourceTree = "<group>"; };
+		F80C99461F43478D004D8FC5 /* JWTAlgorithmHS256.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JWTAlgorithmHS256.h; sourceTree = "<group>"; };
+		F80C99471F43478D004D8FC5 /* JWTAlgorithmHS256.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JWTAlgorithmHS256.m; sourceTree = "<group>"; };
+		F80C99481F43478D004D8FC5 /* JWTAlgorithmHS384.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JWTAlgorithmHS384.h; sourceTree = "<group>"; };
+		F80C99491F43478D004D8FC5 /* JWTAlgorithmHS384.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JWTAlgorithmHS384.m; sourceTree = "<group>"; };
+		F80C994A1F43478D004D8FC5 /* JWTAlgorithmHS512.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JWTAlgorithmHS512.h; sourceTree = "<group>"; };
+		F80C994B1F43478D004D8FC5 /* JWTAlgorithmHS512.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JWTAlgorithmHS512.m; sourceTree = "<group>"; };
+		F80C994C1F43478D004D8FC5 /* JWTAlgorithmHSBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JWTAlgorithmHSBase.h; sourceTree = "<group>"; };
+		F80C994D1F43478D004D8FC5 /* JWTAlgorithmHSBase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JWTAlgorithmHSBase.m; sourceTree = "<group>"; };
+		F80C994F1F43478D004D8FC5 /* JWTAlgorithmRSBase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JWTAlgorithmRSBase.h; sourceTree = "<group>"; };
+		F80C99501F43478D004D8FC5 /* JWTAlgorithmRSBase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JWTAlgorithmRSBase.m; sourceTree = "<group>"; };
+		F80C99511F43478D004D8FC5 /* JWTRSAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JWTRSAlgorithm.h; sourceTree = "<group>"; };
+		F80C99531F43478D004D8FC5 /* JWTClaim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JWTClaim.h; sourceTree = "<group>"; };
+		F80C99541F43478D004D8FC5 /* JWTClaim.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JWTClaim.m; sourceTree = "<group>"; };
+		F80C99551F43478D004D8FC5 /* JWTClaimsSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JWTClaimsSet.h; sourceTree = "<group>"; };
+		F80C99561F43478D004D8FC5 /* JWTClaimsSet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JWTClaimsSet.m; sourceTree = "<group>"; };
+		F80C99571F43478D004D8FC5 /* JWTClaimsSetSerializer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JWTClaimsSetSerializer.h; sourceTree = "<group>"; };
+		F80C99581F43478D004D8FC5 /* JWTClaimsSetSerializer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JWTClaimsSetSerializer.m; sourceTree = "<group>"; };
+		F80C99591F43478D004D8FC5 /* JWTClaimsSetVerifier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JWTClaimsSetVerifier.h; sourceTree = "<group>"; };
+		F80C995A1F43478D004D8FC5 /* JWTClaimsSetVerifier.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JWTClaimsSetVerifier.m; sourceTree = "<group>"; };
+		F80C995C1F43478D004D8FC5 /* JWTCoding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JWTCoding.h; sourceTree = "<group>"; };
+		F80C995D1F43478D004D8FC5 /* JWTCoding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JWTCoding.m; sourceTree = "<group>"; };
+		F80C995E1F43478D004D8FC5 /* JWT.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JWT.h; sourceTree = "<group>"; };
+		F80C99601F43478D004D8FC5 /* JWTBase64Coder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JWTBase64Coder.h; sourceTree = "<group>"; };
+		F80C99611F43478D004D8FC5 /* JWTBase64Coder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JWTBase64Coder.m; sourceTree = "<group>"; };
+		F80C99621F43478D004D8FC5 /* JWTDeprecations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JWTDeprecations.h; sourceTree = "<group>"; };
+		F80C99631F43478D004D8FC5 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -219,6 +288,7 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				F80C99371F43478D004D8FC5 /* JWT */,
 				5498D8F51D21F14100B5EB43 /* CodePushUtils.m */,
 				13BE3DEC1AC21097009241FE /* CodePush.h */,
 				13BE3DED1AC21097009241FE /* CodePush.m */,
@@ -232,8 +302,122 @@
 				1BCC09A61CC19EB700DDC0DD /* RCTConvert+CodePushUpdateState.m */,
 				54A002481C0E2880004C3CEC /* SSZipArchive */,
 				134814211AA4EA7D00B7C361 /* Products */,
-				6463C8241EBA0CB60095B8CD /* libCodePush.a */,
 			);
+			sourceTree = "<group>";
+		};
+		F80C99371F43478D004D8FC5 /* JWT */ = {
+			isa = PBXGroup;
+			children = (
+				F80C99381F43478D004D8FC5 /* Classes */,
+				F80C99631F43478D004D8FC5 /* LICENSE */,
+			);
+			name = JWT;
+			path = CodePush/JWT;
+			sourceTree = "<group>";
+		};
+		F80C99381F43478D004D8FC5 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				F80C99391F43478D004D8FC5 /* Algorithms */,
+				F80C99521F43478D004D8FC5 /* ClaimSet */,
+				F80C995B1F43478D004D8FC5 /* Coding */,
+				F80C995E1F43478D004D8FC5 /* JWT.h */,
+				F80C995F1F43478D004D8FC5 /* Supplement */,
+			);
+			path = Classes;
+			sourceTree = "<group>";
+		};
+		F80C99391F43478D004D8FC5 /* Algorithms */ = {
+			isa = PBXGroup;
+			children = (
+				F80C993A1F43478D004D8FC5 /* Base */,
+				F80C99401F43478D004D8FC5 /* Holders */,
+				F80C99451F43478D004D8FC5 /* HSFamily */,
+				F80C994E1F43478D004D8FC5 /* RSFamily */,
+			);
+			path = Algorithms;
+			sourceTree = "<group>";
+		};
+		F80C993A1F43478D004D8FC5 /* Base */ = {
+			isa = PBXGroup;
+			children = (
+				F80C993B1F43478D004D8FC5 /* JWTAlgorithm.h */,
+				F80C993C1F43478D004D8FC5 /* JWTAlgorithmFactory.h */,
+				F80C993D1F43478D004D8FC5 /* JWTAlgorithmFactory.m */,
+				F80C993E1F43478D004D8FC5 /* JWTAlgorithmNone.h */,
+				F80C993F1F43478D004D8FC5 /* JWTAlgorithmNone.m */,
+			);
+			path = Base;
+			sourceTree = "<group>";
+		};
+		F80C99401F43478D004D8FC5 /* Holders */ = {
+			isa = PBXGroup;
+			children = (
+				F80C99411F43478D004D8FC5 /* JWTAlgorithmDataHolder.h */,
+				F80C99421F43478D004D8FC5 /* JWTAlgorithmDataHolder.m */,
+				F80C99431F43478D004D8FC5 /* JWTAlgorithmDataHolderChain.h */,
+				F80C99441F43478D004D8FC5 /* JWTAlgorithmDataHolderChain.m */,
+			);
+			path = Holders;
+			sourceTree = "<group>";
+		};
+		F80C99451F43478D004D8FC5 /* HSFamily */ = {
+			isa = PBXGroup;
+			children = (
+				F80C99461F43478D004D8FC5 /* JWTAlgorithmHS256.h */,
+				F80C99471F43478D004D8FC5 /* JWTAlgorithmHS256.m */,
+				F80C99481F43478D004D8FC5 /* JWTAlgorithmHS384.h */,
+				F80C99491F43478D004D8FC5 /* JWTAlgorithmHS384.m */,
+				F80C994A1F43478D004D8FC5 /* JWTAlgorithmHS512.h */,
+				F80C994B1F43478D004D8FC5 /* JWTAlgorithmHS512.m */,
+				F80C994C1F43478D004D8FC5 /* JWTAlgorithmHSBase.h */,
+				F80C994D1F43478D004D8FC5 /* JWTAlgorithmHSBase.m */,
+			);
+			path = HSFamily;
+			sourceTree = "<group>";
+		};
+		F80C994E1F43478D004D8FC5 /* RSFamily */ = {
+			isa = PBXGroup;
+			children = (
+				F80C994F1F43478D004D8FC5 /* JWTAlgorithmRSBase.h */,
+				F80C99501F43478D004D8FC5 /* JWTAlgorithmRSBase.m */,
+				F80C99511F43478D004D8FC5 /* JWTRSAlgorithm.h */,
+			);
+			path = RSFamily;
+			sourceTree = "<group>";
+		};
+		F80C99521F43478D004D8FC5 /* ClaimSet */ = {
+			isa = PBXGroup;
+			children = (
+				F80C99531F43478D004D8FC5 /* JWTClaim.h */,
+				F80C99541F43478D004D8FC5 /* JWTClaim.m */,
+				F80C99551F43478D004D8FC5 /* JWTClaimsSet.h */,
+				F80C99561F43478D004D8FC5 /* JWTClaimsSet.m */,
+				F80C99571F43478D004D8FC5 /* JWTClaimsSetSerializer.h */,
+				F80C99581F43478D004D8FC5 /* JWTClaimsSetSerializer.m */,
+				F80C99591F43478D004D8FC5 /* JWTClaimsSetVerifier.h */,
+				F80C995A1F43478D004D8FC5 /* JWTClaimsSetVerifier.m */,
+			);
+			path = ClaimSet;
+			sourceTree = "<group>";
+		};
+		F80C995B1F43478D004D8FC5 /* Coding */ = {
+			isa = PBXGroup;
+			children = (
+				F80C995C1F43478D004D8FC5 /* JWTCoding.h */,
+				F80C995D1F43478D004D8FC5 /* JWTCoding.m */,
+			);
+			path = Coding;
+			sourceTree = "<group>";
+		};
+		F80C995F1F43478D004D8FC5 /* Supplement */ = {
+			isa = PBXGroup;
+			children = (
+				F80C99601F43478D004D8FC5 /* JWTBase64Coder.h */,
+				F80C99611F43478D004D8FC5 /* JWTBase64Coder.m */,
+				F80C99621F43478D004D8FC5 /* JWTDeprecations.h */,
+			);
+			path = Supplement;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -251,7 +435,26 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F80C99821F43478E004D8FC5 /* JWT.h in Headers */,
+				F80C99731F43478D004D8FC5 /* JWTAlgorithmHSBase.h in Headers */,
+				F80C99671F43478D004D8FC5 /* JWTAlgorithmNone.h in Headers */,
+				F80C997E1F43478D004D8FC5 /* JWTClaimsSetVerifier.h in Headers */,
+				F80C99831F43478E004D8FC5 /* JWTBase64Coder.h in Headers */,
+				F80C99801F43478D004D8FC5 /* JWTCoding.h in Headers */,
+				F80C99651F43478D004D8FC5 /* JWTAlgorithmFactory.h in Headers */,
+				F80C997C1F43478D004D8FC5 /* JWTClaimsSetSerializer.h in Headers */,
+				F80C99771F43478D004D8FC5 /* JWTRSAlgorithm.h in Headers */,
+				F80C99851F43478E004D8FC5 /* JWTDeprecations.h in Headers */,
+				F80C997A1F43478D004D8FC5 /* JWTClaimsSet.h in Headers */,
+				F80C99641F43478D004D8FC5 /* JWTAlgorithm.h in Headers */,
+				F80C99781F43478D004D8FC5 /* JWTClaim.h in Headers */,
 				8482F84E1E24C66300F793DB /* CodePush.h in Headers */,
+				F80C99711F43478D004D8FC5 /* JWTAlgorithmHS512.h in Headers */,
+				F80C996D1F43478D004D8FC5 /* JWTAlgorithmHS256.h in Headers */,
+				F80C996B1F43478D004D8FC5 /* JWTAlgorithmDataHolderChain.h in Headers */,
+				F80C99751F43478D004D8FC5 /* JWTAlgorithmRSBase.h in Headers */,
+				F80C99691F43478D004D8FC5 /* JWTAlgorithmDataHolder.h in Headers */,
+				F80C996F1F43478D004D8FC5 /* JWTAlgorithmHS384.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -336,9 +539,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				54A0026D1C0E2880004C3CEC /* aeskey.c in Sources */,
+				F80C997B1F43478D004D8FC5 /* JWTClaimsSet.m in Sources */,
+				F80C99741F43478D004D8FC5 /* JWTAlgorithmHSBase.m in Sources */,
+				F80C996A1F43478D004D8FC5 /* JWTAlgorithmDataHolder.m in Sources */,
 				540D20121C7684FE00D6EF41 /* CodePushUpdateUtils.m in Sources */,
+				F80C99791F43478D004D8FC5 /* JWTClaim.m in Sources */,
 				54A0026E1C0E2880004C3CEC /* aestab.c in Sources */,
+				F80C99701F43478D004D8FC5 /* JWTAlgorithmHS384.m in Sources */,
 				54A002761C0E2880004C3CEC /* mztools.c in Sources */,
+				F80C99761F43478D004D8FC5 /* JWTAlgorithmRSBase.m in Sources */,
 				1BCC09A71CC19EB700DDC0DD /* RCTConvert+CodePushUpdateState.m in Sources */,
 				54A002781C0E2880004C3CEC /* zip.c in Sources */,
 				54A002791C0E2880004C3CEC /* SSZipArchive.m in Sources */,
@@ -348,16 +557,25 @@
 				54FFEDE01BF550630061DD23 /* CodePushDownloadHandler.m in Sources */,
 				54A002711C0E2880004C3CEC /* hmac.c in Sources */,
 				54A002721C0E2880004C3CEC /* prng.c in Sources */,
+				F80C997D1F43478D004D8FC5 /* JWTClaimsSetSerializer.m in Sources */,
 				5421FE311C58AD5A00986A55 /* CodePushTelemetryManager.m in Sources */,
+				F80C996C1F43478D004D8FC5 /* JWTAlgorithmDataHolderChain.m in Sources */,
 				54A002731C0E2880004C3CEC /* pwd2key.c in Sources */,
 				54A002751C0E2880004C3CEC /* ioapi.c in Sources */,
 				54A002771C0E2880004C3CEC /* unzip.c in Sources */,
 				54A0026F1C0E2880004C3CEC /* entropy.c in Sources */,
 				13BE3DEE1AC21097009241FE /* CodePush.m in Sources */,
 				54A0026C1C0E2880004C3CEC /* aescrypt.c in Sources */,
+				F80C99721F43478D004D8FC5 /* JWTAlgorithmHS512.m in Sources */,
 				1B762E901C9A5E9A006EF800 /* CodePushErrorUtils.m in Sources */,
 				54A002701C0E2880004C3CEC /* fileenc.c in Sources */,
+				F80C99811F43478E004D8FC5 /* JWTCoding.m in Sources */,
+				F80C99841F43478E004D8FC5 /* JWTBase64Coder.m in Sources */,
+				F80C997F1F43478D004D8FC5 /* JWTClaimsSetVerifier.m in Sources */,
+				F80C99661F43478D004D8FC5 /* JWTAlgorithmFactory.m in Sources */,
+				F80C99681F43478D004D8FC5 /* JWTAlgorithmNone.m in Sources */,
 				5498D8F61D21F14100B5EB43 /* CodePushUtils.m in Sources */,
+				F80C996E1F43478D004D8FC5 /* JWTAlgorithmHS256.m in Sources */,
 				810D4E6D1B96935000B397E9 /* CodePushPackage.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -572,6 +790,7 @@
 				6463C82B1EBA0CB60095B8CD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
