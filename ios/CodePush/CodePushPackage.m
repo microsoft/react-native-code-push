@@ -39,8 +39,22 @@ static NSString *const UnzippedFolderName = @"unzipped";
     }
 }
 
++ (void) handleFailedDataIntegrityCheck:(void (^)(NSError *err))failCallback
+                                   error:(NSError **)error
+{
+    CPLog(@"The update contents failed the data integrity check.");
+    if (!error || !*error) {
+        failCallback([CodePushErrorUtils errorWithMessage:@"The update contents failed the data integrity check."]);
+        return;
+    }
+    
+    failCallback(*error);
+    return;
+}
+
 + (void)downloadPackage:(NSDictionary *)updatePackage
  expectedBundleFileName:(NSString *)expectedBundleFileName
+              publicKey:(NSString *)publicKey
          operationQueue:(dispatch_queue_t)operationQueue
        progressCallback:(void (^)(long long, long long))progressCallback
            doneCallback:(void (^)())doneCallback
@@ -231,18 +245,38 @@ static NSString *const UnzippedFolderName = @"unzipped";
                                                             }
                                                         }
                                                         
-                                                        if (isDiffUpdate && ![CodePushUpdateUtils verifyHashForDiffUpdate:newUpdateFolderPath
-                                                                                                             expectedHash:newUpdateHash
-                                                                                                                    error:&error]) {
-                                                            if (error) {
-                                                                failCallback(error);
+                                                        if(isDiffUpdate){
+                                                            CPLog(@"Applying diff update.");
+                                                        }else{
+                                                            CPLog(@"Applying full update.");
+                                                        }
+                                                        
+                                                        BOOL isSignatureVerificationEnabled = (publicKey != nil);
+                                                        if (isSignatureVerificationEnabled) {
+                                                            BOOL isSignatureValid = [CodePushUpdateUtils verifySignatureFor:newUpdateFolderPath
+                                                                                      withPublicKey:publicKey
+                                                                                              error:&error];
+                                                            if(!isSignatureValid){
+                                                                [self handleFailedDataIntegrityCheck:failCallback error:&error];
                                                                 return;
+                                                            }else{
+                                                                CPLog(@"The update contents succueded the data integrity check.");
                                                             }
-                                                            
-                                                            error = [CodePushErrorUtils errorWithMessage:@"The update contents failed the data integrity check."];
-                                                            
-                                                            failCallback(error);
-                                                            return;
+                                                        }else{
+                                                            if (isDiffUpdate) {
+                                                                
+                                                                if(![CodePushUpdateUtils verifyFolderHash:newUpdateFolderPath
+                                                                                             expectedHash:newUpdateHash
+                                                                                                    error:&error]){
+                                                                    
+                                                                    [self handleFailedDataIntegrityCheck:failCallback error:&error];
+                                                                    return;
+                                                                }
+                                                                else{
+                                                                    CPLog(@"The update contents succueded the data integrity check.");
+                                                                }
+                                                                
+                                                            }
                                                         }
                                                     } else {
                                                         [[NSFileManager defaultManager] createDirectoryAtPath:newUpdateFolderPath

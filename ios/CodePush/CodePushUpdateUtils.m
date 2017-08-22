@@ -1,17 +1,50 @@
 #import "CodePush.h"
 #include <CommonCrypto/CommonDigest.h>
+#import "JWT.h"
 
 @implementation CodePushUpdateUtils
 
 NSString * const AssetsFolderName = @"assets";
 NSString * const BinaryHashKey = @"CodePushBinaryHash";
 NSString * const ManifestFolderPrefix = @"CodePush";
+NSString * const BundleJWTFile = @".codepushrelease";
+
+/*
+ Ignore list for hashing
+ */
+NSString * const IgnoreMacOSX= @"__MACOSX/";
+NSString * const IgnoreDSStore = @".DS_Store";
+NSString * const IgnoreCodePushMetadata = @".codepushrelease";
+
+/*
++    public static boolean isHashIgnored(String relativeFilePath) {
+    +        final String __MACOSX = "__MACOSX/";
+    +        final String DS_STORE = ".DS_Store";
+    +        final String CODEPUSH_METADATA = ".codepushrelease";
+    +
+    +        return relativeFilePath.startsWith(__MACOSX)
+    +                || relativeFilePath.equals(DS_STORE)
+    +                || relativeFilePath.endsWith("/" + DS_STORE)
+    +                || relativeFilePath.equals(CODEPUSH_METADATA)
+    +                || relativeFilePath.endsWith("/" + CODEPUSH_METADATA);
+    +    }
+*/
+
++ (BOOL)isHashIgnoredFor:(NSString *) relativePath
+{
+    return [relativePath hasPrefix:IgnoreMacOSX]
+    || [relativePath isEqualToString:IgnoreDSStore]
+    || [relativePath hasSuffix:[NSString stringWithFormat:@"/%@", IgnoreDSStore]]
+    || [relativePath isEqualToString:IgnoreCodePushMetadata]
+    || [relativePath hasSuffix:[NSString stringWithFormat:@"/%@", IgnoreCodePushMetadata]];
+}
 
 + (BOOL)addContentsOfFolderToManifest:(NSString *)folderPath
                            pathPrefix:(NSString *)pathPrefix
                              manifest:(NSMutableArray *)manifest
                                 error:(NSError **)error
 {
+    CPLog(@"Verifying hash for folder path: %@", folderPath);
     NSArray *folderFiles = [[NSFileManager defaultManager]
                             contentsOfDirectoryAtPath:folderPath
                             error:error];
@@ -20,13 +53,14 @@ NSString * const ManifestFolderPrefix = @"CodePush";
     }
     
     for (NSString *fileName in folderFiles) {
-        // We must skip the macOS generated files.
-        if ([fileName isEqualToString:@".DS_Store"] || [fileName isEqualToString:@"__MACOSX"]) {
-            continue;
-        }
 
         NSString *fullFilePath = [folderPath stringByAppendingPathComponent:fileName];
         NSString *relativePath = [pathPrefix stringByAppendingPathComponent:fileName];
+        
+        if([self isHashIgnoredFor:relativePath]){
+            continue;
+        }
+        
         BOOL isDir = NO;
         if ([[NSFileManager defaultManager] fileExistsAtPath:fullFilePath
                                                  isDirectory:&isDir] && isDir) {
@@ -43,6 +77,9 @@ NSString * const ManifestFolderPrefix = @"CodePush";
             [manifest addObject:[[relativePath stringByAppendingString:@":"] stringByAppendingString:fileContentsHash]];
         }
     }
+    
+    CPLog(@"Manifest string: %@", manifest);
+    
     return YES;
 }
 
@@ -59,6 +96,7 @@ NSString * const ManifestFolderPrefix = @"CodePush";
 + (NSString *)computeFinalHashFromManifest:(NSMutableArray *)manifest
                                      error:(NSError **)error
 {
+    //sort manifest strings to make sure, that they are completely equal with manifest strings has been generated in cli!
     NSArray *sortedManifest = [manifest sortedArrayUsingSelector:@selector(compare:)];
     NSData *manifestData = [NSJSONSerialization dataWithJSONObject:sortedManifest
                                                            options:kNilOptions
@@ -237,7 +275,7 @@ NSString * const ManifestFolderPrefix = @"CodePush";
     }
 }
 
-+ (BOOL)verifyHashForDiffUpdate:(NSString *)finalUpdateFolder
++ (BOOL)verifyFolderHash:(NSString *)finalUpdateFolder
                    expectedHash:(NSString *)expectedHash
                           error:(NSError **)error
 {
@@ -256,7 +294,88 @@ NSString * const ManifestFolderPrefix = @"CodePush";
         return NO;
     }
     
+    CPLog(@"Expected hash: %@, actual hash: %@", expectedHash, updateContentsManifestHash);
+    
     return [updateContentsManifestHash isEqualToString:expectedHash];
+}
+
++ (NSString *)cleanPublicKey:(NSString *)publicKeyString
+{
+    publicKeyString = [publicKeyString stringByReplacingOccurrencesOfString:@"-----BEGIN PUBLIC KEY-----\n"
+                                                                 withString:@""];
+    publicKeyString = [publicKeyString stringByReplacingOccurrencesOfString:@"-----END PUBLIC KEY-----"
+                                                                 withString:@""];
+    publicKeyString = [publicKeyString stringByReplacingOccurrencesOfString:@"\n"
+                                                                 withString:@""];
+
+    return publicKeyString;
+}
+
++ (NSString *)getSignatureFor:(NSString *)folderPath
+                        error:(NSError **)error
+{
+    NSString *signatureFilePath = [NSString stringWithFormat:@"%@/%@/%@", folderPath, ManifestFolderPrefix, BundleJWTFile];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:signatureFilePath]) {
+        return [NSString stringWithContentsOfFile:signatureFilePath encoding:NSUTF8StringEncoding error:error];
+    }else{
+        *error = [CodePushErrorUtils errorWithMessage:[NSString stringWithFormat: @"Cannot find signature at %@", signatureFilePath]];
+        return nil;
+    }
+    return nil;
+}
+
++ (NSDictionary *) verifyJWT:(NSString *) signature
+     withPublicKey:(NSString *)publicKey
+             error:(NSError **)error
+{
+    id <JWTAlgorithmDataHolderProtocol> verifyDataHolder = [JWTAlgorithmRSFamilyDataHolder new].keyExtractorType([JWTCryptoKeyExtractor publicKeyWithPEMBase64].type).algorithmName(@"RS256").secret(publicKey);
+    
+    JWTCodingBuilder *verifyBuilder = [JWTDecodingBuilder decodeMessage:signature].addHolder(verifyDataHolder);
+    JWTCodingResultType *verifyResult = verifyBuilder.result;
+    if (verifyResult.successResult) {
+        return verifyResult.successResult.payload;
+    }
+    else {
+        *error = verifyResult.errorResult.error;
+        return nil;
+    }
+}
+
++ (BOOL)verifySignatureFor:(NSString *)folderPath
+             withPublicKey:(NSString *)publicKeyString
+                     error:(NSError **)error
+{
+    NSLog(@"Verifying signature for folder path: %@", folderPath);
+    
+    NSString *publicKey = [self cleanPublicKey: publicKeyString];
+    
+    NSString *signature = [self getSignatureFor: folderPath
+                                          error: error];
+    if(signature == nil) {
+        if(error && *error){
+            CPLog(@"The update could not be verified because no signature was found. %@", *error);
+        }else{
+            CPLog(@"The update could not be verified because no signature was found.");
+        }
+        return false;
+    }
+    
+    NSDictionary *envelopedPayload = [self verifyJWT:signature withPublicKey:publicKey error:error];
+    if(envelopedPayload == nil){
+        CPLog(@"The update could not be verified because it was not signed by a trusted party. %@", *error);
+        return false;
+    }
+    
+    if(![envelopedPayload objectForKey:@"contentHash"]){
+        CPLog(@"The update could not be verified because the signature did not specify a content hash.");
+        return false;
+    }
+    
+    NSString *contentHash = envelopedPayload[@"contentHash"];
+    
+    return [self verifyFolderHash:folderPath
+                     expectedHash:contentHash
+                            error:error];
 }
 
 @end

@@ -91,6 +91,11 @@ static NSString * const PublicKeyKey = @"publicKey";
     return [_configDictionary objectForKey:ClientUniqueIDConfigKey];
 }
 
+- (NSString *)publicKey
+{
+    return [_configDictionary objectForKey:PublicKeyKey];
+}
+
 - (void)setAppVersion:(NSString *)appVersion
 {
     [_configDictionary setValue:appVersion forKey:AppVersionConfigKey];
