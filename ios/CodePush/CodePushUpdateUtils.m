@@ -16,20 +16,6 @@ NSString * const IgnoreMacOSX= @"__MACOSX/";
 NSString * const IgnoreDSStore = @".DS_Store";
 NSString * const IgnoreCodePushMetadata = @".codepushrelease";
 
-/*
-+    public static boolean isHashIgnored(String relativeFilePath) {
-    +        final String __MACOSX = "__MACOSX/";
-    +        final String DS_STORE = ".DS_Store";
-    +        final String CODEPUSH_METADATA = ".codepushrelease";
-    +
-    +        return relativeFilePath.startsWith(__MACOSX)
-    +                || relativeFilePath.equals(DS_STORE)
-    +                || relativeFilePath.endsWith("/" + DS_STORE)
-    +                || relativeFilePath.equals(CODEPUSH_METADATA)
-    +                || relativeFilePath.endsWith("/" + CODEPUSH_METADATA);
-    +    }
-*/
-
 + (BOOL)isHashIgnoredFor:(NSString *) relativePath
 {
     return [relativePath hasPrefix:IgnoreMacOSX]
