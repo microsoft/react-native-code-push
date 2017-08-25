@@ -43,7 +43,7 @@ static NSString *const UnzippedFolderName = @"unzipped";
                                    error:(NSError **)error
 {
     CPLog(@"The update contents failed the data integrity check.");
-    if (!error || !*error) {
+    if (!error) {
         failCallback([CodePushErrorUtils errorWithMessage:@"The update contents failed the data integrity check."]);
         return;
     }
@@ -244,10 +244,10 @@ static NSString *const UnzippedFolderName = @"unzipped";
                                                                 return;
                                                             }
                                                         }
-                                                        
-                                                        if(isDiffUpdate){
+
+                                                        if (isDiffUpdate) {
                                                             CPLog(@"Applying diff update.");
-                                                        }else{
+                                                        } else {
                                                             CPLog(@"Applying full update.");
                                                         }
                                                         
@@ -256,26 +256,23 @@ static NSString *const UnzippedFolderName = @"unzipped";
                                                             BOOL isSignatureValid = [CodePushUpdateUtils verifySignatureFor:newUpdateFolderPath
                                                                                       withPublicKey:publicKey
                                                                                               error:&error];
-                                                            if(!isSignatureValid){
+                                                            if (!isSignatureValid) {
                                                                 [self handleFailedDataIntegrityCheck:failCallback error:&error];
                                                                 return;
-                                                            }else{
+                                                            } else {
                                                                 CPLog(@"The update contents succueded the data integrity check.");
                                                             }
-                                                        }else{
+                                                        } else {
                                                             if (isDiffUpdate) {
-                                                                
-                                                                if(![CodePushUpdateUtils verifyFolderHash:newUpdateFolderPath
+                                                                if (![CodePushUpdateUtils verifyFolderHash:newUpdateFolderPath
                                                                                              expectedHash:newUpdateHash
-                                                                                                    error:&error]){
+                                                                                                    error:&error]) {
                                                                     
                                                                     [self handleFailedDataIntegrityCheck:failCallback error:&error];
                                                                     return;
-                                                                }
-                                                                else{
+                                                                } else {
                                                                     CPLog(@"The update contents succueded the data integrity check.");
-                                                                }
-                                                                
+                                                                }                                                                
                                                             }
                                                         }
                                                     } else {

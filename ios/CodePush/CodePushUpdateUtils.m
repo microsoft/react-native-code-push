@@ -285,7 +285,7 @@ NSString * const IgnoreCodePushMetadata = @".codepushrelease";
     return [updateContentsManifestHash isEqualToString:expectedHash];
 }
 
-+ (NSString *)cleanPublicKey:(NSString *)publicKeyString
++ (NSString *)preparePublicKeyForDecoding:(NSString *)publicKeyString
 {
     publicKeyString = [publicKeyString stringByReplacingOccurrencesOfString:@"-----BEGIN PUBLIC KEY-----\n"
                                                                  withString:@""];
@@ -303,14 +303,13 @@ NSString * const IgnoreCodePushMetadata = @".codepushrelease";
     NSString *signatureFilePath = [NSString stringWithFormat:@"%@/%@/%@", folderPath, ManifestFolderPrefix, BundleJWTFile];
     if ([[NSFileManager defaultManager] fileExistsAtPath:signatureFilePath]) {
         return [NSString stringWithContentsOfFile:signatureFilePath encoding:NSUTF8StringEncoding error:error];
-    }else{
+    } else {
         *error = [CodePushErrorUtils errorWithMessage:[NSString stringWithFormat: @"Cannot find signature at %@", signatureFilePath]];
         return nil;
     }
-    return nil;
 }
 
-+ (NSDictionary *) verifyJWT:(NSString *) signature
++ (NSDictionary *) verifyAndDecodeJWT:(NSString *) jwt
      withPublicKey:(NSString *)publicKey
              error:(NSError **)error
 {
@@ -333,22 +332,22 @@ NSString * const IgnoreCodePushMetadata = @".codepushrelease";
 {
     NSLog(@"Verifying signature for folder path: %@", folderPath);
     
-    NSString *publicKey = [self cleanPublicKey: publicKeyString];
+    NSString *publicKey = [self preparePublicKeyForDecoding: publicKeyString];
     
+    NSError *signatureVerificationError;
     NSString *signature = [self getSignatureFor: folderPath
-                                          error: error];
-    if(signature == nil) {
-        if(error && *error){
-            CPLog(@"The update could not be verified because no signature was found. %@", *error);
-        }else{
-            CPLog(@"The update could not be verified because no signature was found.");
-        }
+                                          error: &signatureVerificationError];
+    if(signatureVerificationError) {
+        CPLog(@"The update could not be verified because no signature was found. %@", signatureVerificationError);
+        *error = signatureVerificationError;
         return false;
     }
     
-    NSDictionary *envelopedPayload = [self verifyJWT:signature withPublicKey:publicKey error:error];
-    if(envelopedPayload == nil){
-        CPLog(@"The update could not be verified because it was not signed by a trusted party. %@", *error);
+    NSError *payloadDecodingError;
+    NSDictionary *envelopedPayload = [self verifyAndDecodeJWT:signature withPublicKey:publicKey error:&payloadDecodingError];
+    if(payloadDecodingError){
+        CPLog(@"The update could not be verified because it was not signed by a trusted party. %@", payloadDecodingError);
+        *error = payloadDecodingError;
         return false;
     }
     

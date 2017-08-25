@@ -184,9 +184,9 @@ failCallback:(void (^)(NSError *err))failCallback;
                    expectedHash:(NSString *)expectedHash
                           error:(NSError **)error;
 
-+ (NSString *)cleanPublicKey:(NSString *)publicKeyString;
++ (NSString *)preparePublicKeyForDecoding:(NSString *)publicKeyString;
 
-+ (NSDictionary *) verifyJWT:(NSString *) signature
++ (NSDictionary *) verifyAndDecodeJWT:(NSString *) jwt
                withPublicKey:(NSString *)publicKey
                        error:(NSError **)error;
 

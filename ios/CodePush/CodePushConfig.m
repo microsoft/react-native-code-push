@@ -35,7 +35,7 @@ static NSString * const PublicKeyKey = @"publicKey";
     NSString *buildVersion = [infoDictionary objectForKey:(NSString *)kCFBundleVersionKey];
     NSString *deploymentKey = [infoDictionary objectForKey:@"CodePushDeploymentKey"];
     NSString *serverURL = [infoDictionary objectForKey:@"CodePushServerURL"];
-    NSString *publicKey = [infoDictionary objectForKey:@"PublicKey"];
+    NSString *publicKey = [infoDictionary objectForKey:@"CodePushPublicKey"];
     
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     NSString *clientUniqueId = [userDefaults stringForKey:ClientUniqueIDConfigKey];
