@@ -172,7 +172,7 @@ public class CodePushUpdateUtils {
         }
     }
 
-    public static Map<String, Object> verifyJWT(String jwt, PublicKey publicKey) {
+    public static Map<String, Object> verifyAndDecodeJWT(String jwt, PublicKey publicKey) {
         try {
             final JWTVerifier verifier = new JWTVerifier(publicKey);
             final Map<String, Object> claims = verifier.verify(jwt);
@@ -229,7 +229,7 @@ public class CodePushUpdateUtils {
             throw new CodePushInvalidUpdateException("The update could not be verified because no signature was found.");
         }
 
-        final Map<String, Object> claims = verifyJWT(signature, publicKey);
+        final Map<String, Object> claims = verifyAndDecodeJWT(signature, publicKey);
         if (claims == null) {
             throw new CodePushInvalidUpdateException("The update could not be verified because it was not signed by a trusted party.");
         }
