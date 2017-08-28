@@ -27,6 +27,8 @@ import java.util.Map;
 
 public class CodePushUpdateUtils {
 
+    public static final String NEW_LINE = System.getProperty("line.separator");
+
     // Note: The hashing logic here must mirror the hashing logic in other native SDK's, as well as in the
     // CLI. Ensure that any changes here are propagated to these other locations.
     public static boolean isHashIgnored(String relativeFilePath) {
@@ -187,8 +189,9 @@ public class CodePushUpdateUtils {
         try {
             //remove unnecessary "begin/end public key" entries from string
             stringPublicKey = stringPublicKey
-                    .replace("-----BEGIN PUBLIC KEY-----\n", "")
-                    .replace("-----END PUBLIC KEY-----", "");
+                    .replace("-----BEGIN PUBLIC KEY-----", "")
+                    .replace("-----END PUBLIC KEY-----", "")
+                    .replace(NEW_LINE, "");
             byte[] byteKey = Base64.decode(stringPublicKey.getBytes(), Base64.DEFAULT);
             X509EncodedKeySpec X509Key = new X509EncodedKeySpec(byteKey);
             KeyFactory kf = KeyFactory.getInstance("RSA");
@@ -201,11 +204,15 @@ public class CodePushUpdateUtils {
         }
     }
 
-    public static String getSignature(String folderPath) {
-        final String signatureFilePath = CodePushUtils.appendPathComponent(
-                CodePushUtils.appendPathComponent(folderPath, CodePushConstants.CODE_PUSH_FOLDER_PREFIX),
+    public static String getSignatureFilePath(String updateFolderPath){
+        return CodePushUtils.appendPathComponent(
+                CodePushUtils.appendPathComponent(updateFolderPath, CodePushConstants.CODE_PUSH_FOLDER_PREFIX),
                 CodePushConstants.BUNDLE_JWT_FILE
         );
+    }
+
+    public static String getSignature(String folderPath) {
+        final String signatureFilePath = getSignatureFilePath(folderPath);
 
         try {
             return FileUtils.readFileToString(signatureFilePath);

@@ -8,7 +8,7 @@ public class CodePushBuilder {
 
     private boolean mIsDebugMode;
     private String mServerUrl;
-    private int mPublicKeyResourceDescriptor;
+    private Integer mPublicKeyResourceDescriptor;
 
     public CodePushBuilder(String deploymentKey, Context context) {
         this.mDeploymentKey = deploymentKey;

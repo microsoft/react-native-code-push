@@ -251,11 +251,33 @@ public class CodePushUpdateManager {
                 }
 
                 boolean isSignatureVerificationEnabled = (stringPublicKey != null);
+
+                String signaturePath = CodePushUpdateUtils.getSignatureFilePath(newUpdateFolderPath);
+                boolean isSignatureAppearedInBundle = FileUtils.fileAtPathExists(signaturePath);
+
                 if (isSignatureVerificationEnabled) {
-                    CodePushUpdateUtils.verifySignature(newUpdateFolderPath, stringPublicKey);
+                    if (isSignatureAppearedInBundle) {
+                        CodePushUpdateUtils.verifySignature(newUpdateFolderPath, stringPublicKey);
+                    } else {
+                        throw new CodePushInvalidUpdateException(
+                                "Error! Public key has been set up for application, but bundle lacks of signature to verify. " +
+                                "Reasons, why that might happen: \n" +
+                                "1. You've been released CodePush bundle update using version of CodePush CLI that is not support code signing.\n" +
+                                "2. You've been released CodePush bundle update without providing --privateKeyPath option."
+                        );
+                    }
                 } else {
-                    if (isDiffUpdate) {
+                    if (isSignatureAppearedInBundle) {
+                        CodePushUtils.log(
+                                "Warning! Signature appeared in bundle, but it's " +
+                                "verification can not be performed because no public key " +
+                                "has been set up. Please, configure public key resource descriptor value for your application."
+                        );
                         CodePushUpdateUtils.verifyFolderHash(newUpdateFolderPath, newUpdateHash);
+                    } else {
+                        if (isDiffUpdate) {
+                            CodePushUpdateUtils.verifyFolderHash(newUpdateFolderPath, newUpdateHash);
+                        }
                     }
                 }
 
