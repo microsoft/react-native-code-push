@@ -304,7 +304,7 @@ public class CodePush implements ReactPackage {
         return nativeModules;
     }
 
-    @Override
+    // Deprecated in RN v0.47.
     public List<Class<? extends JavaScriptModule>> createJSModules() {
         return new ArrayList<>();
     }
