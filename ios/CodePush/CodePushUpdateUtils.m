@@ -285,7 +285,8 @@ NSString * const IgnoreCodePushMetadata = @".codepushrelease";
     return [updateContentsManifestHash isEqualToString:expectedHash];
 }
 
-+ (NSString *)preparePublicKeyForDecoding:(NSString *)publicKeyString
+// remove BEGIN / END tags and line breaks from public key string
++ (NSString *)getKeyValueFromPublicKeyString:(NSString *)publicKeyString
 {
     publicKeyString = [publicKeyString stringByReplacingOccurrencesOfString:@"-----BEGIN PUBLIC KEY-----\n"
                                                                  withString:@""];
@@ -297,10 +298,15 @@ NSString * const IgnoreCodePushMetadata = @".codepushrelease";
     return publicKeyString;
 }
 
++ (NSString *)getSignatureFilePath:(NSString *)updateFolderPath
+{
+    return [NSString stringWithFormat:@"%@/%@/%@", updateFolderPath, ManifestFolderPrefix, BundleJWTFile];
+}
+
 + (NSString *)getSignatureFor:(NSString *)folderPath
                         error:(NSError **)error
 {
-    NSString *signatureFilePath = [NSString stringWithFormat:@"%@/%@/%@", folderPath, ManifestFolderPrefix, BundleJWTFile];
+    NSString *signatureFilePath = [self getSignatureFilePath:folderPath];
     if ([[NSFileManager defaultManager] fileExistsAtPath:signatureFilePath]) {
         return [NSString stringWithContentsOfFile:signatureFilePath encoding:NSUTF8StringEncoding error:error];
     } else {
@@ -309,13 +315,13 @@ NSString * const IgnoreCodePushMetadata = @".codepushrelease";
     }
 }
 
-+ (NSDictionary *) verifyAndDecodeJWT:(NSString *) jwt
++ (NSDictionary *) verifyAndDecodeJWT:(NSString *)jwt
      withPublicKey:(NSString *)publicKey
              error:(NSError **)error
 {
     id <JWTAlgorithmDataHolderProtocol> verifyDataHolder = [JWTAlgorithmRSFamilyDataHolder new].keyExtractorType([JWTCryptoKeyExtractor publicKeyWithPEMBase64].type).algorithmName(@"RS256").secret(publicKey);
     
-    JWTCodingBuilder *verifyBuilder = [JWTDecodingBuilder decodeMessage:signature].addHolder(verifyDataHolder);
+    JWTCodingBuilder *verifyBuilder = [JWTDecodingBuilder decodeMessage:jwt].addHolder(verifyDataHolder);
     JWTCodingResultType *verifyResult = verifyBuilder.result;
     if (verifyResult.successResult) {
         return verifyResult.successResult.payload;
@@ -332,12 +338,12 @@ NSString * const IgnoreCodePushMetadata = @".codepushrelease";
 {
     NSLog(@"Verifying signature for folder path: %@", folderPath);
     
-    NSString *publicKey = [self preparePublicKeyForDecoding: publicKeyString];
+    NSString *publicKey = [self getKeyValueFromPublicKeyString: publicKeyString];
     
     NSError *signatureVerificationError;
     NSString *signature = [self getSignatureFor: folderPath
                                           error: &signatureVerificationError];
-    if(signatureVerificationError) {
+    if (signatureVerificationError) {
         CPLog(@"The update could not be verified because no signature was found. %@", signatureVerificationError);
         *error = signatureVerificationError;
         return false;
