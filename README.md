@@ -63,8 +63,8 @@ We try our best to maintain backwards compatability of our plugin with previous 
 | v0.43-v0.44             | v2.0+ *(RN refactored uimanager dependencies)*       |
 | v0.45                   | v3.0+ *(RN refactored instance manager code)*        |
 | v0.46                   | v4.0+ *(RN refactored js bundle loader code)*        |
-| v0.47                   | v5.0+ *(RN removed unused registration of JS modules)*|
-| v0.48+                  | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
+| v0.47-v0.48             | v5.0+ *(RN removed unused registration of JS modules)*|
+| v0.49+                  | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
 
 ### Supported Components
 
