@@ -16,12 +16,11 @@ Constructs the CodePush client runtime and represents the `ReactPackage` instanc
 
     2. The local cache that the React Native runtime maintains in debug mode is deleted whenever a CodePush update is installed. This ensures that when the app is restarted after an update is applied, you will see the expected changes. As soon as [this PR](https://github.com/facebook/react-native/pull/4738) is merged, we won't need to do this anymore.
 
-- __CodePush(String deploymentKey, Context context, boolean isDebugMode, @NonNull String serverUrl, Integer publicKeyResourceDescriptor)__ - Equivalent to the previous constructor, but allows you to specify CodePush server url which SDK will be interacting and Public Key resource descriptor needed to read Public Key content (please refer to [Code Signing](setup-android.md#code-signing) section for more details about Code Signing Feature).
+- __CodePush(String deploymentKey, Context context, boolean isDebugMode, Integer publicKeyResourceDescriptor)__ - Equivalent to the previous constructor, but allows you to specify public key resource descriptor needed to read public key content (please refer to [Code Signing](setup-android.md#code-signing) section for more details about Code Signing Feature).
 
 ##### Builder
 
-As an alternative to constructors you can use `CodePushBuilder` and setup CodePush instance in fluent style configuring only parameters you want to.
-In practice, you create CodePushBuilder instance via its constructor `CodePushBuilder(String deploymentKey, Context context)`, then you call specific setters on this object and finally call `build()` method to instantiate CodePush instance. Here example of `CodePushBuilder` usage:
+As an alternative to constructors *you can also use `CodePushBuilder`* and setup CodePush instance configuring *only parameters you want*. Example of `CodePushBuilder` usage:
 
 ```java
     @Override
@@ -38,7 +37,7 @@ In practice, you create CodePushBuilder instance via its constructor `CodePushBu
 
 `CodePushBuilder` methods:
 
-* __public CodePushBuilder(String deploymentKey, Context context)__ - setup same parameters as __CodePush(String deploymentKey, Activity mainActivity)__
+* __public CodePushBuilder(String deploymentKey, Context context)__ - setup same parameters as via __CodePush(String deploymentKey, Activity mainActivity)__
 
 * __public CodePushBuilder setIsDebugMode(boolean isDebugMode)__ - allows you to specify whether you want the CodePush runtime to be in debug mode or not. Default value: `false`.
 
