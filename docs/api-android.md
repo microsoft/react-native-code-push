@@ -16,6 +16,38 @@ Constructs the CodePush client runtime and represents the `ReactPackage` instanc
 
     2. The local cache that the React Native runtime maintains in debug mode is deleted whenever a CodePush update is installed. This ensures that when the app is restarted after an update is applied, you will see the expected changes. As soon as [this PR](https://github.com/facebook/react-native/pull/4738) is merged, we won't need to do this anymore.
 
+- __CodePush(String deploymentKey, Context context, boolean isDebugMode, @NonNull String serverUrl, Integer publicKeyResourceDescriptor)__ - Equivalent to the previous constructor, but allows you to specify CodePush server url which SDK will be interacting and Public Key resource descriptor needed to read Public Key content (please refer to [Code Signing](setup-android.md#code-signing) section for more details about Code Signing Feature).
+
+##### Builder
+
+As an alternative to constructors you can use `CodePushBuilder` and setup CodePush instance in fluent style configuring only parameters you want to.
+In practice, you create CodePushBuilder instance via its constructor `CodePushBuilder(String deploymentKey, Context context)`, then you call specific setters on this object and finally call `build()` method to instantiate CodePush instance. Here example of `CodePushBuilder` usage:
+
+```java
+    @Override
+    protected List<ReactPackage> getPackages() {
+      return Arrays.<ReactPackage>asList(
+            new MainReactPackage(),
+            new CodePushBuilder("deployment-key-here",getApplicationContext())
+                .setIsDebugMode(BuildConfig.DEBUG)
+                .setPublicKeyResourceDescriptor(R.string.publicKey)
+                .build() //return configured CodePush instance
+      );
+    }
+```
+
+`CodePushBuilder` methods:
+
+* __public CodePushBuilder(String deploymentKey, Context context)__ - setup same parameters as __CodePush(String deploymentKey, Activity mainActivity)__
+
+* __public CodePushBuilder setIsDebugMode(boolean isDebugMode)__ - allows you to specify whether you want the CodePush runtime to be in debug mode or not. Default value: `false`.
+
+* __public CodePushBuilder setServerUrl(String serverUrl)__ - allows you to specify CodePush Server Url which SDK will be interacting. Default value: `"https://codepush.azurewebsites.net/"`.
+
+* __public CodePushBuilder setPublicKeyResourceDescriptor(int publicKeyResourceDescriptor)__ - allows you to specify Public Key resource descriptor which will be used for reading Public Key content for `strings.xml` file. Please refer to [Code Signing](#code-signing) section for more detailed information about purpose of this parameter.
+
+* __public CodePush build()__ - return configured `CodePush` instance.
+
 ##### Static Methods
 
 - __getBundleUrl()__ - Returns the path to the most recent version of your app's JS bundle file, assuming that the resource name is `index.android.bundle`. If your app is using a different bundle name, then use the overloaded version of this method which allows specifying it. This method has the same resolution behavior as the Objective-C equivalent described above.
