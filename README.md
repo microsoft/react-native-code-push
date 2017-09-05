@@ -33,11 +33,11 @@ This plugin provides client-side integration for the [CodePush service](http://c
 
 ## How does it work?
 
-A React Native app is composed of JavaScript files and any accompanying [images](https://facebook.github.io/react-native/docs/images.html#content), which are bundled together by the [packager](https://github.com/facebook/react-native/tree/master/packager) and distributed as part of a platform-specific binary (i.e. an `.ipa` or `.apk` file). Once the app is released, updating either the JavaScript code (e.g. making bug fixes, adding new features) or image assets, requires you to recompile and redistribute the entire binary, which of course, includes any review time associated with the store(s) you are publishing to.
+A React Native app is composed of JavaScript files and any accompanying [images](https://facebook.github.io/react-native/docs/images.html#content), which are bundled together by the packager and distributed as part of a platform-specific binary (i.e. an `.ipa` or `.apk` file). Once the app is released, updating either the JavaScript code (e.g. making bug fixes, adding new features) or image assets, requires you to recompile and redistribute the entire binary, which of course, includes any review time associated with the store(s) you are publishing to.
 
-The CodePush plugin helps get product improvements in front of your end users instantly, by keeping your JavaScript and images synchronized with updates you release to the CodePush server. This way, your app gets the benefits of an offline mobile experience, as well as the "web-like" agility of side-loading updates as soon as they are available. It's a win-win!
+The CodePush plugin helps product improvements in front of your end users instantly, by keeping your JavaScript and images synchronized with updating you release to the CodePush server. This way, your app gets benefits of an offline mobile experience, as well as the "web-like" agility of side-loading updates as soon as they are available. It's a win-win!
 
-In order to ensure that your end users always have a functioning version of your app, the CodePush plugin maintains a copy of the previous update, so that in the event that you accidentally push an update which includes a crash, it can automatically roll back. This way, you can rest assured that your newfound release agility won't result in users becoming blocked before you have a chance to [roll back](http://microsoft.github.io/code-push/docs/cli.html#link-10) on the server. It's a win-win-win!
+In order to ensure that your end users always have a functioning version of your app, the CodePush plugin maintains a copy of the previous update, so that in the event that you accidentally push an update which includes a crash, it can automatically roll back. This way, you can rest assured that your newfound release agility won't result in users becoming blocked before you have a chance to roll back on the server. It's a win-win-win!
 
 *Note: Any product changes which touch native code (e.g. modifying your `AppDelegate.m`/`MainActivity.java` file, adding a new plugin) cannot be distributed via CodePush, and therefore, must be updated via the appropriate store(s).*
 
@@ -47,7 +47,7 @@ In order to ensure that your end users always have a functioning version of your
 - Android (4.1+)
 - Windows (UWP)
 
-We try our best to maintain backwards compatability of our plugin with previous versions of React Native, but due to the nature of the platform, and the existence of breaking changes between releases, it is possible that you need to use a specific version of the CodePush plugin in order to support the exact version of React Native you are using. The following table outlines which CodePush plugin versions officially support the respective React Native versions:
+We maintain backwards compatability of our plugin with previous versions of React Native. Due to the nature of the platform, and the existence of breaking changes between releases, it is possible that you need to use a specific version of the CodePush plugin in order to support the exact version of React Native you are using. The following table outlines which CodePush plugin versions officially support the respective React Native versions:
 
 | React Native version(s) | Supporting CodePush version(s)                       |
 |-------------------------|------------------------------------------------------|
@@ -91,13 +91,14 @@ As new core components are released, which support referencing assets, we'll upd
 
 ## Getting Started
 
-Once you've followed the general-purpose ["getting started"](http://codepush.tools/docs/getting-started.html) instructions for setting up your CodePush account, you can start CodePush-ifying your React Native app by running the following command from within your app's root directory:
+Once you've followed the general-purpose [getting started](http://codepush.tools/docs/getting-started.html) instructions for setting up your CodePush account, you can start CodePush-ifying your React Native app by running the following command from within your app's root directory:
 
 ```shell
 npm install --save react-native-code-push
 ```
 
-As with all other React Native plugins, the integration experience is different for iOS and Android, so perform the following setup steps depending on which platform(s) you are targeting. Note, if you are targeting both platforms it is recommended to create separate CodePush applications for each platform.
+As with all other React Native plugins, the integration experience is different for iOS and Android. Performing the following setup steps depends on which platform(s) you are targeting. 
+*Note, if you are targeting both platforms it is recommended to create separate CodePush applications for each platform.*
 
 If you want to see how other projects have integrated with CodePush, you can check out the excellent [example apps](#example-apps--starters) provided by the community. Additionally, if you'd like to quickly familiarize yourself with CodePush + React Native, you can check out the awesome getting started videos produced by [Bilal Budhani](https://www.youtube.com/watch?v=uN0FRWk-YW8&feature=youtu.be) and/or [Deepak Sisodiya ](https://www.youtube.com/watch?v=f6I9y7V-Ibk).
 
@@ -111,11 +112,12 @@ Then continue with installing the native module
 
 ## Plugin Usage
 
-With the CodePush plugin downloaded and linked, and your app asking CodePush where to get the right JS bundle from, the only thing left is to add the necessary code to your app to control the following policies:
+After link the CodePush plugin, specify your app where CodePush can get the right JS bundle, you need to add necessary code in your app to tackle the below two issues: 
 
 1. When (and how often) to check for an update? (e.g. app start, in response to clicking a button in a settings page, periodically at some fixed interval)
-
 2. When an update is available, how to present it to the end user?
+
+### When to check update
 
 The simplest way to do this is to "CodePush-ify" your app's root component. To do so, you can choose one of the following two options:
 
@@ -142,7 +144,9 @@ The simplest way to do this is to "CodePush-ify" your app's root component. To d
     }
     ```
 
-By default, CodePush will check for updates on every app start. If an update is available, it will be silently downloaded, and installed the next time the app is restarted (either explicitly by the end user or by the OS), which ensures the least invasive experience for your end users. If an available update is mandatory, then it will be installed immediately, ensuring that the end user gets it as soon as possible.
+### How to present an update
+
+By default, CodePush will check for updates on every app start. If an update is available, it will be silently downloaded. When the app is restarted (either explicitly by the end user or by the OS), the update will be installed. If an available update is mandatory, it will be installed immediately, ensuring that the end user gets it as soon as possible.
 
 If you would like your app to discover updates more quickly, you can also choose to sync up with the CodePush server every time the app resumes from the background.
 
@@ -181,8 +185,6 @@ MyApp = codePush(codePushOptions)(MyApp);
 ```
 
 If you would like to display an update confirmation dialog (an "active install"), configure when an available update is installed (e.g. force an immediate restart) or customize the update experience in any other way, refer to the [`codePush()`](docs/api-js.md#codepush) API reference for information on how to tweak this default behavior.
-
-*NOTE: If you are using [Redux](http://redux.js.org) and [Redux Saga](http://yelouafi.github.io/redux-saga/), you can alternatively use the [react-native-code-push-saga](http://github.com/lostintangent/react-native-code-push-saga) module, which allows you to customize when `sync` is called in a perhaps simpler/more idiomatic way.*
 
 ### Store Guideline Compliance
 
@@ -232,9 +234,9 @@ code-push release-react MyApp-Android android --targetBinaryVersion "~1.1.0"
 
 ```
 
-The CodePush client supports differential updates, so even though you are releasing your JS bundle and assets on every update, your end users will only actually download the files they need. The service handles this automatically so that you can focus on creating awesome apps and we can worry about optimizing end user downloads.
+The CodePush client supports differential updates, so even though you are releasing your JS bundle and assets on every update, you will only actually download the files you need. The service handles this optimizing downloads so that you can focus on creating awesome apps.
 
-For more details about how the `release-react` command works, as well as the various parameters it exposes, refer to the [CLI docs](https://github.com/Microsoft/code-push/tree/master/cli#releasing-updates-react-native). Additionally, if you would prefer to handle running the `react-native bundle` command yourself, and therefore, want an even more flexible solution than `release-react`, refer to the [`release` command](https://github.com/Microsoft/code-push/tree/master/cli#releasing-updates-general) for more details.
+For more details about how the `release-react` command works, as well as the various parameters it exposes, you can refer to the [CLI docs](https://github.com/Microsoft/code-push/tree/master/cli#releasing-updates-react-native). Additionally, if you would prefer to handle running the `react-native bundle` command yourself, and therefore, want an even more flexible solution than `release-react`, refer to the [`release` command](https://github.com/Microsoft/code-push/tree/master/cli#releasing-updates-general) for more details.
 
 If you run into any issues, or have any questions/comments/feedback, you can ping us within the [#code-push](https://discord.gg/0ZcbPKXt5bWxFdFu) channel on Reactiflux, [e-mail us](mailto:codepushfeed@microsoft.com) and/or check out the [troubleshooting](#debugging--troubleshooting) details below.
 
@@ -411,7 +413,7 @@ Additionally, if you want to give them seperate names and/or icons, you can modi
 
 The above section illustrated how you can leverage multiple CodePush deployments in order to effectively test your updates before broadly releasing them to your end users. However, since that workflow statically embeds the deployment assignment into the actual binary, a staging or production build will only ever sync updates from that deployment. In many cases, this is sufficient, since you only want your team, customers, stakeholders, etc. to sync with your pre-production releases, and therefore, only they need a build that knows how to sync with staging. However, if you want to be able to perform A/B tests, or provide early access of your app to certain users, it can prove very useful to be able to dynamically place specific users (or audiences) into specific deployments at runtime.
 
-In order to achieve this kind of workflow, all you need to do is specify the deployment key you want the current user to syncronize with when calling the `codePush` method. When specified, this key will override the "default" one that was provided in your app's `Info.plist` (iOS) or `MainActivity.java` (Android) files. This allows you to produce a build for staging or production, that is also capable of being dynamically "redirected" as needed.
+In order to achieve this kind of workflow, all you need to do is specify the deployment key you want the current user to synchronize with when calling the `codePush` method. When specified, this key will override the "default" one that was provided in your app's `Info.plist` (iOS) or `MainActivity.java` (Android) files. This allows you to produce a build for staging or production, that is also capable of being dynamically "redirected" as needed.
 
 ```javascript
 // Imagine that "userProfile" is a prop that this component received
