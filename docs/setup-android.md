@@ -216,7 +216,6 @@ new CodePush(
     "deployment-key",
     getApplicationContext(),
     BuildConfig.DEBUG,
-    "https://codepush.azurewebsites.net/"
     R.string.CodePushPublicKey)
 ```
 
@@ -227,7 +226,6 @@ new CodePush(
  ```java
 new CodePushBuilder("deployment-key-here",getApplicationContext())
     .setIsDebugMode(BuildConfig.DEBUG)
-    .setServerUrl("https://codepush.azurewebsites.net/") //you can omit this
     .setPublicKeyResourceDescriptor(R.string.CodePushPublicKey)
     .build()
 ```
