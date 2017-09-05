@@ -86,8 +86,8 @@ public class CodePush implements ReactPackage {
         mServerUrl = serverUrl;
     }
 
-    public CodePush(String deploymentKey, Context context, boolean isDebugMode, @NonNull String serverUrl, Integer publicKeyResourceDescriptor) {
-        this(deploymentKey, context, isDebugMode, serverUrl);
+    public CodePush(String deploymentKey, Context context, boolean isDebugMode, Integer publicKeyResourceDescriptor) {
+        this(deploymentKey, context, isDebugMode);
 
         if (publicKeyResourceDescriptor != null) {
             try {
@@ -104,6 +104,11 @@ public class CodePush implements ReactPackage {
                 throw new CodePushInvalidPublicKeyException("Specified public key is empty");
             }
         }
+    }
+
+    public CodePush(String deploymentKey, Context context, boolean isDebugMode, @NonNull String serverUrl, Integer publicKeyResourceDescriptor) {
+        this(deploymentKey, context, isDebugMode, publicKeyResourceDescriptor);
+        mServerUrl = serverUrl;
     }
 
     public void clearDebugCacheIfNeeded() {
