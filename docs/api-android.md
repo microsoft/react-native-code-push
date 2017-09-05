@@ -10,13 +10,13 @@ Constructs the CodePush client runtime and represents the `ReactPackage` instanc
 
 - __CodePush(String deploymentKey, Activity mainActivity)__ - Creates a new instance of the CodePush runtime, that will be used to query the service for updates via the provided deployment key. The `mainActivity` parameter should always be set to `this` when configuring your React packages list inside the `MainActivity` class. This constructor puts the CodePush runtime into "release mode", so if you want to enable debugging behavior, use the following constructor instead.
 
-- __CodePush(String deploymentKey, Activity mainActivity, bool isDebugMode)__ - Equivalent to the previous constructor, but allows you to specify whether you want the CodePush runtime to be in debug mode or not. When using this constructor, the `isDebugMode` parameter should always be set to `BuildConfig.DEBUG` in order to stay synchronized with your build type. When putting CodePush into debug mode, the following behaviors are enabled:
+- __CodePush(String deploymentKey, Activity mainActivity, bool isDebugMode)__ - Equivalent to the previous constructor but allows you to specify whether you want the CodePush runtime to be in debug mode or not. When using this constructor, the `isDebugMode` parameter should always be set to `BuildConfig.DEBUG` in order to stay synchronized with your build type. When putting CodePush into debug mode, the following behaviors are enabled:
 
     1. Old CodePush updates aren't deleted from storage whenever a new binary is deployed to the emulator/device. This behavior enables you to deploy new binaries, without bumping the version during development, and without continuously getting the same update every time your app calls `sync`.
 
     2. The local cache that the React Native runtime maintains in debug mode is deleted whenever a CodePush update is installed. This ensures that when the app is restarted after an update is applied, you will see the expected changes. As soon as [this PR](https://github.com/facebook/react-native/pull/4738) is merged, we won't need to do this anymore.
 
-- __CodePush(String deploymentKey, Context context, boolean isDebugMode, Integer publicKeyResourceDescriptor)__ - Equivalent to the previous constructor, but allows you to specify public key resource descriptor needed to read public key content (please refer to [Code Signing](setup-android.md#code-signing) section for more details about Code Signing Feature).
+- __CodePush(String deploymentKey, Context context, boolean isDebugMode, Integer publicKeyResourceDescriptor)__ - Equivalent to the previous constructor but allows you to specify public key resource descriptor needed to read public key content (please refer to [Code Signing](setup-android.md#code-signing) section for more details about Code Signing Feature).
 
 ##### Builder
 
@@ -41,7 +41,7 @@ As an alternative to constructors *you can also use `CodePushBuilder`* and setup
 
 * __public CodePushBuilder setIsDebugMode(boolean isDebugMode)__ - allows you to specify whether you want the CodePush runtime to be in debug mode or not. Default value: `false`.
 
-* __public CodePushBuilder setServerUrl(String serverUrl)__ - allows you to specify CodePush Server Url which SDK will be interacting. Default value: `"https://codepush.azurewebsites.net/"`.
+* __public CodePushBuilder setServerUrl(String serverUrl)__ - allows you to specify CodePush Server Url. Default value: `"https://codepush.azurewebsites.net/"`.
 
 * __public CodePushBuilder setPublicKeyResourceDescriptor(int publicKeyResourceDescriptor)__ - allows you to specify Public Key resource descriptor which will be used for reading Public Key content for `strings.xml` file. Please refer to [Code Signing](#code-signing) section for more detailed information about purpose of this parameter.
 

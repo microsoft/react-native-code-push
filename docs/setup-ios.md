@@ -162,5 +162,20 @@ Before doing anything, please [read the docs][ats] first.
 
 Since version TODO you can self sign bundles during release and verify its signature before installation of update. For more info about Code Signing please refer to [relevant code-push documentation section](https://github.com/Microsoft/code-push/tree/master/cli#code-signing).
 
-In order to configure Public Key for bundle verification you need to create row in `Info.plist` with name `CodePushPublicKey` and string value of public key content.
+In order to configure Public Key for bundle verification you need to add record in `Info.plist` with name `CodePushPublicKey` and string value of public key content. Example:
+
+```xml
+<plist version="1.0">
+  <dict>
+    <!-- ...other configs... -->
+
+    <key>CodePushPublicKey</key>
+        <string>-----BEGIN PUBLIC KEY-----
+MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBANkWYydPuyOumR/sn2agNBVDnzyRpM16NAUpYPGxNgjSEp0etkDNgzzdzyvyl+OsAGBYF3jCxYOXozum+uV5hQECAwEAAQ==
+-----END PUBLIC KEY-----</string>
+
+    <!-- ...other configs... -->
+  </dict>
+</plist>
+```
 

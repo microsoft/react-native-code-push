@@ -188,7 +188,7 @@ In order to effectively make use of the `Staging` and `Production` deployments t
 
 #### Code Signing
 
- Since version TODO you can self sign bundles during release and verify its signature before installation of update. For more info about Code Signing please refer to [relevant code-push documentation section](https://github.com/Microsoft/code-push/tree/master/cli#code-signing). In order to use Public Key for Code Signing you need to do following steps:
+ Starting with version TODO you can self sign bundles during release and verify its signature before installation of update. For more info about Code Signing please refer to [relevant code-push documentation section](https://github.com/Microsoft/code-push/tree/master/cli#code-signing). In order to use Public Key for Code Signing you need to do following steps:
 
  1. Add `CodePushPublicKey` string item to `/path_to_your_app/android/app/src/main/res/values/strings.xml`. It may looks like this:
 
