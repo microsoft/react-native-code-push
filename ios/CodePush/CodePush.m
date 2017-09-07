@@ -338,7 +338,7 @@ static NSString *bundleResourceSubdirectory = nil;
             "1. Update your AppDelegate.m file to load the JS bundle from the packager instead of from CodePush. "
             "You can still test your CodePush update experience using this workflow (Debug builds only).\n\n"
 
-            "2. Force the JS bundle to be generated in simulator builds by enabling the FORCE_BUNDLING flag under "
+            "2. Force the JS bundle to be generated in simulator builds by adding 'export FORCE_BUNDLING=true' to the script under "
             "\"Build Phases\" > \"Bundle React Native code and images\" (React Native >=0.48 only).\n\n"
 
             "3. Force the JS bundle to be generated in simulator builds by removing the if block that echoes "
