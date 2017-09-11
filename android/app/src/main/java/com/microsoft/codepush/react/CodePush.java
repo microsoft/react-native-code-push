@@ -86,29 +86,38 @@ public class CodePush implements ReactPackage {
         mServerUrl = serverUrl;
     }
 
-    public CodePush(String deploymentKey, Context context, boolean isDebugMode, Integer publicKeyResourceDescriptor) {
+    public CodePush(String deploymentKey, Context context, boolean isDebugMode, int publicKeyResourceDescriptor) {
         this(deploymentKey, context, isDebugMode);
 
-        if (publicKeyResourceDescriptor != null) {
-            try {
-                mPublicKey = mContext.getString(publicKeyResourceDescriptor);
-            } catch (Resources.NotFoundException e) {
-                throw new CodePushInvalidPublicKeyException(
-                        "Unable to get public key, related resource descriptor " +
-                                publicKeyResourceDescriptor +
-                                " can not be found", e
-                );
-            }
-
-            if (mPublicKey.isEmpty()) {
-                throw new CodePushInvalidPublicKeyException("Specified public key is empty");
-            }
-        }
+        mPublicKey = getPublicKeyByResourceDescriptor(publicKeyResourceDescriptor);
     }
 
     public CodePush(String deploymentKey, Context context, boolean isDebugMode, @NonNull String serverUrl, Integer publicKeyResourceDescriptor) {
-        this(deploymentKey, context, isDebugMode, publicKeyResourceDescriptor);
+        this(deploymentKey, context, isDebugMode);
+
+        if (publicKeyResourceDescriptor != null) {
+            mPublicKey = getPublicKeyByResourceDescriptor(publicKeyResourceDescriptor);
+        }
+
         mServerUrl = serverUrl;
+    }
+
+    private String getPublicKeyByResourceDescriptor(int publicKeyResourceDescriptor){
+        String publicKey;
+        try {
+            publicKey = mContext.getString(publicKeyResourceDescriptor);
+        } catch (Resources.NotFoundException e) {
+            throw new CodePushInvalidPublicKeyException(
+                    "Unable to get public key, related resource descriptor " +
+                            publicKeyResourceDescriptor +
+                            " can not be found", e
+            );
+        }
+
+        if (publicKey.isEmpty()) {
+            throw new CodePushInvalidPublicKeyException("Specified public key is empty");
+        }
+        return publicKey;
     }
 
     public void clearDebugCacheIfNeeded() {
