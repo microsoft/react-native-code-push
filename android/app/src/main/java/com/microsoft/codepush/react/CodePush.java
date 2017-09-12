@@ -184,7 +184,7 @@ public class CodePush implements ReactPackage {
         JSONObject pendingUpdate = mSettingsManager.getPendingUpdate();
         if (pendingUpdate != null) {
             JSONObject packageMetadata = this.mUpdateManager.getCurrentPackage();
-            if (!isPackageBundleLatest(packageMetadata) && hasBinaryVersionChanged(packageMetadata)) {
+            if (packageMetadata == null || !isPackageBundleLatest(packageMetadata) && hasBinaryVersionChanged(packageMetadata)) {
                 CodePushUtils.log("Skipping initializeUpdateAfterRestart(), binary version is newer");
                 return;
             }
