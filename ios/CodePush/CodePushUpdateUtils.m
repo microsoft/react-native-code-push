@@ -30,7 +30,6 @@ NSString * const IgnoreCodePushMetadata = @".codepushrelease";
                              manifest:(NSMutableArray *)manifest
                                 error:(NSError **)error
 {
-    CPLog(@"Verifying hash for folder path: %@", folderPath);
     NSArray *folderFiles = [[NSFileManager defaultManager]
                             contentsOfDirectoryAtPath:folderPath
                             error:error];
@@ -63,9 +62,7 @@ NSString * const IgnoreCodePushMetadata = @".codepushrelease";
             [manifest addObject:[[relativePath stringByAppendingString:@":"] stringByAppendingString:fileContentsHash]];
         }
     }
-    
-    CPLog(@"Manifest string: %@", manifest);
-    
+ 
     return YES;
 }
 
@@ -223,6 +220,7 @@ NSString * const IgnoreCodePushMetadata = @".codepushrelease";
     // them to the generated content manifest.
     NSString *assetsPath = [CodePush bundleAssetsPath];
     if ([[NSFileManager defaultManager] fileExistsAtPath:assetsPath]) {
+        
         BOOL result = [self addContentsOfFolderToManifest:assetsPath
                                                pathPrefix:[NSString stringWithFormat:@"%@/%@", [self manifestFolderPrefix], @"assets"]
                                                  manifest:manifest
@@ -265,11 +263,16 @@ NSString * const IgnoreCodePushMetadata = @".codepushrelease";
                    expectedHash:(NSString *)expectedHash
                           error:(NSError **)error
 {
+    CPLog(@"Verifying hash for folder path: %@", finalUpdateFolder);
+    
     NSMutableArray *updateContentsManifest = [NSMutableArray array];
     BOOL result = [self addContentsOfFolderToManifest:finalUpdateFolder
                                            pathPrefix:@""
                                              manifest:updateContentsManifest
                                                 error:error];
+    
+    CPLog(@"Manifest string: %@", updateContentsManifest);
+    
     if (!result) {
         return NO;
     }

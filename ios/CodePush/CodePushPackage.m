@@ -245,19 +245,19 @@ static NSString *const UnzippedFolderName = @"unzipped";
                                                                                                                   withPublicKey:publicKey
                                                                                                                           error:&error];
                                                                 if (!isSignatureValid) {
-                                                                    CPLog(@"Code Signing integrity check error.");
+                                                                    CPLog(@"Code signing integrity check error.");
                                                                     if (!error) {
-                                                                        error = [CodePushErrorUtils errorWithMessage:@"Code Signing integrity check error."];
+                                                                        error = [CodePushErrorUtils errorWithMessage:@"Code signing integrity check error."];
                                                                     }
                                                                     failCallback(error);
                                                                     return;
                                                                 } else {
-                                                                    CPLog(@"The update contents succeeded the Code Signing integrity check.");
+                                                                    CPLog(@"The update contents succeeded the code signing integrity check.");
                                                                 }
                                                             } else {
                                                                 error = [CodePushErrorUtils errorWithMessage:
-                                                                         @"Error! Public key has been set up for application, but bundle lacks of signature to verify. " \
-                                                                         "Reasons, why that might happen: \n" \
+                                                                         @"Error! Public key was provided but there is no JWT signature within app bundle to verify " \
+                                                                         "Possible reasons, why that might happen: \n" \
                                                                          "1. You've been released CodePush bundle update using version of CodePush CLI that is not support code signing.\n" \
                                                                          "2. You've been released CodePush bundle update without providing --privateKeyPath option."];
                                                                 failCallback(error);
@@ -267,9 +267,9 @@ static NSString *const UnzippedFolderName = @"unzipped";
                                                         } else {
                                                             BOOL needToVerifyHash;
                                                             if (isSignatureAppearedInBundle) {
-                                                                CPLog(@"Warning! Signature appeared in bundle, but it's " \
-                                                                      "verification can not be performed because no public key " \
-                                                                      "has been set up. Please, configure public key resource descriptor value for your application.");
+                                                                CPLog(@"Warning! JWT signature exists in codepush update but code integrity check couldn't be performed" \
+                                                                      " because there is no public key configured. " \
+                                                                      "Please ensure that public key is properly configured within your application.");
                                                                 needToVerifyHash = true;
                                                             } else {
                                                                 needToVerifyHash = isDiffUpdate;
