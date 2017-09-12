@@ -20,7 +20,7 @@ Constructs the CodePush client runtime and represents the `ReactPackage` instanc
 
 ##### Builder
 
-As an alternative to constructors *you can also use `CodePushBuilder`* and setup CodePush instance configuring *only parameters you want*. Example of `CodePushBuilder` usage:
+As an alternative to constructors *you can also use `CodePushBuilder`* to setup a CodePush instance configured with *only parameters you want*.
 
 ```java
     @Override
