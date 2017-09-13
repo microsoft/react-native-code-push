@@ -266,6 +266,10 @@ namespace CodePush.ReactNative
         private async Task<IFolder> GetCurrentPackageFolderAsync()
         {
             var info = await GetCurrentPackageInfoAsync().ConfigureAwait(false);
+            if (info == null)
+            {
+                return null;
+            }
             var packageHash = (string)info[CodePushConstants.CurrentPackageKey];
             return packageHash == null ? null : await GetPackageFolderAsync(packageHash, false).ConfigureAwait(false);
         }
@@ -273,6 +277,16 @@ namespace CodePush.ReactNative
         private async Task<JObject> GetCurrentPackageInfoAsync()
         {
             var statusFile = await GetStatusFileAsync().ConfigureAwait(false);
+            var info = await CodePushUtils.GetJObjectFromFileAsync(statusFile).ConfigureAwait(false);
+
+            if (info != null)
+            {
+                return info;
+            }
+
+            // info file has been corrupted - re-create it
+            await statusFile.DeleteAsync().ConfigureAwait(false);
+            statusFile = await GetStatusFileAsync().ConfigureAwait(false);
             return await CodePushUtils.GetJObjectFromFileAsync(statusFile).ConfigureAwait(false);
         }
 

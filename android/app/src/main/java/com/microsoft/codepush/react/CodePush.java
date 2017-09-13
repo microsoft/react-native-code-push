@@ -150,7 +150,9 @@ public class CodePush implements ReactPackage {
         try {
             String packageName = this.mContext.getPackageName();
             int codePushApkBuildTimeId = this.mContext.getResources().getIdentifier(CodePushConstants.CODE_PUSH_APK_BUILD_TIME_KEY, "string", packageName);
-            String codePushApkBuildTime = this.mContext.getResources().getString(codePushApkBuildTimeId);
+            // replace double quotes needed for correct restoration of long value from strings.xml
+            // https://github.com/Microsoft/cordova-plugin-code-push/issues/264
+            String codePushApkBuildTime = this.mContext.getResources().getString(codePushApkBuildTimeId).replaceAll("\"","");
             return Long.parseLong(codePushApkBuildTime);
         } catch (Exception e) {
             throw new CodePushUnknownException("Error in getting binary resources modified time", e);
@@ -229,7 +231,7 @@ public class CodePush implements ReactPackage {
         JSONObject pendingUpdate = mSettingsManager.getPendingUpdate();
         if (pendingUpdate != null) {
             JSONObject packageMetadata = this.mUpdateManager.getCurrentPackage();
-            if (!isPackageBundleLatest(packageMetadata) && hasBinaryVersionChanged(packageMetadata)) {
+            if (packageMetadata == null || !isPackageBundleLatest(packageMetadata) && hasBinaryVersionChanged(packageMetadata)) {
                 CodePushUtils.log("Skipping initializeUpdateAfterRestart(), binary version is newer");
                 return;
             }
@@ -347,6 +349,11 @@ public class CodePush implements ReactPackage {
         nativeModules.add(codePushModule);
         nativeModules.add(dialogModule);
         return nativeModules;
+    }
+
+    // Deprecated in RN v0.47.
+    public List<Class<? extends JavaScriptModule>> createJSModules() {
+        return new ArrayList<>();
     }
 
     @Override

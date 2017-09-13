@@ -19,7 +19,9 @@ void runBefore(String dependentTaskName, Task task) {
 gradle.projectsEvaluated {
     def buildTypes = android.buildTypes.collect { type -> type.name }
     android.buildTypes.each {
-        it.resValue 'string', "CODE_PUSH_APK_BUILD_TIME", Long.toString(System.currentTimeMillis())
+        // to prevent incorrect long value restoration from strings.xml we need to wrap it with double quotes
+        // https://github.com/Microsoft/cordova-plugin-code-push/issues/264
+        it.resValue 'string', "CODE_PUSH_APK_BUILD_TIME", String.format("\"%d\"", System.currentTimeMillis())
     }
     def productFlavors = android.productFlavors.collect { flavor -> flavor.name }
     if (!productFlavors) productFlavors.add('')
