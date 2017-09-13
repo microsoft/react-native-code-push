@@ -627,10 +627,13 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
         _didUpdateProgress = NO;
         self.paused = NO;
     }
+    
+    NSString * publicKey = [[CodePushConfig current] publicKey];
 
     [CodePushPackage
         downloadPackage:mutableUpdatePackage
         expectedBundleFileName:[bundleResourceName stringByAppendingPathExtension:bundleResourceExtension]
+        publicKey:publicKey
         operationQueue:_methodQueue
         // The download is progressing forward
         progressCallback:^(long long expectedContentLength, long long receivedContentLength) {
