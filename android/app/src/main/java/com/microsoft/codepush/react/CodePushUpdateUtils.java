@@ -172,13 +172,15 @@ public class CodePushUpdateUtils {
         if (!expectedHash.equals(updateContentsManifestHash)) {
             throw new CodePushInvalidUpdateException("The update contents failed the data integrity check.");
         }
+
+        CodePushUtils.log("The update contents succeeded the data integrity check.");
     }
 
     public static Map<String, Object> verifyAndDecodeJWT(String jwt, PublicKey publicKey) {
         try {
             final JWTVerifier verifier = new JWTVerifier(publicKey);
             final Map<String, Object> claims = verifier.verify(jwt);
-            CodePushUtils.log("JWT verification succeeded:\n" + claims.toString());
+            CodePushUtils.log("JWT signature verification succeeded, payload content: " + claims.toString());
             return claims;
         } catch (Exception e) {
             return null;
@@ -223,7 +225,7 @@ public class CodePushUpdateUtils {
         }
     }
 
-    public static void verifySignature(String folderPath, String stringPublicKey) throws CodePushInvalidUpdateException {
+    public static void verifyUpdateSignature(String folderPath, String packageHash, String stringPublicKey) throws CodePushInvalidUpdateException {
         CodePushUtils.log("Verifying signature for folder path: " + folderPath);
 
         final PublicKey publicKey = parsePublicKey(stringPublicKey);
@@ -246,7 +248,11 @@ public class CodePushUpdateUtils {
             throw new CodePushInvalidUpdateException("The update could not be verified because the signature did not specify a content hash.");
         }
 
-        CodePushUpdateUtils.verifyFolderHash(folderPath, contentHash);
+        if (!contentHash.equals(packageHash)) {
+            throw new CodePushInvalidUpdateException("The update contents failed the code signing check.");
+        }
+
+        CodePushUtils.log("The update contents succeeded the code signing check.");
     }
 
 }

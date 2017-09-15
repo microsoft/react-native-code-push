@@ -257,7 +257,8 @@ public class CodePushUpdateManager {
 
                 if (isSignatureVerificationEnabled) {
                     if (isSignatureAppearedInBundle) {
-                        CodePushUpdateUtils.verifySignature(newUpdateFolderPath, stringPublicKey);
+                        CodePushUpdateUtils.verifyFolderHash(newUpdateFolderPath, newUpdateHash);
+                        CodePushUpdateUtils.verifyUpdateSignature(newUpdateFolderPath, newUpdateHash, stringPublicKey);
                     } else {
                         throw new CodePushInvalidUpdateException(
                                 "Error! Public key was provided but there is no JWT signature within app bundle to verify. " +
