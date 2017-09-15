@@ -251,7 +251,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                                     .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                                     .emit(CodePushConstants.DOWNLOAD_PROGRESS_EVENT_NAME, latestDownloadProgress.createWritableMap());
                         }
-                    });
+                    }, mCodePush.getPublicKey());
 
                     JSONObject newPackage = mUpdateManager.getPackage(CodePushUtils.tryGetString(updatePackage, CodePushConstants.PACKAGE_HASH_KEY));
                     promise.resolve(CodePushUtils.convertJsonObjectToWritable(newPackage));

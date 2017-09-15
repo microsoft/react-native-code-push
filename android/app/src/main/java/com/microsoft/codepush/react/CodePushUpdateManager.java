@@ -55,7 +55,7 @@ public class CodePushUpdateManager {
             return CodePushUtils.getJsonObjectFromFile(statusFilePath);
         } catch (IOException e) {
             // Should not happen.
-            throw new CodePushUnknownException("Error getting current package info" , e);
+            throw new CodePushUnknownException("Error getting current package info", e);
         }
     }
 
@@ -64,7 +64,7 @@ public class CodePushUpdateManager {
             CodePushUtils.writeJsonToFile(packageInfo, getStatusFilePath());
         } catch (IOException e) {
             // Should not happen.
-            throw new CodePushUnknownException("Error updating current package info" , e);
+            throw new CodePushUnknownException("Error updating current package info", e);
         }
     }
 
@@ -116,16 +116,16 @@ public class CodePushUpdateManager {
         if (packageHash == null) {
             return null;
         }
-        
+
         return getPackage(packageHash);
     }
-    
+
     public JSONObject getPreviousPackage() {
         String packageHash = getPreviousPackageHash();
         if (packageHash == null) {
             return null;
         }
-        
+
         return getPackage(packageHash);
     }
 
@@ -140,7 +140,8 @@ public class CodePushUpdateManager {
     }
 
     public void downloadPackage(JSONObject updatePackage, String expectedBundleFileName,
-                                DownloadProgressCallback progressCallback) throws IOException {
+                                DownloadProgressCallback progressCallback,
+                                String stringPublicKey) throws IOException {
         String newUpdateHash = updatePackage.optString(CodePushConstants.PACKAGE_HASH_KEY, null);
         String newUpdateFolderPath = getPackageFolderPath(newUpdateHash);
         String newUpdateMetadataPath = CodePushUtils.appendPathComponent(newUpdateFolderPath, CodePushConstants.PACKAGE_FILE_NAME);
@@ -179,7 +180,7 @@ public class CodePushUpdateManager {
             while ((numBytesRead = bin.read(data, 0, CodePushConstants.DOWNLOAD_BUFFER_SIZE)) >= 0) {
                 if (receivedBytes < 4) {
                     for (int i = 0; i < numBytesRead; i++) {
-                        int headerOffset = (int)(receivedBytes) + i;
+                        int headerOffset = (int) (receivedBytes) + i;
                         if (headerOffset >= 4) {
                             break;
                         }
@@ -244,7 +245,39 @@ public class CodePushUpdateManager {
                 }
 
                 if (isDiffUpdate) {
-                    CodePushUpdateUtils.verifyHashForDiffUpdate(newUpdateFolderPath, newUpdateHash);
+                    CodePushUtils.log("Applying diff update.");
+                } else {
+                    CodePushUtils.log("Applying full update.");
+                }
+
+                boolean isSignatureVerificationEnabled = (stringPublicKey != null);
+
+                String signaturePath = CodePushUpdateUtils.getSignatureFilePath(newUpdateFolderPath);
+                boolean isSignatureAppearedInBundle = FileUtils.fileAtPathExists(signaturePath);
+
+                if (isSignatureVerificationEnabled) {
+                    if (isSignatureAppearedInBundle) {
+                        CodePushUpdateUtils.verifySignature(newUpdateFolderPath, stringPublicKey);
+                    } else {
+                        throw new CodePushInvalidUpdateException(
+                                "Error! Public key was provided but there is no JWT signature within app bundle to verify. " +
+                                "Possible reasons, why that might happen: \n" +
+                                "1. You've been released CodePush bundle update using version of CodePush CLI that is not support code signing.\n" +
+                                "2. You've been released CodePush bundle update without providing --privateKeyPath option."
+                        );
+                    }
+                } else {
+                    if (isSignatureAppearedInBundle) {
+                        CodePushUtils.log(
+                                "Warning! JWT signature exists in codepush update but code integrity check couldn't be performed because there is no public key configured. " +
+                                "Please ensure that public key is properly configured within your application."
+                        );
+                        CodePushUpdateUtils.verifyFolderHash(newUpdateFolderPath, newUpdateHash);
+                    } else {
+                        if (isDiffUpdate) {
+                            CodePushUpdateUtils.verifyFolderHash(newUpdateFolderPath, newUpdateHash);
+                        }
+                    }
                 }
 
                 CodePushUtils.setJSONValueForKey(updatePackage, CodePushConstants.RELATIVE_BUNDLE_PATH_KEY, relativeBundlePath);

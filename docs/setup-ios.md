@@ -38,14 +38,21 @@ And that's it! Isn't RNPM awesome? :)
     pod 'CodePush', :path => '../node_modules/react-native-code-push'
     ```
 
-    CodePush depends on an internal copy of the `SSZipArchive` library, so if your project already includes it (either directly or via a transitive dependency), then you can install a version of CodePush which excludes it by depending specifically on the `Core` subspec:
+    CodePush depends on an internal copy of the `SSZipArchive`, `JWT` and `Base64` libraries, so if your project already includes some of them (either directly or via a transitive dependency), then you can install a version of CodePush which excludes it by depending specifically on the needed subspecs:
 
     ```ruby
+    # `SSZipArchive`, `JWT` and `Base64` already in use
     pod 'CodePush', :path => '../node_modules/react-native-code-push', :subspecs => ['Core']
+
+    # or for example
+
+    # `SSZipArchive` and `Base64` already in use
+    pod 'CodePush', :path => '../node_modules/react-native-code-push', :subspecs => ['Core', 'JWT']
     ```
 
-    *NOTE: The above paths needs to be relative to your app's `Podfile`, so adjust it as nec
-    cessary.*
+    *NOTE: The above paths needs to be relative to your app's `Podfile`, so adjust it as neccessary.*
+
+    *NOTE: `JWT` library should be of version 3.0.x*
 
 2. Run `pod install`
 
@@ -150,3 +157,25 @@ If you want to change the default HTTP security configuration for any of these d
 Before doing anything, please [read the docs][ats] first.
 
 [ats]: https://developer.apple.com/library/content/documentation/General/Reference/InfoPlistKeyReference/Articles/CocoaKeys.html#//apple_ref/doc/uid/TP40009251-SW33
+
+### Code Signing setup
+
+Starting with CLI version **2.1.0** you can self sign bundles during release and verify its signature before installation of update. For more info about Code Signing please refer to [relevant code-push documentation section](https://github.com/Microsoft/code-push/tree/master/cli#code-signing).
+
+In order to configure Public Key for bundle verification you need to add record in `Info.plist` with name `CodePushPublicKey` and string value of public key content. Example:
+
+```xml
+<plist version="1.0">
+  <dict>
+    <!-- ...other configs... -->
+
+    <key>CodePushPublicKey</key>
+        <string>-----BEGIN PUBLIC KEY-----
+MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBANkWYydPuyOumR/sn2agNBVDnzyRpM16NAUpYPGxNgjSEp0etkDNgzzdzyvyl+OsAGBYF3jCxYOXozum+uV5hQECAwEAAQ==
+-----END PUBLIC KEY-----</string>
+
+    <!-- ...other configs... -->
+  </dict>
+</plist>
+```
+
