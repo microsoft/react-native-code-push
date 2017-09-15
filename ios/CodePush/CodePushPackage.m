@@ -241,18 +241,32 @@ static NSString *const UnzippedFolderName = @"unzipped";
                                                         
                                                         if (isSignatureVerificationEnabled) {
                                                             if (isSignatureAppearedInBundle) {
-                                                                BOOL isSignatureValid = [CodePushUpdateUtils verifySignatureFor:newUpdateFolderPath
-                                                                                                                  withPublicKey:publicKey
-                                                                                                                          error:&error];
-                                                                if (!isSignatureValid) {
-                                                                    CPLog(@"Code signing integrity check error.");
+                                                                if (![CodePushUpdateUtils verifyFolderHash:newUpdateFolderPath
+                                                                                              expectedHash:newUpdateHash
+                                                                                                     error:&error]) {
+                                                                    CPLog(@"The update contents failed the data integrity check.");
                                                                     if (!error) {
-                                                                        error = [CodePushErrorUtils errorWithMessage:@"Code signing integrity check error."];
+                                                                        error = [CodePushErrorUtils errorWithMessage:@"The update contents failed the data integrity check."];
+                                                                    }
+                                                                    
+                                                                    failCallback(error);
+                                                                    return;
+                                                                } else {
+                                                                    CPLog(@"The update contents succeeded the data integrity check.");
+                                                                }
+                                                                BOOL isSignatureValid = [CodePushUpdateUtils verifyUpdateSignatureFor:newUpdateFolderPath
+                                                                                                                         expectedHash:newUpdateHash
+                                                                                                                        withPublicKey:publicKey
+                                                                                                                                error:&error];
+                                                                if (!isSignatureValid) {
+                                                                    CPLog(@"The update contents failed code signing check.");
+                                                                    if (!error) {
+                                                                        error = [CodePushErrorUtils errorWithMessage:@"The update contents failed code signing check."];
                                                                     }
                                                                     failCallback(error);
                                                                     return;
                                                                 } else {
-                                                                    CPLog(@"The update contents succeeded the code signing integrity check.");
+                                                                    CPLog(@"The update contents succeeded the code signing check.");
                                                                 }
                                                             } else {
                                                                 error = [CodePushErrorUtils errorWithMessage:
