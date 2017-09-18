@@ -4,7 +4,8 @@ var postlinks = [
 ];
 
 //run them sequentially
-var result = postlinks.reduce((p, fn) => p.then(fn), Promise.resolve());
-result.catch((err) => {
-    console.error(err.message);
-}); 
+postlinks
+    .reduce((p, fn) => p.then(fn), Promise.resolve())
+    .catch((err) => {
+        console.error(err.message);
+    }); 
