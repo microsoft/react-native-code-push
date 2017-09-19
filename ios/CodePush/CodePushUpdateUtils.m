@@ -335,9 +335,10 @@ NSString * const IgnoreCodePushMetadata = @".codepushrelease";
     }
 }
 
-+ (BOOL)verifySignatureFor:(NSString *)folderPath
-             withPublicKey:(NSString *)publicKeyString
-                     error:(NSError **)error
++ (BOOL)verifyUpdateSignatureFor:(NSString *)folderPath
+                    expectedHash:(NSString *)newUpdateHash
+                   withPublicKey:(NSString *)publicKeyString
+                           error:(NSError **)error
 {
     NSLog(@"Verifying signature for folder path: %@", folderPath);
     
@@ -360,6 +361,8 @@ NSString * const IgnoreCodePushMetadata = @".codepushrelease";
         return false;
     }
     
+    CPLog(@"JWT signature verification succeeded, payload content:  %@", envelopedPayload);
+    
     if(![envelopedPayload objectForKey:@"contentHash"]){
         CPLog(@"The update could not be verified because the signature did not specify a content hash.");
         return false;
@@ -367,9 +370,7 @@ NSString * const IgnoreCodePushMetadata = @".codepushrelease";
     
     NSString *contentHash = envelopedPayload[@"contentHash"];
     
-    return [self verifyFolderHash:folderPath
-                     expectedHash:contentHash
-                            error:error];
+    return [contentHash isEqualToString:newUpdateHash];
 }
 
 @end

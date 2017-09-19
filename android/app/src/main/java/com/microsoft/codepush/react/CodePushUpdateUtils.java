@@ -3,7 +3,11 @@ package com.microsoft.codepush.react;
 import android.content.Context;
 import android.util.Base64;
 
-import com.auth0.jwt.JWTVerifier;
+import java.security.interfaces.*;
+
+import com.nimbusds.jose.*;
+import com.nimbusds.jose.crypto.*;
+import com.nimbusds.jwt.*;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -172,15 +176,23 @@ public class CodePushUpdateUtils {
         if (!expectedHash.equals(updateContentsManifestHash)) {
             throw new CodePushInvalidUpdateException("The update contents failed the data integrity check.");
         }
+
+        CodePushUtils.log("The update contents succeeded the data integrity check.");
     }
 
     public static Map<String, Object> verifyAndDecodeJWT(String jwt, PublicKey publicKey) {
         try {
-            final JWTVerifier verifier = new JWTVerifier(publicKey);
-            final Map<String, Object> claims = verifier.verify(jwt);
-            CodePushUtils.log("JWT verification succeeded:\n" + claims.toString());
-            return claims;
-        } catch (Exception e) {
+            SignedJWT signedJWT = SignedJWT.parse(jwt);
+            JWSVerifier verifier = new RSASSAVerifier((RSAPublicKey)publicKey);
+            if (signedJWT.verify(verifier)) {
+                Map<String, Object> claims = signedJWT.getJWTClaimsSet().getClaims();
+                CodePushUtils.log("JWT verification succeeded, payload content: " + claims.toString());
+                return claims;
+            }
+            return null;
+        } catch (Exception ex) {
+            CodePushUtils.log(ex.getMessage());
+            CodePushUtils.log(ex.getStackTrace().toString());
             return null;
         }
     }
@@ -223,7 +235,7 @@ public class CodePushUpdateUtils {
         }
     }
 
-    public static void verifySignature(String folderPath, String stringPublicKey) throws CodePushInvalidUpdateException {
+    public static void verifyUpdateSignature(String folderPath, String packageHash, String stringPublicKey) throws CodePushInvalidUpdateException {
         CodePushUtils.log("Verifying signature for folder path: " + folderPath);
 
         final PublicKey publicKey = parsePublicKey(stringPublicKey);
@@ -246,7 +258,10 @@ public class CodePushUpdateUtils {
             throw new CodePushInvalidUpdateException("The update could not be verified because the signature did not specify a content hash.");
         }
 
-        CodePushUpdateUtils.verifyFolderHash(folderPath, contentHash);
-    }
+        if (!contentHash.equals(packageHash)) {
+            throw new CodePushInvalidUpdateException("The update contents failed the code signing check.");
+        }
 
+        CodePushUtils.log("The update contents succeeded the code signing check.");
+    }
 }

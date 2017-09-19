@@ -193,9 +193,10 @@ failCallback:(void (^)(NSError *err))failCallback;
                withPublicKey:(NSString *)publicKey
                        error:(NSError **)error;
 
-+ (BOOL)verifySignatureFor:(NSString *)updateFolderPath
-             withPublicKey:(NSString *)publicKey
-                  error:(NSError **)error;
++ (BOOL)verifyUpdateSignatureFor:(NSString *)updateFolderPath
+                    expectedHash:(NSString *)newUpdateHash
+                   withPublicKey:(NSString *)publicKeyString
+                           error:(NSError **)error;
 
 @end
 
