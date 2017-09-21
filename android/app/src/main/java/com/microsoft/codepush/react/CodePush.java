@@ -27,6 +27,11 @@ public class CodePush implements ReactPackage {
         return mCodePushCore.createNativeModules(reactApplicationContext);
     }
 
+    // Deprecated in RN v0.47.
+    public List<Class<? extends JavaScriptModule>> createJSModules() {
+        return new ArrayList<>();
+    }
+
     @Override
     public List<ViewManager> createViewManagers(ReactApplicationContext reactApplicationContext) {
         return new ArrayList<>();
