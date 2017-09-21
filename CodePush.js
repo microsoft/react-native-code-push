@@ -8,9 +8,9 @@ import log from "./logging";
 let NativeCodePush = require("react-native").NativeModules.CodePush;
 const PackageMixins = require("./package-mixins")(NativeCodePush);
 
-async function checkForUpdate(deploymentKey = null) {
+async function checkForUpdate(deploymentKey = null, handleBinaryVersionMismatchCallback = null) {
   if (typeof NativeCodePush.checkForUpdate === "function") {
-    return await checkForUpdateNative(deploymentKey);
+    return await checkForUpdateNative(deploymentKey, handleBinaryVersionMismatchCallback);
   }
 
   /*
@@ -80,6 +80,9 @@ async function checkForUpdate(deploymentKey = null) {
       (!localPackage || localPackage._isDebugOnly) && config.packageHash === update.packageHash) {
     if (update && update.updateAppVersion) {
       log("An update is available but it is not targeting the binary version of your app.");
+      if (handleBinaryVersionMismatchCallback && typeof handleBinaryVersionMismatchCallback === "function") {
+        handleBinaryVersionMismatchCallback(update);
+      }
     }
 
     return null;
@@ -91,8 +94,8 @@ async function checkForUpdate(deploymentKey = null) {
   }
 }
 
-async function checkForUpdateNative(deploymentKey = null) {
-  const update = await NativeCodePush.checkForUpdate(deploymentKey);
+async function checkForUpdateNative(deploymentKey = null, handleBinaryVersionMismatchCallback) {
+  const update = await NativeCodePush.checkForUpdate(deploymentKey, handleBinaryVersionMismatchCallback);
   if (typeof update === "object") {
     //no need to extend with sdk.reportStatusDownload because it should be called on native side
     return { ...update, ...PackageMixins.remote() };
@@ -101,7 +104,7 @@ async function checkForUpdateNative(deploymentKey = null) {
   }
 }
 
-async function syncNative(syncOptions = null, syncStatusChangeCallback, downloadProgressCallback) {
+async function syncNative(syncOptions = null, syncStatusChangeCallback, downloadProgressCallback, handleBinaryVersionMismatchCallback) {
   let syncStatusChangeSubscription;
   if (typeof syncStatusChangeCallback === "function") {
     const codePushEventEmitter = new NativeEventEmitter(NativeCodePush);
@@ -120,8 +123,17 @@ async function syncNative(syncOptions = null, syncStatusChangeCallback, download
     );
   }
 
+  let handleBinaryVersionMismatchSubscription;
+  if (typeof handleBinaryVersionMismatchCallback === "function") {
+    const codePushEventEmitter = new NativeEventEmitter(NativeCodePush);
+    handleBinaryVersionMismatchSubscription = codePushEventEmitter.addListener(
+      "CodePushBinaryVersionMismatchHandler",
+      handleBinaryVersionMismatchCallback
+    );
+  }
+
   try {
-    await NativeCodePush.sync(syncOptions, !!syncStatusChangeCallback, !!downloadProgressCallback);
+    await NativeCodePush.sync(syncOptions, !!syncStatusChangeCallback, !!downloadProgressCallback, !!handleBinaryVersionMismatchCallback);
   } catch (error) {
     typeof syncStatusChangeCallback === "function" && syncStatusChangeCallback(CodePush.SyncStatus.UNKNOWN_ERROR);
     log(error.message);
@@ -129,6 +141,7 @@ async function syncNative(syncOptions = null, syncStatusChangeCallback, download
   } finally {
     syncStatusChangeSubscription && syncStatusChangeSubscription.remove();
     downloadProgressSubscription && downloadProgressSubscription.remove();
+    handleBinaryVersionMismatchSubscription && handleBinaryVersionMismatchSubscription.remove();
   }
 }
 
@@ -282,8 +295,8 @@ const sync = (() => {
   let syncInProgress = false;
   const setSyncCompleted = () => { syncInProgress = false; };
 
-  return (options = {}, syncStatusChangeCallback, downloadProgressCallback) => {
-    let syncStatusCallbackWithTryCatch, downloadProgressCallbackkWithTryCatch;
+  return (options = {}, syncStatusChangeCallback, downloadProgressCallback, handleBinaryVersionMismatchCallback) => {
+    let syncStatusCallbackWithTryCatch, downloadProgressCallbackkWithTryCatch, handleBinaryVersionMismatchCallback;
     if (typeof syncStatusChangeCallback === "function") {
       syncStatusCallbackWithTryCatch = (...args) => {
         try {
@@ -295,9 +308,19 @@ const sync = (() => {
     }
 
     if (typeof downloadProgressCallback === "function") {
-      downloadProgressCallbackkWithTryCatch = (...args) => {
+      downloadProgressCallbackWithTryCatch = (...args) => {
         try {
           downloadProgressCallback(...args);
+        } catch (error) {
+          log(`An error has occurred: ${error.stack}`);
+        }
+      }
+    }
+
+    if (typeof handleBinaryVersionMismatchCallback === "function") {
+      handleBinaryVersionMismatchCallbackWithTryCatch = (...args) => {
+        try {
+          handleBinaryVersionMismatchCallback(...args);
         } catch (error) {
           log(`An error has occurred: ${error.stack}`);
         }
@@ -313,7 +336,7 @@ const sync = (() => {
               }
       }
 
-      return syncNative(options, syncStatusCallbackWithTryCatch, downloadProgressCallbackkWithTryCatch);
+      return syncNative(options, syncStatusCallbackWithTryCatch, downloadProgressCallbackWithTryCatch, handleBinaryVersionMismatchCallbackWithTryCatch);
     }
 
     if (syncInProgress) {
@@ -324,7 +347,7 @@ const sync = (() => {
     }
 
     syncInProgress = true;
-    const syncPromise = syncInternal(options, syncStatusCallbackWithTryCatch, downloadProgressCallbackkWithTryCatch);
+    const syncPromise = syncInternal(options, syncStatusCallbackWithTryCatch, downloadProgressCallbackkWithTryCatch, handleBinaryVersionMismatchCallbackWithTryCatch);
     syncPromise
       .then(setSyncCompleted)
       .catch(setSyncCompleted);
@@ -342,7 +365,7 @@ const sync = (() => {
  * releases, and displaying a standard confirmation UI to the end-user
  * when an update is available.
  */
-async function syncInternal(options = {}, syncStatusChangeCallback, downloadProgressCallback) {
+async function syncInternal(options = {}, syncStatusChangeCallback, downloadProgressCallback, handleBinaryVersionMismatchCallback) {
   let resolvedInstallMode;
   const syncOptions = {
     deploymentKey: null,
@@ -397,7 +420,7 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
     await CodePush.notifyApplicationReady();
 
     syncStatusChangeCallback(CodePush.SyncStatus.CHECKING_FOR_UPDATE);
-    const remotePackage = await checkForUpdate(syncOptions.deploymentKey);
+    const remotePackage = await checkForUpdate(syncOptions.deploymentKey, handleBinaryVersionMismatchCallback);
 
     const doDownloadAndInstall = async () => {
       syncStatusChangeCallback(CodePush.SyncStatus.DOWNLOADING_PACKAGE);
@@ -529,7 +552,15 @@ function codePushify(options = {}) {
             }
           }
 
-          CodePush.sync(options, syncStatusCallback, downloadProgressCallback);
+          let handleBinaryVersionMismatchCallback;
+          if (rootComponentInstance && rootComponentInstance.codePushOnBinaryVersionMismatch) {
+            handleBinaryVersionMismatchCallback = rootComponentInstance.codePushOnBinaryVersionMismatch;
+            if (rootComponentInstance instanceof React.Component) {
+              handleBinaryVersionMismatchCallback = handleBinaryVersionMismatchCallback.bind(rootComponentInstance);
+            }
+          }
+
+          CodePush.sync(options, syncStatusCallback, downloadProgressCallback, handleBinaryVersionMismatchCallback);
           if (options.checkFrequency === CodePush.CheckFrequency.ON_APP_RESUME) {
             ReactNative.AppState.addEventListener("change", (newState) => {
               newState === "active" && CodePush.sync(options, syncStatusCallback, downloadProgressCallback);

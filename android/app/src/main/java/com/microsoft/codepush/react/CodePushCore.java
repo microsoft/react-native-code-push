@@ -93,6 +93,7 @@ public class CodePushCore {
 
     private List<CodePushSyncStatusListener> mSyncStatusListeners = new ArrayList<>();
     private List<CodePushDownloadProgressListener> mDownloadProgressListeners = new ArrayList<>();
+    private List<CodePushBinaryVersionMismatchListener> mBinaryVersionMismatchListeners = new ArrayList<>();
 
     private LifecycleEventListener mLifecycleEventListener = null;
     private int mMinimumBackgroundDuration = 0;
@@ -106,6 +107,10 @@ public class CodePushCore {
 
     public void addDownloadProgressListener(CodePushDownloadProgressListener downloadProgressListener) {
         mDownloadProgressListeners.add(downloadProgressListener);
+    }
+
+    public void addBinaryVersionMismatchListener(CodePushBinaryVersionMismatchListener listener) {
+        mBinaryVersionMismatchListeners.add(listener);
     }
 
     private void syncStatusChange(CodePushSyncStatus syncStatus) {
@@ -162,6 +167,16 @@ public class CodePushCore {
         for (CodePushDownloadProgressListener downloadProgressListener: mDownloadProgressListeners) {
             try {
                 downloadProgressListener.downloadProgressChanged(receivedBytes, totalBytes);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void binaryVersionMismatchChange(CodePushRemotePackage update){
+        for (CodePushBinaryVersionMismatchListener listener: mBinaryVersionMismatchListeners) {
+            try {
+                listener.binaryVersionMismatchChanged(update);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -430,10 +445,11 @@ public class CodePushCore {
 
     public CodePushRemotePackage checkForUpdate() {
         CodePushConfiguration nativeConfiguration = getConfiguration();
-        return checkForUpdate(nativeConfiguration.DeploymentKey);
+        return checkForUpdate(nativeConfiguration.DeploymentKey, nativeConfiguration.HandleBinaryVersionMismatchCallback);
     }
 
-    public CodePushRemotePackage checkForUpdate(String deploymentKey) {
+    public CodePushRemotePackage checkForUpdate(String deploymentKey, String handleBinaryVersionMismatchCallback) {
+        //todo check that its correct!
         CodePushConfiguration nativeConfiguration = getConfiguration();
         CodePushConfiguration configuration = new CodePushConfiguration(
                 nativeConfiguration.AppVersion,
@@ -459,6 +475,7 @@ public class CodePushCore {
                 (localPackage == null || localPackage.IsDebugOnly) && configuration.PackageHash == update.PackageHash) {
             if (update != null && update.UpdateAppVersion) {
                 CodePushUtils.log("An update is available but it is not targeting the binary version of your app.");
+                binaryVersionMismatchChange(update);
             }
             return null;
         } else {
