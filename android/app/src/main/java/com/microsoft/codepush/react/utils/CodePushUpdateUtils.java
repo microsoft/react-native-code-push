@@ -1,12 +1,16 @@
 package com.microsoft.codepush.react.utils;
 
 import android.content.Context;
+import android.util.Base64;
 
 import com.microsoft.codepush.react.CodePushConstants;
 import com.microsoft.codepush.react.exceptions.CodePushInvalidUpdateException;
 import com.microsoft.codepush.react.exceptions.CodePushUnknownException;
 import com.microsoft.codepush.react.utils.CodePushUtils;
 import com.microsoft.codepush.react.utils.FileUtils;
+import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.crypto.RSASSAVerifier;
+import com.nimbusds.jwt.SignedJWT;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,12 +23,33 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.DigestInputStream;
+import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Map;
 
 public class CodePushUpdateUtils {
+
+    public static final String NEW_LINE = System.getProperty("line.separator");
+
+    // Note: The hashing logic here must mirror the hashing logic in other native SDK's, as well as in the
+    // CLI. Ensure that any changes here are propagated to these other locations.
+    public static boolean isHashIgnored(String relativeFilePath) {
+        final String __MACOSX = "__MACOSX/";
+        final String DS_STORE = ".DS_Store";
+        final String CODEPUSH_METADATA = ".codepushrelease";
+
+        return relativeFilePath.startsWith(__MACOSX)
+                || relativeFilePath.equals(DS_STORE)
+                || relativeFilePath.endsWith("/" + DS_STORE)
+                || relativeFilePath.equals(CODEPUSH_METADATA)
+                || relativeFilePath.endsWith("/" + CODEPUSH_METADATA);
+    }
 
     private static void addContentsOfFolderToManifest(String folderPath, String pathPrefix, ArrayList<String> manifest) {
         File folder = new File(folderPath);
@@ -34,7 +59,7 @@ public class CodePushUpdateUtils {
             String fullFilePath = file.getAbsolutePath();
             String relativePath = (pathPrefix.isEmpty() ? "" : (pathPrefix + "/")) + fileName;
 
-            if (fileName.equals(".DS_Store") || fileName.equals("__MACOSX")) {
+            if (isHashIgnored(relativePath)) {
                 continue;
             } else if (file.isDirectory()) {
                 addContentsOfFolderToManifest(fullFilePath, relativePath, manifest);
@@ -128,9 +153,15 @@ public class CodePushUpdateUtils {
         }
     }
 
-    public static void verifyHashForDiffUpdate(String folderPath, String expectedHash) {
+    // Hashing algorithm:
+    // 1. Recursively generate a sorted array of format <relativeFilePath>: <sha256FileHash>
+    // 2. JSON stringify the array
+    // 3. SHA256-hash the result
+    public static void verifyFolderHash(String folderPath, String expectedHash) {
+        CodePushUtils.log("Verifying hash for folder path: " + folderPath);
         ArrayList<String> updateContentsManifest = new ArrayList<>();
         addContentsOfFolderToManifest(folderPath, "", updateContentsManifest);
+        //sort manifest strings to make sure, that they are completely equal with manifest strings has been generated in cli!
         Collections.sort(updateContentsManifest);
         JSONArray updateContentsJSONArray = new JSONArray();
         for (String manifestEntry : updateContentsManifest) {
@@ -139,9 +170,100 @@ public class CodePushUpdateUtils {
 
         // The JSON serialization turns path separators into "\/", e.g. "CodePush\/assets\/image.png"
         String updateContentsManifestString = updateContentsJSONArray.toString().replace("\\/", "/");
+        CodePushUtils.log("Manifest string: " + updateContentsManifestString);
+
         String updateContentsManifestHash = computeHash(new ByteArrayInputStream(updateContentsManifestString.getBytes()));
+
+        CodePushUtils.log("Expected hash: " + expectedHash + ", actual hash: " + updateContentsManifestHash);
         if (!expectedHash.equals(updateContentsManifestHash)) {
             throw new CodePushInvalidUpdateException("The update contents failed the data integrity check.");
         }
+
+        CodePushUtils.log("The update contents succeeded the data integrity check.");
+    }
+
+    public static Map<String, Object> verifyAndDecodeJWT(String jwt, PublicKey publicKey) {
+        try {
+            SignedJWT signedJWT = SignedJWT.parse(jwt);
+            JWSVerifier verifier = new RSASSAVerifier((RSAPublicKey)publicKey);
+            if (signedJWT.verify(verifier)) {
+                Map<String, Object> claims = signedJWT.getJWTClaimsSet().getClaims();
+                CodePushUtils.log("JWT verification succeeded, payload content: " + claims.toString());
+                return claims;
+            }
+            return null;
+        } catch (Exception ex) {
+            CodePushUtils.log(ex.getMessage());
+            CodePushUtils.log(ex.getStackTrace().toString());
+            return null;
+        }
+    }
+
+    public static PublicKey parsePublicKey(String stringPublicKey) {
+        try {
+            //remove unnecessary "begin/end public key" entries from string
+            stringPublicKey = stringPublicKey
+                    .replace("-----BEGIN PUBLIC KEY-----", "")
+                    .replace("-----END PUBLIC KEY-----", "")
+                    .replace(NEW_LINE, "");
+            byte[] byteKey = Base64.decode(stringPublicKey.getBytes(), Base64.DEFAULT);
+            X509EncodedKeySpec X509Key = new X509EncodedKeySpec(byteKey);
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+
+            return kf.generatePublic(X509Key);
+        } catch (Exception e) {
+            CodePushUtils.log(e.getMessage());
+            CodePushUtils.log(e.getStackTrace().toString());
+            return null;
+        }
+    }
+
+    public static String getSignatureFilePath(String updateFolderPath){
+        return CodePushUtils.appendPathComponent(
+                CodePushUtils.appendPathComponent(updateFolderPath, CodePushConstants.CODE_PUSH_FOLDER_PREFIX),
+                CodePushConstants.BUNDLE_JWT_FILE
+        );
+    }
+
+    public static String getSignature(String folderPath) {
+        final String signatureFilePath = getSignatureFilePath(folderPath);
+
+        try {
+            return FileUtils.readFileToString(signatureFilePath);
+        } catch (IOException e) {
+            CodePushUtils.log(e.getMessage());
+            CodePushUtils.log(e.getStackTrace().toString());
+            return null;
+        }
+    }
+
+    public static void verifyUpdateSignature(String folderPath, String packageHash, String stringPublicKey) throws CodePushInvalidUpdateException {
+        CodePushUtils.log("Verifying signature for folder path: " + folderPath);
+
+        final PublicKey publicKey = parsePublicKey(stringPublicKey);
+        if (publicKey == null) {
+            throw new CodePushInvalidUpdateException("The update could not be verified because no public key was found.");
+        }
+
+        final String signature = getSignature(folderPath);
+        if (signature == null) {
+            throw new CodePushInvalidUpdateException("The update could not be verified because no signature was found.");
+        }
+
+        final Map<String, Object> claims = verifyAndDecodeJWT(signature, publicKey);
+        if (claims == null) {
+            throw new CodePushInvalidUpdateException("The update could not be verified because it was not signed by a trusted party.");
+        }
+
+        final String contentHash = (String)claims.get("contentHash");
+        if (contentHash == null) {
+            throw new CodePushInvalidUpdateException("The update could not be verified because the signature did not specify a content hash.");
+        }
+
+        if (!contentHash.equals(packageHash)) {
+            throw new CodePushInvalidUpdateException("The update contents failed the code signing check.");
+        }
+
+        CodePushUtils.log("The update contents succeeded the code signing check.");
     }
 }

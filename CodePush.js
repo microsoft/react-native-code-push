@@ -296,7 +296,7 @@ const sync = (() => {
   const setSyncCompleted = () => { syncInProgress = false; };
 
   return (options = {}, syncStatusChangeCallback, downloadProgressCallback, handleBinaryVersionMismatchCallback) => {
-    let syncStatusCallbackWithTryCatch, downloadProgressCallbackkWithTryCatch, handleBinaryVersionMismatchCallback;
+    let syncStatusCallbackWithTryCatch, downloadProgressCallbackWithTryCatch, handleBinaryVersionMismatchCallbackWithTryCatch;
     if (typeof syncStatusChangeCallback === "function") {
       syncStatusCallbackWithTryCatch = (...args) => {
         try {
@@ -660,3 +660,4 @@ if (NativeCodePush) {
 }
 
 module.exports = CodePush;
+

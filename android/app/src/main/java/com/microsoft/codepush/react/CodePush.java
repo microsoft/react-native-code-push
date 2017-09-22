@@ -1,6 +1,7 @@
 package com.microsoft.codepush.react;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.JavaScriptModule;
@@ -47,6 +48,18 @@ public class CodePush implements ReactPackage {
 
     public CodePush(String deploymentKey, Context context, boolean isDebugMode, String serverUrl) {
         mCodePushCore = new CodePushCore(deploymentKey, context, isDebugMode, serverUrl);
+    }
+
+    public CodePush(String deploymentKey, Context context, boolean isDebugMode, int publicKeyResourceDescriptor) {
+        mCodePushCore = new CodePushCore(deploymentKey, context, isDebugMode, publicKeyResourceDescriptor);
+    }
+
+    public CodePush(String deploymentKey, Context context, boolean isDebugMode, @NonNull String serverUrl, Integer publicKeyResourceDescriptor) {
+        mCodePushCore = new CodePushCore(deploymentKey, context, isDebugMode, serverUrl, publicKeyResourceDescriptor);
+    }
+
+    public static String getServerUrl() {
+        return CodePushCore.getServerUrl();
     }
 
     public static String getJSBundleFile() {

@@ -24,6 +24,7 @@ import com.microsoft.codepush.react.enums.CodePushUpdateState;
 import com.microsoft.codepush.react.exceptions.CodePushInvalidUpdateException;
 import com.microsoft.codepush.react.exceptions.CodePushNotInitializedException;
 import com.microsoft.codepush.react.exceptions.CodePushUnknownException;
+import com.microsoft.codepush.react.interfaces.CodePushBinaryVersionMismatchListener;
 import com.microsoft.codepush.react.interfaces.CodePushDownloadProgressListener;
 import com.microsoft.codepush.react.interfaces.CodePushSyncStatusListener;
 import com.microsoft.codepush.react.interfaces.DownloadProgressCallback;
@@ -37,15 +38,18 @@ import com.microsoft.codepush.react.managers.CodePushUpdateManagerDeserializer;
 import com.microsoft.codepush.react.managers.SettingsManager;
 import com.microsoft.codepush.react.utils.CodePushUpdateUtils;
 import com.microsoft.codepush.react.utils.CodePushUtils;
+import com.microsoft.codepush.react.exceptions.CodePushInvalidPublicKeyException;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.view.View;
 
 import org.json.JSONArray;
@@ -79,7 +83,8 @@ public class CodePushCore {
 
     // Config properties.
     private String mDeploymentKey;
-    private String mServerUrl = "https://codepush.azurewebsites.net/";
+    private static String mServerUrl = "https://codepush.azurewebsites.net/";
+    private static String mPublicKey;
 
     private Context mContext;
     private final boolean mIsDebugMode;
@@ -214,9 +219,43 @@ public class CodePushCore {
         initializeUpdateAfterRestart();
     }
 
-    public CodePushCore(String deploymentKey, Context context, boolean isDebugMode, String serverUrl) {
+    public CodePushCore(String deploymentKey, Context context, boolean isDebugMode, @NonNull String serverUrl) {
         this(deploymentKey, context, isDebugMode);
         mServerUrl = serverUrl;
+    }
+
+    public CodePushCore(String deploymentKey, Context context, boolean isDebugMode, int publicKeyResourceDescriptor) {
+        this(deploymentKey, context, isDebugMode);
+
+        mPublicKey = getPublicKeyByResourceDescriptor(publicKeyResourceDescriptor);
+    }
+
+    public CodePushCore(String deploymentKey, Context context, boolean isDebugMode, @NonNull String serverUrl, Integer publicKeyResourceDescriptor) {
+        this(deploymentKey, context, isDebugMode);
+
+        if (publicKeyResourceDescriptor != null) {
+            mPublicKey = getPublicKeyByResourceDescriptor(publicKeyResourceDescriptor);
+        }
+
+        mServerUrl = serverUrl;
+    }
+
+    private String getPublicKeyByResourceDescriptor(int publicKeyResourceDescriptor){
+        String publicKey;
+        try {
+            publicKey = mContext.getString(publicKeyResourceDescriptor);
+        } catch (Resources.NotFoundException e) {
+            throw new CodePushInvalidPublicKeyException(
+                    "Unable to get public key, related resource descriptor " +
+                            publicKeyResourceDescriptor +
+                            " can not be found", e
+            );
+        }
+
+        if (publicKey.isEmpty()) {
+            throw new CodePushInvalidPublicKeyException("Specified public key is empty");
+        }
+        return publicKey;
     }
 
     public void clearDebugCacheIfNeeded() {
@@ -314,7 +353,7 @@ public class CodePushCore {
         }
     }
 
-    public String getServerUrl() {
+    public static String getServerUrl() {
         return mServerUrl;
     }
 
@@ -461,10 +500,10 @@ public class CodePushCore {
 
     public CodePushRemotePackage checkForUpdate() {
         CodePushConfiguration nativeConfiguration = getConfiguration();
-        return checkForUpdate(nativeConfiguration.DeploymentKey, nativeConfiguration.HandleBinaryVersionMismatchCallback);
+        return checkForUpdate(nativeConfiguration.DeploymentKey);
     }
 
-    public CodePushRemotePackage checkForUpdate(String deploymentKey, String handleBinaryVersionMismatchCallback) {
+    public CodePushRemotePackage checkForUpdate(String deploymentKey) {
         //todo check that its correct!
         CodePushConfiguration nativeConfiguration = getConfiguration();
         CodePushConfiguration configuration = new CodePushConfiguration(
@@ -797,7 +836,7 @@ public class CodePushCore {
                         }
                     });
                 }
-            });
+            }, mPublicKey);
 
             newPackage = mUpdateManagerDeserializer.getPackage(updatePackage.PackageHash);
             return newPackage;

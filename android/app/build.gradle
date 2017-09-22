@@ -27,5 +27,5 @@ android {
 
 dependencies {
     compile "com.facebook.react:react-native:+"
-    compile "com.google.code.gson:gson:2.8.1"
+    compile 'com.nimbusds:nimbus-jose-jwt:5.1'
 }
