@@ -40,6 +40,61 @@
 		C35FA4341EAE42E000057B7C /* CodePush+RestartManager.h in Headers */ = {isa = PBXBuildFile; fileRef = C35FA4321EAE42E000057B7C /* CodePush+RestartManager.h */; };
 		C35FA4351EAE42E000057B7C /* CodePush+RestartManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C35FA4331EAE42E000057B7C /* CodePush+RestartManager.m */; };
 		C38B262E1EB0CB45002CBA61 /* RCTConvert+CodePushSyncStatus.m in Sources */ = {isa = PBXBuildFile; fileRef = C38B262D1EB0CB45002CBA61 /* RCTConvert+CodePushSyncStatus.m */; };
+		F88379141F7901C200F27201 /* CodePush+Reporting.h in Sources */ = {isa = PBXBuildFile; fileRef = C32E97641F164FC70031595E /* CodePush+Reporting.h */; };
+		F88379151F7901C200F27201 /* CodePush+Reporting.m in Sources */ = {isa = PBXBuildFile; fileRef = C32E97651F164FC70031595E /* CodePush+Reporting.m */; };
+		F88379161F7901C200F27201 /* CodePushUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 5498D8F51D21F14100B5EB43 /* CodePushUtils.m */; };
+		F88379171F7901C200F27201 /* CodePush.h in Sources */ = {isa = PBXBuildFile; fileRef = 13BE3DEC1AC21097009241FE /* CodePush.h */; };
+		F88379181F7901C200F27201 /* CodePush.m in Sources */ = {isa = PBXBuildFile; fileRef = 13BE3DED1AC21097009241FE /* CodePush.m */; };
+		F88379191F7901C200F27201 /* CodePush+RestartManager.h in Sources */ = {isa = PBXBuildFile; fileRef = C35FA4321EAE42E000057B7C /* CodePush+RestartManager.h */; };
+		F883791A1F7901C200F27201 /* CodePush+RestartManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C35FA4331EAE42E000057B7C /* CodePush+RestartManager.m */; };
+		F883791B1F7901C200F27201 /* CodePushConstants.m in Sources */ = {isa = PBXBuildFile; fileRef = C3289C9B1EAF2F8C0027409B /* CodePushConstants.m */; };
+		F883791C1F7901C200F27201 /* CodePushConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 81D51F391B6181C2000DA084 /* CodePushConfig.m */; };
+		F883791D1F7901C200F27201 /* CodePushAcquisitionSDKManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C35FA4161EA8941300057B7C /* CodePushAcquisitionSDKManager.m */; };
+		F883791E1F7901C200F27201 /* CodePushDownloadHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 54FFEDDF1BF550630061DD23 /* CodePushDownloadHandler.m */; };
+		F883791F1F7901C200F27201 /* CodePushErrorUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B762E8F1C9A5E9A006EF800 /* CodePushErrorUtils.m */; };
+		F88379201F7901C200F27201 /* CodePushPackage.m in Sources */ = {isa = PBXBuildFile; fileRef = 810D4E6C1B96935000B397E9 /* CodePushPackage.m */; };
+		F88379211F7901C200F27201 /* CodePushTelemetryManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 5421FE301C58AD5A00986A55 /* CodePushTelemetryManager.m */; };
+		F88379221F7901C200F27201 /* CodePushUpdateUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 540D20111C7684FE00D6EF41 /* CodePushUpdateUtils.m */; };
+		F88379231F7901C200F27201 /* RCTConvert+CodePushInstallMode.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B23B9131BF9267B000BB2F0 /* RCTConvert+CodePushInstallMode.m */; };
+		F88379241F7901C200F27201 /* RCTConvert+CodePushSyncStatus.m in Sources */ = {isa = PBXBuildFile; fileRef = C38B262D1EB0CB45002CBA61 /* RCTConvert+CodePushSyncStatus.m */; };
+		F88379251F7901C200F27201 /* RCTConvert+CodePushUpdateState.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BCC09A61CC19EB700DDC0DD /* RCTConvert+CodePushUpdateState.m */; };
+		F88379261F7901D900F27201 /* aes.h in Sources */ = {isa = PBXBuildFile; fileRef = 54A0024A1C0E2880004C3CEC /* aes.h */; };
+		F88379271F7901D900F27201 /* aes_via_ace.h in Sources */ = {isa = PBXBuildFile; fileRef = 54A0024B1C0E2880004C3CEC /* aes_via_ace.h */; };
+		F88379281F7901D900F27201 /* aescrypt.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0024C1C0E2880004C3CEC /* aescrypt.c */; };
+		F88379291F7901D900F27201 /* aeskey.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0024D1C0E2880004C3CEC /* aeskey.c */; };
+		F883792A1F7901D900F27201 /* aesopt.h in Sources */ = {isa = PBXBuildFile; fileRef = 54A0024E1C0E2880004C3CEC /* aesopt.h */; };
+		F883792B1F7901D900F27201 /* aestab.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0024F1C0E2880004C3CEC /* aestab.c */; };
+		F883792C1F7901D900F27201 /* aestab.h in Sources */ = {isa = PBXBuildFile; fileRef = 54A002501C0E2880004C3CEC /* aestab.h */; };
+		F883792D1F7901D900F27201 /* brg_endian.h in Sources */ = {isa = PBXBuildFile; fileRef = 54A002511C0E2880004C3CEC /* brg_endian.h */; };
+		F883792E1F7901D900F27201 /* brg_types.h in Sources */ = {isa = PBXBuildFile; fileRef = 54A002521C0E2880004C3CEC /* brg_types.h */; };
+		F883792F1F7901D900F27201 /* entropy.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002531C0E2880004C3CEC /* entropy.c */; };
+		F88379301F7901D900F27201 /* entropy.h in Sources */ = {isa = PBXBuildFile; fileRef = 54A002541C0E2880004C3CEC /* entropy.h */; };
+		F88379311F7901D900F27201 /* fileenc.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002551C0E2880004C3CEC /* fileenc.c */; };
+		F88379321F7901D900F27201 /* fileenc.h in Sources */ = {isa = PBXBuildFile; fileRef = 54A002561C0E2880004C3CEC /* fileenc.h */; };
+		F88379331F7901D900F27201 /* hmac.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002571C0E2880004C3CEC /* hmac.c */; };
+		F88379341F7901D900F27201 /* hmac.h in Sources */ = {isa = PBXBuildFile; fileRef = 54A002581C0E2880004C3CEC /* hmac.h */; };
+		F88379351F7901D900F27201 /* prng.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002591C0E2880004C3CEC /* prng.c */; };
+		F88379361F7901D900F27201 /* prng.h in Sources */ = {isa = PBXBuildFile; fileRef = 54A0025A1C0E2880004C3CEC /* prng.h */; };
+		F88379371F7901D900F27201 /* pwd2key.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0025B1C0E2880004C3CEC /* pwd2key.c */; };
+		F88379381F7901D900F27201 /* pwd2key.h in Sources */ = {isa = PBXBuildFile; fileRef = 54A0025C1C0E2880004C3CEC /* pwd2key.h */; };
+		F88379391F7901D900F27201 /* sha1.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0025D1C0E2880004C3CEC /* sha1.c */; };
+		F883793A1F7901D900F27201 /* sha1.h in Sources */ = {isa = PBXBuildFile; fileRef = 54A0025E1C0E2880004C3CEC /* sha1.h */; };
+		F883793B1F7901D900F27201 /* Common.h in Sources */ = {isa = PBXBuildFile; fileRef = 54A0025F1C0E2880004C3CEC /* Common.h */; };
+		F883793C1F7901D900F27201 /* crypt.h in Sources */ = {isa = PBXBuildFile; fileRef = 54A002611C0E2880004C3CEC /* crypt.h */; };
+		F883793D1F7901D900F27201 /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002621C0E2880004C3CEC /* ioapi.c */; };
+		F883793E1F7901D900F27201 /* ioapi.h in Sources */ = {isa = PBXBuildFile; fileRef = 54A002631C0E2880004C3CEC /* ioapi.h */; };
+		F883793F1F7901D900F27201 /* mztools.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002641C0E2880004C3CEC /* mztools.c */; };
+		F88379401F7901D900F27201 /* mztools.h in Sources */ = {isa = PBXBuildFile; fileRef = 54A002651C0E2880004C3CEC /* mztools.h */; };
+		F88379411F7901D900F27201 /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002661C0E2880004C3CEC /* unzip.c */; };
+		F88379421F7901D900F27201 /* unzip.h in Sources */ = {isa = PBXBuildFile; fileRef = 54A002671C0E2880004C3CEC /* unzip.h */; };
+		F88379431F7901D900F27201 /* zip.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002681C0E2880004C3CEC /* zip.c */; };
+		F88379441F7901D900F27201 /* zip.h in Sources */ = {isa = PBXBuildFile; fileRef = 54A002691C0E2880004C3CEC /* zip.h */; };
+		F88379451F7901D900F27201 /* SSZipArchive.h in Sources */ = {isa = PBXBuildFile; fileRef = 54A0026A1C0E2880004C3CEC /* SSZipArchive.h */; };
+		F88379461F7901D900F27201 /* SSZipArchive.m in Sources */ = {isa = PBXBuildFile; fileRef = 54A0026B1C0E2880004C3CEC /* SSZipArchive.m */; };
+		F88379481F79022400F27201 /* CodePush.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 13BE3DEC1AC21097009241FE /* CodePush.h */; };
+		F883794A1F79024F00F27201 /* CodePush+Reporting.h in Headers */ = {isa = PBXBuildFile; fileRef = C32E97641F164FC70031595E /* CodePush+Reporting.h */; };
+		F883794B1F79024F00F27201 /* CodePush.h in Headers */ = {isa = PBXBuildFile; fileRef = 13BE3DEC1AC21097009241FE /* CodePush.h */; };
+		F883794C1F79024F00F27201 /* CodePush+RestartManager.h in Headers */ = {isa = PBXBuildFile; fileRef = C35FA4321EAE42E000057B7C /* CodePush+RestartManager.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -50,6 +105,16 @@
 			dstSubfolderSpec = 16;
 			files = (
 				8482F84C1E24C58300F793DB /* CodePush.h in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F88379091F79019100F27201 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = include/CodePush;
+			dstSubfolderSpec = 16;
+			files = (
+				F88379481F79022400F27201 /* CodePush.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -108,10 +173,18 @@
 		C35FA4321EAE42E000057B7C /* CodePush+RestartManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "CodePush+RestartManager.h"; path = "CodePush/CodePush+RestartManager.h"; sourceTree = "<group>"; };
 		C35FA4331EAE42E000057B7C /* CodePush+RestartManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "CodePush+RestartManager.m"; path = "CodePush/CodePush+RestartManager.m"; sourceTree = "<group>"; };
 		C38B262D1EB0CB45002CBA61 /* RCTConvert+CodePushSyncStatus.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "RCTConvert+CodePushSyncStatus.m"; path = "CodePush/RCTConvert+CodePushSyncStatus.m"; sourceTree = "<group>"; };
+		F883790B1F79019100F27201 /* libCodePush-tvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libCodePush-tvOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		58B511D81A9E6C8500147676 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F88379081F79019100F27201 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -209,6 +282,7 @@
 				1BCC09A61CC19EB700DDC0DD /* RCTConvert+CodePushUpdateState.m */,
 				54A002481C0E2880004C3CEC /* SSZipArchive */,
 				134814211AA4EA7D00B7C361 /* Products */,
+				F883790B1F79019100F27201 /* libCodePush-tvOS.a */,
 			);
 			sourceTree = "<group>";
 		};
@@ -222,6 +296,16 @@
 				8482F84E1E24C66300F793DB /* CodePush.h in Headers */,
 				C32E97661F164FC70031595E /* CodePush+Reporting.h in Headers */,
 				C35FA4341EAE42E000057B7C /* CodePush+RestartManager.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F88379491F79023E00F27201 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F883794B1F79024F00F27201 /* CodePush.h in Headers */,
+				F883794A1F79024F00F27201 /* CodePush+Reporting.h in Headers */,
+				F883794C1F79024F00F27201 /* CodePush+RestartManager.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -246,6 +330,24 @@
 			productReference = 134814201AA4EA6300B7C361 /* libCodePush.a */;
 			productType = "com.apple.product-type.library.static";
 		};
+		F883790A1F79019100F27201 /* CodePush-tvOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F88379131F79019100F27201 /* Build configuration list for PBXNativeTarget "CodePush-tvOS" */;
+			buildPhases = (
+				F88379071F79019100F27201 /* Sources */,
+				F88379081F79019100F27201 /* Frameworks */,
+				F88379091F79019100F27201 /* CopyFiles */,
+				F88379491F79023E00F27201 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "CodePush-tvOS";
+			productName = "CodePush-tvOS";
+			productReference = F883790B1F79019100F27201 /* libCodePush-tvOS.a */;
+			productType = "com.apple.product-type.library.static";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -257,6 +359,10 @@
 				TargetAttributes = {
 					58B511DA1A9E6C8500147676 = {
 						CreatedOnToolsVersion = 6.1.1;
+					};
+					F883790A1F79019100F27201 = {
+						CreatedOnToolsVersion = 9.0;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -273,6 +379,7 @@
 			projectRoot = "";
 			targets = (
 				58B511DA1A9E6C8500147676 /* CodePush */,
+				F883790A1F79019100F27201 /* CodePush-tvOS */,
 			);
 		};
 /* End PBXProject section */
@@ -311,6 +418,64 @@
 				54A002701C0E2880004C3CEC /* fileenc.c in Sources */,
 				5498D8F61D21F14100B5EB43 /* CodePushUtils.m in Sources */,
 				810D4E6D1B96935000B397E9 /* CodePushPackage.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F88379071F79019100F27201 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F88379261F7901D900F27201 /* aes.h in Sources */,
+				F88379271F7901D900F27201 /* aes_via_ace.h in Sources */,
+				F88379281F7901D900F27201 /* aescrypt.c in Sources */,
+				F88379291F7901D900F27201 /* aeskey.c in Sources */,
+				F883792A1F7901D900F27201 /* aesopt.h in Sources */,
+				F883792B1F7901D900F27201 /* aestab.c in Sources */,
+				F883792C1F7901D900F27201 /* aestab.h in Sources */,
+				F883792D1F7901D900F27201 /* brg_endian.h in Sources */,
+				F883792E1F7901D900F27201 /* brg_types.h in Sources */,
+				F883792F1F7901D900F27201 /* entropy.c in Sources */,
+				F88379301F7901D900F27201 /* entropy.h in Sources */,
+				F88379311F7901D900F27201 /* fileenc.c in Sources */,
+				F88379321F7901D900F27201 /* fileenc.h in Sources */,
+				F88379331F7901D900F27201 /* hmac.c in Sources */,
+				F88379341F7901D900F27201 /* hmac.h in Sources */,
+				F88379351F7901D900F27201 /* prng.c in Sources */,
+				F88379361F7901D900F27201 /* prng.h in Sources */,
+				F88379371F7901D900F27201 /* pwd2key.c in Sources */,
+				F88379381F7901D900F27201 /* pwd2key.h in Sources */,
+				F88379391F7901D900F27201 /* sha1.c in Sources */,
+				F883793A1F7901D900F27201 /* sha1.h in Sources */,
+				F883793B1F7901D900F27201 /* Common.h in Sources */,
+				F883793C1F7901D900F27201 /* crypt.h in Sources */,
+				F883793D1F7901D900F27201 /* ioapi.c in Sources */,
+				F883793E1F7901D900F27201 /* ioapi.h in Sources */,
+				F883793F1F7901D900F27201 /* mztools.c in Sources */,
+				F88379401F7901D900F27201 /* mztools.h in Sources */,
+				F88379411F7901D900F27201 /* unzip.c in Sources */,
+				F88379421F7901D900F27201 /* unzip.h in Sources */,
+				F88379431F7901D900F27201 /* zip.c in Sources */,
+				F88379441F7901D900F27201 /* zip.h in Sources */,
+				F88379451F7901D900F27201 /* SSZipArchive.h in Sources */,
+				F88379461F7901D900F27201 /* SSZipArchive.m in Sources */,
+				F88379141F7901C200F27201 /* CodePush+Reporting.h in Sources */,
+				F88379151F7901C200F27201 /* CodePush+Reporting.m in Sources */,
+				F88379161F7901C200F27201 /* CodePushUtils.m in Sources */,
+				F88379171F7901C200F27201 /* CodePush.h in Sources */,
+				F88379181F7901C200F27201 /* CodePush.m in Sources */,
+				F88379191F7901C200F27201 /* CodePush+RestartManager.h in Sources */,
+				F883791A1F7901C200F27201 /* CodePush+RestartManager.m in Sources */,
+				F883791B1F7901C200F27201 /* CodePushConstants.m in Sources */,
+				F883791C1F7901C200F27201 /* CodePushConfig.m in Sources */,
+				F883791D1F7901C200F27201 /* CodePushAcquisitionSDKManager.m in Sources */,
+				F883791E1F7901C200F27201 /* CodePushDownloadHandler.m in Sources */,
+				F883791F1F7901C200F27201 /* CodePushErrorUtils.m in Sources */,
+				F88379201F7901C200F27201 /* CodePushPackage.m in Sources */,
+				F88379211F7901C200F27201 /* CodePushTelemetryManager.m in Sources */,
+				F88379221F7901C200F27201 /* CodePushUpdateUtils.m in Sources */,
+				F88379231F7901C200F27201 /* RCTConvert+CodePushInstallMode.m in Sources */,
+				F88379241F7901C200F27201 /* RCTConvert+CodePushSyncStatus.m in Sources */,
+				F88379251F7901C200F27201 /* RCTConvert+CodePushUpdateState.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -427,6 +592,66 @@
 			};
 			name = Release;
 		};
+		F88379111F79019100F27201 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 11.0;
+			};
+			name = Debug;
+		};
+		F88379121F79019100F27201 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 3;
+				TVOS_DEPLOYMENT_TARGET = 11.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -444,6 +669,15 @@
 			buildConfigurations = (
 				58B511F01A9E6C8500147676 /* Debug */,
 				58B511F11A9E6C8500147676 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F88379131F79019100F27201 /* Build configuration list for PBXNativeTarget "CodePush-tvOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F88379111F79019100F27201 /* Debug */,
+				F88379121F79019100F27201 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
