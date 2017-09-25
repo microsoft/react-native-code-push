@@ -28,7 +28,8 @@ static CodePushConfig *_currentConfig;
     NSString *buildVersion = [infoDictionary objectForKey:(NSString *)kCFBundleVersionKey];
     NSString *deploymentKey = [infoDictionary objectForKey:@"CodePushDeploymentKey"];
     NSString *serverURL = [infoDictionary objectForKey:@"CodePushServerURL"];
-
+    NSString *publicKey = [infoDictionary objectForKey:@"CodePushPublicKey"];
+    
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     NSString *clientUniqueId = [userDefaults stringForKey:ClientUniqueIDConfigKey];
     if (clientUniqueId == nil) {
@@ -47,6 +48,7 @@ static CodePushConfig *_currentConfig;
                             serverURL,ServerURLConfigKey,
                             clientUniqueId,ClientUniqueIDConfigKey,
                             deploymentKey,DeploymentKeyConfigKey,
+                            publicKey,PublicKeyKey,
                             nil];
 
     return self;
@@ -96,5 +98,7 @@ static CodePushConfig *_currentConfig;
 {
     [_configDictionary setValue:serverURL forKey:ServerURLConfigKey];
 }
+
+//no setter for PublicKey, because it's need to be hard coded within Info.plist for safety
 
 @end

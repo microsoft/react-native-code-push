@@ -1,0 +1,490 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0427A4CA1D05A5120055EA8C /* SherlockHolmes.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 0427A4C91D05A5120055EA8C /* SherlockHolmes.h */; };
+		0427A4CC1D05A5120055EA8C /* SherlockHolmes.m in Sources */ = {isa = PBXBuildFile; fileRef = 0427A4CB1D05A5120055EA8C /* SherlockHolmes.m */; };
+		0427A4D91D05A6A70055EA8C /* SherlockHolmesTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0427A4D81D05A6A70055EA8C /* SherlockHolmesTests.m */; };
+		0427A4DB1D05A6A70055EA8C /* libSherlockHolmes.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0427A4C61D05A5110055EA8C /* libSherlockHolmes.a */; };
+		0427A4E21D05A7930055EA8C /* SuspiciousDictionariesTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0427A4E11D05A7930055EA8C /* SuspiciousDictionariesTests.m */; };
+		6B391AABD7988AE35786E223 /* libPods-SherlockHolmesTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CBD19C847B0022B7BEC8A2C1 /* libPods-SherlockHolmesTests.a */; };
+		95E187E0EFE14DD8D518B27B /* libPods-SherlockHolmes.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F91810534D7094C077B5A68 /* libPods-SherlockHolmes.a */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		0427A4DC1D05A6A70055EA8C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0427A4BE1D05A5110055EA8C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0427A4C51D05A5110055EA8C;
+			remoteInfo = SherlockHolmes;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		0427A4C41D05A5110055EA8C /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+				0427A4CA1D05A5120055EA8C /* SherlockHolmes.h in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		0427A4C61D05A5110055EA8C /* libSherlockHolmes.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSherlockHolmes.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		0427A4C91D05A5120055EA8C /* SherlockHolmes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SherlockHolmes.h; sourceTree = "<group>"; };
+		0427A4CB1D05A5120055EA8C /* SherlockHolmes.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SherlockHolmes.m; sourceTree = "<group>"; };
+		0427A4D61D05A6A70055EA8C /* SherlockHolmesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SherlockHolmesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0427A4D81D05A6A70055EA8C /* SherlockHolmesTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SherlockHolmesTests.m; sourceTree = "<group>"; };
+		0427A4DA1D05A6A70055EA8C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0427A4E11D05A7930055EA8C /* SuspiciousDictionariesTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SuspiciousDictionariesTests.m; sourceTree = "<group>"; };
+		0F91810534D7094C077B5A68 /* libPods-SherlockHolmes.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-SherlockHolmes.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		45483500DA7F581F49A33D2C /* Pods-SherlockHolmes.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SherlockHolmes.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SherlockHolmes/Pods-SherlockHolmes.debug.xcconfig"; sourceTree = "<group>"; };
+		78FFE243E3E46AD30237A8C3 /* Pods-SherlockHolmesTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SherlockHolmesTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-SherlockHolmesTests/Pods-SherlockHolmesTests.release.xcconfig"; sourceTree = "<group>"; };
+		7C6B5E241F2BFDB04B7A80F2 /* Pods-SherlockHolmesTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SherlockHolmesTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-SherlockHolmesTests/Pods-SherlockHolmesTests.debug.xcconfig"; sourceTree = "<group>"; };
+		CBD19C847B0022B7BEC8A2C1 /* libPods-SherlockHolmesTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-SherlockHolmesTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		DAD87623F34BB4725E32FF45 /* Pods-SherlockHolmes.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SherlockHolmes.release.xcconfig"; path = "Pods/Target Support Files/Pods-SherlockHolmes/Pods-SherlockHolmes.release.xcconfig"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		0427A4C31D05A5110055EA8C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				95E187E0EFE14DD8D518B27B /* libPods-SherlockHolmes.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0427A4D31D05A6A70055EA8C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0427A4DB1D05A6A70055EA8C /* libSherlockHolmes.a in Frameworks */,
+				6B391AABD7988AE35786E223 /* libPods-SherlockHolmesTests.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0427A4BD1D05A5110055EA8C = {
+			isa = PBXGroup;
+			children = (
+				0427A4C81D05A5120055EA8C /* SherlockHolmes */,
+				0427A4D71D05A6A70055EA8C /* SherlockHolmesTests */,
+				0427A4C71D05A5110055EA8C /* Products */,
+				073EB207CF0057E6A6531219 /* Pods */,
+				487625013160413FDAC36E90 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		0427A4C71D05A5110055EA8C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				0427A4C61D05A5110055EA8C /* libSherlockHolmes.a */,
+				0427A4D61D05A6A70055EA8C /* SherlockHolmesTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		0427A4C81D05A5120055EA8C /* SherlockHolmes */ = {
+			isa = PBXGroup;
+			children = (
+				0427A4C91D05A5120055EA8C /* SherlockHolmes.h */,
+				0427A4CB1D05A5120055EA8C /* SherlockHolmes.m */,
+			);
+			path = SherlockHolmes;
+			sourceTree = "<group>";
+		};
+		0427A4D71D05A6A70055EA8C /* SherlockHolmesTests */ = {
+			isa = PBXGroup;
+			children = (
+				0427A4D81D05A6A70055EA8C /* SherlockHolmesTests.m */,
+				0427A4DA1D05A6A70055EA8C /* Info.plist */,
+				0427A4E11D05A7930055EA8C /* SuspiciousDictionariesTests.m */,
+			);
+			path = SherlockHolmesTests;
+			sourceTree = "<group>";
+		};
+		073EB207CF0057E6A6531219 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				45483500DA7F581F49A33D2C /* Pods-SherlockHolmes.debug.xcconfig */,
+				DAD87623F34BB4725E32FF45 /* Pods-SherlockHolmes.release.xcconfig */,
+				7C6B5E241F2BFDB04B7A80F2 /* Pods-SherlockHolmesTests.debug.xcconfig */,
+				78FFE243E3E46AD30237A8C3 /* Pods-SherlockHolmesTests.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+		487625013160413FDAC36E90 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				0F91810534D7094C077B5A68 /* libPods-SherlockHolmes.a */,
+				CBD19C847B0022B7BEC8A2C1 /* libPods-SherlockHolmesTests.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		0427A4C51D05A5110055EA8C /* SherlockHolmes */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0427A4CF1D05A5120055EA8C /* Build configuration list for PBXNativeTarget "SherlockHolmes" */;
+			buildPhases = (
+				01318A7DF4C5367B1DD37CE5 /* [CP] Check Pods Manifest.lock */,
+				0427A4C21D05A5110055EA8C /* Sources */,
+				0427A4C31D05A5110055EA8C /* Frameworks */,
+				0427A4C41D05A5110055EA8C /* CopyFiles */,
+				3907CFB9289D53887E6A3E67 /* [CP] Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SherlockHolmes;
+			productName = SherlockHolmes;
+			productReference = 0427A4C61D05A5110055EA8C /* libSherlockHolmes.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		0427A4D51D05A6A70055EA8C /* SherlockHolmesTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0427A4DE1D05A6A70055EA8C /* Build configuration list for PBXNativeTarget "SherlockHolmesTests" */;
+			buildPhases = (
+				73FA3EB645916A02680C3A36 /* [CP] Check Pods Manifest.lock */,
+				0427A4D21D05A6A70055EA8C /* Sources */,
+				0427A4D31D05A6A70055EA8C /* Frameworks */,
+				0427A4D41D05A6A70055EA8C /* Resources */,
+				8F57479ACF5DE42EC4ED0DCB /* [CP] Embed Pods Frameworks */,
+				FE0760A5ED41D3D511E4AAA2 /* [CP] Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0427A4DD1D05A6A70055EA8C /* PBXTargetDependency */,
+			);
+			name = SherlockHolmesTests;
+			productName = SherlockHolmesTests;
+			productReference = 0427A4D61D05A6A70055EA8C /* SherlockHolmesTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		0427A4BE1D05A5110055EA8C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0730;
+				ORGANIZATIONNAME = JWT;
+				TargetAttributes = {
+					0427A4C51D05A5110055EA8C = {
+						CreatedOnToolsVersion = 7.3.1;
+					};
+					0427A4D51D05A6A70055EA8C = {
+						CreatedOnToolsVersion = 7.3.1;
+					};
+				};
+			};
+			buildConfigurationList = 0427A4C11D05A5110055EA8C /* Build configuration list for PBXProject "SherlockHolmes" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 0427A4BD1D05A5110055EA8C;
+			productRefGroup = 0427A4C71D05A5110055EA8C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				0427A4C51D05A5110055EA8C /* SherlockHolmes */,
+				0427A4D51D05A6A70055EA8C /* SherlockHolmesTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		0427A4D41D05A6A70055EA8C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		01318A7DF4C5367B1DD37CE5 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		3907CFB9289D53887E6A3E67 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-SherlockHolmes/Pods-SherlockHolmes-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		73FA3EB645916A02680C3A36 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		8F57479ACF5DE42EC4ED0DCB /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-SherlockHolmesTests/Pods-SherlockHolmesTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		FE0760A5ED41D3D511E4AAA2 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-SherlockHolmesTests/Pods-SherlockHolmesTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		0427A4C21D05A5110055EA8C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0427A4CC1D05A5120055EA8C /* SherlockHolmes.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0427A4D21D05A6A70055EA8C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0427A4E21D05A7930055EA8C /* SuspiciousDictionariesTests.m in Sources */,
+				0427A4D91D05A6A70055EA8C /* SherlockHolmesTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		0427A4DD1D05A6A70055EA8C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0427A4C51D05A5110055EA8C /* SherlockHolmes */;
+			targetProxy = 0427A4DC1D05A6A70055EA8C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		0427A4CD1D05A5120055EA8C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		0427A4CE1D05A5120055EA8C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		0427A4D01D05A5120055EA8C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 45483500DA7F581F49A33D2C /* Pods-SherlockHolmes.debug.xcconfig */;
+			buildSettings = {
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		0427A4D11D05A5120055EA8C /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = DAD87623F34BB4725E32FF45 /* Pods-SherlockHolmes.release.xcconfig */;
+			buildSettings = {
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		0427A4DF1D05A6A70055EA8C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7C6B5E241F2BFDB04B7A80F2 /* Pods-SherlockHolmesTests.debug.xcconfig */;
+			buildSettings = {
+				INFOPLIST_FILE = SherlockHolmesTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.jwt.io.SherlockHolmesTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		0427A4E01D05A6A70055EA8C /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 78FFE243E3E46AD30237A8C3 /* Pods-SherlockHolmesTests.release.xcconfig */;
+			buildSettings = {
+				INFOPLIST_FILE = SherlockHolmesTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.jwt.io.SherlockHolmesTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0427A4C11D05A5110055EA8C /* Build configuration list for PBXProject "SherlockHolmes" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0427A4CD1D05A5120055EA8C /* Debug */,
+				0427A4CE1D05A5120055EA8C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		0427A4CF1D05A5120055EA8C /* Build configuration list for PBXNativeTarget "SherlockHolmes" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0427A4D01D05A5120055EA8C /* Debug */,
+				0427A4D11D05A5120055EA8C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		0427A4DE1D05A6A70055EA8C /* Build configuration list for PBXNativeTarget "SherlockHolmesTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0427A4DF1D05A6A70055EA8C /* Debug */,
+				0427A4E01D05A6A70055EA8C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 0427A4BE1D05A5110055EA8C /* Project object */;
+}

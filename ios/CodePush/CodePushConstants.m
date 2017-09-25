@@ -33,6 +33,7 @@ NSString *const ServerURLConfigKey = @"serverUrl";
 NSString *const DeploymentKeyConfigKey = @"deploymentKey";
 NSString *const ClientUniqueIDConfigKey = @"clientUniqueId";
 NSString *const IgonreAppVersionConfigKey = @"_ignoreAppVersion";
+NSString *const PublicKeyKey = @"publicKey";
 
 NSString *const MinimumBackgroundDurationKey = @"minimumBackgroundDuration";
 NSString *const MandatoryInstallModeKey = @"mandatoryInstallMode";

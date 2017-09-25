@@ -1,0 +1,24 @@
+source 'https://github.com/CocoaPods/Specs.git'
+
+def target_names
+  %w(iOS_Static iOS_Framework iOS_Swift macOS_Framework macOS_Swift).reject do |f|
+  	f =~ /Swift/
+  end
+  .map do |name|
+	  'JWT_' + name
+  end
+end
+
+def utilities
+  pod 'Base64', '~> 1.1.2'
+end
+
+def install
+	target_names.each do |t|
+		target t do
+			utilities
+		end
+	end
+end
+
+#install

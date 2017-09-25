@@ -1,0 +1,23 @@
+source 'https://github.com/CocoaPods/Specs.git'
+#use_frameworks!
+
+def target_name
+  'JWTDesktop'
+end
+
+def test_name
+  target_name + 'Tests'
+end
+
+def handmade
+  pod 'JWT', path: '../../'
+  pod 'Masonry'
+end
+
+target target_name do
+  handmade
+end
+
+target test_name do
+  handmade
+end

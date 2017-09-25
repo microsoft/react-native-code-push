@@ -128,6 +128,7 @@ typedef void(^CPDownloadFailBlock)(NSError*);
 @property (readonly) NSDictionary *configuration;
 @property (copy) NSString *deploymentKey;
 @property (copy) NSString *serverURL;
+@property (copy) NSString *publicKey;
 
 + (instancetype)current;
 
@@ -165,6 +166,7 @@ failCallback:(void (^)(NSError *err))failCallback;
 
 + (void)downloadPackage:(NSDictionary *)updatePackage
  expectedBundleFileName:(NSString *)expectedBundleFileName
+              publicKey:(NSString *)publicKey
          operationQueue:(dispatch_queue_t)operationQueue
        progressCallback:(void (^)(long long, long long))progressCallback
            doneCallback:(void (^)())doneCallback
@@ -221,10 +223,25 @@ failCallback:(void (^)(NSError *err))failCallback;
 + (NSString *)manifestFolderPrefix;
 + (NSString *)modifiedDateStringOfFileAtURL:(NSURL *)fileURL;
 
-+ (BOOL)verifyHashForDiffUpdate:(NSString *)finalUpdateFolder
-                   expectedHash:(NSString *)expectedHash
-                          error:(NSError **)error;
++ (BOOL)isHashIgnoredFor:(NSString *) relativePath;
 
++ (BOOL)verifyFolderHash:(NSString *)finalUpdateFolder
+            expectedHash:(NSString *)expectedHash
+                   error:(NSError **)error;
+
+// remove BEGIN / END tags and line breaks from public key string
++ (NSString *)getKeyValueFromPublicKeyString:(NSString *)publicKeyString;
+
++ (NSString *)getSignatureFilePath:(NSString *)updateFolderPath;
+
++ (NSDictionary *) verifyAndDecodeJWT:(NSString *) jwt
+                        withPublicKey:(NSString *)publicKey
+                                error:(NSError **)error;
+
++ (BOOL)verifyUpdateSignatureFor:(NSString *)updateFolderPath
+                    expectedHash:(NSString *)newUpdateHash
+                   withPublicKey:(NSString *)publicKeyString
+                           error:(NSError **)error;
 @end
 
 // Constants declarations below

@@ -1,0 +1,63 @@
+language: objective-c
+osx_image: xcode8.1
+
+before_install:
+    # - brew update
+    #- if brew outdated | grep -qx xctool; then brew upgrade xctool; fi
+    # install
+    - rvm use 2.2.2 --install --binary --fuzzy
+    - gem install cocoapods --no-rdoc --no-ri --no-document --quiet
+    - gem install xcpretty --no-rdoc --no-ri --no-document --quiet
+    - pod --version
+    - pod setup --silent > /dev/null
+    - pod repo update --silent
+    - xcpretty --version
+    - xcodebuild -version
+    - xcodebuild -showsdks
+script:
+    # 32-bit tests
+    # - xctool -sdk iphonesimulator clean test -destination "name=iPhone 5" -find-target "JWTTests"
+    # 64-bit tests
+    # - xctool -sdk iphonesimulator clean test -destination "name=iPhone 5s" -find-target "JWTTests"
+
+    # Thanks CocoaLumberjack!
+
+    - set -o pipefail
+
+    # Check pod.
+    - echo Install pods for framework.
+    - echo Skipped.
+    # - pod install --project-directory=Framework
+
+    - echo Check if the library described by the podspec can be built
+    - pod lib lint --allow-warnings
+
+    # Build.
+    - echo "Build iOS Static library"
+    - xcodebuild clean build -project Framework/JWT.xcodeproj -scheme 'JWT-iOS-Static' -sdk iphonesimulator PLATFORM_NAME=iphonesimulator -configuration Release | xcpretty -c
+
+    - echo "Build as dynamic framework (ObjectiveC), each platform (osx, ios)"
+    - xcodebuild clean build -project Framework/JWT.xcodeproj -scheme 'JWT-macOS' -configuration Release -sdk macosx | xcpretty -c
+    - xcodebuild clean build -project Framework/JWT.xcodeproj -scheme 'JWT-iOS' -configuration Release -sdk iphonesimulator | xcpretty -c
+
+    - echo "Build as dynamic framework (Swift), each platform (osx, ios)"
+    - xcodebuild clean build -project Framework/JWT.xcodeproj -scheme 'JWT-macOS-Swift' -configuration Release -sdk macosx | xcpretty -c
+    - xcodebuild clean build -project Framework/JWT.xcodeproj -scheme 'JWT-iOS-Swift' -configuration Release -sdk iphonesimulator | xcpretty -c
+
+    # Carthage.
+    - echo "Build dynamic universal for each platform (osx, ios)"
+    - xcodebuild clean build -project Framework/JWT.xcodeproj -scheme 'JWT' -configuration Release -sdk macosx | xcpretty -c
+    - xcodebuild clean build -project Framework/JWT.xcodeproj -scheme 'JWT' -configuration Release -sdk iphonesimulator | xcpretty -c
+
+    # Tests.
+    - echo Run tests
+    - pod install --project-directory=Tests
+    # 32-bit tests
+    - echo Run iOS Tests
+    - xcodebuild test -workspace 'Tests/Tests.xcworkspace/' -scheme 'iOS_Tests' -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 5,OS=latest' | xcpretty -c
+    # 64-bit tests
+    - xcodebuild test -workspace 'Tests/Tests.xcworkspace/' -scheme 'iOS_Tests' -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 5s,OS=latest' | xcpretty -c
+    # mac OS tests
+    # UNCOMMENT WHEN READY!
+    # - echo Run Mac OS Tests
+    - xcodebuild test -workspace 'Tests/Tests.xcworkspace/' -scheme 'macOS_Tests' -sdk macosx | xcpretty -c

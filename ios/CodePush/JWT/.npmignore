@@ -1,0 +1,42 @@
+# Mac OS
+.DS_Store
+# Xcode
+#
+build/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata
+*.xccheckout
+*.moved-aside
+DerivedData
+*.hmap
+*.ipa
+*.xcuserstate
+
+# AppCode JetBrains
+.idea/
+
+# rvm
+.ruby-version
+.ruby-gemset
+Example/**/.ruby-version
+Example/**/.ruby-gemset
+Inspection/**/.ruby-version
+Inspection/**/.ruby-gemset
+
+# Pods
+Pods/Pods.xcodeproj/xcuserdata/
+Pods/
+Example/**/Pods/Pods.xcodeproj/xcuserdata/
+Example/**/Pods/
+Inspection/**/Pods/Pods.xcodeproj/xcuserdata/
+Inspection/**/Pods/
+
+# Carthage
+Example/CarthageCompatibility/Carthage/

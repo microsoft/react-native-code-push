@@ -1,0 +1,25 @@
+source 'https://github.com/CocoaPods/Specs.git'
+#use_frameworks!
+
+def target_name
+  'JWTDesktopSwift'
+end
+
+def test_name
+  target_name + 'Tests'
+end
+
+def handmade
+  pod 'JWT', path: '../../'
+  pod 'SnapKit' #, '~> 3.0'
+  # pod 'Masonry'
+end
+
+target target_name do
+  use_frameworks!
+  handmade
+end
+
+# target test_name do
+#   handmade
+# end

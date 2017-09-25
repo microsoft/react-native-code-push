@@ -1,0 +1,1 @@
+cat .travis.yml | perl -lne '/^script:/ ... eof() and /^\s+-/ and s/^\s+-// and print and print qx($_)'

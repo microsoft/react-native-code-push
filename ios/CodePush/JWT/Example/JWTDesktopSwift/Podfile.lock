@@ -1,0 +1,22 @@
+PODS:
+  - Base64 (1.1.2)
+  - JWT (3.0.0-beta.3):
+    - Base64 (~> 1.1.2)
+  - SnapKit (3.2.0)
+
+DEPENDENCIES:
+  - JWT (from `../../`)
+  - SnapKit
+
+EXTERNAL SOURCES:
+  JWT:
+    :path: "../../"
+
+SPEC CHECKSUMS:
+  Base64: cecfb41a004124895a7bcee567a89bae5a89d49b
+  JWT: a2e44b0d2273e28ae68cec30e95d3d460c76c298
+  SnapKit: 1ca44df72cfa543218d177cb8aab029d10d86ea7
+
+PODFILE CHECKSUM: 9a98d54728f6d6056948e2964c879e8c7fc79e14
+
+COCOAPODS: 1.2.1

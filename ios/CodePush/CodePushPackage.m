@@ -41,6 +41,7 @@ static NSString *const UnzippedFolderName = @"unzipped";
 
 + (void)downloadPackage:(NSDictionary *)updatePackage
  expectedBundleFileName:(NSString *)expectedBundleFileName
+              publicKey:(NSString *)publicKey
          operationQueue:(dispatch_queue_t)operationQueue
        progressCallback:(void (^)(long long, long long))progressCallback
            doneCallback:(void (^)())doneCallback
@@ -231,18 +232,77 @@ static NSString *const UnzippedFolderName = @"unzipped";
                                                             }
                                                         }
                                                         
-                                                        if (isDiffUpdate && ![CodePushUpdateUtils verifyHashForDiffUpdate:newUpdateFolderPath
-                                                                                                             expectedHash:newUpdateHash
-                                                                                                                    error:&error]) {
-                                                            if (error) {
+                                                        CPLog((isDiffUpdate) ? @"Applying diff update." : @"Applying full update.");
+                                                        
+                                                        BOOL isSignatureVerificationEnabled = (publicKey != nil);
+                                                        
+                                                        NSString *signatureFilePath = [CodePushUpdateUtils getSignatureFilePath:newUpdateFolderPath];
+                                                        BOOL isSignatureAppearedInBundle = [[NSFileManager defaultManager] fileExistsAtPath:signatureFilePath];
+                                                        
+                                                        if (isSignatureVerificationEnabled) {
+                                                            if (isSignatureAppearedInBundle) {
+                                                                if (![CodePushUpdateUtils verifyFolderHash:newUpdateFolderPath
+                                                                                              expectedHash:newUpdateHash
+                                                                                                     error:&error]) {
+                                                                    CPLog(@"The update contents failed the data integrity check.");
+                                                                    if (!error) {
+                                                                        error = [CodePushErrorUtils errorWithMessage:@"The update contents failed the data integrity check."];
+                                                                    }
+                                                                    
+                                                                    failCallback(error);
+                                                                    return;
+                                                                } else {
+                                                                    CPLog(@"The update contents succeeded the data integrity check.");
+                                                                }
+                                                                BOOL isSignatureValid = [CodePushUpdateUtils verifyUpdateSignatureFor:newUpdateFolderPath
+                                                                                                                         expectedHash:newUpdateHash
+                                                                                                                        withPublicKey:publicKey
+                                                                                                                                error:&error];
+                                                                if (!isSignatureValid) {
+                                                                    CPLog(@"The update contents failed code signing check.");
+                                                                    if (!error) {
+                                                                        error = [CodePushErrorUtils errorWithMessage:@"The update contents failed code signing check."];
+                                                                    }
+                                                                    failCallback(error);
+                                                                    return;
+                                                                } else {
+                                                                    CPLog(@"The update contents succeeded the code signing check.");
+                                                                }
+                                                            } else {
+                                                                error = [CodePushErrorUtils errorWithMessage:
+                                                                         @"Error! Public key was provided but there is no JWT signature within app bundle to verify " \
+                                                                         "Possible reasons, why that might happen: \n" \
+                                                                         "1. You've been released CodePush bundle update using version of CodePush CLI that is not support code signing.\n" \
+                                                                         "2. You've been released CodePush bundle update without providing --privateKeyPath option."];
                                                                 failCallback(error);
                                                                 return;
                                                             }
                                                             
-                                                            error = [CodePushErrorUtils errorWithMessage:@"The update contents failed the data integrity check."];
-                                                            
-                                                            failCallback(error);
-                                                            return;
+                                                        } else {
+                                                            BOOL needToVerifyHash;
+                                                            if (isSignatureAppearedInBundle) {
+                                                                CPLog(@"Warning! JWT signature exists in codepush update but code integrity check couldn't be performed" \
+                                                                      " because there is no public key configured. " \
+                                                                      "Please ensure that public key is properly configured within your application.");
+                                                                needToVerifyHash = true;
+                                                            } else {
+                                                                needToVerifyHash = isDiffUpdate;
+                                                            }
+                                                            if(needToVerifyHash){
+                                                                if (![CodePushUpdateUtils verifyFolderHash:newUpdateFolderPath
+                                                                                              expectedHash:newUpdateHash
+                                                                                                     error:&error]) {
+                                                                    CPLog(@"The update contents failed the data integrity check.");
+                                                                    if (!error) {
+                                                                        error = [CodePushErrorUtils errorWithMessage:@"The update contents failed the data integrity check."];
+                                                                    }
+                                                                    
+                                                                    failCallback(error);
+                                                                    return;
+                                                                } else {
+                                                                    CPLog(@"The update contents succeeded the data integrity check.");
+                                                                }
+                                                            }
                                                         }
                                                     } else {
                                                         [[NSFileManager defaultManager] createDirectoryAtPath:newUpdateFolderPath

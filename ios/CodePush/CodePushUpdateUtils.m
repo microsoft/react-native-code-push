@@ -20,8 +20,7 @@ NSString * const ManifestFolderPrefix = @"CodePush";
     }
     
     for (NSString *fileName in folderFiles) {
-        // We must skip the macOS generated files.
-        if ([fileName isEqualToString:@".DS_Store"] || [fileName isEqualToString:@"__MACOSX"]) {
+        if([self isHashIgnoredFor:relativePath]){
             continue;
         }
 
@@ -237,26 +236,118 @@ NSString * const ManifestFolderPrefix = @"CodePush";
     }
 }
 
-+ (BOOL)verifyHashForDiffUpdate:(NSString *)finalUpdateFolder
-                   expectedHash:(NSString *)expectedHash
-                          error:(NSError **)error
++ (BOOL)verifyFolderHash:(NSString *)finalUpdateFolder
+            expectedHash:(NSString *)expectedHash
+                   error:(NSError **)error
 {
+    CPLog(@"Verifying hash for folder path: %@", finalUpdateFolder);
+    
     NSMutableArray *updateContentsManifest = [NSMutableArray array];
     BOOL result = [self addContentsOfFolderToManifest:finalUpdateFolder
                                            pathPrefix:@""
                                              manifest:updateContentsManifest
                                                 error:error];
+    
+    CPLog(@"Manifest string: %@", updateContentsManifest);
+    
     if (!result) {
         return NO;
     }
-
+    
     NSString *updateContentsManifestHash = [self computeFinalHashFromManifest:updateContentsManifest
                                                                         error:error];
     if (!updateContentsManifestHash) {
         return NO;
     }
     
+    CPLog(@"Expected hash: %@, actual hash: %@", expectedHash, updateContentsManifestHash);
+    
     return [updateContentsManifestHash isEqualToString:expectedHash];
+}
+
+// remove BEGIN / END tags and line breaks from public key string
++ (NSString *)getKeyValueFromPublicKeyString:(NSString *)publicKeyString
+{
+    publicKeyString = [publicKeyString stringByReplacingOccurrencesOfString:@"-----BEGIN PUBLIC KEY-----\n"
+                                                                 withString:@""];
+    publicKeyString = [publicKeyString stringByReplacingOccurrencesOfString:@"-----END PUBLIC KEY-----"
+                                                                 withString:@""];
+    publicKeyString = [publicKeyString stringByReplacingOccurrencesOfString:@"\n"
+                                                                 withString:@""];
+    
+    return publicKeyString;
+}
+
++ (NSString *)getSignatureFilePath:(NSString *)updateFolderPath
+{
+    return [NSString stringWithFormat:@"%@/%@/%@", updateFolderPath, ManifestFolderPrefix, BundleJWTFile];
+}
+
++ (NSString *)getSignatureFor:(NSString *)folderPath
+                        error:(NSError **)error
+{
+    NSString *signatureFilePath = [self getSignatureFilePath:folderPath];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:signatureFilePath]) {
+        return [NSString stringWithContentsOfFile:signatureFilePath encoding:NSUTF8StringEncoding error:error];
+    } else {
+        *error = [CodePushErrorUtils errorWithMessage:[NSString stringWithFormat: @"Cannot find signature at %@", signatureFilePath]];
+        return nil;
+    }
+}
+
++ (NSDictionary *) verifyAndDecodeJWT:(NSString *)jwt
+                        withPublicKey:(NSString *)publicKey
+                                error:(NSError **)error
+{
+    id <JWTAlgorithmDataHolderProtocol> verifyDataHolder = [JWTAlgorithmRSFamilyDataHolder new].keyExtractorType([JWTCryptoKeyExtractor publicKeyWithPEMBase64].type).algorithmName(@"RS256").secret(publicKey);
+    
+    JWTCodingBuilder *verifyBuilder = [JWTDecodingBuilder decodeMessage:jwt].addHolder(verifyDataHolder);
+    JWTCodingResultType *verifyResult = verifyBuilder.result;
+    if (verifyResult.successResult) {
+        return verifyResult.successResult.payload;
+    }
+    else {
+        *error = verifyResult.errorResult.error;
+        return nil;
+    }
+}
+
++ (BOOL)verifyUpdateSignatureFor:(NSString *)folderPath
+                    expectedHash:(NSString *)newUpdateHash
+                   withPublicKey:(NSString *)publicKeyString
+                           error:(NSError **)error
+{
+    NSLog(@"Verifying signature for folder path: %@", folderPath);
+    
+    NSString *publicKey = [self getKeyValueFromPublicKeyString: publicKeyString];
+    
+    NSError *signatureVerificationError;
+    NSString *signature = [self getSignatureFor: folderPath
+                                          error: &signatureVerificationError];
+    if (signatureVerificationError) {
+        CPLog(@"The update could not be verified because no signature was found. %@", signatureVerificationError);
+        *error = signatureVerificationError;
+        return false;
+    }
+    
+    NSError *payloadDecodingError;
+    NSDictionary *envelopedPayload = [self verifyAndDecodeJWT:signature withPublicKey:publicKey error:&payloadDecodingError];
+    if(payloadDecodingError){
+        CPLog(@"The update could not be verified because it was not signed by a trusted party. %@", payloadDecodingError);
+        *error = payloadDecodingError;
+        return false;
+    }
+    
+    CPLog(@"JWT signature verification succeeded, payload content:  %@", envelopedPayload);
+    
+    if(![envelopedPayload objectForKey:@"contentHash"]){
+        CPLog(@"The update could not be verified because the signature did not specify a content hash.");
+        return false;
+    }
+    
+    NSString *contentHash = envelopedPayload[@"contentHash"];
+    
+    return [contentHash isEqualToString:newUpdateHash];
 }
 
 @end

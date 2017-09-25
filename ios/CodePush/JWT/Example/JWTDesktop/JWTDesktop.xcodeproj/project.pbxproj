@@ -1,0 +1,575 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		04526B1A1CF3A2690090C5A3 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 04526B191CF3A2690090C5A3 /* AppDelegate.m */; };
+		04526B1D1CF3A2690090C5A3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 04526B1C1CF3A2690090C5A3 /* main.m */; };
+		04526B201CF3A2690090C5A3 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 04526B1F1CF3A2690090C5A3 /* ViewController.m */; };
+		04526B221CF3A2690090C5A3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 04526B211CF3A2690090C5A3 /* Assets.xcassets */; };
+		04526B251CF3A2690090C5A3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 04526B231CF3A2690090C5A3 /* Main.storyboard */; };
+		04526B301CF3A2690090C5A3 /* JWTDesktopTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 04526B2F1CF3A2690090C5A3 /* JWTDesktopTests.m */; };
+		04701E631D97F001007A0A86 /* JWTDecriptedViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 04701E611D97F001007A0A86 /* JWTDecriptedViewController.m */; };
+		04701E641D97F001007A0A86 /* JWTDecriptedViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04701E621D97F001007A0A86 /* JWTDecriptedViewController.xib */; };
+		04701E681D97F0E5007A0A86 /* JWTDecriptedCollectionViewItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 04701E661D97F0E5007A0A86 /* JWTDecriptedCollectionViewItem.m */; };
+		04701E691D97F0E5007A0A86 /* JWTDecriptedCollectionViewItem.xib in Resources */ = {isa = PBXBuildFile; fileRef = 04701E671D97F0E5007A0A86 /* JWTDecriptedCollectionViewItem.xib */; };
+		04701E6C1D981F8C007A0A86 /* JWTTokenTextTypeDescription.m in Sources */ = {isa = PBXBuildFile; fileRef = 04701E6B1D981F8C007A0A86 /* JWTTokenTextTypeDescription.m */; };
+		D409F6C340474CDB7CA108BE /* libPods-JWTDesktop.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B0EC4FDC2D76F5A1074A63D2 /* libPods-JWTDesktop.a */; };
+		DB17256DE61643E08ADC47F5 /* libPods-JWTDesktopTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 447DF4A5AF64E7BE744EEE2F /* libPods-JWTDesktopTests.a */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		04526B2C1CF3A2690090C5A3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 04526B0D1CF3A2690090C5A3 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 04526B141CF3A2690090C5A3;
+			remoteInfo = JWTDesktop;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		04526B151CF3A2690090C5A3 /* JWTDesktop.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JWTDesktop.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		04526B181CF3A2690090C5A3 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		04526B191CF3A2690090C5A3 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		04526B1C1CF3A2690090C5A3 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		04526B1E1CF3A2690090C5A3 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		04526B1F1CF3A2690090C5A3 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		04526B211CF3A2690090C5A3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		04526B241CF3A2690090C5A3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		04526B261CF3A2690090C5A3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		04526B2B1CF3A2690090C5A3 /* JWTDesktopTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = JWTDesktopTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		04526B2F1CF3A2690090C5A3 /* JWTDesktopTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JWTDesktopTests.m; sourceTree = "<group>"; };
+		04526B311CF3A2690090C5A3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		04701E601D97F001007A0A86 /* JWTDecriptedViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JWTDecriptedViewController.h; sourceTree = "<group>"; };
+		04701E611D97F001007A0A86 /* JWTDecriptedViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JWTDecriptedViewController.m; sourceTree = "<group>"; };
+		04701E621D97F001007A0A86 /* JWTDecriptedViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = JWTDecriptedViewController.xib; sourceTree = "<group>"; };
+		04701E651D97F0E5007A0A86 /* JWTDecriptedCollectionViewItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JWTDecriptedCollectionViewItem.h; sourceTree = "<group>"; };
+		04701E661D97F0E5007A0A86 /* JWTDecriptedCollectionViewItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JWTDecriptedCollectionViewItem.m; sourceTree = "<group>"; };
+		04701E671D97F0E5007A0A86 /* JWTDecriptedCollectionViewItem.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = JWTDecriptedCollectionViewItem.xib; sourceTree = "<group>"; };
+		04701E6A1D981F8C007A0A86 /* JWTTokenTextTypeDescription.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JWTTokenTextTypeDescription.h; sourceTree = "<group>"; };
+		04701E6B1D981F8C007A0A86 /* JWTTokenTextTypeDescription.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JWTTokenTextTypeDescription.m; sourceTree = "<group>"; };
+		447DF4A5AF64E7BE744EEE2F /* libPods-JWTDesktopTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-JWTDesktopTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5C8C468A8F611D2B9E066749 /* Pods-JWTDesktopTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JWTDesktopTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-JWTDesktopTests/Pods-JWTDesktopTests.debug.xcconfig"; sourceTree = "<group>"; };
+		77679CE619F73022DA0F1176 /* Pods-JWTDesktopTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JWTDesktopTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-JWTDesktopTests/Pods-JWTDesktopTests.release.xcconfig"; sourceTree = "<group>"; };
+		B0EC4FDC2D76F5A1074A63D2 /* libPods-JWTDesktop.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-JWTDesktop.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D096075DF8EC63B15F52B7F5 /* Pods-JWTDesktop.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JWTDesktop.release.xcconfig"; path = "Pods/Target Support Files/Pods-JWTDesktop/Pods-JWTDesktop.release.xcconfig"; sourceTree = "<group>"; };
+		EA3CC4C8C2FAC704551CE6C8 /* Pods-JWTDesktop.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JWTDesktop.debug.xcconfig"; path = "Pods/Target Support Files/Pods-JWTDesktop/Pods-JWTDesktop.debug.xcconfig"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		04526B121CF3A2690090C5A3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D409F6C340474CDB7CA108BE /* libPods-JWTDesktop.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		04526B281CF3A2690090C5A3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DB17256DE61643E08ADC47F5 /* libPods-JWTDesktopTests.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		04526B0C1CF3A2690090C5A3 = {
+			isa = PBXGroup;
+			children = (
+				04526B171CF3A2690090C5A3 /* JWTDesktop */,
+				04526B2E1CF3A2690090C5A3 /* JWTDesktopTests */,
+				04526B161CF3A2690090C5A3 /* Products */,
+				50B81C9194DE1C8CB44DCE20 /* Pods */,
+				2756B542175862D629E8ADEC /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		04526B161CF3A2690090C5A3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				04526B151CF3A2690090C5A3 /* JWTDesktop.app */,
+				04526B2B1CF3A2690090C5A3 /* JWTDesktopTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		04526B171CF3A2690090C5A3 /* JWTDesktop */ = {
+			isa = PBXGroup;
+			children = (
+				04526B181CF3A2690090C5A3 /* AppDelegate.h */,
+				04526B191CF3A2690090C5A3 /* AppDelegate.m */,
+				04526B1E1CF3A2690090C5A3 /* ViewController.h */,
+				04526B1F1CF3A2690090C5A3 /* ViewController.m */,
+				04526B211CF3A2690090C5A3 /* Assets.xcassets */,
+				04526B231CF3A2690090C5A3 /* Main.storyboard */,
+				04526B261CF3A2690090C5A3 /* Info.plist */,
+				04526B1B1CF3A2690090C5A3 /* Supporting Files */,
+				04701E601D97F001007A0A86 /* JWTDecriptedViewController.h */,
+				04701E611D97F001007A0A86 /* JWTDecriptedViewController.m */,
+				04701E621D97F001007A0A86 /* JWTDecriptedViewController.xib */,
+				04701E651D97F0E5007A0A86 /* JWTDecriptedCollectionViewItem.h */,
+				04701E661D97F0E5007A0A86 /* JWTDecriptedCollectionViewItem.m */,
+				04701E671D97F0E5007A0A86 /* JWTDecriptedCollectionViewItem.xib */,
+				04701E6A1D981F8C007A0A86 /* JWTTokenTextTypeDescription.h */,
+				04701E6B1D981F8C007A0A86 /* JWTTokenTextTypeDescription.m */,
+			);
+			path = JWTDesktop;
+			sourceTree = "<group>";
+		};
+		04526B1B1CF3A2690090C5A3 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				04526B1C1CF3A2690090C5A3 /* main.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		04526B2E1CF3A2690090C5A3 /* JWTDesktopTests */ = {
+			isa = PBXGroup;
+			children = (
+				04526B2F1CF3A2690090C5A3 /* JWTDesktopTests.m */,
+				04526B311CF3A2690090C5A3 /* Info.plist */,
+			);
+			path = JWTDesktopTests;
+			sourceTree = "<group>";
+		};
+		2756B542175862D629E8ADEC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B0EC4FDC2D76F5A1074A63D2 /* libPods-JWTDesktop.a */,
+				447DF4A5AF64E7BE744EEE2F /* libPods-JWTDesktopTests.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		50B81C9194DE1C8CB44DCE20 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				EA3CC4C8C2FAC704551CE6C8 /* Pods-JWTDesktop.debug.xcconfig */,
+				D096075DF8EC63B15F52B7F5 /* Pods-JWTDesktop.release.xcconfig */,
+				5C8C468A8F611D2B9E066749 /* Pods-JWTDesktopTests.debug.xcconfig */,
+				77679CE619F73022DA0F1176 /* Pods-JWTDesktopTests.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		04526B141CF3A2690090C5A3 /* JWTDesktop */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 04526B341CF3A2690090C5A3 /* Build configuration list for PBXNativeTarget "JWTDesktop" */;
+			buildPhases = (
+				933CFE363BC4D05B3B832182 /* [CP] Check Pods Manifest.lock */,
+				04526B111CF3A2690090C5A3 /* Sources */,
+				04526B121CF3A2690090C5A3 /* Frameworks */,
+				04526B131CF3A2690090C5A3 /* Resources */,
+				6EC7E0E0E3BCA0103C5F8162 /* [CP] Embed Pods Frameworks */,
+				8656CA746A848F83730E0E13 /* [CP] Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = JWTDesktop;
+			productName = JWTDesktop;
+			productReference = 04526B151CF3A2690090C5A3 /* JWTDesktop.app */;
+			productType = "com.apple.product-type.application";
+		};
+		04526B2A1CF3A2690090C5A3 /* JWTDesktopTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 04526B371CF3A2690090C5A3 /* Build configuration list for PBXNativeTarget "JWTDesktopTests" */;
+			buildPhases = (
+				E3FC1258955CF36F4AD3F07E /* [CP] Check Pods Manifest.lock */,
+				04526B271CF3A2690090C5A3 /* Sources */,
+				04526B281CF3A2690090C5A3 /* Frameworks */,
+				04526B291CF3A2690090C5A3 /* Resources */,
+				444EA45E3D88665407A7FD63 /* [CP] Embed Pods Frameworks */,
+				61C6359D268CC7BB72A678D9 /* [CP] Copy Pods Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				04526B2D1CF3A2690090C5A3 /* PBXTargetDependency */,
+			);
+			name = JWTDesktopTests;
+			productName = JWTDesktopTests;
+			productReference = 04526B2B1CF3A2690090C5A3 /* JWTDesktopTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		04526B0D1CF3A2690090C5A3 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0800;
+				ORGANIZATIONNAME = JWT;
+				TargetAttributes = {
+					04526B141CF3A2690090C5A3 = {
+						CreatedOnToolsVersion = 7.3.1;
+					};
+					04526B2A1CF3A2690090C5A3 = {
+						CreatedOnToolsVersion = 7.3.1;
+						TestTargetID = 04526B141CF3A2690090C5A3;
+					};
+				};
+			};
+			buildConfigurationList = 04526B101CF3A2690090C5A3 /* Build configuration list for PBXProject "JWTDesktop" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 04526B0C1CF3A2690090C5A3;
+			productRefGroup = 04526B161CF3A2690090C5A3 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				04526B141CF3A2690090C5A3 /* JWTDesktop */,
+				04526B2A1CF3A2690090C5A3 /* JWTDesktopTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		04526B131CF3A2690090C5A3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				04526B221CF3A2690090C5A3 /* Assets.xcassets in Resources */,
+				04701E641D97F001007A0A86 /* JWTDecriptedViewController.xib in Resources */,
+				04701E691D97F0E5007A0A86 /* JWTDecriptedCollectionViewItem.xib in Resources */,
+				04526B251CF3A2690090C5A3 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		04526B291CF3A2690090C5A3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		444EA45E3D88665407A7FD63 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-JWTDesktopTests/Pods-JWTDesktopTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		61C6359D268CC7BB72A678D9 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-JWTDesktopTests/Pods-JWTDesktopTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		6EC7E0E0E3BCA0103C5F8162 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-JWTDesktop/Pods-JWTDesktop-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		8656CA746A848F83730E0E13 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-JWTDesktop/Pods-JWTDesktop-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		933CFE363BC4D05B3B832182 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		E3FC1258955CF36F4AD3F07E /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		04526B111CF3A2690090C5A3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				04526B201CF3A2690090C5A3 /* ViewController.m in Sources */,
+				04526B1D1CF3A2690090C5A3 /* main.m in Sources */,
+				04526B1A1CF3A2690090C5A3 /* AppDelegate.m in Sources */,
+				04701E6C1D981F8C007A0A86 /* JWTTokenTextTypeDescription.m in Sources */,
+				04701E631D97F001007A0A86 /* JWTDecriptedViewController.m in Sources */,
+				04701E681D97F0E5007A0A86 /* JWTDecriptedCollectionViewItem.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		04526B271CF3A2690090C5A3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				04526B301CF3A2690090C5A3 /* JWTDesktopTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		04526B2D1CF3A2690090C5A3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 04526B141CF3A2690090C5A3 /* JWTDesktop */;
+			targetProxy = 04526B2C1CF3A2690090C5A3 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		04526B231CF3A2690090C5A3 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				04526B241CF3A2690090C5A3 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		04526B321CF3A2690090C5A3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		04526B331CF3A2690090C5A3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		04526B351CF3A2690090C5A3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = EA3CC4C8C2FAC704551CE6C8 /* Pods-JWTDesktop.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = JWTDesktop/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.io.jwt.JWTDesktop;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		04526B361CF3A2690090C5A3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = D096075DF8EC63B15F52B7F5 /* Pods-JWTDesktop.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = JWTDesktop/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.io.jwt.JWTDesktop;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		04526B381CF3A2690090C5A3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5C8C468A8F611D2B9E066749 /* Pods-JWTDesktopTests.debug.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = JWTDesktopTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.io.jwt.JWTDesktopTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/JWTDesktop.app/Contents/MacOS/JWTDesktop";
+			};
+			name = Debug;
+		};
+		04526B391CF3A2690090C5A3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 77679CE619F73022DA0F1176 /* Pods-JWTDesktopTests.release.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = JWTDesktopTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.io.jwt.JWTDesktopTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/JWTDesktop.app/Contents/MacOS/JWTDesktop";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		04526B101CF3A2690090C5A3 /* Build configuration list for PBXProject "JWTDesktop" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				04526B321CF3A2690090C5A3 /* Debug */,
+				04526B331CF3A2690090C5A3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		04526B341CF3A2690090C5A3 /* Build configuration list for PBXNativeTarget "JWTDesktop" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				04526B351CF3A2690090C5A3 /* Debug */,
+				04526B361CF3A2690090C5A3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		04526B371CF3A2690090C5A3 /* Build configuration list for PBXNativeTarget "JWTDesktopTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				04526B381CF3A2690090C5A3 /* Debug */,
+				04526B391CF3A2690090C5A3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 04526B0D1CF3A2690090C5A3 /* Project object */;
+}

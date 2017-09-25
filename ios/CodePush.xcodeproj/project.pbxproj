@@ -95,7 +95,57 @@
 		F883794A1F79024F00F27201 /* CodePush+Reporting.h in Headers */ = {isa = PBXBuildFile; fileRef = C32E97641F164FC70031595E /* CodePush+Reporting.h */; };
 		F883794B1F79024F00F27201 /* CodePush.h in Headers */ = {isa = PBXBuildFile; fileRef = 13BE3DEC1AC21097009241FE /* CodePush.h */; };
 		F883794C1F79024F00F27201 /* CodePush+RestartManager.h in Headers */ = {isa = PBXBuildFile; fileRef = C35FA4321EAE42E000057B7C /* CodePush+RestartManager.h */; };
+		F88379501F792B0200F27201 /* MF_Base64Additions.h in Headers */ = {isa = PBXBuildFile; fileRef = F883794E1F792B0200F27201 /* MF_Base64Additions.h */; };
+		F88379511F792B0200F27201 /* MF_Base64Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = F883794F1F792B0200F27201 /* MF_Base64Additions.m */; };
+		F88379681F792B1F00F27201 /* JWT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F883795C1F792B0F00F27201 /* JWT.framework */; };
+		F88379691F792B2800F27201 /* JWT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F883795C1F792B0F00F27201 /* JWT.framework */; };
+		F883796A1F792B3D00F27201 /* MF_Base64Additions.h in Headers */ = {isa = PBXBuildFile; fileRef = F883794E1F792B0200F27201 /* MF_Base64Additions.h */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		F883795B1F792B0F00F27201 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F88379521F792B0F00F27201 /* JWT.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 04DEBCA31DBCDB8600C1DF52;
+			remoteInfo = JWT;
+		};
+		F883795D1F792B0F00F27201 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F88379521F792B0F00F27201 /* JWT.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 045146681D5E2A78007B1D7A;
+			remoteInfo = "JWT-iOS-Static";
+		};
+		F883795F1F792B0F00F27201 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F88379521F792B0F00F27201 /* JWT.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 045146761D5E2AA1007B1D7A;
+			remoteInfo = "JWT-iOS";
+		};
+		F88379611F792B0F00F27201 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F88379521F792B0F00F27201 /* JWT.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 045146901D5E2AC3007B1D7A;
+			remoteInfo = "JWT-macOS";
+		};
+		F88379631F792B0F00F27201 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F88379521F792B0F00F27201 /* JWT.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 045146831D5E2AAF007B1D7A;
+			remoteInfo = "JWT-iOS-Swift";
+		};
+		F88379651F792B0F00F27201 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F88379521F792B0F00F27201 /* JWT.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 0451469D1D5E2AD2007B1D7A;
+			remoteInfo = "JWT-macOS-Swift";
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		58B511D91A9E6C8500147676 /* CopyFiles */ = {
@@ -174,6 +224,9 @@
 		C35FA4331EAE42E000057B7C /* CodePush+RestartManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "CodePush+RestartManager.m"; path = "CodePush/CodePush+RestartManager.m"; sourceTree = "<group>"; };
 		C38B262D1EB0CB45002CBA61 /* RCTConvert+CodePushSyncStatus.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "RCTConvert+CodePushSyncStatus.m"; path = "CodePush/RCTConvert+CodePushSyncStatus.m"; sourceTree = "<group>"; };
 		F883790B1F79019100F27201 /* libCodePush-tvOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libCodePush-tvOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F883794E1F792B0200F27201 /* MF_Base64Additions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MF_Base64Additions.h; sourceTree = "<group>"; };
+		F883794F1F792B0200F27201 /* MF_Base64Additions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MF_Base64Additions.m; sourceTree = "<group>"; };
+		F88379521F792B0F00F27201 /* JWT.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = JWT.xcodeproj; path = CodePush/JWT/Framework/JWT.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -181,6 +234,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F88379691F792B2800F27201 /* JWT.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -188,6 +242,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F88379681F792B1F00F27201 /* JWT.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -280,10 +335,43 @@
 				1B23B9131BF9267B000BB2F0 /* RCTConvert+CodePushInstallMode.m */,
 				C38B262D1EB0CB45002CBA61 /* RCTConvert+CodePushSyncStatus.m */,
 				1BCC09A61CC19EB700DDC0DD /* RCTConvert+CodePushUpdateState.m */,
+				F88379521F792B0F00F27201 /* JWT.xcodeproj */,
+				F883794D1F792B0200F27201 /* Base64 */,
 				54A002481C0E2880004C3CEC /* SSZipArchive */,
 				134814211AA4EA7D00B7C361 /* Products */,
 				F883790B1F79019100F27201 /* libCodePush-tvOS.a */,
+				F88379671F792B1F00F27201 /* Frameworks */,
 			);
+			sourceTree = "<group>";
+		};
+		F883794D1F792B0200F27201 /* Base64 */ = {
+			isa = PBXGroup;
+			children = (
+				F883794E1F792B0200F27201 /* MF_Base64Additions.h */,
+				F883794F1F792B0200F27201 /* MF_Base64Additions.m */,
+			);
+			name = Base64;
+			path = CodePush/Base64;
+			sourceTree = "<group>";
+		};
+		F88379531F792B0F00F27201 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F883795C1F792B0F00F27201 /* JWT.framework */,
+				F883795E1F792B0F00F27201 /* libJWT.a */,
+				F88379601F792B0F00F27201 /* JWT.framework */,
+				F88379621F792B0F00F27201 /* JWT.framework */,
+				F88379641F792B0F00F27201 /* JWTSwift.framework */,
+				F88379661F792B0F00F27201 /* JWTSwift.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F88379671F792B1F00F27201 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -293,6 +381,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F88379501F792B0200F27201 /* MF_Base64Additions.h in Headers */,
 				8482F84E1E24C66300F793DB /* CodePush.h in Headers */,
 				C32E97661F164FC70031595E /* CodePush+Reporting.h in Headers */,
 				C35FA4341EAE42E000057B7C /* CodePush+RestartManager.h in Headers */,
@@ -303,6 +392,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F883796A1F792B3D00F27201 /* MF_Base64Additions.h in Headers */,
 				F883794B1F79024F00F27201 /* CodePush.h in Headers */,
 				F883794A1F79024F00F27201 /* CodePush+Reporting.h in Headers */,
 				F883794C1F79024F00F27201 /* CodePush+RestartManager.h in Headers */,
@@ -376,6 +466,12 @@
 			mainGroup = 58B511D21A9E6C8500147676;
 			productRefGroup = 58B511D21A9E6C8500147676;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = F88379531F792B0F00F27201 /* Products */;
+					ProjectRef = F88379521F792B0F00F27201 /* JWT.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				58B511DA1A9E6C8500147676 /* CodePush */,
@@ -383,6 +479,51 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		F883795C1F792B0F00F27201 /* JWT.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = JWT.framework;
+			remoteRef = F883795B1F792B0F00F27201 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F883795E1F792B0F00F27201 /* libJWT.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libJWT.a;
+			remoteRef = F883795D1F792B0F00F27201 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F88379601F792B0F00F27201 /* JWT.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = JWT.framework;
+			remoteRef = F883795F1F792B0F00F27201 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F88379621F792B0F00F27201 /* JWT.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = JWT.framework;
+			remoteRef = F88379611F792B0F00F27201 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F88379641F792B0F00F27201 /* JWTSwift.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = JWTSwift.framework;
+			remoteRef = F88379631F792B0F00F27201 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		F88379661F792B0F00F27201 /* JWTSwift.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = JWTSwift.framework;
+			remoteRef = F88379651F792B0F00F27201 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXSourcesBuildPhase section */
 		58B511D71A9E6C8500147676 /* Sources */ = {
@@ -400,6 +541,7 @@
 				81D51F3A1B6181C2000DA084 /* CodePushConfig.m in Sources */,
 				54A002741C0E2880004C3CEC /* sha1.c in Sources */,
 				54FFEDE01BF550630061DD23 /* CodePushDownloadHandler.m in Sources */,
+				F88379511F792B0200F27201 /* MF_Base64Additions.m in Sources */,
 				C3289C9C1EAF2F8C0027409B /* CodePushConstants.m in Sources */,
 				54A002711C0E2880004C3CEC /* hmac.c in Sources */,
 				54A002721C0E2880004C3CEC /* prng.c in Sources */,

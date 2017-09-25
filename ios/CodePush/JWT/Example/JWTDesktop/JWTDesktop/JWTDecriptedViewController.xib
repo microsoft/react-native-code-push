@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="11201" systemVersion="16A323" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+    <dependencies>
+        <deployment identifier="macosx"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="11201"/>
+    </dependencies>
+    <objects>
+        <customObject id="-2" userLabel="File's Owner" customClass="JWTDecriptedViewController">
+            <connections>
+                <outlet property="collectionView" destination="mXP-VW-npz" id="V1D-I4-wcM"/>
+                <outlet property="view" destination="Hz6-mo-xeY" id="0bl-1N-x8E"/>
+            </connections>
+        </customObject>
+        <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
+        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
+        <customView id="Hz6-mo-xeY">
+            <rect key="frame" x="0.0" y="0.0" width="480" height="272"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+            <subviews>
+                <scrollView autohidesScrollers="YES" horizontalLineScroll="10" horizontalPageScroll="10" verticalLineScroll="10" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ova-Fc-W4C">
+                    <rect key="frame" x="0.0" y="0.0" width="480" height="272"/>
+                    <clipView key="contentView" id="xMO-YT-V6e">
+                        <rect key="frame" x="1" y="1" width="478" height="270"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <collectionView id="mXP-VW-npz">
+                                <rect key="frame" x="0.0" y="0.0" width="478" height="270"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                <collectionViewFlowLayout key="collectionViewLayout" minimumInteritemSpacing="10" minimumLineSpacing="10" id="KcQ-Vu-xXO">
+                                    <size key="itemSize" width="50" height="50"/>
+                                </collectionViewFlowLayout>
+                                <color key="primaryBackgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
+                            </collectionView>
+                        </subviews>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </clipView>
+                    <scroller key="horizontalScroller" hidden="YES" verticalHuggingPriority="750" horizontal="YES" id="dAS-nP-5HK">
+                        <rect key="frame" x="1" y="144" width="233" height="15"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </scroller>
+                    <scroller key="verticalScroller" hidden="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="GVr-s4-nLA">
+                        <rect key="frame" x="234" y="1" width="15" height="143"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </scroller>
+                </scrollView>
+            </subviews>
+            <constraints>
+                <constraint firstAttribute="bottom" secondItem="Ova-Fc-W4C" secondAttribute="bottom" id="LWr-cT-dGa"/>
+                <constraint firstItem="Ova-Fc-W4C" firstAttribute="top" secondItem="Hz6-mo-xeY" secondAttribute="top" id="hjX-ov-aWZ"/>
+                <constraint firstItem="Ova-Fc-W4C" firstAttribute="leading" secondItem="Hz6-mo-xeY" secondAttribute="leading" id="kHB-Er-WN1"/>
+                <constraint firstAttribute="trailing" secondItem="Ova-Fc-W4C" secondAttribute="trailing" id="qTj-ZS-hGY"/>
+            </constraints>
+        </customView>
+    </objects>
+</document>

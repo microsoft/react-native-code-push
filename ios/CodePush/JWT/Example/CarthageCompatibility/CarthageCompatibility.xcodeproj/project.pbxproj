@@ -1,0 +1,325 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		042DCB121DB67ADA002D7E55 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 042DCB111DB67ADA002D7E55 /* AppDelegate.swift */; };
+		042DCB141DB67ADA002D7E55 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 042DCB131DB67ADA002D7E55 /* ViewController.swift */; };
+		042DCB171DB67ADA002D7E55 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 042DCB151DB67ADA002D7E55 /* Main.storyboard */; };
+		042DCB191DB67ADA002D7E55 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 042DCB181DB67ADA002D7E55 /* Assets.xcassets */; };
+		042DCB1C1DB67ADA002D7E55 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 042DCB1A1DB67ADA002D7E55 /* LaunchScreen.storyboard */; };
+		04DEBCEE1DBCF24600C1DF52 /* JWT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 04DEBCED1DBCF24500C1DF52 /* JWT.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		042DCB0E1DB67ADA002D7E55 /* CarthageCompatibility.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CarthageCompatibility.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		042DCB111DB67ADA002D7E55 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		042DCB131DB67ADA002D7E55 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		042DCB161DB67ADA002D7E55 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		042DCB181DB67ADA002D7E55 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		042DCB1B1DB67ADA002D7E55 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		042DCB1D1DB67ADA002D7E55 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		04DEBCED1DBCF24500C1DF52 /* JWT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JWT.framework; path = Carthage/Build/iOS/JWT.framework; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		042DCB0B1DB67ADA002D7E55 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				04DEBCEE1DBCF24600C1DF52 /* JWT.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		042DCB051DB67ADA002D7E55 = {
+			isa = PBXGroup;
+			children = (
+				042DCB101DB67ADA002D7E55 /* CarthageCompatibility */,
+				042DCB231DB67BE6002D7E55 /* Frameworks */,
+				04DEBCED1DBCF24500C1DF52 /* JWT.framework */,
+				042DCB0F1DB67ADA002D7E55 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		042DCB0F1DB67ADA002D7E55 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				042DCB0E1DB67ADA002D7E55 /* CarthageCompatibility.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		042DCB101DB67ADA002D7E55 /* CarthageCompatibility */ = {
+			isa = PBXGroup;
+			children = (
+				042DCB111DB67ADA002D7E55 /* AppDelegate.swift */,
+				042DCB131DB67ADA002D7E55 /* ViewController.swift */,
+				042DCB151DB67ADA002D7E55 /* Main.storyboard */,
+				042DCB181DB67ADA002D7E55 /* Assets.xcassets */,
+				042DCB1A1DB67ADA002D7E55 /* LaunchScreen.storyboard */,
+				042DCB1D1DB67ADA002D7E55 /* Info.plist */,
+			);
+			path = CarthageCompatibility;
+			sourceTree = "<group>";
+		};
+		042DCB231DB67BE6002D7E55 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		042DCB0D1DB67ADA002D7E55 /* CarthageCompatibility */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 042DCB201DB67ADA002D7E55 /* Build configuration list for PBXNativeTarget "CarthageCompatibility" */;
+			buildPhases = (
+				042DCB0A1DB67ADA002D7E55 /* Sources */,
+				042DCB0B1DB67ADA002D7E55 /* Frameworks */,
+				042DCB0C1DB67ADA002D7E55 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CarthageCompatibility;
+			productName = CarthageCompatibility;
+			productReference = 042DCB0E1DB67ADA002D7E55 /* CarthageCompatibility.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		042DCB061DB67ADA002D7E55 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0800;
+				LastUpgradeCheck = 0800;
+				ORGANIZATIONNAME = JWTIO;
+				TargetAttributes = {
+					042DCB0D1DB67ADA002D7E55 = {
+						CreatedOnToolsVersion = 8.0;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 042DCB091DB67ADA002D7E55 /* Build configuration list for PBXProject "CarthageCompatibility" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 042DCB051DB67ADA002D7E55;
+			productRefGroup = 042DCB0F1DB67ADA002D7E55 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				042DCB0D1DB67ADA002D7E55 /* CarthageCompatibility */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		042DCB0C1DB67ADA002D7E55 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				042DCB1C1DB67ADA002D7E55 /* LaunchScreen.storyboard in Resources */,
+				042DCB191DB67ADA002D7E55 /* Assets.xcassets in Resources */,
+				042DCB171DB67ADA002D7E55 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		042DCB0A1DB67ADA002D7E55 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				042DCB141DB67ADA002D7E55 /* ViewController.swift in Sources */,
+				042DCB121DB67ADA002D7E55 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		042DCB151DB67ADA002D7E55 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				042DCB161DB67ADA002D7E55 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		042DCB1A1DB67ADA002D7E55 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				042DCB1B1DB67ADA002D7E55 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		042DCB1E1DB67ADA002D7E55 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		042DCB1F1DB67ADA002D7E55 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		042DCB211DB67ADA002D7E55 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
+				INFOPLIST_FILE = CarthageCompatibility/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.jwtio..CarthageCompatibility;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		042DCB221DB67ADA002D7E55 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
+				INFOPLIST_FILE = CarthageCompatibility/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.jwtio..CarthageCompatibility;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		042DCB091DB67ADA002D7E55 /* Build configuration list for PBXProject "CarthageCompatibility" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				042DCB1E1DB67ADA002D7E55 /* Debug */,
+				042DCB1F1DB67ADA002D7E55 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		042DCB201DB67ADA002D7E55 /* Build configuration list for PBXNativeTarget "CarthageCompatibility" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				042DCB211DB67ADA002D7E55 /* Debug */,
+				042DCB221DB67ADA002D7E55 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 042DCB061DB67ADA002D7E55 /* Project object */;
+}

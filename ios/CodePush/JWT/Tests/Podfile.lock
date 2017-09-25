@@ -1,0 +1,22 @@
+PODS:
+  - Base64 (1.1.2)
+  - JWT (3.0.0-beta.3):
+    - Base64 (~> 1.1.2)
+  - Kiwi (2.4.0)
+
+DEPENDENCIES:
+  - JWT (from `../`)
+  - Kiwi
+
+EXTERNAL SOURCES:
+  JWT:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  Base64: cecfb41a004124895a7bcee567a89bae5a89d49b
+  JWT: a2e44b0d2273e28ae68cec30e95d3d460c76c298
+  Kiwi: f49c9d54b28917df5928fe44968a39ed198cb8a8
+
+PODFILE CHECKSUM: c75c7cf114c84da4136ca88e1af74b58b1b83616
+
+COCOAPODS: 1.2.1
