@@ -101,6 +101,7 @@ public class CodePushCore {
     private List<CodePushBinaryVersionMismatchListener> mBinaryVersionMismatchListeners = new ArrayList<>();
 
     private LifecycleEventListener mLifecycleEventListener = null;
+    private LifecycleEventListener mLifecycleEventListenerForReport = null;
     private int mMinimumBackgroundDuration = 0;
 
     private boolean mSyncInProgress = false;
@@ -119,14 +120,14 @@ public class CodePushCore {
     }
 
     private void syncStatusChange(CodePushSyncStatus syncStatus) {
-        for (CodePushSyncStatusListener syncStatusListener: mSyncStatusListeners) {
+        for (CodePushSyncStatusListener syncStatusListener : mSyncStatusListeners) {
             try {
                 syncStatusListener.syncStatusChanged(syncStatus);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        switch (syncStatus){
+        switch (syncStatus) {
             case CHECKING_FOR_UPDATE: {
                 CodePushUtils.log("Checking for update.");
                 break;
@@ -169,7 +170,7 @@ public class CodePushCore {
     }
 
     private void downloadProgressChange(long receivedBytes, long totalBytes) {
-        for (CodePushDownloadProgressListener downloadProgressListener: mDownloadProgressListeners) {
+        for (CodePushDownloadProgressListener downloadProgressListener : mDownloadProgressListeners) {
             try {
                 downloadProgressListener.downloadProgressChanged(receivedBytes, totalBytes);
             } catch (Exception e) {
@@ -178,8 +179,8 @@ public class CodePushCore {
         }
     }
 
-    private void binaryVersionMismatchChange(CodePushRemotePackage update){
-        for (CodePushBinaryVersionMismatchListener listener: mBinaryVersionMismatchListeners) {
+    private void binaryVersionMismatchChange(CodePushRemotePackage update) {
+        for (CodePushBinaryVersionMismatchListener listener : mBinaryVersionMismatchListeners) {
             try {
                 listener.binaryVersionMismatchChanged(update);
             } catch (Exception e) {
@@ -240,7 +241,7 @@ public class CodePushCore {
         mServerUrl = serverUrl;
     }
 
-    private String getPublicKeyByResourceDescriptor(int publicKeyResourceDescriptor){
+    private String getPublicKeyByResourceDescriptor(int publicKeyResourceDescriptor) {
         String publicKey;
         try {
             publicKey = mContext.getString(publicKeyResourceDescriptor);
@@ -280,15 +281,15 @@ public class CodePushCore {
         return mAssetsBundleFileName;
     }
 
-    long getBinaryResourcesModifiedTime() {
+    private long getBinaryResourcesModifiedTime() {
         try {
             String packageName = this.mContext.getPackageName();
             int codePushApkBuildTimeId = this.mContext.getResources().getIdentifier(CodePushConstants.CODE_PUSH_APK_BUILD_TIME_KEY, "string", packageName);
             // double quotes replacement is needed for correct restoration of long value from strings.xml
             // https://github.com/Microsoft/cordova-plugin-code-push/issues/264
-            String codePushApkBuildTime = this.mContext.getResources().getString(codePushApkBuildTimeId).replaceAll("\"","");
+            String codePushApkBuildTime = this.mContext.getResources().getString(codePushApkBuildTimeId).replaceAll("\"", "");
             return Long.parseLong(codePushApkBuildTime);
-        } catch (Exception e)  {
+        } catch (Exception e) {
             throw new CodePushUnknownException("Error in getting binary resources modified time", e);
         }
     }
@@ -415,7 +416,7 @@ public class CodePushCore {
                 binaryModifiedDateDuringPackageInstall = Long.parseLong(binaryModifiedDateDuringPackageInstallString);
             }
             String packageAppVersion = packageMetadata.optString("appVersion", null);
-            long binaryResourcesModifiedTime = this.getBinaryResourcesModifiedTime();
+            long binaryResourcesModifiedTime = getBinaryResourcesModifiedTime();
             return binaryModifiedDateDuringPackageInstall != null &&
                     binaryModifiedDateDuringPackageInstall == binaryResourcesModifiedTime &&
                     (isUsingTestConfiguration() || sAppVersion.equals(packageAppVersion));
@@ -490,11 +491,11 @@ public class CodePushCore {
 
     public CodePushConfiguration getConfiguration() {
         return new CodePushConfiguration(
-            sAppVersion,
-            Settings.Secure.getString(getContext().getContentResolver(), Settings.Secure.ANDROID_ID),
-            getDeploymentKey(),
-            getServerUrl(),
-            CodePushUpdateUtils.getHashForBinaryContents(getContext(), isDebugMode())
+                sAppVersion,
+                Settings.Secure.getString(getContext().getContentResolver(), Settings.Secure.ANDROID_ID),
+                getDeploymentKey(),
+                getServerUrl(),
+                CodePushUpdateUtils.getHashForBinaryContents(getContext(), isDebugMode())
         );
     }
 
@@ -520,7 +521,7 @@ public class CodePushCore {
         if (localPackage != null) {
             queryPackage = localPackage;
         } else {
-            queryPackage = new CodePushLocalPackage(configuration.AppVersion, "", "", false, false, false, false, "" , "", false);
+            queryPackage = new CodePushLocalPackage(configuration.AppVersion, "", "", false, false, false, false, "", "", false);
         }
 
         CodePushRemotePackage update = new CodePushAcquisitionManager(configuration).queryUpdateWithCurrentPackage(queryPackage);
@@ -763,14 +764,14 @@ public class CodePushCore {
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
-                try {
-                    mDialogModule.showDialog(titleFinal, messageFinal, button1TextFinal, button2TextFinal, successCallback, errorCallback);
-                } catch (Exception e) {
-                    syncStatusChange(CodePushSyncStatus.UNKNOWN_ERROR);
-                    mSyncInProgress = false;
-                    if (promise != null) promise.resolve("");
-                    CodePushUtils.log(e.toString());
-                }
+                    try {
+                        mDialogModule.showDialog(titleFinal, messageFinal, button1TextFinal, button2TextFinal, successCallback, errorCallback);
+                    } catch (Exception e) {
+                        syncStatusChange(CodePushSyncStatus.UNKNOWN_ERROR);
+                        mSyncInProgress = false;
+                        if (promise != null) promise.resolve("");
+                        CodePushUtils.log(e.toString());
+                    }
                 }
             });
         } else {
@@ -993,7 +994,7 @@ public class CodePushCore {
     private void resetReactRootViews(ReactInstanceManager instanceManager) throws NoSuchFieldException, IllegalAccessException {
         Field mAttachedRootViewsField = instanceManager.getClass().getDeclaredField("mAttachedRootViews");
         mAttachedRootViewsField.setAccessible(true);
-        List<ReactRootView> mAttachedRootViews = (List<ReactRootView>)mAttachedRootViewsField.get(instanceManager);
+        List<ReactRootView> mAttachedRootViews = (List<ReactRootView>) mAttachedRootViewsField.get(instanceManager);
         for (ReactRootView reactRootView : mAttachedRootViews) {
             reactRootView.removeAllViews();
             reactRootView.setId(View.NO_ID);
@@ -1006,6 +1007,14 @@ public class CodePushCore {
         if (mLifecycleEventListener != null) {
             mReactApplicationContext.removeLifecycleEventListener(mLifecycleEventListener);
             mLifecycleEventListener = null;
+        }
+    }
+
+    private void clearLifecycleEventListenerForReport() {
+        // Remove LifecycleEventListener to prevent infinite restart loop
+        if (mLifecycleEventListenerForReport != null) {
+            mReactApplicationContext.removeLifecycleEventListener(mLifecycleEventListenerForReport);
+            mLifecycleEventListenerForReport = null;
         }
     }
 
@@ -1076,26 +1085,70 @@ public class CodePushCore {
     }
 
     private void tryReportStatus(final CodePushStatusReport statusReport) {
-        CodePushConfiguration nativeConfiguration = getConfiguration();
-        if (statusReport.AppVersion != null && !statusReport.AppVersion.isEmpty()) {
-            CodePushUtils.log("Reporting binary update (" + statusReport.AppVersion + ")");
-            new CodePushAcquisitionManager(nativeConfiguration).reportStatusDeploy(statusReport);
-        } else {
-            if (statusReport.Status.equals(CodePushDeploymentStatus.SUCCEEDED)) {
-                CodePushUtils.log("Reporting CodePush update success (" + statusReport.Label + ")");
+        boolean succeeded = true;
+        try {
+            CodePushConfiguration nativeConfiguration = getConfiguration();
+            if (statusReport.AppVersion != null && !statusReport.AppVersion.isEmpty()) {
+                CodePushUtils.log("Reporting binary update (" + statusReport.AppVersion + ")");
+                succeeded = new CodePushAcquisitionManager(nativeConfiguration).reportStatusDeploy(statusReport);
             } else {
-                CodePushUtils.log("Reporting CodePush update rollback (" + statusReport.Label + ")");
-            }
+                if (statusReport.Status.equals(CodePushDeploymentStatus.SUCCEEDED)) {
+                    CodePushUtils.log("Reporting CodePush update success (" + statusReport.Label + ")");
+                } else {
+                    CodePushUtils.log("Reporting CodePush update rollback (" + statusReport.Label + ")");
+                }
 
-            CodePushConfiguration configuration = new CodePushConfiguration(
-                    nativeConfiguration.AppVersion,
-                    nativeConfiguration.ClientUniqueId,
-                    statusReport.Package.DeploymentKey,
-                    nativeConfiguration.ServerUrl,
-                    nativeConfiguration.PackageHash
-            );
-            if (new CodePushAcquisitionManager(configuration).reportStatusDeploy(statusReport)) {
-                recordStatusReported(statusReport);
+                CodePushConfiguration configuration = new CodePushConfiguration(
+                        nativeConfiguration.AppVersion,
+                        nativeConfiguration.ClientUniqueId,
+                        statusReport.Package.DeploymentKey,
+                        nativeConfiguration.ServerUrl,
+                        nativeConfiguration.PackageHash
+                );
+                if (new CodePushAcquisitionManager(configuration).reportStatusDeploy(statusReport)) {
+                    recordStatusReported(statusReport);
+                } else {
+                    succeeded = false;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            succeeded = false;
+        }
+
+        if (!succeeded) {
+            CodePushUtils.log("Report status failed: " + statusReport.toString());
+            saveStatusReportForRetry(statusReport);
+
+            // Try again when the app resumes
+            if (mLifecycleEventListenerForReport == null) {
+                mLifecycleEventListenerForReport = new LifecycleEventListener() {
+
+                    @Override
+                    public void onHostResume() {
+                        final CodePushStatusReport statusReport = getNewStatusReport();
+                        if (statusReport != null) {
+                            tryReportStatus(statusReport);
+                        }
+                    }
+
+                    @Override
+                    public void onHostPause() {
+
+                    }
+
+                    @Override
+                    public void onHostDestroy() {
+
+                    }
+                };
+
+                mReactApplicationContext.addLifecycleEventListener(mLifecycleEventListenerForReport);
+            }
+        } else {
+            // If there was several attempts to send error reports
+            if (mLifecycleEventListenerForReport != null) {
+                clearLifecycleEventListenerForReport();
             }
         }
     }

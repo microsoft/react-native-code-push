@@ -17,6 +17,7 @@ import com.microsoft.codepush.react.datacontracts.CodePushRemotePackage;
 import com.microsoft.codepush.react.datacontracts.CodePushStatusReport;
 import com.microsoft.codepush.react.enums.CodePushSyncStatus;
 import com.microsoft.codepush.react.enums.CodePushUpdateState;
+import com.microsoft.codepush.react.interfaces.CodePushBinaryVersionMismatchListener;
 import com.microsoft.codepush.react.interfaces.CodePushDownloadProgressListener;
 import com.microsoft.codepush.react.interfaces.CodePushSyncStatusListener;
 import com.microsoft.codepush.react.utils.CodePushUpdateUtils;
@@ -27,10 +28,11 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CodePushNativeModule extends ReactContextBaseJavaModule implements CodePushDownloadProgressListener, CodePushSyncStatusListener {
+public class CodePushNativeModule extends ReactContextBaseJavaModule implements CodePushDownloadProgressListener, CodePushSyncStatusListener, CodePushBinaryVersionMismatchListener {
     private String mBinaryContentsHash = null;
     private static boolean mNotifyDownloadProgress = false;
     private static boolean mNotifySyncStatusChanged = false;
+    private static boolean mNotifyBinaryVersionMismatch = false;
 
     private CodePushCore mCodePushCore;
 
@@ -98,10 +100,12 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
             final ReadableMap syncOptionsMap,
             final boolean notifySyncStatusChanged,
             final boolean notifyDownloadProgress,
+            final boolean notifyBinaryVersionMismatch,
             final Promise promise
     ) {
         mNotifySyncStatusChanged = notifySyncStatusChanged;
         mNotifyDownloadProgress = notifyDownloadProgress;
+        mNotifyBinaryVersionMismatch = notifyBinaryVersionMismatch;
         AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
@@ -279,6 +283,15 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
             getReactApplicationContext()
                     .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                     .emit(CodePushConstants.DOWNLOAD_PROGRESS_EVENT_NAME, downloadProgress.createWritableMap());
+        }
+    }
+
+    @Override
+    public void binaryVersionMismatchChanged(CodePushRemotePackage update) {
+        if (mNotifyBinaryVersionMismatch) {
+            getReactApplicationContext()
+                    .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                    .emit(CodePushConstants.BINARY_VERSION_MISMATCH_EVENT_NAME, update);
         }
     }
 }

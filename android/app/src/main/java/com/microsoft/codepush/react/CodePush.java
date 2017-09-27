@@ -58,10 +58,6 @@ public class CodePush implements ReactPackage {
         mCodePushCore = new CodePushCore(deploymentKey, context, isDebugMode, serverUrl, publicKeyResourceDescriptor);
     }
 
-    public static String getServerUrl() {
-        return CodePushCore.getServerUrl();
-    }
-
     public static String getJSBundleFile() {
         return CodePushCore.getJSBundleFile();
     }

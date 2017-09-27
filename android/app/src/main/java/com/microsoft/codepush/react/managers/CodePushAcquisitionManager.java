@@ -35,7 +35,7 @@ public class CodePushAcquisitionManager {
         mServerUrl = configuration.ServerUrl;
         if (!mServerUrl.endsWith("/")) {
             mServerUrl += "/";
-        };
+        }
         mAppVersion = configuration.AppVersion;
         mClientUniqueId = configuration.ClientUniqueId;
         mDeploymentKey = configuration.DeploymentKey;

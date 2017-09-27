@@ -13,7 +13,7 @@ public class CodePushBuilder {
     public CodePushBuilder(String deploymentKey, Context context) {
         this.mDeploymentKey = deploymentKey;
         this.mContext = context;
-        this.mServerUrl = CodePush.getServerUrl();
+        this.mServerUrl = CodePushCore.getServerUrl();
     }
 
     public CodePushBuilder setIsDebugMode(boolean isDebugMode) {
