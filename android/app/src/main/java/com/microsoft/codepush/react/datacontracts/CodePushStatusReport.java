@@ -2,7 +2,6 @@ package com.microsoft.codepush.react.datacontracts;
 
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.codepush.react.enums.CodePushDeploymentStatus;
-import com.microsoft.codepush.react.enums.CodePushSyncStatus;
 
 public class CodePushStatusReport {
     @SerializedName("appVersion")

@@ -126,7 +126,7 @@ public class CodePushTelemetryManager {
     }
 
     public void recordStatusReported(CodePushStatusReport statusReport) {
-        if (statusReport.Status != null && statusReport.Status.equals(CodePushDeploymentStatus.FAILED.getValue())) {
+        if (statusReport.Status != null && statusReport.Status.getValue().equals(CodePushDeploymentStatus.FAILED.getValue())) {
             return;
         }
 
@@ -165,7 +165,7 @@ public class CodePushTelemetryManager {
         // Because deploymentKeys can be dynamically switched, we use a
         // combination of the deploymentKey and label as the packageIdentifier.
         String deploymentKey = updatePackage.DeploymentKey;
-        String label = updatePackage.DeploymentKey;
+        String label = updatePackage.Label;
         if (deploymentKey != null && label != null) {
             return deploymentKey + ":" + label;
         } else {

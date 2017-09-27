@@ -105,7 +105,7 @@ public class CodePushAcquisitionManager {
             e.printStackTrace();
         }
         return null;
-    };
+    }
 
     public boolean reportStatusDeploy(CodePushStatusReport statusReport) {
         final String requestUrl = mServerUrl + "reportStatus/download";

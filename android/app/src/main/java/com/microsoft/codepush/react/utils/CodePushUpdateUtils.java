@@ -30,6 +30,7 @@ import java.security.PublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
@@ -61,7 +62,9 @@ public class CodePushUpdateUtils {
 
             if (isHashIgnored(relativePath)) {
                 continue;
-            } else if (file.isDirectory()) {
+            }
+
+            if (file.isDirectory()) {
                 addContentsOfFolderToManifest(fullFilePath, relativePath, manifest);
             } else {
                 try {
@@ -194,7 +197,7 @@ public class CodePushUpdateUtils {
             return null;
         } catch (Exception ex) {
             CodePushUtils.log(ex.getMessage());
-            CodePushUtils.log(ex.getStackTrace().toString());
+            CodePushUtils.log(Arrays.toString(ex.getStackTrace()));
             return null;
         }
     }
@@ -213,7 +216,7 @@ public class CodePushUpdateUtils {
             return kf.generatePublic(X509Key);
         } catch (Exception e) {
             CodePushUtils.log(e.getMessage());
-            CodePushUtils.log(e.getStackTrace().toString());
+            CodePushUtils.log(Arrays.toString(e.getStackTrace()));
             return null;
         }
     }
@@ -232,7 +235,7 @@ public class CodePushUpdateUtils {
             return FileUtils.readFileToString(signatureFilePath);
         } catch (IOException e) {
             CodePushUtils.log(e.getMessage());
-            CodePushUtils.log(e.getStackTrace().toString());
+            CodePushUtils.log(Arrays.toString(e.getStackTrace()));
             return null;
         }
     }

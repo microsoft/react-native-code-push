@@ -60,6 +60,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -527,8 +528,8 @@ public class CodePushCore {
         CodePushRemotePackage update = new CodePushAcquisitionManager(configuration).queryUpdateWithCurrentPackage(queryPackage);
 
         if (update == null || update.UpdateAppVersion ||
-                localPackage != null && (update.PackageHash == localPackage.PackageHash) ||
-                (localPackage == null || localPackage.IsDebugOnly) && configuration.PackageHash == update.PackageHash) {
+                localPackage != null && (update.PackageHash.equals(localPackage.PackageHash)) ||
+                (localPackage == null || localPackage.IsDebugOnly) && configuration.PackageHash.equals(update.PackageHash)) {
             if (update != null && update.UpdateAppVersion) {
                 CodePushUtils.log("An update is available but it is not targeting the binary version of your app.");
                 binaryVersionMismatchChange(update);
@@ -666,7 +667,7 @@ public class CodePushCore {
         final CodePushConfiguration configuration = new CodePushConfiguration(
                 nativeConfiguration.AppVersion,
                 nativeConfiguration.ClientUniqueId,
-                syncOptions != null && syncOptions.DeploymentKey != null ? syncOptions.DeploymentKey : nativeConfiguration.DeploymentKey,
+                syncOptions.DeploymentKey != null ? syncOptions.DeploymentKey : nativeConfiguration.DeploymentKey,
                 nativeConfiguration.ServerUrl,
                 nativeConfiguration.PackageHash
         );
@@ -751,7 +752,7 @@ public class CodePushCore {
                     syncStatusChange(CodePushSyncStatus.UNKNOWN_ERROR);
                     mSyncInProgress = false;
                     if (promise != null) promise.resolve("");
-                    throw new CodePushUnknownException(args.toString());
+                    throw new CodePushUnknownException(Arrays.toString(args));
                 }
             };
 
@@ -765,6 +766,7 @@ public class CodePushCore {
                 @Override
                 public void run() {
                     try {
+                        // errorCallback is not used inside mDialogModule.showDialog()
                         mDialogModule.showDialog(titleFinal, messageFinal, button1TextFinal, button2TextFinal, successCallback, errorCallback);
                     } catch (Exception e) {
                         syncStatusChange(CodePushSyncStatus.UNKNOWN_ERROR);
