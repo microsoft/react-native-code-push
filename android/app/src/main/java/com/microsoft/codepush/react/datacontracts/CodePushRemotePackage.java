@@ -30,4 +30,8 @@ public class CodePushRemotePackage extends CodePushPackage {
         PackageSize = packageSize;
         UpdateAppVersion = updateAppVersion;
     }
+
+    public CodePushRemotePackage(final String appVersion, final boolean updateAppVersion) {
+        this(appVersion, null, null, false, false, null, null, 0, null, updateAppVersion);
+    }
 }

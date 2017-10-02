@@ -14,14 +14,17 @@ import com.microsoft.codepush.react.datacontracts.CodePushSyncOptions;
 import com.microsoft.codepush.react.enums.CodePushUpdateState;
 import com.microsoft.codepush.react.interfaces.CodePushDownloadProgressListener;
 import com.microsoft.codepush.react.interfaces.CodePushSyncStatusListener;
+import com.microsoft.codepush.react.interfaces.ReactInstanceHolder;
 import com.microsoft.codepush.react.managers.CodePushAcquisitionManager;
 import com.microsoft.codepush.react.utils.CodePushUtils;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CodePush implements ReactPackage {
-    private CodePushCore mCodePushCore;
+public class CodePush implements ReactPackage, Serializable{
+
+    private static CodePushCore mCodePushCore;
 
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactApplicationContext) {
@@ -64,6 +67,11 @@ public class CodePush implements ReactPackage {
 
     public static String getJSBundleFile(String assetsBundleFileName) {
         return CodePushCore.getJSBundleFile(assetsBundleFileName);
+    }
+
+    public static void setReactInstanceHolder(ReactInstanceHolder reactInstanceHolder) {
+        //todo remove or not?
+        mCodePushCore.setReactInstanceHolder(reactInstanceHolder);
     }
 
     public CodePushConfiguration getConfiguration() {
