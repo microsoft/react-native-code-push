@@ -61,10 +61,13 @@
 - (NSString *)extractedSecKeyTypeWithParameters:(NSDictionary *)parameters;
 - (JWTCryptoKeyBuilder *)extractedBuilderWithParameters:(NSDictionary *)parameters;
 @end
+// Consider that both methods in this category should return non-nullable values
 @implementation JWTCryptoKey (ParametersExtraction)
+// Parameters are nil at that moment, could be used later for some purposes
 - (JWTCryptoKeyBuilder *)extractedBuilderWithParameters:(NSDictionary *)parameters {
-    return (JWTCryptoKeyBuilder *)parameters[[self.class parametersKeyBuilder]];
+    return (JWTCryptoKeyBuilder *)parameters[[self.class parametersKeyBuilder]] ?: [JWTCryptoKeyBuilder new].keyTypeRSA;
 }
+// Parameters are nil at that moment, could be used later for some purposes
 - (NSString *)extractedSecKeyTypeWithParameters:(NSDictionary *)parameters {
     JWTCryptoKeyBuilder *builder = [self extractedBuilderWithParameters:parameters];
     NSString *result = nil;
