@@ -229,7 +229,7 @@ const notifyApplicationReady = (() => {
 })();
 
 async function notifyApplicationReadyInternal() {
-  await NativeCodePush.notifyApplicationReady();
+  await NativeCodePush.removePendingUpdate();
   const statusReport = await NativeCodePush.getNewStatusReport();
   statusReport && tryReportStatus(statusReport); // Don't wait for this to complete.
 

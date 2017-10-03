@@ -222,7 +222,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
     }
 
     @ReactMethod
-    public void notifyApplicationReady(Promise promise) {
+    public void removePendingUpdate(Promise promise) {
         mCodePushCore.removePendingUpdate();
         promise.resolve("");
     }

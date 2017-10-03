@@ -94,6 +94,10 @@ public class CodePush implements ReactPackage, Serializable{
         return mCodePushCore.checkForUpdate(deploymentKey);
     }
 
+    /**
+     * @deprecated use {@link #getUpdateMetadata()} instead.
+     */
+    @Deprecated
     public CodePushLocalPackage getCurrentPackage() {
         return mCodePushCore.getCurrentPackage();
     }

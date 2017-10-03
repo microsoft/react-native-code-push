@@ -1269,9 +1269,9 @@ RCT_EXPORT_METHOD(isFirstRun:(NSString *)packageHash
 }
 
 /*
- * This method is the native side of the CodePush.notifyApplicationReady() method.
+ * This method is the native side of the CodePush.removePendingUpdate() method.
  */
-RCT_EXPORT_METHOD(notifyApplicationReady:(RCTPromiseResolveBlock)resolve
+RCT_EXPORT_METHOD(removePendingUpdate:(RCTPromiseResolveBlock)resolve
                                 rejecter:(RCTPromiseRejectBlock)reject)
 {
     [CodePush removePendingUpdate];
