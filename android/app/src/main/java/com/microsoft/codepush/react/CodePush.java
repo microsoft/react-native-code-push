@@ -2,6 +2,7 @@ package com.microsoft.codepush.react;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.JavaScriptModule;
@@ -22,7 +23,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CodePush implements ReactPackage, Serializable{
+public class CodePush implements ReactPackage, Serializable {
 
     private static CodePushCore mCodePushCore;
 
@@ -41,24 +42,66 @@ public class CodePush implements ReactPackage, Serializable{
         return new ArrayList<>();
     }
 
+    /**
+     * @deprecated use {@link #builder} instead
+     */
+    @Deprecated
     public CodePush(String deploymentKey, Context context) {
         this(deploymentKey, context, false);
     }
 
+    /**
+     * @deprecated use {@link #builder} instead
+     */
+    @Deprecated
     public CodePush(String deploymentKey, Context context, boolean isDebugMode) {
-        mCodePushCore = new CodePushCore(deploymentKey, context, isDebugMode);
+        mCodePushCore = new CodePushCore(deploymentKey, context, isDebugMode, null, null, null);
     }
 
+    /**
+     * @deprecated use {@link #builder} instead
+     */
+    @Deprecated
     public CodePush(String deploymentKey, Context context, boolean isDebugMode, String serverUrl) {
-        mCodePushCore = new CodePushCore(deploymentKey, context, isDebugMode, serverUrl);
+        mCodePushCore = new CodePushCore(deploymentKey, context, isDebugMode, serverUrl, null, null);
     }
 
+    /**
+     * @deprecated use {@link #builder} instead
+     */
+    @Deprecated
     public CodePush(String deploymentKey, Context context, boolean isDebugMode, int publicKeyResourceDescriptor) {
-        mCodePushCore = new CodePushCore(deploymentKey, context, isDebugMode, publicKeyResourceDescriptor);
+        mCodePushCore = new CodePushCore(deploymentKey, context, isDebugMode, null, publicKeyResourceDescriptor, null);
     }
 
+    /**
+     * @deprecated use {@link #builder} instead
+     */
+    @Deprecated
     public CodePush(String deploymentKey, Context context, boolean isDebugMode, @NonNull String serverUrl, Integer publicKeyResourceDescriptor) {
-        mCodePushCore = new CodePushCore(deploymentKey, context, isDebugMode, serverUrl, publicKeyResourceDescriptor);
+        mCodePushCore = new CodePushCore(deploymentKey, context, isDebugMode, serverUrl, publicKeyResourceDescriptor, null);
+    }
+
+    public CodePush(
+            @NonNull String deploymentKey,
+            @NonNull Context context,
+            boolean isDebugMode,
+            @Nullable String serverUrl,
+            @Nullable Integer publicKeyResourceDescriptor,
+            @Nullable String jsBundleFileName
+    ) {
+        mCodePushCore = new CodePushCore(
+                deploymentKey,
+                context,
+                isDebugMode,
+                serverUrl,
+                publicKeyResourceDescriptor,
+                jsBundleFileName
+        );
+    }
+
+    public static CodePushBuilder builder(String deploymentKey, Context context) {
+        return new CodePushBuilder(deploymentKey, context);
     }
 
     public static String getJSBundleFile() {

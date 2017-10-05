@@ -5,10 +5,10 @@ import android.content.Context;
 public class CodePushBuilder {
     private String mDeploymentKey;
     private Context mContext;
-
     private boolean mIsDebugMode;
     private String mServerUrl;
     private Integer mPublicKeyResourceDescriptor;
+    private String mJsBundleFileName;
 
     public CodePushBuilder(String deploymentKey, Context context) {
         this.mDeploymentKey = deploymentKey;
@@ -26,12 +26,24 @@ public class CodePushBuilder {
         return this;
     }
 
-    public CodePushBuilder setPublicKeyResourceDescriptor(int publicKeyResourceDescriptor) {
+    public CodePushBuilder setPublicKeyResourceDescriptor(Integer publicKeyResourceDescriptor) {
         this.mPublicKeyResourceDescriptor = publicKeyResourceDescriptor;
         return this;
     }
 
+    public CodePushBuilder setJsBundleFileName(String jsBundleFileName) {
+        this.mJsBundleFileName = jsBundleFileName;
+        return this;
+    }
+
     public CodePush build() {
-        return new CodePush(this.mDeploymentKey, this.mContext, this.mIsDebugMode, this.mServerUrl, this.mPublicKeyResourceDescriptor);
+        return new CodePush(
+                this.mDeploymentKey,
+                this.mContext,
+                this.mIsDebugMode,
+                this.mServerUrl,
+                this.mPublicKeyResourceDescriptor,
+                this.mJsBundleFileName
+        );
     }
 }

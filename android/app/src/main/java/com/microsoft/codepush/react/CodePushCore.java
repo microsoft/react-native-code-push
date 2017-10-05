@@ -50,6 +50,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.View;
 
 import org.json.JSONArray;
@@ -107,6 +108,73 @@ public class CodePushCore {
 
     private boolean mSyncInProgress = false;
     private CodePushInstallMode mCurrentInstallModeInProgress = CodePushInstallMode.ON_NEXT_RESTART;
+
+    public CodePushCore(
+            String deploymentKey,
+            Context context,
+            boolean isDebugMode,
+            @Nullable String serverUrl,
+            @Nullable Integer publicKeyResourceDescriptor,
+            @Nullable String jsBundleFileName
+    ) {
+        mDeploymentKey = deploymentKey;
+        mContext = context.getApplicationContext();
+        mIsDebugMode = isDebugMode;
+
+        if (serverUrl != null) {
+            mServerUrl = serverUrl;
+        }
+
+        if (publicKeyResourceDescriptor != null) {
+            mPublicKey = getPublicKeyByResourceDescriptor(publicKeyResourceDescriptor);
+        }
+
+        if (jsBundleFileName == null) {
+            mAssetsBundleFileName = getJSBundleFile();
+        } else {
+            mAssetsBundleFileName = getJSBundleFile(jsBundleFileName);
+        }
+
+        if (sAppVersion == null) {
+            try {
+                PackageInfo pInfo = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
+                sAppVersion = pInfo.versionName;
+            } catch (PackageManager.NameNotFoundException e) {
+                throw new CodePushUnknownException("Unable to get package info for " + mContext.getPackageName(), e);
+            }
+        }
+
+        mUpdateManager = new CodePushUpdateManager(context.getFilesDir().getAbsolutePath());
+        mUpdateManagerDeserializer = new CodePushUpdateManagerDeserializer(mUpdateManager);
+        mTelemetryManager = new CodePushTelemetryManager(mContext);
+        mTelemetryManagerDeserializer = new CodePushTelemetryManagerDeserializer(mTelemetryManager);
+
+        mSettingsManager = new SettingsManager(mContext);
+        mRestartManager = new CodePushRestartManager(this);
+
+        mCurrentInstance = this;
+
+        clearDebugCacheIfNeeded();
+        initializeUpdateAfterRestart();
+    }
+
+    private String getPublicKeyByResourceDescriptor(int publicKeyResourceDescriptor) {
+        String publicKey;
+        try {
+            publicKey = mContext.getString(publicKeyResourceDescriptor);
+        } catch (Resources.NotFoundException e) {
+            throw new CodePushInvalidPublicKeyException(
+                    "Unable to get public key, related resource descriptor " +
+                            publicKeyResourceDescriptor +
+                            " can not be found", e
+            );
+        }
+
+        if (publicKey.isEmpty()) {
+            throw new CodePushInvalidPublicKeyException("Specified public key is empty");
+        }
+        return publicKey;
+    }
 
     public void addSyncStatusListener(CodePushSyncStatusListener syncStatusListener) {
         mSyncStatusListeners.add(syncStatusListener);
@@ -188,76 +256,6 @@ public class CodePushCore {
                 e.printStackTrace();
             }
         }
-    }
-
-    public CodePushCore(String deploymentKey, Context context) {
-        this(deploymentKey, context, false);
-    }
-
-    public CodePushCore(String deploymentKey, Context context, boolean isDebugMode) {
-        mContext = context.getApplicationContext();
-
-        mUpdateManager = new CodePushUpdateManager(context.getFilesDir().getAbsolutePath());
-        mUpdateManagerDeserializer = new CodePushUpdateManagerDeserializer(mUpdateManager);
-        mTelemetryManager = new CodePushTelemetryManager(mContext);
-        mTelemetryManagerDeserializer = new CodePushTelemetryManagerDeserializer(mTelemetryManager);
-        mDeploymentKey = deploymentKey;
-        mIsDebugMode = isDebugMode;
-        mSettingsManager = new SettingsManager(mContext);
-        mRestartManager = new CodePushRestartManager(this);
-
-        if (sAppVersion == null) {
-            try {
-                PackageInfo pInfo = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
-                sAppVersion = pInfo.versionName;
-            } catch (PackageManager.NameNotFoundException e) {
-                throw new CodePushUnknownException("Unable to get package info for " + mContext.getPackageName(), e);
-            }
-        }
-
-        mCurrentInstance = this;
-
-        clearDebugCacheIfNeeded();
-        initializeUpdateAfterRestart();
-    }
-
-    public CodePushCore(String deploymentKey, Context context, boolean isDebugMode, @NonNull String serverUrl) {
-        this(deploymentKey, context, isDebugMode);
-        mServerUrl = serverUrl;
-    }
-
-    public CodePushCore(String deploymentKey, Context context, boolean isDebugMode, int publicKeyResourceDescriptor) {
-        this(deploymentKey, context, isDebugMode);
-
-        mPublicKey = getPublicKeyByResourceDescriptor(publicKeyResourceDescriptor);
-    }
-
-    public CodePushCore(String deploymentKey, Context context, boolean isDebugMode, @NonNull String serverUrl, Integer publicKeyResourceDescriptor) {
-        this(deploymentKey, context, isDebugMode);
-
-        if (publicKeyResourceDescriptor != null) {
-            mPublicKey = getPublicKeyByResourceDescriptor(publicKeyResourceDescriptor);
-        }
-
-        mServerUrl = serverUrl;
-    }
-
-    private String getPublicKeyByResourceDescriptor(int publicKeyResourceDescriptor) {
-        String publicKey;
-        try {
-            publicKey = mContext.getString(publicKeyResourceDescriptor);
-        } catch (Resources.NotFoundException e) {
-            throw new CodePushInvalidPublicKeyException(
-                    "Unable to get public key, related resource descriptor " +
-                            publicKeyResourceDescriptor +
-                            " can not be found", e
-            );
-        }
-
-        if (publicKey.isEmpty()) {
-            throw new CodePushInvalidPublicKeyException("Specified public key is empty");
-        }
-        return publicKey;
     }
 
     public void clearDebugCacheIfNeeded() {
@@ -777,14 +775,23 @@ public class CodePushCore {
                 }
             });
         } else {
-            doDownloadAndInstall(remotePackage, syncOptions, configuration);
+            try {
+                doDownloadAndInstall(remotePackage, syncOptions, configuration);
+            } catch (Exception e) {
+                syncStatusChange(CodePushSyncStatus.UNKNOWN_ERROR);
+                mSyncInProgress = false;
+                if (promise != null) promise.reject(e);
+            }
             if (promise != null) promise.resolve("");
         }
     }
 
-    private void doDownloadAndInstall(final CodePushRemotePackage remotePackage, final CodePushSyncOptions syncOptions, final CodePushConfiguration configuration) {
+    private void doDownloadAndInstall(final CodePushRemotePackage remotePackage, final CodePushSyncOptions syncOptions, final CodePushConfiguration configuration) throws Exception {
         syncStatusChange(CodePushSyncStatus.DOWNLOADING_PACKAGE);
         CodePushLocalPackage localPackage = downloadUpdate(remotePackage);
+        if (localPackage.DownloadException != null) {
+            throw localPackage.DownloadException;
+        }
         new CodePushAcquisitionManager(configuration).reportStatusDownload(localPackage);
 
         CodePushInstallMode resolvedInstallMode = localPackage.IsMandatory ? syncOptions.MandatoryInstallMode : syncOptions.InstallMode;
@@ -823,21 +830,26 @@ public class CodePushCore {
                     }
 
                     hasScheduledNextFrame = true;
-                    mReactApplicationContext.runOnUiQueueThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            ReactChoreographer.getInstance().postFrameCallback(ReactChoreographer.CallbackType.TIMERS_EVENTS, new ChoreographerCompat.FrameCallback() {
-                                @Override
-                                public void doFrame(long frameTimeNanos) {
-                                    if (!latestDownloadProgress.isCompleted()) {
-                                        downloadProgressChange(downloadProgress.getReceivedBytes(), downloadProgress.getTotalBytes());
-                                    }
+                    // if ReactNative app wasn't been initialized, no need to send download progress to it
+                    if (mReactApplicationContext != null) {
+                        mReactApplicationContext.runOnUiQueueThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ReactChoreographer.getInstance().postFrameCallback(ReactChoreographer.CallbackType.TIMERS_EVENTS, new ChoreographerCompat.FrameCallback() {
+                                    @Override
+                                    public void doFrame(long frameTimeNanos) {
+                                        if (!latestDownloadProgress.isCompleted()) {
+                                            downloadProgressChange(downloadProgress.getReceivedBytes(), downloadProgress.getTotalBytes());
+                                        }
 
-                                    hasScheduledNextFrame = false;
-                                }
-                            });
-                        }
-                    });
+                                        hasScheduledNextFrame = false;
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        downloadProgressChange(downloadProgress.getReceivedBytes(), downloadProgress.getTotalBytes());
+                    }
                 }
             }, mPublicKey);
 
@@ -919,7 +931,9 @@ public class CodePushCore {
                     }
                 };
 
-                mReactApplicationContext.addLifecycleEventListener(mLifecycleEventListener);
+                if (mReactApplicationContext != null) {
+                    mReactApplicationContext.addLifecycleEventListener(mLifecycleEventListener);
+                }
             }
         }
     }

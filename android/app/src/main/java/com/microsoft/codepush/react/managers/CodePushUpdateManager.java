@@ -1,7 +1,10 @@
 package com.microsoft.codepush.react.managers;
 
+import android.os.AsyncTask;
+
 import com.microsoft.codepush.react.CodePushConstants;
 import com.microsoft.codepush.react.CodePushCore;
+import com.microsoft.codepush.react.CodePushDownloadPackageResult;
 import com.microsoft.codepush.react.exceptions.CodePushInvalidUpdateException;
 import com.microsoft.codepush.react.exceptions.CodePushMalformedDataException;
 import com.microsoft.codepush.react.exceptions.CodePushUnknownException;
@@ -16,12 +19,14 @@ import org.json.JSONObject;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.util.concurrent.ExecutionException;
 
 public class CodePushUpdateManager {
 
@@ -66,7 +71,7 @@ public class CodePushUpdateManager {
             return CodePushUtils.getJsonObjectFromFile(statusFilePath);
         } catch (IOException e) {
             // Should not happen.
-            throw new CodePushUnknownException("Error getting current package info" , e);
+            throw new CodePushUnknownException("Error getting current package info", e);
         }
     }
 
@@ -75,7 +80,7 @@ public class CodePushUpdateManager {
             CodePushUtils.writeJsonToFile(packageInfo, getStatusFilePath());
         } catch (IOException e) {
             // Should not happen.
-            throw new CodePushUnknownException("Error updating current package info" , e);
+            throw new CodePushUnknownException("Error updating current package info", e);
         }
     }
 
@@ -127,16 +132,16 @@ public class CodePushUpdateManager {
         if (packageHash == null) {
             return null;
         }
-        
+
         return getPackage(packageHash);
     }
-    
+
     public JSONObject getPreviousPackage() {
         String packageHash = getPreviousPackageHash();
         if (packageHash == null) {
             return null;
         }
-        
+
         return getPackage(packageHash);
     }
 
@@ -151,7 +156,7 @@ public class CodePushUpdateManager {
     }
 
     public void downloadPackage(JSONObject updatePackage, String expectedBundleFileName,
-                                DownloadProgressCallback progressCallback, String stringPublicKey) throws IOException {
+                                final DownloadProgressCallback progressCallback, String stringPublicKey) throws IOException {
         String newUpdateHash = updatePackage.optString(CodePushConstants.PACKAGE_HASH_KEY, null);
         String newUpdateFolderPath = getPackageFolderPath(newUpdateHash);
         String newUpdateMetadataPath = CodePushUtils.appendPathComponent(newUpdateFolderPath, CodePushConstants.PACKAGE_FILE_NAME);
@@ -161,66 +166,89 @@ public class CodePushUpdateManager {
             FileUtils.deleteDirectoryAtPath(newUpdateFolderPath);
         }
 
-        String downloadUrlString = updatePackage.optString(CodePushConstants.DOWNLOAD_URL_KEY, null);
-        HttpURLConnection connection = null;
-        BufferedInputStream bin = null;
-        FileOutputStream fos = null;
-        BufferedOutputStream bout = null;
-        File downloadFile = null;
-        boolean isZip = false;
+        final String downloadUrlString = updatePackage.optString(CodePushConstants.DOWNLOAD_URL_KEY, null);
 
         // Download the file while checking if it is a zip and notifying client of progress.
-        try {
-            URL downloadUrl = new URL(downloadUrlString);
-            connection = (HttpURLConnection) (downloadUrl.openConnection());
+        AsyncTask<Void, Void, CodePushDownloadPackageResult> downloadTask = new AsyncTask<Void, Void, CodePushDownloadPackageResult>() {
+            @Override
+            protected CodePushDownloadPackageResult doInBackground(Void... params) {
+                HttpURLConnection connection = null;
+                BufferedInputStream bin = null;
+                FileOutputStream fos = null;
+                BufferedOutputStream bout = null;
 
-            long totalBytes = connection.getContentLength();
-            long receivedBytes = 0;
+                try {
+                    URL downloadUrl = new URL(downloadUrlString);
 
-            bin = new BufferedInputStream(connection.getInputStream());
-            File downloadFolder = new File(getCodePushPath());
-            downloadFolder.mkdirs();
-            downloadFile = new File(downloadFolder, CodePushConstants.DOWNLOAD_FILE_NAME);
-            fos = new FileOutputStream(downloadFile);
-            bout = new BufferedOutputStream(fos, CodePushConstants.DOWNLOAD_BUFFER_SIZE);
-            byte[] data = new byte[CodePushConstants.DOWNLOAD_BUFFER_SIZE];
-            byte[] header = new byte[4];
+                    connection = (HttpURLConnection) (downloadUrl.openConnection());
 
-            int numBytesRead = 0;
-            while ((numBytesRead = bin.read(data, 0, CodePushConstants.DOWNLOAD_BUFFER_SIZE)) >= 0) {
-                if (receivedBytes < 4) {
-                    for (int i = 0; i < numBytesRead; i++) {
-                        int headerOffset = (int)(receivedBytes) + i;
-                        if (headerOffset >= 4) {
-                            break;
+                    long totalBytes = connection.getContentLength();
+                    long receivedBytes = 0;
+
+                    bin = new BufferedInputStream(connection.getInputStream());
+                    File downloadFolder = new File(getCodePushPath());
+                    downloadFolder.mkdirs();
+                    File downloadFile = new File(downloadFolder, CodePushConstants.DOWNLOAD_FILE_NAME);
+                    fos = new FileOutputStream(downloadFile);
+                    bout = new BufferedOutputStream(fos, CodePushConstants.DOWNLOAD_BUFFER_SIZE);
+                    byte[] data = new byte[CodePushConstants.DOWNLOAD_BUFFER_SIZE];
+                    byte[] header = new byte[4];
+
+                    int numBytesRead = 0;
+                    while ((numBytesRead = bin.read(data, 0, CodePushConstants.DOWNLOAD_BUFFER_SIZE)) >= 0) {
+                        if (receivedBytes < 4) {
+                            for (int i = 0; i < numBytesRead; i++) {
+                                int headerOffset = (int) (receivedBytes) + i;
+                                if (headerOffset >= 4) {
+                                    break;
+                                }
+
+                                header[headerOffset] = data[i];
+                            }
                         }
 
-                        header[headerOffset] = data[i];
+                        receivedBytes += numBytesRead;
+                        bout.write(data, 0, numBytesRead);
+                        progressCallback.call(new DownloadProgress(totalBytes, receivedBytes));
+                    }
+
+                    if (totalBytes != receivedBytes) {
+                        throw new CodePushUnknownException("Received " + receivedBytes + " bytes, expected " + totalBytes);
+                    }
+
+                    boolean isZip = ByteBuffer.wrap(header).getInt() == 0x504b0304;
+
+                    return new CodePushDownloadPackageResult(downloadFile, isZip);
+                } catch (MalformedURLException e) {
+                    throw new CodePushMalformedDataException(downloadUrlString, e);
+                } catch (Exception e) {
+                    throw new CodePushUnknownException("Error occured while downloading package.", e);
+                } finally {
+                    try {
+                        if (bout != null) bout.close();
+                        if (fos != null) fos.close();
+                        if (bin != null) bin.close();
+                        if (connection != null) connection.disconnect();
+                    } catch (IOException e) {
+                        throw new CodePushUnknownException("Error closing IO resources.", e);
                     }
                 }
-
-                receivedBytes += numBytesRead;
-                bout.write(data, 0, numBytesRead);
-                progressCallback.call(new DownloadProgress(totalBytes, receivedBytes));
             }
+        };
 
-            if (totalBytes != receivedBytes) {
-                throw new CodePushUnknownException("Received " + receivedBytes + " bytes, expected " + totalBytes);
-            }
+        downloadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-            isZip = ByteBuffer.wrap(header).getInt() == 0x504b0304;
-        } catch (MalformedURLException e) {
-            throw new CodePushMalformedDataException(downloadUrlString, e);
-        } finally {
-            try {
-                if (bout != null) bout.close();
-                if (fos != null) fos.close();
-                if (bin != null) bin.close();
-                if (connection != null) connection.disconnect();
-            } catch (IOException e) {
-                throw new CodePushUnknownException("Error closing IO resources.", e);
-            }
+        CodePushDownloadPackageResult downloadPackageResult = null;
+        try {
+            downloadPackageResult = downloadTask.get();
+        } catch (InterruptedException e) {
+            throw new CodePushUnknownException("Error occured while downloading package.", e);
+        } catch (ExecutionException e) {
+            throw new CodePushUnknownException("Error occured while downloading package.", e);
         }
+
+        File downloadFile = downloadPackageResult.getDownloadFile();
+        boolean isZip = downloadPackageResult.isZip();
 
         if (isZip) {
             // Unzip the downloaded file and then delete the zip
@@ -339,36 +367,55 @@ public class CodePushUpdateManager {
         updateCurrentPackageInfo(info);
     }
 
-    public void downloadAndReplaceCurrentBundle(String remoteBundleUrl, String bundleFileName) throws IOException {
-        URL downloadUrl;
-        HttpURLConnection connection = null;
-        BufferedInputStream bin = null;
-        FileOutputStream fos = null;
-        BufferedOutputStream bout = null;
+    public void downloadAndReplaceCurrentBundle(final String remoteBundleUrl, final String bundleFileName) throws IOException {
+
+        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+            URL downloadUrl;
+            HttpURLConnection connection = null;
+            BufferedInputStream bin = null;
+            FileOutputStream fos = null;
+            BufferedOutputStream bout = null;
+            @Override
+            protected Void doInBackground(Void... params) {
+                try {
+                    downloadUrl = new URL(remoteBundleUrl);
+                    connection = (HttpURLConnection) (downloadUrl.openConnection());
+                    bin = new BufferedInputStream(connection.getInputStream());
+                    File downloadFile = new File(getCurrentPackageBundlePath(bundleFileName));
+                    downloadFile.delete();
+                    fos = new FileOutputStream(downloadFile);
+                    bout = new BufferedOutputStream(fos, CodePushConstants.DOWNLOAD_BUFFER_SIZE);
+                    byte[] data = new byte[CodePushConstants.DOWNLOAD_BUFFER_SIZE];
+                    int numBytesRead = 0;
+                    while ((numBytesRead = bin.read(data, 0, CodePushConstants.DOWNLOAD_BUFFER_SIZE)) >= 0) {
+                        bout.write(data, 0, numBytesRead);
+                    }
+                } catch (MalformedURLException e) {
+                    throw new CodePushMalformedDataException(remoteBundleUrl, e);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        if (bout != null) bout.close();
+                        if (fos != null) fos.close();
+                        if (bin != null) bin.close();
+                        if (connection != null) connection.disconnect();
+                    } catch (IOException e) {
+                        throw new CodePushUnknownException("Error closing IO resources.", e);
+                    }
+                }
+                return null;
+            }
+        };
+
+        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
         try {
-            downloadUrl = new URL(remoteBundleUrl);
-            connection = (HttpURLConnection) (downloadUrl.openConnection());
-            bin = new BufferedInputStream(connection.getInputStream());
-            File downloadFile = new File(getCurrentPackageBundlePath(bundleFileName));
-            downloadFile.delete();
-            fos = new FileOutputStream(downloadFile);
-            bout = new BufferedOutputStream(fos, CodePushConstants.DOWNLOAD_BUFFER_SIZE);
-            byte[] data = new byte[CodePushConstants.DOWNLOAD_BUFFER_SIZE];
-            int numBytesRead = 0;
-            while ((numBytesRead = bin.read(data, 0, CodePushConstants.DOWNLOAD_BUFFER_SIZE)) >= 0) {
-                bout.write(data, 0, numBytesRead);
-            }
-        } catch (MalformedURLException e) {
-            throw new CodePushMalformedDataException(remoteBundleUrl, e);
-        } finally {
-            try {
-                if (bout != null) bout.close();
-                if (fos != null) fos.close();
-                if (bin != null) bin.close();
-                if (connection != null) connection.disconnect();
-            } catch (IOException e) {
-                throw new CodePushUnknownException("Error closing IO resources.", e);
-            }
+            asyncTask.get();
+        } catch (InterruptedException e) {
+            throw new CodePushUnknownException("Error occured while downloading package.", e);
+        } catch (ExecutionException e) {
+            throw new CodePushUnknownException("Error occured while downloading package.", e);
         }
     }
 
