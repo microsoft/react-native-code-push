@@ -302,6 +302,11 @@ static NSString *bundleResourceSubdirectory = nil;
             };
 };
 
++ (BOOL)requiresMainQueueSetup
+{
+    return YES;
+}
+
 - (void)dealloc
 {
     // Ensure the global resume handler is cleared, so that
@@ -627,7 +632,7 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
         _didUpdateProgress = NO;
         self.paused = NO;
     }
-    
+
     NSString * publicKey = [[CodePushConfig current] publicKey];
 
     [CodePushPackage
