@@ -19,6 +19,8 @@ This plugin provides client-side integration for the [CodePush service](http://c
     * [Store Guideline Compliance](#store-guideline-compliance)
 * [Releasing Updates](#releasing-updates)
 * [Multi-Deployment Testing](#multi-deployment-testing)
+    * [Android](docs/multi-deployment-testing-android.md)
+    * [iOS](docs/multi-deployment-testing-ios.md)
 * [Dynamic Deployment Assignment](#dynamic-deployment-assignment)
 * [API Reference](#api-reference)
     * [JavaScript API](docs/api-js.md)
@@ -258,154 +260,11 @@ Taking advantage of the `Staging` and `Production` deployments allows you to ach
 
 *NOTE: If you want to get really fancy, you can even choose to perform a "staged rollout" as part of #3, which allows you to mitigate additional potential risk with the update (e.g. did your testing in #2 touch all possible devices/conditions?) by only making the production update available to a percentage of your users (e.g. `code-push promote <APP_NAME> Staging Production -r 20%`). Then, after waiting for a reasonable amount of time to see if any crash reports or customer feedback comes in, you can expand it to your entire audience by running `code-push patch <APP_NAME> Production -r 100%`.*
 
-You'll notice that the above steps refer to a "staging build" and "production build" of your app. If your build process already generates distinct binaries per "environment", then you don't need to read any further, since swapping out CodePush deployment keys is just like handling environment-specific config for any other service your app uses (e.g. Facebook). However, if you're looking for examples on how to setup your build process to accommodate this, then refer to the following sections, depending on the platform(s) your app is targeting.
+You'll notice that the above steps refer to a "staging build" and "production build" of your app. If your build process already generates distinct binaries per "environment", then you don't need to read any further, since swapping out CodePush deployment keys is just like handling environment-specific config for any other service your app uses (e.g. Facebook). However, if you're looking for examples on how to setup your build process to accommodate this, then refer to the following sections, depending on the platform(s) your app is targeting:
 
-### Android
+  * [Android](docs/multi-deployment-testing-android.md)
+  * [iOS](docs/multi-deployment-testing-ios.md)
 
-The [Android Gradle plugin](http://google.github.io/android-gradle-dsl/current/index.html) allows you to define custom config settings for each "build type" (e.g. debug, release), which in turn are generated as properties on the `BuildConfig` class that you can reference from your Java code. This mechanism allows you to easily configure your debug builds to use your CodePush staging deployment key and your release builds to use your CodePush production deployment key.
-
-To set this up, perform the following steps:
-
-1. Open your app's `build.gradle` file (e.g. `android/app/build.gradle` in standard React Native projects)
-
-2. Find the `android { buildTypes {} }` section and define `buildConfigField` entries for both your `debug` and `release` build types, which reference your `Staging` and `Production` deployment keys respectively. If you prefer, you can define the key literals in your `gradle.properties` file, and then reference them here. Either way will work, and it's just a matter of personal preference.
-
-    ```groovy
-    android {
-        ...
-        buildTypes {
-            debug {
-                ...
-                // Note: CodePush updates should not be tested in Debug mode as they are overriden by the RN packager. However, because CodePush checks for updates in all modes, we must supply a key.
-                buildConfigField "String", "CODEPUSH_KEY", '""'
-                ...
-            }
-
-            releaseStaging {
-                ...
-                buildConfigField "String", "CODEPUSH_KEY", '"<INSERT_STAGING_KEY>"'
-                ...
-            }
-
-            release {
-                ...
-                buildConfigField "String", "CODEPUSH_KEY", '"<INSERT_PRODUCTION_KEY>"'
-                ...
-            }
-        }
-        ...
-    }
-    ```
-
-    *NOTE: As a reminder, you can retrieve these keys by running `code-push deployment ls <APP_NAME> -k` from your terminal.*
-
-    *NOTE: The naming convention for `releaseStaging` is significant due to [this line](https://github.com/facebook/react-native/blob/e083f9a139b3f8c5552528f8f8018529ef3193b9/react.gradle#L79).*
-
-4. Pass the deployment key to the `CodePush` constructor via the build config you just defined, as opposed to a string literal.
-
-**For React Native >= v0.29**
-
-Open up your `MainApplication.java` file and make the following changes:
-
- ```java
-@Override
-protected List<ReactPackage> getPackages() {
-     return Arrays.<ReactPackage>asList(
-         ...
-         new CodePush(BuildConfig.CODEPUSH_KEY, MainApplication.this, BuildConfig.DEBUG), // Add/change this line.
-         ...
-     );
-}
- ```
-
-**For React Native v0.19 - v0.28**
-
-Open up your `MainActivity.java` file and make the following changes:
-
- ```java
- @Override
- protected List<ReactPackage> getPackages() {
-     return Arrays.<ReactPackage>asList(
-         ...
-         new CodePush(BuildConfig.CODEPUSH_KEY, this, BuildConfig.DEBUG), // Add/change this line.
-         ...
-     );
- }
- ```
-
-*Note: If you gave your build setting a different name in your Gradle file, simply make sure to reflect that in your Java code.*
-
-And that's it! Now when you run or build your app, your debug builds will automatically be configured to sync with your `Staging` deployment, and your release builds will be configured to sync with your `Production` deployment.
-
-*NOTE: By default, the `react-native run-android` command builds and deploys the debug version of your app, so if you want to test out a release/production build, simply run `react-native run-android --variant release. Refer to the [React Native docs](http://facebook.github.io/react-native/docs/signed-apk-android.html#conten) for details about how to configure and create release builds for your Android apps.*
-
-If you want to be able to install both debug and release builds simultaneously on the same device (highly recommended!), then you need to ensure that your debug build has a unique identity and icon from your release build. Otherwise, neither the OS nor you will be able to differentiate between the two. You can achieve this by performing the following steps:
-
-1. In your `build.gradle` file, specify the [`applicationIdSuffix`](http://google.github.io/android-gradle-dsl/current/com.android.build.gradle.internal.dsl.BuildType.html#com.android.build.gradle.internal.dsl.BuildType:applicationIdSuffix) field for your debug build type, which gives your debug build a unique identity for the OS (e.g. `com.foo` vs. `com.foo.debug`).
-
-```groovy
-buildTypes {
-    debug {
-        applicationIdSuffix ".debug"
-    }
-}
-```
-
-2. Create the `app/src/debug/res` directory structure in your app, which allows overriding resources (e.g. strings, icons, layouts) for your debug builds
-
-3. Create a `values` directory underneath the debug res directory created in #2, and copy the existing `strings.xml` file from the `app/src/main/res/values` directory
-
-4. Open up the new debug `strings.xml` file and change the `<string name="app_name">` element's value to something else (e.g. `foo-debug`). This ensures that your debug build now has a distinct display name, so that you can differentiate it from your release build.
-
-5. Optionally, create "mirrored" directories in the `app/src/debug/res` directory for all of your app's icons that you want to change for your debug build. This part isn't technically critical, but it can make it easier to quickly spot your debug builds on a device if its icon is noticeable different.
-
-And that's it! View [here](http://tools.android.com/tech-docs/new-build-system/resource-merging) for more details on how resource merging works in Android.
-
-### iOS
-
-Xcode allows you to define custom build settings for each "configuration" (e.g. debug, release), which can then be referenced as the value of keys within the `Info.plist` file (e.g. the `CodePushDeploymentKey` setting). This mechanism allows you to easily configure your builds to produce binaries, which are configured to synchronize with different CodePush deployments.
-
-To set this up, perform the following steps:
-
-1. Open up your Xcode project and select your project in the `Project navigator` window
-
-2. Ensure the project node is selected, as opposed to one of your targets
-
-3. Select the `Info` tab
-
-4. Click the `+` button within the `Configurations` section and select `Duplicate "Release" Configuration`
-
-   ![Configuration](https://cloud.githubusercontent.com/assets/116461/16101597/088714c0-331c-11e6-9504-5469d9a59d74.png)
-
-5. Name the new configuration `Staging` (or whatever you prefer)
-
-6. Select the `Build Settings` tab
-
-7. Go to `Build Location -> Per-configuration Build Products Path -> Staging` and change `Staging` value from `$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)` to `$(BUILD_DIR)/Release$(EFFECTIVE_PLATFORM_NAME)`
-
-   ![BuildFilesPath](https://cloud.githubusercontent.com/assets/4928157/22645377/b1d7df0e-ec77-11e6-83c6-291a27bcdb17.png)
-
-   *NOTE: Due to https://github.com/facebook/react-native/issues/11813, we have to do this step to make it possible to use other configurations than Debug or Release on RN 0.40.0 or higher.*
-
-8. Click the `+` button on the toolbar and select `Add User-Defined Setting`
-
-   ![Setting](https://cloud.githubusercontent.com/assets/116461/15764165/a16dbe30-28dd-11e6-94f2-fa3b7eb0c7de.png)
-
-9. Name this new setting something like `CODEPUSH_KEY`, expand it, and specify your `Staging` deployment key for the `Staging` config and your `Production` deployment key for the `Release` config.
-
-    ![Setting Keys](https://cloud.githubusercontent.com/assets/8598682/16821919/fc1eac4a-490d-11e6-9b11-128129c24b80.png)
-
-    *NOTE: As a reminder, you can retrieve these keys by running `code-push deployment ls <APP_NAME> -k` from your terminal.*
-
-10. Open your project's `Info.plist` file and change the value of your `CodePushDeploymentKey` entry to `$(CODEPUSH_KEY)`
-
-    ![Infoplist](https://cloud.githubusercontent.com/assets/116461/15764252/3ac8aed2-28de-11e6-8c19-2270ae9857a7.png)
-
-And that's it! Now when you run or build your app, your staging builds will automatically be configured to sync with your `Staging` deployment, and your release builds will be configured to sync with your `Production` deployment.
-
-*Note: If you encounter the error message `ld: library not found for ...`, please consult [this issue](https://github.com/Microsoft/react-native-code-push/issues/426) for a possible solution.*
-
-Additionally, if you want to give them seperate names and/or icons, you can modify the `Product Bundle Identifier`, `Product Name` and `Asset Catalog App Icon Set Name` build settings, which will allow your staging builds to be distinguishable from release builds when installed on the same device.
 
 ### Dynamic Deployment Assignment
 
