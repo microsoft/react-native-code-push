@@ -24,3 +24,6 @@
 -keepclassmembers class com.facebook.react.XReactInstanceManagerImpl {
     void recreateReactContextInBackground();
 }
+
+# Can't find referenced class org.bouncycastle.**
+-dontwarn com.nimbusds.jose.**
