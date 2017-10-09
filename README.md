@@ -19,6 +19,8 @@ This plugin provides client-side integration for the [CodePush service](http://c
     * [Store Guideline Compliance](#store-guideline-compliance)
 * [Releasing Updates](#releasing-updates)
 * [Multi-Deployment Testing](#multi-deployment-testing)
+    * [Android](docs/multi-deployment-testing-android.md)
+    * [iOS](docs/multi-deployment-testing-ios.md)
 * [Dynamic Deployment Assignment](#dynamic-deployment-assignment)
 * [API Reference](#api-reference)
     * [JavaScript API](docs/api-js.md)
