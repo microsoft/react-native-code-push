@@ -264,7 +264,7 @@ const sync = (() => {
 
     if (syncInProgress) {
       typeof syncStatusCallbackWithTryCatch === "function"
-        ? syncStatusCallbackWithTryCatch(CodePush.SyncStatus.SYNC_IN_PROGRESS)
+        ? syncStatusCallbackWithTryCatch(CodePush.SyncStatus.SYNC_IN_PROGRESS, null)
         : log("Sync already in progress.");
       return Promise.resolve(CodePush.SyncStatus.SYNC_IN_PROGRESS);
     }
@@ -303,18 +303,18 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
   syncStatusChangeCallback = typeof syncStatusChangeCallback === "function"
     ? syncStatusChangeCallback
     : (syncStatus) => {
-        switch(syncStatus) {
+        switch(syncStatus, resolvedInstallMode) {
           case CodePush.SyncStatus.CHECKING_FOR_UPDATE:
             log("Checking for update.");
             break;
           case CodePush.SyncStatus.AWAITING_USER_ACTION:
-            log("Awaiting user action.");
+            log("Awaiting user action. Install mode:", resolvedInstallMode);
             break;
           case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
-            log("Downloading package.");
+            log("Downloading package. Install mode:", resolvedInstallMode);
             break;
           case CodePush.SyncStatus.INSTALLING_UPDATE:
-            log("Installing update.");
+            log("Installing update. Install mode:", resolvedInstallMode);
             break;
           case CodePush.SyncStatus.UP_TO_DATE:
             log("App is up to date.");
@@ -342,19 +342,19 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
   try {
     await CodePush.notifyApplicationReady();
 
-    syncStatusChangeCallback(CodePush.SyncStatus.CHECKING_FOR_UPDATE);
+    syncStatusChangeCallback(CodePush.SyncStatus.CHECKING_FOR_UPDATE, null);
     const remotePackage = await checkForUpdate(syncOptions.deploymentKey, handleBinaryVersionMismatchCallback);
 
     const doDownloadAndInstall = async () => {
-      syncStatusChangeCallback(CodePush.SyncStatus.DOWNLOADING_PACKAGE);
+      // Determine the correct install mode based on whether the update is mandatory or not.
+      resolvedInstallMode = remotePackage.isMandatory ? syncOptions.mandatoryInstallMode : syncOptions.installMode;
+
+      syncStatusChangeCallback(CodePush.SyncStatus.DOWNLOADING_PACKAGE, resolvedInstallMode);
       const localPackage = await remotePackage.download(downloadProgressCallback);
 
-      // Determine the correct install mode based on whether the update is mandatory or not.
-      resolvedInstallMode = localPackage.isMandatory ? syncOptions.mandatoryInstallMode : syncOptions.installMode;
-
-      syncStatusChangeCallback(CodePush.SyncStatus.INSTALLING_UPDATE);
+      syncStatusChangeCallback(CodePush.SyncStatus.INSTALLING_UPDATE, resolvedInstallMode);
       await localPackage.install(resolvedInstallMode, syncOptions.minimumBackgroundDuration, () => {
-        syncStatusChangeCallback(CodePush.SyncStatus.UPDATE_INSTALLED);
+        syncStatusChangeCallback(CodePush.SyncStatus.UPDATE_INSTALLED, null);
       });
 
       return CodePush.SyncStatus.UPDATE_INSTALLED;
@@ -368,10 +368,10 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
 
       const currentPackage = await CodePush.getCurrentPackage();
       if (currentPackage && currentPackage.isPending) {
-        syncStatusChangeCallback(CodePush.SyncStatus.UPDATE_INSTALLED);
+        syncStatusChangeCallback(CodePush.SyncStatus.UPDATE_INSTALLED, null);
         return CodePush.SyncStatus.UPDATE_INSTALLED;
       } else {
-        syncStatusChangeCallback(CodePush.SyncStatus.UP_TO_DATE);
+        syncStatusChangeCallback(CodePush.SyncStatus.UP_TO_DATE, null);
         return CodePush.SyncStatus.UP_TO_DATE;
       }
     } else if (syncOptions.updateDialog) {
@@ -404,7 +404,7 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
           dialogButtons.push({
             text: syncOptions.updateDialog.optionalIgnoreButtonLabel,
             onPress: () => {
-              syncStatusChangeCallback(CodePush.SyncStatus.UPDATE_IGNORED);
+              syncStatusChangeCallback(CodePush.SyncStatus.UPDATE_IGNORED, null);
               resolve(CodePush.SyncStatus.UPDATE_IGNORED);
             }
           });
@@ -416,14 +416,14 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
           message += `${syncOptions.updateDialog.descriptionPrefix} ${remotePackage.description}`;
         }
 
-        syncStatusChangeCallback(CodePush.SyncStatus.AWAITING_USER_ACTION);
+        syncStatusChangeCallback(CodePush.SyncStatus.AWAITING_USER_ACTION, null);
         Alert.alert(syncOptions.updateDialog.title, message, dialogButtons);
       });
     } else {
       return await doDownloadAndInstall();
     }
   } catch (error) {
-    syncStatusChangeCallback(CodePush.SyncStatus.UNKNOWN_ERROR);
+    syncStatusChangeCallback(CodePush.SyncStatus.UNKNOWN_ERROR, null);
     log(error.message);
     throw error;
   }
