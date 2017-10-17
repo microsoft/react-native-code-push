@@ -5,6 +5,7 @@ using ReactNative.Modules.Core;
 using ReactNative.UIManager;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
 
 
@@ -20,10 +21,47 @@ namespace CodePush.ReactNative
         internal bool NeedToReportRollback { get; set; } = false;
         internal bool DidUpdate { get; private set; } = false;
         internal bool IsRunningBinaryVersion { get; private set; } = false;
+#pragma warning disable CS0618 // Keeping for backward compatibility
         internal ReactPage MainPage { get; private set; }
+#pragma warning restore CS0618 // Keeping for backward compatibility
+        internal ReactNativeHost Host { get; private set; }
         internal UpdateManager UpdateManager { get; private set; }
 
+        internal ReactInstanceManager ReactInstanceManager
+        {
+            get
+            {
+                if (Host != null)
+                {
+                    return Host.ReactInstanceManager;
+                }
+
+#if WINDOWS_UWP
+#pragma warning disable CS0618 // Keeping for backward compatibility
+                return (ReactInstanceManager)typeof(ReactPage)
+#pragma warning restore CS0618 // Keeping for backward compatibility
+                    .GetField("_reactInstanceManager", BindingFlags.NonPublic | BindingFlags.Instance)
+                    .GetValue(MainPage);
+#else
+                return ((Lazy<ReactInstanceManager>)typeof(ReactPage)
+                    .GetField("_reactInstanceManager", BindingFlags.NonPublic | BindingFlags.Instance)
+                    .GetValue(MainPage)).Value as ReactInstanceManager;
+#endif
+            }
+        }
+
+        internal bool UseDeveloperSupport
+        {
+            get
+            {
+                return Host?.UseDeveloperSupport ?? MainPage.UseDeveloperSupport;
+            }
+        }
+
+
+#pragma warning disable CS0618 // Keeping for backward compatibility
         public CodePushReactPackage(string deploymentKey, ReactPage mainPage)
+#pragma warning restore CS0618 // Keeping for backward compatibility
         {
             AppVersion = CodePushUtils.GetAppVersion();
             DeploymentKey = deploymentKey;
@@ -38,7 +76,22 @@ namespace CodePush.ReactNative
             CurrentInstance = this;
         }
 
-        #region Public methods
+        public CodePushReactPackage(string deploymentKey, ReactNativeHost host)
+        {
+            AppVersion = CodePushUtils.GetAppVersion();
+            DeploymentKey = deploymentKey;
+            Host = host;
+            UpdateManager = new UpdateManager();
+
+            if (CurrentInstance != null)
+            {
+                CodePushUtils.Log("More than one CodePush instance has been initialized. Please use the instance method codePush.getBundleUrlInternal() to get the correct bundleURL for a particular instance.");
+            }
+
+            CurrentInstance = this;
+        }
+
+#region Public methods
         public IReadOnlyList<Type> CreateJavaScriptModulesConfig()
         {
             return new List<Type>();
@@ -110,7 +163,7 @@ namespace CodePush.ReactNative
             {
                 // The binary version is newer.
                 DidUpdate = false;
-                if (!MainPage.UseDeveloperSupport || !AppVersion.Equals(packageAppVersion))
+                if (!UseDeveloperSupport || !AppVersion.Equals(packageAppVersion))
                 {
                     await ClearUpdatesAsync().ConfigureAwait(false);
                 }
@@ -147,7 +200,7 @@ namespace CodePush.ReactNative
                 {
                     DidUpdate = true;
                     // Clear the React dev bundle cache so that new updates can be loaded.
-                    if (MainPage.UseDeveloperSupport)
+                    if (UseDeveloperSupport)
                     {
                         FileUtils.ClearReactDevBundleCacheAsync().Wait();
                     }
