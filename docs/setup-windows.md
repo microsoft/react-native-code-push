@@ -22,14 +22,14 @@ Once you've acquired the CodePush plugin, you need to integrate it into the Visu
 
 ### Plugin Configuration (Windows)
 
-After installing the plugin, you need to configure your app to consult CodePush for the location of your JS bundle, since it will "take control" of managing the current and all future versions. To do this, update the `AppReactPage.cs` file to use CodePush via the following changes:
+After installing the plugin, you need to configure your app to consult CodePush for the location of your JS bundle, since it will "take control" of managing the current and all future versions. To do this, update the `MainReactNativeHost.cs` file to use CodePush via the following changes:
 
 ```c#
 ...
 // 1. Import the CodePush namespace
 using CodePush.ReactNative;
 ...
-class AppReactPage : ReactPage
+class MainReactNativeHost : ReactNativeHost
 {
     // 2. Declare a private instance variable for the CodePushModule instance.
     private CodePushReactPackage codePushReactPackage;
@@ -38,7 +38,7 @@ class AppReactPage : ReactPage
     // specifying the right deployment key, then use it to return the bundle URL from
     // CodePush instead of statically from the binary. If you don't already have your
     // deployment key, you can run "code-push deployment ls <appName> -k" to retrieve it.
-    public override string JavaScriptBundleFile
+    protected override string JavaScriptBundleFile
     {
         get
         {
@@ -48,7 +48,7 @@ class AppReactPage : ReactPage
     }
 
     // 4. Add the codePushReactPackage instance to the list of existing packages.
-    public override List<IReactPackage> Packages
+    protected override List<IReactPackage> Packages
     {
         get
         {
