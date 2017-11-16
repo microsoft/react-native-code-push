@@ -99,6 +99,14 @@ public class MainApplication extends Application implements ReactApplication {
 }
 ```
 
+*NOTE: For React Native v0.49+ please be sure that `getJSMainModuleName` function in the `MainApplication.java` file determines correct URL to fetch JS bundle (used when dev support is enabled, see [this](https://github.com/facebook/react-native/blob/c7f37074ac89f7e568ca26a6bad3bdb02812c39f/ReactAndroid/src/main/java/com/facebook/react/ReactNativeHost.java#L124) for more details) e.g.*
+```
+@Override
+protected String getJSMainModuleName() {
+    return "index";
+}
+```
+
 **For React Native v0.19 - v0.28**
 
 Update the `MainActivity.java` file to use CodePush via the following changes:
