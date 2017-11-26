@@ -173,11 +173,13 @@ class MyApp extends Component {
     }
 
     render() {
-        <View>
-            <TouchableOpacity onPress={this.onButtonPress}>
-                <Text>Check for updates</Text>
-            </TouchableOpacity>
-        </View>
+        return (
+            <View>
+                <TouchableOpacity onPress={this.onButtonPress}>
+                    <Text>Check for updates</Text>
+                </TouchableOpacity>
+            </View> 
+        )
     }
 }
 
