@@ -66,7 +66,7 @@ After installing the plugin and syncing your Android Studio project with Gradle,
 
 **For React Native >= v0.29**
 
-If you are using React Native for the whole application please do the following:
+If you are integrating Code Push into React Native application please do the following steps:
 
 Update the `MainApplication.java` file to use CodePush via the following changes:
 
@@ -109,9 +109,9 @@ protected String getJSMainModuleName() {
 }
 ```
 
-If you are integrating React Native into existing application please do the following:
+If you are integrating React Native into existing native application please do the following steps:
 
-Update `MyReactActivity.java` (it could be named differently in you app) file to use CodePush via the following changes:
+Update `MyReactActivity.java` (it could be named differently in your app) file to use CodePush via the following changes:
 
 ```java
 ...
