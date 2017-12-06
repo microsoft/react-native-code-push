@@ -66,6 +66,8 @@ After installing the plugin and syncing your Android Studio project with Gradle,
 
 **For React Native >= v0.29**
 
+If you are integrating Code Push into React Native application please do the following steps:
+
 Update the `MainApplication.java` file to use CodePush via the following changes:
 
 ```java
@@ -104,6 +106,40 @@ public class MainApplication extends Application implements ReactApplication {
 @Override
 protected String getJSMainModuleName() {
     return "index";
+}
+```
+
+If you are integrating React Native into existing native application please do the following steps:
+
+Update `MyReactActivity.java` (it could be named differently in your app) file to use CodePush via the following changes:
+
+```java
+...
+// 1. Import the plugin class.
+import com.microsoft.codepush.react.CodePush;
+
+public class MyReactActivity extends Activity {
+    private ReactRootView mReactRootView;
+    private ReactInstanceManager mReactInstanceManager;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        ...
+        mReactInstanceManager = ReactInstanceManager.builder()
+                // ...
+                // Add CodePush package
+                .addPackage(new CodePush("deployment-key-here", getApplicationContext(), BuildConfig.DEBUG))
+                // Get the JS Bundle File via Code Push
+                .setJSBundleFile(CodePush.getJSBundleFile())
+                // ...
+                
+                .build();
+        mReactRootView.startReactApplication(mReactInstanceManager, "MyReactNativeApp", null);
+
+        setContentView(mReactRootView);
+    }
+
+    ...
 }
 ```
 
