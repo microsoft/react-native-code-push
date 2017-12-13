@@ -303,7 +303,15 @@ NSString * const IgnoreCodePushMetadata = @".codepushrelease";
 
 + (NSString *)getSignatureFilePath:(NSString *)updateFolderPath
 {
-    return [NSString stringWithFormat:@"%@/%@/%@", updateFolderPath, ManifestFolderPrefix, BundleJWTFile];
+    NSString* signatureFilePath = [NSString stringWithFormat:@"%@/%@/%@", updateFolderPath, ManifestFolderPrefix, BundleJWTFile];
+  
+    if ([[NSFileManager defaultManager] fileExistsAtPath:signatureFilePath]) {
+      return signatureFilePath;
+    } else {
+      return [NSString stringWithFormat:@"%@/%@", updateFolderPath, [CodePushUpdateUtils findMainBundleInFolder:updateFolderPath
+                                                                                               expectedFileName:BundleJWTFile
+                                                                                                          error:nil]];
+    }
 }
 
 + (NSString *)getSignatureFor:(NSString *)folderPath
