@@ -319,6 +319,10 @@ public class CodePush implements ReactPackage {
         return sTestConfigurationFlag;
     }
 
+    public void setDeploymentKey(String deploymentKey) {
+        mDeploymentKey = deploymentKey;
+    }
+
     public static void setUsingTestConfiguration(boolean shouldUseTestConfiguration) {
         sTestConfigurationFlag = shouldUseTestConfiguration;
     }
