@@ -43,6 +43,8 @@ module.exports = () => {
     var oldJsCodeLocationAssignmentStatement;
     if (jsCodeLocations) {
         oldJsCodeLocationAssignmentStatement = jsCodeLocations[1];
+    } else {
+        console.log('Couldn\'t find jsCodeLocation setting in AppDelegate.');
     }
     var newJsCodeLocationAssignmentStatement = "jsCodeLocation = [CodePush bundleURL];";
     if (~appDelegateContents.indexOf(newJsCodeLocationAssignmentStatement)) {
