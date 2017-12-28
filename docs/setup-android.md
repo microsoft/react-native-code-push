@@ -14,7 +14,7 @@
   * [WIX React Native Navigation applications (ver 1.x)](#wix-react-native-navigation-applications)
   * [Code Signing setup](#code-signing-setup)
 
-In order to integrate CodePush into your Android project, perform the following steps:
+In order to integrate CodePush into your Android project, please perform the following steps:
 
 ### Plugin Installation (Android)
 
@@ -252,7 +252,7 @@ In order to effectively make use of the `Staging` and `Production` deployments t
 
 If you are using [WIX React Native Navigation **version 1.x**](https://github.com/wix/react-native-navigation) based application, please do the following steps to integrate CodePush:
 
-1. No need to change `MainActivity.java` file, so if you are integrating CodePush to newly create RNN application it might be looking like this:
+1. No need to change `MainActivity.java` file, so if you are integrating CodePush to newly created RNN application it might be looking like this:
 
 ```java
 import com.facebook.react.ReactActivity;
