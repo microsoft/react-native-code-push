@@ -535,6 +535,11 @@ static NSString *bundleResourceSubdirectory = nil;
             };
 };
 
++ (BOOL)requiresMainQueueSetup
+{
+    return YES;
+}
+
 - (void)dealloc
 {
     // Ensure the global resume handler is cleared, so that
