@@ -19,6 +19,7 @@
   "dependencies": {
     "code-push": "1.11.2-beta",
     "glob": "^5.0.15",
+    "hoist-non-react-statics": "^2.3.1",
     "inquirer": "1.1.2",
     "plist": "1.2.0",
     "xcode": "0.9.2"

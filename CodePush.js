@@ -4,9 +4,11 @@ import requestFetchAdapter from "./request-fetch-adapter";
 import { AppState, Platform, NativeEventEmitter } from "react-native";
 import RestartManager from "./RestartManager";
 import log from "./logging";
+import hoistStatics from 'hoist-non-react-statics';
 
 let NativeCodePush = require("react-native").NativeModules.CodePush;
 const PackageMixins = require("./package-mixins")(NativeCodePush);
+
 
 async function checkForUpdate(deploymentKey = null, handleBinaryVersionMismatchCallback = null) {
   if (typeof NativeCodePush.checkForUpdate === "function") {
@@ -529,7 +531,7 @@ function codePushify(options = {}) {
   }
 
   var decorator = (RootComponent) => {
-    return class CodePushComponent extends React.Component {
+    const extended = class CodePushComponent extends React.Component {
       componentDidMount() {
         if (options.checkFrequency === CodePush.CheckFrequency.MANUAL) {
           CodePush.notifyAppReady();
@@ -581,6 +583,8 @@ function codePushify(options = {}) {
         return <RootComponent {...props} />
       }
     }
+
+    return hoistStatics(extended, RootComponent);
   }
 
   if (typeof options === "function") {
