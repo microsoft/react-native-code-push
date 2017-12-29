@@ -15,7 +15,7 @@ namespace CodePush.ReactNative
             var deletedFiles = (JArray)diffManifest["deletedFiles"];
             foreach (string fileNameToDelete in deletedFiles)
             {
-                StorageFile fileToDelete = await newPackageFolder.GetFileAsync(fileNameToDelete).AsTask().ConfigureAwait(false);
+                StorageFile fileToDelete = await newPackageFolder.GetFileAsync(fileNameToDelete.Replace("/", "\\")).AsTask().ConfigureAwait(false);
                 await fileToDelete.DeleteAsync().AsTask().ConfigureAwait(false);
             }
         }
