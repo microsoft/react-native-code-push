@@ -46,6 +46,8 @@ To set this up, perform the following steps:
 
 And that's it! Now when you run or build your app, your staging builds will automatically be configured to sync with your `Staging` deployment, and your release builds will be configured to sync with your `Production` deployment.
 
+*NOTE: CocoaPods users may need to run `pod install` before building with their new release configuration.*
+
 *Note: If you encounter the error message `ld: library not found for ...`, please consult [this issue](https://github.com/Microsoft/react-native-code-push/issues/426) for a possible solution.*
 
 Additionally, if you want to give them seperate names and/or icons, you can modify the `Product Bundle Identifier`, `Product Name` and `Asset Catalog App Icon Set Name` build settings, which will allow your staging builds to be distinguishable from release builds when installed on the same device.
