@@ -1,6 +1,20 @@
 ## Android Setup
 
-In order to integrate CodePush into your Android project, perform the following steps:
+* [Plugin Installation (Android)](#plugin-installation-android)
+  * [Plugin Installation (Android - RNPM)](#plugin-installation-android---rnpm)
+  * [Plugin Installation (Android - Manual)](#plugin-installation-android---manual)
+* [Plugin Configuration (Android)](#plugin-configuration-android)
+  * [For React Native >= v0.29](#for-react-native--v029)
+    * [For newly created React Native application](#for-newly-created-react-native-application)
+    * [For existing native application](#for-existing-native-application)
+  * [For React Native v0.19 - v0.28](#for-react-native-v019---v028)
+  * [Background React Instances](#background-react-instances)
+    * [For React Native >= v0.29 (Background React Instances)](#for-react-native--v029-background-react-instances)
+    * [For React Native v0.19 - v0.28 (Background React Instances)](#for-react-native-v019---v028-background-react-instances)
+  * [WIX React Native Navigation applications (ver 1.x)](#wix-react-native-navigation-applications)
+  * [Code Signing setup](#code-signing-setup)
+
+In order to integrate CodePush into your Android project, please perform the following steps:
 
 ### Plugin Installation (Android)
 
@@ -64,7 +78,11 @@ And that's it for installation using RNPM! Continue below to the [Plugin Configu
 
 After installing the plugin and syncing your Android Studio project with Gradle, you need to configure your app to consult CodePush for the location of your JS bundle, since it will "take control" of managing the current and all future versions. To do this:
 
-**For React Native >= v0.29**
+#### For React Native >= v0.29
+
+##### For newly created React Native application
+
+If you are integrating Code Push into React Native application please do the following steps:
 
 Update the `MainApplication.java` file to use CodePush via the following changes:
 
@@ -107,7 +125,43 @@ protected String getJSMainModuleName() {
 }
 ```
 
-**For React Native v0.19 - v0.28**
+##### For existing native application
+
+If you are integrating React Native into existing native application please do the following steps:
+
+Update `MyReactActivity.java` (it could be named differently in your app) file to use CodePush via the following changes:
+
+```java
+...
+// 1. Import the plugin class.
+import com.microsoft.codepush.react.CodePush;
+
+public class MyReactActivity extends Activity {
+    private ReactRootView mReactRootView;
+    private ReactInstanceManager mReactInstanceManager;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        ...
+        mReactInstanceManager = ReactInstanceManager.builder()
+                // ...
+                // Add CodePush package
+                .addPackage(new CodePush("deployment-key-here", getApplicationContext(), BuildConfig.DEBUG))
+                // Get the JS Bundle File via Code Push
+                .setJSBundleFile(CodePush.getJSBundleFile())
+                // ...
+                
+                .build();
+        mReactRootView.startReactApplication(mReactInstanceManager, "MyReactNativeApp", null);
+
+        setContentView(mReactRootView);
+    }
+
+    ...
+}
+```
+
+#### For React Native v0.19 - v0.28
 
 Update the `MainActivity.java` file to use CodePush via the following changes:
 
@@ -147,7 +201,7 @@ public class MainActivity extends ReactActivity {
 
 In order to update/restart your React Native instance, CodePush must be configured with a `ReactInstanceHolder` before attempting to restart an instance in the background. This is usually done in your `Application` implementation.
 
-**For React Native >= v0.29**
+##### For React Native >= v0.29 (Background React Instances)
 
 Update the `MainApplication.java` file to use CodePush via the following changes:
 
@@ -174,7 +228,7 @@ public class MainApplication extends Application implements ReactApplication {
 }
 ```
 
-**For React Native v0.19 - v0.28**
+##### For React Native v0.19 - v0.28 (Background React Instances)
 
 Before v0.29, React Native did not provide a `ReactNativeHost` abstraction. If you're launching a background instance, you'll likely have built your own, which should now implement `ReactInstanceHolder`. Once that's done:
 
@@ -193,6 +247,70 @@ public class MainApplication extends Application {
 ```
 
 In order to effectively make use of the `Staging` and `Production` deployments that were created along with your CodePush app, refer to the [multi-deployment testing](../README.md#multi-deployment-testing) docs below before actually moving your app's usage of CodePush into production.
+
+#### WIX React Native Navigation applications
+
+If you are using [WIX React Native Navigation **version 1.x**](https://github.com/wix/react-native-navigation) based application, please do the following steps to integrate CodePush:
+
+1. No need to change `MainActivity.java` file, so if you are integrating CodePush to newly created RNN application it might be looking like this:
+
+```java
+import com.facebook.react.ReactActivity;
+import com.reactnativenavigation.controllers.SplashActivity;
+
+public class MainActivity extends SplashActivity {
+
+}
+```
+
+2. Update the `MainApplication.java` file to use CodePush via the following changes:
+
+```java
+// ...
+import com.facebook.react.ReactInstanceManager;
+
+// Add CodePush imports
+import com.microsoft.codepush.react.ReactInstanceHolder;
+import com.microsoft.codepush.react.CodePush;
+
+public class MainApplication extends NavigationApplication implements ReactInstanceHolder {
+
+	@Override
+	public boolean isDebug() {
+		// Make sure you are using BuildConfig from your own application
+		return BuildConfig.DEBUG;
+	}
+
+	protected List<ReactPackage> getPackages() {
+		// Add additional packages you require here
+		return Arrays.<ReactPackage>asList(
+			new CodePush("deployment-key-here", getApplicationContext(), BuildConfig.DEBUG)
+		);
+	}
+
+	@Override
+	public List<ReactPackage> createAdditionalReactPackages() {
+		return getPackages();
+	}
+
+	@Override
+	public String getJSBundleFile() {
+        // Override default getJSBundleFile method with the one CodePush is providing
+		return CodePush.getJSBundleFile();
+	}
+
+	@Override
+	public String getJSMainModuleName() {
+		return "index";
+	}
+
+    @Override
+    public ReactInstanceManager getReactInstanceManager() {
+        // CodePush must be told how to find React Native instance
+        return getReactNativeHost().getReactInstanceManager();
+    }
+}
+```
 
 #### Code Signing setup
 

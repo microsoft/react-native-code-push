@@ -39,7 +39,13 @@ module.exports = () => {
     }
 
     // 2. Modify jsCodeLocation value assignment
-    var oldJsCodeLocationAssignmentStatement = appDelegateContents.match(/(jsCodeLocation = .*)/)[1];
+    var jsCodeLocations = appDelegateContents.match(/(jsCodeLocation = .*)/);
+    var oldJsCodeLocationAssignmentStatement;
+    if (jsCodeLocations) {
+        oldJsCodeLocationAssignmentStatement = jsCodeLocations[1];
+    } else {
+        console.log('Couldn\'t find jsCodeLocation setting in AppDelegate.');
+    }
     var newJsCodeLocationAssignmentStatement = "jsCodeLocation = [CodePush bundleURL];";
     if (~appDelegateContents.indexOf(newJsCodeLocationAssignmentStatement)) {
         console.log(`"jsCodeLocation" already pointing to "[CodePush bundleURL]".`);

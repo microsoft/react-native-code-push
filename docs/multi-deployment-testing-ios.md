@@ -1,5 +1,11 @@
 ### iOS
 
+> NOTE
+>
+> Complete demos configured with "multi-deployment testing" feature are [here]:
+> *  **without using cocoa pods**: [link](https://github.com/Microsoft/react-native-code-push/files/1259957/rncp976.copy.zip)
+> *  **using cocoa pods**: [link](https://github.com/Microsoft/react-native-code-push/files/1172217/rncp893.copy.zip)
+
 Xcode allows you to define custom build settings for each "configuration" (e.g. debug, release), which can then be referenced as the value of keys within the `Info.plist` file (e.g. the `CodePushDeploymentKey` setting). This mechanism allows you to easily configure your builds to produce binaries, which are configured to synchronize with different CodePush deployments.
 
 To set this up, perform the following steps:
@@ -39,6 +45,8 @@ To set this up, perform the following steps:
     ![Infoplist](https://cloud.githubusercontent.com/assets/116461/15764252/3ac8aed2-28de-11e6-8c19-2270ae9857a7.png)
 
 And that's it! Now when you run or build your app, your staging builds will automatically be configured to sync with your `Staging` deployment, and your release builds will be configured to sync with your `Production` deployment.
+
+*NOTE: CocoaPods users may need to run `pod install` before building with their new release configuration.*
 
 *Note: If you encounter the error message `ld: library not found for ...`, please consult [this issue](https://github.com/Microsoft/react-native-code-push/issues/426) for a possible solution.*
 

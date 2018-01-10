@@ -67,8 +67,8 @@ We try our best to maintain backwards compatability of our plugin with previous 
 | v0.43-v0.44             | v2.0+ *(RN refactored uimanager dependencies)*       |
 | v0.45                   | v3.0+ *(RN refactored instance manager code)*        |
 | v0.46                   | v4.0+ *(RN refactored js bundle loader code)*        |
-| v0.46-v0.50             | v5.1+ *(RN removed unused registration of JS modules)*|
-| v0.51+                  | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
+| v0.46-v0.51             | v5.1+ *(RN removed unused registration of JS modules)*|
+| v0.52+                  | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
 
 ### Supported Components
 
@@ -264,7 +264,7 @@ Taking advantage of the `Staging` and `Production` deployments allows you to ach
 
 *NOTE: If you want to get really fancy, you can even choose to perform a "staged rollout" as part of #3, which allows you to mitigate additional potential risk with the update (e.g. did your testing in #2 touch all possible devices/conditions?) by only making the production update available to a percentage of your users (e.g. `code-push promote <APP_NAME> Staging Production -r 20%`). Then, after waiting for a reasonable amount of time to see if any crash reports or customer feedback comes in, you can expand it to your entire audience by running `code-push patch <APP_NAME> Production -r 100%`.*
 
-You'll notice that the above steps refer to a "staging build" and "production build" of your app. If your build process already generates distinct binaries per "environment", then you don't need to read any further, since swapping out CodePush deployment keys is just like handling environment-specific config for any other service your app uses (e.g. Facebook). However, if you're looking for examples on how to setup your build process to accommodate this, then refer to the following sections, depending on the platform(s) your app is targeting:
+You'll notice that the above steps refer to a "staging build" and "production build" of your app. If your build process already generates distinct binaries per "environment", then you don't need to read any further, since swapping out CodePush deployment keys is just like handling environment-specific config for any other service your app uses (e.g. Facebook). However, if you're looking for examples (**including demo projects**) on how to setup your build process to accommodate this, then refer to the following sections, depending on the platform(s) your app is targeting:
 
   * [Android](docs/multi-deployment-testing-android.md)
   * [iOS](docs/multi-deployment-testing-ios.md)

@@ -11,7 +11,7 @@ import {
 
 import CodePush from "react-native-code-push";
 
-export default class App extends Component<{}> {
+class App extends Component<{}> {
   constructor() {
     super();
     this.state = { restartAllowed: true };
@@ -158,3 +158,5 @@ const styles = StyleSheet.create({
 let codePushOptions = { checkFrequency: CodePush.CheckFrequency.MANUAL };
 
 App = CodePush(codePushOptions)(App);
+
+export default App;
