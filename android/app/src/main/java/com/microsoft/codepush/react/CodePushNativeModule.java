@@ -20,6 +20,7 @@ import com.microsoft.codepush.react.enums.CodePushUpdateState;
 import com.microsoft.codepush.react.interfaces.CodePushBinaryVersionMismatchListener;
 import com.microsoft.codepush.react.interfaces.CodePushDownloadProgressListener;
 import com.microsoft.codepush.react.interfaces.CodePushSyncStatusListener;
+import com.microsoft.codepush.react.utils.CodePushRNUtils;
 import com.microsoft.codepush.react.utils.CodePushUpdateUtils;
 import com.microsoft.codepush.react.utils.CodePushUtils;
 
@@ -84,7 +85,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
                 CodePushRemotePackage remotePackage = mCodePushCore.checkForUpdate(deploymentKey);
                 if (remotePackage != null) {
                     JSONObject jsonObject = CodePushUtils.convertObjectToJsonObject(remotePackage);
-                    promise.resolve(CodePushUtils.convertJsonObjectToWritable(jsonObject));
+                    promise.resolve(CodePushRNUtils.convertJsonObjectToWritable(jsonObject));
                 } else {
                     promise.resolve("");
                 }
@@ -109,7 +110,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
         AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                CodePushSyncOptions syncOptions = CodePushUtils.convertReadableToObject(syncOptionsMap, CodePushSyncOptions.class);
+                CodePushSyncOptions syncOptions = CodePushRNUtils.convertReadableToObject(syncOptionsMap, CodePushSyncOptions.class);
                 mCodePushCore.sync(syncOptions, promise);
                 return null;
             }
@@ -125,11 +126,11 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
             @Override
             protected Void doInBackground(Void... params) {
                 CodePushLocalPackage newPackage = mCodePushCore.downloadUpdate(
-                        CodePushUtils.convertReadableToObject(updatePackage, CodePushRemotePackage.class)
+                        CodePushRNUtils.convertReadableToObject(updatePackage, CodePushRemotePackage.class)
                 );
 
                 if (newPackage.DownloadException == null) {
-                    promise.resolve(CodePushUtils.convertObjectToWritableMap(newPackage));
+                    promise.resolve(CodePushRNUtils.convertObjectToWritableMap(newPackage));
                 } else {
                     promise.reject(newPackage.DownloadException);
                 }
@@ -165,7 +166,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
             protected Void doInBackground(Void... params) {
                 CodePushLocalPackage currentPackage = mCodePushCore.getUpdateMetadata(CodePushUpdateState.values()[updateState]);
                 if (currentPackage != null) {
-                    promise.resolve(CodePushUtils.convertObjectToWritableMap(currentPackage));
+                    promise.resolve(CodePushRNUtils.convertObjectToWritableMap(currentPackage));
                 } else {
                     promise.resolve("");
                 }
@@ -183,7 +184,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
             protected Void doInBackground(Void... params) {
                 CodePushStatusReport statusReport = mCodePushCore.getNewStatusReport();
                 if (statusReport != null) {
-                    promise.resolve(CodePushUtils.convertObjectToWritableMap(statusReport));
+                    promise.resolve(CodePushRNUtils.convertObjectToWritableMap(statusReport));
                 } else {
                     promise.resolve("");
                 }
@@ -200,7 +201,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
             @Override
             protected Void doInBackground(Void... params) {
                 mCodePushCore.installUpdate(
-                        CodePushUtils.convertReadableToObject(updatePackage, CodePushLocalPackage.class),
+                        CodePushRNUtils.convertReadableToObject(updatePackage, CodePushLocalPackage.class),
                         CodePushInstallMode.values()[installMode],
                         minimumBackgroundDuration);
                 promise.resolve("");
@@ -229,7 +230,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
 
     @ReactMethod
     public void recordStatusReported(ReadableMap statusReport) {
-        mCodePushCore.recordStatusReported(CodePushUtils.convertReadableToObject(statusReport, CodePushStatusReport.class));
+        mCodePushCore.recordStatusReported(CodePushRNUtils.convertReadableToObject(statusReport, CodePushStatusReport.class));
     }
 
     @ReactMethod
@@ -259,7 +260,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
 
     @ReactMethod
     public void saveStatusReportForRetry(ReadableMap statusReport) {
-        mCodePushCore.saveStatusReportForRetry(CodePushUtils.convertReadableToObject(statusReport, CodePushStatusReport.class));
+        mCodePushCore.saveStatusReportForRetry(CodePushRNUtils.convertReadableToObject(statusReport, CodePushStatusReport.class));
     }
 
     @ReactMethod

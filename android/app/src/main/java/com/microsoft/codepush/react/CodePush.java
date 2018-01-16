@@ -17,7 +17,7 @@ import com.microsoft.codepush.react.interfaces.CodePushDownloadProgressListener;
 import com.microsoft.codepush.react.interfaces.CodePushSyncStatusListener;
 import com.microsoft.codepush.react.interfaces.ReactInstanceHolder;
 import com.microsoft.codepush.react.managers.CodePushAcquisitionManager;
-import com.microsoft.codepush.react.utils.CodePushUtils;
+import com.microsoft.codepush.react.utils.CodePushRNUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -154,7 +154,7 @@ public class CodePush implements ReactPackage, Serializable {
     }
 
     public static void log(String message) {
-        CodePushUtils.log(message);
+        CodePushRNUtils.log(message);
     }
 
     public void notifyApplicationReady() {

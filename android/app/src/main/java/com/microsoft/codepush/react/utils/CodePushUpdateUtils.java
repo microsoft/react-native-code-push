@@ -6,8 +6,6 @@ import android.util.Base64;
 import com.microsoft.codepush.react.CodePushConstants;
 import com.microsoft.codepush.react.exceptions.CodePushInvalidUpdateException;
 import com.microsoft.codepush.react.exceptions.CodePushUnknownException;
-import com.microsoft.codepush.react.utils.CodePushUtils;
-import com.microsoft.codepush.react.utils.FileUtils;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jwt.SignedJWT;
@@ -149,7 +147,7 @@ public class CodePushUpdateUtils {
                 if (!isDebugMode) {
                     // Only print this message in "Release" mode. In "Debug", we may not have the
                     // hash if the build skips bundling the files.
-                    CodePushUtils.log("Unable to get the hash of the binary's bundled resources - \"codepush.gradle\" may have not been added to the build definition.");
+                    CodePushRNUtils.log("Unable to get the hash of the binary's bundled resources - \"codepush.gradle\" may have not been added to the build definition.");
                 }
             }
             return null;
@@ -161,7 +159,7 @@ public class CodePushUpdateUtils {
     // 2. JSON stringify the array
     // 3. SHA256-hash the result
     public static void verifyFolderHash(String folderPath, String expectedHash) {
-        CodePushUtils.log("Verifying hash for folder path: " + folderPath);
+        CodePushRNUtils.log("Verifying hash for folder path: " + folderPath);
         ArrayList<String> updateContentsManifest = new ArrayList<>();
         addContentsOfFolderToManifest(folderPath, "", updateContentsManifest);
         //sort manifest strings to make sure, that they are completely equal with manifest strings has been generated in cli!
@@ -173,16 +171,16 @@ public class CodePushUpdateUtils {
 
         // The JSON serialization turns path separators into "\/", e.g. "CodePush\/assets\/image.png"
         String updateContentsManifestString = updateContentsJSONArray.toString().replace("\\/", "/");
-        CodePushUtils.log("Manifest string: " + updateContentsManifestString);
+        CodePushRNUtils.log("Manifest string: " + updateContentsManifestString);
 
         String updateContentsManifestHash = computeHash(new ByteArrayInputStream(updateContentsManifestString.getBytes()));
 
-        CodePushUtils.log("Expected hash: " + expectedHash + ", actual hash: " + updateContentsManifestHash);
+        CodePushRNUtils.log("Expected hash: " + expectedHash + ", actual hash: " + updateContentsManifestHash);
         if (!expectedHash.equals(updateContentsManifestHash)) {
             throw new CodePushInvalidUpdateException("The update contents failed the data integrity check.");
         }
 
-        CodePushUtils.log("The update contents succeeded the data integrity check.");
+        CodePushRNUtils.log("The update contents succeeded the data integrity check.");
     }
 
     public static Map<String, Object> verifyAndDecodeJWT(String jwt, PublicKey publicKey) {
@@ -191,13 +189,13 @@ public class CodePushUpdateUtils {
             JWSVerifier verifier = new RSASSAVerifier((RSAPublicKey)publicKey);
             if (signedJWT.verify(verifier)) {
                 Map<String, Object> claims = signedJWT.getJWTClaimsSet().getClaims();
-                CodePushUtils.log("JWT verification succeeded, payload content: " + claims.toString());
+                CodePushRNUtils.log("JWT verification succeeded, payload content: " + claims.toString());
                 return claims;
             }
             return null;
         } catch (Exception ex) {
-            CodePushUtils.log(ex.getMessage());
-            CodePushUtils.log(Arrays.toString(ex.getStackTrace()));
+            CodePushRNUtils.log(ex.getMessage());
+            CodePushRNUtils.log(Arrays.toString(ex.getStackTrace()));
             return null;
         }
     }
@@ -215,8 +213,8 @@ public class CodePushUpdateUtils {
 
             return kf.generatePublic(X509Key);
         } catch (Exception e) {
-            CodePushUtils.log(e.getMessage());
-            CodePushUtils.log(Arrays.toString(e.getStackTrace()));
+            CodePushRNUtils.log(e.getMessage());
+            CodePushRNUtils.log(Arrays.toString(e.getStackTrace()));
             return null;
         }
     }
@@ -234,14 +232,14 @@ public class CodePushUpdateUtils {
         try {
             return FileUtils.readFileToString(signatureFilePath);
         } catch (IOException e) {
-            CodePushUtils.log(e.getMessage());
-            CodePushUtils.log(Arrays.toString(e.getStackTrace()));
+            CodePushRNUtils.log(e.getMessage());
+            CodePushRNUtils.log(Arrays.toString(e.getStackTrace()));
             return null;
         }
     }
 
     public static void verifyUpdateSignature(String folderPath, String packageHash, String stringPublicKey) throws CodePushInvalidUpdateException {
-        CodePushUtils.log("Verifying signature for folder path: " + folderPath);
+        CodePushRNUtils.log("Verifying signature for folder path: " + folderPath);
 
         final PublicKey publicKey = parsePublicKey(stringPublicKey);
         if (publicKey == null) {
@@ -267,6 +265,6 @@ public class CodePushUpdateUtils {
             throw new CodePushInvalidUpdateException("The update contents failed the code signing check.");
         }
 
-        CodePushUtils.log("The update contents succeeded the code signing check.");
+        CodePushRNUtils.log("The update contents succeeded the code signing check.");
     }
 }

@@ -6,7 +6,7 @@ import android.content.SharedPreferences;
 import com.microsoft.codepush.react.CodePushConstants;
 import com.microsoft.codepush.react.exceptions.CodePushMalformedDataException;
 import com.microsoft.codepush.react.exceptions.CodePushUnknownException;
-import com.microsoft.codepush.react.utils.CodePushUtils;
+import com.microsoft.codepush.react.utils.CodePushRNUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -46,7 +46,7 @@ public class SettingsManager {
             return new JSONObject(pendingUpdateString);
         } catch (JSONException e) {
             // Should not happen.
-            CodePushUtils.log("Unable to parse pending update metadata " + pendingUpdateString +
+            CodePushRNUtils.log("Unable to parse pending update metadata " + pendingUpdateString +
                     " stored in SharedPreferences");
             return null;
         }

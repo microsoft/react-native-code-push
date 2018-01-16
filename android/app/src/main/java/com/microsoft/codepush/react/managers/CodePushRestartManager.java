@@ -1,7 +1,7 @@
 package com.microsoft.codepush.react.managers;
 
 import com.microsoft.codepush.react.CodePushCore;
-import com.microsoft.codepush.react.utils.CodePushUtils;
+import com.microsoft.codepush.react.utils.CodePushRNUtils;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -20,11 +20,11 @@ public class CodePushRestartManager {
     }
 
     public void allow() {
-        CodePushUtils.log("Re-allowing restarts");
+        CodePushRNUtils.log("Re-allowing restarts");
         mAllowed = true;
 
         if (mRestartQueue.size() > 0) {
-            CodePushUtils.log("Executing pending restart");
+            CodePushRNUtils.log("Executing pending restart");
             boolean onlyIfUpdateIsPending = mRestartQueue.get(0);
             mRestartQueue.remove(0);
             restartApp(onlyIfUpdateIsPending);
@@ -32,7 +32,7 @@ public class CodePushRestartManager {
     }
 
     public void disallow() {
-        CodePushUtils.log("Disallowing restarts");
+        CodePushRNUtils.log("Disallowing restarts");
         mAllowed = false;
     }
 
@@ -42,15 +42,15 @@ public class CodePushRestartManager {
 
     public boolean restartApp(boolean onlyIfUpdateIsPending) {
         if (mRestartInProgress) {
-            CodePushUtils.log("Restart request queued until the current restart is completed");
+            CodePushRNUtils.log("Restart request queued until the current restart is completed");
             mRestartQueue.add(onlyIfUpdateIsPending);
         } else if (!mAllowed) {
-            CodePushUtils.log("Restart request queued until restarts are re-allowed");
+            CodePushRNUtils.log("Restart request queued until restarts are re-allowed");
             mRestartQueue.add(onlyIfUpdateIsPending);
         } else {
             mRestartInProgress = true;
             if (mCodePushCore.restartApp(onlyIfUpdateIsPending)) {
-                CodePushUtils.log("Restarting app");
+                CodePushRNUtils.log("Restarting app");
                 return true;
             }
 

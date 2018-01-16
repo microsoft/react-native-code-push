@@ -12,6 +12,7 @@ import com.microsoft.codepush.react.datacontracts.CodePushUpdateRequest;
 import com.microsoft.codepush.react.datacontracts.CodePushUpdateResponse;
 import com.microsoft.codepush.react.datacontracts.CodePushUpdateResponseUpdateInfo;
 import com.microsoft.codepush.react.exceptions.CodePushUnknownException;
+import com.microsoft.codepush.react.utils.CodePushRNUtils;
 import com.microsoft.codepush.react.utils.CodePushUtils;
 
 import java.io.InputStream;
@@ -90,7 +91,7 @@ public class CodePushAcquisitionManager {
                         InputStream inputStream = connection.getErrorStream();
                         Scanner s = new Scanner(inputStream).useDelimiter("\\A");
                         String result = s.hasNext() ? s.next() : "";
-                        CodePushUtils.log(result);
+                        CodePushRNUtils.log(result);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -168,13 +169,13 @@ public class CodePushAcquisitionManager {
                         stream = connection.getInputStream();
                         Scanner s = new Scanner(stream).useDelimiter("\\A");
                         String result = s.hasNext() ? s.next() : "";
-                        CodePushUtils.log("Report status deploy: " + result);
+                        CodePushRNUtils.log("Report status deploy: " + result);
                         return true;
                     } else {
                         stream = connection.getErrorStream();
                         Scanner s = new Scanner(stream).useDelimiter("\\A");
                         String result = s.hasNext() ? s.next() : "";
-                        CodePushUtils.log("Report status deploy: " + result);
+                        CodePushRNUtils.log("Report status deploy: " + result);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -234,7 +235,7 @@ public class CodePushAcquisitionManager {
                     }
                     Scanner s = new Scanner(stream).useDelimiter("\\A");
                     String result = s.hasNext() ? s.next() : "";
-                    CodePushUtils.log("Report status download: " + result);
+                    CodePushRNUtils.log("Report status download: " + result);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

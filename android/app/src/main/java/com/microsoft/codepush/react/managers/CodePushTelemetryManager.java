@@ -7,6 +7,7 @@ import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.microsoft.codepush.react.CodePushConstants;
+import com.microsoft.codepush.react.utils.CodePushRNUtils;
 import com.microsoft.codepush.react.utils.CodePushUtils;
 import com.microsoft.codepush.react.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.react.datacontracts.CodePushStatusReport;
@@ -63,7 +64,7 @@ public class CodePushTelemetryManager {
             clearRetryStatusReport();
             try {
                 JSONObject retryStatusReport = new JSONObject(retryStatusReportString);
-                return CodePushUtils.convertJsonObjectToWritable(retryStatusReport);
+                return CodePushRNUtils.convertJsonObjectToWritable(retryStatusReport);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -144,7 +145,7 @@ public class CodePushTelemetryManager {
     }
 
     public void saveStatusReportForRetry(ReadableMap statusReport) {
-        JSONObject statusReportJSON = CodePushUtils.convertReadableToJsonObject(statusReport);
+        JSONObject statusReportJSON = CodePushRNUtils.convertReadableToJsonObject(statusReport);
         mSettings.edit().putString(RETRY_DEPLOYMENT_REPORT_KEY, statusReportJSON.toString()).commit();
     }
 
@@ -176,8 +177,8 @@ public class CodePushTelemetryManager {
     private String getPackageStatusReportIdentifier(ReadableMap updatePackage) {
         // Because deploymentKeys can be dynamically switched, we use a
         // combination of the deploymentKey and label as the packageIdentifier.
-        String deploymentKey = CodePushUtils.tryGetString(updatePackage, DEPLOYMENT_KEY_KEY);
-        String label = CodePushUtils.tryGetString(updatePackage, LABEL_KEY);
+        String deploymentKey = CodePushRNUtils.tryGetString(updatePackage, DEPLOYMENT_KEY_KEY);
+        String label = CodePushRNUtils.tryGetString(updatePackage, LABEL_KEY);
         if (deploymentKey != null && label != null) {
             return deploymentKey + ":" + label;
         } else {

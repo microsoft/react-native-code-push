@@ -8,6 +8,7 @@ import com.microsoft.codepush.react.CodePushDownloadPackageResult;
 import com.microsoft.codepush.react.exceptions.CodePushInvalidUpdateException;
 import com.microsoft.codepush.react.exceptions.CodePushMalformedDataException;
 import com.microsoft.codepush.react.exceptions.CodePushUnknownException;
+import com.microsoft.codepush.react.utils.CodePushRNUtils;
 import com.microsoft.codepush.react.utils.CodePushUpdateUtils;
 import com.microsoft.codepush.react.utils.CodePushUtils;
 import com.microsoft.codepush.react.DownloadProgress;
@@ -19,7 +20,6 @@ import org.json.JSONObject;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -283,9 +283,9 @@ public class CodePushUpdateManager {
                 }
 
                 if (isDiffUpdate) {
-                    CodePushUtils.log("Applying diff update.");
+                    CodePushRNUtils.log("Applying diff update.");
                 } else {
-                    CodePushUtils.log("Applying full update.");
+                    CodePushRNUtils.log("Applying full update.");
                 }
 
                 boolean isSignatureVerificationEnabled = (stringPublicKey != null);
@@ -307,7 +307,7 @@ public class CodePushUpdateManager {
                     }
                 } else {
                     if (isSignatureAppearedInBundle) {
-                        CodePushUtils.log(
+                        CodePushRNUtils.log(
                                 "Warning! JWT signature exists in codepush update but code integrity check couldn't be performed because there is no public key configured. " +
                                         "Please ensure that public key is properly configured within your application."
                         );

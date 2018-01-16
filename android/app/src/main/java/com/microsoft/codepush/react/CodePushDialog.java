@@ -10,7 +10,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.microsoft.codepush.react.exceptions.CodePushUnknownException;
-import com.microsoft.codepush.react.utils.CodePushUtils;
+import com.microsoft.codepush.react.utils.CodePushRNUtils;
 
 public class CodePushDialog extends ReactContextBaseJavaModule{
 
@@ -93,7 +93,7 @@ public class CodePushDialog extends ReactContextBaseJavaModule{
             AlertDialog dialog = builder.create();
             dialog.show();
         } catch (Exception e) {
-            CodePushUtils.log(e.toString());
+            CodePushRNUtils.log(e.toString());
         }
     }
 
