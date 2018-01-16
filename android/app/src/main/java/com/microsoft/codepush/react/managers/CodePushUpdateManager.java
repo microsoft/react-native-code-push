@@ -290,7 +290,7 @@ public class CodePushUpdateManager {
 
                 boolean isSignatureVerificationEnabled = (stringPublicKey != null);
 
-                String signaturePath = CodePushUpdateUtils.getSignatureFilePath(newUpdateFolderPath);
+                String signaturePath = CodePushUpdateUtils.getJWTFilePath(newUpdateFolderPath);
                 boolean isSignatureAppearedInBundle = FileUtils.fileAtPathExists(signaturePath);
 
                 if (isSignatureVerificationEnabled) {

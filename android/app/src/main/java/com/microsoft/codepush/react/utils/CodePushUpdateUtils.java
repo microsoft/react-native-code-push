@@ -219,7 +219,7 @@ public class CodePushUpdateUtils {
         }
     }
 
-    public static String getSignatureFilePath(String updateFolderPath){
+    public static String getJWTFilePath(String updateFolderPath){
         return CodePushUtils.appendPathComponent(
                 CodePushUtils.appendPathComponent(updateFolderPath, CodePushConstants.CODE_PUSH_FOLDER_PREFIX),
                 CodePushConstants.BUNDLE_JWT_FILE
@@ -227,7 +227,7 @@ public class CodePushUpdateUtils {
     }
 
     public static String getSignature(String folderPath) {
-        final String signatureFilePath = getSignatureFilePath(folderPath);
+        final String signatureFilePath = getJWTFilePath(folderPath);
 
         try {
             return FileUtils.readFileToString(signatureFilePath);
