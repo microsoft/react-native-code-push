@@ -37,11 +37,11 @@ public class CodePushUpdateManager {
     }
 
     private String getDownloadFilePath() {
-        return CodePushUtils.appendPathComponent(getCodePushPath(), CodePushConstants.DOWNLOAD_FILE_NAME);
+        return FileUtils.appendPathComponent(getCodePushPath(), CodePushConstants.DOWNLOAD_FILE_NAME);
     }
 
     private String getUnzippedFolderPath() {
-        return CodePushUtils.appendPathComponent(getCodePushPath(), CodePushConstants.UNZIPPED_FOLDER_NAME);
+        return FileUtils.appendPathComponent(getCodePushPath(), CodePushConstants.UNZIPPED_FOLDER_NAME);
     }
 
     private String getDocumentsDirectory() {
@@ -49,16 +49,16 @@ public class CodePushUpdateManager {
     }
 
     private String getCodePushPath() {
-        String codePushPath = CodePushUtils.appendPathComponent(getDocumentsDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX);
+        String codePushPath = FileUtils.appendPathComponent(getDocumentsDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX);
         if (CodePushCore.isUsingTestConfiguration()) {
-            codePushPath = CodePushUtils.appendPathComponent(codePushPath, "TestPackages");
+            codePushPath = FileUtils.appendPathComponent(codePushPath, "TestPackages");
         }
 
         return codePushPath;
     }
 
     private String getStatusFilePath() {
-        return CodePushUtils.appendPathComponent(getCodePushPath(), CodePushConstants.STATUS_FILE);
+        return FileUtils.appendPathComponent(getCodePushPath(), CodePushConstants.STATUS_FILE);
     }
 
     public JSONObject getCurrentPackageInfo() {
@@ -107,14 +107,14 @@ public class CodePushUpdateManager {
 
         String relativeBundlePath = currentPackage.optString(CodePushConstants.RELATIVE_BUNDLE_PATH_KEY, null);
         if (relativeBundlePath == null) {
-            return CodePushUtils.appendPathComponent(packageFolder, bundleFileName);
+            return FileUtils.appendPathComponent(packageFolder, bundleFileName);
         } else {
-            return CodePushUtils.appendPathComponent(packageFolder, relativeBundlePath);
+            return FileUtils.appendPathComponent(packageFolder, relativeBundlePath);
         }
     }
 
     public String getPackageFolderPath(String packageHash) {
-        return CodePushUtils.appendPathComponent(getCodePushPath(), packageHash);
+        return FileUtils.appendPathComponent(getCodePushPath(), packageHash);
     }
 
     public String getCurrentPackageHash() {
@@ -147,7 +147,7 @@ public class CodePushUpdateManager {
 
     public JSONObject getPackage(String packageHash) {
         String folderPath = getPackageFolderPath(packageHash);
-        String packageFilePath = CodePushUtils.appendPathComponent(folderPath, CodePushConstants.PACKAGE_FILE_NAME);
+        String packageFilePath = FileUtils.appendPathComponent(folderPath, CodePushConstants.PACKAGE_FILE_NAME);
         try {
             return CodePushUtils.getJsonObjectFromFile(packageFilePath);
         } catch (IOException e) {
@@ -159,7 +159,7 @@ public class CodePushUpdateManager {
                                 final DownloadProgressCallback progressCallback, String stringPublicKey) throws IOException {
         String newUpdateHash = updatePackage.optString(CodePushConstants.PACKAGE_HASH_KEY, null);
         String newUpdateFolderPath = getPackageFolderPath(newUpdateHash);
-        String newUpdateMetadataPath = CodePushUtils.appendPathComponent(newUpdateFolderPath, CodePushConstants.PACKAGE_FILE_NAME);
+        String newUpdateMetadataPath = FileUtils.appendPathComponent(newUpdateFolderPath, CodePushConstants.PACKAGE_FILE_NAME);
         if (FileUtils.fileAtPathExists(newUpdateFolderPath)) {
             // This removes any stale data in newPackageFolderPath that could have been left
             // uncleared due to a crash or error during the download or install process.
@@ -257,7 +257,7 @@ public class CodePushUpdateManager {
             FileUtils.deleteFileOrFolderSilently(downloadFile);
 
             // Merge contents with current update based on the manifest
-            String diffManifestFilePath = CodePushUtils.appendPathComponent(unzippedFolderPath,
+            String diffManifestFilePath = FileUtils.appendPathComponent(unzippedFolderPath,
                     CodePushConstants.DIFF_MANIFEST_FILE_NAME);
             boolean isDiffUpdate = FileUtils.fileAtPathExists(diffManifestFilePath);
             if (isDiffUpdate) {
@@ -272,7 +272,7 @@ public class CodePushUpdateManager {
 
             // For zip updates, we need to find the relative path to the jsBundle and save it in the
             // metadata so that we can find and run it easily the next time.
-            String relativeBundlePath = CodePushUpdateUtils.findJSBundleInUpdateContents(newUpdateFolderPath, expectedBundleFileName);
+            String relativeBundlePath = CodePushRNUtils.findJSBundleInUpdateContents(newUpdateFolderPath, expectedBundleFileName);
 
             if (relativeBundlePath == null) {
                 throw new CodePushInvalidUpdateException("Update is invalid - A JS bundle file named \"" + expectedBundleFileName + "\" could not be found within the downloaded contents. Please check that you are releasing your CodePush updates using the exact same JS bundle file name that was shipped with your app's binary.");

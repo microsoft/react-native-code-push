@@ -116,27 +116,6 @@ public class CodePushUpdateUtils {
         }
     }
 
-    public static String findJSBundleInUpdateContents(String folderPath, String expectedFileName) {
-        File folder = new File(folderPath);
-        File[] folderFiles = folder.listFiles();
-        for (File file : folderFiles) {
-            String fullFilePath = CodePushUtils.appendPathComponent(folderPath, file.getName());
-            if (file.isDirectory()) {
-                String mainBundlePathInSubFolder = findJSBundleInUpdateContents(fullFilePath, expectedFileName);
-                if (mainBundlePathInSubFolder != null) {
-                    return CodePushUtils.appendPathComponent(file.getName(), mainBundlePathInSubFolder);
-                }
-            } else {
-                String fileName = file.getName();
-                if (fileName.equals(expectedFileName)) {
-                    return fileName;
-                }
-            }
-        }
-
-        return null;
-    }
-
     public static String getHashForBinaryContents(Context context, boolean isDebugMode) {
         try {
             return CodePushUtils.getStringFromInputStream(context.getAssets().open(CodePushConstants.CODE_PUSH_HASH_FILE_NAME));
@@ -220,8 +199,8 @@ public class CodePushUpdateUtils {
     }
 
     public static String getJWTFilePath(String updateFolderPath){
-        return CodePushUtils.appendPathComponent(
-                CodePushUtils.appendPathComponent(updateFolderPath, CodePushConstants.CODE_PUSH_FOLDER_PREFIX),
+        return FileUtils.appendPathComponent(
+                FileUtils.appendPathComponent(updateFolderPath, CodePushConstants.CODE_PUSH_FOLDER_PREFIX),
                 CodePushConstants.BUNDLE_JWT_FILE
         );
     }

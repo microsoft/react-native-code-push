@@ -17,6 +17,10 @@ public class FileUtils {
 
     private static final int WRITE_BUFFER_SIZE = 1024 * 8;
 
+    public static String appendPathComponent(String basePath, String appendPathComponent) {
+        return new File(basePath, appendPathComponent).getAbsolutePath();
+    }
+
     public static void copyDirectoryContents(String sourceDirectoryPath, String destinationDirectoryPath) throws IOException {
         File sourceDir = new File(sourceDirectoryPath);
         File destDir = new File(destinationDirectoryPath);
@@ -27,8 +31,8 @@ public class FileUtils {
         for (File sourceFile : sourceDir.listFiles()) {
             if (sourceFile.isDirectory()) {
                 copyDirectoryContents(
-                        CodePushUtils.appendPathComponent(sourceDirectoryPath, sourceFile.getName()),
-                        CodePushUtils.appendPathComponent(destinationDirectoryPath, sourceFile.getName()));
+                        FileUtils.appendPathComponent(sourceDirectoryPath, sourceFile.getName()),
+                        FileUtils.appendPathComponent(destinationDirectoryPath, sourceFile.getName()));
             } else {
                 File destFile = new File(destDir, sourceFile.getName());
                 FileInputStream fromFileStream = null;

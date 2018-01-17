@@ -19,6 +19,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.Iterator;
 
 public class CodePushRNUtils extends CodePushUtils {
@@ -194,5 +195,26 @@ public class CodePushRNUtils extends CodePushUtils {
 
     public static WritableMap convertObjectToWritableMap(Object object) {
         return convertJsonObjectToWritable(CodePushUtils.convertObjectToJsonObject(object));
+    }
+
+    public static String findJSBundleInUpdateContents(String folderPath, String expectedFileName) {
+        File folder = new File(folderPath);
+        File[] folderFiles = folder.listFiles();
+        for (File file : folderFiles) {
+            String fullFilePath = FileUtils.appendPathComponent(folderPath, file.getName());
+            if (file.isDirectory()) {
+                String mainBundlePathInSubFolder = findJSBundleInUpdateContents(fullFilePath, expectedFileName);
+                if (mainBundlePathInSubFolder != null) {
+                    return FileUtils.appendPathComponent(file.getName(), mainBundlePathInSubFolder);
+                }
+            } else {
+                String fileName = file.getName();
+                if (fileName.equals(expectedFileName)) {
+                    return fileName;
+                }
+            }
+        }
+
+        return null;
     }
 }
