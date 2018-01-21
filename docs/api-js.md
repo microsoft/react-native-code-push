@@ -51,16 +51,18 @@ This decorator provides support for letting you customize its behaviour to easil
     // Fully silent update which keeps the app in
     // sync with the server, without ever
     // interrupting the end user
-    class MyApp extends Component {}
+    class MyApp extends Component<{}> {}
     MyApp = codePush(MyApp);
+    export default MyApp;
     ```
 
 2. **Silent sync everytime the app resumes**. Same as 1, except we check for updates, or apply an update if one exists every time the app returns to the foreground after being "backgrounded".
 
     ```javascript
     // Sync for updates everytime the app resumes.
-    class MyApp extends Component {}
+    class MyApp extends Component<{}> {}
     MyApp = codePush({ checkFrequency: codePush.CheckFrequency.ON_APP_RESUME, installMode: codePush.InstallMode.ON_NEXT_RESUME })(MyApp);
+    export default MyApp;
     ```
 
 3. **Interactive**. When an update is available, prompt the end user for permission before downloading it, and then immediately apply the update. If an update was released using the `mandatory` flag, the end user would still be notified about the update, but they wouldn't have the choice to ignore it.
@@ -69,8 +71,9 @@ This decorator provides support for letting you customize its behaviour to easil
     // Active update, which lets the end user know
     // about each update, and displays it to them
     // immediately after downloading it
-    class MyApp extends Component {}
+    class MyApp extends Component<{}> {}
     MyApp = codePush({ updateDialog: true, installMode: codePush.InstallMode.IMMEDIATE })(MyApp);
+    export default MyApp;
     ```
 
 4. **Log/display progress**. While the app is syncing with the server for updates, make use of the `codePushStatusDidChange` and/or `codePushDownloadDidProgress` event hooks to log down the different stages of this process, or even display a progress bar to the user.
@@ -78,7 +81,7 @@ This decorator provides support for letting you customize its behaviour to easil
     ```javascript
     // Make use of the event hooks to keep track of
     // the different stages of the sync process.
-    class MyApp extends Component {
+    class MyApp extends Component<{}> {
         codePushStatusDidChange(status) {
             switch(status) {
                 case codePush.SyncStatus.CHECKING_FOR_UPDATE:
@@ -104,6 +107,7 @@ This decorator provides support for letting you customize its behaviour to easil
         }
     }
     MyApp = codePush(MyApp);
+    export default MyApp;
     ```
 
 ##### CodePushOptions
