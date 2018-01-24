@@ -24,6 +24,10 @@ import java.util.Iterator;
 
 public class CodePushRNUtils extends CodePushUtils {
 
+    public static void log(String message) {
+        Log.d(CodePushConstants.REACT_NATIVE_LOG_TAG, "[CodePush] " + message);
+    }
+
     public static WritableArray convertJsonArrayToWritable(JSONArray jsonArr) {
         WritableArray arr = Arguments.createArray();
         for (int i=0; i<jsonArr.length(); i++) {
