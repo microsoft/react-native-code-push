@@ -191,3 +191,6 @@ Ankh.NoLoad
 Examples/testapp_rn*
 Examples/CodePushDemoApp/package-lock.json
 
+android/app/gradle/
+android/app/gradlew.bat
+android/app/gradlew
