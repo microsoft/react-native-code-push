@@ -9,7 +9,7 @@ public interface CodePushBinaryVersionMismatchListener {
 
     /**
      * Callback for handling binary version mismatch event.
-     * 
+     *
      * @param update Remote package (from server).
      */
     void binaryVersionMismatchChanged(CodePushRemotePackage update);

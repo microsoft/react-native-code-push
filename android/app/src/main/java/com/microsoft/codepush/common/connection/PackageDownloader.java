@@ -59,7 +59,7 @@ public class PackageDownloader extends AsyncTask<Void, Void, CodePushDownloadPac
      *
      * @param url url to open.
      * @return instance of url connection.
-     * @throws IOException exception thrown during opening.
+     * @throws IOException read/write error occurred while accessing the file system.
      */
     public HttpURLConnection createConnection(URL url) throws IOException {
         HttpURLConnection connection;

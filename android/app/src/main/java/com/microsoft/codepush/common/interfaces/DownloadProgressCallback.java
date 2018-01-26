@@ -9,7 +9,7 @@ public interface DownloadProgressCallback {
 
     /**
      * Callback function for handling progress of downloading of update.
-     * 
+     *
      * @param downloadProgress Progress of downloading of update.
      */
     void call(DownloadProgress downloadProgress);

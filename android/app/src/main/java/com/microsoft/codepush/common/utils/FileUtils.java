@@ -20,12 +20,12 @@ import static com.microsoft.codepush.common.CodePush.LOG_TAG;
 import static com.microsoft.codepush.common.utils.CodePushUtils.finalizeResources;
 
 /**
- * Class containing support methods for work with files.
+ * Class containing support methods simplifying work with files.
  */
 public class FileUtils {
 
     /**
-     * Size of the buffer used when writing files.
+     * Size of the buffer used when writing to files.
      */
     private static final int WRITE_BUFFER_SIZE = 1024 * 8;
 
@@ -33,7 +33,7 @@ public class FileUtils {
      * Appends file path with one more component.
      *
      * @param basePath            path to be appended.
-     * @param appendPathComponent path component to append the base path.
+     * @param appendPathComponent path component to be appended to the base path.
      * @return new path.
      */
     public static String appendPathComponent(String basePath, String appendPathComponent) {
@@ -41,11 +41,11 @@ public class FileUtils {
     }
 
     /**
-     * Copies the contents of one directory to another. Copies all teh contents recursively.
+     * Copies the contents of one directory to another. Copies all the contents recursively.
      *
      * @param sourceDir path to the directory to copy files from.
      * @param destDir   path to the directory to copy files to.
-     * @throws IOException if read/write error occurred while accessing the file system.
+     * @throws IOException read/write error occurred while accessing the file system.
      */
     public static void copyDirectoryContents(File sourceDir, File destDir) throws IOException {
         if (!destDir.exists()) {
@@ -89,10 +89,10 @@ public class FileUtils {
     }
 
     /**
-     * Deletes directory by the following path.
+     * Deletes directory located by the following path.
      *
-     * @param directoryPath path to directory to be deleted. Can't be null.
-     * @throws IOException if error occurred while accessing the file system.
+     * @param directoryPath path to directory to be deleted. Can't be <code>null</code>.
+     * @throws IOException read/write error occurred while accessing the file system.
      */
     public static void deleteDirectoryAtPath(String directoryPath) throws IOException {
         if (directoryPath == null) {
@@ -105,12 +105,14 @@ public class FileUtils {
     }
 
     /**
-     * Deletes file or folder throwing no errors if something went wrong (errors will be logged instead).
+     * Deletes file or folder throwing no errors if something goes wrong (errors will be logged instead).
      *
      * @param file path to file/folder to be deleted.
      */
     @SuppressWarnings("WeakerAccess")
     public static void deleteFileOrFolderSilently(File file) {
+
+        /* First, if this is a directory, delete all the files it contains. */
         if (file.isDirectory()) {
             File[] files = file.listFiles();
             if (files == null) {
@@ -136,7 +138,7 @@ public class FileUtils {
      * Checks whether a file by the following path exists.
      *
      * @param filePath path to be checked.
-     * @return <code>true</code> if exists, <code>false</code> if not.
+     * @return <code>true</code> if exists, <code>false</code> otherwise.
      */
     public static boolean fileAtPathExists(String filePath) {
         return filePath != null && new File(filePath).exists();
@@ -148,7 +150,7 @@ public class FileUtils {
      * @param fileToMove  path to the file to be moved.
      * @param newFolder   path to be moved to.
      * @param newFileName new name for the file to be moved.
-     * @throws IOException if read/write error occurred while accessing the file system.
+     * @throws IOException read/write error occurred while accessing the file system.
      */
     public static void moveFile(File fileToMove, File newFolder, String newFileName) throws IOException {
         if (!newFolder.exists()) {
@@ -163,11 +165,11 @@ public class FileUtils {
     }
 
     /**
-     * Reads the contents of file.
+     * Reads the contents of file to a string.
      *
      * @param filePath path to file to be read.
      * @return string with contents of the file.
-     * @throws IOException if read/write error occurred while accessing the file system.
+     * @throws IOException read/write error occurred while accessing the file system.
      */
     public static String readFileToString(String filePath) throws IOException {
         FileInputStream fileInputStream = null;
@@ -197,7 +199,7 @@ public class FileUtils {
      *
      * @param zipFile           path to zip-archive.
      * @param destinationFolder path for the unzipped files to be saved.
-     * @throws IOException exception occurred during read/write operations.
+     * @throws IOException read/write error occurred while accessing the file system.
      */
     public static void unzipFile(File zipFile, File destinationFolder) throws IOException {
         FileInputStream fileStream = null;
@@ -230,6 +232,15 @@ public class FileUtils {
         }
     }
 
+    /**
+     * Saves file from one zip entry to the specified location.
+     *
+     * @param entry     zip entry.
+     * @param file      path for the unzipped file.
+     * @param buffer    read buffer.
+     * @param zipStream stream with zip file.
+     * @throws IOException read/write error occurred while accessing the file system.
+     */
     public static void unzipSingleFile(ZipEntry entry, File file, byte[] buffer, ZipInputStream zipStream) throws IOException {
         if (entry.isDirectory()) {
             if (!file.mkdirs()) {
@@ -269,7 +280,7 @@ public class FileUtils {
      *
      * @param content  content to be written to a file.
      * @param filePath path to a file.
-     * @throws IOException if error occurred while accessing the file system.
+     * @throws IOException read/write error occurred while accessing the file system.
      */
     public static void writeStringToFile(String content, String filePath) throws IOException {
         PrintWriter printWriter = null;
