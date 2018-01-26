@@ -26,7 +26,10 @@ android {
 }
 
 dependencies {
-    compile "com.facebook.react:react-native:+"
+    compile "com.facebook.react:react-native:0.20.1"
     compile 'com.nimbusds:nimbus-jose-jwt:5.1'
     compile "com.google.code.gson:gson:2.8.1"
+    compile 'junit:junit:4.12'
+    def appCenterSdkVersion = '1.2.0'
+    compile "com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}"
 }
