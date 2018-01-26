@@ -29,4 +29,6 @@ dependencies {
     compile "com.facebook.react:react-native:+"
     compile 'com.nimbusds:nimbus-jose-jwt:5.1'
     compile "com.google.code.gson:gson:2.8.1"
+    compile "com.microsoft.appcenter:appcenter-crashes:1.2.0"
+
 }
