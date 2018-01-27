@@ -1,5 +1,6 @@
 package com.microsoft.codepush.common;
 
+import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
 import com.microsoft.codepush.common.datacontracts.CodePushDownloadStatusReport;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
@@ -16,20 +17,15 @@ import com.microsoft.codepush.common.enums.CodePushInstallMode;
 import com.microsoft.codepush.common.enums.CodePushSyncStatus;
 import com.microsoft.codepush.common.enums.CodePushUpdateState;
 import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
-import com.microsoft.appcenter.utils.AppCenterLog;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.internal.verification.VerificationModeFactory;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.File;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 
 /**
  * Tests all the data classes.
@@ -63,19 +59,15 @@ public class CodePushDataTest {
         CodePushCheckFrequency codePushCheckFrequency = CodePushCheckFrequency.MANUAL;
         int checkFrequencyValue = codePushCheckFrequency.getValue();
         assertEquals(2, checkFrequencyValue);
-
         CodePushDeploymentStatus codePushDeploymentStatus = CodePushDeploymentStatus.SUCCEEDED;
         String deploymentStatusValue = codePushDeploymentStatus.getValue();
         assertEquals("DeploymentSucceeded", deploymentStatusValue);
-
         CodePushInstallMode codePushInstallMode = CodePushInstallMode.IMMEDIATE;
         int installModeValue = codePushInstallMode.getValue();
         assertEquals(0, installModeValue);
-
         CodePushSyncStatus codePushSyncStatus = CodePushSyncStatus.AWAITING_USER_ACTION;
         int syncStatusValue = codePushSyncStatus.getValue();
         assertEquals(6, syncStatusValue);
-
         CodePushUpdateState codePushUpdateState = CodePushUpdateState.LATEST;
         int updateStateValue = codePushUpdateState.getValue();
         assertEquals(2, updateStateValue);
@@ -163,19 +155,6 @@ public class CodePushDataTest {
         assertEquals(codePushLocalPackage.getLabel(), codePushUpdateRequest.getLabel());
         assertEquals(codePushLocalPackage.getPackageHash(), codePushUpdateRequest.getPackageHash());
         assertEquals(false, codePushUpdateRequest.isCompanion());
-
-        /* Verify errors are logged. */
-        PowerMockito.mockStatic(AppCenterLog.class);
-        codePushUpdateRequest.setDeploymentKey(null);
-        codePushUpdateRequest.setAppVersion(null);
-        codePushDownloadStatusReport.setLabel(null);
-        codePushDownloadStatusReport.setClientUniqueId(null);
-        codePushDownloadStatusReport.setDeploymentKey(null);
-        codePushDeploymentStatusReport.setAppVersion(null);
-        codePushDeploymentStatusReport.setPreviousDeploymentKey(null);
-        codePushUpdateResponse.setUpdateInfo(null);
-        PowerMockito.verifyStatic(VerificationModeFactory.times(8));
-        AppCenterLog.error(eq(CodePush.LOG_TAG), anyString());
 
         /* Check update dialog. */
         CodePushUpdateDialog codePushUpdateDialog = new CodePushUpdateDialog();

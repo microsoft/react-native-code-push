@@ -50,7 +50,7 @@ public class FileUtils {
      */
     public static void copyDirectoryContents(File sourceDir, File destDir) throws IOException {
         if (!destDir.exists()) {
-            if (!destDir.mkdir()) {
+            if (!destDir.mkdirs()) {
                 throw new IOException("Unable to copy file from " + sourceDir.getAbsolutePath() + " to " + destDir.getAbsolutePath() + ". Error creating directory.");
             }
         }
@@ -189,6 +189,7 @@ public class FileUtils {
             Exception e = finalizeResources(
                     Arrays.asList(reader, fileInputStream),
                     "Error closing IO resources when reading file.");
+
             if (e != null) {
                 throw new CodePushFinalizeException(OperationType.READ, e);
             }
@@ -261,10 +262,11 @@ public class FileUtils {
                     fileOutputStream.write(buffer, 0, numBytesRead);
                 }
             } finally {
-                try {
-                    fileOutputStream.close();
-                } catch (IOException e) {
-                    throw new IOException("Error closing IO resources when reading files.");
+                Exception e = finalizeResources(
+                        Arrays.<Closeable>asList(fileOutputStream),
+                        "Error closing IO resources when reading file.");
+                if (e != null) {
+                    throw new CodePushFinalizeException(OperationType.COPY, e);
                 }
             }
         }

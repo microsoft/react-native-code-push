@@ -8,9 +8,11 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import static junit.framework.Assert.assertEquals;
 
@@ -26,8 +28,9 @@ public class CodePushFileTest {
         String fileName = "file.txt";
         File testDir = new File(Environment.getExternalStorageDirectory(), "Test");
         File testDirMove = new File(Environment.getExternalStorageDirectory(), "TestMove");
+        File testDirMoveInternal = new File(testDirMove, "Internal");
         testDir.mkdirs();
-        testDirMove.mkdirs();
+        testDirMoveInternal.mkdirs();
         File newFile = new File(testDir, fileName);
         newFile.createNewFile();
         assertEquals(true, FileUtils.fileAtPathExists(newFile.getPath()));
@@ -49,7 +52,6 @@ public class CodePushFileTest {
         assertEquals(false, FileUtils.fileAtPathExists(testDirMove.getPath()));
     }
 
-    /*
     @Test
     public void zipTest() throws Exception {
         String testString = "123";
@@ -69,7 +71,17 @@ public class CodePushFileTest {
         out.close();
         FileUtils.unzipFile(zip, testDirZipMove);
         assertEquals(true, FileUtils.fileAtPathExists(FileUtils.appendPathComponent(testDirZipMove.getPath(), zipEntryFileName)));
-    }*/
+    }
+
+    @Test(expected = IOException.class)
+    public void zipTestFail1() throws Exception {
+        File file = Mockito.mock(File.class);
+        File sourceFile = Mockito.mock(File.class);
+        Mockito.doReturn(false).when(file).exists();
+        Mockito.doReturn(false).when(file).mkdirs();
+        Mockito.doReturn(file).when(sourceFile).getParentFile();
+        FileUtils.unzipSingleFile(Mockito.mock(ZipEntry.class), sourceFile, new byte[10], Mockito.mock(ZipInputStream.class));
+    }
 
     @Test(expected = IOException.class)
     public void zipTestFail() throws Exception {
@@ -78,6 +90,22 @@ public class CodePushFileTest {
         Mockito.doReturn(true).when(entry).isDirectory();
         ZipInputStream zipInputStream = Mockito.mock(ZipInputStream.class);
         byte[] buffer = new byte[1024];
+        FileUtils.unzipSingleFile(entry, mocked, buffer, zipInputStream);
+    }
+
+    @Test(expected = IOException.class)
+    public void zipTestFail2() throws Exception {
+        String fileName = "file.txt";
+        File testDir = new File(Environment.getExternalStorageDirectory(), "Test");
+        testDir.mkdirs();
+        File mocked = new File(testDir, fileName);
+        mocked = Mockito.spy(mocked);
+        Mockito.doReturn(false).when(mocked).setLastModified(Mockito.anyLong());
+        ZipEntry entry = Mockito.mock(ZipEntry.class);
+        Mockito.doReturn((long) 1).when(entry).getTime();
+        ZipInputStream zipInputStream = Mockito.mock(ZipInputStream.class);
+        byte[] buffer = new byte[1024];
+        Mockito.doReturn(-1).when(zipInputStream).read(buffer);
         FileUtils.unzipSingleFile(entry, mocked, buffer, zipInputStream);
     }
 
@@ -124,5 +152,23 @@ public class CodePushFileTest {
         newFile = Mockito.spy(newFile);
         Mockito.doReturn(false).when(newFile).renameTo(Mockito.any(File.class));
         FileUtils.moveFile(newFile, testDirMove, "file1.txt");
+    }
+
+    @Test(expected = IOException.class)
+    public void deleteDirectoryNull() throws Exception {
+        FileUtils.deleteDirectoryAtPath(null);
+    }
+
+    @Test(expected = IOException.class)
+    public void copyDestDirMkDirsFails() throws Exception {
+        File destDir = mockTestDirMoveMkDir();
+        FileUtils.copyDirectoryContents(new File("/"), destDir);
+    }
+
+    @Test(expected = IOException.class)
+    public void copySourceDirListFilesFails() throws Exception {
+        File sourceDir = Mockito.mock(File.class);
+        Mockito.doReturn(null).when(sourceDir).listFiles();
+        FileUtils.copyDirectoryContents(sourceDir, new File("/"));
     }
 }
