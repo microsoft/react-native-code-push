@@ -13,6 +13,7 @@ import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
 import com.microsoft.codepush.common.exceptions.CodePushMergeException;
 import com.microsoft.codepush.common.exceptions.CodePushRollbackException;
 import com.microsoft.codepush.common.exceptions.CodePushSignatureVerificationException;
+import com.microsoft.codepush.common.exceptions.CodePushSignatureVerificationException.SignatureExceptionType;
 import com.microsoft.codepush.common.exceptions.CodePushUnzipException;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
 import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
@@ -296,7 +297,7 @@ public class CodePushUpdateManager {
             String currentPackageHash = getCurrentPackageHash();
             if (packageHash != null && packageHash.equals(currentPackageHash)) {
 
-            /* The current package is already the one being installed, so we should no-op. */
+                /* The current package is already the one being installed, so we should no-op. */
                 return;
             }
             if (removePendingUpdate) {
@@ -398,6 +399,8 @@ public class CodePushUpdateManager {
         String newUpdateMetadataPath = FileUtils.appendPathComponent(newUpdateFolderPath, CodePushConstants.PACKAGE_FILE_NAME);
         String unzippedFolderPath = getUnzippedFolderPath();
         String diffManifestFilePath = FileUtils.appendPathComponent(unzippedFolderPath, CodePushConstants.DIFF_MANIFEST_FILE_NAME);
+
+        /* If this is a diff, not full update, copy the new files to the package directory. */
         boolean isDiffUpdate = FileUtils.fileAtPathExists(diffManifestFilePath);
         try {
             if (isDiffUpdate) {
@@ -455,12 +458,7 @@ public class CodePushUpdateManager {
                     CodePushUpdateUtils.verifyFolderHash(newUpdateFolderPath, newUpdateHash);
                     CodePushUpdateUtils.verifyUpdateSignature(newUpdateFolderPath, newUpdateHash, stringPublicKey);
                 } else {
-                    throw new CodePushSignatureVerificationException(
-                            "Error! Public key was provided but there is no JWT signature within app to verify. " +
-                                    "Possible reasons, why that might happen: \n" +
-                                    "1. You've released a CodePush update using version of CodePush CLI that does not support code signing.\n" +
-                                    "2. You've released a CodePush update without providing --privateKeyPath option."
-                    );
+                    throw new CodePushSignatureVerificationException(SignatureExceptionType.NO_SIGNATURE);
                 }
             } else {
                 if (isSignatureAppearedInApp) {

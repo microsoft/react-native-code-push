@@ -9,6 +9,7 @@ import com.microsoft.codepush.common.CodePush;
 import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
 import com.microsoft.codepush.common.exceptions.CodePushSignatureVerificationException;
+import com.microsoft.codepush.common.exceptions.CodePushSignatureVerificationException.SignatureExceptionType;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
@@ -227,7 +228,7 @@ public class CodePushUpdateUtils {
         } catch (JOSEException | ParseException e) {
             throw new CodePushSignatureVerificationException(e);
         }
-        throw new CodePushSignatureVerificationException("Signature was not signed by a trusted party.");
+        throw new CodePushSignatureVerificationException(SignatureExceptionType.NOT_SIGNED);
     }
 
     /**
@@ -251,7 +252,7 @@ public class CodePushUpdateUtils {
             KeyFactory kf = KeyFactory.getInstance("RSA");
             return kf.generatePublic(X509Key);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            throw new CodePushSignatureVerificationException("Unable to parse public key.", e);
+            throw new CodePushSignatureVerificationException(SignatureExceptionType.PUBLIC_KEY_NOT_PARSED, e);
         }
     }
 
@@ -282,7 +283,7 @@ public class CodePushUpdateUtils {
         try {
             return FileUtils.readFileToString(signatureFilePath);
         } catch (IOException e) {
-            throw new CodePushSignatureVerificationException("Unable to read signature file.", e);
+            throw new CodePushSignatureVerificationException(SignatureExceptionType.READ_SIGNATURE_FILE_ERROR, e);
         }
     }
 
@@ -302,7 +303,7 @@ public class CodePushUpdateUtils {
         final Map<String, Object> claims = verifyAndDecodeJWT(jwt, publicKey);
         final String contentHash = (String) claims.get("contentHash");
         if (contentHash == null) {
-            throw new CodePushSignatureVerificationException("Signature file did not specify a content hash.");
+            throw new CodePushSignatureVerificationException(SignatureExceptionType.NO_CONTENT_HASH);
         }
         return contentHash.equals(packageHash);
     }

@@ -27,6 +27,11 @@ import java.util.Arrays;
 public class PackageDownloader extends AsyncTask<Void, Void, CodePushDownloadPackageResult> {
 
     /**
+     * Header in the beginning of every zip file.
+     */
+    private final Integer ZIP_HEADER = 0x504b0304;
+
+    /**
      * Url for downloading an update.
      */
     private String downloadUrlString;
@@ -55,7 +60,7 @@ public class PackageDownloader extends AsyncTask<Void, Void, CodePushDownloadPac
     }
 
     /**
-     * Opens url connection.
+     * Opens url connection for the provided url.
      *
      * @param url url to open.
      * @return instance of url connection.
@@ -69,15 +74,16 @@ public class PackageDownloader extends AsyncTask<Void, Void, CodePushDownloadPac
 
     @Override
     protected CodePushDownloadPackageResult doInBackground(Void... params) {
-        HttpURLConnection connection = null;
-
+        HttpURLConnection connection;
         BufferedInputStream bufferedInputStream = null;
         FileOutputStream fileOutputStream = null;
         BufferedOutputStream bufferedOutputStream = null;
-        URL downloadUrl = null;
+        URL downloadUrl;
         try {
             downloadUrl = new URL(downloadUrlString);
         } catch (MalformedURLException e) {
+
+            /* We can't throw custom errors from this function, so any error will be passed to the result. */
             return new CodePushDownloadPackageResult(new CodePushDownloadPackageException(downloadUrlString, e));
         }
         try {
@@ -88,6 +94,8 @@ public class PackageDownloader extends AsyncTask<Void, Void, CodePushDownloadPac
             fileOutputStream = new FileOutputStream(downloadFile);
             bufferedOutputStream = new BufferedOutputStream(fileOutputStream, CodePushConstants.DOWNLOAD_BUFFER_SIZE);
             byte[] data = new byte[CodePushConstants.DOWNLOAD_BUFFER_SIZE];
+
+            /* Header allows us to check whether this is a zip-stream. */
             byte[] header = new byte[4];
             int numBytesRead;
             while ((numBytesRead = bufferedInputStream.read(data, 0, CodePushConstants.DOWNLOAD_BUFFER_SIZE)) >= 0) {
@@ -109,7 +117,7 @@ public class PackageDownloader extends AsyncTask<Void, Void, CodePushDownloadPac
             if (totalBytes >= 0 && totalBytes != receivedBytes) {
                 return new CodePushDownloadPackageResult(new CodePushDownloadPackageException(receivedBytes, totalBytes));
             }
-            boolean isZip = ByteBuffer.wrap(header).getInt() == 0x504b0304;
+            boolean isZip = ByteBuffer.wrap(header).getInt() == ZIP_HEADER;
             return new CodePushDownloadPackageResult(downloadFile, isZip);
         } catch (IOException e) {
             return new CodePushDownloadPackageResult(new CodePushDownloadPackageException(e));

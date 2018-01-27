@@ -2,6 +2,7 @@ package com.microsoft.codepush.common.utils;
 
 import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.exceptions.CodePushFinalizeException;
+import com.microsoft.codepush.common.exceptions.CodePushFinalizeException.OperationType;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -81,7 +82,7 @@ public class FileUtils {
                             Arrays.asList(fromFileStream, fromBufferedStream, destStream),
                             "Unable to copy file from " + sourceDir.getAbsolutePath() + " to " + destDir.getAbsolutePath() + ". Error closing resources.");
                     if (e != null) {
-                        throw new CodePushFinalizeException("Error closing IO resources when copying files.", e);
+                        throw new CodePushFinalizeException(OperationType.COPY, e);
                     }
                 }
             }
@@ -189,7 +190,7 @@ public class FileUtils {
                     Arrays.asList(reader, fileInputStream),
                     "Error closing IO resources when reading file.");
             if (e != null) {
-                throw new CodePushFinalizeException("Error closing IO resources when reading file.", e);
+                throw new CodePushFinalizeException(OperationType.READ, e);
             }
         }
     }
@@ -227,7 +228,7 @@ public class FileUtils {
                     Arrays.<Closeable>asList(zipStream, bufferedStream, fileStream),
                     "Error closing IO resources when reading file.");
             if (e != null) {
-                throw new CodePushFinalizeException("Error closing IO resources when copying file.", e);
+                throw new CodePushFinalizeException(OperationType.COPY, e);
             }
         }
     }
@@ -291,7 +292,7 @@ public class FileUtils {
             if (printWriter != null) {
                 printWriter.close();
                 if (printWriter.checkError()) {
-                    throw new CodePushFinalizeException("Error closing IO resources when writing to file.");
+                    throw new CodePushFinalizeException(OperationType.WRITE);
                 }
             }
         }
