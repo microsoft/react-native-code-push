@@ -8,6 +8,11 @@ import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import static com.microsoft.codepush.common.TestUtils.APP_VERSION;
+import static com.microsoft.codepush.common.TestUtils.CLIENT_UNIQUE_ID;
+import static com.microsoft.codepush.common.TestUtils.DEPLOYMENT_KEY;
+import static com.microsoft.codepush.common.TestUtils.PACKAGE_HASH;
+import static com.microsoft.codepush.common.TestUtils.SERVER_URL;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -26,16 +31,16 @@ public class CodePushConfigurationTest {
     @Test
     public void correctConfigurationTest() {
         CodePushConfiguration correctConfig = new CodePushConfiguration();
-        correctConfig.setAppVersion("1.0.0")
-                .setClientUniqueId("clientUniqueId")
-                .setDeploymentKey("deploymentKey")
-                .setPackageHash("packageHash")
-                .setServerUrl("serverUrl");
-        assertEquals("1.0.0", correctConfig.getAppVersion());
-        assertEquals("clientUniqueId", correctConfig.getClientUniqueId());
-        assertEquals("deploymentKey", correctConfig.getDeploymentKey());
-        assertEquals("packageHash", correctConfig.getPackageHash());
-        assertEquals("serverUrl", correctConfig.getServerUrl());
+        correctConfig.setAppVersion(APP_VERSION)
+                .setClientUniqueId(CLIENT_UNIQUE_ID)
+                .setDeploymentKey(DEPLOYMENT_KEY)
+                .setPackageHash(PACKAGE_HASH)
+                .setServerUrl(SERVER_URL);
+        assertEquals(APP_VERSION, correctConfig.getAppVersion());
+        assertEquals(CLIENT_UNIQUE_ID, correctConfig.getClientUniqueId());
+        assertEquals(DEPLOYMENT_KEY, correctConfig.getDeploymentKey());
+        assertEquals(PACKAGE_HASH, correctConfig.getPackageHash());
+        assertEquals(SERVER_URL, correctConfig.getServerUrl());
 
         /* Package hash can be null. */
         correctConfig.setPackageHash(null);

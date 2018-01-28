@@ -15,38 +15,35 @@ import com.microsoft.codepush.common.enums.CodePushDeploymentStatus;
 import com.microsoft.codepush.common.enums.CodePushInstallMode;
 import com.microsoft.codepush.common.enums.CodePushSyncStatus;
 import com.microsoft.codepush.common.enums.CodePushUpdateState;
-import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
 
 import org.junit.Test;
 
-import java.io.File;
-
+import static com.microsoft.codepush.common.TestUtils.APP_VERSION;
+import static com.microsoft.codepush.common.TestUtils.CLIENT_UNIQUE_ID;
+import static com.microsoft.codepush.common.TestUtils.DEPLOYMENT_KEY;
+import static com.microsoft.codepush.common.TestUtils.DESCRIPTION;
+import static com.microsoft.codepush.common.TestUtils.DOWNLOAD_URL;
+import static com.microsoft.codepush.common.TestUtils.ERROR;
+import static com.microsoft.codepush.common.TestUtils.FAILED_INSTALL;
+import static com.microsoft.codepush.common.TestUtils.IS_AVAILABLE;
+import static com.microsoft.codepush.common.TestUtils.IS_DEBUG_ONLY;
+import static com.microsoft.codepush.common.TestUtils.IS_FIRST_RUN;
+import static com.microsoft.codepush.common.TestUtils.IS_MANDATORY;
+import static com.microsoft.codepush.common.TestUtils.IS_PENDING;
+import static com.microsoft.codepush.common.TestUtils.LABEL;
+import static com.microsoft.codepush.common.TestUtils.PACKAGE_HASH;
+import static com.microsoft.codepush.common.TestUtils.PACKAGE_SIZE;
+import static com.microsoft.codepush.common.TestUtils.PREVIOUS_DEPLOYMENT_KEY;
+import static com.microsoft.codepush.common.TestUtils.PREVIOUS_LABEL;
+import static com.microsoft.codepush.common.TestUtils.SHOULD_RUN_BINARY;
+import static com.microsoft.codepush.common.TestUtils.STATUS;
+import static com.microsoft.codepush.common.TestUtils.UPDATE_APP_VERSION;
 import static org.junit.Assert.assertEquals;
 
 /**
  * Tests all the data classes.
  */
 public class CodePushDataTest {
-    private String clientUniqueId = "YHFv65";
-    private String deploymentKey = "ABC123";
-    private String previousDeploymentKey = "prevABC123";
-    private String previousLabel = "awesome package previous";
-    private String appVersion = "2.2.1";
-    private String status = "Succeeded";
-    private String label = "awesome package";
-    private String description = "short description";
-    private boolean failedInstall = false;
-    private boolean isMandatory = true;
-    private boolean isPending = true;
-    private boolean isDebugOnly = false;
-    private boolean isFirstRun = false;
-    private boolean updateAppVersion = true;
-    private boolean isAvailable = true;
-    private boolean shouldRunBinary = false;
-    private long packageSize = 102546723;
-    private String downloadUrl = "https://url.com";
-    private String packageHash = "HASH";
-    private String error = "An error has occurred";
 
     @Test
     public void enumsTest() throws Exception {
@@ -65,48 +62,50 @@ public class CodePushDataTest {
         CodePushUpdateState codePushUpdateState = CodePushUpdateState.LATEST;
         int updateStateValue = codePushUpdateState.getValue();
         assertEquals(2, updateStateValue);
-    }
 
-    @Test
-    public void dataClassesTest() throws Exception {
-
-        /* Checks DownloadPackageResult work. */
-        File file = new File("/");
-        CodePushDownloadPackageResult codePushDownloadPackageResult = new CodePushDownloadPackageResult(file, false);
-        assertEquals(false, codePushDownloadPackageResult.isZip());
-        assertEquals(file, codePushDownloadPackageResult.getDownloadFile());
+        /* Test <code>valueOf()</code> and <code>values()</code>. */
+        assertEquals(3, CodePushCheckFrequency.values().length);
+        assertEquals(2, CodePushDeploymentStatus.values().length);
+        assertEquals(4, CodePushInstallMode.values().length);
+        assertEquals(9, CodePushSyncStatus.values().length);
+        assertEquals(3, CodePushUpdateState.values().length);
+        assertEquals(CodePushUpdateState.RUNNING, CodePushUpdateState.valueOf("RUNNING"));
+        assertEquals(CodePushDeploymentStatus.FAILED, CodePushDeploymentStatus.valueOf("FAILED"));
+        assertEquals(CodePushInstallMode.IMMEDIATE, CodePushInstallMode.valueOf("IMMEDIATE"));
+        assertEquals(CodePushSyncStatus.AWAITING_USER_ACTION, CodePushSyncStatus.valueOf("AWAITING_USER_ACTION"));
+        assertEquals(CodePushCheckFrequency.MANUAL, CodePushCheckFrequency.valueOf("MANUAL"));
     }
 
     @Test
     public void dataContractsTest() throws Exception {
 
         /* Check download report. */
-        CodePushDownloadStatusReport codePushDownloadStatusReport = CodePushDownloadStatusReport.createReport(clientUniqueId, deploymentKey, label);
+        CodePushDownloadStatusReport codePushDownloadStatusReport = CodePushDownloadStatusReport.createReport(CLIENT_UNIQUE_ID, DEPLOYMENT_KEY, LABEL);
         checkDownloadReport(codePushDownloadStatusReport);
 
         /* Check deployment report. */
         CodePushDeploymentStatusReport codePushDeploymentStatusReport = new CodePushDeploymentStatusReport();
-        codePushDeploymentStatusReport.setClientUniqueId(clientUniqueId);
-        codePushDeploymentStatusReport.setDeploymentKey(deploymentKey);
-        codePushDeploymentStatusReport.setLabel(label);
-        codePushDeploymentStatusReport.setAppVersion(appVersion);
-        codePushDeploymentStatusReport.setPreviousDeploymentKey(previousDeploymentKey);
-        codePushDeploymentStatusReport.setPreviousLabelOrAppVersion(previousLabel);
-        codePushDeploymentStatusReport.setStatus(status);
+        codePushDeploymentStatusReport.setClientUniqueId(CLIENT_UNIQUE_ID);
+        codePushDeploymentStatusReport.setDeploymentKey(DEPLOYMENT_KEY);
+        codePushDeploymentStatusReport.setLabel(LABEL);
+        codePushDeploymentStatusReport.setAppVersion(APP_VERSION);
+        codePushDeploymentStatusReport.setPreviousDeploymentKey(PREVIOUS_DEPLOYMENT_KEY);
+        codePushDeploymentStatusReport.setPreviousLabelOrAppVersion(PREVIOUS_LABEL);
+        codePushDeploymentStatusReport.setStatus(STATUS);
         checkDeploymentReport(codePushDeploymentStatusReport);
 
         /* Check update response info. */
         CodePushUpdateResponseUpdateInfo codePushUpdateResponseUpdateInfo = new CodePushUpdateResponseUpdateInfo();
-        codePushUpdateResponseUpdateInfo.setAppVersion(appVersion);
-        codePushUpdateResponseUpdateInfo.setAvailable(isAvailable);
-        codePushUpdateResponseUpdateInfo.setDescription(description);
-        codePushUpdateResponseUpdateInfo.setDownloadUrl(downloadUrl);
-        codePushUpdateResponseUpdateInfo.setLabel(label);
-        codePushUpdateResponseUpdateInfo.setMandatory(isMandatory);
-        codePushUpdateResponseUpdateInfo.setPackageHash(packageHash);
-        codePushUpdateResponseUpdateInfo.setPackageSize(packageSize);
-        codePushUpdateResponseUpdateInfo.setShouldRunBinaryVersion(shouldRunBinary);
-        codePushUpdateResponseUpdateInfo.setUpdateAppVersion(updateAppVersion);
+        codePushUpdateResponseUpdateInfo.setAppVersion(APP_VERSION);
+        codePushUpdateResponseUpdateInfo.setAvailable(IS_AVAILABLE);
+        codePushUpdateResponseUpdateInfo.setDescription(DESCRIPTION);
+        codePushUpdateResponseUpdateInfo.setDownloadUrl(DOWNLOAD_URL);
+        codePushUpdateResponseUpdateInfo.setLabel(LABEL);
+        codePushUpdateResponseUpdateInfo.setMandatory(IS_MANDATORY);
+        codePushUpdateResponseUpdateInfo.setPackageHash(PACKAGE_HASH);
+        codePushUpdateResponseUpdateInfo.setPackageSize(PACKAGE_SIZE);
+        codePushUpdateResponseUpdateInfo.setShouldRunBinaryVersion(SHOULD_RUN_BINARY);
+        codePushUpdateResponseUpdateInfo.setUpdateAppVersion(UPDATE_APP_VERSION);
         checkUpdateResponse(codePushUpdateResponseUpdateInfo);
 
         /* Check update response. */
@@ -116,35 +115,35 @@ public class CodePushDataTest {
 
         /* Check package. */
         CodePushPackage codePushPackage = new CodePushPackage();
-        codePushPackage.setAppVersion(appVersion);
-        codePushPackage.setDeploymentKey(deploymentKey);
-        codePushPackage.setDescription(description);
-        codePushPackage.setFailedInstall(failedInstall);
-        codePushPackage.setLabel(label);
-        codePushPackage.setMandatory(isMandatory);
-        codePushPackage.setPackageHash(packageHash);
+        codePushPackage.setAppVersion(APP_VERSION);
+        codePushPackage.setDeploymentKey(DEPLOYMENT_KEY);
+        codePushPackage.setDescription(DESCRIPTION);
+        codePushPackage.setFailedInstall(FAILED_INSTALL);
+        codePushPackage.setLabel(LABEL);
+        codePushPackage.setMandatory(IS_MANDATORY);
+        codePushPackage.setPackageHash(PACKAGE_HASH);
         checkPackage(codePushPackage);
 
         /* Check local package. */
-        CodePushLocalPackage codePushLocalPackage = CodePushLocalPackage.createLocalPackage(failedInstall, isFirstRun, isPending, isDebugOnly, codePushPackage);
+        CodePushLocalPackage codePushLocalPackage = CodePushLocalPackage.createLocalPackage(FAILED_INSTALL, IS_FIRST_RUN, IS_PENDING, IS_DEBUG_ONLY, codePushPackage);
         checkLocalPackage(codePushLocalPackage);
-        CodePushLocalPackage failedPackage = CodePushLocalPackage.createFailedLocalPackage(new Exception(error));
-        assertEquals(error, failedPackage.getDownloadException().getMessage());
+        CodePushLocalPackage failedPackage = CodePushLocalPackage.createFailedLocalPackage(new Exception(ERROR));
+        assertEquals(ERROR, failedPackage.getDownloadException().getMessage());
 
         /* Check remote package. */
-        CodePushRemotePackage codePushDefaultRemotePackage = CodePushRemotePackage.createDefaultRemotePackage(appVersion, updateAppVersion);
-        assertEquals(appVersion, codePushDefaultRemotePackage.getAppVersion());
-        assertEquals(updateAppVersion, codePushDefaultRemotePackage.isUpdateAppVersion());
-        CodePushRemotePackage codePushRemotePackage = CodePushRemotePackage.createRemotePackage(failedInstall, packageSize, downloadUrl, updateAppVersion, codePushPackage);
+        CodePushRemotePackage codePushDefaultRemotePackage = CodePushRemotePackage.createDefaultRemotePackage(APP_VERSION, UPDATE_APP_VERSION);
+        assertEquals(APP_VERSION, codePushDefaultRemotePackage.getAppVersion());
+        assertEquals(UPDATE_APP_VERSION, codePushDefaultRemotePackage.isUpdateAppVersion());
+        CodePushRemotePackage codePushRemotePackage = CodePushRemotePackage.createRemotePackage(FAILED_INSTALL, PACKAGE_SIZE, DOWNLOAD_URL, UPDATE_APP_VERSION, codePushPackage);
         checkRemotePackage(codePushRemotePackage);
-        CodePushRemotePackage codePushUpdateRemotePackage = CodePushRemotePackage.createRemotePackageFromUpdateInfo(deploymentKey, codePushUpdateResponseUpdateInfo);
+        CodePushRemotePackage codePushUpdateRemotePackage = CodePushRemotePackage.createRemotePackageFromUpdateInfo(DEPLOYMENT_KEY, codePushUpdateResponseUpdateInfo);
         checkRemotePackage(codePushUpdateRemotePackage);
 
         /* Check update request. */
-        CodePushUpdateRequest codePushUpdateRequest = CodePushUpdateRequest.createUpdateRequest(deploymentKey, codePushLocalPackage, clientUniqueId);
+        CodePushUpdateRequest codePushUpdateRequest = CodePushUpdateRequest.createUpdateRequest(DEPLOYMENT_KEY, codePushLocalPackage, CLIENT_UNIQUE_ID);
         codePushUpdateRequest.setCompanion(false);
-        assertEquals(deploymentKey, codePushUpdateRequest.getDeploymentKey());
-        assertEquals(clientUniqueId, codePushUpdateRequest.getClientUniqueId());
+        assertEquals(DEPLOYMENT_KEY, codePushUpdateRequest.getDeploymentKey());
+        assertEquals(CLIENT_UNIQUE_ID, codePushUpdateRequest.getClientUniqueId());
         assertEquals(codePushLocalPackage.getAppVersion(), codePushUpdateRequest.getAppVersion());
         assertEquals(codePushLocalPackage.getLabel(), codePushUpdateRequest.getLabel());
         assertEquals(codePushLocalPackage.getPackageHash(), codePushUpdateRequest.getPackageHash());
@@ -162,9 +161,9 @@ public class CodePushDataTest {
         assertEquals(false, codePushUpdateDialog.getAppendReleaseDescription());
 
         /* Check sync options. */
-        CodePushSyncOptions codePushSyncOptions = new CodePushSyncOptions(deploymentKey);
+        CodePushSyncOptions codePushSyncOptions = new CodePushSyncOptions(DEPLOYMENT_KEY);
         codePushSyncOptions.setUpdateDialog(codePushUpdateDialog);
-        assertEquals(deploymentKey, codePushSyncOptions.getDeploymentKey());
+        assertEquals(DEPLOYMENT_KEY, codePushSyncOptions.getDeploymentKey());
         assertEquals(0, codePushSyncOptions.getMinimumBackgroundDuration());
         assertEquals(CodePushInstallMode.ON_NEXT_RESTART, codePushSyncOptions.getInstallMode());
         assertEquals(CodePushInstallMode.IMMEDIATE, codePushSyncOptions.getMandatoryInstallMode());
@@ -174,53 +173,53 @@ public class CodePushDataTest {
     }
 
     private void checkDeploymentReport(CodePushDeploymentStatusReport codePushDeploymentStatusReport) {
-        assertEquals(appVersion, codePushDeploymentStatusReport.getAppVersion());
-        assertEquals(previousDeploymentKey, codePushDeploymentStatusReport.getPreviousDeploymentKey());
-        assertEquals(previousLabel, codePushDeploymentStatusReport.getPreviousLabelOrAppVersion());
-        assertEquals(status, codePushDeploymentStatusReport.getStatus());
+        assertEquals(APP_VERSION, codePushDeploymentStatusReport.getAppVersion());
+        assertEquals(PREVIOUS_DEPLOYMENT_KEY, codePushDeploymentStatusReport.getPreviousDeploymentKey());
+        assertEquals(PREVIOUS_LABEL, codePushDeploymentStatusReport.getPreviousLabelOrAppVersion());
+        assertEquals(STATUS, codePushDeploymentStatusReport.getStatus());
         checkDownloadReport(codePushDeploymentStatusReport);
     }
 
     private void checkDownloadReport(CodePushDownloadStatusReport codePushDownloadStatusReport) {
-        assertEquals(clientUniqueId, codePushDownloadStatusReport.getClientUniqueId());
-        assertEquals(deploymentKey, codePushDownloadStatusReport.getDeploymentKey());
-        assertEquals(label, codePushDownloadStatusReport.getLabel());
+        assertEquals(CLIENT_UNIQUE_ID, codePushDownloadStatusReport.getClientUniqueId());
+        assertEquals(DEPLOYMENT_KEY, codePushDownloadStatusReport.getDeploymentKey());
+        assertEquals(LABEL, codePushDownloadStatusReport.getLabel());
     }
 
     private void checkLocalPackage(CodePushLocalPackage codePushLocalPackage) {
-        assertEquals(isFirstRun, codePushLocalPackage.isFirstRun());
-        assertEquals(isPending, codePushLocalPackage.isPending());
-        assertEquals(isDebugOnly, codePushLocalPackage.isDebugOnly());
+        assertEquals(IS_FIRST_RUN, codePushLocalPackage.isFirstRun());
+        assertEquals(IS_PENDING, codePushLocalPackage.isPending());
+        assertEquals(IS_DEBUG_ONLY, codePushLocalPackage.isDebugOnly());
         checkPackage(codePushLocalPackage);
     }
 
     private void checkRemotePackage(CodePushRemotePackage codePushRemotePackage) {
-        assertEquals(updateAppVersion, codePushRemotePackage.isUpdateAppVersion());
-        assertEquals(packageSize, codePushRemotePackage.getPackageSize());
-        assertEquals(downloadUrl, codePushRemotePackage.getDownloadUrl());
+        assertEquals(UPDATE_APP_VERSION, codePushRemotePackage.isUpdateAppVersion());
+        assertEquals(PACKAGE_SIZE, codePushRemotePackage.getPackageSize());
+        assertEquals(DOWNLOAD_URL, codePushRemotePackage.getDownloadUrl());
         checkPackage(codePushRemotePackage);
     }
 
     private void checkPackage(CodePushPackage codePushPackage) {
-        assertEquals(appVersion, codePushPackage.getAppVersion());
-        assertEquals(deploymentKey, codePushPackage.getDeploymentKey());
-        assertEquals(description, codePushPackage.getDescription());
-        assertEquals(failedInstall, codePushPackage.isFailedInstall());
-        assertEquals(label, codePushPackage.getLabel());
-        assertEquals(isMandatory, codePushPackage.isMandatory());
-        assertEquals(packageHash, codePushPackage.getPackageHash());
+        assertEquals(APP_VERSION, codePushPackage.getAppVersion());
+        assertEquals(DEPLOYMENT_KEY, codePushPackage.getDeploymentKey());
+        assertEquals(DESCRIPTION, codePushPackage.getDescription());
+        assertEquals(FAILED_INSTALL, codePushPackage.isFailedInstall());
+        assertEquals(LABEL, codePushPackage.getLabel());
+        assertEquals(IS_MANDATORY, codePushPackage.isMandatory());
+        assertEquals(PACKAGE_HASH, codePushPackage.getPackageHash());
     }
 
     private void checkUpdateResponse(CodePushUpdateResponseUpdateInfo codePushUpdateResponseUpdateInfo) {
-        assertEquals(appVersion, codePushUpdateResponseUpdateInfo.getAppVersion());
-        assertEquals(isAvailable, codePushUpdateResponseUpdateInfo.isAvailable());
-        assertEquals(description, codePushUpdateResponseUpdateInfo.getDescription());
-        assertEquals(downloadUrl, codePushUpdateResponseUpdateInfo.getDownloadUrl());
-        assertEquals(label, codePushUpdateResponseUpdateInfo.getLabel());
-        assertEquals(isMandatory, codePushUpdateResponseUpdateInfo.isMandatory());
-        assertEquals(packageHash, codePushUpdateResponseUpdateInfo.getPackageHash());
-        assertEquals(packageSize, codePushUpdateResponseUpdateInfo.getPackageSize());
-        assertEquals(shouldRunBinary, codePushUpdateResponseUpdateInfo.isShouldRunBinaryVersion());
-        assertEquals(updateAppVersion, codePushUpdateResponseUpdateInfo.isUpdateAppVersion());
+        assertEquals(APP_VERSION, codePushUpdateResponseUpdateInfo.getAppVersion());
+        assertEquals(IS_AVAILABLE, codePushUpdateResponseUpdateInfo.isAvailable());
+        assertEquals(DESCRIPTION, codePushUpdateResponseUpdateInfo.getDescription());
+        assertEquals(DOWNLOAD_URL, codePushUpdateResponseUpdateInfo.getDownloadUrl());
+        assertEquals(LABEL, codePushUpdateResponseUpdateInfo.getLabel());
+        assertEquals(IS_MANDATORY, codePushUpdateResponseUpdateInfo.isMandatory());
+        assertEquals(PACKAGE_HASH, codePushUpdateResponseUpdateInfo.getPackageHash());
+        assertEquals(PACKAGE_SIZE, codePushUpdateResponseUpdateInfo.getPackageSize());
+        assertEquals(SHOULD_RUN_BINARY, codePushUpdateResponseUpdateInfo.isShouldRunBinaryVersion());
+        assertEquals(UPDATE_APP_VERSION, codePushUpdateResponseUpdateInfo.isUpdateAppVersion());
     }
 }

@@ -17,6 +17,13 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.File;
 
+import static com.microsoft.codepush.common.TestUtils.CLIENT_UNIQUE_ID;
+import static com.microsoft.codepush.common.TestUtils.DEPLOYMENT_KEY;
+import static com.microsoft.codepush.common.TestUtils.FAILED_INSTALL;
+import static com.microsoft.codepush.common.TestUtils.IS_DEBUG_ONLY;
+import static com.microsoft.codepush.common.TestUtils.IS_FIRST_RUN;
+import static com.microsoft.codepush.common.TestUtils.IS_PENDING;
+import static com.microsoft.codepush.common.TestUtils.LABEL;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -27,20 +34,13 @@ import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(AppCenterLog.class)
 public class CodePushLoggingTest {
-    private String clientUniqueId = "YHFv65";
-    private String deploymentKey = "ABC123";
-    private String label = "awesome package";
-    private boolean failedInstall = false;
-    private boolean isPending = true;
-    private boolean isDebugOnly = false;
-    private boolean isFirstRun = false;
 
     @Test
     public void testLogging() throws Exception {
         CodePushPackage codePushPackage = new CodePushPackage();
-        CodePushLocalPackage codePushLocalPackage = CodePushLocalPackage.createLocalPackage(failedInstall, isFirstRun, isPending, isDebugOnly, codePushPackage);
-        CodePushUpdateRequest codePushUpdateRequest = CodePushUpdateRequest.createUpdateRequest(deploymentKey, codePushLocalPackage, clientUniqueId);
-        CodePushDownloadStatusReport codePushDownloadStatusReport = CodePushDownloadStatusReport.createReport(clientUniqueId, deploymentKey, label);
+        CodePushLocalPackage codePushLocalPackage = CodePushLocalPackage.createLocalPackage(FAILED_INSTALL, IS_FIRST_RUN, IS_PENDING, IS_DEBUG_ONLY, codePushPackage);
+        CodePushUpdateRequest codePushUpdateRequest = CodePushUpdateRequest.createUpdateRequest(DEPLOYMENT_KEY, codePushLocalPackage, CLIENT_UNIQUE_ID);
+        CodePushDownloadStatusReport codePushDownloadStatusReport = CodePushDownloadStatusReport.createReport(CLIENT_UNIQUE_ID, DEPLOYMENT_KEY, LABEL);
         CodePushDeploymentStatusReport codePushDeploymentStatusReport = new CodePushDeploymentStatusReport();
         CodePushUpdateResponse codePushUpdateResponse = new CodePushUpdateResponse();
 
@@ -61,10 +61,10 @@ public class CodePushLoggingTest {
         testFile = mock(File.class);
         doReturn(false).when(testFile).delete();
         FileUtils.deleteFileOrFolderSilently(testFile);
-        File testFile1 = mock(File.class);
-        doReturn(true).when(testFile1).isDirectory();
-        doReturn(new File[]{testFile}).when(testFile1).listFiles();
-        FileUtils.deleteFileOrFolderSilently(testFile1);
+        File newTestFile = mock(File.class);
+        doReturn(true).when(newTestFile).isDirectory();
+        doReturn(new File[]{testFile}).when(newTestFile).listFiles();
+        FileUtils.deleteFileOrFolderSilently(newTestFile);
         verifyStatic(VerificationModeFactory.times(12));
         AppCenterLog.error(eq(CodePush.LOG_TAG), anyString());
     }

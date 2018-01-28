@@ -13,166 +13,139 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import static com.microsoft.codepush.common.AndroidTestUtils.getFileMock;
+import static com.microsoft.codepush.common.AndroidTestUtils.getRealFile;
+import static com.microsoft.codepush.common.AndroidTestUtils.getRealTestFolder;
+import static com.microsoft.codepush.common.AndroidTestUtils.mockDirListFilesFail;
+import static com.microsoft.codepush.common.AndroidTestUtils.mockDirMkDirFail;
+import static com.microsoft.codepush.common.AndroidTestUtils.mockFileRenameToFail;
+import static com.microsoft.codepush.common.AndroidTestUtils.mockSetLastModifiedFail;
+import static com.microsoft.codepush.common.AndroidTestUtils.mockZipEntry;
 import static junit.framework.Assert.assertEquals;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 
 public class CodePushFileTest {
 
     @Test
-    public void fileTest() throws Exception {
+    public void fileOperations_succeed() throws Exception {
         new FileUtils();
 
         /* Creating files and directories. */
-        String testString = "123";
-        String newName = "newFileName.txt";
+        String fileContent = "123";
+        String newFileName = "newFileName.txt";
         String fileName = "file.txt";
-        File testDir = new File(Environment.getExternalStorageDirectory(), "Test");
-        File testDirMove = new File(Environment.getExternalStorageDirectory(), "TestMove");
-        File testDirMoveInternal = new File(testDirMove, "Internal");
-        testDir.mkdirs();
-        testDirMoveInternal.mkdirs();
-        File newFile = new File(testDir, fileName);
+        File testFolder = new File(Environment.getExternalStorageDirectory(), "Test");
+        File moveTestFolder = new File(Environment.getExternalStorageDirectory(), "TestMove");
+        File moveTestSubfolder = new File(moveTestFolder, "Internal");
+        testFolder.mkdirs();
+        moveTestSubfolder.mkdirs();
+        File newFile = new File(testFolder, fileName);
         newFile.createNewFile();
         assertEquals(true, FileUtils.fileAtPathExists(newFile.getPath()));
 
         /* Testing write/read. */
-        FileUtils.writeStringToFile(testString, newFile.getPath());
-        assertEquals(testString, FileUtils.readFileToString(newFile.getPath()));
+        FileUtils.writeStringToFile(fileContent, newFile.getPath());
+        assertEquals(fileContent, FileUtils.readFileToString(newFile.getPath()));
 
         /* Testing move/copy. */
-        FileUtils.moveFile(newFile, testDirMove, newName);
-        assertEquals(true, FileUtils.fileAtPathExists(FileUtils.appendPathComponent(testDirMove.getPath(), newName)));
-        assertEquals(false, FileUtils.fileAtPathExists(FileUtils.appendPathComponent(testDir.getPath(), fileName)));
-        FileUtils.copyDirectoryContents(testDirMove, testDir);
-        assertEquals(true, FileUtils.fileAtPathExists(FileUtils.appendPathComponent(testDirMove.getPath(), newName)));
-        assertEquals(true, FileUtils.fileAtPathExists(FileUtils.appendPathComponent(testDir.getPath(), newName)));
+        FileUtils.moveFile(newFile, moveTestFolder, newFileName);
+        assertEquals(true, FileUtils.fileAtPathExists(FileUtils.appendPathComponent(moveTestFolder.getPath(), newFileName)));
+        assertEquals(false, FileUtils.fileAtPathExists(FileUtils.appendPathComponent(testFolder.getPath(), fileName)));
+        FileUtils.copyDirectoryContents(moveTestFolder, testFolder);
+        assertEquals(true, FileUtils.fileAtPathExists(FileUtils.appendPathComponent(moveTestFolder.getPath(), newFileName)));
+        assertEquals(true, FileUtils.fileAtPathExists(FileUtils.appendPathComponent(testFolder.getPath(), newFileName)));
 
         /* Testing delete. */
-        FileUtils.deleteDirectoryAtPath(testDirMove.getPath());
-        assertEquals(false, FileUtils.fileAtPathExists(testDirMove.getPath()));
+        FileUtils.deleteDirectoryAtPath(moveTestFolder.getPath());
+        assertEquals(false, FileUtils.fileAtPathExists(moveTestFolder.getPath()));
     }
 
     @Test
-    public void zipTest() throws Exception {
-        String testString = "123";
+    public void unzip_succeeds() throws Exception {
+        String zipEntryFileContent = "123";
         String zipFileName = "test.zip";
         String zipEntryFileName = "mytext.txt";
-        File testDirZip = new File(Environment.getExternalStorageDirectory(), "/TestZip");
-        testDirZip.mkdir();
-        File testDirZipMove = new File(Environment.getExternalStorageDirectory(), "/TestZipMove");
-        testDirZipMove.mkdir();
-        File zip = new File(testDirZip, zipFileName);
+        File zipFolder = new File(Environment.getExternalStorageDirectory(), "/TestZip");
+        zipFolder.mkdir();
+        File unzipFolder = new File(Environment.getExternalStorageDirectory(), "/TestZipMove");
+        unzipFolder.mkdir();
+        File zip = new File(zipFolder, zipFileName);
         ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zip));
         ZipEntry e = new ZipEntry(zipEntryFileName);
         out.putNextEntry(e);
-        byte[] data = testString.getBytes();
+        byte[] data = zipEntryFileContent.getBytes();
         out.write(data, 0, data.length);
         out.closeEntry();
         out.close();
-        FileUtils.unzipFile(zip, testDirZipMove);
-        assertEquals(true, FileUtils.fileAtPathExists(FileUtils.appendPathComponent(testDirZipMove.getPath(), zipEntryFileName)));
+        FileUtils.unzipFile(zip, unzipFolder);
+        assertEquals(true, FileUtils.fileAtPathExists(FileUtils.appendPathComponent(unzipFolder.getPath(), zipEntryFileName)));
     }
 
     @Test(expected = IOException.class)
-    public void zipTestFail1() throws Exception {
-        File file = mock(File.class);
-        File sourceFile = mock(File.class);
-        doReturn(false).when(file).exists();
-        doReturn(false).when(file).mkdirs();
-        doReturn(file).when(sourceFile).getParentFile();
-        FileUtils.unzipSingleFile(mock(ZipEntry.class), sourceFile, new byte[10], mock(ZipInputStream.class));
+    public void unzip_fails_ifParentFileMkDirFails() throws Exception {
+        File parentFile = mockDirMkDirFail();
+        File sourceFile = getFileMock();
+        doReturn(parentFile).when(sourceFile).getParentFile();
+        ZipInputStream zipInputStream = mock(ZipInputStream.class);
+        byte[] buffer = new byte[1024];
+        FileUtils.unzipSingleFile(mock(ZipEntry.class), sourceFile, buffer, zipInputStream);
     }
 
     @Test(expected = IOException.class)
-    public void zipTestFail() throws Exception {
-        File mocked = mockTestDirMoveMkDir();
-        ZipEntry entry = mock(ZipEntry.class);
-        doReturn(true).when(entry).isDirectory();
+    public void unzip_fails_ifFileMkDirFails() throws Exception {
+        File mocked = mockDirMkDirFail();
+        ZipEntry entry = mockZipEntry(true);
         ZipInputStream zipInputStream = mock(ZipInputStream.class);
         byte[] buffer = new byte[1024];
         FileUtils.unzipSingleFile(entry, mocked, buffer, zipInputStream);
     }
 
     @Test(expected = IOException.class)
-    public void zipTestFail2() throws Exception {
-        String fileName = "file.txt";
-        File testDir = new File(Environment.getExternalStorageDirectory(), "Test");
-        testDir.mkdirs();
-        File mocked = new File(testDir, fileName);
-        mocked = spy(mocked);
-        doReturn(false).when(mocked).setLastModified(anyLong());
-        ZipEntry entry = mock(ZipEntry.class);
-        doReturn((long) 1).when(entry).getTime();
+    public void unzip_fails_ifSetLastModifiedFails() throws Exception {
+        File file = mockSetLastModifiedFail();
+        ZipEntry entry = mockZipEntry(false);
         ZipInputStream zipInputStream = mock(ZipInputStream.class);
         byte[] buffer = new byte[1024];
         doReturn(-1).when(zipInputStream).read(buffer);
-        FileUtils.unzipSingleFile(entry, mocked, buffer, zipInputStream);
+        FileUtils.unzipSingleFile(entry, file, buffer, zipInputStream);
     }
 
     @Test(expected = IOException.class)
-    public void fileUnzipDestinationMkDirFailTest() throws Exception {
-        String fileName = "file.txt";
-        File testDir = new File(Environment.getExternalStorageDirectory(), "Test1");
-        testDir.mkdirs();
-        File newFile = new File(testDir, fileName);
-        newFile.createNewFile();
-        File testDirMove = mockTestDirMoveMkDir();
+    public void unzip_fails_ifDestinationMkDirFails() throws Exception {
+        File newFile = getRealFile();
+        File testDirMove = mockDirMkDirFail();
         FileUtils.unzipFile(newFile, testDirMove);
     }
 
     @Test(expected = IOException.class)
-    public void fileMoveDestinationMkDirFailTest() throws Exception {
-        File testDir = new File(Environment.getExternalStorageDirectory(), "Test1");
-        testDir.mkdirs();
-        File testDirMove = mockTestDirMoveMkDir();
-        FileUtils.moveFile(testDir, testDirMove, "file1.txt");
-    }
-
-    private File mockTestDirMoveMkDir() {
-        File testDirMove = new File(Environment.getExternalStorageDirectory(), "Test35941");
-        if (testDirMove.exists()) {
-            try {
-                FileUtils.deleteDirectoryAtPath(testDirMove.getPath());
-            } catch (IOException e) {
-            }
-        }
-        testDirMove = spy(testDirMove);
-        doReturn(false).when(testDirMove).mkdirs();
-        return testDirMove;
+    public void move_fails_ifDestinationMkDirFails() throws Exception {
+        File testDir = getFileMock();
+        File testDirMove = mockDirMkDirFail();
+        FileUtils.moveFile(testDir, testDirMove, "");
     }
 
     @Test(expected = IOException.class)
-    public void fileMoveRenameToFailTest() throws Exception {
-        String fileName = "file.txt";
-        File testDir = new File(Environment.getExternalStorageDirectory(), "Test1");
-        File testDirMove = new File(Environment.getExternalStorageDirectory(), "Test35941");
-        testDir.mkdirs();
-        File newFile = new File(testDir, fileName);
-        newFile.createNewFile();
-        newFile = spy(newFile);
-        doReturn(false).when(newFile).renameTo(any(File.class));
-        FileUtils.moveFile(newFile, testDirMove, "file1.txt");
+    public void move_fails_ifRenameToFails() throws Exception {
+        File testDirMove = getRealTestFolder();
+        File newFile = mockFileRenameToFail();
+        FileUtils.moveFile(newFile, testDirMove, "");
     }
 
     @Test(expected = IOException.class)
-    public void deleteDirectoryNull() throws Exception {
+    public void delete_fails_ifPassNull() throws Exception {
         FileUtils.deleteDirectoryAtPath(null);
     }
 
     @Test(expected = IOException.class)
-    public void copyDestDirMkDirsFails() throws Exception {
-        File destDir = mockTestDirMoveMkDir();
-        FileUtils.copyDirectoryContents(new File("/"), destDir);
+    public void copy_fails_ifDestinationMkDirFails() throws Exception {
+        File destDir = mockDirMkDirFail();
+        FileUtils.copyDirectoryContents(getFileMock(), destDir);
     }
 
     @Test(expected = IOException.class)
-    public void copySourceDirListFilesFails() throws Exception {
-        File sourceDir = mock(File.class);
-        doReturn(null).when(sourceDir).listFiles();
-        FileUtils.copyDirectoryContents(sourceDir, new File("/"));
+    public void copy_fails_ifSourceListFilesFails() throws Exception {
+        File sourceDir = mockDirListFilesFail();
+        FileUtils.copyDirectoryContents(sourceDir, getFileMock(true));
     }
 }
