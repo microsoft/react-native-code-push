@@ -1,6 +1,5 @@
 package com.microsoft.codepush.common;
 
-import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
 import com.microsoft.codepush.common.datacontracts.CodePushDownloadStatusReport;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
@@ -19,9 +18,6 @@ import com.microsoft.codepush.common.enums.CodePushUpdateState;
 import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.File;
 
@@ -30,8 +26,6 @@ import static org.junit.Assert.assertEquals;
 /**
  * Tests all the data classes.
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(AppCenterLog.class)
 public class CodePushDataTest {
     private String clientUniqueId = "YHFv65";
     private String deploymentKey = "ABC123";
@@ -76,7 +70,7 @@ public class CodePushDataTest {
     @Test
     public void dataClassesTest() throws Exception {
 
-        /* Checks DownloadPackageResult work.*/
+        /* Checks DownloadPackageResult work. */
         File file = new File("/");
         CodePushDownloadPackageResult codePushDownloadPackageResult = new CodePushDownloadPackageResult(file, false);
         assertEquals(false, codePushDownloadPackageResult.isZip());

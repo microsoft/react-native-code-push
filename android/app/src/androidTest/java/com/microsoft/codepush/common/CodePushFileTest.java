@@ -5,7 +5,6 @@ import android.os.Environment;
 import com.microsoft.codepush.common.utils.FileUtils;
 
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -15,6 +14,11 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import static junit.framework.Assert.assertEquals;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 public class CodePushFileTest {
 
@@ -75,20 +79,20 @@ public class CodePushFileTest {
 
     @Test(expected = IOException.class)
     public void zipTestFail1() throws Exception {
-        File file = Mockito.mock(File.class);
-        File sourceFile = Mockito.mock(File.class);
-        Mockito.doReturn(false).when(file).exists();
-        Mockito.doReturn(false).when(file).mkdirs();
-        Mockito.doReturn(file).when(sourceFile).getParentFile();
-        FileUtils.unzipSingleFile(Mockito.mock(ZipEntry.class), sourceFile, new byte[10], Mockito.mock(ZipInputStream.class));
+        File file = mock(File.class);
+        File sourceFile = mock(File.class);
+        doReturn(false).when(file).exists();
+        doReturn(false).when(file).mkdirs();
+        doReturn(file).when(sourceFile).getParentFile();
+        FileUtils.unzipSingleFile(mock(ZipEntry.class), sourceFile, new byte[10], mock(ZipInputStream.class));
     }
 
     @Test(expected = IOException.class)
     public void zipTestFail() throws Exception {
         File mocked = mockTestDirMoveMkDir();
-        ZipEntry entry = Mockito.mock(ZipEntry.class);
-        Mockito.doReturn(true).when(entry).isDirectory();
-        ZipInputStream zipInputStream = Mockito.mock(ZipInputStream.class);
+        ZipEntry entry = mock(ZipEntry.class);
+        doReturn(true).when(entry).isDirectory();
+        ZipInputStream zipInputStream = mock(ZipInputStream.class);
         byte[] buffer = new byte[1024];
         FileUtils.unzipSingleFile(entry, mocked, buffer, zipInputStream);
     }
@@ -99,13 +103,13 @@ public class CodePushFileTest {
         File testDir = new File(Environment.getExternalStorageDirectory(), "Test");
         testDir.mkdirs();
         File mocked = new File(testDir, fileName);
-        mocked = Mockito.spy(mocked);
-        Mockito.doReturn(false).when(mocked).setLastModified(Mockito.anyLong());
-        ZipEntry entry = Mockito.mock(ZipEntry.class);
-        Mockito.doReturn((long) 1).when(entry).getTime();
-        ZipInputStream zipInputStream = Mockito.mock(ZipInputStream.class);
+        mocked = spy(mocked);
+        doReturn(false).when(mocked).setLastModified(anyLong());
+        ZipEntry entry = mock(ZipEntry.class);
+        doReturn((long) 1).when(entry).getTime();
+        ZipInputStream zipInputStream = mock(ZipInputStream.class);
         byte[] buffer = new byte[1024];
-        Mockito.doReturn(-1).when(zipInputStream).read(buffer);
+        doReturn(-1).when(zipInputStream).read(buffer);
         FileUtils.unzipSingleFile(entry, mocked, buffer, zipInputStream);
     }
 
@@ -136,8 +140,8 @@ public class CodePushFileTest {
             } catch (IOException e) {
             }
         }
-        testDirMove = Mockito.spy(testDirMove);
-        Mockito.doReturn(false).when(testDirMove).mkdirs();
+        testDirMove = spy(testDirMove);
+        doReturn(false).when(testDirMove).mkdirs();
         return testDirMove;
     }
 
@@ -149,8 +153,8 @@ public class CodePushFileTest {
         testDir.mkdirs();
         File newFile = new File(testDir, fileName);
         newFile.createNewFile();
-        newFile = Mockito.spy(newFile);
-        Mockito.doReturn(false).when(newFile).renameTo(Mockito.any(File.class));
+        newFile = spy(newFile);
+        doReturn(false).when(newFile).renameTo(any(File.class));
         FileUtils.moveFile(newFile, testDirMove, "file1.txt");
     }
 
@@ -167,8 +171,8 @@ public class CodePushFileTest {
 
     @Test(expected = IOException.class)
     public void copySourceDirListFilesFails() throws Exception {
-        File sourceDir = Mockito.mock(File.class);
-        Mockito.doReturn(null).when(sourceDir).listFiles();
+        File sourceDir = mock(File.class);
+        doReturn(null).when(sourceDir).listFiles();
         FileUtils.copyDirectoryContents(sourceDir, new File("/"));
     }
 }
