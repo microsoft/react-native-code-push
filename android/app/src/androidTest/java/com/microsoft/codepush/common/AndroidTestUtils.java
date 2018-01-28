@@ -20,8 +20,11 @@ class AndroidTestUtils {
 
     final static String FULL_PACKAGE_URL = "https://codepush.blob.core.windows.net/storagev2/6CjTRZUgaYrHlhH3mKy2JsQVIJtsa0021bd2-9be1-4904-b4c6-16ce9c797779";
     final static String DIFF_PACKAGE_URL = "https://codepush.blob.core.windows.net/storagev2/8wuI2wwTlf4RioIb1cLRtyQyzRW80840428d-683e-4d30-a120-c592a355a594";
+    final static String SIGNED_PACKAGE_URL = "https://codepush.blob.core.windows.net/storagev2/UJRf6E-33CYlqt2jkzT5Ls7-E9Jla0021bd2-9be1-4904-b4c6-16ce9c797779";
     final static String FULL_PACKAGE_HASH = "a1d28a073a1fa45745a8b1952ccc5c2bd4753e533e7b9e48459a6c186ecd32af";
     final static String DIFF_PACKAGE_HASH = "ff46674f196ae852ccb67e49346a11cb9d8c0243ba24003e11b83dd7469b5dd4";
+    final static String SIGNED_PACKAGE_HASH = "9c44daa1ac5697bbd928046e1aa658555e56453c3223a2229656079aff0e01bc";
+    final static String SIGNED_PACKAGE_PUBLIC_KEY = "76ghtryu5743543fd";
 
     /**
      * Mocks a file to fail when performing <code>mkdirs()</code>.

@@ -33,7 +33,7 @@ public class CodePushFileCommonTest {
     }
 
     @Test(expected = CodePushFinalizeException.class)
-    public void copy_fails_ifFinalizeFails() throws Exception {
+    public void download_fails_ifFinalizeFails() throws Exception {
         String fileName = "file.txt";
         File testFolder = new File(Environment.getExternalStorageDirectory(), "Test");
         File copyFolder = new File(Environment.getExternalStorageDirectory(), "TestMove");

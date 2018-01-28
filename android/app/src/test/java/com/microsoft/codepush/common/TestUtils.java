@@ -25,4 +25,5 @@ class TestUtils {
     final static String PACKAGE_HASH = "HASH";
     final static String ERROR = "An error has occurred";
     final static String SERVER_URL = "https";
+    final static String FULL_PACKAGE_URL = "https://codepush.blob.core.windows.net/storagev2/6CjTRZUgaYrHlhH3mKy2JsQVIJtsa0021bd2-9be1-4904-b4c6-16ce9c797779";
 }
