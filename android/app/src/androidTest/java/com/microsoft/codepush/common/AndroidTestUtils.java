@@ -56,6 +56,12 @@ class AndroidTestUtils {
         return testFolder;
     }
 
+    /**
+     * Creates a real (not mocked) file for testing.
+     *
+     * @return real test file.
+     * @throws IOException exception occurred when creating a file.
+     */
     static File getRealFile() throws IOException {
         File testFolder = getRealTestFolder();
         File realFile = new File(testFolder, "file.txt");

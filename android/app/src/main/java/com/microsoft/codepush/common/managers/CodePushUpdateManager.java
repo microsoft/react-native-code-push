@@ -471,7 +471,7 @@ public class CodePushUpdateManager {
                     }
                 }
             }
-        }
+        } catch (IOException e) {
             throw new CodePushSignatureVerificationException(e);
         }
     }
