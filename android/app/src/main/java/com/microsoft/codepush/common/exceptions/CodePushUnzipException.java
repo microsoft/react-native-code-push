@@ -8,7 +8,7 @@ public class CodePushUnzipException extends Exception {
     /**
      * Default error message.
      */
-    private static String MESSAGE = "Error occurred during package unzipping. ";
+    private static String MESSAGE = "Error occurred during package unzipping.";
 
     /**
      * Creates an instance of the exception with default detail message and specified cause.

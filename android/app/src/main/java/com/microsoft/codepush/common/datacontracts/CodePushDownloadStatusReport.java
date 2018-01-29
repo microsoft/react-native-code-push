@@ -44,7 +44,6 @@ public class CodePushDownloadStatusReport {
         return codePushDownloadStatusReport;
     }
 
-
     /**
      * Gets the id of the device and returns it.
      *
