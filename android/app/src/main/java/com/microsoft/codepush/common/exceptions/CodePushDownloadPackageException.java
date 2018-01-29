@@ -8,7 +8,7 @@ public class CodePushDownloadPackageException extends Exception {
     /**
      * The default error message.
      */
-    private static String MESSAGE = "Error occurred during package downloading. ";
+    private static String MESSAGE = "Error occurred during package downloading.";
 
     /**
      * Creates an instance of the exception provided the package url.

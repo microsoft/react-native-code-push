@@ -8,7 +8,7 @@ public class CodePushInstallException extends Exception {
     /**
      * Default error message.
      */
-    private static String MESSAGE = "Error occurred during installing the package. ";
+    private static String MESSAGE = "Error occurred during installing the package.";
 
     /**
      * Creates an instance of the exception with default detail message and specified cause.

@@ -8,7 +8,7 @@ public class CodePushMergeException extends Exception {
     /**
      * Default error message.
      */
-    private static String MESSAGE = "Error occurred during package contents merging. ";
+    private static String MESSAGE = "Error occurred during package contents merging.";
 
     /**
      * Creates an instance of the exception with default detail message and specified cause.
