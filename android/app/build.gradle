@@ -7,7 +7,7 @@ jacoco {
 
 android {
     compileSdkVersion 23
-    buildToolsVersion '26.0.2'
+    buildToolsVersion '23.0.1'
 
     defaultConfig {
         minSdkVersion 16
