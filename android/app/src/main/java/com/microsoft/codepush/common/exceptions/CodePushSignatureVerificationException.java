@@ -12,7 +12,7 @@ public class CodePushSignatureVerificationException extends SignatureException {
      */
     public enum SignatureExceptionType {
 
-        DEFAULT("Error occurred during signature verification"),
+        DEFAULT("Error occurred during signature verification."),
 
         NO_SIGNATURE("Error! Public key was provided but there is no JWT signature within app to verify. \n" +
                 "                                    Possible reasons, why that might happen: \n" +

@@ -14,11 +14,11 @@ public class CodePushFinalizeException extends IOException {
 
         DEFAULT("Error closing IO resources."),
 
-        COPY("Error closing IO resources when copying files. "),
+        COPY("Error closing IO resources when copying files."),
 
-        READ("Error closing IO resources when reading file. "),
+        READ("Error closing IO resources when reading file."),
 
-        WRITE("Error closing IO resources when writing to a file. ");
+        WRITE("Error closing IO resources when writing to a file.");
 
         /**
          * Message describing the exception depending on the operation type.
