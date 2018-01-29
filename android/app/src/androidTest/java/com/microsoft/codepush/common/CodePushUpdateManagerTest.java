@@ -30,6 +30,9 @@ import static com.microsoft.codepush.common.AndroidTestUtils.DIFF_PACKAGE_HASH;
 import static com.microsoft.codepush.common.AndroidTestUtils.DIFF_PACKAGE_URL;
 import static com.microsoft.codepush.common.AndroidTestUtils.FULL_PACKAGE_HASH;
 import static com.microsoft.codepush.common.AndroidTestUtils.FULL_PACKAGE_URL;
+import static com.microsoft.codepush.common.AndroidTestUtils.SIGNED_PACKAGE_HASH;
+import static com.microsoft.codepush.common.AndroidTestUtils.SIGNED_PACKAGE_PUBLIC_KEY;
+import static com.microsoft.codepush.common.AndroidTestUtils.SIGNED_PACKAGE_URL;
 import static com.microsoft.codepush.common.CodePushConstants.APP_ENTRY_POINT_PATH_KEY;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -190,14 +193,17 @@ public class CodePushUpdateManagerTest {
         codePushUpdateManager.getPreviousPackage();
     }
 
-    /*@Test
+    @Test
     public void verifyTest() throws Exception {
         CodePushDownloadPackageResult downloadPackageResult = executeDownload(true, SIGNED_PACKAGE_URL);
         File downloadFile = downloadPackageResult.getDownloadFile();
         codePushUpdateManager.unzipPackage(downloadFile);
         codePushUpdateManager.mergeDiff(SIGNED_PACKAGE_HASH, SIGNED_PACKAGE_PUBLIC_KEY, "index.html");
+        downloadPackageResult = executeDownload(true, SIGNED_PACKAGE_URL);
+        downloadFile = downloadPackageResult.getDownloadFile();
+        codePushUpdateManager.unzipPackage(downloadFile);
         codePushUpdateManager.mergeDiff(SIGNED_PACKAGE_HASH, null, "index.html");
-    }*/
+    }
 
     @Test
     public void getPreviousPackage_null_ifGetPreviousPackageHashNull() throws Exception {
