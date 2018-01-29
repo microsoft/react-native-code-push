@@ -9,7 +9,6 @@ import com.microsoft.codepush.common.exceptions.CodePushInstallException;
 import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
 import com.microsoft.codepush.common.exceptions.CodePushMergeException;
 import com.microsoft.codepush.common.exceptions.CodePushRollbackException;
-import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
 import com.microsoft.codepush.common.managers.CodePushUpdateManager;
 import com.microsoft.codepush.common.managers.CodePushUpdateManagerDeserializer;
 import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
@@ -23,8 +22,10 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 
 import static com.microsoft.codepush.common.AndroidTestUtils.DIFF_PACKAGE_HASH;
 import static com.microsoft.codepush.common.AndroidTestUtils.DIFF_PACKAGE_URL;
@@ -33,6 +34,10 @@ import static com.microsoft.codepush.common.AndroidTestUtils.FULL_PACKAGE_URL;
 import static com.microsoft.codepush.common.AndroidTestUtils.SIGNED_PACKAGE_HASH;
 import static com.microsoft.codepush.common.AndroidTestUtils.SIGNED_PACKAGE_PUBLIC_KEY;
 import static com.microsoft.codepush.common.AndroidTestUtils.SIGNED_PACKAGE_URL;
+import static com.microsoft.codepush.common.AndroidTestUtils.checkDoInBackgroundFails;
+import static com.microsoft.codepush.common.AndroidTestUtils.createPackageDownloader;
+import static com.microsoft.codepush.common.AndroidTestUtils.executeDownload;
+import static com.microsoft.codepush.common.AndroidTestUtils.executeWorkflow;
 import static com.microsoft.codepush.common.CodePushConstants.APP_ENTRY_POINT_PATH_KEY;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -41,11 +46,12 @@ import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.timeout;
 
 public class CodePushUpdateManagerTest {
 
@@ -72,61 +78,18 @@ public class CodePushUpdateManagerTest {
         packageObject.put("packageSize", 1024);
         packageObject.put(APP_ENTRY_POINT_PATH_KEY, "/www/index.html");
         packageObject.put("updateAppVersion", false);
-    }
-
-    @Test(expected = CodePushGetPackageException.class)
-    public void getCurrentPackageEntryPath_fails_ifGetFolderPathFails() throws Exception {
-        CodePushUpdateManager spiedUpdateManager = Mockito.spy(codePushUpdateManager);
-        Mockito.doThrow(mock(CodePushMalformedDataException.class)).when(spiedUpdateManager).getCurrentPackageFolderPath();
-        spiedUpdateManager.getCurrentPackageEntryPath("");
-    }
-
-    @Test(expected = CodePushMergeException.class)
-    public void merge_fails_ifGetFolderPathFails() throws Exception {
-        CodePushUpdateManager spiedUpdateManager = Mockito.spy(codePushUpdateManager);
-        Mockito.doThrow(mock(CodePushMalformedDataException.class)).when(spiedUpdateManager).getCurrentPackageFolderPath();
-        spiedUpdateManager.mergeDiff(FULL_PACKAGE_HASH, null, "");
-    }
-
-    @Test(expected = CodePushGetPackageException.class)
-    public void getCurrentPackage_fails_ifGetPackageHashFails() throws Exception {
-        CodePushUpdateManager spiedUpdateManager = Mockito.spy(codePushUpdateManager);
-        Mockito.doThrow(mock(CodePushMalformedDataException.class)).when(spiedUpdateManager).getCurrentPackageHash();
-        spiedUpdateManager.getCurrentPackage();
-    }
-
-    @Test
-    public void getCurrentPackageEntryPath_returnNull_whenPackageIsNull() throws Exception {
-        codePushUpdateManager.clearUpdates();
-        CodePushUpdateManager spiedUpdateManager = Mockito.spy(codePushUpdateManager);
-        Mockito.doReturn(null).when(spiedUpdateManager).getCurrentPackage();
-        assertNull(spiedUpdateManager.getCurrentPackageEntryPath(""));
-    }
-
-    @Test(expected = CodePushRollbackException.class)
-    public void rollback_fails_ifGetCurrentPackageFails() throws Exception {
-        codePushUpdateManager.clearUpdates();
-        CodePushUpdateManager spiedUpdateManager = Mockito.spy(codePushUpdateManager);
-        Mockito.doReturn(null).when(spiedUpdateManager).getCurrentPackage();
-        spiedUpdateManager.rollbackPackage();
-    }
-
-    @Test
-    public void downloadPackage_fails_ifPackageDownloader_Fails() throws Exception {
-        CodePushDownloadPackageResult codePushDownloadPackageResult = executeDownload(false, "/");
-        assertNotNull(codePushDownloadPackageResult.getCodePushDownloadPackageException());
+        File codePushFolder = new File(Environment.getExternalStorageDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX);
+        codePushFolder.mkdirs();
     }
 
     @Test
     public void workflowTest() throws Exception {
         codePushUpdateManager.clearUpdates();
-        CodePushDownloadPackageResult downloadPackageResult = executeDownload(true, FULL_PACKAGE_URL);
-        File downloadFile = downloadPackageResult.getDownloadFile();
-        codePushUpdateManager.unzipPackage(downloadFile);
+        packageObject.put("packageHash", FULL_PACKAGE_HASH);
+        executeWorkflow(codePushUpdateManager, packageObject, FULL_PACKAGE_URL);
         String appEntryPoint = codePushUpdateManager.mergeDiff(FULL_PACKAGE_HASH, null, "index.html");
         assertEquals("/www/index.html", appEntryPoint);
 
-        packageObject.put("packageHash", FULL_PACKAGE_HASH);
         codePushUpdateManager.installPackage(packageObject, false);
         JSONObject json = codePushUpdateManager.getCurrentPackageInfo();
         assertEquals(FULL_PACKAGE_HASH, json.getString("currentPackage"));
@@ -136,9 +99,7 @@ public class CodePushUpdateManagerTest {
         CodePushUtils.writeJsonToFile(packageObject, newUpdateMetadataPath);
 
         packageObject.put("packageHash", DIFF_PACKAGE_HASH);
-        downloadPackageResult = executeDownload(true, DIFF_PACKAGE_URL);
-        downloadFile = downloadPackageResult.getDownloadFile();
-        codePushUpdateManager.unzipPackage(downloadFile);
+        executeWorkflow(codePushUpdateManager, packageObject, DIFF_PACKAGE_URL);
         new File(codePushUpdateManager.getCurrentPackageFolderPath()).mkdirs();
         appEntryPoint = codePushUpdateManager.mergeDiff(DIFF_PACKAGE_HASH, null, "index.html");
         assertEquals("/www/index.html", appEntryPoint);
@@ -170,68 +131,20 @@ public class CodePushUpdateManagerTest {
     }
 
     @Test(expected = CodePushGetPackageException.class)
-    public void getPreviousPackage_fails_ifGetJsonFails() throws Exception {
+    public void getPreviousPackageFailsIfGetJsonFails() throws Exception {
         String newUpdateFolderPath = codePushUpdateManager.getPackageFolderPath(DIFF_PACKAGE_HASH);
         String newUpdateMetadataPath = FileUtils.appendPathComponent(newUpdateFolderPath, CodePushConstants.PACKAGE_FILE_NAME);
         new File(newUpdateMetadataPath).delete();
         codePushUpdateManager.getPackage(DIFF_PACKAGE_HASH);
     }
 
-    @Test(expected = CodePushMergeException.class)
-    public void merge_fails_ifWrongAppEntryPoint() throws Exception {
-        packageObject.put("packageHash", DIFF_PACKAGE_HASH);
-        CodePushDownloadPackageResult downloadPackageResult = executeDownload(true, DIFF_PACKAGE_URL);
-        File downloadFile = downloadPackageResult.getDownloadFile();
-        codePushUpdateManager.unzipPackage(downloadFile);
-        codePushUpdateManager.mergeDiff(DIFF_PACKAGE_HASH, null, "indexw.html");
-    }
-
-    @Test(expected = CodePushGetPackageException.class)
-    public void getPreviousPackage_fails_ifGetPreviousPackageHashFails() throws Exception {
-        codePushUpdateManager = spy(codePushUpdateManager);
-        doThrow(new IOException()).when(codePushUpdateManager).getPreviousPackageHash();
-        codePushUpdateManager.getPreviousPackage();
-    }
-
     @Test
     public void verifyTest() throws Exception {
-        CodePushDownloadPackageResult downloadPackageResult = executeDownload(true, SIGNED_PACKAGE_URL);
-        File downloadFile = downloadPackageResult.getDownloadFile();
-        codePushUpdateManager.unzipPackage(downloadFile);
+        packageObject.put("packageHash", SIGNED_PACKAGE_HASH);
+        executeWorkflow(codePushUpdateManager, packageObject, SIGNED_PACKAGE_URL);
         codePushUpdateManager.mergeDiff(SIGNED_PACKAGE_HASH, SIGNED_PACKAGE_PUBLIC_KEY, "index.html");
-        downloadPackageResult = executeDownload(true, SIGNED_PACKAGE_URL);
-        downloadFile = downloadPackageResult.getDownloadFile();
-        codePushUpdateManager.unzipPackage(downloadFile);
+        executeWorkflow(codePushUpdateManager, packageObject, SIGNED_PACKAGE_URL);
         codePushUpdateManager.mergeDiff(SIGNED_PACKAGE_HASH, null, "index.html");
-    }
-
-    @Test
-    public void getPreviousPackage_null_ifGetPreviousPackageHashNull() throws Exception {
-        codePushUpdateManager = spy(codePushUpdateManager);
-        doReturn(null).when(codePushUpdateManager).getPreviousPackageHash();
-        assertNull(codePushUpdateManager.getPreviousPackage());
-    }
-
-    @Test(expected = CodePushMergeException.class)
-    public void merge_fails_ifNoSignatureWhereShouldBe() throws Exception {
-        CodePushDownloadPackageResult downloadPackageResult = executeDownload(true, DIFF_PACKAGE_URL);
-        File downloadFile = downloadPackageResult.getDownloadFile();
-        codePushUpdateManager.unzipPackage(downloadFile);
-        codePushUpdateManager.mergeDiff(DIFF_PACKAGE_HASH, "", "index.html");
-    }
-
-    private CodePushDownloadPackageResult executeDownload(boolean verify, String url) throws Exception {
-        PackageDownloader packageDownloader = new PackageDownloader();
-        DownloadProgressCallback downloadProgressCallback = mock(DownloadProgressCallback.class);
-        File codePushPath = new File(Environment.getExternalStorageDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX);
-        File downloadFolder = new File(codePushPath.getPath());
-        downloadFolder.mkdirs();
-        packageObject.put("downloadUrl", url);
-        CodePushDownloadPackageResult codePushDownloadPackageResult = codePushUpdateManager.downloadPackage(packageObject, downloadProgressCallback, packageDownloader);
-        if (verify) {
-            Mockito.verify(downloadProgressCallback, timeout(5000).atLeast(1)).call(any(DownloadProgress.class));
-        }
-        return codePushDownloadPackageResult;
     }
 
     @Test
@@ -244,29 +157,20 @@ public class CodePushUpdateManagerTest {
         assertNull(codePushUpdateManager.getCurrentPackageEntryPath(""));
     }
 
-    @Test(expected = CodePushInstallException.class)
-    public void installTestFail() throws Exception {
-        FileUtils.deleteDirectoryAtPath(new File(Environment.getExternalStorageDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX).getPath());
-        codePushUpdateManager.installPackage(packageObject, false);
-    }
-
     @Test
     public void installTestTestConfig() throws Exception {
-        codePushUpdateManager.setUsingTestConfiguration(true);
+        CodePushUpdateManager.setUsingTestConfiguration(true);
         File one = new File(Environment.getExternalStorageDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX);
-        one.mkdirs();
         new File(one, "TestPackages").mkdirs();
         codePushUpdateManager.installPackage(packageObject, true);
         codePushUpdateManager.installPackage(packageObject, false);
         JSONObject json = codePushUpdateManager.getCurrentPackageInfo();
         assertEquals(FULL_PACKAGE_HASH, json.getString("currentPackage"));
-        codePushUpdateManager.setUsingTestConfiguration(false);
+        CodePushUpdateManager.setUsingTestConfiguration(false);
     }
 
     @Test
     public void installTestRollback() throws Exception {
-        File g = new File(Environment.getExternalStorageDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX);
-        g.mkdirs();
         codePushUpdateManager.installPackage(packageObject, false);
         packageObject.put("packageHash", DIFF_PACKAGE_HASH);
         codePushUpdateManager.installPackage(packageObject, false);
@@ -286,6 +190,83 @@ public class CodePushUpdateManagerTest {
         codePushUpdateManager.installPackage(packageObject, false);
     }
 
+    @Test(expected = CodePushMergeException.class)
+    public void mergeFailsIfWrongAppEntryPoint() throws Exception {
+        packageObject.put("packageHash", DIFF_PACKAGE_HASH);
+        executeWorkflow(codePushUpdateManager, packageObject, DIFF_PACKAGE_URL);
+        codePushUpdateManager.mergeDiff(DIFF_PACKAGE_HASH, null, "indexw.html");
+    }
+
+    @Test(expected = CodePushGetPackageException.class)
+    public void getPreviousPackageFailsIfGetPreviousPackageHashFails() throws Exception {
+        codePushUpdateManager = spy(codePushUpdateManager);
+        doThrow(new IOException()).when(codePushUpdateManager).getPreviousPackageHash();
+        codePushUpdateManager.getPreviousPackage();
+    }
+
+    @Test
+    public void getPreviousPackageNullIfGetPreviousPackageHashNull() throws Exception {
+        codePushUpdateManager = spy(codePushUpdateManager);
+        doReturn(null).when(codePushUpdateManager).getPreviousPackageHash();
+        assertNull(codePushUpdateManager.getPreviousPackage());
+    }
+
+    @Test(expected = CodePushMergeException.class)
+    public void mergeFailsIfNoSignatureWhereShouldBe() throws Exception {
+        packageObject.put("packageHash", DIFF_PACKAGE_HASH);
+        executeWorkflow(codePushUpdateManager, packageObject, DIFF_PACKAGE_URL);
+        codePushUpdateManager.mergeDiff(DIFF_PACKAGE_HASH, "", "index.html");
+    }
+
+    @Test(expected = CodePushInstallException.class)
+    public void installTestFail() throws Exception {
+        FileUtils.deleteDirectoryAtPath(new File(Environment.getExternalStorageDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX).getPath());
+        codePushUpdateManager.installPackage(packageObject, false);
+    }
+
+    @Test(expected = CodePushGetPackageException.class)
+    public void getCurrentPackageEntryPathFailsIfGetFolderPathFails() throws Exception {
+        CodePushUpdateManager spiedUpdateManager = Mockito.spy(codePushUpdateManager);
+        Mockito.doThrow(mock(CodePushMalformedDataException.class)).when(spiedUpdateManager).getCurrentPackageFolderPath();
+        spiedUpdateManager.getCurrentPackageEntryPath("");
+    }
+
+    @Test(expected = CodePushMergeException.class)
+    public void mergeFailsIfGetFolderPathFails() throws Exception {
+        CodePushUpdateManager spiedUpdateManager = Mockito.spy(codePushUpdateManager);
+        Mockito.doThrow(mock(CodePushMalformedDataException.class)).when(spiedUpdateManager).getCurrentPackageFolderPath();
+        spiedUpdateManager.mergeDiff(FULL_PACKAGE_HASH, null, "");
+    }
+
+    @Test(expected = CodePushGetPackageException.class)
+    public void getCurrentPackageFailsIfGetPackageHashFails() throws Exception {
+        CodePushUpdateManager spiedUpdateManager = Mockito.spy(codePushUpdateManager);
+        Mockito.doThrow(mock(CodePushMalformedDataException.class)).when(spiedUpdateManager).getCurrentPackageHash();
+        spiedUpdateManager.getCurrentPackage();
+    }
+
+    @Test
+    public void getCurrentPackageEntryPathReturnNullWhenPackageIsNull() throws Exception {
+        codePushUpdateManager.clearUpdates();
+        CodePushUpdateManager spiedUpdateManager = Mockito.spy(codePushUpdateManager);
+        Mockito.doReturn(null).when(spiedUpdateManager).getCurrentPackage();
+        assertNull(spiedUpdateManager.getCurrentPackageEntryPath(""));
+    }
+
+    @Test(expected = CodePushRollbackException.class)
+    public void rollbackFailsIfGetCurrentPackageFails() throws Exception {
+        codePushUpdateManager.clearUpdates();
+        CodePushUpdateManager spiedUpdateManager = Mockito.spy(codePushUpdateManager);
+        Mockito.doReturn(null).when(spiedUpdateManager).getCurrentPackage();
+        spiedUpdateManager.rollbackPackage();
+    }
+
+    @Test
+    public void downloadPackageFailsIfPackageDownloaderFails() throws Exception {
+        CodePushDownloadPackageResult codePushDownloadPackageResult = executeDownload(codePushUpdateManager, packageObject, false, "/");
+        assertNotNull(codePushDownloadPackageResult.getCodePushDownloadPackageException());
+    }
+
     @Test
     public void noPackageInfoTest() throws Exception {
         File codePush = new File(Environment.getExternalStorageDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX);
@@ -302,45 +283,36 @@ public class CodePushUpdateManagerTest {
         codePushUpdateManager.getCurrentPackageInfo();
     }
 
-
-/*
-
-    @Test(expected = CodePushInvalidUpdateException.class)
-    public void publicKeyFailTest() throws Exception {
-        CodePushDownloadPackageResult codePushDownloadPackageResult = executeDownload(packageHash);
-        codePushUpdateManager.installPackage(packageObject, false);
-        CodePushDownloadPackageResult codePushDownloadPackageResult1 = Mockito.spy(codePushDownloadPackageResult);
-        codePushUpdateManager.unzipPackage(packageObject, codePushDownloadPackageResult1, "index.html", "fff");
+    @Test
+    public void downloadFailsIfBytesMismatch() throws Exception {
+        PackageDownloader packageDownloader = createPackageDownloader();
+        HttpURLConnection connectionMock = Mockito.mock(HttpURLConnection.class);
+        doReturn(100).when(connectionMock).getContentLength();
+        BufferedInputStream bufferedInputStream = mock(BufferedInputStream.class);
+        doReturn(-1).when(bufferedInputStream).read(any(byte[].class), anyInt(), anyInt());
+        doReturn(bufferedInputStream).when(connectionMock).getInputStream();
+        doReturn(connectionMock).when(packageDownloader).createConnection(anyString());
+        checkDoInBackgroundFails(packageDownloader);
     }
 
     @Test
-    public void updateManagerTest() throws Exception {
-        codePushUpdateManager.clearUpdates();
-        assertNull(codePushUpdateManager.getPreviousPackage());
-        assertNull(codePushUpdateManagerDeserializer.getPreviousPackage());
-        CodePushDownloadPackageResult codePushDownloadPackageResult = executeDownload(packageHash);
-        codePushUpdateManager.installPackage(packageObject, false);
-        CodePushDownloadPackageResult codePushDownloadPackageResult1 = Mockito.spy(codePushDownloadPackageResult);
-        codePushUpdateManager.unzipPackage(packageObject, codePushDownloadPackageResult1, "index.html", null);
-        CodePushLocalPackage codePushLocalPackage = codePushUpdateManagerDeserializer.getCurrentPackage();
-        assertEquals(packageHash, codePushLocalPackage.getPackageHash());
-        FileUtils.fileAtPathExists(codePushUpdateManager.getCurrentPackageEntryPath("index.html"));
-        String newHash = "wgggwwftds";
-        packageObject.put("packageHash", newHash);
-        codePushDownloadPackageResult = executeDownload(newHash);
-        codePushUpdateManager.installPackage(packageObject, false);
-        codePushDownloadPackageResult1 = Mockito.spy(codePushDownloadPackageResult);
+    public void downloadFailsIfCloseFails() throws Exception {
+        PackageDownloader packageDownloader = createPackageDownloader();
+        HttpURLConnection connectionMock = Mockito.mock(HttpURLConnection.class);
+        BufferedInputStream bufferedInputStream = mock(BufferedInputStream.class);
+        doReturn(-1).when(bufferedInputStream).read(any(byte[].class), anyInt(), anyInt());
+        doThrow(new IOException()).when(bufferedInputStream).close();
+        doReturn(bufferedInputStream).when(connectionMock).getInputStream();
+        doReturn(connectionMock).when(packageDownloader).createConnection(anyString());
+        checkDoInBackgroundFails(packageDownloader);
+    }
 
-         Current package folder path not null
-        packageObject.put("packageHash", packageHash);
-        codePushUpdateManager.unzipPackage(packageObject, codePushDownloadPackageResult1, "index.html", null);
-
-        CodePushLocalPackage codePushPrevPackage = codePushUpdateManagerDeserializer.getPreviousPackage();
-        CodePushLocalPackage codePushPackage = codePushUpdateManagerDeserializer.getPackage(packageHash);
-        assertEquals(packageHash, codePushPrevPackage.getPackageHash());
-        assertEquals(packageHash, codePushPackage.getPackageHash());
-        CodePushLocalPackage codePushPackageNull = codePushUpdateManagerDeserializer.getPackage("notExist");
-        assertNull(codePushPackageNull);
-    }*/
-
+    @Test
+    public void downloadFailsIfReadFails() throws Exception {
+        File codePushPath = new File(Environment.getExternalStorageDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX);
+        File downloadFolder = new File(codePushPath.getPath());
+        downloadFolder.mkdirs();
+        PackageDownloader packageDownloader = createPackageDownloader(downloadFolder);
+        checkDoInBackgroundFails(packageDownloader);
+    }
 }

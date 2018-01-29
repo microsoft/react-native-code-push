@@ -28,7 +28,7 @@ import static org.mockito.Mockito.mock;
 public class CodePushFileTest {
 
     @Test
-    public void fileOperations_succeed() throws Exception {
+    public void fileOperationsSucceed() throws Exception {
         new FileUtils();
 
         /* Creating files and directories. */
@@ -62,7 +62,7 @@ public class CodePushFileTest {
     }
 
     @Test
-    public void unzip_succeeds() throws Exception {
+    public void unzipSucceeds() throws Exception {
         String zipEntryFileContent = "123";
         String zipFileName = "test.zip";
         String zipEntryFileName = "mytext.txt";
@@ -83,7 +83,7 @@ public class CodePushFileTest {
     }
 
     @Test(expected = IOException.class)
-    public void unzip_fails_ifParentFileMkDirFails() throws Exception {
+    public void unzipFailsIfParentFileMkDirFails() throws Exception {
         File parentFile = mockDirMkDirFail();
         File sourceFile = getFileMock();
         doReturn(parentFile).when(sourceFile).getParentFile();
@@ -93,7 +93,7 @@ public class CodePushFileTest {
     }
 
     @Test(expected = IOException.class)
-    public void unzip_fails_ifFileMkDirFails() throws Exception {
+    public void unzipFailsIfFileMkDirFails() throws Exception {
         File mocked = mockDirMkDirFail();
         ZipEntry entry = mockZipEntry(true);
         ZipInputStream zipInputStream = mock(ZipInputStream.class);
@@ -102,7 +102,7 @@ public class CodePushFileTest {
     }
 
     @Test(expected = IOException.class)
-    public void unzip_fails_ifSetLastModifiedFails() throws Exception {
+    public void unzipFailsIfSetLastModifiedFails() throws Exception {
         File file = mockSetLastModifiedFail();
         ZipEntry entry = mockZipEntry(false);
         ZipInputStream zipInputStream = mock(ZipInputStream.class);
@@ -112,39 +112,39 @@ public class CodePushFileTest {
     }
 
     @Test(expected = IOException.class)
-    public void unzip_fails_ifDestinationMkDirFails() throws Exception {
+    public void unzipFailsIfDestinationMkDirFails() throws Exception {
         File newFile = getRealFile();
         File testDirMove = mockDirMkDirFail();
         FileUtils.unzipFile(newFile, testDirMove);
     }
 
     @Test(expected = IOException.class)
-    public void move_fails_ifDestinationMkDirFails() throws Exception {
+    public void moveFailsIfDestinationMkDirFails() throws Exception {
         File testDir = getFileMock();
         File testDirMove = mockDirMkDirFail();
         FileUtils.moveFile(testDir, testDirMove, "");
     }
 
     @Test(expected = IOException.class)
-    public void move_fails_ifRenameToFails() throws Exception {
+    public void moveFailsIfRenameToFails() throws Exception {
         File testDirMove = getRealTestFolder();
         File newFile = mockFileRenameToFail();
         FileUtils.moveFile(newFile, testDirMove, "");
     }
 
     @Test(expected = IOException.class)
-    public void delete_fails_ifPassNull() throws Exception {
+    public void deleteFailsIfPassNull() throws Exception {
         FileUtils.deleteDirectoryAtPath(null);
     }
 
     @Test(expected = IOException.class)
-    public void copy_fails_ifDestinationMkDirFails() throws Exception {
+    public void copyFailsIfDestinationMkDirFails() throws Exception {
         File destDir = mockDirMkDirFail();
         FileUtils.copyDirectoryContents(getFileMock(), destDir);
     }
 
     @Test(expected = IOException.class)
-    public void copy_fails_ifSourceListFilesFails() throws Exception {
+    public void copyFailsIfSourceListFilesFails() throws Exception {
         File sourceDir = mockDirListFilesFail();
         FileUtils.copyDirectoryContents(sourceDir, getFileMock(true));
     }

@@ -7,11 +7,9 @@ import com.microsoft.codepush.common.exceptions.CodePushDownloadPackageException
 import com.microsoft.codepush.common.exceptions.CodePushUnzipException;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
 import com.microsoft.codepush.common.managers.CodePushUpdateManager;
-import com.microsoft.codepush.common.managers.CodePushUpdateManagerDeserializer;
 import com.microsoft.codepush.common.utils.FileUtils;
 
 import org.json.JSONObject;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -38,17 +36,10 @@ public class CodePushUpdateManagerCommonTest {
     public final ExpectedException exception = ExpectedException.none();
 
     private CodePushUpdateManager codePushUpdateManager;
-    private CodePushUpdateManagerDeserializer codePushUpdateManagerDeserializer;
-    private JSONObject packageObject;
-
-    @Before
-    public void setUp() throws Exception {
-    }
 
     @Test(expected = CodePushDownloadPackageException.class)
-    public void download_fails_ifDeleteNewUpdateFolderPathFails() throws Exception {
+    public void downloadFailsIfDeleteNewUpdateFolderPathFails() throws Exception {
         codePushUpdateManager = new CodePushUpdateManager(new File(Environment.getExternalStorageDirectory(), "/Test").getPath());
-
         mockStatic(FileUtils.class);
         PowerMockito.doThrow(new IOException()).when(FileUtils.class, "deleteDirectoryAtPath", anyString());
         PowerMockito.doReturn(true).when(FileUtils.class, "fileAtPathExists", anyString());
@@ -56,7 +47,7 @@ public class CodePushUpdateManagerCommonTest {
     }
 
     @Test(expected = CodePushUnzipException.class)
-    public void unzip_fails_ifUnzipFileFails() throws Exception {
+    public void unzipFailsIfUnzipFileFails() throws Exception {
         codePushUpdateManager = new CodePushUpdateManager(new File(Environment.getExternalStorageDirectory(), "/Test").getPath());
         mockStatic(FileUtils.class);
         PowerMockito.doThrow(new IOException()).when(FileUtils.class, "unzipFile", any(File.class), any(File.class));
@@ -66,7 +57,7 @@ public class CodePushUpdateManagerCommonTest {
     }
 
     @Test(expected = CodePushDownloadPackageException.class)
-    public void download_fails_ifPackageDownloaderFails() throws Exception {
+    public void downloadFailsIfPackageDownloaderFails() throws Exception {
         codePushUpdateManager = new CodePushUpdateManager(new File(Environment.getExternalStorageDirectory(), "/Test").getPath());
         codePushUpdateManager = spy(codePushUpdateManager);
         doReturn(new File(Environment.getExternalStorageDirectory(), "/Test/HASH").getPath()).when(codePushUpdateManager).getPackageFolderPath(anyString());

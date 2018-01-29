@@ -10,9 +10,9 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -286,16 +286,15 @@ public class FileUtils {
      * @throws IOException read/write error occurred while accessing the file system.
      */
     public static void writeStringToFile(String content, String filePath) throws IOException {
-        PrintWriter printWriter = null;
+        FileWriter writer =  new FileWriter(filePath);
         try {
-            printWriter = new PrintWriter(filePath);
-            printWriter.print(content);
+            writer.write(content);
         } finally {
-            if (printWriter != null) {
-                printWriter.close();
-                if (printWriter.checkError()) {
-                    throw new CodePushFinalizeException(OperationType.WRITE);
-                }
+            Exception e = finalizeResources(
+                    Arrays.<Closeable>asList(writer),
+                    "Error closing IO resources when reading file.");
+            if (e != null) {
+                throw new CodePushFinalizeException(OperationType.COPY, e);
             }
         }
     }

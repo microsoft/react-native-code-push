@@ -26,37 +26,42 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(CodePushUtils.class)
 public class CodePushFileCommonTest {
+
+    private File newFile;
+    private File testFolder;
+
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
+        String fileContent = "123";
+        String fileName = "file.txt";
+        testFolder = new File(Environment.getExternalStorageDirectory(), "Test");
+        testFolder.mkdirs();
+        newFile = new File(testFolder, fileName);
+        newFile.createNewFile();
+        FileUtils.writeStringToFile(fileContent, newFile.getPath());
         mockStatic(CodePushUtils.class);
         BDDMockito.given(CodePushUtils.finalizeResources(anyList(), anyString())).willReturn(new IOException());
     }
 
     @Test(expected = CodePushFinalizeException.class)
-    public void download_fails_ifFinalizeFails() throws Exception {
-        String fileName = "file.txt";
-        File testFolder = new File(Environment.getExternalStorageDirectory(), "Test");
-        File copyFolder = new File(Environment.getExternalStorageDirectory(), "TestMove");
-        testFolder.mkdirs();
-        File newFile = new File(testFolder, fileName);
-        newFile.createNewFile();
-        FileUtils.copyDirectoryContents(testFolder, copyFolder);
-    }
-
-    @Test(expected = CodePushFinalizeException.class)
-    public void read_fails_ifFinalizeFails() throws Exception {
-        String fileContent = "123";
-        String fileName = "file.txt";
-        File testFolder = new File(Environment.getExternalStorageDirectory(), "Test");
-        testFolder.mkdirs();
-        File newFile = new File(testFolder, fileName);
-        newFile.createNewFile();
-        FileUtils.writeStringToFile(fileContent, newFile.getPath());
+    public void readFailsIfFinalizeFails() throws Exception {
         FileUtils.readFileToString(newFile.getPath());
     }
 
     @Test(expected = CodePushFinalizeException.class)
-    public void unzip_fails_ifFinalizeFails() throws Exception {
+    public void copyFailsIfFinalizeFails() throws Exception {
+        File copyFolder = new File(Environment.getExternalStorageDirectory(), "TestMove");
+        FileUtils.copyDirectoryContents(testFolder, copyFolder);
+    }
+
+    @Test(expected = CodePushFinalizeException.class)
+    public void writeFailsIfFinalizeFails() throws Exception {
+        String fileContent = "123";
+        FileUtils.writeStringToFile(fileContent, newFile.getPath());
+    }
+
+    @Test(expected = CodePushFinalizeException.class)
+    public void unzipFailsIfFinalizeFails() throws Exception {
         String zipEntryFileContent = "123";
         String zipFileName = "test.zip";
         String zipEntryFileName = "mytext.txt";

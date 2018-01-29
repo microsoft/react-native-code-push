@@ -2,16 +2,27 @@ package com.microsoft.codepush.common;
 
 import android.os.Environment;
 
+import com.microsoft.codepush.common.connection.PackageDownloader;
+import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
+import com.microsoft.codepush.common.managers.CodePushUpdateManager;
+import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
+
+import org.json.JSONObject;
+import org.mockito.Mockito;
+
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.zip.ZipEntry;
 
+import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.timeout;
 
 /**
  * Utils to make testing process easier and avoid code repetition.
@@ -128,5 +139,95 @@ class AndroidTestUtils {
         File mocked = mock(File.class);
         doReturn(exists).when(mocked).exists();
         return mocked;
+    }
+
+    /**
+     * Executes <code>doInBackground()</code> method of {@link PackageDownloader} only and assert that it fails..
+     *
+     * @param packageDownloader instance of package downloader.
+     * @throws Exception any exception that might occur.
+     */
+    static void checkDoInBackgroundFails(PackageDownloader packageDownloader) throws Exception {
+        Method method = packageDownloader.getClass().getMethod("doInBackground", Void[].class);
+        CodePushDownloadPackageResult codePushDownloadPackageResult = (CodePushDownloadPackageResult) method.invoke(packageDownloader, new Void[]{null});
+        assertTrue(codePushDownloadPackageResult.isCorrupt());
+    }
+
+    /**
+     * Creates spied package downloader instance.
+     *
+     * @param url custom url.
+     * @return package downloader instance that can be mocked.
+     */
+    static PackageDownloader createPackageDownloader(String url) {
+        File codePushPath = new File(Environment.getExternalStorageDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX);
+        File downloadFolder = new File(codePushPath.getPath());
+        downloadFolder.mkdirs();
+        File downloadFilePath = new File(downloadFolder, CodePushConstants.DOWNLOAD_FILE_NAME);
+        PackageDownloader packageDownloader = new PackageDownloader();
+        DownloadProgressCallback downloadProgressCallback = mock(DownloadProgressCallback.class);
+        packageDownloader.setParameters(url, downloadFilePath, downloadProgressCallback);
+        return spy(packageDownloader);
+    }
+
+    /**
+     * Creates spied package downloader instance.
+     *
+     * @param downloadFilePath custom download path.
+     * @return package downloader instance that can be mocked.
+     */
+    static PackageDownloader createPackageDownloader(File downloadFilePath) {
+        PackageDownloader packageDownloader = new PackageDownloader();
+        DownloadProgressCallback downloadProgressCallback = mock(DownloadProgressCallback.class);
+        packageDownloader.setParameters(FULL_PACKAGE_URL, downloadFilePath, downloadProgressCallback);
+        return spy(packageDownloader);
+    }
+
+    /**
+     * Creates default spied package downloader instance.
+     *
+     * @return package downloader instance that can be mocked.
+     */
+    static PackageDownloader createPackageDownloader() {
+        File codePushPath = new File(Environment.getExternalStorageDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX);
+        File downloadFolder = new File(codePushPath.getPath());
+        downloadFolder.mkdirs();
+        File downloadFilePath = new File(downloadFolder, CodePushConstants.DOWNLOAD_FILE_NAME);
+        return createPackageDownloader(downloadFilePath);
+    }
+
+    /**
+     * Executes "download" workflow.
+     *
+     * @param codePushUpdateManager instance of code push update manager.
+     * @param packageObject         current package object.
+     * @param verify                whether verify that callback is called.
+     * @param url                   url for downloading.
+     * @return result of the download.
+     * @throws Exception any exception that might occur.
+     */
+    static CodePushDownloadPackageResult executeDownload(CodePushUpdateManager codePushUpdateManager, JSONObject packageObject, boolean verify, String url) throws Exception {
+        PackageDownloader packageDownloader = new PackageDownloader();
+        DownloadProgressCallback downloadProgressCallback = mock(DownloadProgressCallback.class);
+        packageObject.put("downloadUrl", url);
+        CodePushDownloadPackageResult codePushDownloadPackageResult = codePushUpdateManager.downloadPackage(packageObject, downloadProgressCallback, packageDownloader);
+        if (verify) {
+            Mockito.verify(downloadProgressCallback, timeout(5000).atLeast(1)).call(any(DownloadProgress.class));
+        }
+        return codePushDownloadPackageResult;
+    }
+
+    /**
+     * Performs very common workflow: download -> unzip.
+     *
+     * @param codePushUpdateManager instance of update manager.
+     * @param packageObject         current package object.
+     * @param url                   url for downloading.
+     * @throws Exception any exception that might occur.
+     */
+    static void executeWorkflow(CodePushUpdateManager codePushUpdateManager, JSONObject packageObject, String url) throws Exception {
+        CodePushDownloadPackageResult downloadPackageResult = executeDownload(codePushUpdateManager, packageObject, true, url);
+        File downloadFile = downloadPackageResult.getDownloadFile();
+        codePushUpdateManager.unzipPackage(downloadFile);
     }
 }
