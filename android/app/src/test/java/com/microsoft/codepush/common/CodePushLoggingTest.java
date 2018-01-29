@@ -31,6 +31,9 @@ import static org.mockito.Mockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
+/**
+ * This class tests cases where an error happens and should be logged via {@link AppCenterLog#error(String, String)}.
+ */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(AppCenterLog.class)
 public class CodePushLoggingTest {
@@ -65,6 +68,8 @@ public class CodePushLoggingTest {
         doReturn(true).when(newTestFile).isDirectory();
         doReturn(new File[]{testFile}).when(newTestFile).listFiles();
         FileUtils.deleteFileOrFolderSilently(newTestFile);
+
+        /* We expect exactly 12 logged errors. */
         verifyStatic(VerificationModeFactory.times(12));
         AppCenterLog.error(eq(CodePush.LOG_TAG), anyString());
     }

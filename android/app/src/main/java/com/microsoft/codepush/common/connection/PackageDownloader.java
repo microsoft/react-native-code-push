@@ -66,7 +66,7 @@ public class PackageDownloader extends AsyncTask<Void, Void, CodePushDownloadPac
      * @throws IOException read/write error occurred while accessing the file system.
      */
     public HttpURLConnection createConnection(String urlString) throws IOException {
-        URL url = new URL(downloadUrlString);
+        URL url = new URL(urlString);
         HttpURLConnection connection;
         connection = (HttpURLConnection) url.openConnection();
         return connection;

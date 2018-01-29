@@ -42,7 +42,7 @@ class AndroidTestUtils {
      *
      * @return mocked file returning <code>false</code> when <code>mkdirs()</code> is called.
      */
-    static File mockDirMkDirFail() {
+    static File mockDirMkDirsFail() {
         File mocked = getFileMock();
         doReturn(false).when(mocked).mkdirs();
         return mocked;

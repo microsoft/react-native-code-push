@@ -4,6 +4,7 @@ import android.os.Environment;
 
 import com.microsoft.codepush.common.connection.PackageDownloader;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
+import com.microsoft.codepush.common.exceptions.CodePushDownloadPackageException;
 import com.microsoft.codepush.common.exceptions.CodePushGetPackageException;
 import com.microsoft.codepush.common.exceptions.CodePushInstallException;
 import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
@@ -53,13 +54,27 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
+/**
+ * This class tests all the {@link CodePushUpdateManager} and {@link CodePushUpdateManagerDeserializer} scenarios.
+ */
 public class CodePushUpdateManagerTest {
 
     @Rule
     public final ExpectedException exception = ExpectedException.none();
 
+    /**
+     * Instance of update manager.
+     */
     private CodePushUpdateManager codePushUpdateManager;
+
+    /**
+     * Instance of update manager deserializer.
+     */
     private CodePushUpdateManagerDeserializer codePushUpdateManagerDeserializer;
+
+    /**
+     * Instance of package json object.
+     */
     private JSONObject packageObject;
 
     @Before
@@ -82,6 +97,9 @@ public class CodePushUpdateManagerTest {
         codePushFolder.mkdirs();
     }
 
+    /**
+     * This tests a full update workflow. Download -> unzip -> merge install several packages.
+     */
     @Test
     public void workflowTest() throws Exception {
         codePushUpdateManager.clearUpdates();
@@ -138,6 +156,10 @@ public class CodePushUpdateManagerTest {
         codePushUpdateManager.getPackage(DIFF_PACKAGE_HASH);
     }
 
+    /**
+     * This tests {@link CodePushUpdateManager#verifySignature(String, String, boolean)} method.
+     * It downloads signed package and tests case when it is verified and when no public key passed to signed package.
+     */
     @Test
     public void verifyTest() throws Exception {
         packageObject.put("packageHash", SIGNED_PACKAGE_HASH);
@@ -307,6 +329,9 @@ public class CodePushUpdateManagerTest {
         checkDoInBackgroundFails(packageDownloader);
     }
 
+    /**
+     * Downloading files should return a {@link CodePushDownloadPackageException} if a {@link java.io.InputStream#read()} throws an {@link IOException}.
+     */
     @Test
     public void downloadFailsIfReadFails() throws Exception {
         File codePushPath = new File(Environment.getExternalStorageDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX);

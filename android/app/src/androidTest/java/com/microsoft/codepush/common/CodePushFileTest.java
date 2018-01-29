@@ -17,7 +17,7 @@ import static com.microsoft.codepush.common.AndroidTestUtils.getFileMock;
 import static com.microsoft.codepush.common.AndroidTestUtils.getRealFile;
 import static com.microsoft.codepush.common.AndroidTestUtils.getRealTestFolder;
 import static com.microsoft.codepush.common.AndroidTestUtils.mockDirListFilesFail;
-import static com.microsoft.codepush.common.AndroidTestUtils.mockDirMkDirFail;
+import static com.microsoft.codepush.common.AndroidTestUtils.mockDirMkDirsFail;
 import static com.microsoft.codepush.common.AndroidTestUtils.mockFileRenameToFail;
 import static com.microsoft.codepush.common.AndroidTestUtils.mockSetLastModifiedFail;
 import static com.microsoft.codepush.common.AndroidTestUtils.mockZipEntry;
@@ -25,8 +25,14 @@ import static junit.framework.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
+/**
+ * This class tests all the {@link FileUtils} scenarios.
+ */
 public class CodePushFileTest {
 
+    /**
+     * Tests all the common file operations in a flow.
+     */
     @Test
     public void fileOperationsSucceed() throws Exception {
         new FileUtils();
@@ -61,6 +67,9 @@ public class CodePushFileTest {
         assertEquals(false, FileUtils.fileAtPathExists(moveTestFolder.getPath()));
     }
 
+    /**
+     * Tests successful unzip process.
+     */
     @Test
     public void unzipSucceeds() throws Exception {
         String zipEntryFileContent = "123";
@@ -82,9 +91,12 @@ public class CodePushFileTest {
         assertEquals(true, FileUtils.fileAtPathExists(FileUtils.appendPathComponent(unzipFolder.getPath(), zipEntryFileName)));
     }
 
+    /**
+     * Unzipping files should throw an {@link IOException} if a {@link File#mkdirs()} on parent file returns <code>false</code>.
+     */
     @Test(expected = IOException.class)
-    public void unzipFailsIfParentFileMkDirFails() throws Exception {
-        File parentFile = mockDirMkDirFail();
+    public void unzipFailsIfParentFileMkDirsFails() throws Exception {
+        File parentFile = mockDirMkDirsFail();
         File sourceFile = getFileMock();
         doReturn(parentFile).when(sourceFile).getParentFile();
         ZipInputStream zipInputStream = mock(ZipInputStream.class);
@@ -92,15 +104,21 @@ public class CodePushFileTest {
         FileUtils.unzipSingleFile(mock(ZipEntry.class), sourceFile, buffer, zipInputStream);
     }
 
+    /**
+     * Unzipping files should throw an {@link IOException} if a {@link File#mkdirs()} on file returns <code>false</code>.
+     */
     @Test(expected = IOException.class)
-    public void unzipFailsIfFileMkDirFails() throws Exception {
-        File mocked = mockDirMkDirFail();
+    public void unzipFailsIfFileMkDirsFails() throws Exception {
+        File mocked = mockDirMkDirsFail();
         ZipEntry entry = mockZipEntry(true);
         ZipInputStream zipInputStream = mock(ZipInputStream.class);
         byte[] buffer = new byte[1024];
         FileUtils.unzipSingleFile(entry, mocked, buffer, zipInputStream);
     }
 
+    /**
+     * Unzipping files should throw an {@link IOException} if a {@link File#setLastModified(long)} on file returns <code>false</code>.
+     */
     @Test(expected = IOException.class)
     public void unzipFailsIfSetLastModifiedFails() throws Exception {
         File file = mockSetLastModifiedFail();
@@ -111,20 +129,29 @@ public class CodePushFileTest {
         FileUtils.unzipSingleFile(entry, file, buffer, zipInputStream);
     }
 
+    /**
+     * Unzipping files should throw an {@link IOException} if a {@link File#mkdirs()} on destination folder returns <code>false</code>.
+     */
     @Test(expected = IOException.class)
-    public void unzipFailsIfDestinationMkDirFails() throws Exception {
+    public void unzipFailsIfDestinationMkDirsFails() throws Exception {
         File newFile = getRealFile();
-        File testDirMove = mockDirMkDirFail();
+        File testDirMove = mockDirMkDirsFail();
         FileUtils.unzipFile(newFile, testDirMove);
     }
 
+    /**
+     * Moving files should throw an {@link IOException} if a {@link File#mkdirs()} on destination folder returns <code>false</code>.
+     */
     @Test(expected = IOException.class)
-    public void moveFailsIfDestinationMkDirFails() throws Exception {
+    public void moveFailsIfDestinationMkDirsFails() throws Exception {
         File testDir = getFileMock();
-        File testDirMove = mockDirMkDirFail();
+        File testDirMove = mockDirMkDirsFail();
         FileUtils.moveFile(testDir, testDirMove, "");
     }
 
+    /**
+     * Moving files should throw an {@link IOException} if a {@link File#renameTo(File)} on new file returns <code>false</code>.
+     */
     @Test(expected = IOException.class)
     public void moveFailsIfRenameToFails() throws Exception {
         File testDirMove = getRealTestFolder();
@@ -132,17 +159,26 @@ public class CodePushFileTest {
         FileUtils.moveFile(newFile, testDirMove, "");
     }
 
+    /**
+     * Deleting files should throw an {@link IOException} if pass <code>null</code> path to it.
+     */
     @Test(expected = IOException.class)
     public void deleteFailsIfPassNull() throws Exception {
         FileUtils.deleteDirectoryAtPath(null);
     }
 
+    /**
+     * Copying files should throw an {@link IOException} if a {@link File#mkdirs()} on destination folder returns <code>false</code>.
+     */
     @Test(expected = IOException.class)
-    public void copyFailsIfDestinationMkDirFails() throws Exception {
-        File destDir = mockDirMkDirFail();
+    public void copyFailsIfDestinationMkDirsFails() throws Exception {
+        File destDir = mockDirMkDirsFail();
         FileUtils.copyDirectoryContents(getFileMock(), destDir);
     }
 
+    /**
+     * Copying files should throw an {@link IOException} if an {@link File#listFiles()} on source folder returns <code>null</code>.
+     */
     @Test(expected = IOException.class)
     public void copyFailsIfSourceListFilesFails() throws Exception {
         File sourceDir = mockDirListFilesFail();
