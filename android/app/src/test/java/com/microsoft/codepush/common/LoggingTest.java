@@ -17,13 +17,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.File;
 
-import static com.microsoft.codepush.common.TestUtils.CLIENT_UNIQUE_ID;
-import static com.microsoft.codepush.common.TestUtils.DEPLOYMENT_KEY;
-import static com.microsoft.codepush.common.TestUtils.FAILED_INSTALL;
-import static com.microsoft.codepush.common.TestUtils.IS_DEBUG_ONLY;
-import static com.microsoft.codepush.common.TestUtils.IS_FIRST_RUN;
-import static com.microsoft.codepush.common.TestUtils.IS_PENDING;
-import static com.microsoft.codepush.common.TestUtils.LABEL;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -36,7 +29,15 @@ import static org.powermock.api.mockito.PowerMockito.verifyStatic;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(AppCenterLog.class)
-public class CodePushLoggingTest {
+public class LoggingTest {
+
+    private final static String CLIENT_UNIQUE_ID = "YHFfdsfdv65";
+    private final static String DEPLOYMENT_KEY = "ABC123";
+    private final static String LABEL = "awesome package";
+    private final static boolean FAILED_INSTALL = false;
+    private final static boolean IS_PENDING = true;
+    private final static boolean IS_DEBUG_ONLY = false;
+    private final static boolean IS_FIRST_RUN = false;
 
     @Test
     public void testLogging() throws Exception {

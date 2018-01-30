@@ -13,14 +13,14 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import static com.microsoft.codepush.common.AndroidTestUtils.getFileMock;
-import static com.microsoft.codepush.common.AndroidTestUtils.getRealFile;
-import static com.microsoft.codepush.common.AndroidTestUtils.getRealTestFolder;
-import static com.microsoft.codepush.common.AndroidTestUtils.mockDirListFilesFail;
-import static com.microsoft.codepush.common.AndroidTestUtils.mockDirMkDirsFail;
-import static com.microsoft.codepush.common.AndroidTestUtils.mockFileRenameToFail;
-import static com.microsoft.codepush.common.AndroidTestUtils.mockSetLastModifiedFail;
-import static com.microsoft.codepush.common.AndroidTestUtils.mockZipEntry;
+import static com.microsoft.codepush.common.utils.FileTestUtils.getFileMock;
+import static com.microsoft.codepush.common.utils.FileTestUtils.getRealFile;
+import static com.microsoft.codepush.common.utils.FileTestUtils.getRealTestFolder;
+import static com.microsoft.codepush.common.utils.FileTestUtils.mockDirListFilesFail;
+import static com.microsoft.codepush.common.utils.FileTestUtils.mockDirMkDirsFail;
+import static com.microsoft.codepush.common.utils.FileTestUtils.mockFileRenameToFail;
+import static com.microsoft.codepush.common.utils.FileTestUtils.mockSetLastModifiedFail;
+import static com.microsoft.codepush.common.utils.FileTestUtils.mockZipEntry;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static org.mockito.Mockito.doReturn;
@@ -29,7 +29,7 @@ import static org.mockito.Mockito.mock;
 /**
  * This class tests all the {@link FileUtils} scenarios.
  */
-public class CodePushFileTest {
+public class FileTest {
 
     /**
      * Tests all the common file operations in a flow.
@@ -149,7 +149,7 @@ public class CodePushFileTest {
     public void unzipEntryTimeIsLessThanZero() throws Exception {
         File file = getRealTestFolder();
         ZipEntry entry = mockZipEntry(true);
-        doReturn((long)-1).when(entry).getTime();
+        doReturn((long) -1).when(entry).getTime();
         ZipInputStream zipInputStream = mock(ZipInputStream.class);
         byte[] buffer = new byte[1024];
         doReturn(-1).when(zipInputStream).read(buffer);

@@ -29,7 +29,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(CodePushUtils.class)
-public class CodePushFileCommonTest {
+public class FileCommonTest {
 
     /**
      * Shared test file.

@@ -24,7 +24,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.io.File;
 import java.io.IOException;
 
-import static com.microsoft.codepush.common.TestUtils.PACKAGE_HASH;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -37,7 +36,9 @@ import static org.powermock.api.mockito.PowerMockito.spy;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({FileUtils.class, CodePushUpdateUtils.class})
-public class CodePushUpdateManagerCommonTest {
+public class UpdateManagerCommonTest {
+
+    private final static String PACKAGE_HASH = "FHJDKF648723f";
 
     @Rule
     public final ExpectedException exception = ExpectedException.none();

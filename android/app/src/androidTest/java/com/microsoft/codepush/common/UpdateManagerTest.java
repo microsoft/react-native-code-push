@@ -25,34 +25,19 @@ import org.junit.rules.ExpectedException;
 import org.junit.runners.MethodSorters;
 import org.mockito.Mockito;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
-import static com.microsoft.codepush.common.AndroidTestUtils.DIFF_PACKAGE_HASH;
-import static com.microsoft.codepush.common.AndroidTestUtils.DIFF_PACKAGE_URL;
-import static com.microsoft.codepush.common.AndroidTestUtils.FULL_PACKAGE_HASH;
-import static com.microsoft.codepush.common.AndroidTestUtils.FULL_PACKAGE_URL;
-import static com.microsoft.codepush.common.AndroidTestUtils.SIGNED_PACKAGE_HASH;
-import static com.microsoft.codepush.common.AndroidTestUtils.SIGNED_PACKAGE_PUBLIC_KEY;
-import static com.microsoft.codepush.common.AndroidTestUtils.SIGNED_PACKAGE_URL;
-import static com.microsoft.codepush.common.AndroidTestUtils.checkDoInBackgroundFails;
-import static com.microsoft.codepush.common.AndroidTestUtils.checkDoInBackgroundNotFails;
-import static com.microsoft.codepush.common.AndroidTestUtils.createPackageDownloader;
-import static com.microsoft.codepush.common.AndroidTestUtils.executeDownload;
-import static com.microsoft.codepush.common.AndroidTestUtils.executeFullWorkflow;
-import static com.microsoft.codepush.common.AndroidTestUtils.executeWorkflow;
 import static com.microsoft.codepush.common.CodePushConstants.APP_ENTRY_POINT_PATH_KEY;
+import static com.microsoft.codepush.common.utils.UpdateManagerTestUtils.executeDownload;
+import static com.microsoft.codepush.common.utils.UpdateManagerTestUtils.executeFullWorkflow;
+import static com.microsoft.codepush.common.utils.UpdateManagerTestUtils.executeWorkflow;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -63,10 +48,18 @@ import static org.mockito.Mockito.spy;
  * This class tests all the {@link CodePushUpdateManager} and {@link CodePushUpdateManagerDeserializer} scenarios.
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class CodePushUpdateManagerTest {
+public class UpdateManagerTest {
 
     @Rule
     public final ExpectedException exception = ExpectedException.none();
+
+    private final static String FULL_PACKAGE_URL = "https://codepush.blob.core.windows.net/storagev2/6CjTRZUgaYrHlhH3mKy2JsQVIJtsa0021bd2-9be1-4904-b4c6-16ce9c797779";
+    private final static String DIFF_PACKAGE_URL = "https://codepush.blob.core.windows.net/storagev2/8wuI2wwTlf4RioIb1cLRtyQyzRW80840428d-683e-4d30-a120-c592a355a594";
+    private final static String SIGNED_PACKAGE_URL = "https://codepush.blob.core.windows.net/storagev2/OWIRaqwJQUbNeiX60nDnijj9HxMza0021bd2-9be1-4904-b4c6-16ce9c797779";
+    private final static String FULL_PACKAGE_HASH = "a1d28a073a1fa45745a8b1952ccc5c2bd4753e533e7b9e48459a6c186ecd32af";
+    private final static String DIFF_PACKAGE_HASH = "ff46674f196ae852ccb67e49346a11cb9d8c0243ba24003e11b83dd7469b5dd4";
+    private final static String SIGNED_PACKAGE_HASH = "ce9148e0d0422dc7ffefba3a82f527a0e75f51c449f34a5f7dabab6f36251aaf";
+    private final static String SIGNED_PACKAGE_PUBLIC_KEY = "MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAM4bfGAHAEx+IVl5/qaRHisPvpGfCY47O7EkW8XhZVer+bo1k6VT3s8hPBMQfcFw/ZQotWwLkvStelvrQptJFiUCAwEAAQ";
 
     /**
      * Instance of update manager.
@@ -439,67 +432,5 @@ public class CodePushUpdateManagerTest {
         new File(codePush, CodePushConstants.STATUS_FILE_NAME).delete();
         new File(codePush, CodePushConstants.STATUS_FILE_NAME).createNewFile();
         codePushUpdateManager.getCurrentPackageInfo();
-    }
-
-    /**
-     * Downloading files should return a {@link CodePushDownloadPackageException}
-     * if the amount of <code>receivedBytes</code> does not match the amount of <code>totalBytes</code>.
-     * The amount of <code>totalBytes</code> is more than <code>receivedBytes</code>.
-     */
-    @Test
-    public void downloadFailsIfBytesMismatchMore() throws Exception {
-        PackageDownloader packageDownloader = createPackageDownloader();
-        HttpURLConnection connectionMock = Mockito.mock(HttpURLConnection.class);
-        doReturn(100).when(connectionMock).getContentLength();
-        BufferedInputStream bufferedInputStream = mock(BufferedInputStream.class);
-        doReturn(-1).when(bufferedInputStream).read(any(byte[].class), anyInt(), anyInt());
-        doReturn(bufferedInputStream).when(connectionMock).getInputStream();
-        doReturn(connectionMock).when(packageDownloader).createConnection(anyString());
-        checkDoInBackgroundFails(packageDownloader);
-    }
-
-    /**
-     * Downloading files should not return a {@link CodePushDownloadPackageException}
-     * if the amount of <code>receivedBytes</code> does not match the amount of <code>totalBytes</code>, but <code>totalBytes</code> is less that zero.
-     */
-    @Test
-    public void downloadNotFailsIfBytesMismatchLess() throws Exception {
-        PackageDownloader packageDownloader = createPackageDownloader();
-        HttpURLConnection realConnection = (HttpURLConnection) (new URL(FULL_PACKAGE_URL)).openConnection();
-        BufferedInputStream realStream = new BufferedInputStream(realConnection.getInputStream());
-        HttpURLConnection connectionMock = Mockito.mock(HttpURLConnection.class);
-        doReturn(-1).when(connectionMock).getContentLength();
-        doReturn(realStream).when(connectionMock).getInputStream();
-        doReturn(connectionMock).when(packageDownloader).createConnection(anyString());
-        checkDoInBackgroundNotFails(packageDownloader);
-    }
-
-    /**
-     * Downloading files should return a {@link CodePushDownloadPackageException}
-     * if a {@link java.io.InputStream#read()} throws an {@link IOException} when closing.
-     */
-    @Test
-    public void downloadFailsIfCloseFails() throws Exception {
-        PackageDownloader packageDownloader = createPackageDownloader();
-        HttpURLConnection connectionMock = Mockito.mock(HttpURLConnection.class);
-        BufferedInputStream bufferedInputStream = mock(BufferedInputStream.class);
-        doReturn(-1).when(bufferedInputStream).read(any(byte[].class), anyInt(), anyInt());
-        doThrow(new IOException()).when(bufferedInputStream).close();
-        doReturn(bufferedInputStream).when(connectionMock).getInputStream();
-        doReturn(connectionMock).when(packageDownloader).createConnection(anyString());
-        checkDoInBackgroundFails(packageDownloader);
-    }
-
-    /**
-     * Downloading files should return a {@link CodePushDownloadPackageException}
-     * if a {@link java.io.InputStream#read()} throws an {@link IOException}.
-     */
-    @Test
-    public void downloadFailsIfReadFails() throws Exception {
-        File codePushPath = new File(Environment.getExternalStorageDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX);
-        File downloadFolder = new File(codePushPath.getPath());
-        downloadFolder.mkdirs();
-        PackageDownloader packageDownloader = createPackageDownloader(downloadFolder);
-        checkDoInBackgroundFails(packageDownloader);
     }
 }

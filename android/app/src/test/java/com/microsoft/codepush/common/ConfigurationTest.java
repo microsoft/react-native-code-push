@@ -8,11 +8,6 @@ import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import static com.microsoft.codepush.common.TestUtils.APP_VERSION;
-import static com.microsoft.codepush.common.TestUtils.CLIENT_UNIQUE_ID;
-import static com.microsoft.codepush.common.TestUtils.DEPLOYMENT_KEY;
-import static com.microsoft.codepush.common.TestUtils.PACKAGE_HASH;
-import static com.microsoft.codepush.common.TestUtils.SERVER_URL;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -22,7 +17,14 @@ import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({AppCenterLog.class})
-public class CodePushConfigurationTest {
+public class ConfigurationTest {
+
+    private final static String CLIENT_UNIQUE_ID = "YHFv65";
+    private final static String DEPLOYMENT_KEY = "ABC123";
+    private final static String APP_VERSION = "2.2.1";
+    private final static String PACKAGE_HASH = "HASH";
+    private final static String SERVER_URL = "https";
+
     @Before
     public void setUp() {
         mockStatic(AppCenterLog.class);

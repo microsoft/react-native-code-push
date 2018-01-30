@@ -11,70 +11,37 @@ import com.microsoft.codepush.common.datacontracts.CodePushUpdateRequest;
 import com.microsoft.codepush.common.datacontracts.CodePushUpdateResponse;
 import com.microsoft.codepush.common.datacontracts.CodePushUpdateResponseUpdateInfo;
 import com.microsoft.codepush.common.enums.CodePushCheckFrequency;
-import com.microsoft.codepush.common.enums.CodePushDeploymentStatus;
 import com.microsoft.codepush.common.enums.CodePushInstallMode;
-import com.microsoft.codepush.common.enums.CodePushSyncStatus;
-import com.microsoft.codepush.common.enums.CodePushUpdateState;
 
 import org.junit.Test;
 
-import static com.microsoft.codepush.common.TestUtils.APP_VERSION;
-import static com.microsoft.codepush.common.TestUtils.CLIENT_UNIQUE_ID;
-import static com.microsoft.codepush.common.TestUtils.DEPLOYMENT_KEY;
-import static com.microsoft.codepush.common.TestUtils.DESCRIPTION;
-import static com.microsoft.codepush.common.TestUtils.DOWNLOAD_URL;
-import static com.microsoft.codepush.common.TestUtils.ERROR;
-import static com.microsoft.codepush.common.TestUtils.FAILED_INSTALL;
-import static com.microsoft.codepush.common.TestUtils.IS_AVAILABLE;
-import static com.microsoft.codepush.common.TestUtils.IS_DEBUG_ONLY;
-import static com.microsoft.codepush.common.TestUtils.IS_FIRST_RUN;
-import static com.microsoft.codepush.common.TestUtils.IS_MANDATORY;
-import static com.microsoft.codepush.common.TestUtils.IS_PENDING;
-import static com.microsoft.codepush.common.TestUtils.LABEL;
-import static com.microsoft.codepush.common.TestUtils.PACKAGE_HASH;
-import static com.microsoft.codepush.common.TestUtils.PACKAGE_SIZE;
-import static com.microsoft.codepush.common.TestUtils.PREVIOUS_DEPLOYMENT_KEY;
-import static com.microsoft.codepush.common.TestUtils.PREVIOUS_LABEL;
-import static com.microsoft.codepush.common.TestUtils.SHOULD_RUN_BINARY;
-import static com.microsoft.codepush.common.TestUtils.STATUS;
-import static com.microsoft.codepush.common.TestUtils.UPDATE_APP_VERSION;
 import static org.junit.Assert.assertEquals;
 
 /**
  * Tests all the data classes.
  */
-public class CodePushDataTest {
+public class DataContractsTest {
 
-    @Test
-    public void enumsTest() throws Exception {
-        CodePushCheckFrequency codePushCheckFrequency = CodePushCheckFrequency.MANUAL;
-        int checkFrequencyValue = codePushCheckFrequency.getValue();
-        assertEquals(2, checkFrequencyValue);
-        CodePushDeploymentStatus codePushDeploymentStatus = CodePushDeploymentStatus.SUCCEEDED;
-        String deploymentStatusValue = codePushDeploymentStatus.getValue();
-        assertEquals("DeploymentSucceeded", deploymentStatusValue);
-        CodePushInstallMode codePushInstallMode = CodePushInstallMode.IMMEDIATE;
-        int installModeValue = codePushInstallMode.getValue();
-        assertEquals(0, installModeValue);
-        CodePushSyncStatus codePushSyncStatus = CodePushSyncStatus.AWAITING_USER_ACTION;
-        int syncStatusValue = codePushSyncStatus.getValue();
-        assertEquals(6, syncStatusValue);
-        CodePushUpdateState codePushUpdateState = CodePushUpdateState.LATEST;
-        int updateStateValue = codePushUpdateState.getValue();
-        assertEquals(2, updateStateValue);
-
-        /* Test <code>valueOf()</code> and <code>values()</code>. */
-        assertEquals(3, CodePushCheckFrequency.values().length);
-        assertEquals(2, CodePushDeploymentStatus.values().length);
-        assertEquals(4, CodePushInstallMode.values().length);
-        assertEquals(9, CodePushSyncStatus.values().length);
-        assertEquals(3, CodePushUpdateState.values().length);
-        assertEquals(CodePushUpdateState.RUNNING, CodePushUpdateState.valueOf("RUNNING"));
-        assertEquals(CodePushDeploymentStatus.FAILED, CodePushDeploymentStatus.valueOf("FAILED"));
-        assertEquals(CodePushInstallMode.IMMEDIATE, CodePushInstallMode.valueOf("IMMEDIATE"));
-        assertEquals(CodePushSyncStatus.AWAITING_USER_ACTION, CodePushSyncStatus.valueOf("AWAITING_USER_ACTION"));
-        assertEquals(CodePushCheckFrequency.MANUAL, CodePushCheckFrequency.valueOf("MANUAL"));
-    }
+    private final static String CLIENT_UNIQUE_ID = "YHFv65";
+    private final static String DEPLOYMENT_KEY = "ABC123";
+    private final static String LABEL = "awesome package";
+    private final static boolean FAILED_INSTALL = false;
+    private final static boolean IS_PENDING = true;
+    private final static boolean IS_DEBUG_ONLY = false;
+    private final static boolean IS_FIRST_RUN = false;
+    private final static String PREVIOUS_DEPLOYMENT_KEY = "prevABC123";
+    private final static String PREVIOUS_LABEL = "awesome package previous";
+    private final static String APP_VERSION = "2.2.1";
+    private final static String STATUS = "Succeeded";
+    private final static String DESCRIPTION = "short description";
+    private final static boolean IS_MANDATORY = true;
+    private final static boolean UPDATE_APP_VERSION = true;
+    private final static boolean IS_AVAILABLE = true;
+    private final static boolean SHOULD_RUN_BINARY = false;
+    private final static long PACKAGE_SIZE = 102546723;
+    private final static String DOWNLOAD_URL = "https://url.com";
+    private final static String PACKAGE_HASH = "HASH";
+    private final static String ERROR = "An error has occurred";
 
     @Test
     public void dataContractsTest() throws Exception {
