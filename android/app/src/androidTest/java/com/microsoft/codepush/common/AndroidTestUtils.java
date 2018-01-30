@@ -6,6 +6,8 @@ import com.microsoft.codepush.common.connection.PackageDownloader;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
 import com.microsoft.codepush.common.managers.CodePushUpdateManager;
 import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
+import com.microsoft.codepush.common.utils.CodePushUtils;
+import com.microsoft.codepush.common.utils.FileUtils;
 
 import org.json.JSONObject;
 import org.mockito.Mockito;
@@ -14,8 +16,11 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Date;
+import java.util.Random;
 import java.util.zip.ZipEntry;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
@@ -60,24 +65,24 @@ class AndroidTestUtils {
     }
 
     /**
-     * Creates a real (not mocked) folder for testing.
+     * Gets a real (not mocked) randomly named folder for testing.
+     * Note: folder is not created.
      *
      * @return real test folder.
      */
     static File getRealTestFolder() {
-        File testFolder = new File(Environment.getExternalStorageDirectory(), "Test35941");
-        testFolder.mkdirs();
-        return testFolder;
+        Random random = new Random(System.currentTimeMillis());
+        return new File(Environment.getExternalStorageDirectory(), "Test" + random.nextInt());
     }
 
     /**
      * Creates a real (not mocked) file for testing.
      *
      * @return real test file.
-     * @throws IOException exception occurred when creating a file.
      */
     static File getRealFile() throws IOException {
         File testFolder = getRealTestFolder();
+        testFolder.mkdirs();
         File realFile = new File(testFolder, "file.txt");
         realFile.createNewFile();
         return realFile;
@@ -142,15 +147,32 @@ class AndroidTestUtils {
     }
 
     /**
-     * Executes <code>doInBackground()</code> method of {@link PackageDownloader} only and assert that it fails..
+     * Executes <code>doInBackground()</code> method of {@link PackageDownloader} only and assert that it fails.
      *
      * @param packageDownloader instance of package downloader.
-     * @throws Exception any exception that might occur.
      */
     static void checkDoInBackgroundFails(PackageDownloader packageDownloader) throws Exception {
+        assertTrue(executeDoInBackground(packageDownloader).isCorrupt());
+    }
+
+    /**
+     * Executes <code>doInBackground()</code> method of {@link PackageDownloader}.
+     *
+     * @param packageDownloader instance of package downloader.
+     * @return download result.
+     */
+    private static CodePushDownloadPackageResult executeDoInBackground(PackageDownloader packageDownloader) throws Exception {
         Method method = packageDownloader.getClass().getMethod("doInBackground", Void[].class);
-        CodePushDownloadPackageResult codePushDownloadPackageResult = (CodePushDownloadPackageResult) method.invoke(packageDownloader, new Void[]{null});
-        assertTrue(codePushDownloadPackageResult.isCorrupt());
+        return (CodePushDownloadPackageResult) method.invoke(packageDownloader, (Object[]) new Void[]{null});
+    }
+
+    /**
+     * Executes <code>doInBackground()</code> method of {@link PackageDownloader} only and assert that it does not fail.
+     *
+     * @param packageDownloader instance of package downloader.
+     */
+    static void checkDoInBackgroundNotFails(PackageDownloader packageDownloader) throws Exception {
+        assertFalse(executeDoInBackground(packageDownloader).isCorrupt());
     }
 
     /**
@@ -204,7 +226,6 @@ class AndroidTestUtils {
      * @param verify                whether verify that callback is called.
      * @param url                   url for downloading.
      * @return result of the download.
-     * @throws Exception any exception that might occur.
      */
     static CodePushDownloadPackageResult executeDownload(CodePushUpdateManager codePushUpdateManager, JSONObject packageObject, boolean verify, String url) throws Exception {
         PackageDownloader packageDownloader = new PackageDownloader();
@@ -223,11 +244,29 @@ class AndroidTestUtils {
      * @param codePushUpdateManager instance of update manager.
      * @param packageObject         current package object.
      * @param url                   url for downloading.
-     * @throws Exception any exception that might occur.
      */
     static void executeWorkflow(CodePushUpdateManager codePushUpdateManager, JSONObject packageObject, String url) throws Exception {
         CodePushDownloadPackageResult downloadPackageResult = executeDownload(codePushUpdateManager, packageObject, true, url);
         File downloadFile = downloadPackageResult.getDownloadFile();
         codePushUpdateManager.unzipPackage(downloadFile);
+    }
+
+    /**
+     * Performs full testing workflow: download -> unzip -> install -> write metadata.
+     *
+     * @param packageObject         current package object.
+     * @param codePushUpdateManager instance of update manager.
+     * @param packageHash           package hash to use.
+     * @param packageUrl            package url to use.
+     */
+    static void executeFullWorkflow(JSONObject packageObject, CodePushUpdateManager codePushUpdateManager, String packageHash, String packageUrl) throws Exception {
+        packageObject.put("packageHash", packageHash);
+        executeWorkflow(codePushUpdateManager, packageObject, packageUrl);
+        String appEntryPoint = codePushUpdateManager.mergeDiff(packageHash, null, "index.html");
+        assertEquals("/www/index.html", appEntryPoint);
+        codePushUpdateManager.installPackage(packageObject, false);
+        String newUpdateFolderPath = codePushUpdateManager.getPackageFolderPath(packageHash);
+        String newUpdateMetadataPath = FileUtils.appendPathComponent(newUpdateFolderPath, CodePushConstants.PACKAGE_FILE_NAME);
+        CodePushUtils.writeJsonToFile(packageObject, newUpdateMetadataPath);
     }
 }

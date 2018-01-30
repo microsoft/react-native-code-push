@@ -57,7 +57,8 @@ public class CodePushFileCommonTest {
     }
 
     /**
-     * Read file should throw a {@link CodePushFinalizeException} if an {@link IOException} is thrown during {@link CodePushUtils#finalizeResources(List, String)}.
+     * Read file should throw a {@link CodePushFinalizeException}
+     * if an {@link IOException} is thrown during {@link CodePushUtils#finalizeResources(List, String)}.
      */
     @Test(expected = CodePushFinalizeException.class)
     public void readFailsIfFinalizeFails() throws Exception {
@@ -65,7 +66,8 @@ public class CodePushFileCommonTest {
     }
 
     /**
-     * Copy files should throw a {@link CodePushFinalizeException} if an {@link IOException} is thrown during {@link CodePushUtils#finalizeResources(List, String)}.
+     * Copy files should throw a {@link CodePushFinalizeException}
+     * if an {@link IOException} is thrown during {@link CodePushUtils#finalizeResources(List, String)}.
      */
     @Test(expected = CodePushFinalizeException.class)
     public void copyFailsIfFinalizeFails() throws Exception {
@@ -74,7 +76,8 @@ public class CodePushFileCommonTest {
     }
 
     /**
-     * Write to file should throw a {@link CodePushFinalizeException} if an {@link IOException} is thrown during {@link CodePushUtils#finalizeResources(List, String)}.
+     * Write to file should throw a {@link CodePushFinalizeException}
+     * if an {@link IOException} is thrown during {@link CodePushUtils#finalizeResources(List, String)}.
      */
     @Test(expected = CodePushFinalizeException.class)
     public void writeFailsIfFinalizeFails() throws Exception {
@@ -83,7 +86,8 @@ public class CodePushFileCommonTest {
     }
 
     /**
-     * Unzip files should throw a {@link CodePushFinalizeException} if an {@link IOException} is thrown during {@link CodePushUtils#finalizeResources(List, String)}.
+     * Unzip files should throw a {@link CodePushFinalizeException}
+     * if an {@link IOException} is thrown during {@link CodePushUtils#finalizeResources(List, String)}.
      */
     @Test(expected = CodePushFinalizeException.class)
     public void unzipFailsIfFinalizeFails() throws Exception {

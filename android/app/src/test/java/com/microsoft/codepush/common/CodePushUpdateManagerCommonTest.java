@@ -4,9 +4,11 @@ import android.os.Environment;
 
 import com.microsoft.codepush.common.connection.PackageDownloader;
 import com.microsoft.codepush.common.exceptions.CodePushDownloadPackageException;
+import com.microsoft.codepush.common.exceptions.CodePushSignatureVerificationException;
 import com.microsoft.codepush.common.exceptions.CodePushUnzipException;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
 import com.microsoft.codepush.common.managers.CodePushUpdateManager;
+import com.microsoft.codepush.common.utils.CodePushUpdateUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
 
 import org.json.JSONObject;
@@ -22,6 +24,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.io.File;
 import java.io.IOException;
 
+import static com.microsoft.codepush.common.TestUtils.PACKAGE_HASH;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -33,7 +36,7 @@ import static org.powermock.api.mockito.PowerMockito.spy;
  * This class is for testing those {@link CodePushUpdateManager} test cases that depend on {@link FileUtils} static methods failure.
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(FileUtils.class)
+@PrepareForTest({FileUtils.class, CodePushUpdateUtils.class})
 public class CodePushUpdateManagerCommonTest {
 
     @Rule
@@ -50,7 +53,8 @@ public class CodePushUpdateManagerCommonTest {
     }
 
     /**
-     * Download package should throw a {@link CodePushDownloadPackageException} if an {@link IOException} is thrown during {@link FileUtils#deleteDirectoryAtPath(String)}.
+     * Download package should throw a {@link CodePushDownloadPackageException}
+     * if an {@link IOException} is thrown during {@link FileUtils#deleteDirectoryAtPath(String)}.
      * If deleting file at path where a new update should be located fails, the whole method should fail.
      */
     @Test(expected = CodePushDownloadPackageException.class)
@@ -62,7 +66,8 @@ public class CodePushUpdateManagerCommonTest {
     }
 
     /**
-     * Unzip should throw a {@link CodePushUnzipException} if an {@link IOException} is thrown during {@link FileUtils#unzipFile(File, File)}.
+     * Unzip should throw a {@link CodePushUnzipException}
+     * if an {@link IOException} is thrown during {@link FileUtils#unzipFile(File, File)}.
      */
     @Test(expected = CodePushUnzipException.class)
     public void unzipFailsIfUnzipFileFails() throws Exception {
@@ -84,5 +89,16 @@ public class CodePushUpdateManagerCommonTest {
         PackageDownloader packageDownloader = PowerMockito.mock(PackageDownloader.class);
         PowerMockito.when(packageDownloader.get()).thenThrow(new InterruptedException());
         codePushUpdateManager.downloadPackage(mock(JSONObject.class), mock(DownloadProgressCallback.class), packageDownloader);
+    }
+
+    /**
+     * Verifying signature should throw a {@link CodePushSignatureVerificationException}
+     * if {@link CodePushUpdateUtils#verifyFolderHash(String, String)} throws an {@link IOException}.
+     */
+    @Test(expected = CodePushSignatureVerificationException.class)
+    public void verifyFailsIfVerifyFolderHashFails() throws Exception {
+        mockStatic(CodePushUpdateUtils.class);
+        PowerMockito.doThrow(new IOException()).when(CodePushUpdateUtils.class, "verifyFolderHash", anyString(), anyString());
+        codePushUpdateManager.verifySignature(null, PACKAGE_HASH, true);
     }
 }
