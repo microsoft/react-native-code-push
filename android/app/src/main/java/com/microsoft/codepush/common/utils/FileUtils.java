@@ -10,9 +10,9 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -50,7 +50,7 @@ public class FileUtils {
      */
     public static void copyDirectoryContents(File sourceDir, File destDir) throws IOException {
         if (!destDir.exists()) {
-            if (!destDir.mkdir()) {
+            if (!destDir.mkdirs()) {
                 throw new IOException("Unable to copy file from " + sourceDir.getAbsolutePath() + " to " + destDir.getAbsolutePath() + ". Error creating directory.");
             }
         }
@@ -189,6 +189,7 @@ public class FileUtils {
             Exception e = finalizeResources(
                     Arrays.asList(reader, fileInputStream),
                     "Error closing IO resources when reading file.");
+
             if (e != null) {
                 throw new CodePushFinalizeException(OperationType.READ, e);
             }
@@ -261,10 +262,11 @@ public class FileUtils {
                     fileOutputStream.write(buffer, 0, numBytesRead);
                 }
             } finally {
-                try {
-                    fileOutputStream.close();
-                } catch (IOException e) {
-                    throw new IOException("Error closing IO resources when reading files.");
+                Exception e = finalizeResources(
+                        Arrays.<Closeable>asList(fileOutputStream),
+                        "Error closing IO resources when reading file.");
+                if (e != null) {
+                    throw new CodePushFinalizeException(OperationType.COPY, e);
                 }
             }
         }
@@ -284,16 +286,15 @@ public class FileUtils {
      * @throws IOException read/write error occurred while accessing the file system.
      */
     public static void writeStringToFile(String content, String filePath) throws IOException {
-        PrintWriter printWriter = null;
+        FileWriter writer =  new FileWriter(filePath);
         try {
-            printWriter = new PrintWriter(filePath);
-            printWriter.print(content);
+            writer.write(content);
         } finally {
-            if (printWriter != null) {
-                printWriter.close();
-                if (printWriter.checkError()) {
-                    throw new CodePushFinalizeException(OperationType.WRITE);
-                }
+            Exception e = finalizeResources(
+                    Arrays.<Closeable>asList(writer),
+                    "Error closing IO resources when reading file.");
+            if (e != null) {
+                throw new CodePushFinalizeException(OperationType.COPY, e);
             }
         }
     }

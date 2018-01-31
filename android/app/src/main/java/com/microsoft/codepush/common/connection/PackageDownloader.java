@@ -16,7 +16,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -62,11 +61,12 @@ public class PackageDownloader extends AsyncTask<Void, Void, CodePushDownloadPac
     /**
      * Opens url connection for the provided url.
      *
-     * @param url url to open.
+     * @param urlString url to open.
      * @return instance of url connection.
      * @throws IOException read/write error occurred while accessing the file system.
      */
-    public HttpURLConnection createConnection(URL url) throws IOException {
+    public HttpURLConnection createConnection(String urlString) throws IOException {
+        URL url = new URL(urlString);
         HttpURLConnection connection;
         connection = (HttpURLConnection) url.openConnection();
         return connection;
@@ -78,16 +78,14 @@ public class PackageDownloader extends AsyncTask<Void, Void, CodePushDownloadPac
         BufferedInputStream bufferedInputStream = null;
         FileOutputStream fileOutputStream = null;
         BufferedOutputStream bufferedOutputStream = null;
-        URL downloadUrl;
         try {
-            downloadUrl = new URL(downloadUrlString);
-        } catch (MalformedURLException e) {
+            connection = createConnection(downloadUrlString);
+        } catch (IOException e) {
 
             /* We can't throw custom errors from this function, so any error will be passed to the result. */
             return new CodePushDownloadPackageResult(new CodePushDownloadPackageException(downloadUrlString, e));
         }
         try {
-            connection = createConnection(downloadUrl);
             long totalBytes = connection.getContentLength();
             long receivedBytes = 0;
             bufferedInputStream = new BufferedInputStream(connection.getInputStream());

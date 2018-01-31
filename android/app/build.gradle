@@ -7,7 +7,7 @@ jacoco {
 
 android {
     compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    buildToolsVersion '23.0.1'
 
     defaultConfig {
         minSdkVersion 16
@@ -50,7 +50,7 @@ dependencies {
     compile "com.facebook.react:react-native:+"
     compile 'com.nimbusds:nimbus-jose-jwt:5.3'
     compile "com.google.code.gson:gson:2.8.2"
-    compile 'com.microsoft.appcenter:appcenter:1.1.0'
+    compile 'com.microsoft.appcenter:appcenter:1.2.0'
 
     testCompile 'junit:junit:4.12'
 
