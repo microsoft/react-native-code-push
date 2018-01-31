@@ -3,6 +3,7 @@ package com.microsoft.codepush.common.datacontracts;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.CodePush;
+import com.microsoft.codepush.common.enums.CodePushDeploymentStatus;
 
 /**
  * Represents a report about the deployment.
@@ -31,7 +32,12 @@ public class CodePushDeploymentStatusReport extends CodePushDownloadStatusReport
      * Whether the deployment succeeded or failed.
      */
     @SerializedName("status")
-    private String status;
+    private CodePushDeploymentStatus status;
+
+    /**
+     * Non-serializable field, temporarily stores information about installed/failed package.
+     */
+    private transient CodePushLocalPackage localPackage;
 
     /**
      * Gets the version of the app that was deployed and returns it.
@@ -100,7 +106,7 @@ public class CodePushDeploymentStatusReport extends CodePushDownloadStatusReport
      *
      * @return whether the deployment succeeded or failed.
      */
-    public String getStatus() {
+    public CodePushDeploymentStatus getStatus() {
         return status;
     }
 
@@ -109,7 +115,25 @@ public class CodePushDeploymentStatusReport extends CodePushDownloadStatusReport
      *
      * @param status whether the deployment succeeded or failed.
      */
-    public void setStatus(String status) {
+    public void setStatus(CodePushDeploymentStatus status) {
         this.status = status;
+    }
+
+    /**
+     * Sets local installed/failed package, (will not be serialized).
+     *
+     * @return local installed package.
+     */
+    public CodePushLocalPackage getLocalPackage() {
+        return localPackage;
+    }
+
+    /**
+     * Gets local installed/failed package, (will not be serialized).
+     *
+     * @param localPackage local installed/failed package, (will not be serialized).
+     */
+    public void setLocalPackage(CodePushLocalPackage localPackage) {
+        this.localPackage = localPackage;
     }
 }
