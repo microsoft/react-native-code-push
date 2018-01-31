@@ -29,6 +29,7 @@ public class CodePushUpdateManagerDeserializer {
      * Gets current package contents.
      *
      * @return object with current package info.
+     * @throws CodePushGetPackageException exception occurred when obtaining a package.
      */
     public CodePushLocalPackage getCurrentPackage() throws CodePushGetPackageException {
         JSONObject currentPackage = mUpdateManager.getCurrentPackage();
@@ -43,6 +44,7 @@ public class CodePushUpdateManagerDeserializer {
      *
      * @param packageHash package identifier (hash).
      * @return object with current package info.
+     * @throws CodePushGetPackageException exception occurred when obtaining a package.
      */
     public CodePushLocalPackage getPackage(String packageHash) throws CodePushGetPackageException {
         JSONObject localPackage = mUpdateManager.getPackage(packageHash);
@@ -56,6 +58,7 @@ public class CodePushUpdateManagerDeserializer {
      * Gets previous installed package object.
      *
      * @return previous installed package object.
+     * @throws CodePushGetPackageException exception occurred when obtaining a package.
      */
     public CodePushLocalPackage getPreviousPackage() throws CodePushGetPackageException {
         JSONObject previousPackage = mUpdateManager.getPreviousPackage();

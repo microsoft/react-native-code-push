@@ -1,4 +1,9 @@
 apply plugin: "com.android.library"
+apply plugin: 'jacoco'
+
+jacoco {
+    toolVersion '0.7.4.201502262128'
+}
 
 android {
     compileSdkVersion 23
@@ -9,26 +14,80 @@ android {
         targetSdkVersion 22
         versionCode 1
         versionName "1.0"
+        consumerProguardFiles 'proguard-rules.pro'
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
     lintOptions {
         abortOnError false
+        explainIssues true
+        textReport true
     }
 
-    defaultConfig {
-        consumerProguardFiles 'proguard-rules.pro'
-    }
     sourceSets {
         main {
             java.srcDirs = ['src/main/java']
+        }
+    }
+
+    buildTypes {
+        debug {
+            testCoverageEnabled true
+        }
+    }
+
+    testOptions {
+        unitTests {
+            all {
+                jvmArgs '-noverify'
+            }
+            returnDefaultValues = true
         }
     }
 }
 
 dependencies {
     compile "com.facebook.react:react-native:+"
-    compile 'com.nimbusds:nimbus-jose-jwt:5.1'
-    compile "com.google.code.gson:gson:2.8.1"
-    compile "com.microsoft.appcenter:appcenter-crashes:1.2.0"
+    compile 'com.nimbusds:nimbus-jose-jwt:5.3'
+    compile "com.google.code.gson:gson:2.8.2"
+    compile 'com.microsoft.appcenter:appcenter:1.1.0'
 
+    testCompile 'junit:junit:4.12'
+
+    testCompile 'org.powermock:powermock-api-mockito:1.6.5'
+    testCompile 'org.powermock:powermock-module-junit4:1.6.5'
+    testCompile 'org.powermock:powermock-module-junit4-rule-agent:1.6.5'
+    testCompile "com.android.support:support-annotations:27.0.2"
+    testCompile "com.android.support.test:runner:1.0.1"
+
+    androidTestCompile 'com.crittercism.dexmaker:dexmaker-dx:1.4'
+    androidTestCompile 'com.crittercism.dexmaker:dexmaker-mockito:1.4'
+    androidTestCompile 'com.android.support.test:runner:1.0.1'
+    androidTestCompile 'com.android.support.test:rules:1.0.1'
+}
+
+// Android Studio 2.2.0 broke a lot of scripting, could not find another way of doing this rename trick
+def createDebugCoverageReportExecutionDataFile = file("${buildDir}/outputs/code-coverage/connected/coverage.ec")
+
+task renameCreateDebugCoverageReportExecutionDataFile(dependsOn: 'createDebugCoverageReport') {
+    doLast {
+        def file = file(createDebugCoverageReportExecutionDataFile.getParentFile()).listFiles().first()
+        file.renameTo(createDebugCoverageReportExecutionDataFile)
+    }
+}
+
+task coverageReport(type: JacocoReport, dependsOn: ['renameCreateDebugCoverageReportExecutionDataFile', 'testDebugUnitTest']) {
+    reports {
+        xml.enabled = false
+        html.enabled = true
+    }
+
+    def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*']
+    def debugTree = fileTree(dir: "${buildDir}/intermediates/classes/debug", excludes: fileFilter)
+    def mainSrc = "${project.projectDir}/src/main/java"
+
+    sourceDirectories = files([mainSrc])
+    classDirectories = files([debugTree])
+    executionData = files(["${buildDir}/jacoco/testDebugUnitTest.exec",
+                           createDebugCoverageReportExecutionDataFile])
 }

@@ -8,7 +8,7 @@ public class CodePushGetPackageException extends Exception {
     /**
      * The default error message.
      */
-    private static String MESSAGE = "Error occurred during obtaining a package. ";
+    private static String MESSAGE = "Error occurred during obtaining a package.";
 
     /**
      * Creates an instance of the exception with default detail message and specified cause.

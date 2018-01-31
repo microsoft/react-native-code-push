@@ -7,9 +7,9 @@ public interface CodePushDownloadProgressListener {
 
     /**
      * Callback for handling download progress changed event.
-     * 
+     *
      * @param receivedBytes Total size of update in bytes.
-     * @param totalBytes Amount of bytes already downloaded from server.
+     * @param totalBytes    Amount of bytes already downloaded from server.
      */
     void downloadProgressChanged(long receivedBytes, long totalBytes);
 }

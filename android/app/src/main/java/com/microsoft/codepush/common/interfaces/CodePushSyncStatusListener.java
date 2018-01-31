@@ -9,8 +9,8 @@ public interface CodePushSyncStatusListener {
 
     /**
      * Callback for handling sync status changed event.
-     * 
-     * @param syncStatus Status of sync.
+     *
+     * @param syncStatus new synchronization status.
      */
     void syncStatusChanged(CodePushSyncStatus syncStatus);
 }

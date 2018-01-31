@@ -18,10 +18,10 @@ public class DownloadProgress {
     /**
      * DownloadProgress constructor.
      *
-     * @param totalBytes Total size of update in bytes.
+     * @param totalBytes    Total size of update in bytes.
      * @param receivedBytes Amount of bytes already downloaded from server.
      */
-    public DownloadProgress(long totalBytes, long receivedBytes){
+    public DownloadProgress(long totalBytes, long receivedBytes) {
         mTotalBytes = totalBytes;
         mReceivedBytes = receivedBytes;
     }
@@ -46,7 +46,7 @@ public class DownloadProgress {
 
     /**
      * Indicates whether downloading of update is completed.
-     * 
+     *
      * @return True if downloading of update is completed, false otherwise.
      */
     public boolean isCompleted() {

@@ -31,14 +31,14 @@ import java.util.Map;
 public abstract class CodePushUtils {
 
     /**
-     * Instance of GsonBuilder, singleton.
+     * Instance of {@link GsonBuilder}, singleton.
      */
     private static Gson mGson = new GsonBuilder().create();
 
     /**
      * Gracefully finalizes {@link Closeable} resources. Method iterates through resources and invokes
-     * {@link Closeable#close()} on it if needed. If an exception was thrown during <code>.close()</code> call,
-     * it will be logged using logErrorMessage parameter as general message.
+     * {@link Closeable#close()} on them if necessary. If an exception is thrown during <code>.close()</code> call,
+     * it is be logged using <code>logErrorMessage</code> parameter as general message.
      *
      * @param resources       resources to finalize.
      * @param logErrorMessage general logging message for errors occurred during resource finalization.
@@ -68,7 +68,7 @@ public abstract class CodePushUtils {
      *
      * @param inputStream InputStream instance.
      * @return string content.
-     * @throws IOException if read/write error occurred while accessing the file system.
+     * @throws IOException read/write error occurred while accessing the file system.
      */
     @SuppressWarnings("WeakerAccess")
     public static String getStringFromInputStream(InputStream inputStream) throws IOException {
@@ -97,7 +97,7 @@ public abstract class CodePushUtils {
      *
      * @param filePath path to file.
      * @return parsed {@link JSONObject} instance.
-     * @throws CodePushMalformedDataException if file contains malformed data.
+     * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
     @SuppressWarnings("WeakerAccess")
     public static JSONObject getJsonObjectFromFile(String filePath) throws CodePushMalformedDataException {
@@ -116,7 +116,7 @@ public abstract class CodePushUtils {
      *
      * @param json     {@link JSONObject} instance.
      * @param filePath path to file.
-     * @throws IOException if write error occurred while accessing the file system.
+     * @throws IOException read/write error occurred while accessing the file system.
      */
     public static void writeJsonToFile(JSONObject json, String filePath) throws IOException {
         String jsonString = json.toString();
@@ -128,7 +128,7 @@ public abstract class CodePushUtils {
      *
      * @param object {@link JSONObject} instance.
      * @return {@link JSONObject} instance.
-     * @throws JSONException if there was a problem with the JSON API.
+     * @throws JSONException error occurred during parsing a json object.
      */
     public static JSONObject convertObjectToJsonObject(Object object) throws JSONException {
         return new JSONObject(mGson.toJsonTree(object).toString());
@@ -180,7 +180,7 @@ public abstract class CodePushUtils {
      *
      * @param object object.
      * @return query string.
-     * @throws CodePushMalformedDataException if object contains malformed data.
+     * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
     public static String getQueryStringFromObject(Object object) throws CodePushMalformedDataException {
         JsonObject updateRequestJson = mGson.toJsonTree(object).getAsJsonObject();

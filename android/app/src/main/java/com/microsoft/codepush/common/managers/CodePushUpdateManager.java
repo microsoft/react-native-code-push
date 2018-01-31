@@ -13,6 +13,7 @@ import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
 import com.microsoft.codepush.common.exceptions.CodePushMergeException;
 import com.microsoft.codepush.common.exceptions.CodePushRollbackException;
 import com.microsoft.codepush.common.exceptions.CodePushSignatureVerificationException;
+import com.microsoft.codepush.common.exceptions.CodePushSignatureVerificationException.SignatureExceptionType;
 import com.microsoft.codepush.common.exceptions.CodePushUnzipException;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
 import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
@@ -29,7 +30,6 @@ import java.util.concurrent.ExecutionException;
 
 /**
  * Manager responsible for update read/write actions.
- * Abstract, should be extended by implementation-specific managers.
  */
 public class CodePushUpdateManager {
 
@@ -105,8 +105,8 @@ public class CodePushUpdateManager {
      * Gets metadata about the current update.
      *
      * @return metadata about the current update.
-     * @throws IOException                    read/write operations exception.
-     * @throws CodePushMalformedDataException an exception occurred during obtaining info from json.
+     * @throws IOException                    read/write error occurred while accessing the file system.
+     * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
     public JSONObject getCurrentPackageInfo() throws CodePushMalformedDataException, IOException {
         String statusFilePath = getStatusFilePath();
@@ -121,7 +121,7 @@ public class CodePushUpdateManager {
      * Updates file containing information about the available packages.
      *
      * @param packageInfo new information.
-     * @throws IOException read/write operations exception.
+     * @throws IOException read/write error occurred while accessing the file system.
      */
     public void updateCurrentPackageInfo(JSONObject packageInfo) throws IOException {
         try {
@@ -135,8 +135,8 @@ public class CodePushUpdateManager {
      * Gets folder for storing current package files.
      *
      * @return folder for storing current package files.
-     * @throws IOException                    read/write operations exception.
-     * @throws CodePushMalformedDataException an exception occurred during obtaining info from json.
+     * @throws IOException                    read/write error occurred while accessing the file system.
+     * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
     public String getCurrentPackageFolderPath() throws CodePushMalformedDataException, IOException {
         String packageHash = getCurrentPackageHash();
@@ -161,8 +161,8 @@ public class CodePushUpdateManager {
      *
      * @param entryFileName file name of the entry file.
      * @return entry path to the application.
-     * @throws IOException                 read/write operations exception.
-     * @throws CodePushGetPackageException an exception occurred during obtaining a package.
+     * @throws IOException                 read/write error occurred while accessing the file system.
+     * @throws CodePushGetPackageException exception occurred when obtaining a package.
      */
     public String getCurrentPackageEntryPath(String entryFileName) throws CodePushGetPackageException, IOException {
         String packageFolder;
@@ -190,8 +190,8 @@ public class CodePushUpdateManager {
      * Gets the identifier of the current package (hash).
      *
      * @return the identifier of the current package.
-     * @throws IOException                    read/write operations exception.
-     * @throws CodePushMalformedDataException an exception occurred during obtaining info from json.
+     * @throws IOException                    read/write error occurred while accessing the file system.
+     * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
     public String getCurrentPackageHash() throws IOException, CodePushMalformedDataException {
         JSONObject info = getCurrentPackageInfo();
@@ -202,9 +202,9 @@ public class CodePushUpdateManager {
      * Gets the identifier of the previous installed package (hash).
      *
      * @return the identifier of the previous installed package.
-     * @throws IOException                    read/write operations exception.
-     * @throws CodePushMalformedDataException an exception occurred during obtaining info from json.
-     */
+     * @throws IOException                    read/write error occurred while accessing the file system.
+     * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
+     **/
     public String getPreviousPackageHash() throws IOException, CodePushMalformedDataException {
         JSONObject info = getCurrentPackageInfo();
         return info.optString(CodePushConstants.PREVIOUS_PACKAGE_KEY, null);
@@ -214,7 +214,7 @@ public class CodePushUpdateManager {
      * Gets current package json object.
      *
      * @return current package json object.
-     * @throws CodePushGetPackageException an exception occurerd obtaining the package.
+     * @throws CodePushGetPackageException exception occurred when obtaining a package.
      */
     public JSONObject getCurrentPackage() throws CodePushGetPackageException {
         String packageHash;
@@ -233,7 +233,7 @@ public class CodePushUpdateManager {
      * Gets previous installed package json object.
      *
      * @return previous installed package json object.
-     * @throws CodePushGetPackageException an exception occurerd obtaining the package.
+     * @throws CodePushGetPackageException exception occurred when obtaining a package.
      */
     public JSONObject getPreviousPackage() throws CodePushGetPackageException {
         String packageHash;
@@ -253,7 +253,7 @@ public class CodePushUpdateManager {
      *
      * @param packageHash package identifier (hash).
      * @return package object.
-     * @throws CodePushGetPackageException an exception occurerd obtaining the package.
+     * @throws CodePushGetPackageException exception occurred when obtaining a package.
      */
     public JSONObject getPackage(String packageHash) throws CodePushGetPackageException {
         String folderPath = getPackageFolderPath(packageHash);
@@ -268,7 +268,7 @@ public class CodePushUpdateManager {
     /**
      * Deletes the current package and installs the previous one.
      *
-     * @throws CodePushRollbackException an exception occurred during package rollback.
+     * @throws CodePushRollbackException exception occurred during package rollback.
      */
     public void rollbackPackage() throws CodePushRollbackException {
         try {
@@ -288,7 +288,7 @@ public class CodePushUpdateManager {
      *
      * @param updatePackage       json containing the information about the current package.
      * @param removePendingUpdate whether to remove pending updates data.
-     * @throws CodePushInstallException an exception occurred during package installation.
+     * @throws CodePushInstallException exception occurred during package installation.
      */
     public void installPackage(JSONObject updatePackage, boolean removePendingUpdate) throws CodePushInstallException {
         try {
@@ -297,7 +297,7 @@ public class CodePushUpdateManager {
             String currentPackageHash = getCurrentPackageHash();
             if (packageHash != null && packageHash.equals(currentPackageHash)) {
 
-            /* The current package is already the one being installed, so we should no-op. */
+                /* The current package is already the one being installed, so we should no-op. */
                 return;
             }
             if (removePendingUpdate) {
@@ -322,7 +322,7 @@ public class CodePushUpdateManager {
     /**
      * Clears all the updates data.
      *
-     * @throws IOException exception during delete operations.
+     * @throws IOException read/write error occurred while accessing the file system.
      */
     public void clearUpdates() throws IOException {
         FileUtils.deleteDirectoryAtPath(getCodePushPath());
@@ -372,7 +372,7 @@ public class CodePushUpdateManager {
      * Unzips the following package file.
      *
      * @param downloadFile package file.
-     * @throws CodePushUnzipException an exception occured during unzipping.
+     * @throws CodePushUnzipException an exception occurred during unzipping.
      */
     public void unzipPackage(File downloadFile) throws CodePushUnzipException {
         String unzippedFolderPath = getUnzippedFolderPath();
@@ -399,6 +399,8 @@ public class CodePushUpdateManager {
         String newUpdateMetadataPath = FileUtils.appendPathComponent(newUpdateFolderPath, CodePushConstants.PACKAGE_FILE_NAME);
         String unzippedFolderPath = getUnzippedFolderPath();
         String diffManifestFilePath = FileUtils.appendPathComponent(unzippedFolderPath, CodePushConstants.DIFF_MANIFEST_FILE_NAME);
+
+        /* If this is a diff, not full update, copy the new files to the package directory. */
         boolean isDiffUpdate = FileUtils.fileAtPathExists(diffManifestFilePath);
         try {
             if (isDiffUpdate) {
@@ -456,12 +458,7 @@ public class CodePushUpdateManager {
                     CodePushUpdateUtils.verifyFolderHash(newUpdateFolderPath, newUpdateHash);
                     CodePushUpdateUtils.verifyUpdateSignature(newUpdateFolderPath, newUpdateHash, stringPublicKey);
                 } else {
-                    throw new CodePushSignatureVerificationException(
-                            "Error! Public key was provided but there is no JWT signature within app to verify. " +
-                                    "Possible reasons, why that might happen: \n" +
-                                    "1. You've released a CodePush update using version of CodePush CLI that does not support code signing.\n" +
-                                    "2. You've released a CodePush update without providing --privateKeyPath option."
-                    );
+                    throw new CodePushSignatureVerificationException(SignatureExceptionType.NO_SIGNATURE);
                 }
             } else {
                 if (isSignatureAppearedInApp) {

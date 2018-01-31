@@ -9,6 +9,7 @@ import com.microsoft.codepush.common.CodePush;
 import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
 import com.microsoft.codepush.common.exceptions.CodePushSignatureVerificationException;
+import com.microsoft.codepush.common.exceptions.CodePushSignatureVerificationException.SignatureExceptionType;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
@@ -70,7 +71,7 @@ public class CodePushUpdateUtils {
      * @param folderPath root directory for walking.
      * @param pathPrefix prefix for each path which will be added in manifest to avoid using absolute paths.
      * @param manifest   reference to manifest object.
-     * @throws IOException if read/write error occurred while accessing the file system.
+     * @throws IOException read/write error occurred while accessing the file system.
      */
     private static void addContentsOfFolderToManifest(String folderPath, String pathPrefix, ArrayList<String> manifest) throws IOException {
         File folder = new File(folderPath);
@@ -99,7 +100,7 @@ public class CodePushUpdateUtils {
     }
 
     /**
-     * Compute hash for string.
+     * Computes hash for string.
      *
      * @param data input data string.
      * @return computed hash.
@@ -118,9 +119,9 @@ public class CodePushUpdateUtils {
      * @param diffManifestFilePath     path to diff manifest file.
      * @param currentPackageFolderPath path to current package directory.
      * @param newPackageFolderPath     path to new package directory.
-     * @throws IOException                    if read/write error occurred while accessing the file system.
-     * @throws JSONException                  if there was a problem with the JSON API.
-     * @throws CodePushMalformedDataException if malformed data was used during operation.
+     * @throws IOException                    read/write error occurred while accessing the file system.
+     * @throws JSONException                  error occurred during parsing a json object.
+     * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
     public static void copyNecessaryFilesFromCurrentPackage(
             String diffManifestFilePath,
@@ -180,7 +181,7 @@ public class CodePushUpdateUtils {
      * @param folderPath   path to directory.
      * @param expectedHash expected hash value.
      * @return <code>true</code>, if verification succeeded, <code>false</code> otherwise.
-     * @throws IOException if i/o error occurred while accessing the file system.
+     * @throws IOException read/write error occurred while accessing the file system.
      */
     public static boolean verifyFolderHash(String folderPath, String expectedHash) throws IOException {
         AppCenterLog.info(CodePush.LOG_TAG, "Verifying hash for folder path: " + folderPath);
@@ -227,7 +228,7 @@ public class CodePushUpdateUtils {
         } catch (JOSEException | ParseException e) {
             throw new CodePushSignatureVerificationException(e);
         }
-        throw new CodePushSignatureVerificationException("Signature was not signed by a trusted party.");
+        throw new CodePushSignatureVerificationException(SignatureExceptionType.NOT_SIGNED);
     }
 
     /**
@@ -235,7 +236,7 @@ public class CodePushUpdateUtils {
      *
      * @param stringPublicKey input public key value.
      * @return parsed {@link PublicKey} class instance.
-     * @throws CodePushSignatureVerificationException if there as an error during public key parsing.
+     * @throws CodePushSignatureVerificationException error during public key parsing.
      */
     @SuppressWarnings("WeakerAccess")
     public static PublicKey parsePublicKey(String stringPublicKey) throws CodePushSignatureVerificationException {
@@ -251,7 +252,7 @@ public class CodePushUpdateUtils {
             KeyFactory kf = KeyFactory.getInstance("RSA");
             return kf.generatePublic(X509Key);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            throw new CodePushSignatureVerificationException("Unable to parse public key.", e);
+            throw new CodePushSignatureVerificationException(SignatureExceptionType.PUBLIC_KEY_NOT_PARSED, e);
         }
     }
 
@@ -274,7 +275,7 @@ public class CodePushUpdateUtils {
      *
      * @param folderPath local update directory path.
      * @return JWT content of update.
-     * @throws CodePushSignatureVerificationException if was unable to read signature file.
+     * @throws CodePushSignatureVerificationException error during signature verification.
      */
     @SuppressWarnings("WeakerAccess")
     public static String getJWT(String folderPath) throws CodePushSignatureVerificationException {
@@ -282,7 +283,7 @@ public class CodePushUpdateUtils {
         try {
             return FileUtils.readFileToString(signatureFilePath);
         } catch (IOException e) {
-            throw new CodePushSignatureVerificationException("Unable to read signature file.", e);
+            throw new CodePushSignatureVerificationException(SignatureExceptionType.READ_SIGNATURE_FILE_ERROR, e);
         }
     }
 
@@ -293,7 +294,7 @@ public class CodePushUpdateUtils {
      * @param packageHash     remote package hash.
      * @param stringPublicKey public key value.
      * @return <code>true</code> if signature valid, <code>false</code> otherwise.
-     * @throws CodePushSignatureVerificationException if there as an error during signature verification.
+     * @throws CodePushSignatureVerificationException error during signature verification.
      */
     public static boolean verifyUpdateSignature(String folderPath, String packageHash, String stringPublicKey) throws CodePushSignatureVerificationException {
         AppCenterLog.info(CodePush.LOG_TAG, "Verifying signature for folder path: " + folderPath);
@@ -302,7 +303,7 @@ public class CodePushUpdateUtils {
         final Map<String, Object> claims = verifyAndDecodeJWT(jwt, publicKey);
         final String contentHash = (String) claims.get("contentHash");
         if (contentHash == null) {
-            throw new CodePushSignatureVerificationException("Signature file did not specify a content hash.");
+            throw new CodePushSignatureVerificationException(SignatureExceptionType.NO_CONTENT_HASH);
         }
         return contentHash.equals(packageHash);
     }
@@ -333,4 +334,5 @@ public class CodePushUpdateUtils {
         }
         return null;
     }
+
 }
