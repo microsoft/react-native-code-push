@@ -1,7 +1,5 @@
 package com.microsoft.codepush.common.managers;
 
-import android.os.AsyncTask;
-
 import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.CodePush;
 import com.microsoft.codepush.common.CodePushConstants;
@@ -451,7 +449,7 @@ public class CodePushUpdateManager {
         try {
             String newUpdateFolderPath = getPackageFolderPath(newUpdateHash);
             boolean isSignatureVerificationEnabled = (stringPublicKey != null);
-            String signaturePath = CodePushUpdateUtils.getJWT(newUpdateFolderPath);
+            String signaturePath = CodePushUpdateUtils.getJWTFilePath(newUpdateFolderPath);
             boolean isSignatureAppearedInApp = FileUtils.fileAtPathExists(signaturePath);
             if (isSignatureVerificationEnabled) {
                 if (isSignatureAppearedInApp) {
@@ -475,37 +473,6 @@ public class CodePushUpdateManager {
             }
         } catch (IOException e) {
             throw new CodePushSignatureVerificationException(e);
-        }
-    }
-
-    /**
-     * Downloads update files (bundle for RN, for example) and places them instead of current ones.
-     * It is only to be used during tests. No-ops if the test configuration flag is not set.
-     *
-     * @param remoteUpdateUrl url to get files from.
-     * @param entryFileName   file name of entry point.
-     * @throws CodePushDownloadPackageException exception during download operations.
-     */
-    public void downloadAndReplaceCurrentUpdate(final String remoteUpdateUrl, final String entryFileName) throws CodePushDownloadPackageException {
-        String entryPath;
-        try {
-            entryPath = getCurrentPackageEntryPath(entryFileName);
-        } catch (IOException | CodePushGetPackageException e) {
-            throw new CodePushDownloadPackageException(e);
-        }
-
-        /* First, delete the previous package files. */
-        File downloadFile = new File(entryPath);
-        downloadFile.delete();
-
-        /* Then, download the new package to the same folder as before. */
-        PackageDownloader downloadTask = new PackageDownloader();
-        downloadTask.setParameters(remoteUpdateUrl, downloadFile, null);
-        downloadTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        try {
-            downloadTask.get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new CodePushDownloadPackageException(e);
         }
     }
 }
