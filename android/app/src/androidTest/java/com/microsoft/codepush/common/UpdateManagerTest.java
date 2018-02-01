@@ -74,7 +74,7 @@ public class UpdateManagerTest {
 
     @Before
     public void setUp() throws Exception {
-        PlatformUtils platformUtils = new TestPlatformUtils();
+        PlatformUtils platformUtils = TestPlatformUtils.getInstance();
         codePushUpdateManager = new CodePushUpdateManager(Environment.getExternalStorageDirectory().getPath(), platformUtils);
         CodePushPackage codePushPackage = new CodePushPackage();
         codePushPackage.setAppVersion("1.2");

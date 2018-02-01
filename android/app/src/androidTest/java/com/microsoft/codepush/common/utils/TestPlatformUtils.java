@@ -14,7 +14,7 @@ public class TestPlatformUtils implements PlatformUtils {
     /**
      * Instance of the utils implementation (singleton).
      */
-    private TestPlatformUtils INSTANCE;
+    private static TestPlatformUtils INSTANCE;
 
     /**
      * Private constructor to prevent creating utils manually.
@@ -27,7 +27,7 @@ public class TestPlatformUtils implements PlatformUtils {
      *
      * @return instance.
      */
-    public TestPlatformUtils getInstance() {
+    public static TestPlatformUtils getInstance() {
         if (INSTANCE == null) {
             INSTANCE = new TestPlatformUtils();
         }
