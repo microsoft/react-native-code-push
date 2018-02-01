@@ -36,9 +36,9 @@ public class CodePushTelemetryManager {
     private final String RETRY_DEPLOYMENT_REPORT_KEY = "CODE_PUSH_RETRY_DEPLOYMENT_REPORT";
 
     /**
-     * Constructor for CodePushTelemetryManager.
+     * Creates an instance of {@link CodePushTelemetryManager}.
      *
-     * @param settings Manager of CodePush preferences storage.
+     * @param settings manager of CodePush preferences storage.
      */
     public CodePushTelemetryManager(SharedPreferences settings) {
         mSettings = settings;
@@ -47,7 +47,7 @@ public class CodePushTelemetryManager {
     /**
      * Builds binary update report using current app version.
      *
-     * @param appVersion Current app version.
+     * @param appVersion current app version.
      * @return new binary update report.
      */
     public CodePushDeploymentStatusReport buildBinaryUpdateReport(String appVersion) {
@@ -86,7 +86,7 @@ public class CodePushTelemetryManager {
     /**
      * Builds update report using current local package information.
      *
-     * @param currentPackage Current local package information.
+     * @param currentPackage current local package information.
      * @return new update report.
      */
     public CodePushDeploymentStatusReport buildUpdateReport(CodePushLocalPackage currentPackage) {
@@ -122,7 +122,6 @@ public class CodePushTelemetryManager {
                 }
             }
         }
-
         return report;
     }
 

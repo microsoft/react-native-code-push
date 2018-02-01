@@ -24,7 +24,7 @@ public class CodePushStatusReportIdentifier {
     private String versionLabel;
 
     /**
-     * Constructor for identifier of binary report.
+     * Creates an instance of {@link CodePushStatusReportIdentifier}.
      *
      * @param versionLabel version label.
      */
@@ -33,7 +33,7 @@ public class CodePushStatusReportIdentifier {
     }
 
     /**
-     * Constructor for identifier of update report.
+     * Creates an instance of {@link CodePushStatusReportIdentifier}.
      *
      * @param deploymentKey deployment key.
      * @param versionLabel  version label.
