@@ -1,7 +1,5 @@
 package com.microsoft.codepush.common;
 
-import android.os.Environment;
-
 import com.microsoft.codepush.common.exceptions.CodePushFinalizeException;
 import com.microsoft.codepush.common.utils.CodePushUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
@@ -23,6 +21,7 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import static com.microsoft.codepush.common.utils.CommonFileTestUtils.getRealFile;
+import static com.microsoft.codepush.common.utils.CommonFileTestUtils.getTestingDirectory;
 import static com.microsoft.codepush.common.utils.CommonFileTestUtils.mockZipEntry;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
@@ -52,7 +51,7 @@ public class FileCommonTest {
     public void setUp() throws Exception {
         String fileContent = "123";
         String fileName = "file.txt";
-        testFolder = new File(Environment.getExternalStorageDirectory(), "/Test/Test");
+        testFolder = new File(getTestingDirectory(), "/Test");
         testFolder.mkdirs();
         newFile = new File(testFolder, fileName);
         newFile.createNewFile();
@@ -78,7 +77,7 @@ public class FileCommonTest {
      */
     @Test(expected = CodePushFinalizeException.class)
     public void copyFailsIfFinalizeFails() throws Exception {
-        File copyFolder = new File(Environment.getExternalStorageDirectory(), "/Test/TestMove");
+        File copyFolder = new File(getTestingDirectory(), "/TestMove");
         FileUtils.copyDirectoryContents(testFolder, copyFolder);
     }
 
@@ -134,9 +133,9 @@ public class FileCommonTest {
         String zipEntryFileContent = "123";
         String zipFileName = "test.zip";
         String zipEntryFileName = "mytext.txt";
-        File zipFolder = new File(Environment.getExternalStorageDirectory(), "/Test/TestZip");
+        File zipFolder = new File(getTestingDirectory(), "/TestZip");
         zipFolder.mkdir();
-        File unzipFolder = new File(Environment.getExternalStorageDirectory(), "/Test/TestZipMove");
+        File unzipFolder = new File(getTestingDirectory(), "/TestZipMove");
         unzipFolder.mkdir();
         File zip = new File(zipFolder, zipFileName);
         ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zip));
@@ -154,7 +153,7 @@ public class FileCommonTest {
      */
     @After
     public void tearDown() throws Exception {
-        File testFolder = new File(Environment.getExternalStorageDirectory(), "Test");
+        File testFolder = getTestingDirectory();
         testFolder.delete();
     }
 }

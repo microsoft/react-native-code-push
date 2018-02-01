@@ -24,7 +24,7 @@ public class CommonFileTestUtils {
      */
     public static File getRealTestFolder() {
         Random random = new Random(System.currentTimeMillis());
-        return new File(Environment.getExternalStorageDirectory(), "Test" + random.nextInt());
+        return new File(getTestingDirectory(), "Test" + random.nextInt());
     }
 
     /**
@@ -51,5 +51,15 @@ public class CommonFileTestUtils {
         doReturn(new Date().getTime()).when(mocked).getTime();
         doReturn(isDirectory).when(mocked).isDirectory();
         return mocked;
+    }
+
+    /**
+     * Gets shared directory to create test folders in.
+     * Note: must be deleted on tearDown.
+     *
+     * @return shared test directory.
+     */
+    public static File getTestingDirectory() {
+        return new File(Environment.getExternalStorageDirectory(), "/Test");
     }
 }
