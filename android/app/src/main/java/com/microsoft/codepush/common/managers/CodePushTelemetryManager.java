@@ -159,7 +159,7 @@ public class CodePushTelemetryManager {
      * Saves status report for further retry os it's sending.
      *
      * @param statusReport status report.
-     * @throws JSONException if there was error of serialization of report into json document.
+     * @throws JSONException if there was an error during report serialization into json document.
      */
     public void saveStatusReportForRetry(CodePushDeploymentStatusReport statusReport) throws JSONException {
         JSONObject statusReportJSON = CodePushUtils.convertObjectToJsonObject(statusReport);
