@@ -11,24 +11,22 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
-import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
-import java.util.Random;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import static com.microsoft.codepush.common.utils.CommonFileTestUtils.getRealFile;
+import static com.microsoft.codepush.common.utils.CommonFileTestUtils.mockZipEntry;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -113,30 +111,6 @@ public class FileCommonTest {
     @Test(expected = CodePushFinalizeException.class)
     public void readDoubleFailure() throws Exception {
         FileUtils.readFileToString("/***");
-    }
-
-    public static File getRealTestFolder() {
-        Random random = new Random(System.currentTimeMillis());
-        return new File(Environment.getExternalStorageDirectory(), "/Test/Test" + random.nextInt());
-    }
-
-    /**
-     * Creates a real (not mocked) file for testing.
-     *
-     * @return real test file.
-     */
-    public static File getRealFile() throws IOException {
-        File testFolder = getRealTestFolder();
-        testFolder.mkdirs();
-        File realFile = new File(testFolder, "file.txt");
-        realFile.createNewFile();
-        return realFile;
-    }
-    public static ZipEntry mockZipEntry(boolean isDirectory) {
-        ZipEntry mocked = Mockito.mock(ZipEntry.class);
-        doReturn(new Date().getTime()).when(mocked).getTime();
-        doReturn(isDirectory).when(mocked).isDirectory();
-        return mocked;
     }
 
     /**
