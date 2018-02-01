@@ -20,6 +20,7 @@ import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
 import com.microsoft.codepush.common.utils.CodePushUpdateUtils;
 import com.microsoft.codepush.common.utils.CodePushUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
+import com.microsoft.codepush.common.utils.PlatformUtils;
 
 import org.json.JSONException;
 
@@ -31,6 +32,11 @@ import java.util.concurrent.ExecutionException;
  * Manager responsible for update read/write actions.
  */
 public class CodePushUpdateManager {
+
+    /**
+     * Platform-specific utils implementation.
+     */
+    private PlatformUtils mPlatformUtils;
 
     /**
      * Whether to use test configuration.
@@ -47,7 +53,8 @@ public class CodePushUpdateManager {
      *
      * @param documentsDirectory path for storing files.
      */
-    public CodePushUpdateManager(String documentsDirectory) {
+    public CodePushUpdateManager(String documentsDirectory, PlatformUtils platformUtils) {
+        mPlatformUtils = platformUtils;
         mDocumentsDirectory = documentsDirectory;
     }
 
@@ -440,7 +447,7 @@ public class CodePushUpdateManager {
      */
     public void verifySignature(String stringPublicKey, String newUpdateHash, boolean isDiffUpdate) throws CodePushSignatureVerificationException {
         try {
-            String newUpdateFolderPath = getPackageFolderPath(newUpdateHash);
+            String newUpdateFolderPath = mPlatformUtils.getUpdateFolderPath(newUpdateHash);
             boolean isSignatureVerificationEnabled = (stringPublicKey != null);
             String signaturePath = CodePushUpdateUtils.getJWTFilePath(newUpdateFolderPath);
             boolean isSignatureAppearedInApp = FileUtils.fileAtPathExists(signaturePath);

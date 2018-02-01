@@ -16,6 +16,8 @@ import com.microsoft.codepush.common.managers.CodePushUpdateManager;
 import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
 import com.microsoft.codepush.common.utils.CodePushUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
+import com.microsoft.codepush.common.utils.PlatformUtils;
+import com.microsoft.codepush.common.utils.TestPlatformUtils;
 
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -72,7 +74,8 @@ public class UpdateManagerTest {
 
     @Before
     public void setUp() throws Exception {
-        codePushUpdateManager = new CodePushUpdateManager(Environment.getExternalStorageDirectory().getPath());
+        PlatformUtils platformUtils = new TestPlatformUtils();
+        codePushUpdateManager = new CodePushUpdateManager(Environment.getExternalStorageDirectory().getPath(), platformUtils);
         CodePushPackage codePushPackage = new CodePushPackage();
         codePushPackage.setAppVersion("1.2");
         codePushPackage.setPackageHash(FULL_PACKAGE_HASH);
