@@ -4,6 +4,8 @@ import android.os.Environment;
 
 import com.microsoft.codepush.common.connection.PackageDownloader;
 import com.microsoft.codepush.common.exceptions.CodePushDownloadPackageException;
+import com.microsoft.codepush.common.exceptions.CodePushFinalizeException;
+import com.microsoft.codepush.common.utils.CodePushUtils;
 
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -13,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 
 import static com.microsoft.codepush.common.utils.PackageDownloaderTestUtils.checkDoInBackgroundFails;
 import static com.microsoft.codepush.common.utils.PackageDownloaderTestUtils.checkDoInBackgroundNotFails;
@@ -90,6 +93,26 @@ public class PackageDownloaderTests {
         File downloadFolder = new File(codePushPath.getPath());
         downloadFolder.mkdirs();
         PackageDownloader packageDownloader = createPackageDownloader(FULL_PACKAGE_URL, downloadFolder);
+        checkDoInBackgroundFails(packageDownloader);
+    }
+
+    /**
+     * If download fails with an {@link IOException}, it should go straight to finally block,
+     * where it should throw a {@link CodePushFinalizeException}
+     * if an {@link IOException} is thrown during {@link CodePushUtils#finalizeResources(List, String)}.
+     */
+    @Test
+    public void downloadDoubleFailure() throws Exception {
+        File codePushPath = new File(Environment.getExternalStorageDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX);
+        File downloadFolder = new File(codePushPath.getPath());
+        downloadFolder.mkdirs();
+        PackageDownloader packageDownloader = createPackageDownloader(FULL_PACKAGE_URL, downloadFolder);
+        HttpURLConnection connectionMock = Mockito.mock(HttpURLConnection.class);
+        BufferedInputStream bufferedInputStream = mock(BufferedInputStream.class);
+        doReturn(0).when(bufferedInputStream).read(any(byte[].class), anyInt(), anyInt());
+        doThrow(new IOException()).when(bufferedInputStream).close();
+        doReturn(bufferedInputStream).when(connectionMock).getInputStream();
+        doReturn(connectionMock).when(packageDownloader).createConnection(anyString());
         checkDoInBackgroundFails(packageDownloader);
     }
 }

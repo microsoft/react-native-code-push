@@ -42,6 +42,7 @@ public class DataContractsTest {
     private final static String DOWNLOAD_URL = "https://url.com";
     private final static String PACKAGE_HASH = "HASH";
     private final static String ERROR = "An error has occurred";
+    private final static String APP_ENTRY_POINT = "/www/index.html";
 
     @Test
     public void dataContractsTest() throws Exception {
@@ -92,7 +93,7 @@ public class DataContractsTest {
         checkPackage(codePushPackage);
 
         /* Check local package. */
-        CodePushLocalPackage codePushLocalPackage = CodePushLocalPackage.createLocalPackage(FAILED_INSTALL, IS_FIRST_RUN, IS_PENDING, IS_DEBUG_ONLY, codePushPackage);
+        CodePushLocalPackage codePushLocalPackage = CodePushLocalPackage.createLocalPackage(FAILED_INSTALL, IS_FIRST_RUN, IS_PENDING, IS_DEBUG_ONLY, APP_ENTRY_POINT, codePushPackage);
         checkLocalPackage(codePushLocalPackage);
         CodePushLocalPackage failedPackage = CodePushLocalPackage.createFailedLocalPackage(new Exception(ERROR));
         assertEquals(ERROR, failedPackage.getDownloadException().getMessage());

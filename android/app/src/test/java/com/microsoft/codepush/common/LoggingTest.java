@@ -38,11 +38,12 @@ public class LoggingTest {
     private final static boolean IS_PENDING = true;
     private final static boolean IS_DEBUG_ONLY = false;
     private final static boolean IS_FIRST_RUN = false;
+    private final static String APP_ENTRY_POINT = "/www/index.html";
 
     @Test
     public void testLogging() throws Exception {
         CodePushPackage codePushPackage = new CodePushPackage();
-        CodePushLocalPackage codePushLocalPackage = CodePushLocalPackage.createLocalPackage(FAILED_INSTALL, IS_FIRST_RUN, IS_PENDING, IS_DEBUG_ONLY, codePushPackage);
+        CodePushLocalPackage codePushLocalPackage = CodePushLocalPackage.createLocalPackage(FAILED_INSTALL, IS_FIRST_RUN, IS_PENDING, IS_DEBUG_ONLY, APP_ENTRY_POINT, codePushPackage);
         CodePushUpdateRequest codePushUpdateRequest = CodePushUpdateRequest.createUpdateRequest(DEPLOYMENT_KEY, codePushLocalPackage, CLIENT_UNIQUE_ID);
         CodePushDownloadStatusReport codePushDownloadStatusReport = CodePushDownloadStatusReport.createReport(CLIENT_UNIQUE_ID, DEPLOYMENT_KEY, LABEL);
         CodePushDeploymentStatusReport codePushDeploymentStatusReport = new CodePushDeploymentStatusReport();

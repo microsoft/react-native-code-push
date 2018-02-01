@@ -6,12 +6,10 @@ import com.microsoft.codepush.common.connection.PackageDownloader;
 import com.microsoft.codepush.common.exceptions.CodePushDownloadPackageException;
 import com.microsoft.codepush.common.exceptions.CodePushSignatureVerificationException;
 import com.microsoft.codepush.common.exceptions.CodePushUnzipException;
-import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
 import com.microsoft.codepush.common.managers.CodePushUpdateManager;
 import com.microsoft.codepush.common.utils.CodePushUpdateUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
 
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -63,7 +61,7 @@ public class UpdateManagerCommonTest {
         mockStatic(FileUtils.class);
         PowerMockito.doThrow(new IOException()).when(FileUtils.class, "deleteDirectoryAtPath", anyString());
         PowerMockito.doReturn(true).when(FileUtils.class, "fileAtPathExists", anyString());
-        codePushUpdateManager.downloadPackage(mock(JSONObject.class), mock(DownloadProgressCallback.class), mock(PackageDownloader.class));
+        codePushUpdateManager.downloadPackage("", mock(PackageDownloader.class));
     }
 
     /**
@@ -89,7 +87,7 @@ public class UpdateManagerCommonTest {
         doReturn(new File(Environment.getExternalStorageDirectory(), "/Test/HASH").getPath()).when(codePushUpdateManager).getPackageFolderPath(anyString());
         PackageDownloader packageDownloader = PowerMockito.mock(PackageDownloader.class);
         PowerMockito.when(packageDownloader.get()).thenThrow(new InterruptedException());
-        codePushUpdateManager.downloadPackage(mock(JSONObject.class), mock(DownloadProgressCallback.class), packageDownloader);
+        codePushUpdateManager.downloadPackage("", packageDownloader);
     }
 
     /**

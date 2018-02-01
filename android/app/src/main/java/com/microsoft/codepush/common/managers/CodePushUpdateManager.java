@@ -4,6 +4,8 @@ import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.CodePush;
 import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.connection.PackageDownloader;
+import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
+import com.microsoft.codepush.common.datacontracts.CodePushPackageInfo;
 import com.microsoft.codepush.common.exceptions.CodePushDownloadPackageException;
 import com.microsoft.codepush.common.exceptions.CodePushGetPackageException;
 import com.microsoft.codepush.common.exceptions.CodePushInstallException;
@@ -20,7 +22,6 @@ import com.microsoft.codepush.common.utils.CodePushUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -106,12 +107,12 @@ public class CodePushUpdateManager {
      * @throws IOException                    read/write error occurred while accessing the file system.
      * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
-    public JSONObject getCurrentPackageInfo() throws CodePushMalformedDataException, IOException {
+    public CodePushPackageInfo getCurrentPackageInfo() throws CodePushMalformedDataException, IOException {
         String statusFilePath = getStatusFilePath();
         if (!FileUtils.fileAtPathExists(statusFilePath)) {
-            return new JSONObject();
+            return new CodePushPackageInfo();
         }
-        return CodePushUtils.getJsonObjectFromFile(statusFilePath);
+        return CodePushUtils.getObjectFromJsonFile(statusFilePath, CodePushPackageInfo.class);
 
     }
 
@@ -121,9 +122,9 @@ public class CodePushUpdateManager {
      * @param packageInfo new information.
      * @throws IOException read/write error occurred while accessing the file system.
      */
-    public void updateCurrentPackageInfo(JSONObject packageInfo) throws IOException {
+    public void updateCurrentPackageInfo(CodePushPackageInfo packageInfo) throws IOException {
         try {
-            CodePushUtils.writeJsonToFile(packageInfo, getStatusFilePath());
+            CodePushUtils.writeObjectToJsonFile(packageInfo, getStatusFilePath());
         } catch (IOException e) {
             throw new IOException("Error updating current package info", e);
         }
@@ -172,11 +173,11 @@ public class CodePushUpdateManager {
         if (packageFolder == null) {
             return null;
         }
-        JSONObject currentPackage = getCurrentPackage();
+        CodePushLocalPackage currentPackage = getCurrentPackage();
         if (currentPackage == null) {
             return null;
         }
-        String relativeEntryPath = currentPackage.optString(CodePushConstants.APP_ENTRY_POINT_PATH_KEY, null);
+        String relativeEntryPath = currentPackage.getAppEntryPoint();
         if (relativeEntryPath == null) {
             return FileUtils.appendPathComponent(packageFolder, entryFileName);
         } else {
@@ -192,8 +193,8 @@ public class CodePushUpdateManager {
      * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
     public String getCurrentPackageHash() throws IOException, CodePushMalformedDataException {
-        JSONObject info = getCurrentPackageInfo();
-        return info.optString(CodePushConstants.CURRENT_PACKAGE_KEY, null);
+        CodePushPackageInfo info = getCurrentPackageInfo();
+        return info.getCurrentPackage();
     }
 
     /**
@@ -204,8 +205,8 @@ public class CodePushUpdateManager {
      * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      **/
     public String getPreviousPackageHash() throws IOException, CodePushMalformedDataException {
-        JSONObject info = getCurrentPackageInfo();
-        return info.optString(CodePushConstants.PREVIOUS_PACKAGE_KEY, null);
+        CodePushPackageInfo info = getCurrentPackageInfo();
+        return info.getPreviousPackage();
     }
 
     /**
@@ -214,7 +215,7 @@ public class CodePushUpdateManager {
      * @return current package json object.
      * @throws CodePushGetPackageException exception occurred when obtaining a package.
      */
-    public JSONObject getCurrentPackage() throws CodePushGetPackageException {
+    public CodePushLocalPackage getCurrentPackage() throws CodePushGetPackageException {
         String packageHash;
         try {
             packageHash = getCurrentPackageHash();
@@ -233,7 +234,7 @@ public class CodePushUpdateManager {
      * @return previous installed package json object.
      * @throws CodePushGetPackageException exception occurred when obtaining a package.
      */
-    public JSONObject getPreviousPackage() throws CodePushGetPackageException {
+    public CodePushLocalPackage getPreviousPackage() throws CodePushGetPackageException {
         String packageHash;
         try {
             packageHash = getPreviousPackageHash();
@@ -253,11 +254,11 @@ public class CodePushUpdateManager {
      * @return package object.
      * @throws CodePushGetPackageException exception occurred when obtaining a package.
      */
-    public JSONObject getPackage(String packageHash) throws CodePushGetPackageException {
+    public CodePushLocalPackage getPackage(String packageHash) throws CodePushGetPackageException {
         String folderPath = getPackageFolderPath(packageHash);
         String packageFilePath = FileUtils.appendPathComponent(folderPath, CodePushConstants.PACKAGE_FILE_NAME);
         try {
-            return CodePushUtils.getJsonObjectFromFile(packageFilePath);
+            return CodePushUtils.getObjectFromJsonFile(packageFilePath, CodePushLocalPackage.class);
         } catch (CodePushMalformedDataException e) {
             throw new CodePushGetPackageException(e);
         }
@@ -270,13 +271,13 @@ public class CodePushUpdateManager {
      */
     public void rollbackPackage() throws CodePushRollbackException {
         try {
-            JSONObject info = getCurrentPackageInfo();
+            CodePushPackageInfo info = getCurrentPackageInfo();
             String currentPackageFolderPath = getCurrentPackageFolderPath();
             FileUtils.deleteDirectoryAtPath(currentPackageFolderPath);
-            info.put(CodePushConstants.CURRENT_PACKAGE_KEY, info.optString(CodePushConstants.PREVIOUS_PACKAGE_KEY, null));
-            info.put(CodePushConstants.PREVIOUS_PACKAGE_KEY, null);
+            info.setCurrentPackage(info.getPreviousPackage());
+            info.setPreviousPackage(null);
             updateCurrentPackageInfo(info);
-        } catch (IOException | JSONException | CodePushMalformedDataException e) {
+        } catch (IOException | CodePushMalformedDataException e) {
             throw new CodePushRollbackException(e);
         }
     }
@@ -284,14 +285,13 @@ public class CodePushUpdateManager {
     /**
      * Installs the new package.
      *
-     * @param updatePackage       json containing the information about the current package.
+     * @param packageHash       package hash to install.
      * @param removePendingUpdate whether to remove pending updates data.
      * @throws CodePushInstallException exception occurred during package installation.
      */
-    public void installPackage(JSONObject updatePackage, boolean removePendingUpdate) throws CodePushInstallException {
+    public void installPackage(String packageHash, boolean removePendingUpdate) throws CodePushInstallException {
         try {
-            String packageHash = updatePackage.optString(CodePushConstants.PACKAGE_HASH_KEY, null);
-            JSONObject info = getCurrentPackageInfo();
+            CodePushPackageInfo info = getCurrentPackageInfo();
             String currentPackageHash = getCurrentPackageHash();
             if (packageHash != null && packageHash.equals(currentPackageHash)) {
 
@@ -308,11 +308,11 @@ public class CodePushUpdateManager {
                 if (previousPackageHash != null && !previousPackageHash.equals(packageHash)) {
                     FileUtils.deleteDirectoryAtPath(getPackageFolderPath(previousPackageHash));
                 }
-                info.put(CodePushConstants.PREVIOUS_PACKAGE_KEY, info.optString(CodePushConstants.CURRENT_PACKAGE_KEY, null));
+                info.setPreviousPackage(info.getCurrentPackage());
             }
-            info.put(CodePushConstants.CURRENT_PACKAGE_KEY, packageHash);
+            info.setCurrentPackage(packageHash);
             updateCurrentPackageInfo(info);
-        } catch (IOException | JSONException | CodePushMalformedDataException e) {
+        } catch (IOException | CodePushMalformedDataException e) {
             throw new CodePushInstallException(e);
         }
     }
@@ -329,16 +329,14 @@ public class CodePushUpdateManager {
     /**
      * Downloads the update package.
      *
-     * @param updatePackage    information about the package.
-     * @param progressCallback callback to send information about download to.
-     *                         Can be <code>null</code> if code signing is not enabled.
+     * @param packageHash     update package hash.
+     * @param packageDownloader instance of {@link PackageDownloader} to download the update.
+     *                          Note: all the parameters should be already set via {@link PackageDownloader#setParameters(String, File, DownloadProgressCallback)}.
      * @return downloaded package.
      * @throws CodePushDownloadPackageException an exception occurred during package downloading.
      */
-    public CodePushDownloadPackageResult downloadPackage(JSONObject updatePackage,
-                                                         final DownloadProgressCallback progressCallback, PackageDownloader packageDownloader) throws CodePushDownloadPackageException {
-        String newUpdateHash = updatePackage.optString(CodePushConstants.PACKAGE_HASH_KEY, null);
-        String newUpdateFolderPath = getPackageFolderPath(newUpdateHash);
+    public CodePushDownloadPackageResult downloadPackage(String packageHash, PackageDownloader packageDownloader) throws CodePushDownloadPackageException {
+        String newUpdateFolderPath = getPackageFolderPath(packageHash);
         if (FileUtils.fileAtPathExists(newUpdateFolderPath)) {
 
             /* This removes any stale data in <code>newPackageFolderPath</code> that could have been left
@@ -349,13 +347,8 @@ public class CodePushUpdateManager {
                 throw new CodePushDownloadPackageException(e);
             }
         }
-        final String downloadUrlString = updatePackage.optString(CodePushConstants.DOWNLOAD_URL_KEY, null);
-        File downloadFolder = new File(getCodePushPath());
-        downloadFolder.mkdirs();
-        File downloadFilePath = new File(downloadFolder, CodePushConstants.DOWNLOAD_FILE_NAME);
 
         /* Download the file while checking if it is a zip and notifying client of progress. */
-        packageDownloader.setParameters(downloadUrlString, downloadFilePath, progressCallback);
         packageDownloader.execute();
         CodePushDownloadPackageResult downloadPackageResult;
         try {
