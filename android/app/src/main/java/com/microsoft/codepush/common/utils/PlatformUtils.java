@@ -10,7 +10,7 @@ public interface PlatformUtils {
      * F. i., it is "CodePush/" for RN and "www/" for Cordova.
      *
      * @param hash hash of the desired update.
-     * @return oath to update folder.
+     * @return path to update folder.
      */
     String getUpdateFolderPath(String hash);
 }
