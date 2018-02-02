@@ -95,5 +95,5 @@ task coverageReport(type: JacocoReport, dependsOn: ['renameCreateDebugCoverageRe
     sourceDirectories = files([mainSrc])
     classDirectories = files([debugTree])
     executionData = files(["${buildDir}/jacoco/testDebugUnitTest.exec",
-                           "${buildDir}/outputs/code-coverage/connected/coverage.ec"])
+                           createDebugCoverageReportExecutionDataFile])
 }
