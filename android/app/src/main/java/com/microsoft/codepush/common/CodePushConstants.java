@@ -32,11 +32,6 @@ public final class CodePushConstants {
     public static final String CODE_PUSH_PREFERENCES = "CodePush";
 
     /**
-     * Key for setting current package hash property for JSONObject.
-     */
-    public static final String CURRENT_PACKAGE_KEY = "currentPackage";
-
-    /**
      * File name for diff manifest that distributes with CodePush updates.
      */
     public static final String DIFF_MANIFEST_FILE_NAME = "hotcodepush.json";
@@ -101,18 +96,6 @@ public final class CodePushConstants {
      * Key for getting/storing pending CodePush update.
      */
     public static final String PENDING_UPDATE_KEY = "CODE_PUSH_PENDING_UPDATE";
-
-    /**
-     * Key for getting/storing previous CodePush update.
-     */
-    public static final String PREVIOUS_PACKAGE_KEY = "previousPackage";
-
-    /**
-     * Key for specifying app entry point.
-     * For example, it could be JS bundle path for React Native.
-     * Or path to <code>index.js</code> for Cordova.
-     */
-    public static final String APP_ENTRY_POINT_PATH_KEY = "appEntryPoint";
 
     /**
      * Name of the file containing information about the available packages.

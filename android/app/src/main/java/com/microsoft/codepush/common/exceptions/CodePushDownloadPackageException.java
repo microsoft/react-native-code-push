@@ -11,15 +11,6 @@ public class CodePushDownloadPackageException extends Exception {
     private static String MESSAGE = "Error occurred during package downloading.";
 
     /**
-     * Creates an instance of the exception provided the package url.
-     *
-     * @param downloadUrl the url an update was attempted to be downloaded from.
-     */
-    public CodePushDownloadPackageException(String downloadUrl) {
-        super(MESSAGE + "Download url is " + downloadUrl);
-    }
-
-    /**
      * Creates an instance of the exception provided the size mismatch.
      *
      * @param received the number of bytes actually received.

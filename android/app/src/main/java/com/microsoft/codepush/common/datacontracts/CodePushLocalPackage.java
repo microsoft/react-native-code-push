@@ -17,6 +17,12 @@ public class CodePushLocalPackage extends CodePushPackage {
     private boolean isPending;
 
     /**
+     * Indicates the path to the application entry point.
+     */
+    @SerializedName("appEntryPoint")
+    private String appEntryPoint;
+
+    /**
      * Indicates whether this is the first time the update has been run after being installed.
      */
     @SerializedName("isFirstRun")
@@ -57,7 +63,7 @@ public class CodePushLocalPackage extends CodePushPackage {
      * @return instance of the {@link CodePushLocalPackage}.
      */
     public static CodePushLocalPackage createLocalPackage(final boolean failedInstall, final boolean isFirstRun,
-                                                          final boolean isPending, final boolean isDebugOnly,
+                                                          final boolean isPending, final boolean isDebugOnly, String appEntryPoint,
                                                           final CodePushPackage codePushPackage) {
         CodePushLocalPackage codePushLocalPackage = new CodePushLocalPackage();
         codePushLocalPackage.setAppVersion(codePushPackage.getAppVersion());
@@ -70,6 +76,7 @@ public class CodePushLocalPackage extends CodePushPackage {
         codePushLocalPackage.setPending(isPending);
         codePushLocalPackage.setFirstRun(isFirstRun);
         codePushLocalPackage.setDebugOnly(isDebugOnly);
+        codePushLocalPackage.setAppEntryPoint(appEntryPoint);
         return codePushLocalPackage;
     }
 
@@ -147,5 +154,23 @@ public class CodePushLocalPackage extends CodePushPackage {
     @SuppressWarnings("WeakerAccess")
     public void setDownloadException(Exception downloadException) {
         this.downloadException = downloadException;
+    }
+
+    /**
+     * Gets the value of the path to the application entry point.
+     *
+     * @return the path to the application entry point.
+     */
+    public String getAppEntryPoint() {
+        return appEntryPoint;
+    }
+
+    /**
+     * Sets the path to the application entry point.
+     *
+     * @param appEntryPoint the path to the application entry point.
+     */
+    public void setAppEntryPoint(String appEntryPoint) {
+        this.appEntryPoint = appEntryPoint;
     }
 }
