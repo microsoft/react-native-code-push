@@ -145,6 +145,7 @@ public class CodePushTelemetryManager {
      * @throws JSONException if there was error of deserialization of report from json document.
      */
     public CodePushDeploymentStatusReport getStatusReportSavedForRetry() throws JSONException {
+        
         //TODO move to settings manager
         String retryStatusReportString = mSettings.getString(RETRY_DEPLOYMENT_REPORT_KEY, null);
         if (retryStatusReportString != null) {
@@ -163,6 +164,7 @@ public class CodePushTelemetryManager {
      */
     public void saveStatusReportForRetry(CodePushDeploymentStatusReport statusReport) throws JSONException {
         JSONObject statusReportJSON = CodePushUtils.convertObjectToJsonObject(statusReport);
+
         //TODO move to settings manager
         mSettings.edit().putString(RETRY_DEPLOYMENT_REPORT_KEY, statusReportJSON.toString()).commit();
     }
@@ -171,6 +173,7 @@ public class CodePushTelemetryManager {
      * Remove status report that was saved for retry of it's sending.
      */
     private void removeStatusReportSavedForRetry() {
+
         //TODO move to settings manager
         mSettings.edit().remove(RETRY_DEPLOYMENT_REPORT_KEY).commit();
     }
@@ -217,6 +220,7 @@ public class CodePushTelemetryManager {
      * @return previously saved status report identifier.
      */
     private CodePushStatusReportIdentifier getPreviousStatusReportIdentifier() {
+
         //TODO move to Settings manager
         String identifierString = mSettings.getString(LAST_DEPLOYMENT_REPORT_KEY, null);
         return CodePushStatusReportIdentifier.fromString(identifierString);
@@ -228,6 +232,7 @@ public class CodePushTelemetryManager {
      * @param identifier identifier of already sent status report.
      */
     private void saveIdentifierOfReportedStatus(CodePushStatusReportIdentifier identifier) {
+        
         //TODO move to Settings manager
         mSettings.edit().putString(LAST_DEPLOYMENT_REPORT_KEY, identifier.toString()).commit();
     }

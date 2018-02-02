@@ -51,12 +51,15 @@ public class CodePushStatusReportIdentifier {
      */
     public static CodePushStatusReportIdentifier fromString(String stringIdentifier) {
         String[] parsedIdentifier = stringIdentifier.split(":");
-        if (parsedIdentifier.length > 0) {
-            return new CodePushStatusReportIdentifier(parsedIdentifier[0]);
-        } else if (parsedIdentifier.length > 1) {
-            return new CodePushStatusReportIdentifier(parsedIdentifier[0], parsedIdentifier[1]);
+        if (parsedIdentifier.length == 1) {
+            String versionLabel = parsedIdentifier[0];
+            return new CodePushStatusReportIdentifier(versionLabel);
+        } else if (parsedIdentifier.length == 2) {
+            String versionLabel = parsedIdentifier[0];
+            String deploymentKey = parsedIdentifier[1];
+            return new CodePushStatusReportIdentifier(versionLabel, deploymentKey);
         } else {
-            return null;
+            return null; 
         }
     }
 
