@@ -159,7 +159,7 @@ public class SettingManagerTests {
     }
 
     /**
-     * {@link SettingsManager#getFailedUpdates()} should return empty array.
+     * {@link SettingsManager#getFailedUpdates()} should return empty array
      * if a {@link JsonSyntaxException} is thrown during parsing failed updates info.
      */
     @Test
@@ -170,7 +170,7 @@ public class SettingManagerTests {
     }
 
     /**
-     * {@link SettingsManager#getFailedUpdates()} should return <code>null</code> if there is no info about the failed updates.
+     * {@link SettingsManager#getFailedUpdates()} should return empty array if there is no info about the failed updates.
      */
     @Test
     public void failedUpdateIsNull() throws Exception {
