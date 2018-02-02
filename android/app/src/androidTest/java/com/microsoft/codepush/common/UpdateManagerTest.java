@@ -54,12 +54,39 @@ public class UpdateManagerTest {
     @Rule
     public final ExpectedException exception = ExpectedException.none();
 
+    /**
+     * Url to download a package that represents a full update.
+     */
     private final static String FULL_PACKAGE_URL = "https://codepush.blob.core.windows.net/storagev2/6CjTRZUgaYrHlhH3mKy2JsQVIJtsa0021bd2-9be1-4904-b4c6-16ce9c797779";
+
+    /**
+     * Url to download a package that represents a diff update.
+     */
     private final static String DIFF_PACKAGE_URL = "https://codepush.blob.core.windows.net/storagev2/8wuI2wwTlf4RioIb1cLRtyQyzRW80840428d-683e-4d30-a120-c592a355a594";
+
+    /**
+     * Url to download a package that represents a signed package.
+     */
     private final static String SIGNED_PACKAGE_URL = "https://codepush.blob.core.windows.net/storagev2/OWIRaqwJQUbNeiX60nDnijj9HxMza0021bd2-9be1-4904-b4c6-16ce9c797779";
+
+    /**
+     * Hash of the package that represents a full update.
+     */
     private final static String FULL_PACKAGE_HASH = "a1d28a073a1fa45745a8b1952ccc5c2bd4753e533e7b9e48459a6c186ecd32af";
+
+    /**
+     * Hash of the package that represents a diff update.
+     */
     private final static String DIFF_PACKAGE_HASH = "ff46674f196ae852ccb67e49346a11cb9d8c0243ba24003e11b83dd7469b5dd4";
+
+    /**
+     * Hash of the signed package.
+     */
     private final static String SIGNED_PACKAGE_HASH = "ce9148e0d0422dc7ffefba3a82f527a0e75f51c449f34a5f7dabab6f36251aaf";
+
+    /**
+     * Public key used to sign a test package.
+     */
     private final static String SIGNED_PACKAGE_PUBLIC_KEY = "MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAM4bfGAHAEx+IVl5/qaRHisPvpGfCY47O7EkW8XhZVer+bo1k6VT3s8hPBMQfcFw/ZQotWwLkvStelvrQptJFiUCAwEAAQ";
 
     /**
