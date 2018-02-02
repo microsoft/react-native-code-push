@@ -22,27 +22,13 @@ import static junit.framework.Assert.assertTrue;
 
 public class SettingManagerTests {
 
-    private final static String CLIENT_UNIQUE_ID = "YHFv65";
     private final static String DEPLOYMENT_KEY = "ABC123";
     private final static String LABEL = "awesome package";
     private final static boolean FAILED_INSTALL = false;
-    private final static boolean IS_PENDING = true;
-    private final static boolean IS_DEBUG_ONLY = false;
-    private final static boolean IS_FIRST_RUN = false;
-    private final static String PREVIOUS_DEPLOYMENT_KEY = "prevABC123";
-    private final static String PREVIOUS_LABEL = "awesome package previous";
     private final static String APP_VERSION = "2.2.1";
-    private final static String STATUS = "Succeeded";
     private final static String DESCRIPTION = "short description";
     private final static boolean IS_MANDATORY = true;
-    private final static boolean UPDATE_APP_VERSION = true;
-    private final static boolean IS_AVAILABLE = true;
-    private final static boolean SHOULD_RUN_BINARY = false;
-    private final static long PACKAGE_SIZE = 102546723;
-    private final static String DOWNLOAD_URL = "https://url.com";
     private final static String PACKAGE_HASH = "HASH";
-    private final static String ERROR = "An error has occurred";
-    private final static String APP_ENTRY_POINT = "/www/index.html";
 
     private SettingsManager mSettingsManager;
 
