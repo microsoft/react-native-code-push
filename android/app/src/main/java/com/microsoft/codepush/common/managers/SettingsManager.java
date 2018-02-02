@@ -50,13 +50,13 @@ public class SettingsManager {
      *
      * @return an array with failed updates info.
      */
-    public List<CodePushLocalPackage> getFailedUpdates() {
+    public ArrayList<CodePushLocalPackage> getFailedUpdates() {
         String failedUpdatesString = mSettings.getString(FAILED_UPDATES_KEY, null);
         if (failedUpdatesString == null) {
             return new ArrayList<>();
         }
         try {
-            return Arrays.asList(CodePushUtils.convertStringToObject(failedUpdatesString, CodePushLocalPackage[].class));
+            return new ArrayList<>(Arrays.asList(CodePushUtils.convertStringToObject(failedUpdatesString, CodePushLocalPackage[].class)));
         } catch (JsonSyntaxException e) {
 
             /* Unrecognized data format, clear and replace with expected format. */
@@ -135,7 +135,7 @@ public class SettingsManager {
      * @param failedPackage failed update package.
      */
     public void saveFailedUpdate(CodePushLocalPackage failedPackage) {
-        List<CodePushLocalPackage> failedUpdates = getFailedUpdates();
+        ArrayList<CodePushLocalPackage> failedUpdates = getFailedUpdates();
         failedUpdates.add(failedPackage);
         String failedUpdatesString = CodePushUtils.convertObjectToJsonString(failedUpdates);
         mSettings.edit().putString(FAILED_UPDATES_KEY, failedUpdatesString).apply();

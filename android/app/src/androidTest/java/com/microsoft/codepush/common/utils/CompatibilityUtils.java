@@ -35,6 +35,12 @@ public class CompatibilityUtils {
      */
     private static final String PENDING_UPDATE_KEY = "CODE_PUSH_PENDING_UPDATE";
 
+    /**
+     * Saves a failed update using old version of the method.
+     *
+     * @param failedPackage {@link JSONObject} containing failed package.
+     * @param context       application context.
+     */
     public static void saveFailedUpdate(JSONObject failedPackage, Context context) throws JSONException {
         SharedPreferences mSettings = context.getSharedPreferences(CodePushConstants.CODE_PUSH_PREFERENCES, 0);
         String failedUpdatesString = mSettings.getString(FAILED_UPDATES_KEY, null);
@@ -72,5 +78,16 @@ public class CompatibilityUtils {
     public static void saveStringToPending(String fakeString, Context context) {
         SharedPreferences mSettings = context.getSharedPreferences(CodePushConstants.CODE_PUSH_PREFERENCES, 0);
         mSettings.edit().putString(PENDING_UPDATE_KEY, fakeString).commit();
+    }
+
+    /**
+     * Saves any string under the <code>FAILED_UPDATE_KEY</code>.
+     *
+     * @param fakeString string to be saved.
+     * @param context    application context.
+     */
+    public static void saveStringToFailed(String fakeString, Context context) {
+        SharedPreferences mSettings = context.getSharedPreferences(CodePushConstants.CODE_PUSH_PREFERENCES, 0);
+        mSettings.edit().putString(FAILED_UPDATES_KEY, fakeString).commit();
     }
 }
