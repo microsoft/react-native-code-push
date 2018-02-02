@@ -4,8 +4,7 @@ package com.microsoft.codepush.common;
  * Common set of the CodePush-specific constants.
  */
 public final class CodePushConstants {
-
-
+    
     /**
      * Key from <code>build.gradle</code> file for TimeStamp value.
      * TimeStamp represents the time when binary package has been build.
