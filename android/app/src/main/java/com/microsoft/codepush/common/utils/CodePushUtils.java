@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.CodePush;
 import com.microsoft.codepush.common.exceptions.CodePushFinalizeException;
@@ -189,7 +190,7 @@ public abstract class CodePushUtils {
      * @return instance of T.
      */
     @SuppressWarnings("WeakerAccess")
-    public static <T> T convertStringToObject(String stringObject, Class<T> classOfT) {
+    public static <T> T convertStringToObject(String stringObject, Class<T> classOfT) throws JsonSyntaxException {
         return mGson.fromJson(stringObject, classOfT);
     }
 
