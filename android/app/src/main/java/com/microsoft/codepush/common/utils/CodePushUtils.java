@@ -112,6 +112,30 @@ public abstract class CodePushUtils {
     }
 
     /**
+     * Gets information from json file and converts it to an object of specified type.
+     * @param filePath path to file with json contents.
+     * @param classOfT the class of the desired type.
+     * @param <T> the type of the desired object.
+     * @return object of type T.
+     * @throws CodePushMalformedDataException exception during parsing data.
+     */
+    public static <T> T getObjectFromJsonFile(String filePath, Class<T> classOfT) throws CodePushMalformedDataException {
+        return convertStringToObject(getJsonObjectFromFile(filePath).toString(), classOfT);
+    }
+
+    /**
+     * Saves object of specified type to a file as json string.
+     * @param object object to be saved.
+     * @param filePath path to file.
+     * @param <T> the type of the desired object.
+     * @throws IOException read/write error occurred while accessing the system.
+     */
+    public static <T> void writeObjectToJsonFile(T object, String filePath) throws IOException {
+        String jsonString = convertObjectToJsonString(object);
+        FileUtils.writeStringToFile(jsonString, filePath);
+    }
+
+    /**
      * Writes {@link JSONObject} to file.
      *
      * @param json     {@link JSONObject} instance.

@@ -44,6 +44,12 @@ android {
             returnDefaultValues = true
         }
     }
+    packagingOptions {
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/license.txt'
+    }
+
 }
 
 dependencies {

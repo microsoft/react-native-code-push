@@ -286,8 +286,9 @@ public class FileUtils {
      * @throws IOException read/write error occurred while accessing the file system.
      */
     public static void writeStringToFile(String content, String filePath) throws IOException {
-        FileWriter writer =  new FileWriter(filePath);
+        FileWriter writer = null;
         try {
+            writer = new FileWriter(filePath);
             writer.write(content);
         } finally {
             Exception e = finalizeResources(

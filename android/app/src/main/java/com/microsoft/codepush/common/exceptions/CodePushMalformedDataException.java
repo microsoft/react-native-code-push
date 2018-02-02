@@ -1,7 +1,5 @@
 package com.microsoft.codepush.common.exceptions;
 
-import java.net.MalformedURLException;
-
 /**
  * Exception class for throwing malformed CodePush data exceptions.
  * Malformed data could be json blob of CodePush update manifest and other json blobs
@@ -18,16 +16,5 @@ public class CodePushMalformedDataException extends Exception {
      */
     public CodePushMalformedDataException(String message, Throwable cause) {
         super(message, cause);
-    }
-
-    /**
-     * Creates instance of the malformed CodePush data exception using
-     * <code>url</code> and <code>cause</code> arguments.
-     *
-     * @param url   the malformed <code>downloadUrl</code> of CodePush update.
-     * @param cause the cause why CodePush <code>downloadUrl</code> cannot be used.
-     */
-    public CodePushMalformedDataException(String url, MalformedURLException cause) {
-        super("The package has an invalid \"downloadUrl\": " + url, cause);
     }
 }
