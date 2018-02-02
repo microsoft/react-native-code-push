@@ -5,6 +5,7 @@ package com.microsoft.codepush.common;
  */
 public final class CodePushConstants {
 
+
     /**
      * Key from <code>build.gradle</code> file for TimeStamp value.
      * TimeStamp represents the time when binary package has been build.
@@ -30,11 +31,6 @@ public final class CodePushConstants {
      * Key for getting CodePush shared preferences from application context.
      */
     public static final String CODE_PUSH_PREFERENCES = "CodePush";
-
-    /**
-     * Key for setting current package hash property for JSONObject.
-     */
-    public static final String CURRENT_PACKAGE_KEY = "currentPackage";
 
     /**
      * File name for diff manifest that distributes with CodePush updates.
@@ -73,11 +69,6 @@ public final class CodePushConstants {
     public static final String DOWNLOAD_URL_KEY = "downloadUrl";
 
     /**
-     * Key to store info about failed CodePush updates.
-     */
-    public static final String FAILED_UPDATES_KEY = "CODE_PUSH_FAILED_UPDATES";
-
-    /**
      * Package file name to store CodePush update metadata file.
      */
     public static final String PACKAGE_FILE_NAME = "app.json";
@@ -86,33 +77,6 @@ public final class CodePushConstants {
      * Package hash key for running CodePush update.
      */
     public static final String PACKAGE_HASH_KEY = "packageHash";
-
-    /**
-     * Package hash key for pending CodePush update.
-     */
-    public static final String PENDING_UPDATE_HASH_KEY = "hash";
-
-    /**
-     * Key for getting/storing pending CodePush update that is loading.
-     */
-    public static final String PENDING_UPDATE_IS_LOADING_KEY = "isLoading";
-
-    /**
-     * Key for getting/storing pending CodePush update.
-     */
-    public static final String PENDING_UPDATE_KEY = "CODE_PUSH_PENDING_UPDATE";
-
-    /**
-     * Key for getting/storing previous CodePush update.
-     */
-    public static final String PREVIOUS_PACKAGE_KEY = "previousPackage";
-
-    /**
-     * Key for specifying app entry point.
-     * For example, it could be JS bundle path for React Native.
-     * Or path to <code>index.js</code> for Cordova.
-     */
-    public static final String APP_ENTRY_POINT_PATH_KEY = "appEntryPoint";
 
     /**
      * Name of the file containing information about the available packages.

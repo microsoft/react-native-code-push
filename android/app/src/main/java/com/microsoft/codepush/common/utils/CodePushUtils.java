@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
 import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.CodePush;
 import com.microsoft.codepush.common.exceptions.CodePushFinalizeException;
@@ -112,6 +113,30 @@ public abstract class CodePushUtils {
     }
 
     /**
+     * Gets information from json file and converts it to an object of specified type.
+     * @param filePath path to file with json contents.
+     * @param classOfT the class of the desired type.
+     * @param <T> the type of the desired object.
+     * @return object of type T.
+     * @throws CodePushMalformedDataException exception during parsing data.
+     */
+    public static <T> T getObjectFromJsonFile(String filePath, Class<T> classOfT) throws CodePushMalformedDataException {
+        return convertStringToObject(getJsonObjectFromFile(filePath).toString(), classOfT);
+    }
+
+    /**
+     * Saves object of specified type to a file as json string.
+     * @param object object to be saved.
+     * @param filePath path to file.
+     * @param <T> the type of the desired object.
+     * @throws IOException read/write error occurred while accessing the system.
+     */
+    public static <T> void writeObjectToJsonFile(T object, String filePath) throws IOException {
+        String jsonString = convertObjectToJsonString(object);
+        FileUtils.writeStringToFile(jsonString, filePath);
+    }
+
+    /**
      * Writes {@link JSONObject} to file.
      *
      * @param json     {@link JSONObject} instance.
@@ -165,7 +190,7 @@ public abstract class CodePushUtils {
      * @return instance of T.
      */
     @SuppressWarnings("WeakerAccess")
-    public static <T> T convertStringToObject(String stringObject, Class<T> classOfT) {
+    public static <T> T convertStringToObject(String stringObject, Class<T> classOfT) throws JsonSyntaxException {
         return mGson.fromJson(stringObject, classOfT);
     }
 

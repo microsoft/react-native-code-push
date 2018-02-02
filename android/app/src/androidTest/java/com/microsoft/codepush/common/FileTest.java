@@ -1,9 +1,8 @@
 package com.microsoft.codepush.common;
 
-import android.os.Environment;
-
 import com.microsoft.codepush.common.utils.FileUtils;
 
+import org.junit.After;
 import org.junit.Test;
 
 import java.io.File;
@@ -16,6 +15,7 @@ import java.util.zip.ZipOutputStream;
 import static com.microsoft.codepush.common.utils.FileTestUtils.getFileMock;
 import static com.microsoft.codepush.common.utils.FileTestUtils.getRealFile;
 import static com.microsoft.codepush.common.utils.FileTestUtils.getRealTestFolder;
+import static com.microsoft.codepush.common.utils.FileTestUtils.getTestingDirectory;
 import static com.microsoft.codepush.common.utils.FileTestUtils.mockDirListFilesFail;
 import static com.microsoft.codepush.common.utils.FileTestUtils.mockDirMkDirsFail;
 import static com.microsoft.codepush.common.utils.FileTestUtils.mockFileRenameToFail;
@@ -42,8 +42,8 @@ public class FileTest {
         String fileContent = "123";
         String newFileName = "newFileName.txt";
         String fileName = "file.txt";
-        File testFolder = new File(Environment.getExternalStorageDirectory(), "Test");
-        File moveTestFolder = new File(Environment.getExternalStorageDirectory(), "TestMove");
+        File testFolder = new File(getTestingDirectory(), "Test");
+        File moveTestFolder = new File(getTestingDirectory(), "TestMove");
         File moveTestSubfolder = new File(moveTestFolder, "Internal");
         testFolder.mkdirs();
         moveTestSubfolder.mkdirs();
@@ -76,9 +76,9 @@ public class FileTest {
         String zipEntryFileContent = "123";
         String zipFileName = "test.zip";
         String zipEntryFileName = "mytext.txt";
-        File zipFolder = new File(Environment.getExternalStorageDirectory(), "/TestZip");
+        File zipFolder = new File(getTestingDirectory(), "/TestZip");
         zipFolder.mkdir();
-        File unzipFolder = new File(Environment.getExternalStorageDirectory(), "/TestZipMove");
+        File unzipFolder = new File(getTestingDirectory(), "/TestZipMove");
         unzipFolder.mkdir();
         File zip = new File(zipFolder, zipFileName);
         ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zip));
@@ -216,5 +216,14 @@ public class FileTest {
     public void copyFailsIfSourceListFilesFails() throws Exception {
         File sourceDir = mockDirListFilesFail();
         FileUtils.copyDirectoryContents(sourceDir, getFileMock(true));
+    }
+
+    /**
+     * After running tests on file, we must delete all the created folders.
+     */
+    @After
+    public void tearDown() throws Exception {
+        File testFolder = getTestingDirectory();
+        testFolder.delete();
     }
 }

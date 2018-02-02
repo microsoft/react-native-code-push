@@ -96,7 +96,7 @@ public class PackageDownloader extends AsyncTask<Void, Void, CodePushDownloadPac
             /* Header allows us to check whether this is a zip-stream. */
             byte[] header = new byte[4];
             int numBytesRead;
-            while ((numBytesRead = bufferedInputStream.read(data, 0, CodePushConstants.DOWNLOAD_BUFFER_SIZE)) >= 0) {
+            while ((numBytesRead = bufferedInputStream.read(data, 0, CodePushConstants.DOWNLOAD_BUFFER_SIZE)) > 0) {
                 if (receivedBytes < 4) {
                     for (int i = 0; i < numBytesRead; i++) {
                         int headerOffset = (int) (receivedBytes) + i;

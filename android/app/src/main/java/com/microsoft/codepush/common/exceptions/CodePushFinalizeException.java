@@ -46,13 +46,6 @@ public class CodePushFinalizeException extends IOException {
 
     /**
      * Creates instance of the resource finalize exception.
-     */
-    public CodePushFinalizeException() {
-        super(OperationType.DEFAULT.getMessage());
-    }
-
-    /**
-     * Creates instance of the resource finalize exception.
      *
      * @param cause the cause why resource cannot be finalized.
      */
@@ -69,14 +62,5 @@ public class CodePushFinalizeException extends IOException {
      */
     public CodePushFinalizeException(OperationType type, Throwable cause) {
         super(type.getMessage(), cause);
-    }
-
-    /**
-     * Creates instance of the resource finalize exception using <code>message</code> argument.
-     *
-     * @param type of the operation being performed before closing resources.
-     */
-    public CodePushFinalizeException(OperationType type) {
-        super(type.getMessage());
     }
 }

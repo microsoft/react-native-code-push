@@ -264,10 +264,7 @@ public class CodePushUpdateUtils {
      */
     @SuppressWarnings("WeakerAccess")
     public static String getJWTFilePath(String updateFolderPath) {
-        return FileUtils.appendPathComponent(
-                FileUtils.appendPathComponent(updateFolderPath, CodePushConstants.CODE_PUSH_FOLDER_PREFIX),
-                CodePushConstants.BUNDLE_JWT_FILE_NAME
-        );
+        return FileUtils.appendPathComponent(updateFolderPath, CodePushConstants.BUNDLE_JWT_FILE_NAME);
     }
 
     /**

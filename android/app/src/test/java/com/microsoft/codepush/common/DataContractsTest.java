@@ -11,6 +11,7 @@ import com.microsoft.codepush.common.datacontracts.CodePushUpdateRequest;
 import com.microsoft.codepush.common.datacontracts.CodePushUpdateResponse;
 import com.microsoft.codepush.common.datacontracts.CodePushUpdateResponseUpdateInfo;
 import com.microsoft.codepush.common.enums.CodePushCheckFrequency;
+import com.microsoft.codepush.common.enums.CodePushDeploymentStatus;
 import com.microsoft.codepush.common.enums.CodePushInstallMode;
 
 import org.junit.Test;
@@ -32,7 +33,6 @@ public class DataContractsTest {
     private final static String PREVIOUS_DEPLOYMENT_KEY = "prevABC123";
     private final static String PREVIOUS_LABEL = "awesome package previous";
     private final static String APP_VERSION = "2.2.1";
-    private final static String STATUS = "Succeeded";
     private final static String DESCRIPTION = "short description";
     private final static boolean IS_MANDATORY = true;
     private final static boolean UPDATE_APP_VERSION = true;
@@ -42,6 +42,7 @@ public class DataContractsTest {
     private final static String DOWNLOAD_URL = "https://url.com";
     private final static String PACKAGE_HASH = "HASH";
     private final static String ERROR = "An error has occurred";
+    private final static String APP_ENTRY_POINT = "/www/index.html";
 
     @Test
     public void dataContractsTest() throws Exception {
@@ -58,7 +59,7 @@ public class DataContractsTest {
         codePushDeploymentStatusReport.setAppVersion(APP_VERSION);
         codePushDeploymentStatusReport.setPreviousDeploymentKey(PREVIOUS_DEPLOYMENT_KEY);
         codePushDeploymentStatusReport.setPreviousLabelOrAppVersion(PREVIOUS_LABEL);
-        codePushDeploymentStatusReport.setStatus(STATUS);
+        codePushDeploymentStatusReport.setStatus(CodePushDeploymentStatus.SUCCEEDED);
         checkDeploymentReport(codePushDeploymentStatusReport);
 
         /* Check update response info. */
@@ -92,7 +93,7 @@ public class DataContractsTest {
         checkPackage(codePushPackage);
 
         /* Check local package. */
-        CodePushLocalPackage codePushLocalPackage = CodePushLocalPackage.createLocalPackage(FAILED_INSTALL, IS_FIRST_RUN, IS_PENDING, IS_DEBUG_ONLY, codePushPackage);
+        CodePushLocalPackage codePushLocalPackage = CodePushLocalPackage.createLocalPackage(FAILED_INSTALL, IS_FIRST_RUN, IS_PENDING, IS_DEBUG_ONLY, APP_ENTRY_POINT, codePushPackage);
         checkLocalPackage(codePushLocalPackage);
         CodePushLocalPackage failedPackage = CodePushLocalPackage.createFailedLocalPackage(new Exception(ERROR));
         assertEquals(ERROR, failedPackage.getDownloadException().getMessage());
@@ -143,7 +144,7 @@ public class DataContractsTest {
         assertEquals(APP_VERSION, codePushDeploymentStatusReport.getAppVersion());
         assertEquals(PREVIOUS_DEPLOYMENT_KEY, codePushDeploymentStatusReport.getPreviousDeploymentKey());
         assertEquals(PREVIOUS_LABEL, codePushDeploymentStatusReport.getPreviousLabelOrAppVersion());
-        assertEquals(STATUS, codePushDeploymentStatusReport.getStatus());
+        assertEquals(CodePushDeploymentStatus.SUCCEEDED, codePushDeploymentStatusReport.getStatus());
         checkDownloadReport(codePushDeploymentStatusReport);
     }
 
