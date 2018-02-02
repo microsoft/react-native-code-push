@@ -109,9 +109,9 @@ public class CodePushStatusReportIdentifier {
     }
 
     /**
-     * Gets version label or empty string (<code>""</code>) if it equals null.
+     * Gets version label or empty string if it equals null.
      *
-     * @return version label or empty string (<code>""</code>) if it equals null
+     * @return version label or empty string if it equals null
      */
     public String getVersionLabelOrEmpty() {
         return versionLabel == null ? "" : versionLabel;
