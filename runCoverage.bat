@@ -8,8 +8,8 @@ rmdir /S /Q node_modules\react-native-code-push\android
 xcopy  /I /Q /E /S ..\android node_modules\react-native-code-push\android
 
 cd android
-gradlew :react-native-code-push:build
-gradlew :react-native-code-push:coverageReport
+call gradlew :react-native-code-push:build
+call gradlew :react-native-code-push:coverageReport
 
 cd ..\..
 
