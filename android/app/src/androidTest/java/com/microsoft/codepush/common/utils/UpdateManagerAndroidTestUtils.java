@@ -8,20 +8,18 @@ import com.microsoft.codepush.common.connection.PackageDownloader;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
 import com.microsoft.codepush.common.managers.CodePushUpdateManager;
 
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import java.io.File;
 
 import static com.microsoft.codepush.common.CodePushConstants.CODE_PUSH_FOLDER_PREFIX;
 import static junit.framework.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.timeout;
 
 /**
  * Utils to make {@link CodePushUpdateManager} testing process easier and avoid code repetition.
  */
-public class UpdateManagerTestUtils {
+public class UpdateManagerAndroidTestUtils {
 
     /**
      * Executes "download" workflow.
@@ -34,14 +32,14 @@ public class UpdateManagerTestUtils {
      */
     public static CodePushDownloadPackageResult executeDownload(CodePushUpdateManager codePushUpdateManager, String packageHash, boolean verify, String url) throws Exception {
         PackageDownloader packageDownloader = new PackageDownloader();
-        DownloadProgressCallback downloadProgressCallback = mock(DownloadProgressCallback.class);
+        DownloadProgressCallback downloadProgressCallback = Mockito.mock(DownloadProgressCallback.class);
         File downloadFolder = new File(Environment.getExternalStorageDirectory(), CODE_PUSH_FOLDER_PREFIX);
         downloadFolder.mkdirs();
         File downloadFilePath = new File(downloadFolder, CodePushConstants.DOWNLOAD_FILE_NAME);
         packageDownloader.setParameters(url, downloadFilePath, downloadProgressCallback);
         CodePushDownloadPackageResult codePushDownloadPackageResult = codePushUpdateManager.downloadPackage(packageHash, packageDownloader);
         if (verify) {
-            Mockito.verify(downloadProgressCallback, timeout(5000).atLeast(1)).call(any(DownloadProgress.class));
+            Mockito.verify(downloadProgressCallback, Mockito.timeout(5000).atLeast(1)).call(Matchers.any(DownloadProgress.class));
         }
         return codePushDownloadPackageResult;
     }

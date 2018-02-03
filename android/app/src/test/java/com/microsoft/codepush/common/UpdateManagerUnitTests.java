@@ -8,7 +8,6 @@ import com.microsoft.codepush.common.exceptions.CodePushSignatureVerificationExc
 import com.microsoft.codepush.common.exceptions.CodePushUnzipException;
 import com.microsoft.codepush.common.managers.CodePushUpdateManager;
 import com.microsoft.codepush.common.utils.CodePushUpdateUtils;
-import com.microsoft.codepush.common.utils.CommonTestPlatformUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
 
 import org.junit.Before;
@@ -35,7 +34,7 @@ import static org.powermock.api.mockito.PowerMockito.spy;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({FileUtils.class, CodePushUpdateUtils.class})
-public class UpdateManagerCommonTest {
+public class UpdateManagerUnitTests {
 
     private final static String PACKAGE_HASH = "FHJDKF648723f";
 
@@ -49,7 +48,7 @@ public class UpdateManagerCommonTest {
 
     @Before
     public void setUp() {
-        codePushUpdateManager = new CodePushUpdateManager(new File(Environment.getExternalStorageDirectory(), "/Test").getPath(), CommonTestPlatformUtils.getInstance());
+        codePushUpdateManager = new CodePushUpdateManager(new File(Environment.getExternalStorageDirectory(), "/Test").getPath(), AndroidTestPlatformUtils.getInstance());
     }
 
     /**
