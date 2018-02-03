@@ -17,17 +17,17 @@ import java.util.List;
 import static com.microsoft.codepush.common.CodePush.LOG_TAG;
 
 /**
- * Manager responsible for saving and retrieving settings.
+ * Manager responsible for saving and retrieving settings in local repository.
  */
 public class SettingsManager {
 
     /**
-     * Key to store info about failed CodePush updates.
+     * Key for getting/storing info about failed CodePush updates.
      */
     private static final String FAILED_UPDATES_KEY = "CODE_PUSH_FAILED_UPDATES";
 
     /**
-     * Key for getting/storing pending CodePush update.
+     * Key for getting/storing info about pending CodePush update.
      */
     private static final String PENDING_UPDATE_KEY = "CODE_PUSH_PENDING_UPDATE";
 
@@ -46,9 +46,10 @@ public class SettingsManager {
     }
 
     /**
-     * Gets an array with failed updates info.
+     * Gets an array with containing failed updates info arranged by time of the failure ascending.
+     * Each item represents an instance of {@link CodePushLocalPackage} that has failed to update.
      *
-     * @return an array with failed updates info.
+     * @return an array of failed updates.
      */
     public ArrayList<CodePushLocalPackage> getFailedUpdates() {
         String failedUpdatesString = mSettings.getString(FAILED_UPDATES_KEY, null);
@@ -91,7 +92,7 @@ public class SettingsManager {
      * Checks whether an update with the following hash has failed.
      *
      * @param packageHash hash to check.
-     * @return <code>true</code> if there is a failed update with provided hash.
+     * @return <code>true</code> if there is a failed update with provided hash, <code>false</code> otherwise.
      */
     public boolean existsFailedUpdate(String packageHash) {
         List<CodePushLocalPackage> failedUpdates = getFailedUpdates();
@@ -106,10 +107,11 @@ public class SettingsManager {
     }
 
     /**
-     * Checks whether there is a pending update.
+     * Checks whether there is a pending update with the provided hash.
+     * Pass <code>null</code> to check if there is any pending update.
      *
      * @param packageHash expected package hash of the pending update.
-     * @return whether there is a pending update with the provided hash.
+     * @return <code>true</code> if there is a pending update with the provided hash.
      */
     public boolean isPendingUpdate(String packageHash) {
         CodePushPendingUpdate pendingUpdate = getPendingUpdate();
@@ -125,16 +127,16 @@ public class SettingsManager {
     }
 
     /**
-     * Removes information about pending update.
+     * Removes information about the pending update.
      */
     public void removePendingUpdate() {
         mSettings.edit().remove(PENDING_UPDATE_KEY).apply();
     }
 
     /**
-     * Adds another failed updates to the list of failed updates.
+     * Adds another failed update info to the list of failed updates.
      *
-     * @param failedPackage failed update package.
+     * @param failedPackage instance of failed {@link CodePushLocalPackage}.
      */
     public void saveFailedUpdate(CodePushLocalPackage failedPackage) {
         ArrayList<CodePushLocalPackage> failedUpdates = getFailedUpdates();
