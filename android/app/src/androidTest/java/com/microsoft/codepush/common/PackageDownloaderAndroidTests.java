@@ -18,9 +18,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 
-import static com.microsoft.codepush.common.utils.PackageDownloaderTestUtils.checkDoInBackgroundFails;
-import static com.microsoft.codepush.common.utils.PackageDownloaderTestUtils.checkDoInBackgroundNotFails;
-import static com.microsoft.codepush.common.utils.PackageDownloaderTestUtils.createPackageDownloader;
+import static com.microsoft.codepush.common.utils.PackageDownloaderAndroidTestUtils.checkDoInBackgroundFails;
+import static com.microsoft.codepush.common.utils.PackageDownloaderAndroidTestUtils.checkDoInBackgroundNotFails;
+import static com.microsoft.codepush.common.utils.PackageDownloaderAndroidTestUtils.createPackageDownloader;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.when;
 /**
  * This class tests all the {@link PackageDownloader} scenarios.
  */
-public class PackageDownloaderTests {
+public class PackageDownloaderAndroidTests {
 
     private final static String FULL_PACKAGE_URL = "https://codepush.blob.core.windows.net/storagev2/6CjTRZUgaYrHlhH3mKy2JsQVIJtsa0021bd2-9be1-4904-b4c6-16ce9c797779";
 

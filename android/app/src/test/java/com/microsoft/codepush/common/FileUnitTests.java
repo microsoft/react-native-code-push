@@ -20,9 +20,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import static com.microsoft.codepush.common.utils.FileUnitTestUtils.mockZipEntry;
 import static com.microsoft.codepush.common.utils.CommonFileTestUtils.getRealFile;
 import static com.microsoft.codepush.common.utils.CommonFileTestUtils.getTestingDirectory;
-import static com.microsoft.codepush.common.utils.CommonFileTestUtils.mockZipEntry;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
@@ -35,7 +35,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(CodePushUtils.class)
-public class FileCommonTest {
+public class FileUnitTests {
 
     /**
      * Shared test file.

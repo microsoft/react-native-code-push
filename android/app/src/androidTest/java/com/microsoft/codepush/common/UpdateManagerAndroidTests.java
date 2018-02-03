@@ -17,7 +17,6 @@ import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
 import com.microsoft.codepush.common.utils.CodePushUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
 import com.microsoft.codepush.common.utils.PlatformUtils;
-import com.microsoft.codepush.common.utils.TestPlatformUtils;
 
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -31,9 +30,9 @@ import java.io.File;
 import java.io.IOException;
 
 import static com.microsoft.codepush.common.CodePushConstants.CODE_PUSH_FOLDER_PREFIX;
-import static com.microsoft.codepush.common.utils.UpdateManagerTestUtils.executeDownload;
-import static com.microsoft.codepush.common.utils.UpdateManagerTestUtils.executeFullWorkflow;
-import static com.microsoft.codepush.common.utils.UpdateManagerTestUtils.executeWorkflow;
+import static com.microsoft.codepush.common.utils.UpdateManagerAndroidTestUtils.executeDownload;
+import static com.microsoft.codepush.common.utils.UpdateManagerAndroidTestUtils.executeFullWorkflow;
+import static com.microsoft.codepush.common.utils.UpdateManagerAndroidTestUtils.executeWorkflow;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -49,7 +48,7 @@ import static org.mockito.Mockito.spy;
  * This class tests all the {@link CodePushUpdateManager} scenarios.
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class UpdateManagerTest {
+public class UpdateManagerAndroidTests {
 
     @Rule
     public final ExpectedException exception = ExpectedException.none();

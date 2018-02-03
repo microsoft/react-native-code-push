@@ -13,7 +13,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Tests all the enum classes.
  */
-public class EnumsTest {
+public class EnumUnitTests {
 
     @Test
     public void enumsTest() throws Exception {

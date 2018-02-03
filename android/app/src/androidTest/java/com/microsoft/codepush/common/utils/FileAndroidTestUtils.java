@@ -1,23 +1,20 @@
 package com.microsoft.codepush.common.utils;
 
-import android.os.Environment;
+import org.mockito.Matchers;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
-import java.util.Random;
 import java.util.zip.ZipEntry;
 
+import static com.microsoft.codepush.common.utils.CommonFileTestUtils.getRealFile;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 
 /**
  * Utils to make {@link FileUtils} testing process easier and avoid code repetition.
  */
-public class FileTestUtils {
+public class FileAndroidTestUtils {
 
     /**
      * Mocks a file to fail when performing <code>mkdirs()</code>.
@@ -26,7 +23,7 @@ public class FileTestUtils {
      */
     public static File mockDirMkDirsFail() {
         File mocked = getFileMock();
-        doReturn(false).when(mocked).mkdirs();
+        Mockito.doReturn(false).when(mocked).mkdirs();
         return mocked;
     }
 
@@ -37,32 +34,8 @@ public class FileTestUtils {
      */
     public static File mockFileRenameToFail() {
         File mocked = getFileMock();
-        doReturn(false).when(mocked).renameTo(any(File.class));
+        Mockito.doReturn(false).when(mocked).renameTo(any(File.class));
         return mocked;
-    }
-
-    /**
-     * Gets a real (not mocked) randomly named folder for testing.
-     * Note: folder is not created.
-     *
-     * @return real test folder.
-     */
-    public static File getRealTestFolder() {
-        Random random = new Random(System.currentTimeMillis());
-        return new File(getTestingDirectory(), "Test" + random.nextInt());
-    }
-
-    /**
-     * Creates a real (not mocked) file for testing.
-     *
-     * @return real test file.
-     */
-    public static File getRealFile() throws IOException {
-        File testFolder = getRealTestFolder();
-        testFolder.mkdirs();
-        File realFile = new File(testFolder, "file.txt");
-        realFile.createNewFile();
-        return realFile;
     }
 
     /**
@@ -72,8 +45,8 @@ public class FileTestUtils {
      */
     public static File mockSetLastModifiedFail() throws IOException {
         File mocked = getRealFile();
-        mocked = spy(mocked);
-        doReturn(false).when(mocked).setLastModified(anyLong());
+        mocked = Mockito.spy(mocked);
+        Mockito.doReturn(false).when(mocked).setLastModified(Matchers.anyLong());
         return mocked;
     }
 
@@ -84,9 +57,9 @@ public class FileTestUtils {
      * @return mocked zip entry.
      */
     public static ZipEntry mockZipEntry(boolean isDirectory) {
-        ZipEntry mocked = mock(ZipEntry.class);
-        doReturn(new Date().getTime()).when(mocked).getTime();
-        doReturn(isDirectory).when(mocked).isDirectory();
+        ZipEntry mocked = Mockito.mock(ZipEntry.class);
+        Mockito.doReturn(new Date().getTime()).when(mocked).getTime();
+        Mockito.doReturn(isDirectory).when(mocked).isDirectory();
         return mocked;
     }
 
@@ -97,7 +70,7 @@ public class FileTestUtils {
      */
     public static File mockDirListFilesFail() {
         File mocked = getFileMock();
-        doReturn(null).when(mocked).listFiles();
+        Mockito.doReturn(null).when(mocked).listFiles();
         return mocked;
     }
 
@@ -118,18 +91,8 @@ public class FileTestUtils {
      * @return mocked file.
      */
     public static File getFileMock(boolean exists) {
-        File mocked = mock(File.class);
-        doReturn(exists).when(mocked).exists();
+        File mocked = Mockito.mock(File.class);
+        Mockito.doReturn(exists).when(mocked).exists();
         return mocked;
-    }
-
-    /**
-     * Gets shared directory to create test folders in.
-     * Note: must be deleted on tearDown.
-     *
-     * @return shared test directory.
-     */
-    public static File getTestingDirectory() {
-        return new File(Environment.getExternalStorageDirectory(), "/Test");
     }
 }
