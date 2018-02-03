@@ -145,17 +145,17 @@ public class SettingManagerTests {
         List<CodePushLocalPackage> codePushLocalPackages = mSettingsManager.getFailedUpdates();
         codePushLocalPackage = codePushLocalPackages.get(0);
         assertEquals(codePushLocalPackage.getDeploymentKey(), DEPLOYMENT_KEY);
-        assertTrue(mSettingsManager.isFailedHash(PACKAGE_HASH));
-        assertFalse(mSettingsManager.isFailedHash(null));
+        assertTrue(mSettingsManager.existsFailedUpdate(PACKAGE_HASH));
+        assertFalse(mSettingsManager.existsFailedUpdate(null));
     }
 
     /**
-     * {@link SettingsManager#isFailedHash(String)} should return <code>false</code> if failed update info is empty.
+     * {@link SettingsManager#existsFailedUpdate(String)} should return <code>false</code> if failed update info is empty.
      */
     @Test
     public void failedUpdateNullTest() throws Exception {
         mSettingsManager.removeFailedUpdates();
-        assertFalse(mSettingsManager.isFailedHash(PACKAGE_HASH));
+        assertFalse(mSettingsManager.existsFailedUpdate(PACKAGE_HASH));
     }
 
     /**

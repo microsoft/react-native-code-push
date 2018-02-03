@@ -60,6 +60,8 @@ public class SettingsManager {
         } catch (JsonSyntaxException e) {
 
             /* Unrecognized data format, clear and replace with expected format. */
+            AppCenterLog.error(LOG_TAG, "Unable to parse failed updates metadata " + failedUpdatesString +
+                    " stored in SharedPreferences");
             List<CodePushLocalPackage> emptyArray = new ArrayList<>();
             mSettings.edit().putString(FAILED_UPDATES_KEY, CodePushUtils.convertObjectToJsonString(emptyArray)).apply();
             return new ArrayList<>();
@@ -79,7 +81,7 @@ public class SettingsManager {
         try {
             return CodePushUtils.convertStringToObject(pendingUpdateString, CodePushPendingUpdate.class);
         } catch (JsonSyntaxException e) {
-            AppCenterLog.logAssert(LOG_TAG, "Unable to parse pending update metadata " + pendingUpdateString +
+            AppCenterLog.error(LOG_TAG, "Unable to parse pending update metadata " + pendingUpdateString +
                     " stored in SharedPreferences");
             return null;
         }
@@ -91,7 +93,7 @@ public class SettingsManager {
      * @param packageHash hash to check.
      * @return <code>true</code> if there is a failed update with provided hash.
      */
-    public boolean isFailedHash(String packageHash) {
+    public boolean existsFailedUpdate(String packageHash) {
         List<CodePushLocalPackage> failedUpdates = getFailedUpdates();
         if (packageHash != null) {
             for (CodePushLocalPackage failedPackage : failedUpdates) {
