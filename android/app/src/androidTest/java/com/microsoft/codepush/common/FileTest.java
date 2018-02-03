@@ -77,9 +77,9 @@ public class FileTest {
         String zipFileName = "test.zip";
         String zipEntryFileName = "mytext.txt";
         File zipFolder = new File(getTestingDirectory(), "/TestZip");
-        zipFolder.mkdir();
+        zipFolder.mkdirs();
         File unzipFolder = new File(getTestingDirectory(), "/TestZipMove");
-        unzipFolder.mkdir();
+        unzipFolder.mkdirs();
         File zip = new File(zipFolder, zipFileName);
         ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zip));
         ZipEntry e = new ZipEntry(zipEntryFileName);
