@@ -30,11 +30,11 @@ android {
         }
 
         test {
-            java.srcDirs += "$projectDir/src/testShared"
+            java.srcDirs += "$projectDir/src/sharedTest/java"
         }
 
         androidTest {
-            java.srcDirs += "$projectDir/src/testShared"
+            java.srcDirs += "$projectDir/src/sharedTest/java"
         }
     }
 
