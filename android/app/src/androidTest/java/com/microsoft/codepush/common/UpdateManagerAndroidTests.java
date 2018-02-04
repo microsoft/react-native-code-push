@@ -15,6 +15,7 @@ import com.microsoft.codepush.common.exceptions.CodePushRollbackException;
 import com.microsoft.codepush.common.managers.CodePushUpdateManager;
 import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
 import com.microsoft.codepush.common.utils.CodePushUtils;
+import com.microsoft.codepush.common.utils.CommonTestPlatformUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
 import com.microsoft.codepush.common.utils.PlatformUtils;
 
@@ -100,7 +101,7 @@ public class UpdateManagerAndroidTests {
 
     @Before
     public void setUp() throws Exception {
-        PlatformUtils platformUtils = TestPlatformUtils.getInstance();
+        PlatformUtils platformUtils = CommonTestPlatformUtils.getInstance();
         codePushUpdateManager = new CodePushUpdateManager(Environment.getExternalStorageDirectory().getPath(), platformUtils);
         CodePushPackage codePushPackage = new CodePushPackage();
         codePushPackage.setAppVersion("1.2");

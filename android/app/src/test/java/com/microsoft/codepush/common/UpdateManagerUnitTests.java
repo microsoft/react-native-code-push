@@ -8,6 +8,7 @@ import com.microsoft.codepush.common.exceptions.CodePushSignatureVerificationExc
 import com.microsoft.codepush.common.exceptions.CodePushUnzipException;
 import com.microsoft.codepush.common.managers.CodePushUpdateManager;
 import com.microsoft.codepush.common.utils.CodePushUpdateUtils;
+import com.microsoft.codepush.common.utils.CommonTestPlatformUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
 
 import org.junit.Before;
@@ -48,7 +49,7 @@ public class UpdateManagerUnitTests {
 
     @Before
     public void setUp() {
-        codePushUpdateManager = new CodePushUpdateManager(new File(Environment.getExternalStorageDirectory(), "/Test").getPath(), AndroidTestPlatformUtils.getInstance());
+        codePushUpdateManager = new CodePushUpdateManager(new File(Environment.getExternalStorageDirectory(), "/Test").getPath(), CommonTestPlatformUtils.getInstance());
     }
 
     /**
