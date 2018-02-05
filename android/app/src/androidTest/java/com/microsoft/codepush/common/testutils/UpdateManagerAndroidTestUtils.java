@@ -1,4 +1,4 @@
-package com.microsoft.codepush.common.utils;
+package com.microsoft.codepush.common.testutils;
 
 import android.os.Environment;
 
@@ -7,8 +7,7 @@ import com.microsoft.codepush.common.DownloadProgress;
 import com.microsoft.codepush.common.connection.PackageDownloader;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
 import com.microsoft.codepush.common.managers.CodePushUpdateManager;
-
-import org.mockito.Mockito;
+import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
 
 import java.io.File;
 
@@ -17,11 +16,12 @@ import static junit.framework.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
 
 /**
  * Utils to make {@link CodePushUpdateManager} testing process easier and avoid code repetition.
  */
-public class UpdateManagerTestUtils {
+public class UpdateManagerAndroidTestUtils {
 
     /**
      * Executes "download" workflow.
@@ -41,7 +41,7 @@ public class UpdateManagerTestUtils {
         packageDownloader.setParameters(url, downloadFilePath, downloadProgressCallback);
         CodePushDownloadPackageResult codePushDownloadPackageResult = codePushUpdateManager.downloadPackage(packageHash, packageDownloader);
         if (verify) {
-            Mockito.verify(downloadProgressCallback, timeout(5000).atLeast(1)).call(any(DownloadProgress.class));
+            verify(downloadProgressCallback, timeout(5000).atLeast(1)).call(any(DownloadProgress.class));
         }
         return codePushDownloadPackageResult;
     }

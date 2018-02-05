@@ -1,25 +1,26 @@
-package com.microsoft.codepush.common.utils;
+package com.microsoft.codepush.common.testutils;
 
 import android.os.Environment;
 
 import com.microsoft.codepush.common.CodePushConstants;
+import com.microsoft.codepush.common.utils.PlatformUtils;
 
 import java.io.File;
 
 /**
  * Platform specific implementation of utils (only for testing).
  */
-public class TestPlatformUtils implements PlatformUtils {
+public class CommonTestPlatformUtils implements PlatformUtils {
 
     /**
      * Instance of the utils implementation (singleton).
      */
-    private static TestPlatformUtils INSTANCE;
+    private static CommonTestPlatformUtils INSTANCE;
 
     /**
      * Private constructor to prevent creating utils manually.
      */
-    private TestPlatformUtils() {
+    private CommonTestPlatformUtils() {
     }
 
     /**
@@ -27,9 +28,9 @@ public class TestPlatformUtils implements PlatformUtils {
      *
      * @return instance.
      */
-    public static TestPlatformUtils getInstance() {
+    public static CommonTestPlatformUtils getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new TestPlatformUtils();
+            INSTANCE = new CommonTestPlatformUtils();
         }
         return INSTANCE;
     }

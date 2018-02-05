@@ -1,15 +1,14 @@
-package com.microsoft.codepush.common;
+package com.microsoft.codepush.common.connection;
 
 import android.os.Environment;
 
-import com.microsoft.codepush.common.connection.PackageDownloader;
+import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.exceptions.CodePushDownloadPackageException;
 import com.microsoft.codepush.common.exceptions.CodePushFinalizeException;
 import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
 import com.microsoft.codepush.common.utils.CodePushUtils;
 
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -18,9 +17,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 
-import static com.microsoft.codepush.common.utils.PackageDownloaderTestUtils.checkDoInBackgroundFails;
-import static com.microsoft.codepush.common.utils.PackageDownloaderTestUtils.checkDoInBackgroundNotFails;
-import static com.microsoft.codepush.common.utils.PackageDownloaderTestUtils.createPackageDownloader;
+import static com.microsoft.codepush.common.testutils.PackageDownloaderAndroidTestUtils.checkDoInBackgroundFails;
+import static com.microsoft.codepush.common.testutils.PackageDownloaderAndroidTestUtils.checkDoInBackgroundNotFails;
+import static com.microsoft.codepush.common.testutils.PackageDownloaderAndroidTestUtils.createPackageDownloader;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -32,7 +31,7 @@ import static org.mockito.Mockito.when;
 /**
  * This class tests all the {@link PackageDownloader} scenarios.
  */
-public class PackageDownloaderTests {
+public class PackageDownloaderAndroidTests {
 
     private final static String FULL_PACKAGE_URL = "https://codepush.blob.core.windows.net/storagev2/6CjTRZUgaYrHlhH3mKy2JsQVIJtsa0021bd2-9be1-4904-b4c6-16ce9c797779";
 
@@ -44,7 +43,7 @@ public class PackageDownloaderTests {
     @Test
     public void downloadFailsIfBytesMismatchMore() throws Exception {
         PackageDownloader packageDownloader = createPackageDownloader(FULL_PACKAGE_URL);
-        HttpURLConnection connectionMock = Mockito.mock(HttpURLConnection.class);
+        HttpURLConnection connectionMock = mock(HttpURLConnection.class);
         doReturn(100).when(connectionMock).getContentLength();
         BufferedInputStream bufferedInputStream = mock(BufferedInputStream.class);
         doReturn(-1).when(bufferedInputStream).read(any(byte[].class), anyInt(), anyInt());
@@ -62,7 +61,7 @@ public class PackageDownloaderTests {
         PackageDownloader packageDownloader = createPackageDownloader(FULL_PACKAGE_URL);
         HttpURLConnection realConnection = (HttpURLConnection) (new URL(FULL_PACKAGE_URL)).openConnection();
         BufferedInputStream realStream = new BufferedInputStream(realConnection.getInputStream());
-        HttpURLConnection connectionMock = Mockito.mock(HttpURLConnection.class);
+        HttpURLConnection connectionMock = mock(HttpURLConnection.class);
         doReturn(-1).when(connectionMock).getContentLength();
         doReturn(realStream).when(connectionMock).getInputStream();
         doReturn(connectionMock).when(packageDownloader).createConnection(anyString());
@@ -76,7 +75,7 @@ public class PackageDownloaderTests {
     @Test
     public void downloadFailsIfCloseFails() throws Exception {
         PackageDownloader packageDownloader = createPackageDownloader(FULL_PACKAGE_URL);
-        HttpURLConnection connectionMock = Mockito.mock(HttpURLConnection.class);
+        HttpURLConnection connectionMock = mock(HttpURLConnection.class);
         BufferedInputStream bufferedInputStream = mock(BufferedInputStream.class);
         doReturn(-1).when(bufferedInputStream).read(any(byte[].class), anyInt(), anyInt());
         doThrow(new IOException()).when(bufferedInputStream).close();
@@ -94,7 +93,7 @@ public class PackageDownloaderTests {
     @Test
     public void downloadDoubleFailureInputStream() throws Exception {
         PackageDownloader packageDownloader = createPackageDownloader(FULL_PACKAGE_URL);
-        HttpURLConnection connectionMock = Mockito.mock(HttpURLConnection.class);
+        HttpURLConnection connectionMock = mock(HttpURLConnection.class);
         BufferedInputStream bufferedInputStream = mock(BufferedInputStream.class);
         doReturn(-1).when(bufferedInputStream).read(any(byte[].class), anyInt(), anyInt());
         doThrow(new IOException()).when(bufferedInputStream).close();
@@ -109,7 +108,7 @@ public class PackageDownloaderTests {
     @Test
     public void downloadSkipCycleTest() throws Exception {
         PackageDownloader packageDownloader = createPackageDownloader(FULL_PACKAGE_URL);
-        HttpURLConnection connectionMock = Mockito.mock(HttpURLConnection.class);
+        HttpURLConnection connectionMock = mock(HttpURLConnection.class);
         BufferedInputStream bufferedInputStream = mock(BufferedInputStream.class);
         when(bufferedInputStream.read(any(byte[].class), anyInt(), anyInt())).thenReturn(1).thenReturn(-1);
         doThrow(new IOException()).when(bufferedInputStream).close();
@@ -143,7 +142,7 @@ public class PackageDownloaderTests {
         File downloadFolder = new File(codePushPath.getPath());
         downloadFolder.mkdirs();
         PackageDownloader packageDownloader = createPackageDownloader(FULL_PACKAGE_URL, downloadFolder);
-        HttpURLConnection connectionMock = Mockito.mock(HttpURLConnection.class);
+        HttpURLConnection connectionMock = mock(HttpURLConnection.class);
         BufferedInputStream bufferedInputStream = mock(BufferedInputStream.class);
         doReturn(0).when(bufferedInputStream).read(any(byte[].class), anyInt(), anyInt());
         doThrow(new IOException()).when(bufferedInputStream).close();
@@ -161,7 +160,7 @@ public class PackageDownloaderTests {
     @Test
     public void downloadDoubleFailureMismatch() throws Exception {
         PackageDownloader packageDownloader = createPackageDownloader(FULL_PACKAGE_URL);
-        HttpURLConnection connectionMock = Mockito.mock(HttpURLConnection.class);
+        HttpURLConnection connectionMock = mock(HttpURLConnection.class);
         BufferedInputStream bufferedInputStream = mock(BufferedInputStream.class);
         doReturn(-1).when(bufferedInputStream).read(any(byte[].class), anyInt(), anyInt());
         doThrow(new IOException()).when(bufferedInputStream).close();

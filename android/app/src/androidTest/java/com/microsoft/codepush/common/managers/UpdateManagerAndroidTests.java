@@ -1,7 +1,8 @@
-package com.microsoft.codepush.common;
+package com.microsoft.codepush.common.managers;
 
 import android.os.Environment;
 
+import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.connection.PackageDownloader;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPackage;
@@ -12,12 +13,11 @@ import com.microsoft.codepush.common.exceptions.CodePushInstallException;
 import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
 import com.microsoft.codepush.common.exceptions.CodePushMergeException;
 import com.microsoft.codepush.common.exceptions.CodePushRollbackException;
-import com.microsoft.codepush.common.managers.CodePushUpdateManager;
 import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
 import com.microsoft.codepush.common.utils.CodePushUtils;
+import com.microsoft.codepush.common.testutils.CommonTestPlatformUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
 import com.microsoft.codepush.common.utils.PlatformUtils;
-import com.microsoft.codepush.common.utils.TestPlatformUtils;
 
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -31,9 +31,9 @@ import java.io.File;
 import java.io.IOException;
 
 import static com.microsoft.codepush.common.CodePushConstants.CODE_PUSH_FOLDER_PREFIX;
-import static com.microsoft.codepush.common.utils.UpdateManagerTestUtils.executeDownload;
-import static com.microsoft.codepush.common.utils.UpdateManagerTestUtils.executeFullWorkflow;
-import static com.microsoft.codepush.common.utils.UpdateManagerTestUtils.executeWorkflow;
+import static com.microsoft.codepush.common.testutils.UpdateManagerAndroidTestUtils.executeDownload;
+import static com.microsoft.codepush.common.testutils.UpdateManagerAndroidTestUtils.executeFullWorkflow;
+import static com.microsoft.codepush.common.testutils.UpdateManagerAndroidTestUtils.executeWorkflow;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -49,7 +49,7 @@ import static org.mockito.Mockito.spy;
  * This class tests all the {@link CodePushUpdateManager} scenarios.
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class UpdateManagerTest {
+public class UpdateManagerAndroidTests {
 
     @Rule
     public final ExpectedException exception = ExpectedException.none();
@@ -101,7 +101,7 @@ public class UpdateManagerTest {
 
     @Before
     public void setUp() throws Exception {
-        PlatformUtils platformUtils = TestPlatformUtils.getInstance();
+        PlatformUtils platformUtils = CommonTestPlatformUtils.getInstance();
         codePushUpdateManager = new CodePushUpdateManager(Environment.getExternalStorageDirectory().getPath(), platformUtils);
         CodePushPackage codePushPackage = new CodePushPackage();
         codePushPackage.setAppVersion("1.2");

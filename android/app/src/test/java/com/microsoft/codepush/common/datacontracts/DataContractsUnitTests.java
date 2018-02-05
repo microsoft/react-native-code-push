@@ -1,4 +1,4 @@
-package com.microsoft.codepush.common;
+package com.microsoft.codepush.common.datacontracts;
 
 import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
 import com.microsoft.codepush.common.datacontracts.CodePushDownloadStatusReport;
@@ -21,7 +21,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Tests all the data classes.
  */
-public class DataContractsTest {
+public class DataContractsUnitTests {
 
     private final static String CLIENT_UNIQUE_ID = "YHFv65";
     private final static String DEPLOYMENT_KEY = "ABC123";
