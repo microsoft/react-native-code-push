@@ -1,4 +1,4 @@
-package com.microsoft.codepush.common;
+package com.microsoft.codepush.common.datacontracts;
 
 import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
 import com.microsoft.codepush.common.datacontracts.CodePushDownloadStatusReport;
@@ -11,6 +11,7 @@ import com.microsoft.codepush.common.datacontracts.CodePushUpdateRequest;
 import com.microsoft.codepush.common.datacontracts.CodePushUpdateResponse;
 import com.microsoft.codepush.common.datacontracts.CodePushUpdateResponseUpdateInfo;
 import com.microsoft.codepush.common.enums.CodePushCheckFrequency;
+import com.microsoft.codepush.common.enums.CodePushDeploymentStatus;
 import com.microsoft.codepush.common.enums.CodePushInstallMode;
 
 import org.junit.Test;
@@ -20,7 +21,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Tests all the data classes.
  */
-public class DataContractsTest {
+public class DataContractsUnitTests {
 
     private final static String CLIENT_UNIQUE_ID = "YHFv65";
     private final static String DEPLOYMENT_KEY = "ABC123";
@@ -32,7 +33,6 @@ public class DataContractsTest {
     private final static String PREVIOUS_DEPLOYMENT_KEY = "prevABC123";
     private final static String PREVIOUS_LABEL = "awesome package previous";
     private final static String APP_VERSION = "2.2.1";
-    private final static String STATUS = "Succeeded";
     private final static String DESCRIPTION = "short description";
     private final static boolean IS_MANDATORY = true;
     private final static boolean UPDATE_APP_VERSION = true;
@@ -59,7 +59,7 @@ public class DataContractsTest {
         codePushDeploymentStatusReport.setAppVersion(APP_VERSION);
         codePushDeploymentStatusReport.setPreviousDeploymentKey(PREVIOUS_DEPLOYMENT_KEY);
         codePushDeploymentStatusReport.setPreviousLabelOrAppVersion(PREVIOUS_LABEL);
-        codePushDeploymentStatusReport.setStatus(STATUS);
+        codePushDeploymentStatusReport.setStatus(CodePushDeploymentStatus.SUCCEEDED);
         checkDeploymentReport(codePushDeploymentStatusReport);
 
         /* Check update response info. */
@@ -144,7 +144,7 @@ public class DataContractsTest {
         assertEquals(APP_VERSION, codePushDeploymentStatusReport.getAppVersion());
         assertEquals(PREVIOUS_DEPLOYMENT_KEY, codePushDeploymentStatusReport.getPreviousDeploymentKey());
         assertEquals(PREVIOUS_LABEL, codePushDeploymentStatusReport.getPreviousLabelOrAppVersion());
-        assertEquals(STATUS, codePushDeploymentStatusReport.getStatus());
+        assertEquals(CodePushDeploymentStatus.SUCCEEDED, codePushDeploymentStatusReport.getStatus());
         checkDownloadReport(codePushDeploymentStatusReport);
     }
 

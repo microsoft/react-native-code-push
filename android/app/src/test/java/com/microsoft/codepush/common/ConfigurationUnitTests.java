@@ -17,7 +17,7 @@ import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({AppCenterLog.class})
-public class ConfigurationTest {
+public class ConfigurationUnitTests {
 
     private final static String CLIENT_UNIQUE_ID = "YHFv65";
     private final static String DEPLOYMENT_KEY = "ABC123";

@@ -1,4 +1,4 @@
-package com.microsoft.codepush.common;
+package com.microsoft.codepush.common.enums;
 
 import com.microsoft.codepush.common.enums.CodePushCheckFrequency;
 import com.microsoft.codepush.common.enums.CodePushDeploymentStatus;
@@ -13,7 +13,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Tests all the enum classes.
  */
-public class EnumsTest {
+public class EnumUnitTests {
 
     @Test
     public void enumsTest() throws Exception {
