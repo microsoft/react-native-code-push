@@ -8,6 +8,7 @@ import com.microsoft.codepush.common.connection.PackageDownloader;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
 import com.microsoft.codepush.common.managers.CodePushUpdateManager;
 import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
+import com.microsoft.codepush.common.utils.FileUtils;
 
 import java.io.File;
 
@@ -33,7 +34,7 @@ public class UpdateManagerAndroidTestUtils {
      * @return result of the download.
      */
     public static CodePushDownloadPackageResult executeDownload(CodePushUpdateManager codePushUpdateManager, String packageHash, boolean verify, String url) throws Exception {
-        PackageDownloader packageDownloader = new PackageDownloader();
+        PackageDownloader packageDownloader = new PackageDownloader(FileUtils.getInstance());
         DownloadProgressCallback downloadProgressCallback = mock(DownloadProgressCallback.class);
         File downloadFolder = new File(Environment.getExternalStorageDirectory(), CODE_PUSH_FOLDER_PREFIX);
         downloadFolder.mkdirs();

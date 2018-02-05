@@ -1,15 +1,5 @@
 package com.microsoft.codepush.common.datacontracts;
 
-import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
-import com.microsoft.codepush.common.datacontracts.CodePushDownloadStatusReport;
-import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
-import com.microsoft.codepush.common.datacontracts.CodePushPackage;
-import com.microsoft.codepush.common.datacontracts.CodePushRemotePackage;
-import com.microsoft.codepush.common.datacontracts.CodePushSyncOptions;
-import com.microsoft.codepush.common.datacontracts.CodePushUpdateDialog;
-import com.microsoft.codepush.common.datacontracts.CodePushUpdateRequest;
-import com.microsoft.codepush.common.datacontracts.CodePushUpdateResponse;
-import com.microsoft.codepush.common.datacontracts.CodePushUpdateResponseUpdateInfo;
 import com.microsoft.codepush.common.enums.CodePushCheckFrequency;
 import com.microsoft.codepush.common.enums.CodePushDeploymentStatus;
 import com.microsoft.codepush.common.enums.CodePushInstallMode;

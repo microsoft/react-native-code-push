@@ -1,7 +1,6 @@
 package com.microsoft.codepush.common.managers;
 
 import com.microsoft.codepush.common.interfaces.CodePushRestartListener;
-import com.microsoft.codepush.common.managers.CodePushRestartManager;
 
 import org.junit.Before;
 import org.junit.Test;

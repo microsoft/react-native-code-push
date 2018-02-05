@@ -39,6 +39,21 @@ public class CodePushUpdateManager {
     private PlatformUtils mPlatformUtils;
 
     /**
+     * Instance of {@link FileUtils} to work with.
+     */
+    private FileUtils mFileUtils;
+
+    /**
+     * Instance of {@link CodePushUpdateUtils} to work with.
+     */
+    private CodePushUpdateUtils mCodePushUpdateUtils;
+
+    /**
+     * Instance of {@link CodePushUtils} to work with.
+     */
+    private CodePushUtils mCodePushUtils;
+
+    /**
      * Whether to use test configuration.
      */
     private static boolean sTestConfigurationFlag = false;
@@ -51,10 +66,17 @@ public class CodePushUpdateManager {
     /**
      * Creates instance of CodePushUpdateManager.
      *
-     * @param documentsDirectory path for storing files.
+     * @param documentsDirectory  path for storing files.
+     * @param platformUtils       instance of {@link PlatformUtils} to work with.
+     * @param fileUtils           instance of {@link FileUtils} to work with.
+     * @param codePushUtils       instance of {@link CodePushUtils} to work with.
+     * @param codePushUpdateUtils instance of {@link CodePushUpdateUtils} to work with.
      */
-    public CodePushUpdateManager(String documentsDirectory, PlatformUtils platformUtils) {
+    public CodePushUpdateManager(String documentsDirectory, PlatformUtils platformUtils, FileUtils fileUtils, CodePushUtils codePushUtils, CodePushUpdateUtils codePushUpdateUtils) {
         mPlatformUtils = platformUtils;
+        mFileUtils = fileUtils;
+        mCodePushUpdateUtils = codePushUpdateUtils;
+        mCodePushUtils = codePushUtils;
         mDocumentsDirectory = documentsDirectory;
     }
 
@@ -72,8 +94,8 @@ public class CodePushUpdateManager {
      *
      * @return path to unzip files to.
      */
-    private String getUnzippedFolderPath() {
-        return FileUtils.appendPathComponent(getCodePushPath(), CodePushConstants.UNZIPPED_FOLDER_NAME);
+    public String getUnzippedFolderPath() {
+        return mFileUtils.appendPathComponent(getCodePushPath(), CodePushConstants.UNZIPPED_FOLDER_NAME);
     }
 
     /**
@@ -91,9 +113,9 @@ public class CodePushUpdateManager {
      * @return application-specific folder.
      */
     private String getCodePushPath() {
-        String codePushPath = FileUtils.appendPathComponent(getDocumentsDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX);
+        String codePushPath = mFileUtils.appendPathComponent(getDocumentsDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX);
         if (sTestConfigurationFlag) {
-            codePushPath = FileUtils.appendPathComponent(codePushPath, "TestPackages");
+            codePushPath = mFileUtils.appendPathComponent(codePushPath, "TestPackages");
         }
         return codePushPath;
     }
@@ -104,7 +126,7 @@ public class CodePushUpdateManager {
      * @return path to json file containing information about the available packages.
      */
     private String getStatusFilePath() {
-        return FileUtils.appendPathComponent(getCodePushPath(), CodePushConstants.STATUS_FILE_NAME);
+        return mFileUtils.appendPathComponent(getCodePushPath(), CodePushConstants.STATUS_FILE_NAME);
     }
 
     /**
@@ -116,10 +138,10 @@ public class CodePushUpdateManager {
      */
     public CodePushPackageInfo getCurrentPackageInfo() throws CodePushMalformedDataException, IOException {
         String statusFilePath = getStatusFilePath();
-        if (!FileUtils.fileAtPathExists(statusFilePath)) {
+        if (!mFileUtils.fileAtPathExists(statusFilePath)) {
             return new CodePushPackageInfo();
         }
-        return CodePushUtils.getObjectFromJsonFile(statusFilePath, CodePushPackageInfo.class);
+        return mCodePushUtils.getObjectFromJsonFile(statusFilePath, CodePushPackageInfo.class);
 
     }
 
@@ -131,7 +153,7 @@ public class CodePushUpdateManager {
      */
     public void updateCurrentPackageInfo(CodePushPackageInfo packageInfo) throws IOException {
         try {
-            CodePushUtils.writeObjectToJsonFile(packageInfo, getStatusFilePath());
+            mCodePushUtils.writeObjectToJsonFile(packageInfo, getStatusFilePath());
         } catch (IOException e) {
             throw new IOException("Error updating current package info", e);
         }
@@ -159,7 +181,7 @@ public class CodePushUpdateManager {
      * @return path to package folder.
      */
     public String getPackageFolderPath(String packageHash) {
-        return FileUtils.appendPathComponent(getCodePushPath(), packageHash);
+        return mFileUtils.appendPathComponent(getCodePushPath(), packageHash);
     }
 
     /**
@@ -186,9 +208,9 @@ public class CodePushUpdateManager {
         }
         String relativeEntryPath = currentPackage.getAppEntryPoint();
         if (relativeEntryPath == null) {
-            return FileUtils.appendPathComponent(packageFolder, entryFileName);
+            return mFileUtils.appendPathComponent(packageFolder, entryFileName);
         } else {
-            return FileUtils.appendPathComponent(packageFolder, relativeEntryPath);
+            return mFileUtils.appendPathComponent(packageFolder, relativeEntryPath);
         }
     }
 
@@ -263,9 +285,9 @@ public class CodePushUpdateManager {
      */
     public CodePushLocalPackage getPackage(String packageHash) throws CodePushGetPackageException {
         String folderPath = getPackageFolderPath(packageHash);
-        String packageFilePath = FileUtils.appendPathComponent(folderPath, CodePushConstants.PACKAGE_FILE_NAME);
+        String packageFilePath = mFileUtils.appendPathComponent(folderPath, CodePushConstants.PACKAGE_FILE_NAME);
         try {
-            return CodePushUtils.getObjectFromJsonFile(packageFilePath, CodePushLocalPackage.class);
+            return mCodePushUtils.getObjectFromJsonFile(packageFilePath, CodePushLocalPackage.class);
         } catch (CodePushMalformedDataException e) {
             throw new CodePushGetPackageException(e);
         }
@@ -280,7 +302,7 @@ public class CodePushUpdateManager {
         try {
             CodePushPackageInfo info = getCurrentPackageInfo();
             String currentPackageFolderPath = getCurrentPackageFolderPath();
-            FileUtils.deleteDirectoryAtPath(currentPackageFolderPath);
+            mFileUtils.deleteDirectoryAtPath(currentPackageFolderPath);
             info.setCurrentPackage(info.getPreviousPackage());
             info.setPreviousPackage(null);
             updateCurrentPackageInfo(info);
@@ -292,7 +314,7 @@ public class CodePushUpdateManager {
     /**
      * Installs the new package.
      *
-     * @param packageHash       package hash to install.
+     * @param packageHash         package hash to install.
      * @param removePendingUpdate whether to remove pending updates data.
      * @throws CodePushInstallException exception occurred during package installation.
      */
@@ -308,12 +330,12 @@ public class CodePushUpdateManager {
             if (removePendingUpdate) {
                 String currentPackageFolderPath = getCurrentPackageFolderPath();
                 if (currentPackageFolderPath != null) {
-                    FileUtils.deleteDirectoryAtPath(currentPackageFolderPath);
+                    mFileUtils.deleteDirectoryAtPath(currentPackageFolderPath);
                 }
             } else {
                 String previousPackageHash = getPreviousPackageHash();
                 if (previousPackageHash != null && !previousPackageHash.equals(packageHash)) {
-                    FileUtils.deleteDirectoryAtPath(getPackageFolderPath(previousPackageHash));
+                    mFileUtils.deleteDirectoryAtPath(getPackageFolderPath(previousPackageHash));
                 }
                 info.setPreviousPackage(info.getCurrentPackage());
             }
@@ -330,13 +352,13 @@ public class CodePushUpdateManager {
      * @throws IOException read/write error occurred while accessing the file system.
      */
     public void clearUpdates() throws IOException {
-        FileUtils.deleteDirectoryAtPath(getCodePushPath());
+        mFileUtils.deleteDirectoryAtPath(getCodePushPath());
     }
 
     /**
      * Downloads the update package.
      *
-     * @param packageHash     update package hash.
+     * @param packageHash       update package hash.
      * @param packageDownloader instance of {@link PackageDownloader} to download the update.
      *                          Note: all the parameters should be already set via {@link PackageDownloader#setParameters(String, File, DownloadProgressCallback)}.
      * @return downloaded package.
@@ -344,12 +366,12 @@ public class CodePushUpdateManager {
      */
     public CodePushDownloadPackageResult downloadPackage(String packageHash, PackageDownloader packageDownloader) throws CodePushDownloadPackageException {
         String newUpdateFolderPath = getPackageFolderPath(packageHash);
-        if (FileUtils.fileAtPathExists(newUpdateFolderPath)) {
+        if (mFileUtils.fileAtPathExists(newUpdateFolderPath)) {
 
             /* This removes any stale data in <code>newPackageFolderPath</code> that could have been left
              * uncleared due to a crash or error during the download or install process. */
             try {
-                FileUtils.deleteDirectoryAtPath(newUpdateFolderPath);
+                mFileUtils.deleteDirectoryAtPath(newUpdateFolderPath);
             } catch (IOException e) {
                 throw new CodePushDownloadPackageException(e);
             }
@@ -375,11 +397,11 @@ public class CodePushUpdateManager {
     public void unzipPackage(File downloadFile) throws CodePushUnzipException {
         String unzippedFolderPath = getUnzippedFolderPath();
         try {
-            FileUtils.unzipFile(downloadFile, new File(unzippedFolderPath));
+            mFileUtils.unzipFile(downloadFile, new File(unzippedFolderPath));
         } catch (IOException e) {
             throw new CodePushUnzipException(e);
         }
-        FileUtils.deleteFileOrFolderSilently(downloadFile);
+        mFileUtils.deleteFileOrFolderSilently(downloadFile);
     }
 
     /**
@@ -394,31 +416,31 @@ public class CodePushUpdateManager {
      */
     public String mergeDiff(String newUpdateHash, String stringPublicKey, String expectedEntryPointFileName) throws CodePushMergeException {
         String newUpdateFolderPath = getPackageFolderPath(newUpdateHash);
-        String newUpdateMetadataPath = FileUtils.appendPathComponent(newUpdateFolderPath, CodePushConstants.PACKAGE_FILE_NAME);
+        String newUpdateMetadataPath = mFileUtils.appendPathComponent(newUpdateFolderPath, CodePushConstants.PACKAGE_FILE_NAME);
         String unzippedFolderPath = getUnzippedFolderPath();
-        String diffManifestFilePath = FileUtils.appendPathComponent(unzippedFolderPath, CodePushConstants.DIFF_MANIFEST_FILE_NAME);
+        String diffManifestFilePath = mFileUtils.appendPathComponent(unzippedFolderPath, CodePushConstants.DIFF_MANIFEST_FILE_NAME);
 
         /* If this is a diff, not full update, copy the new files to the package directory. */
-        boolean isDiffUpdate = FileUtils.fileAtPathExists(diffManifestFilePath);
+        boolean isDiffUpdate = mFileUtils.fileAtPathExists(diffManifestFilePath);
         try {
             if (isDiffUpdate) {
                 String currentPackageFolderPath = getCurrentPackageFolderPath();
                 if (currentPackageFolderPath != null) {
-                    CodePushUpdateUtils.copyNecessaryFilesFromCurrentPackage(diffManifestFilePath, currentPackageFolderPath, newUpdateFolderPath);
+                    mCodePushUpdateUtils.copyNecessaryFilesFromCurrentPackage(diffManifestFilePath, currentPackageFolderPath, newUpdateFolderPath);
                 }
                 File diffManifestFile = new File(diffManifestFilePath);
                 diffManifestFile.delete();
             }
-            FileUtils.copyDirectoryContents(new File(unzippedFolderPath), new File(newUpdateFolderPath));
-            FileUtils.deleteDirectoryAtPath(unzippedFolderPath);
+            mFileUtils.copyDirectoryContents(new File(unzippedFolderPath), new File(newUpdateFolderPath));
+            mFileUtils.deleteDirectoryAtPath(unzippedFolderPath);
         } catch (IOException | CodePushMalformedDataException | JSONException e) {
             throw new CodePushMergeException(e);
         }
-        String appEntryPoint = CodePushUpdateUtils.findEntryPointInUpdateContents(newUpdateFolderPath, expectedEntryPointFileName);
+        String appEntryPoint = mCodePushUpdateUtils.findEntryPointInUpdateContents(newUpdateFolderPath, expectedEntryPointFileName);
         if (appEntryPoint == null) {
             throw new CodePushMergeException("Update is invalid - An entry point file named \"" + expectedEntryPointFileName + "\" could not be found within the downloaded contents. Please check that you are releasing your CodePush updates using the exact same JS entry point file name that was shipped with your app's binary.");
         } else {
-            if (FileUtils.fileAtPathExists(newUpdateMetadataPath)) {
+            if (mFileUtils.fileAtPathExists(newUpdateMetadataPath)) {
                 File metadataFileFromOldUpdate = new File(newUpdateMetadataPath);
                 metadataFileFromOldUpdate.delete();
             }
@@ -434,7 +456,7 @@ public class CodePushUpdateManager {
             }
             return appEntryPoint;
 
-            /* TODO: Remember to rewrite this logic: CodePushUtils.setJSONValueForKey(updatePackage, CodePushConstants.RELATIVE_BUNDLE_PATH_KEY, appEntryPoint); */
+            /* TODO: Remember to rewrite this logic: mCodePushUtils.setJSONValueForKey(updatePackage, CodePushConstants.RELATIVE_BUNDLE_PATH_KEY, appEntryPoint); */
         }
     }
 
@@ -451,12 +473,12 @@ public class CodePushUpdateManager {
         try {
             String newUpdateFolderPath = mPlatformUtils.getUpdateFolderPath(newUpdateHash);
             boolean isSignatureVerificationEnabled = (stringPublicKey != null);
-            String signaturePath = CodePushUpdateUtils.getJWTFilePath(newUpdateFolderPath);
-            boolean isSignatureAppearedInApp = FileUtils.fileAtPathExists(signaturePath);
+            String signaturePath = mCodePushUpdateUtils.getJWTFilePath(newUpdateFolderPath);
+            boolean isSignatureAppearedInApp = mFileUtils.fileAtPathExists(signaturePath);
             if (isSignatureVerificationEnabled) {
                 if (isSignatureAppearedInApp) {
-                    CodePushUpdateUtils.verifyFolderHash(newUpdateFolderPath, newUpdateHash);
-                    CodePushUpdateUtils.verifyUpdateSignature(newUpdateFolderPath, newUpdateHash, stringPublicKey);
+                    mCodePushUpdateUtils.verifyFolderHash(newUpdateFolderPath, newUpdateHash);
+                    mCodePushUpdateUtils.verifyUpdateSignature(newUpdateFolderPath, newUpdateHash, stringPublicKey);
                 } else {
                     throw new CodePushSignatureVerificationException(SignatureExceptionType.NO_SIGNATURE);
                 }
@@ -466,10 +488,10 @@ public class CodePushUpdateManager {
                             "Warning! JWT signature exists in codepush update but code integrity check couldn't be performed because there is no public key configured. "
                                     + "Please ensure that public key is properly configured within your application."
                     );
-                    CodePushUpdateUtils.verifyFolderHash(newUpdateFolderPath, newUpdateHash);
+                    mCodePushUpdateUtils.verifyFolderHash(newUpdateFolderPath, newUpdateHash);
                 } else {
                     if (isDiffUpdate) {
-                        CodePushUpdateUtils.verifyFolderHash(newUpdateFolderPath, newUpdateHash);
+                        mCodePushUpdateUtils.verifyFolderHash(newUpdateFolderPath, newUpdateHash);
                     }
                 }
             }

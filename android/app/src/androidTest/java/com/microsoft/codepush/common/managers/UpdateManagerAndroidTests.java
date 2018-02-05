@@ -13,9 +13,10 @@ import com.microsoft.codepush.common.exceptions.CodePushInstallException;
 import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
 import com.microsoft.codepush.common.exceptions.CodePushMergeException;
 import com.microsoft.codepush.common.exceptions.CodePushRollbackException;
-import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
-import com.microsoft.codepush.common.utils.CodePushUtils;
 import com.microsoft.codepush.common.testutils.CommonTestPlatformUtils;
+import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
+import com.microsoft.codepush.common.utils.CodePushUpdateUtils;
+import com.microsoft.codepush.common.utils.CodePushUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
 import com.microsoft.codepush.common.utils.PlatformUtils;
 
@@ -90,9 +91,19 @@ public class UpdateManagerAndroidTests {
     private final static String SIGNED_PACKAGE_PUBLIC_KEY = "MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAM4bfGAHAEx+IVl5/qaRHisPvpGfCY47O7EkW8XhZVer+bo1k6VT3s8hPBMQfcFw/ZQotWwLkvStelvrQptJFiUCAwEAAQ";
 
     /**
-     * Instance of update manager.
+     * Instance of {@link CodePushUpdateManager} to work with.
      */
     private CodePushUpdateManager codePushUpdateManager;
+
+    /**
+     * Instance of {@link CodePushUtils} to work with.
+     */
+    private CodePushUtils mCodePushUtils;
+
+    /**
+     * Instance of {@link FileUtils} to work with.
+     */
+    private FileUtils mFileUtils;
 
     /**
      * Instance of package json object.
@@ -102,7 +113,10 @@ public class UpdateManagerAndroidTests {
     @Before
     public void setUp() throws Exception {
         PlatformUtils platformUtils = CommonTestPlatformUtils.getInstance();
-        codePushUpdateManager = new CodePushUpdateManager(Environment.getExternalStorageDirectory().getPath(), platformUtils);
+        mFileUtils = FileUtils.getInstance();
+        mCodePushUtils = CodePushUtils.getInstance(mFileUtils);
+        CodePushUpdateUtils codePushUpdateUtils = CodePushUpdateUtils.getInstance(mFileUtils, mCodePushUtils);
+        codePushUpdateManager = new CodePushUpdateManager(Environment.getExternalStorageDirectory().getPath(), platformUtils, mFileUtils, mCodePushUtils, codePushUpdateUtils);
         CodePushPackage codePushPackage = new CodePushPackage();
         codePushPackage.setAppVersion("1.2");
         codePushPackage.setPackageHash(FULL_PACKAGE_HASH);
@@ -124,21 +138,21 @@ public class UpdateManagerAndroidTests {
         codePushUpdateManager.clearUpdates();
         executeFullWorkflow(codePushUpdateManager, FULL_PACKAGE_HASH, FULL_PACKAGE_URL);
         String newUpdateFolderPath = codePushUpdateManager.getPackageFolderPath(FULL_PACKAGE_HASH);
-        String newUpdateMetadataPath = FileUtils.appendPathComponent(newUpdateFolderPath, CodePushConstants.PACKAGE_FILE_NAME);
+        String newUpdateMetadataPath = mFileUtils.appendPathComponent(newUpdateFolderPath, CodePushConstants.PACKAGE_FILE_NAME);
         packageObject.setPackageHash(FULL_PACKAGE_HASH);
-        CodePushUtils.writeObjectToJsonFile(packageObject, newUpdateMetadataPath);
+        mCodePushUtils.writeObjectToJsonFile(packageObject, newUpdateMetadataPath);
         executeFullWorkflow(codePushUpdateManager, DIFF_PACKAGE_HASH, DIFF_PACKAGE_URL);
         newUpdateFolderPath = codePushUpdateManager.getPackageFolderPath(DIFF_PACKAGE_HASH);
-        newUpdateMetadataPath = FileUtils.appendPathComponent(newUpdateFolderPath, CodePushConstants.PACKAGE_FILE_NAME);
+        newUpdateMetadataPath = mFileUtils.appendPathComponent(newUpdateFolderPath, CodePushConstants.PACKAGE_FILE_NAME);
         packageObject.setPackageHash(DIFF_PACKAGE_HASH);
-        CodePushUtils.writeObjectToJsonFile(packageObject, newUpdateMetadataPath);
+        mCodePushUtils.writeObjectToJsonFile(packageObject, newUpdateMetadataPath);
         CodePushLocalPackage codePushPreviousPackage = codePushUpdateManager.getPreviousPackage();
         CodePushLocalPackage codePushCurrentPackage = codePushUpdateManager.getCurrentPackage();
         CodePushLocalPackage codePushPackage = codePushUpdateManager.getPackage(DIFF_PACKAGE_HASH);
         assertEquals(FULL_PACKAGE_HASH, codePushPreviousPackage.getPackageHash());
         assertEquals(DIFF_PACKAGE_HASH, codePushPackage.getPackageHash());
         assertEquals(DIFF_PACKAGE_HASH, codePushCurrentPackage.getPackageHash());
-        assertTrue(FileUtils.fileAtPathExists(codePushUpdateManager.getCurrentPackageEntryPath("index.html")));
+        assertTrue(mFileUtils.fileAtPathExists(codePushUpdateManager.getCurrentPackageEntryPath("index.html")));
     }
 
     /**
@@ -151,7 +165,7 @@ public class UpdateManagerAndroidTests {
         codePushUpdateManager = spy(codePushUpdateManager);
         doReturn(packageObject).when(codePushUpdateManager).getCurrentPackage();
         doReturn("").when(codePushUpdateManager).getCurrentPackageFolderPath();
-        assertFalse(FileUtils.fileAtPathExists(codePushUpdateManager.getCurrentPackageEntryPath("index.html")));
+        assertFalse(mFileUtils.fileAtPathExists(codePushUpdateManager.getCurrentPackageEntryPath("index.html")));
     }
 
     /**
@@ -185,7 +199,7 @@ public class UpdateManagerAndroidTests {
     public void updateManagerClearTest() throws Exception {
         codePushUpdateManager.clearUpdates();
         assertNull(codePushUpdateManager.getCurrentPackageEntryPath(""));
-        assertFalse(FileUtils.fileAtPathExists(new File(Environment.getExternalStorageDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX).getPath()));
+        assertFalse(mFileUtils.fileAtPathExists(new File(Environment.getExternalStorageDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX).getPath()));
         CodePushLocalPackage codePushLocalPackage = codePushUpdateManager.getCurrentPackage();
         assertNull(codePushLocalPackage);
         assertNull(codePushUpdateManager.getCurrentPackageEntryPath(""));
@@ -229,7 +243,7 @@ public class UpdateManagerAndroidTests {
      */
     @Test
     public void nullDownloadProgressCallBack() throws Exception {
-        PackageDownloader packageDownloader = new PackageDownloader();
+        PackageDownloader packageDownloader = new PackageDownloader(mFileUtils);
         File downloadFolder = new File(Environment.getExternalStorageDirectory(), CODE_PUSH_FOLDER_PREFIX);
         downloadFolder.mkdirs();
         File downloadFilePath = new File(downloadFolder, CodePushConstants.DOWNLOAD_FILE_NAME);
@@ -261,7 +275,7 @@ public class UpdateManagerAndroidTests {
         codePushUpdateManager = spy(codePushUpdateManager);
         doReturn(new File(Environment.getExternalStorageDirectory(), "/Test").getPath()).when(codePushUpdateManager).getCurrentPackageFolderPath();
         codePushUpdateManager.installPackage(packageObject.getPackageHash(), true);
-        assertFalse(FileUtils.fileAtPathExists(new File(Environment.getExternalStorageDirectory(), "/Test").getPath()));
+        assertFalse(mFileUtils.fileAtPathExists(new File(Environment.getExternalStorageDirectory(), "/Test").getPath()));
     }
 
     /**
@@ -281,7 +295,7 @@ public class UpdateManagerAndroidTests {
     @Test(expected = CodePushGetPackageException.class)
     public void getPreviousPackageFailsIfGetJsonFails() throws Exception {
         String newUpdateFolderPath = codePushUpdateManager.getPackageFolderPath(DIFF_PACKAGE_HASH);
-        String newUpdateMetadataPath = FileUtils.appendPathComponent(newUpdateFolderPath, CodePushConstants.PACKAGE_FILE_NAME);
+        String newUpdateMetadataPath = mFileUtils.appendPathComponent(newUpdateFolderPath, CodePushConstants.PACKAGE_FILE_NAME);
         new File(newUpdateMetadataPath).delete();
         codePushUpdateManager.getPackage(DIFF_PACKAGE_HASH);
     }
@@ -336,7 +350,7 @@ public class UpdateManagerAndroidTests {
      */
     @Test(expected = CodePushInstallException.class)
     public void installTestFail() throws Exception {
-        FileUtils.deleteDirectoryAtPath(new File(Environment.getExternalStorageDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX).getPath());
+        mFileUtils.deleteDirectoryAtPath(new File(Environment.getExternalStorageDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX).getPath());
         codePushUpdateManager.installPackage(packageObject.getPackageHash(), false);
     }
 
