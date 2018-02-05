@@ -46,10 +46,10 @@ public class CodePushRestartManager {
      * Allows the manager to perform restarts and performs them if there are pending.
      */
     public void allowRestarts() {
-        AppCenterLog.logAssert(LOG_TAG, "Re-allowing restarts");
+        AppCenterLog.info(LOG_TAG, "Re-allowing restarts");
         mAllowed = true;
         if (mRestartQueue.size() > 0) {
-            AppCenterLog.logAssert(LOG_TAG, "Executing pending restart");
+            AppCenterLog.info(LOG_TAG, "Executing pending restart");
             boolean onlyIfUpdateIsPending = mRestartQueue.get(0);
             mRestartQueue.remove(0);
             restartApp(onlyIfUpdateIsPending);
@@ -60,7 +60,7 @@ public class CodePushRestartManager {
      * Disallows the manager to perform restarts.
      */
     public void disallowRestarts() {
-        AppCenterLog.logAssert(LOG_TAG, "Disallowing restarts");
+        AppCenterLog.info(LOG_TAG, "Disallowing restarts");
         mAllowed = false;
     }
 
@@ -79,15 +79,15 @@ public class CodePushRestartManager {
      */
     public boolean restartApp(boolean onlyIfUpdateIsPending) {
         if (mRestartInProgress) {
-            AppCenterLog.logAssert(LOG_TAG, "Restart request queued until the current restart is completed");
+            AppCenterLog.info(LOG_TAG, "Restart request queued until the current restart is completed");
             mRestartQueue.add(onlyIfUpdateIsPending);
         } else if (!mAllowed) {
-            AppCenterLog.logAssert(LOG_TAG, "Restart request queued until restarts are re-allowed");
+            AppCenterLog.info(LOG_TAG, "Restart request queued until restarts are re-allowed");
             mRestartQueue.add(onlyIfUpdateIsPending);
         } else {
             mRestartInProgress = true;
             if (mRestartListener.onRestartReady(onlyIfUpdateIsPending)) {
-                AppCenterLog.logAssert(LOG_TAG, "Restarting app");
+                AppCenterLog.info(LOG_TAG, "Restarting app");
                 return true;
             }
             mRestartInProgress = false;

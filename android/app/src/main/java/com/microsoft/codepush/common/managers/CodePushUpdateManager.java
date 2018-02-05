@@ -445,9 +445,9 @@ public class CodePushUpdateManager {
                 metadataFileFromOldUpdate.delete();
             }
             if (isDiffUpdate) {
-                AppCenterLog.logAssert(CodePush.LOG_TAG, "Applying diff update.");
+                AppCenterLog.info(CodePush.LOG_TAG, "Applying diff update.");
             } else {
-                AppCenterLog.logAssert(CodePush.LOG_TAG, "Applying full update.");
+                AppCenterLog.info(CodePush.LOG_TAG, "Applying full update.");
             }
             try {
                 verifySignature(stringPublicKey, newUpdateHash, isDiffUpdate);
@@ -484,7 +484,7 @@ public class CodePushUpdateManager {
                 }
             } else {
                 if (isSignatureAppearedInApp) {
-                    AppCenterLog.logAssert(CodePush.LOG_TAG,
+                    AppCenterLog.info(CodePush.LOG_TAG,
                             "Warning! JWT signature exists in codepush update but code integrity check couldn't be performed because there is no public key configured. "
                                     + "Please ensure that public key is properly configured within your application."
                     );
