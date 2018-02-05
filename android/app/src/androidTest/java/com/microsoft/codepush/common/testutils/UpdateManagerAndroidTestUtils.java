@@ -9,12 +9,11 @@ import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
 import com.microsoft.codepush.common.managers.CodePushUpdateManager;
 import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
 
-import org.mockito.Matchers;
-
 import java.io.File;
 
 import static com.microsoft.codepush.common.CodePushConstants.CODE_PUSH_FOLDER_PREFIX;
 import static junit.framework.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -42,7 +41,7 @@ public class UpdateManagerAndroidTestUtils {
         packageDownloader.setParameters(url, downloadFilePath, downloadProgressCallback);
         CodePushDownloadPackageResult codePushDownloadPackageResult = codePushUpdateManager.downloadPackage(packageHash, packageDownloader);
         if (verify) {
-            verify(downloadProgressCallback, timeout(5000).atLeast(1)).call(Matchers.any(DownloadProgress.class));
+            verify(downloadProgressCallback, timeout(5000).atLeast(1)).call(any(DownloadProgress.class));
         }
         return codePushDownloadPackageResult;
     }

@@ -2,8 +2,6 @@ package com.microsoft.codepush.common.testutils;
 
 import com.microsoft.codepush.common.utils.FileUtils;
 
-import org.mockito.Matchers;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
@@ -11,6 +9,7 @@ import java.util.zip.ZipEntry;
 
 import static com.microsoft.codepush.common.testutils.CommonFileTestUtils.getRealFile;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -50,7 +49,7 @@ public class FileAndroidTestUtils {
     public static File mockSetLastModifiedFail() throws IOException {
         File mocked = getRealFile();
         mocked = spy(mocked);
-        doReturn(false).when(mocked).setLastModified(Matchers.anyLong());
+        doReturn(false).when(mocked).setLastModified(anyLong());
         return mocked;
     }
 
