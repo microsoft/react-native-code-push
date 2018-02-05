@@ -433,6 +433,8 @@ public class CodePushUpdateManager {
                 throw new CodePushMergeException(e);
             }
             return appEntryPoint;
+
+            /* TODO: Remember to rewrite this logic: CodePushUtils.setJSONValueForKey(updatePackage, CodePushConstants.RELATIVE_BUNDLE_PATH_KEY, appEntryPoint); */
         }
     }
 
