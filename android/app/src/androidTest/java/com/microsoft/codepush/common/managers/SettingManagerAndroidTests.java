@@ -101,6 +101,7 @@ public class SettingManagerAndroidTests {
      */
     @Test
     public void failedUpdateCompatibilityTest() throws Exception {
+        mSettingsManager.removeFailedUpdates();
         CodePushLocalPackage codePushLocalPackage = createLocalPackage(PACKAGE_HASH);
         CommonSettingsCompatibilityUtils.saveFailedUpdate(CodePushUtils.convertObjectToJsonObject(codePushLocalPackage), InstrumentationRegistry.getContext());
         List<CodePushLocalPackage> codePushLocalPackages = mSettingsManager.getFailedUpdates();
