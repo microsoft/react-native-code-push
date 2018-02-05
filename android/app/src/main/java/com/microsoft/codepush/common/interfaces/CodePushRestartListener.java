@@ -11,5 +11,5 @@ public interface CodePushRestartListener {
      * @param onlyIfUpdateIsPending <code>true</code> if restart only if update is pending.
      * @return <code>true</code> if application restarted successfully.
      */
-    boolean onRestartReady(boolean onlyIfUpdateIsPending);
+    boolean onRestart(boolean onlyIfUpdateIsPending);
 }

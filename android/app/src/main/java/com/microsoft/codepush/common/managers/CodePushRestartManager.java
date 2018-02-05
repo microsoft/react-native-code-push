@@ -86,7 +86,7 @@ public class CodePushRestartManager {
             mRestartQueue.add(onlyIfUpdateIsPending);
         } else {
             mRestartInProgress = true;
-            if (mRestartListener.onRestartReady(onlyIfUpdateIsPending)) {
+            if (mRestartListener.onRestart(onlyIfUpdateIsPending)) {
                 AppCenterLog.info(LOG_TAG, "Restarting app");
                 return true;
             }

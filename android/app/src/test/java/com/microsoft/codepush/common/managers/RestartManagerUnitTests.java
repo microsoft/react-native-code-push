@@ -29,36 +29,36 @@ public class RestartManagerUnitTests {
     @Before
     public void setUp() throws Exception {
         mRestartListener = mock(CodePushRestartListener.class);
-        when(mRestartListener.onRestartReady(anyBoolean())).thenReturn(true);
+        when(mRestartListener.onRestart(anyBoolean())).thenReturn(true);
         mRestartManager = new CodePushRestartManager(mRestartListener);
     }
 
     /**
      * Tests the case disallow -> add pending restart -> allow -> perform restart.
-     * {@link CodePushRestartListener#onRestartReady(boolean)} should be called.
+     * {@link CodePushRestartListener#onRestart(boolean)} should be called.
      */
     @Test
     public void testDisallow() throws Exception {
         mRestartManager.disallowRestarts();
         mRestartManager.restartApp(false);
         mRestartManager.allowRestarts();
-        verify(mRestartListener, timeout(0).times(1)).onRestartReady(anyBoolean());
+        verify(mRestartListener, timeout(0).times(1)).onRestart(anyBoolean());
     }
 
     /**
      * Tests the case disallow -> allow.
-     * {@link CodePushRestartListener#onRestartReady(boolean)} should NOT be called.
+     * {@link CodePushRestartListener#onRestart(boolean)} should NOT be called.
      */
     @Test
     public void testDisallowEmptyQueue() throws Exception {
         mRestartManager.disallowRestarts();
         mRestartManager.allowRestarts();
-        verify(mRestartListener, timeout(0).times(0)).onRestartReady(anyBoolean());
+        verify(mRestartListener, timeout(0).times(0)).onRestart(anyBoolean());
     }
 
     /**
      * Tests the case disallow -> add pending restart -> clear the queue -> allow.
-     * {@link CodePushRestartListener#onRestartReady(boolean)} should NOT be called.
+     * {@link CodePushRestartListener#onRestart(boolean)} should NOT be called.
      */
     @Test
     public void testDisallowClearedQueue() throws Exception {
@@ -66,7 +66,7 @@ public class RestartManagerUnitTests {
         mRestartManager.restartApp(false);
         mRestartManager.clearPendingRestart();
         mRestartManager.allowRestarts();
-        verify(mRestartListener, timeout(0).times(0)).onRestartReady(anyBoolean());
+        verify(mRestartListener, timeout(0).times(0)).onRestart(anyBoolean());
     }
 
     /**
@@ -83,12 +83,12 @@ public class RestartManagerUnitTests {
      */
     @Test
     public void testMultipleRestartsInQueue() throws Exception {
-        when(mRestartListener.onRestartReady(anyBoolean())).thenReturn(false);
+        when(mRestartListener.onRestart(anyBoolean())).thenReturn(false);
         mRestartManager = new CodePushRestartManager(mRestartListener);
         mRestartManager.disallowRestarts();
         mRestartManager.restartApp(false);
         mRestartManager.restartApp(false);
         mRestartManager.allowRestarts();
-        verify(mRestartListener, timeout(0).times(2)).onRestartReady(anyBoolean());
+        verify(mRestartListener, timeout(0).times(2)).onRestart(anyBoolean());
     }
 }
