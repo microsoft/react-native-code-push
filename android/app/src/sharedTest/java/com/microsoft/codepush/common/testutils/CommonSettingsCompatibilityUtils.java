@@ -1,4 +1,4 @@
-package com.microsoft.codepush.common.utils;
+package com.microsoft.codepush.common.testutils;
 
 import android.content.Context;
 import android.content.SharedPreferences;

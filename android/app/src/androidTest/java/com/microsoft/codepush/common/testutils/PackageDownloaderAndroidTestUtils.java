@@ -1,18 +1,19 @@
-package com.microsoft.codepush.common.utils;
+package com.microsoft.codepush.common.testutils;
 
 import android.os.Environment;
 
 import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.connection.PackageDownloader;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
-
-import org.mockito.Mockito;
+import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
 
 import java.io.File;
 import java.lang.reflect.Method;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 /**
  * Utils to make {@link PackageDownloader} testing process easier and avoid code repetition.
@@ -60,9 +61,9 @@ public class PackageDownloaderAndroidTestUtils {
         downloadFolder.mkdirs();
         File downloadFilePath = new File(downloadFolder, CodePushConstants.DOWNLOAD_FILE_NAME);
         PackageDownloader packageDownloader = new PackageDownloader();
-        DownloadProgressCallback downloadProgressCallback = Mockito.mock(DownloadProgressCallback.class);
+        DownloadProgressCallback downloadProgressCallback = mock(DownloadProgressCallback.class);
         packageDownloader.setParameters(url, downloadFilePath, downloadProgressCallback);
-        return Mockito.spy(packageDownloader);
+        return spy(packageDownloader);
     }
 
     /**
@@ -74,8 +75,8 @@ public class PackageDownloaderAndroidTestUtils {
      */
     public static PackageDownloader createPackageDownloader(String url, File downloadFilePath) {
         PackageDownloader packageDownloader = new PackageDownloader();
-        DownloadProgressCallback downloadProgressCallback = Mockito.mock(DownloadProgressCallback.class);
+        DownloadProgressCallback downloadProgressCallback = mock(DownloadProgressCallback.class);
         packageDownloader.setParameters(url, downloadFilePath, downloadProgressCallback);
-        return Mockito.spy(packageDownloader);
+        return spy(packageDownloader);
     }
 }

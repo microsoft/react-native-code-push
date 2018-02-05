@@ -1,4 +1,4 @@
-package com.microsoft.codepush.common;
+package com.microsoft.codepush.common.managers;
 
 import android.support.test.InstrumentationRegistry;
 
@@ -6,9 +6,8 @@ import com.google.gson.JsonSyntaxException;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPendingUpdate;
-import com.microsoft.codepush.common.managers.SettingsManager;
 import com.microsoft.codepush.common.utils.CodePushUtils;
-import com.microsoft.codepush.common.utils.CommonSettingsCompatibilityUtils;
+import com.microsoft.codepush.common.testutils.CommonSettingsCompatibilityUtils;
 
 import org.junit.Before;
 import org.junit.Test;

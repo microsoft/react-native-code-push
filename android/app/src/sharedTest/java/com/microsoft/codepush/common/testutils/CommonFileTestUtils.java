@@ -1,6 +1,8 @@
-package com.microsoft.codepush.common.utils;
+package com.microsoft.codepush.common.testutils;
 
 import android.os.Environment;
+
+import com.microsoft.codepush.common.utils.FileUtils;
 
 import java.io.File;
 import java.io.IOException;

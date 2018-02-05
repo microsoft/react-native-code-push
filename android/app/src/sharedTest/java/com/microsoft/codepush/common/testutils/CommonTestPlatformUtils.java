@@ -1,8 +1,9 @@
-package com.microsoft.codepush.common.utils;
+package com.microsoft.codepush.common.testutils;
 
 import android.os.Environment;
 
 import com.microsoft.codepush.common.CodePushConstants;
+import com.microsoft.codepush.common.utils.PlatformUtils;
 
 import java.io.File;
 

@@ -1,6 +1,4 @@
-package com.microsoft.codepush.common;
-
-import com.microsoft.codepush.common.utils.FileUtils;
+package com.microsoft.codepush.common.utils;
 
 import org.junit.After;
 import org.junit.Test;
@@ -12,15 +10,15 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import static com.microsoft.codepush.common.utils.CommonFileTestUtils.getRealFile;
-import static com.microsoft.codepush.common.utils.CommonFileTestUtils.getRealTestFolder;
-import static com.microsoft.codepush.common.utils.CommonFileTestUtils.getTestingDirectory;
-import static com.microsoft.codepush.common.utils.FileAndroidTestUtils.getFileMock;
-import static com.microsoft.codepush.common.utils.FileAndroidTestUtils.mockDirListFilesFail;
-import static com.microsoft.codepush.common.utils.FileAndroidTestUtils.mockDirMkDirsFail;
-import static com.microsoft.codepush.common.utils.FileAndroidTestUtils.mockFileRenameToFail;
-import static com.microsoft.codepush.common.utils.FileAndroidTestUtils.mockSetLastModifiedFail;
-import static com.microsoft.codepush.common.utils.FileAndroidTestUtils.mockZipEntry;
+import static com.microsoft.codepush.common.testutils.CommonFileTestUtils.getRealFile;
+import static com.microsoft.codepush.common.testutils.CommonFileTestUtils.getRealTestFolder;
+import static com.microsoft.codepush.common.testutils.CommonFileTestUtils.getTestingDirectory;
+import static com.microsoft.codepush.common.testutils.FileAndroidTestUtils.getFileMock;
+import static com.microsoft.codepush.common.testutils.FileAndroidTestUtils.mockDirListFilesFail;
+import static com.microsoft.codepush.common.testutils.FileAndroidTestUtils.mockDirMkDirsFail;
+import static com.microsoft.codepush.common.testutils.FileAndroidTestUtils.mockFileRenameToFail;
+import static com.microsoft.codepush.common.testutils.FileAndroidTestUtils.mockSetLastModifiedFail;
+import static com.microsoft.codepush.common.testutils.FileAndroidTestUtils.mockZipEntry;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static org.mockito.Mockito.doReturn;
