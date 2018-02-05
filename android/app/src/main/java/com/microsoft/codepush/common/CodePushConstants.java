@@ -4,7 +4,7 @@ package com.microsoft.codepush.common;
  * Common set of the CodePush-specific constants.
  */
 public final class CodePushConstants {
-
+    
     /**
      * Key from <code>build.gradle</code> file for TimeStamp value.
      * TimeStamp represents the time when binary package has been build.
@@ -68,11 +68,6 @@ public final class CodePushConstants {
     public static final String DOWNLOAD_URL_KEY = "downloadUrl";
 
     /**
-     * Key to store info about failed CodePush updates.
-     */
-    public static final String FAILED_UPDATES_KEY = "CODE_PUSH_FAILED_UPDATES";
-
-    /**
      * Package file name to store CodePush update metadata file.
      */
     public static final String PACKAGE_FILE_NAME = "app.json";
@@ -81,21 +76,6 @@ public final class CodePushConstants {
      * Package hash key for running CodePush update.
      */
     public static final String PACKAGE_HASH_KEY = "packageHash";
-
-    /**
-     * Package hash key for pending CodePush update.
-     */
-    public static final String PENDING_UPDATE_HASH_KEY = "hash";
-
-    /**
-     * Key for getting/storing pending CodePush update that is loading.
-     */
-    public static final String PENDING_UPDATE_IS_LOADING_KEY = "isLoading";
-
-    /**
-     * Key for getting/storing pending CodePush update.
-     */
-    public static final String PENDING_UPDATE_KEY = "CODE_PUSH_PENDING_UPDATE";
 
     /**
      * Name of the file containing information about the available packages.
