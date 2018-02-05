@@ -34,12 +34,12 @@ public class SettingsManager {
     /**
      * Key for getting/storing info about failed CodePush updates.
      */
-    private static final String FAILED_UPDATES_KEY = "CODE_PUSH_FAILED_UPDATES";
+    private final String FAILED_UPDATES_KEY = "CODE_PUSH_FAILED_UPDATES";
 
     /**
      * Key for getting/storing info about pending CodePush update.
      */
-    private static final String PENDING_UPDATE_KEY = "CODE_PUSH_PENDING_UPDATE";
+    private final String PENDING_UPDATE_KEY = "CODE_PUSH_PENDING_UPDATE";
 
     /**
      * Key for storing last deployment report identifier.
