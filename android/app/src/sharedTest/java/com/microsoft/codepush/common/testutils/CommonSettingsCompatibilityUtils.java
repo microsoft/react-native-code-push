@@ -1,4 +1,4 @@
-package com.microsoft.codepush.common.utils;
+package com.microsoft.codepush.common.testutils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -13,7 +13,7 @@ import org.json.JSONObject;
  * Utils to test settings manager compatibility with the old version of the sdk.
  * Contains simplified version of the old storing methods.
  */
-public class CompatibilityUtils {
+public class CommonSettingsCompatibilityUtils {
 
     /**
      * Key for getting/storing pending CodePush failed update.

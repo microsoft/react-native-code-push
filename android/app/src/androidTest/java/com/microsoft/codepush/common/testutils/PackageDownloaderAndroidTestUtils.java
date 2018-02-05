@@ -1,10 +1,11 @@
-package com.microsoft.codepush.common.utils;
+package com.microsoft.codepush.common.testutils;
 
 import android.os.Environment;
 
 import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.connection.PackageDownloader;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
+import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -17,7 +18,7 @@ import static org.mockito.Mockito.spy;
 /**
  * Utils to make {@link PackageDownloader} testing process easier and avoid code repetition.
  */
-public class PackageDownloaderTestUtils {
+public class PackageDownloaderAndroidTestUtils {
 
     /**
      * Executes <code>doInBackground()</code> method of {@link PackageDownloader} only and assert that it fails.

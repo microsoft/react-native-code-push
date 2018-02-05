@@ -1,4 +1,6 @@
-package com.microsoft.codepush.common;
+package com.microsoft.codepush.common.utils;
+
+import com.microsoft.codepush.common.DownloadProgress;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -7,7 +9,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
-public class DownloadProgressTest {
+public class DownloadProgressUnitTests {
 
     private DownloadProgress downloadProgress;
 
