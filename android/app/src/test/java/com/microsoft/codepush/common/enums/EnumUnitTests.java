@@ -1,4 +1,4 @@
-package com.microsoft.codepush.common;
+package com.microsoft.codepush.common.enums;
 
 import com.microsoft.codepush.common.enums.CodePushCheckFrequency;
 import com.microsoft.codepush.common.enums.CodePushDeploymentStatus;

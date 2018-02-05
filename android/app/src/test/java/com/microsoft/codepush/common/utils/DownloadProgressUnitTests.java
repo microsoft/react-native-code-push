@@ -1,4 +1,6 @@
-package com.microsoft.codepush.common;
+package com.microsoft.codepush.common.utils;
+
+import com.microsoft.codepush.common.DownloadProgress;
 
 import org.junit.Before;
 import org.junit.Test;

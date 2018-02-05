@@ -1,15 +1,19 @@
-package com.microsoft.codepush.common.utils;
+package com.microsoft.codepush.common.testutils;
+
+import com.microsoft.codepush.common.utils.FileUtils;
 
 import org.mockito.Matchers;
-import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.zip.ZipEntry;
 
-import static com.microsoft.codepush.common.utils.CommonFileTestUtils.getRealFile;
+import static com.microsoft.codepush.common.testutils.CommonFileTestUtils.getRealFile;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 /**
  * Utils to make {@link FileUtils} testing process easier and avoid code repetition.
@@ -23,7 +27,7 @@ public class FileAndroidTestUtils {
      */
     public static File mockDirMkDirsFail() {
         File mocked = getFileMock();
-        Mockito.doReturn(false).when(mocked).mkdirs();
+        doReturn(false).when(mocked).mkdirs();
         return mocked;
     }
 
@@ -34,7 +38,7 @@ public class FileAndroidTestUtils {
      */
     public static File mockFileRenameToFail() {
         File mocked = getFileMock();
-        Mockito.doReturn(false).when(mocked).renameTo(any(File.class));
+        doReturn(false).when(mocked).renameTo(any(File.class));
         return mocked;
     }
 
@@ -45,8 +49,8 @@ public class FileAndroidTestUtils {
      */
     public static File mockSetLastModifiedFail() throws IOException {
         File mocked = getRealFile();
-        mocked = Mockito.spy(mocked);
-        Mockito.doReturn(false).when(mocked).setLastModified(Matchers.anyLong());
+        mocked = spy(mocked);
+        doReturn(false).when(mocked).setLastModified(Matchers.anyLong());
         return mocked;
     }
 
@@ -57,9 +61,9 @@ public class FileAndroidTestUtils {
      * @return mocked zip entry.
      */
     public static ZipEntry mockZipEntry(boolean isDirectory) {
-        ZipEntry mocked = Mockito.mock(ZipEntry.class);
-        Mockito.doReturn(new Date().getTime()).when(mocked).getTime();
-        Mockito.doReturn(isDirectory).when(mocked).isDirectory();
+        ZipEntry mocked = mock(ZipEntry.class);
+        doReturn(new Date().getTime()).when(mocked).getTime();
+        doReturn(isDirectory).when(mocked).isDirectory();
         return mocked;
     }
 
@@ -70,7 +74,7 @@ public class FileAndroidTestUtils {
      */
     public static File mockDirListFilesFail() {
         File mocked = getFileMock();
-        Mockito.doReturn(null).when(mocked).listFiles();
+        doReturn(null).when(mocked).listFiles();
         return mocked;
     }
 
@@ -91,8 +95,8 @@ public class FileAndroidTestUtils {
      * @return mocked file.
      */
     public static File getFileMock(boolean exists) {
-        File mocked = Mockito.mock(File.class);
-        Mockito.doReturn(exists).when(mocked).exists();
+        File mocked = mock(File.class);
+        doReturn(exists).when(mocked).exists();
         return mocked;
     }
 }

@@ -1,4 +1,6 @@
-package com.microsoft.codepush.common.utils;
+package com.microsoft.codepush.common.testutils;
+
+import com.microsoft.codepush.common.utils.FileUtils;
 
 import java.util.Date;
 import java.util.zip.ZipEntry;

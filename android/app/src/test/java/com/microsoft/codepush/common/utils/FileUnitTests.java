@@ -1,8 +1,6 @@
-package com.microsoft.codepush.common;
+package com.microsoft.codepush.common.utils;
 
 import com.microsoft.codepush.common.exceptions.CodePushFinalizeException;
-import com.microsoft.codepush.common.utils.CodePushUtils;
-import com.microsoft.codepush.common.utils.FileUtils;
 
 import org.junit.After;
 import org.junit.Before;
@@ -20,9 +18,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import static com.microsoft.codepush.common.utils.FileUnitTestUtils.mockZipEntry;
-import static com.microsoft.codepush.common.utils.CommonFileTestUtils.getRealFile;
-import static com.microsoft.codepush.common.utils.CommonFileTestUtils.getTestingDirectory;
+import static com.microsoft.codepush.common.testutils.FileUnitTestUtils.mockZipEntry;
+import static com.microsoft.codepush.common.testutils.CommonFileTestUtils.getRealFile;
+import static com.microsoft.codepush.common.testutils.CommonFileTestUtils.getTestingDirectory;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;

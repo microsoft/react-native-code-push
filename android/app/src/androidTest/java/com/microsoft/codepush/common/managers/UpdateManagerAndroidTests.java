@@ -1,7 +1,8 @@
-package com.microsoft.codepush.common;
+package com.microsoft.codepush.common.managers;
 
 import android.os.Environment;
 
+import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.connection.PackageDownloader;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPackage;
@@ -12,10 +13,9 @@ import com.microsoft.codepush.common.exceptions.CodePushInstallException;
 import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
 import com.microsoft.codepush.common.exceptions.CodePushMergeException;
 import com.microsoft.codepush.common.exceptions.CodePushRollbackException;
-import com.microsoft.codepush.common.managers.CodePushUpdateManager;
 import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
 import com.microsoft.codepush.common.utils.CodePushUtils;
-import com.microsoft.codepush.common.utils.CommonTestPlatformUtils;
+import com.microsoft.codepush.common.testutils.CommonTestPlatformUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
 import com.microsoft.codepush.common.utils.PlatformUtils;
 
@@ -31,9 +31,9 @@ import java.io.File;
 import java.io.IOException;
 
 import static com.microsoft.codepush.common.CodePushConstants.CODE_PUSH_FOLDER_PREFIX;
-import static com.microsoft.codepush.common.utils.UpdateManagerAndroidTestUtils.executeDownload;
-import static com.microsoft.codepush.common.utils.UpdateManagerAndroidTestUtils.executeFullWorkflow;
-import static com.microsoft.codepush.common.utils.UpdateManagerAndroidTestUtils.executeWorkflow;
+import static com.microsoft.codepush.common.testutils.UpdateManagerAndroidTestUtils.executeDownload;
+import static com.microsoft.codepush.common.testutils.UpdateManagerAndroidTestUtils.executeFullWorkflow;
+import static com.microsoft.codepush.common.testutils.UpdateManagerAndroidTestUtils.executeWorkflow;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
