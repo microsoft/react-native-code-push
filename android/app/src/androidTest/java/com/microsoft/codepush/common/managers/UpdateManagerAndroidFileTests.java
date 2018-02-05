@@ -58,6 +58,13 @@ public class UpdateManagerAndroidFileTests {
         recreateUpdateManager(fileUtils, codePushUtils, codePushUpdateUtils);
     }
 
+    /**
+     * Recreates {@link CodePushUpdateManager} with the new mocks of utils.
+     *
+     * @param fileUtils           mocked instance of {@link FileUtils}.
+     * @param codePushUtils       mocked instance of {@link CodePushUtils}.
+     * @param codePushUpdateUtils mocked instance of {@link CodePushUpdateUtils}.
+     */
     private void recreateUpdateManager(FileUtils fileUtils, CodePushUtils codePushUtils, CodePushUpdateUtils codePushUpdateUtils) {
         codePushUpdateManager = new CodePushUpdateManager(new File(Environment.getExternalStorageDirectory(), "/Test").getPath(), mPlatformUtils, fileUtils, codePushUtils, codePushUpdateUtils);
     }
