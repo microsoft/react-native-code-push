@@ -1,7 +1,5 @@
 package com.microsoft.codepush.common.utils;
 
-import com.microsoft.codepush.common.utils.FileUtils;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,11 +15,21 @@ import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
 
+/**
+ * This class tests scenarios of {@link FileUtils#finalizeResources} usage.
+ */
 @RunWith(Parameterized.class)
 public class FinalizeResourcesTest {
 
+    /**
+     * {@link FileUtils} instance.
+     */
     private FileUtils mFileUtils;
 
+    /**
+     * Helper which creates {@link Closeable} resource that doesn't throw {@link IOException} during the close.
+     * @return {@link Closeable} resource
+     */
     private static Closeable createGoodResource() {
         return new Closeable() {
             @Override
@@ -30,6 +38,10 @@ public class FinalizeResourcesTest {
         };
     }
 
+    /**
+     * Helper which creates {@link Closeable} resource that does throw {@link IOException} during the close.
+     * @return {@link Closeable} resource
+     */
     private static Closeable createBrokenResource(final IOException exceptionToThrow) {
         return new Closeable() {
             @Override
@@ -68,7 +80,7 @@ public class FinalizeResourcesTest {
     public void setUp(){
         mFileUtils = FileUtils.getInstance();
     }
-
+    
     @Test
     public void testFinalizeResources() {
         assertEquals(expectedException, mFileUtils.finalizeResources(resourcesToTest, null));

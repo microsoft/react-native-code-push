@@ -88,6 +88,9 @@ public class LoggingUnitTests {
         AppCenterLog.error(eq(CodePush.LOG_TAG), anyString());
     }
 
+    /**
+     * Checks {@link FileUtils#finalizeResources} logs custom error message.
+     */
     @Test
     public void testFinalizeResourcesLogging() {
         mockStatic(AppCenterLog.class);

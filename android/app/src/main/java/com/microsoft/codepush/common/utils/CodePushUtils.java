@@ -146,7 +146,8 @@ public class CodePushUtils {
 
     /**
      * Saves object of specified type to a file as json string.
-     ** @param object object to be saved.
+     *
+     * @param object   object to be saved.
      * @param filePath path to file.
      * @param <T>      the type of the desired object.
      * @throws IOException read/write error occurred while accessing the system.
@@ -200,7 +201,7 @@ public class CodePushUtils {
      * <li>iterates through {@link Map}&lt;String, Object&gt; instance and builds query string.</li>
      * </ul>
      *
-     * @param object object.
+     * @param object      object.
      * @param charsetName charset that will be used for url parts encoding. Recommended value: <code>"UTF-8"</code>
      * @return query string.
      * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
