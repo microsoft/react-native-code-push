@@ -57,10 +57,10 @@ public class CommonFileTestUtils {
      */
     public static File getRealNamedFileWithContent(String fileName, String content) throws IOException {
         File file = getRealNamedFile(fileName);
-        FileWriter fw = new FileWriter(file);
-        fw.write(content);
-        fw.flush();
-        fw.close();
+        FileWriter fileWriter = new FileWriter(file);
+        fileWriter.write(content);
+        fileWriter.flush();
+        fileWriter.close();
         return file;
     }
 

@@ -14,6 +14,7 @@ import org.junit.Test;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 
 import static com.microsoft.codepush.common.testutils.CommonFileTestUtils.getRealNamedFileWithContent;
 import static com.microsoft.codepush.common.testutils.CommonFileTestUtils.getTestingDirectory;
@@ -65,6 +66,8 @@ public class UtilsAndroidTest {
 
     /**
      * Tests getting json object from malformed json file.
+     * {@link CodePushUtils#getJsonObjectFromFile(String)} should throw a {@link CodePushMalformedDataException}
+     * if a {@link JSONException} is thrown during converting.
      */
     @Test(expected = CodePushMalformedDataException.class)
     public void testGetJsonObjectFromMalformedJsonFile() throws Exception {
@@ -75,6 +78,8 @@ public class UtilsAndroidTest {
 
     /**
      * Tests getting json object from nonexistent json file.
+     * {@link CodePushUtils#getJsonObjectFromFile(String)} should throw a {@link CodePushMalformedDataException}
+     * if a {@link java.io.IOException} is thrown during converting.
      */
     @Test(expected = CodePushMalformedDataException.class)
     public void testGetJsonObjectFromNonexistentJsonFile() throws Exception {
@@ -145,6 +150,8 @@ public class UtilsAndroidTest {
 
     /**
      * Tests converting java object to query string using unsupported charset.
+     * {@link CodePushUtils#getQueryStringFromObject(Object, String)} should throw a {@link CodePushMalformedDataException}
+     * if a {@link UnsupportedEncodingException} is thrown during converting.
      */
     @Test(expected = CodePushMalformedDataException.class)
     public void testGetQueryStringFromObjectWithUnsupportedCharSet() throws Exception {

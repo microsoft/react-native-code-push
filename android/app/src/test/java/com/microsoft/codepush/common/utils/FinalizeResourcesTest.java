@@ -6,6 +6,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
+import org.mockito.Mockito;
+import org.powermock.api.mockito.internal.mockcreation.MockCreator;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -14,6 +16,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
 /**
  * This class tests scenarios of {@link FileUtils#finalizeResources} usage.
@@ -28,6 +31,7 @@ public class FinalizeResourcesTest {
 
     /**
      * Helper which creates {@link Closeable} resource that doesn't throw {@link IOException} during the close.
+     *
      * @return {@link Closeable} resource
      */
     private static Closeable createGoodResource() {
@@ -40,6 +44,7 @@ public class FinalizeResourcesTest {
 
     /**
      * Helper which creates {@link Closeable} resource that does throw {@link IOException} during the close.
+     *
      * @return {@link Closeable} resource
      */
     private static Closeable createBrokenResource(final IOException exceptionToThrow) {
@@ -62,7 +67,7 @@ public class FinalizeResourcesTest {
         IOException exception2 = new IOException();
 
         return Arrays.asList(new Object[][]{
-                {Arrays.asList(createGoodResource()), null},
+                {Arrays.asList(mock(Closeable.class) ), null},
                 {Arrays.asList(createGoodResource(), createGoodResource()), null},
                 {Arrays.asList(createGoodResource(), createBrokenResource(exception1)), exception1},
                 {Arrays.asList(createBrokenResource(exception1), createGoodResource()), exception1},
@@ -77,7 +82,7 @@ public class FinalizeResourcesTest {
     public IOException expectedException;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         mFileUtils = FileUtils.getInstance();
     }
 
