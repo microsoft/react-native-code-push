@@ -17,7 +17,6 @@ import com.microsoft.codepush.common.testutils.CommonTestPlatformUtils;
 import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
 import com.microsoft.codepush.common.utils.CodePushUpdateUtils;
 import com.microsoft.codepush.common.utils.CodePushUtils;
-import com.microsoft.codepush.common.testutils.CommonTestPlatformUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
 import com.microsoft.codepush.common.utils.PlatformUtils;
 
