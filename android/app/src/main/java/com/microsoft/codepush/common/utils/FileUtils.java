@@ -1,6 +1,9 @@
 package com.microsoft.codepush.common.utils;
 
+import android.support.annotation.Nullable;
+
 import com.microsoft.appcenter.utils.AppCenterLog;
+import com.microsoft.codepush.common.CodePush;
 import com.microsoft.codepush.common.exceptions.CodePushFinalizeException;
 import com.microsoft.codepush.common.exceptions.CodePushFinalizeException.OperationType;
 
@@ -14,11 +17,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import static com.microsoft.codepush.common.CodePush.LOG_TAG;
-import static com.microsoft.codepush.common.utils.CodePushUtils.finalizeResources;
 
 /**
  * Class containing support methods simplifying work with files.
@@ -26,9 +29,32 @@ import static com.microsoft.codepush.common.utils.CodePushUtils.finalizeResource
 public class FileUtils {
 
     /**
+     * Instance of the class (singleton).
+     */
+    private static FileUtils INSTANCE;
+
+    /**
+     * Gets and instance of {@link FileUtils}.
+     *
+     * @return instance of the class.
+     */
+    public static FileUtils getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new FileUtils();
+        }
+        return INSTANCE;
+    }
+
+    /**
+     * Private constructor to prevent direct creating the instance of the class.
+     */
+    private FileUtils() {
+    }
+
+    /**
      * Size of the buffer used when writing to files.
      */
-    private static final int WRITE_BUFFER_SIZE = 1024 * 8;
+    private final int WRITE_BUFFER_SIZE = 1024 * 8;
 
     /**
      * Appends file path with one more component.
@@ -37,7 +63,7 @@ public class FileUtils {
      * @param appendPathComponent path component to be appended to the base path.
      * @return new path.
      */
-    public static String appendPathComponent(String basePath, String appendPathComponent) {
+    public String appendPathComponent(String basePath, String appendPathComponent) {
         return new File(basePath, appendPathComponent).getAbsolutePath();
     }
 
@@ -48,7 +74,7 @@ public class FileUtils {
      * @param destDir   path to the directory to copy files to.
      * @throws IOException read/write error occurred while accessing the file system.
      */
-    public static void copyDirectoryContents(File sourceDir, File destDir) throws IOException {
+    public void copyDirectoryContents(File sourceDir, File destDir) throws IOException {
         if (!destDir.exists()) {
             if (!destDir.mkdirs()) {
                 throw new IOException("Unable to copy file from " + sourceDir.getAbsolutePath() + " to " + destDir.getAbsolutePath() + ". Error creating directory.");
@@ -95,7 +121,7 @@ public class FileUtils {
      * @param directoryPath path to directory to be deleted. Can't be <code>null</code>.
      * @throws IOException read/write error occurred while accessing the file system.
      */
-    public static void deleteDirectoryAtPath(String directoryPath) throws IOException {
+    public void deleteDirectoryAtPath(String directoryPath) throws IOException {
         if (directoryPath == null) {
             throw new IOException("directoryPath cannot be null");
         }
@@ -111,7 +137,7 @@ public class FileUtils {
      * @param file path to file/folder to be deleted.
      */
     @SuppressWarnings("WeakerAccess")
-    public static void deleteFileOrFolderSilently(File file) {
+    public void deleteFileOrFolderSilently(File file) {
 
         /* First, if this is a directory, delete all the files it contains. */
         if (file.isDirectory()) {
@@ -141,7 +167,7 @@ public class FileUtils {
      * @param filePath path to be checked.
      * @return <code>true</code> if exists, <code>false</code> otherwise.
      */
-    public static boolean fileAtPathExists(String filePath) {
+    public boolean fileAtPathExists(String filePath) {
         return filePath != null && new File(filePath).exists();
     }
 
@@ -153,7 +179,7 @@ public class FileUtils {
      * @param newFileName new name for the file to be moved.
      * @throws IOException read/write error occurred while accessing the file system.
      */
-    public static void moveFile(File fileToMove, File newFolder, String newFileName) throws IOException {
+    public void moveFile(File fileToMove, File newFolder, String newFileName) throws IOException {
         if (!newFolder.exists()) {
             if (!newFolder.mkdirs()) {
                 throw new IOException("Unable to move file from " + fileToMove.getAbsolutePath() + " to " + newFolder.getAbsolutePath() + ". Error creating folder.");
@@ -172,7 +198,7 @@ public class FileUtils {
      * @return string with contents of the file.
      * @throws IOException read/write error occurred while accessing the file system.
      */
-    public static String readFileToString(String filePath) throws IOException {
+    public String readFileToString(String filePath) throws IOException {
         FileInputStream fileInputStream = null;
         BufferedReader reader = null;
         try {
@@ -202,7 +228,7 @@ public class FileUtils {
      * @param destinationFolder path for the unzipped files to be saved.
      * @throws IOException read/write error occurred while accessing the file system.
      */
-    public static void unzipFile(File zipFile, File destinationFolder) throws IOException {
+    public void unzipFile(File zipFile, File destinationFolder) throws IOException {
         FileInputStream fileStream = null;
         BufferedInputStream bufferedStream = null;
         ZipInputStream zipStream = null;
@@ -242,7 +268,7 @@ public class FileUtils {
      * @param zipStream stream with zip file.
      * @throws IOException read/write error occurred while accessing the file system.
      */
-    public static void unzipSingleFile(ZipEntry entry, File file, byte[] buffer, ZipInputStream zipStream) throws IOException {
+    public void unzipSingleFile(ZipEntry entry, File file, byte[] buffer, ZipInputStream zipStream) throws IOException {
         if (entry.isDirectory()) {
             if (!file.mkdirs()) {
                 throw new IOException("Error while unzipping. Cannot create directory.");
@@ -284,7 +310,7 @@ public class FileUtils {
      * @param filePath path to a file.
      * @throws IOException read/write error occurred while accessing the file system.
      */
-    public static void writeStringToFile(String content, String filePath) throws IOException {
+    public void writeStringToFile(String content, String filePath) throws IOException {
         FileWriter writer = null;
         try {
             writer = new FileWriter(filePath, false);
@@ -297,5 +323,33 @@ public class FileUtils {
                 throw new CodePushFinalizeException(OperationType.COPY, e);
             }
         }
+    }
+
+    /**
+     * Gracefully finalizes {@link Closeable} resources. Method iterates through resources and invokes
+     * {@link Closeable#close()} on them if necessary. If an exception is thrown during <code>.close()</code> call,
+     * it is be logged using <code>logErrorMessage</code> parameter as general message.
+     *
+     * @param resources       resources to finalize.
+     * @param logErrorMessage general logging message for errors occurred during resource finalization.
+     * @return last {@link IOException} thrown during resource finalization, null if no exception was thrown.
+     */
+    @SuppressWarnings("WeakerAccess")
+    public IOException finalizeResources(List<Closeable> resources, @Nullable String logErrorMessage) {
+        IOException lastException = null;
+        for (int i = 0; i < resources.size(); i++) {
+            Closeable resource = resources.get(i);
+            try {
+                if (resource != null) {
+                    resource.close();
+                }
+            } catch (IOException e) {
+                lastException = e;
+                if (logErrorMessage != null) {
+                    AppCenterLog.error(CodePush.LOG_TAG, logErrorMessage, e);
+                }
+            }
+        }
+        return lastException;
     }
 }

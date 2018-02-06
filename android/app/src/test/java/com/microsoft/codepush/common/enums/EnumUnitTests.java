@@ -1,11 +1,5 @@
 package com.microsoft.codepush.common.enums;
 
-import com.microsoft.codepush.common.enums.CodePushCheckFrequency;
-import com.microsoft.codepush.common.enums.CodePushDeploymentStatus;
-import com.microsoft.codepush.common.enums.CodePushInstallMode;
-import com.microsoft.codepush.common.enums.CodePushSyncStatus;
-import com.microsoft.codepush.common.enums.CodePushUpdateState;
-
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

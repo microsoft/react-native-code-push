@@ -8,7 +8,7 @@ import com.microsoft.codepush.common.exceptions.CodePushDownloadPackageException
 import com.microsoft.codepush.common.exceptions.CodePushFinalizeException;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
 import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
-import com.microsoft.codepush.common.utils.CodePushUtils;
+import com.microsoft.codepush.common.utils.FileUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -44,6 +44,19 @@ public class PackageDownloader extends AsyncTask<Void, Void, CodePushDownloadPac
      * Callback for download process.
      */
     private DownloadProgressCallback downloadProgressCallback;
+
+    /**
+     * Instance of {@link FileUtils} to work with.
+     */
+    private FileUtils mFileUtils;
+
+    /**
+     * Creates an instance of {@link PackageDownloader} provided instances of utils.
+     * @param fileUtils instance of {@link FileUtils} to work with.
+     */
+    public PackageDownloader(FileUtils fileUtils) {
+        mFileUtils = fileUtils;
+    }
 
     /**
      * Sets the downloader required parameters.
@@ -120,7 +133,7 @@ public class PackageDownloader extends AsyncTask<Void, Void, CodePushDownloadPac
         } catch (IOException e) {
             return new CodePushDownloadPackageResult(new CodePushDownloadPackageException(e));
         } finally {
-            Exception e = CodePushUtils.finalizeResources(
+            Exception e = mFileUtils.finalizeResources(
                     Arrays.asList(bufferedOutputStream, fileOutputStream, bufferedInputStream),
                     null);
             if (e != null) {

@@ -38,10 +38,47 @@ import java.util.Map;
 public class CodePushUpdateUtils {
 
     /**
+     * Instance of {@link FileUtils} to work with.
+     */
+    private FileUtils mFileUtils;
+
+    /**
+     * Instance of {@link CodePushUtils} to work with.
+     */
+    private CodePushUtils mCodePushUtils;
+
+    /**
+     * Instance of the class (singleton).
+     */
+    private static CodePushUpdateUtils INSTANCE;
+
+    /**
+     * Gets and instance of {@link CodePushUpdateUtils}.
+     *
+     * @param fileUtils     instance of {@link FileUtils} to work with.
+     * @param codePushUtils instance of {@link CodePushUtils} to work with.
+     * @return instance of the class.
+     */
+    public static CodePushUpdateUtils getInstance(FileUtils fileUtils, CodePushUtils codePushUtils) {
+        if (INSTANCE == null) {
+            INSTANCE = new CodePushUpdateUtils();
+        }
+        INSTANCE.mFileUtils = fileUtils;
+        INSTANCE.mCodePushUtils = codePushUtils;
+        return INSTANCE;
+    }
+
+    /**
+     * Private constructor to prevent direct creating the instance of the class.
+     */
+    private CodePushUpdateUtils() {
+    }
+
+    /**
      * A string constant defining the operating system-specific new line marker.
      */
     @SuppressWarnings("WeakerAccess")
-    public static final String NEW_LINE = System.getProperty("line.separator");
+    public final String NEW_LINE = System.getProperty("line.separator");
 
     /**
      * Whether hashing file or directory should be ignored or not.
@@ -50,7 +87,7 @@ public class CodePushUpdateUtils {
      * @return <code>true</code> if file path should be ignored during the hashing, <code>false</code> otherwise.
      */
     @SuppressWarnings("WeakerAccess")
-    public static boolean isHashIgnored(String relativeFilePath) {
+    public boolean isHashIgnored(String relativeFilePath) {
 
         /* Note: The hashing logic here must mirror the hashing logic in other native SDK's, as well
          * as in the CLI. Ensure that any changes here are propagated to these other locations. */
@@ -73,7 +110,7 @@ public class CodePushUpdateUtils {
      * @param manifest   reference to manifest object.
      * @throws IOException read/write error occurred while accessing the file system.
      */
-    private static void addContentsOfFolderToManifest(String folderPath, String pathPrefix, ArrayList<String> manifest) throws IOException {
+    private void addContentsOfFolderToManifest(String folderPath, String pathPrefix, ArrayList<String> manifest) throws IOException {
         File folder = new File(folderPath);
         File[] folderFiles = folder.listFiles();
         if (folderFiles == null) {
@@ -90,7 +127,7 @@ public class CodePushUpdateUtils {
                 addContentsOfFolderToManifest(fullFilePath, relativePath, manifest);
             } else {
                 try {
-                    String fileData = FileUtils.readFileToString(file.getAbsolutePath());
+                    String fileData = mFileUtils.readFileToString(file.getAbsolutePath());
                     manifest.add(relativePath + ":" + computeHash(fileData));
                 } catch (IOException e) {
                     throw new IOException("Unable to compute hash of update contents.", e);
@@ -105,7 +142,7 @@ public class CodePushUpdateUtils {
      * @param data input data string.
      * @return computed hash.
      */
-    private static String computeHash(String data) {
+    private String computeHash(String data) {
         return HashUtils.sha256(data);
     }
 
@@ -123,13 +160,13 @@ public class CodePushUpdateUtils {
      * @throws JSONException                  error occurred during parsing a json object.
      * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
-    public static void copyNecessaryFilesFromCurrentPackage(
+    public void copyNecessaryFilesFromCurrentPackage(
             String diffManifestFilePath,
             String currentPackageFolderPath,
             String newPackageFolderPath
     ) throws IOException, JSONException, CodePushMalformedDataException {
-        FileUtils.copyDirectoryContents(new File(currentPackageFolderPath), new File(newPackageFolderPath));
-        JSONObject diffManifest = CodePushUtils.getJsonObjectFromFile(diffManifestFilePath);
+        mFileUtils.copyDirectoryContents(new File(currentPackageFolderPath), new File(newPackageFolderPath));
+        JSONObject diffManifest = mCodePushUtils.getJsonObjectFromFile(diffManifestFilePath);
         JSONArray deletedFiles = diffManifest.getJSONArray("deletedFiles");
         for (int i = 0; i < deletedFiles.length(); i++) {
             String fileNameToDelete = deletedFiles.getString(i);
@@ -149,12 +186,12 @@ public class CodePushUpdateUtils {
      * @param isDebugMode is application running in debug mode.
      * @return hash value.
      */
-    public static String getHashForBinaryContents(Context context, boolean isDebugMode) {
+    public String getHashForBinaryContents(Context context, boolean isDebugMode) {
         try {
-            return CodePushUtils.getStringFromInputStream(context.getAssets().open(CodePushConstants.CODE_PUSH_HASH_FILE_NAME));
+            return mCodePushUtils.getStringFromInputStream(context.getAssets().open(CodePushConstants.CODE_PUSH_HASH_FILE_NAME));
         } catch (IOException e) {
             try {
-                return CodePushUtils.getStringFromInputStream(context.getAssets().open(CodePushConstants.CODE_PUSH_OLD_HASH_FILE_NAME));
+                return mCodePushUtils.getStringFromInputStream(context.getAssets().open(CodePushConstants.CODE_PUSH_OLD_HASH_FILE_NAME));
             } catch (IOException ex) {
                 if (!isDebugMode) {
 
@@ -183,7 +220,7 @@ public class CodePushUpdateUtils {
      * @return <code>true</code>, if verification succeeded, <code>false</code> otherwise.
      * @throws IOException read/write error occurred while accessing the file system.
      */
-    public static boolean verifyFolderHash(String folderPath, String expectedHash) throws IOException {
+    public boolean verifyFolderHash(String folderPath, String expectedHash) throws IOException {
         AppCenterLog.info(CodePush.LOG_TAG, "Verifying hash for folder path: " + folderPath);
         ArrayList<String> updateContentsManifest = new ArrayList<>();
         try {
@@ -216,7 +253,7 @@ public class CodePushUpdateUtils {
      * @throws CodePushSignatureVerificationException if error occurred during JWT decoding or verification.
      */
     @SuppressWarnings("WeakerAccess")
-    public static Map<String, Object> verifyAndDecodeJWT(String jwt, PublicKey publicKey) throws CodePushSignatureVerificationException {
+    public Map<String, Object> verifyAndDecodeJWT(String jwt, PublicKey publicKey) throws CodePushSignatureVerificationException {
         try {
             SignedJWT signedJWT = SignedJWT.parse(jwt);
             JWSVerifier verifier = new RSASSAVerifier((RSAPublicKey) publicKey);
@@ -239,7 +276,7 @@ public class CodePushUpdateUtils {
      * @throws CodePushSignatureVerificationException error during public key parsing.
      */
     @SuppressWarnings("WeakerAccess")
-    public static PublicKey parsePublicKey(String stringPublicKey) throws CodePushSignatureVerificationException {
+    public PublicKey parsePublicKey(String stringPublicKey) throws CodePushSignatureVerificationException {
 
         /* Remove unnecessary "begin/end public key" entries from string. */
         stringPublicKey = stringPublicKey
@@ -263,8 +300,8 @@ public class CodePushUpdateUtils {
      * @return JWT file path of update.
      */
     @SuppressWarnings("WeakerAccess")
-    public static String getJWTFilePath(String updateFolderPath) {
-        return FileUtils.appendPathComponent(updateFolderPath, CodePushConstants.BUNDLE_JWT_FILE_NAME);
+    public String getJWTFilePath(String updateFolderPath) {
+        return mFileUtils.appendPathComponent(updateFolderPath, CodePushConstants.BUNDLE_JWT_FILE_NAME);
     }
 
     /**
@@ -275,10 +312,10 @@ public class CodePushUpdateUtils {
      * @throws CodePushSignatureVerificationException error during signature verification.
      */
     @SuppressWarnings("WeakerAccess")
-    public static String getJWT(String folderPath) throws CodePushSignatureVerificationException {
+    public String getJWT(String folderPath) throws CodePushSignatureVerificationException {
         final String signatureFilePath = getJWTFilePath(folderPath);
         try {
-            return FileUtils.readFileToString(signatureFilePath);
+            return mFileUtils.readFileToString(signatureFilePath);
         } catch (IOException e) {
             throw new CodePushSignatureVerificationException(SignatureExceptionType.READ_SIGNATURE_FILE_ERROR, e);
         }
@@ -293,7 +330,7 @@ public class CodePushUpdateUtils {
      * @return <code>true</code> if signature valid, <code>false</code> otherwise.
      * @throws CodePushSignatureVerificationException error during signature verification.
      */
-    public static boolean verifyUpdateSignature(String folderPath, String packageHash, String stringPublicKey) throws CodePushSignatureVerificationException {
+    public boolean verifyUpdateSignature(String folderPath, String packageHash, String stringPublicKey) throws CodePushSignatureVerificationException {
         AppCenterLog.info(CodePush.LOG_TAG, "Verifying signature for folder path: " + folderPath);
         final PublicKey publicKey = parsePublicKey(stringPublicKey);
         final String jwt = getJWT(folderPath);
@@ -312,15 +349,15 @@ public class CodePushUpdateUtils {
      * @param expectedFileName expected file name of the entry point.
      * @return full path to entry point.
      */
-    public static String findEntryPointInUpdateContents(String folderPath, String expectedFileName) {
+    public String findEntryPointInUpdateContents(String folderPath, String expectedFileName) {
         File folder = new File(folderPath);
         File[] folderFiles = folder.listFiles();
         for (File file : folderFiles) {
-            String fullFilePath = FileUtils.appendPathComponent(folderPath, file.getName());
+            String fullFilePath = mFileUtils.appendPathComponent(folderPath, file.getName());
             if (file.isDirectory()) {
                 String mainBundlePathInSubFolder = findEntryPointInUpdateContents(fullFilePath, expectedFileName);
                 if (mainBundlePathInSubFolder != null) {
-                    return FileUtils.appendPathComponent(file.getName(), mainBundlePathInSubFolder);
+                    return mFileUtils.appendPathComponent(file.getName(), mainBundlePathInSubFolder);
                 }
             } else {
                 String fileName = file.getName();

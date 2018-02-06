@@ -6,8 +6,9 @@ import com.google.gson.JsonSyntaxException;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPendingUpdate;
-import com.microsoft.codepush.common.utils.CodePushUtils;
 import com.microsoft.codepush.common.testutils.CommonSettingsCompatibilityUtils;
+import com.microsoft.codepush.common.utils.CodePushUtils;
+import com.microsoft.codepush.common.utils.FileUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -29,11 +30,20 @@ public class SettingManagerAndroidTests {
     private final static boolean IS_MANDATORY = true;
     private final static String PACKAGE_HASH = "HASH";
 
+    /**
+     * Instance of {@link CodePushUtils} to work with.
+     */
+    private CodePushUtils mCodePushUtils;
+
+    /**
+     * Instance of {@link SettingsManager} to work with.
+     */
     private SettingsManager mSettingsManager;
 
     @Before
     public void setUp() throws Exception {
-        mSettingsManager = new SettingsManager(InstrumentationRegistry.getContext());
+        mCodePushUtils = CodePushUtils.getInstance(FileUtils.getInstance());
+        mSettingsManager = new SettingsManager(InstrumentationRegistry.getContext(), mCodePushUtils);
     }
 
     /**
@@ -103,12 +113,12 @@ public class SettingManagerAndroidTests {
     public void failedUpdateCompatibilityTest() throws Exception {
         mSettingsManager.removeFailedUpdates();
         CodePushLocalPackage codePushLocalPackage = createLocalPackage(PACKAGE_HASH);
-        CommonSettingsCompatibilityUtils.saveFailedUpdate(CodePushUtils.convertObjectToJsonObject(codePushLocalPackage), InstrumentationRegistry.getContext());
+        CommonSettingsCompatibilityUtils.saveFailedUpdate(mCodePushUtils.convertObjectToJsonObject(codePushLocalPackage), InstrumentationRegistry.getContext());
         List<CodePushLocalPackage> codePushLocalPackages = mSettingsManager.getFailedUpdates();
         codePushLocalPackage = codePushLocalPackages.get(0);
         assertEquals(codePushLocalPackage.getDeploymentKey(), DEPLOYMENT_KEY);
         codePushLocalPackage = createLocalPackage("123");
-        CommonSettingsCompatibilityUtils.saveFailedUpdate(CodePushUtils.convertObjectToJsonObject(codePushLocalPackage), InstrumentationRegistry.getContext());
+        CommonSettingsCompatibilityUtils.saveFailedUpdate(mCodePushUtils.convertObjectToJsonObject(codePushLocalPackage), InstrumentationRegistry.getContext());
         codePushLocalPackages = mSettingsManager.getFailedUpdates();
         codePushLocalPackage = codePushLocalPackages.get(1);
         assertEquals(codePushLocalPackage.getPackageHash(), "123");

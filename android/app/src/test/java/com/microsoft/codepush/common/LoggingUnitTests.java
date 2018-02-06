@@ -46,6 +46,7 @@ public class LoggingUnitTests {
 
     @Test
     public void testLogging() throws Exception {
+        FileUtils fileUtils = FileUtils.getInstance();
         CodePushPackage codePushPackage = new CodePushPackage();
         CodePushLocalPackage codePushLocalPackage = CodePushLocalPackage.createLocalPackage(FAILED_INSTALL, IS_FIRST_RUN, IS_PENDING, IS_DEBUG_ONLY, APP_ENTRY_POINT, codePushPackage);
         CodePushUpdateRequest codePushUpdateRequest = CodePushUpdateRequest.createUpdateRequest(DEPLOYMENT_KEY, codePushLocalPackage, CLIENT_UNIQUE_ID);
@@ -66,14 +67,14 @@ public class LoggingUnitTests {
         File testFile = mock(File.class);
         doReturn(null).when(testFile).listFiles();
         doReturn(true).when(testFile).isDirectory();
-        FileUtils.deleteFileOrFolderSilently(testFile);
+        fileUtils.deleteFileOrFolderSilently(testFile);
         testFile = mock(File.class);
         doReturn(false).when(testFile).delete();
-        FileUtils.deleteFileOrFolderSilently(testFile);
+        fileUtils.deleteFileOrFolderSilently(testFile);
         File newTestFile = mock(File.class);
         doReturn(true).when(newTestFile).isDirectory();
         doReturn(new File[]{testFile}).when(newTestFile).listFiles();
-        FileUtils.deleteFileOrFolderSilently(newTestFile);
+        fileUtils.deleteFileOrFolderSilently(newTestFile);
 
         /* We expect exactly 12 logged errors. */
         verifyStatic(VerificationModeFactory.times(12));
