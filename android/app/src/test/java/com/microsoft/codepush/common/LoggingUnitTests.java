@@ -15,8 +15,12 @@ import org.mockito.internal.verification.VerificationModeFactory;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
 
+import static com.microsoft.codepush.common.utils.CodePushUtils.finalizeResources;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -75,4 +79,18 @@ public class LoggingUnitTests {
         verifyStatic(VerificationModeFactory.times(12));
         AppCenterLog.error(eq(CodePush.LOG_TAG), anyString());
     }
+
+    @Test
+    public void testFinalizeResourcesLogging(){
+        mockStatic(AppCenterLog.class);
+        Closeable brokenResource = new Closeable() {
+            @Override
+            public void close() throws IOException {
+                throw new IOException();
+            }
+        };
+        finalizeResources(Arrays.asList(brokenResource), "log me");
+        verifyStatic(VerificationModeFactory.times(1));
+    }
+
 }

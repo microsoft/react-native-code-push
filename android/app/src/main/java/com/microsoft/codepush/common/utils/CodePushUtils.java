@@ -40,6 +40,7 @@ public abstract class CodePushUtils {
      * Gracefully finalizes {@link Closeable} resources. Method iterates through resources and invokes
      * {@link Closeable#close()} on them if necessary. If an exception is thrown during <code>.close()</code> call,
      * it is be logged using <code>logErrorMessage</code> parameter as general message.
+     * TODO move this function to separate class
      *
      * @param resources       resources to finalize.
      * @param logErrorMessage general logging message for errors occurred during resource finalization.
@@ -113,6 +114,29 @@ public abstract class CodePushUtils {
     }
 
     /**
+     * Converts json string to specified class.
+     *
+     * @param stringObject json string.
+     * @param classOfT     the class of T.
+     * @param <T>          the type of the desired object.
+     * @return instance of T.
+     */
+    @SuppressWarnings("WeakerAccess")
+    public static <T> T convertStringToObject(String stringObject, Class<T> classOfT) throws JsonSyntaxException {
+        return mGson.fromJson(stringObject, classOfT);
+    }
+
+    /**
+     * Converts {@link Object} instance to json string.
+     *
+     * @param object {@link JSONObject} instance.
+     * @return the json string.
+     */
+    public static String convertObjectToJsonString(Object object) {
+        return mGson.toJsonTree(object).toString();
+    }
+
+    /**
      * Gets information from json file and converts it to an object of specified type.
      * @param filePath path to file with json contents.
      * @param classOfT the class of the desired type.
@@ -126,6 +150,7 @@ public abstract class CodePushUtils {
 
     /**
      * Saves object of specified type to a file as json string.
+     * 
      * @param object object to be saved.
      * @param filePath path to file.
      * @param <T> the type of the desired object.
@@ -160,16 +185,6 @@ public abstract class CodePushUtils {
     }
 
     /**
-     * Converts {@link Object} instance to json string.
-     *
-     * @param object {@link JSONObject} instance.
-     * @return the json string.
-     */
-    public static String convertObjectToJsonString(Object object) {
-        return mGson.toJsonTree(object).toString();
-    }
-
-    /**
      * Converts {@link JSONObject} instance to specified class.
      *
      * @param jsonObject {@link JSONObject} instance.
@@ -182,19 +197,6 @@ public abstract class CodePushUtils {
     }
 
     /**
-     * Converts json string to specified class.
-     *
-     * @param stringObject json string.
-     * @param classOfT     the class of T.
-     * @param <T>          the type of the desired object.
-     * @return instance of T.
-     */
-    @SuppressWarnings("WeakerAccess")
-    public static <T> T convertStringToObject(String stringObject, Class<T> classOfT) throws JsonSyntaxException {
-        return mGson.fromJson(stringObject, classOfT);
-    }
-
-    /**
      * Converts object to query string using the following scheme: <br/>
      * <ul>
      * <li>object converts to {@link JSONObject};</li>
@@ -204,10 +206,11 @@ public abstract class CodePushUtils {
      * </ul>
      *
      * @param object object.
+     * @param charsetName charset that will be used for url parts encoding. Recommended value: <code>"UTF-8"</code>
      * @return query string.
      * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
-    public static String getQueryStringFromObject(Object object) throws CodePushMalformedDataException {
+    public static String getQueryStringFromObject(Object object, String charsetName) throws CodePushMalformedDataException {
         JsonObject updateRequestJson = mGson.toJsonTree(object).getAsJsonObject();
         Map<String, Object> updateRequestMap = new HashMap<>();
         updateRequestMap = (Map<String, Object>) mGson.fromJson(updateRequestJson, updateRequestMap.getClass());
@@ -217,9 +220,9 @@ public abstract class CodePushUtils {
                 sb.append('&');
             }
             try {
-                sb.append(URLEncoder.encode(e.getKey(), "UTF-8"))
+                sb.append(URLEncoder.encode(e.getKey(), charsetName))
                         .append('=')
-                        .append(URLEncoder.encode(e.getValue().toString(), "UTF-8"));
+                        .append(URLEncoder.encode(e.getValue().toString(), charsetName));
             } catch (UnsupportedEncodingException exception) {
                 throw new CodePushMalformedDataException("Error converting object to query string", exception);
             }

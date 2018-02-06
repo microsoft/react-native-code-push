@@ -5,6 +5,7 @@ import android.os.Environment;
 import com.microsoft.codepush.common.utils.FileUtils;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Random;
 
@@ -30,11 +31,37 @@ public class CommonFileTestUtils {
      * @return real test file.
      */
     public static File getRealFile() throws IOException {
+        return getRealNamedFile("file.txt");
+    }
+
+    /**
+     * Creates a real (not mocked) file for testing.
+     *
+     * @param fileName name for the file.
+     * @return real test file.
+     */
+    public static File getRealNamedFile(String fileName) throws IOException {
         File testFolder = getRealTestFolder();
         testFolder.mkdirs();
-        File realFile = new File(testFolder, "file.txt");
+        File realFile = new File(testFolder, fileName);
         realFile.createNewFile();
         return realFile;
+    }
+
+    /**
+     * Creates a real (not mocked) file for testing.
+     *
+     * @param fileName name for the file.
+     * @param content  content of file.
+     * @return real test file.
+     */
+    public static File getRealNamedFileWithContent(String fileName, String content) throws IOException {
+        File file = getRealNamedFile(fileName);
+        FileWriter fw = new FileWriter(file);
+        fw.write(content);
+        fw.flush();
+        fw.close();
+        return file;
     }
 
     /**
