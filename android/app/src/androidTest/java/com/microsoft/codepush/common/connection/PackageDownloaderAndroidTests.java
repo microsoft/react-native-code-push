@@ -6,7 +6,7 @@ import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.exceptions.CodePushDownloadPackageException;
 import com.microsoft.codepush.common.exceptions.CodePushFinalizeException;
 import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
-import com.microsoft.codepush.common.utils.CodePushUtils;
+import com.microsoft.codepush.common.utils.FileUtils;
 
 import org.junit.Test;
 
@@ -33,6 +33,9 @@ import static org.mockito.Mockito.when;
  */
 public class PackageDownloaderAndroidTests {
 
+    /**
+     * Url of the package representing the full update.
+     */
     private final static String FULL_PACKAGE_URL = "https://codepush.blob.core.windows.net/storagev2/6CjTRZUgaYrHlhH3mKy2JsQVIJtsa0021bd2-9be1-4904-b4c6-16ce9c797779";
 
     /**
@@ -87,7 +90,7 @@ public class PackageDownloaderAndroidTests {
     /**
      * If download fails with an {@link IOException}, it should go straight to finally block,
      * where it should throw a {@link CodePushFinalizeException}
-     * if an {@link IOException} is thrown during {@link CodePushUtils#finalizeResources(List, String)}.
+     * if an {@link IOException} is thrown during {@link FileUtils#finalizeResources(List, String)}.
      * In this case, downloading fails on {@link HttpURLConnection#getInputStream()}.
      */
     @Test
@@ -133,7 +136,7 @@ public class PackageDownloaderAndroidTests {
     /**
      * If download fails with an {@link IOException}, it should go straight to finally block,
      * where it should throw a {@link CodePushFinalizeException}
-     * if an {@link IOException} is thrown during {@link CodePushUtils#finalizeResources(List, String)}.
+     * if an {@link IOException} is thrown during {@link FileUtils#finalizeResources(List, String)}.
      * In this case, downloading fails when creating {@link java.io.FileOutputStream} for folder (should be a file, not directory).
      */
     @Test
@@ -154,7 +157,7 @@ public class PackageDownloaderAndroidTests {
     /**
      * If download returns {@link CodePushDownloadPackageResult} with an {@link CodePushDownloadPackageException},
      * it should go straight to finally block, where it should throw a {@link CodePushFinalizeException}
-     * if an {@link IOException} is thrown during {@link CodePushUtils#finalizeResources(List, String)}.
+     * if an {@link IOException} is thrown during {@link FileUtils#finalizeResources(List, String)}.
      * In this case, downloading fails due to bytes mismatch.
      */
     @Test

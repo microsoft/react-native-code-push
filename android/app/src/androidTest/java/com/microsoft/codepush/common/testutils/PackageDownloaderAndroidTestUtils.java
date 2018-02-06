@@ -6,6 +6,7 @@ import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.connection.PackageDownloader;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
 import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
+import com.microsoft.codepush.common.utils.FileUtils;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -60,7 +61,7 @@ public class PackageDownloaderAndroidTestUtils {
         File downloadFolder = new File(codePushPath.getPath());
         downloadFolder.mkdirs();
         File downloadFilePath = new File(downloadFolder, CodePushConstants.DOWNLOAD_FILE_NAME);
-        PackageDownloader packageDownloader = new PackageDownloader();
+        PackageDownloader packageDownloader = new PackageDownloader(FileUtils.getInstance());
         DownloadProgressCallback downloadProgressCallback = mock(DownloadProgressCallback.class);
         packageDownloader.setParameters(url, downloadFilePath, downloadProgressCallback);
         return spy(packageDownloader);
@@ -74,7 +75,7 @@ public class PackageDownloaderAndroidTestUtils {
      * @return package downloader instance that can be mocked.
      */
     public static PackageDownloader createPackageDownloader(String url, File downloadFilePath) {
-        PackageDownloader packageDownloader = new PackageDownloader();
+        PackageDownloader packageDownloader = new PackageDownloader(FileUtils.getInstance());
         DownloadProgressCallback downloadProgressCallback = mock(DownloadProgressCallback.class);
         packageDownloader.setParameters(url, downloadFilePath, downloadProgressCallback);
         return spy(packageDownloader);

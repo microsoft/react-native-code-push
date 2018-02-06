@@ -1,14 +1,8 @@
 package com.microsoft.codepush.common.managers;
 
-import android.content.SharedPreferences;
-
 import com.microsoft.codepush.common.CodePushStatusReportIdentifier;
 import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
-import com.microsoft.codepush.common.utils.CodePushUtils;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import static com.microsoft.codepush.common.enums.CodePushDeploymentStatus.FAILED;
 import static com.microsoft.codepush.common.enums.CodePushDeploymentStatus.SUCCEEDED;
@@ -20,28 +14,17 @@ import static com.microsoft.codepush.common.utils.StringUtils.isNullOrEmpty;
 public class CodePushTelemetryManager {
 
     /**
-     * TODO remove this line after CodePush preferences storage addition
-     * Manager of CodePush preferences storage.
+     * Instance of {@link SettingsManager} to work with.
      */
-    private SharedPreferences mSettings;
-
-    /**
-     * Key for storing last deployment report identifier.
-     */
-    private final String LAST_DEPLOYMENT_REPORT_KEY = "CODE_PUSH_LAST_DEPLOYMENT_REPORT";
-
-    /**
-     * Key for storing last retry deployment report identifier.
-     */
-    private final String RETRY_DEPLOYMENT_REPORT_KEY = "CODE_PUSH_RETRY_DEPLOYMENT_REPORT";
+    private SettingsManager mSettingsManager;
 
     /**
      * Creates an instance of {@link CodePushTelemetryManager}.
      *
-     * @param settings manager of CodePush preferences storage.
+     * @param settingsManager instance of {@link SettingsManager} to work with.
      */
-    public CodePushTelemetryManager(SharedPreferences settings) {
-        mSettings = settings;
+    public CodePushTelemetryManager(SettingsManager settingsManager) {
+        mSettingsManager = settingsManager;
     }
 
     /**
@@ -51,19 +34,19 @@ public class CodePushTelemetryManager {
      * @return new binary update report.
      */
     public CodePushDeploymentStatusReport buildBinaryUpdateReport(String appVersion) {
-        CodePushStatusReportIdentifier previousStatusReportIdentifier = getPreviousStatusReportIdentifier();
+        CodePushStatusReportIdentifier previousStatusReportIdentifier = mSettingsManager.getPreviousStatusReportIdentifier();
         CodePushDeploymentStatusReport report = null;
         if (previousStatusReportIdentifier == null) {
 
             /* There was no previous status report */
-            removeStatusReportSavedForRetry();
+            mSettingsManager.removeStatusReportSavedForRetry();
             report = new CodePushDeploymentStatusReport();
             report.setAppVersion(appVersion);
         } else {
             boolean identifierHasDeploymentKey = previousStatusReportIdentifier.hasDeploymentKey();
             String identifierLabel = previousStatusReportIdentifier.getVersionLabelOrEmpty();
             if (identifierHasDeploymentKey || !identifierLabel.equals(appVersion)) {
-                removeStatusReportSavedForRetry();
+                mSettingsManager.removeStatusReportSavedForRetry();
                 report = new CodePushDeploymentStatusReport();
                 if (identifierHasDeploymentKey) {
                     String previousDeploymentKey = previousStatusReportIdentifier.getDeploymentKey();
@@ -91,11 +74,11 @@ public class CodePushTelemetryManager {
      */
     public CodePushDeploymentStatusReport buildUpdateReport(CodePushLocalPackage currentPackage) {
         CodePushStatusReportIdentifier currentPackageIdentifier = buildPackageStatusReportIdentifier(currentPackage);
-        CodePushStatusReportIdentifier previousStatusReportIdentifier = getPreviousStatusReportIdentifier();
+        CodePushStatusReportIdentifier previousStatusReportIdentifier = mSettingsManager.getPreviousStatusReportIdentifier();
         CodePushDeploymentStatusReport report = null;
         if (currentPackageIdentifier != null) {
             if (previousStatusReportIdentifier == null) {
-                removeStatusReportSavedForRetry();
+                mSettingsManager.removeStatusReportSavedForRetry();
                 report = new CodePushDeploymentStatusReport();
                 report.setLocalPackage(currentPackage);
                 report.setStatus(SUCCEEDED);
@@ -103,7 +86,7 @@ public class CodePushTelemetryManager {
 
                 /* Compare identifiers as strings for simplicity */
                 if (!previousStatusReportIdentifier.toString().equals(currentPackageIdentifier.toString())) {
-                    removeStatusReportSavedForRetry();
+                    mSettingsManager.removeStatusReportSavedForRetry();
                     report = new CodePushDeploymentStatusReport();
                     if (previousStatusReportIdentifier.hasDeploymentKey()) {
                         String previousDeploymentKey = previousStatusReportIdentifier.getDeploymentKey();
@@ -139,46 +122,6 @@ public class CodePushTelemetryManager {
     }
 
     /**
-     * Gets status report already saved for retry it's sending.
-     *
-     * @return report saved for retry sending.
-     * @throws JSONException if there was error of deserialization of report from json document.
-     */
-    public CodePushDeploymentStatusReport getStatusReportSavedForRetry() throws JSONException {
-        
-        //TODO move to settings manager
-        String retryStatusReportString = mSettings.getString(RETRY_DEPLOYMENT_REPORT_KEY, null);
-        if (retryStatusReportString != null) {
-            removeStatusReportSavedForRetry();
-            JSONObject retryStatusReport = new JSONObject(retryStatusReportString);
-            return CodePushUtils.convertJsonObjectToObject(retryStatusReport, CodePushDeploymentStatusReport.class);
-        }
-        return null;
-    }
-
-    /**
-     * Saves status report for further retry os it's sending.
-     *
-     * @param statusReport status report.
-     * @throws JSONException if there was an error during report serialization into json document.
-     */
-    public void saveStatusReportForRetry(CodePushDeploymentStatusReport statusReport) throws JSONException {
-        JSONObject statusReportJSON = CodePushUtils.convertObjectToJsonObject(statusReport);
-
-        //TODO move to settings manager
-        mSettings.edit().putString(RETRY_DEPLOYMENT_REPORT_KEY, statusReportJSON.toString()).commit();
-    }
-
-    /**
-     * Remove status report that was saved for retry of it's sending.
-     */
-    private void removeStatusReportSavedForRetry() {
-
-        //TODO move to settings manager
-        mSettings.edit().remove(RETRY_DEPLOYMENT_REPORT_KEY).commit();
-    }
-
-    /**
      * Saves already sent status report.
      *
      * @param statusReport report to save.
@@ -189,12 +132,13 @@ public class CodePushTelemetryManager {
         }
         if (!isNullOrEmpty(statusReport.getAppVersion())) {
             CodePushStatusReportIdentifier statusIdentifier = new CodePushStatusReportIdentifier(statusReport.getAppVersion());
-            saveIdentifierOfReportedStatus(statusIdentifier);
+            mSettingsManager.saveIdentifierOfReportedStatus(statusIdentifier);
         } else if (statusReport.getLocalPackage() != null) {
             CodePushStatusReportIdentifier packageIdentifier = buildPackageStatusReportIdentifier(statusReport.getLocalPackage());
-            saveIdentifierOfReportedStatus(packageIdentifier);
+            mSettingsManager.saveIdentifierOfReportedStatus(packageIdentifier);
         }
     }
+
     /**
      * Builds status report identifier using local package.
      *
@@ -212,28 +156,5 @@ public class CodePushTelemetryManager {
         } else {
             return null;
         }
-    }
-
-    /**
-     * Gets previously saved status report identifier.
-     *
-     * @return previously saved status report identifier.
-     */
-    private CodePushStatusReportIdentifier getPreviousStatusReportIdentifier() {
-
-        //TODO move to Settings manager
-        String identifierString = mSettings.getString(LAST_DEPLOYMENT_REPORT_KEY, null);
-        return CodePushStatusReportIdentifier.fromString(identifierString);
-    }
-
-    /**
-     * Saves identifier of already sent status report.
-     *
-     * @param identifier identifier of already sent status report.
-     */
-    private void saveIdentifierOfReportedStatus(CodePushStatusReportIdentifier identifier) {
-        
-        //TODO move to Settings manager
-        mSettings.edit().putString(LAST_DEPLOYMENT_REPORT_KEY, identifier.toString()).commit();
     }
 }
