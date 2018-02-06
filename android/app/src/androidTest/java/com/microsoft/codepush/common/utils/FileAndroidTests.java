@@ -1,6 +1,7 @@
 package com.microsoft.codepush.common.utils;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -30,11 +31,20 @@ import static org.mockito.Mockito.mock;
 public class FileAndroidTests {
 
     /**
+     * Instance of {@link FileUtils} to work with.
+     */
+    private FileUtils mFileUtils;
+
+    @Before
+    public void setUp() {
+        mFileUtils = FileUtils.getInstance();
+    }
+
+    /**
      * Tests all the common file operations in a flow.
      */
     @Test
     public void fileOperationsSucceed() throws Exception {
-        new FileUtils();
 
         /* Creating files and directories. */
         String fileContent = "123";
@@ -47,23 +57,23 @@ public class FileAndroidTests {
         moveTestSubfolder.mkdirs();
         File newFile = new File(testFolder, fileName);
         newFile.createNewFile();
-        assertEquals(true, FileUtils.fileAtPathExists(newFile.getPath()));
+        assertEquals(true, mFileUtils.fileAtPathExists(newFile.getPath()));
 
         /* Testing write/read. */
-        FileUtils.writeStringToFile(fileContent, newFile.getPath());
-        assertEquals(fileContent, FileUtils.readFileToString(newFile.getPath()));
+        mFileUtils.writeStringToFile(fileContent, newFile.getPath());
+        assertEquals(fileContent, mFileUtils.readFileToString(newFile.getPath()));
 
         /* Testing move/copy. */
-        FileUtils.moveFile(newFile, moveTestFolder, newFileName);
-        assertEquals(true, FileUtils.fileAtPathExists(FileUtils.appendPathComponent(moveTestFolder.getPath(), newFileName)));
-        assertEquals(false, FileUtils.fileAtPathExists(FileUtils.appendPathComponent(testFolder.getPath(), fileName)));
-        FileUtils.copyDirectoryContents(moveTestFolder, testFolder);
-        assertEquals(true, FileUtils.fileAtPathExists(FileUtils.appendPathComponent(moveTestFolder.getPath(), newFileName)));
-        assertEquals(true, FileUtils.fileAtPathExists(FileUtils.appendPathComponent(testFolder.getPath(), newFileName)));
+        mFileUtils.moveFile(newFile, moveTestFolder, newFileName);
+        assertEquals(true, mFileUtils.fileAtPathExists(mFileUtils.appendPathComponent(moveTestFolder.getPath(), newFileName)));
+        assertEquals(false, mFileUtils.fileAtPathExists(mFileUtils.appendPathComponent(testFolder.getPath(), fileName)));
+        mFileUtils.copyDirectoryContents(moveTestFolder, testFolder);
+        assertEquals(true, mFileUtils.fileAtPathExists(mFileUtils.appendPathComponent(moveTestFolder.getPath(), newFileName)));
+        assertEquals(true, mFileUtils.fileAtPathExists(mFileUtils.appendPathComponent(testFolder.getPath(), newFileName)));
 
         /* Testing delete. */
-        FileUtils.deleteDirectoryAtPath(moveTestFolder.getPath());
-        assertEquals(false, FileUtils.fileAtPathExists(moveTestFolder.getPath()));
+        mFileUtils.deleteDirectoryAtPath(moveTestFolder.getPath());
+        assertEquals(false, mFileUtils.fileAtPathExists(moveTestFolder.getPath()));
     }
 
     /**
@@ -86,8 +96,8 @@ public class FileAndroidTests {
         out.write(data, 0, data.length);
         out.closeEntry();
         out.close();
-        FileUtils.unzipFile(zip, unzipFolder);
-        assertEquals(true, FileUtils.fileAtPathExists(FileUtils.appendPathComponent(unzipFolder.getPath(), zipEntryFileName)));
+        mFileUtils.unzipFile(zip, unzipFolder);
+        assertEquals(true, mFileUtils.fileAtPathExists(mFileUtils.appendPathComponent(unzipFolder.getPath(), zipEntryFileName)));
     }
 
     /**
@@ -101,7 +111,7 @@ public class FileAndroidTests {
         doReturn(parentFile).when(sourceFile).getParentFile();
         ZipInputStream zipInputStream = mock(ZipInputStream.class);
         byte[] buffer = new byte[1024];
-        FileUtils.unzipSingleFile(mock(ZipEntry.class), sourceFile, buffer, zipInputStream);
+        mFileUtils.unzipSingleFile(mock(ZipEntry.class), sourceFile, buffer, zipInputStream);
     }
 
     /**
@@ -114,7 +124,7 @@ public class FileAndroidTests {
         ZipEntry entry = mockZipEntry(true);
         ZipInputStream zipInputStream = mock(ZipInputStream.class);
         byte[] buffer = new byte[1024];
-        FileUtils.unzipSingleFile(entry, mocked, buffer, zipInputStream);
+        mFileUtils.unzipSingleFile(entry, mocked, buffer, zipInputStream);
     }
 
     /**
@@ -123,7 +133,7 @@ public class FileAndroidTests {
      */
     @Test
     public void fileAtNullPathNotExist() throws Exception {
-        assertFalse(FileUtils.fileAtPathExists(null));
+        assertFalse(mFileUtils.fileAtPathExists(null));
     }
 
     /**
@@ -137,7 +147,7 @@ public class FileAndroidTests {
         ZipInputStream zipInputStream = mock(ZipInputStream.class);
         byte[] buffer = new byte[1024];
         doReturn(-1).when(zipInputStream).read(buffer);
-        FileUtils.unzipSingleFile(entry, file, buffer, zipInputStream);
+        mFileUtils.unzipSingleFile(entry, file, buffer, zipInputStream);
     }
 
     /**
@@ -151,7 +161,7 @@ public class FileAndroidTests {
         ZipInputStream zipInputStream = mock(ZipInputStream.class);
         byte[] buffer = new byte[1024];
         doReturn(-1).when(zipInputStream).read(buffer);
-        FileUtils.unzipSingleFile(entry, file, buffer, zipInputStream);
+        mFileUtils.unzipSingleFile(entry, file, buffer, zipInputStream);
     }
 
     /**
@@ -162,7 +172,7 @@ public class FileAndroidTests {
     public void unzipFailsIfDestinationMkDirsFails() throws Exception {
         File newFile = getRealFile();
         File testDirMove = mockDirMkDirsFail();
-        FileUtils.unzipFile(newFile, testDirMove);
+        mFileUtils.unzipFile(newFile, testDirMove);
     }
 
     /**
@@ -173,7 +183,7 @@ public class FileAndroidTests {
     public void moveFailsIfDestinationMkDirsFails() throws Exception {
         File testDir = getFileMock();
         File testDirMove = mockDirMkDirsFail();
-        FileUtils.moveFile(testDir, testDirMove, "");
+        mFileUtils.moveFile(testDir, testDirMove, "");
     }
 
     /**
@@ -184,7 +194,7 @@ public class FileAndroidTests {
     public void moveFailsIfRenameToFails() throws Exception {
         File testDirMove = getRealTestFolder();
         File newFile = mockFileRenameToFail();
-        FileUtils.moveFile(newFile, testDirMove, "");
+        mFileUtils.moveFile(newFile, testDirMove, "");
     }
 
     /**
@@ -193,7 +203,7 @@ public class FileAndroidTests {
      */
     @Test(expected = IOException.class)
     public void deleteFailsIfPassNull() throws Exception {
-        FileUtils.deleteDirectoryAtPath(null);
+        mFileUtils.deleteDirectoryAtPath(null);
     }
 
     /**
@@ -203,7 +213,7 @@ public class FileAndroidTests {
     @Test(expected = IOException.class)
     public void copyFailsIfDestinationMkDirsFails() throws Exception {
         File destDir = mockDirMkDirsFail();
-        FileUtils.copyDirectoryContents(getFileMock(), destDir);
+        mFileUtils.copyDirectoryContents(getFileMock(), destDir);
     }
 
     /**
@@ -213,7 +223,7 @@ public class FileAndroidTests {
     @Test(expected = IOException.class)
     public void copyFailsIfSourceListFilesFails() throws Exception {
         File sourceDir = mockDirListFilesFail();
-        FileUtils.copyDirectoryContents(sourceDir, getFileMock(true));
+        mFileUtils.copyDirectoryContents(sourceDir, getFileMock(true));
     }
 
     /**

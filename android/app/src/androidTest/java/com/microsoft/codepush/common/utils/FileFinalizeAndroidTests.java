@@ -1,15 +1,13 @@
 package com.microsoft.codepush.common.utils;
 
 import com.microsoft.codepush.common.exceptions.CodePushFinalizeException;
+import com.microsoft.codepush.common.testutils.FileAndroidTestUtils;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.BDDMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -18,22 +16,20 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import static com.microsoft.codepush.common.testutils.FileUnitTestUtils.mockZipEntry;
 import static com.microsoft.codepush.common.testutils.CommonFileTestUtils.getRealFile;
 import static com.microsoft.codepush.common.testutils.CommonFileTestUtils.getTestingDirectory;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 /**
- * This class is for testing those {@link FileUtils} test cases that depend on {@link CodePushUtils#finalizeResources(List, String)} static methods failure.
+ * This class is for testing those {@link FileUtils} test cases that depend on {@link FileUtils#finalizeResources(List, String)} method failure.
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(CodePushUtils.class)
-public class FileUnitTests {
+public class FileFinalizeAndroidTests {
 
     /**
      * Shared test file.
@@ -45,6 +41,11 @@ public class FileUnitTests {
      */
     private File testFolder;
 
+    /**
+     * Instance of {@link FileUtils} to work with.
+     */
+    private FileUtils mFileUtils;
+
     @Before
     public void setUp() throws Exception {
         String fileContent = "123";
@@ -53,78 +54,79 @@ public class FileUnitTests {
         testFolder.mkdirs();
         newFile = new File(testFolder, fileName);
         newFile.createNewFile();
-        FileUtils.writeStringToFile(fileContent, newFile.getPath());
+        mFileUtils = FileUtils.getInstance();
+        mFileUtils.writeStringToFile(fileContent, newFile.getPath());
+        mFileUtils = spy(mFileUtils);
 
         /* Set up that finalizeResources should always fail. */
-        mockStatic(CodePushUtils.class);
-        BDDMockito.given(CodePushUtils.finalizeResources(anyList(), anyString())).willReturn(new IOException());
+        doReturn(new IOException()).when(mFileUtils).finalizeResources(anyListOf(Closeable.class), anyString());
     }
 
     /**
      * Read file should throw a {@link CodePushFinalizeException}
-     * if an {@link IOException} is thrown during {@link CodePushUtils#finalizeResources(List, String)}.
+     * if an {@link IOException} is thrown during {@link FileUtils#finalizeResources(List, String)}.
      */
     @Test(expected = CodePushFinalizeException.class)
     public void readFailsIfFinalizeFails() throws Exception {
-        FileUtils.readFileToString(newFile.getPath());
+        mFileUtils.readFileToString(newFile.getPath());
     }
 
     /**
      * Copy files should throw a {@link CodePushFinalizeException}
-     * if an {@link IOException} is thrown during {@link CodePushUtils#finalizeResources(List, String)}.
+     * if an {@link IOException} is thrown during {@link FileUtils#finalizeResources(List, String)}.
      */
     @Test(expected = CodePushFinalizeException.class)
     public void copyFailsIfFinalizeFails() throws Exception {
         File copyFolder = new File(getTestingDirectory(), "/TestMove");
-        FileUtils.copyDirectoryContents(testFolder, copyFolder);
+        mFileUtils.copyDirectoryContents(testFolder, copyFolder);
     }
 
     /**
      * Write to file should throw a {@link CodePushFinalizeException}
-     * if an {@link IOException} is thrown during {@link CodePushUtils#finalizeResources(List, String)}.
+     * if an {@link IOException} is thrown during {@link FileUtils#finalizeResources(List, String)}.
      */
     @Test(expected = CodePushFinalizeException.class)
     public void writeFailsIfFinalizeFails() throws Exception {
         String fileContent = "123";
-        FileUtils.writeStringToFile(fileContent, newFile.getPath());
+        mFileUtils.writeStringToFile(fileContent, newFile.getPath());
     }
 
     /**
      * If write file fails with an {@link IOException}, it should go straight to finally block,
      * where it should throw a {@link CodePushFinalizeException}
-     * if an {@link IOException} is thrown during {@link CodePushUtils#finalizeResources(List, String)}.
+     * if an {@link IOException} is thrown during {@link FileUtils#finalizeResources(List, String)}.
      */
     @Test(expected = CodePushFinalizeException.class)
     public void writeDoubleFailure() throws Exception {
         String fileContent = "123";
-        FileUtils.writeStringToFile(fileContent, "/***");
+        mFileUtils.writeStringToFile(fileContent, "/***");
     }
 
     /**
      * If read file fails with an {@link IOException}, it should go straight to finally block,
      * where it should throw a {@link CodePushFinalizeException}
-     * if an {@link IOException} is thrown during {@link CodePushUtils#finalizeResources(List, String)}.
+     * if an {@link IOException} is thrown during {@link FileUtils#finalizeResources(List, String)}.
      */
     @Test(expected = CodePushFinalizeException.class)
     public void readDoubleFailure() throws Exception {
-        FileUtils.readFileToString("/***");
+        mFileUtils.readFileToString("/***");
     }
 
     /**
      * If unzip file fails with an {@link IOException}, it should go straight to finally block,
      * where it should throw a {@link CodePushFinalizeException}
-     * if an {@link IOException} is thrown during {@link CodePushUtils#finalizeResources(List, String)}.
+     * if an {@link IOException} is thrown during {@link FileUtils#finalizeResources(List, String)}.
      */
     @Test(expected = CodePushFinalizeException.class)
     public void unzipDoubleFailure() throws Exception {
         ZipInputStream zipInputStream = mock(ZipInputStream.class);
         doThrow(new IOException()).when(zipInputStream).read(any(byte[].class));
-        FileUtils.unzipSingleFile(mockZipEntry(false), getRealFile(), new byte[1024], zipInputStream);
+        mFileUtils.unzipSingleFile(FileAndroidTestUtils.mockZipEntry(false), getRealFile(), new byte[1024], zipInputStream);
     }
 
     /**
      * Unzip files should throw a {@link CodePushFinalizeException}
-     * if an {@link IOException} is thrown during {@link CodePushUtils#finalizeResources(List, String)}.
+     * if an {@link IOException} is thrown during {@link FileUtils#finalizeResources(List, String)}.
      */
     @Test(expected = CodePushFinalizeException.class)
     public void unzipFailsIfFinalizeFails() throws Exception {
@@ -143,7 +145,7 @@ public class FileUnitTests {
         out.write(data, 0, data.length);
         out.closeEntry();
         out.close();
-        FileUtils.unzipFile(zip, unzipFolder);
+        mFileUtils.unzipFile(zip, unzipFolder);
     }
 
     /**
