@@ -125,7 +125,7 @@ public class UtilsAndroidTest {
     }
 
     /**
-     * Tests writing JSONObject instance to json file.
+     * Tests writing {@link JSONObject} instance to json file.
      */
     @Test
     public void testWriteJsonToFile() throws Exception {
@@ -160,7 +160,7 @@ public class UtilsAndroidTest {
     }
 
     /**
-     * Tests converting JSONObject instance to java object.
+     * Tests converting {@link JSONObject} instance to java object.
      */
     @Test
     public void testConvertJsonObjectToObject() throws Exception {
@@ -170,7 +170,7 @@ public class UtilsAndroidTest {
     }
 
     /**
-     * Tests getting string from InputStream instance.
+     * Tests getting string from {@link InputStream} instance.
      */
     @Test
     public void testGetStringFromInputStream() throws Exception {
