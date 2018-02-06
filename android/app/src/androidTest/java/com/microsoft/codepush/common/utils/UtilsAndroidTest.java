@@ -8,27 +8,25 @@ import junit.framework.Assert;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 
 import static com.microsoft.codepush.common.testutils.CommonFileTestUtils.getRealNamedFileWithContent;
 import static com.microsoft.codepush.common.testutils.CommonFileTestUtils.getTestingDirectory;
-import static com.microsoft.codepush.common.utils.CodePushUtils.convertJsonObjectToObject;
-import static com.microsoft.codepush.common.utils.CodePushUtils.convertObjectToJsonObject;
-import static com.microsoft.codepush.common.utils.CodePushUtils.convertObjectToJsonString;
-import static com.microsoft.codepush.common.utils.CodePushUtils.getJsonObjectFromFile;
-import static com.microsoft.codepush.common.utils.CodePushUtils.getObjectFromJsonFile;
-import static com.microsoft.codepush.common.utils.CodePushUtils.getQueryStringFromObject;
-import static com.microsoft.codepush.common.utils.CodePushUtils.getStringFromInputStream;
-import static com.microsoft.codepush.common.utils.CodePushUtils.writeJsonToFile;
 import static org.junit.Assert.assertEquals;
 
+/**
+ * This class tests all the {@link CodePushUtils} scenarios.
+ */
 public class UtilsAndroidTest {
 
+    /**
+     * Sample class for JSON mapping.
+     */
     private final class SampleObject {
         public String id;
         public String name;
@@ -43,86 +41,135 @@ public class UtilsAndroidTest {
         }
     }
 
+    /**
+     * {@link CodePushUtils} instance.
+     */
+    private CodePushUtils mUtils;
+
+    @Before
+    public void setUp() {
+        FileUtils fileUtils = FileUtils.getInstance();
+        mUtils = CodePushUtils.getInstance(fileUtils);
+    }
+
+    /**
+     * Tests getting json object from correct json file.
+     */
     @Test
-    public void testGetJsonObjectFromCorrectJsonFile() throws IOException, CodePushMalformedDataException {
+    public void testGetJsonObjectFromCorrectJsonFile() throws Exception {
         String inputJsonString = "{\"key\":\"value\"}";
         File jsonFile = getRealNamedFileWithContent("json.json", inputJsonString);
-        JSONObject result = getJsonObjectFromFile(jsonFile.getAbsolutePath());
+        JSONObject result = mUtils.getJsonObjectFromFile(jsonFile.getAbsolutePath());
         Assert.assertEquals(result.toString(), inputJsonString);
     }
 
+    /**
+     * Tests getting json object from malformed json file.
+     */
     @Test(expected = CodePushMalformedDataException.class)
     public void testGetJsonObjectFromMalformedJsonFile() throws Exception {
         String inputJsonString = "malformed-json";
         File jsonFile = getRealNamedFileWithContent("json.json", inputJsonString);
-        getJsonObjectFromFile(jsonFile.getAbsolutePath());
+        mUtils.getJsonObjectFromFile(jsonFile.getAbsolutePath());
     }
 
+    /**
+     * Tests getting json object from nonexistent json file.
+     */
     @Test(expected = CodePushMalformedDataException.class)
-    public void testGetJsonObjectFromUnexistentJsonFile() throws Exception {
-        getJsonObjectFromFile(getTestingDirectory().getAbsolutePath() + "/this/path/is/not/exist");
+    public void testGetJsonObjectFromNonexistentJsonFile() throws Exception {
+        mUtils.getJsonObjectFromFile(getTestingDirectory().getAbsolutePath() + "/this/path/is/not/exist");
     }
 
+    /**
+     * Tests getting mapped java object from correct json file.
+     */
     @Test
-    public void testGetObjectFromCorrectJsonFile() throws IOException, CodePushMalformedDataException {
+    public void testGetObjectFromCorrectJsonFile() throws Exception {
         String inputJsonString = "{\"id\":\"000-000-000\"}";
         File jsonFile = getRealNamedFileWithContent("json.json", inputJsonString);
-        SampleObject result = getObjectFromJsonFile(jsonFile.getAbsolutePath(), SampleObject.class);
+        SampleObject result = mUtils.getObjectFromJsonFile(jsonFile.getAbsolutePath(), SampleObject.class);
         Assert.assertEquals(result.id, "000-000-000");
     }
 
+    /**
+     * Tests converting convertable java object to json file.
+     */
     @Test
-    public void testConvertConvertableObjectToJsonObject() throws JSONException {
+    public void testConvertConvertableObjectToJsonObject() throws Exception {
         SampleObject object = new SampleObject("000-000-000");
-        JSONObject result = convertObjectToJsonObject(object);
+        JSONObject result = mUtils.convertObjectToJsonObject(object);
         Assert.assertEquals(object.id, result.getString("id"));
     }
 
+    /**
+     * Tests converting non convertible java object to json file.
+     */
     @Test(expected = JSONException.class)
-    public void testConvertUnconvertableObjectToJsonObject() throws JSONException {
-        convertObjectToJsonObject(null);
+    public void testConvertNonConvertibleObjectToJsonObject() throws Exception {
+        mUtils.convertObjectToJsonObject(null);
     }
 
+    /**
+     * Tests converting java object to json string.
+     */
     @Test
-    public void testConvertObjectToJsonString() throws JSONException {
+    public void testConvertObjectToJsonString() throws Exception {
         SampleObject object = new SampleObject("000-000-000");
-        Assert.assertEquals("{\"id\":\"000-000-000\"}", convertObjectToJsonString(object));
+        Assert.assertEquals("{\"id\":\"000-000-000\"}", mUtils.convertObjectToJsonString(object));
     }
 
+    /**
+     * Tests writing JSONObject instance to json file.
+     */
     @Test
     public void testWriteJsonToFile() throws Exception {
         JSONObject json = new JSONObject("{\"key\":\"value\"}");
-        String jsonPath = getTestingDirectory().getAbsolutePath() + UtilsAndroidTest.class + "testWriteJsonToFile/json.json";
-        File resultFile = new File(jsonPath);
-        writeJsonToFile(json, jsonPath);
-        Assert.assertTrue(resultFile.exists());
+        String jsonPath = getTestingDirectory().getAbsolutePath() + "/testWriteJsonToFile/json.json";
+        File jsonFile = new File(jsonPath);
+        jsonFile.getParentFile().mkdirs();
+        jsonFile.createNewFile();
+        mUtils.writeJsonToFile(json, jsonPath);
+        Assert.assertTrue(jsonFile.exists());
     }
 
+    /**
+     * Tests converting java object to query string using supported charset.
+     */
     @Test
-    public void testGetQueryStringFromObject() throws Exception {
+    public void testGetQueryStringFromObjectWithSupportedCharSet() throws Exception {
         SampleObject object = new SampleObject("id1", "name1");
-        String queryString = getQueryStringFromObject(object, "UTF-8");
+        String queryString = mUtils.getQueryStringFromObject(object, "UTF-8");
         Assert.assertEquals("name=name1&id=id1", queryString);
     }
 
+    /**
+     * Tests converting java object to query string using unsupported charset.
+     */
     @Test(expected = CodePushMalformedDataException.class)
     public void testGetQueryStringFromObjectWithUnsupportedCharSet() throws Exception {
         SampleObject object = new SampleObject("id1");
-        getQueryStringFromObject(object, "unsupported");
+        mUtils.getQueryStringFromObject(object, "unsupported");
     }
 
+    /**
+     * Tests converting JSONObject instance to java object.
+     */
     @Test
     public void testConvertJsonObjectToObject() throws Exception {
         JSONObject jsonObject = new JSONObject("{\"id\":\"000-000-000\"}");
-        SampleObject result = convertJsonObjectToObject(jsonObject, SampleObject.class);
+        SampleObject result = mUtils.convertJsonObjectToObject(jsonObject, SampleObject.class);
         Assert.assertEquals(jsonObject.getString("id"), result.id);
     }
 
+    /**
+     * Tests getting string from InputStream instance.
+     */
     @Test
     public void testGetStringFromInputStream() throws Exception {
         String expectedString = "string";
         InputStream stream = new ByteArrayInputStream(expectedString.getBytes("UTF-8"));
-        assertEquals(expectedString, getStringFromInputStream(stream));
+        assertEquals(expectedString, mUtils.getStringFromInputStream(stream));
     }
 
     /**

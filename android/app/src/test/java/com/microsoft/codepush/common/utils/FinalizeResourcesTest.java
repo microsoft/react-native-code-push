@@ -1,5 +1,8 @@
-package com.microsoft.codepush.common.utils.finalize;
+package com.microsoft.codepush.common.utils;
 
+import com.microsoft.codepush.common.utils.FileUtils;
+
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -12,11 +15,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import static com.microsoft.codepush.common.utils.CodePushUtils.finalizeResources;
 import static junit.framework.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
-public class CommonFinalizeResourcesTest {
+public class FinalizeResourcesTest {
+
+    private FileUtils mFileUtils;
 
     private static Closeable createGoodResource() {
         return new Closeable() {
@@ -60,8 +64,13 @@ public class CommonFinalizeResourcesTest {
     @Parameter(1)
     public IOException expectedException;
 
+    @Before
+    public void setUp(){
+        mFileUtils = FileUtils.getInstance();
+    }
+
     @Test
     public void testFinalizeResources() {
-        assertEquals(expectedException, finalizeResources(resourcesToTest, null));
+        assertEquals(expectedException, mFileUtils.finalizeResources(resourcesToTest, null));
     }
 }

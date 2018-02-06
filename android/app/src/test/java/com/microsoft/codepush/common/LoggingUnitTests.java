@@ -9,6 +9,7 @@ import com.microsoft.codepush.common.datacontracts.CodePushUpdateRequest;
 import com.microsoft.codepush.common.datacontracts.CodePushUpdateResponse;
 import com.microsoft.codepush.common.utils.FileUtils;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.internal.verification.VerificationModeFactory;
@@ -20,7 +21,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
-import static com.microsoft.codepush.common.utils.CodePushUtils.finalizeResources;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -43,6 +43,13 @@ public class LoggingUnitTests {
     private final static boolean IS_DEBUG_ONLY = false;
     private final static boolean IS_FIRST_RUN = false;
     private final static String APP_ENTRY_POINT = "/www/index.html";
+
+    private FileUtils mFileUtils;
+
+    @Before
+    public void setUp() {
+        this.mFileUtils = FileUtils.getInstance();
+    }
 
     @Test
     public void testLogging() throws Exception {
@@ -82,7 +89,7 @@ public class LoggingUnitTests {
     }
 
     @Test
-    public void testFinalizeResourcesLogging(){
+    public void testFinalizeResourcesLogging() {
         mockStatic(AppCenterLog.class);
         Closeable brokenResource = new Closeable() {
             @Override
@@ -90,8 +97,7 @@ public class LoggingUnitTests {
                 throw new IOException();
             }
         };
-        finalizeResources(Arrays.asList(brokenResource), "log me");
+        mFileUtils.finalizeResources(Arrays.asList(brokenResource), "log me");
         verifyStatic(VerificationModeFactory.times(1));
     }
-
 }

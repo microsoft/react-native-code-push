@@ -117,7 +117,7 @@ public class CodePushUtils {
      * @return instance of T.
      */
     @SuppressWarnings("WeakerAccess")
-    public static <T> T convertStringToObject(String stringObject, Class<T> classOfT) throws JsonSyntaxException {
+    public <T> T convertStringToObject(String stringObject, Class<T> classOfT) throws JsonSyntaxException {
         return mGson.fromJson(stringObject, classOfT);
     }
 
@@ -127,7 +127,7 @@ public class CodePushUtils {
      * @param object {@link JSONObject} instance.
      * @return the json string.
      */
-    public static String convertObjectToJsonString(Object object) {
+    public String convertObjectToJsonString(Object object) {
         return mGson.toJsonTree(object).toString();
     }
 
