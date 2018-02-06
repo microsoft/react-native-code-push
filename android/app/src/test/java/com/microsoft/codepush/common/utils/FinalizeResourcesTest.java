@@ -80,7 +80,7 @@ public class FinalizeResourcesTest {
     public void setUp(){
         mFileUtils = FileUtils.getInstance();
     }
-    
+
     @Test
     public void testFinalizeResources() {
         assertEquals(expectedException, mFileUtils.finalizeResources(resourcesToTest, null));
