@@ -36,6 +36,6 @@ public class CodePushDownloadPackageException extends Exception {
      * @param cause       cause of exception.
      */
     public CodePushDownloadPackageException(String downloadUrl, Throwable cause) {
-        super(MESSAGE + "Download url is " + downloadUrl, cause);
+        super(MESSAGE + " Download url is " + downloadUrl, cause);
     }
 }

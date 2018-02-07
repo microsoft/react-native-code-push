@@ -3,7 +3,7 @@ package com.microsoft.codepush.common.testutils;
 import android.os.Environment;
 
 import com.microsoft.codepush.common.CodePushConstants;
-import com.microsoft.codepush.common.connection.PackageDownloader;
+import com.microsoft.codepush.common.connection.DownloadPackageJob;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
 import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
 import com.microsoft.codepush.common.utils.FileUtils;
@@ -17,37 +17,37 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
 /**
- * Utils to make {@link PackageDownloader} testing process easier and avoid code repetition.
+ * Utils to make {@link DownloadPackageJob} testing process easier and avoid code repetition.
  */
 public class PackageDownloaderAndroidTestUtils {
 
     /**
-     * Executes <code>doInBackground()</code> method of {@link PackageDownloader} only and assert that it fails.
+     * Executes <code>doInBackground()</code> method of {@link DownloadPackageJob} only and assert that it fails.
      *
-     * @param packageDownloader instance of package downloader.
+     * @param downloadPackageJob instance of package downloader.
      */
-    public static void checkDoInBackgroundFails(PackageDownloader packageDownloader) throws Exception {
-        assertTrue(executeDoInBackground(packageDownloader).isCorrupt());
+    public static void checkDoInBackgroundFails(DownloadPackageJob downloadPackageJob) throws Exception {
+        assertTrue(executeDoInBackground(downloadPackageJob).isFailed());
     }
 
     /**
-     * Executes <code>doInBackground()</code> method of {@link PackageDownloader}.
+     * Executes <code>doInBackground()</code> method of {@link DownloadPackageJob}.
      *
-     * @param packageDownloader instance of package downloader.
+     * @param downloadPackageJob instance of package downloader.
      * @return download result.
      */
-    private static CodePushDownloadPackageResult executeDoInBackground(PackageDownloader packageDownloader) throws Exception {
-        Method method = packageDownloader.getClass().getMethod("doInBackground", Void[].class);
-        return (CodePushDownloadPackageResult) method.invoke(packageDownloader, (Object[]) new Void[]{null});
+    private static CodePushDownloadPackageResult executeDoInBackground(DownloadPackageJob downloadPackageJob) throws Exception {
+        Method method = downloadPackageJob.getClass().getMethod("doInBackground", Void[].class);
+        return (CodePushDownloadPackageResult) method.invoke(downloadPackageJob, (Object[]) new Void[]{null});
     }
 
     /**
-     * Executes <code>doInBackground()</code> method of {@link PackageDownloader} only and assert that it does not fail.
+     * Executes <code>doInBackground()</code> method of {@link DownloadPackageJob} only and assert that it does not fail.
      *
-     * @param packageDownloader instance of package downloader.
+     * @param downloadPackageJob instance of package downloader.
      */
-    public static void checkDoInBackgroundNotFails(PackageDownloader packageDownloader) throws Exception {
-        assertFalse(executeDoInBackground(packageDownloader).isCorrupt());
+    public static void checkDoInBackgroundNotFails(DownloadPackageJob downloadPackageJob) throws Exception {
+        assertFalse(executeDoInBackground(downloadPackageJob).isFailed());
     }
 
     /**
@@ -56,15 +56,15 @@ public class PackageDownloaderAndroidTestUtils {
      * @param url custom url.
      * @return package downloader instance that can be mocked.
      */
-    public static PackageDownloader createPackageDownloader(String url) {
+    public static DownloadPackageJob createPackageDownloader(String url) {
         File codePushPath = new File(Environment.getExternalStorageDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX);
         File downloadFolder = new File(codePushPath.getPath());
         downloadFolder.mkdirs();
         File downloadFilePath = new File(downloadFolder, CodePushConstants.DOWNLOAD_FILE_NAME);
-        PackageDownloader packageDownloader = new PackageDownloader(FileUtils.getInstance());
+        DownloadPackageJob downloadPackageJob = new DownloadPackageJob(FileUtils.getInstance());
         DownloadProgressCallback downloadProgressCallback = mock(DownloadProgressCallback.class);
-        packageDownloader.setParameters(url, downloadFilePath, downloadProgressCallback);
-        return spy(packageDownloader);
+        downloadPackageJob.setParameters(url, downloadFilePath, downloadProgressCallback);
+        return spy(downloadPackageJob);
     }
 
     /**
@@ -74,10 +74,10 @@ public class PackageDownloaderAndroidTestUtils {
      * @param url              custom url.
      * @return package downloader instance that can be mocked.
      */
-    public static PackageDownloader createPackageDownloader(String url, File downloadFilePath) {
-        PackageDownloader packageDownloader = new PackageDownloader(FileUtils.getInstance());
+    public static DownloadPackageJob createPackageDownloader(String url, File downloadFilePath) {
+        DownloadPackageJob downloadPackageJob = new DownloadPackageJob(FileUtils.getInstance());
         DownloadProgressCallback downloadProgressCallback = mock(DownloadProgressCallback.class);
-        packageDownloader.setParameters(url, downloadFilePath, downloadProgressCallback);
-        return spy(packageDownloader);
+        downloadPackageJob.setParameters(url, downloadFilePath, downloadProgressCallback);
+        return spy(downloadPackageJob);
     }
 }

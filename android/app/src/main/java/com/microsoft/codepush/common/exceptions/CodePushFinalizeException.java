@@ -28,7 +28,7 @@ public class CodePushFinalizeException extends IOException {
         /**
          * Creates instance of the enum using the provided message.
          *
-         * @param message message describing teh exception.
+         * @param message message describing the exception.
          */
         OperationType(String message) {
             this.message = message;
