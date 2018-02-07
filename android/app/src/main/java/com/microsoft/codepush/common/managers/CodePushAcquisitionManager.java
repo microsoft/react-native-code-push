@@ -104,7 +104,7 @@ public class CodePushAcquisitionManager {
         }
         CodePushUpdateRequest updateRequest = CodePushUpdateRequest.createUpdateRequest(mDeploymentKey, currentPackage, mClientUniqueId);
         try {
-            final String requestUrl = mServerUrl + String.format(Locale.getDefault(), UPDATE_CHECK_ENDPOINT, mCodePushUtils.getQueryStringFromObject(updateRequest));
+            final String requestUrl = mServerUrl + String.format(Locale.getDefault(), UPDATE_CHECK_ENDPOINT, mCodePushUtils.getQueryStringFromObject(updateRequest, "UTF-8"));
             CheckForUpdateJob checkForUpdateJob = new CheckForUpdateJob(mFileUtils, mCodePushUtils);
             checkForUpdateJob.setParameters(requestUrl);
             checkForUpdateJob.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
