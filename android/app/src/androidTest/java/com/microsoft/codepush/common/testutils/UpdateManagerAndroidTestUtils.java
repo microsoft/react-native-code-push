@@ -4,7 +4,7 @@ import android.os.Environment;
 
 import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.DownloadProgress;
-import com.microsoft.codepush.common.connection.PackageDownloader;
+import com.microsoft.codepush.common.connection.DownloadPackageJob;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
 import com.microsoft.codepush.common.managers.CodePushUpdateManager;
 import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
@@ -34,13 +34,13 @@ public class UpdateManagerAndroidTestUtils {
      * @return result of the download.
      */
     public static CodePushDownloadPackageResult executeDownload(CodePushUpdateManager codePushUpdateManager, String packageHash, boolean verify, String url) throws Exception {
-        PackageDownloader packageDownloader = new PackageDownloader(FileUtils.getInstance());
+        DownloadPackageJob downloadPackageJob = new DownloadPackageJob(FileUtils.getInstance());
         DownloadProgressCallback downloadProgressCallback = mock(DownloadProgressCallback.class);
         File downloadFolder = new File(Environment.getExternalStorageDirectory(), CODE_PUSH_FOLDER_PREFIX);
         downloadFolder.mkdirs();
         File downloadFilePath = new File(downloadFolder, CodePushConstants.DOWNLOAD_FILE_NAME);
-        packageDownloader.setParameters(url, downloadFilePath, downloadProgressCallback);
-        CodePushDownloadPackageResult codePushDownloadPackageResult = codePushUpdateManager.downloadPackage(packageHash, packageDownloader);
+        downloadPackageJob.setParameters(url, downloadFilePath, downloadProgressCallback);
+        CodePushDownloadPackageResult codePushDownloadPackageResult = codePushUpdateManager.downloadPackage(packageHash, downloadPackageJob);
         if (verify) {
             verify(downloadProgressCallback, timeout(5000).atLeast(1)).call(any(DownloadProgress.class));
         }
