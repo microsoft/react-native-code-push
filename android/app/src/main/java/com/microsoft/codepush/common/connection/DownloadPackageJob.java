@@ -1,7 +1,5 @@
 package com.microsoft.codepush.common.connection;
 
-import android.os.AsyncTask;
-
 import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.DownloadProgress;
 import com.microsoft.codepush.common.exceptions.CodePushDownloadPackageException;
@@ -16,14 +14,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /**
  * Downloads an update.
  */
-public class PackageDownloader extends AsyncTask<Void, Void, CodePushDownloadPackageResult> {
+public class DownloadPackageJob extends BaseJob<CodePushDownloadPackageResult> {
 
     /**
      * Header in the beginning of every zip file.
@@ -46,15 +43,11 @@ public class PackageDownloader extends AsyncTask<Void, Void, CodePushDownloadPac
     private DownloadProgressCallback downloadProgressCallback;
 
     /**
-     * Instance of {@link FileUtils} to work with.
-     */
-    private FileUtils mFileUtils;
-
-    /**
-     * Creates an instance of {@link PackageDownloader} provided instances of utils.
+     * Creates instance of {@link DownloadPackageJob}.
+     *
      * @param fileUtils instance of {@link FileUtils} to work with.
      */
-    public PackageDownloader(FileUtils fileUtils) {
+    public DownloadPackageJob(FileUtils fileUtils) {
         mFileUtils = fileUtils;
     }
 
@@ -69,20 +62,6 @@ public class PackageDownloader extends AsyncTask<Void, Void, CodePushDownloadPac
         this.downloadUrlString = downloadUrlString;
         this.downloadFile = downloadFile;
         this.downloadProgressCallback = downloadProgressCallback;
-    }
-
-    /**
-     * Opens url connection for the provided url.
-     *
-     * @param urlString url to open.
-     * @return instance of url connection.
-     * @throws IOException read/write error occurred while accessing the file system.
-     */
-    public HttpURLConnection createConnection(String urlString) throws IOException {
-        URL url = new URL(urlString);
-        HttpURLConnection connection;
-        connection = (HttpURLConnection) url.openConnection();
-        return connection;
     }
 
     @Override

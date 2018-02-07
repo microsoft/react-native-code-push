@@ -1,9 +1,11 @@
 package com.microsoft.codepush.common.managers;
 
+import android.os.AsyncTask;
+
 import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.CodePush;
 import com.microsoft.codepush.common.CodePushConstants;
-import com.microsoft.codepush.common.connection.PackageDownloader;
+import com.microsoft.codepush.common.connection.DownloadPackageJob;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPackageInfo;
 import com.microsoft.codepush.common.exceptions.CodePushDownloadPackageException;
@@ -359,12 +361,12 @@ public class CodePushUpdateManager {
      * Downloads the update package.
      *
      * @param packageHash       update package hash.
-     * @param packageDownloader instance of {@link PackageDownloader} to download the update.
-     *                          Note: all the parameters should be already set via {@link PackageDownloader#setParameters(String, File, DownloadProgressCallback)}.
+     * @param downloadPackageJob instance of {@link DownloadPackageJob} to download the update.
+     *                          Note: all the parameters should be already set via {@link DownloadPackageJob#setParameters(String, File, DownloadProgressCallback)}.
      * @return downloaded package.
      * @throws CodePushDownloadPackageException an exception occurred during package downloading.
      */
-    public CodePushDownloadPackageResult downloadPackage(String packageHash, PackageDownloader packageDownloader) throws CodePushDownloadPackageException {
+    public CodePushDownloadPackageResult downloadPackage(String packageHash, DownloadPackageJob downloadPackageJob) throws CodePushDownloadPackageException {
         String newUpdateFolderPath = getPackageFolderPath(packageHash);
         if (mFileUtils.fileAtPathExists(newUpdateFolderPath)) {
 
@@ -378,12 +380,15 @@ public class CodePushUpdateManager {
         }
 
         /* Download the file while checking if it is a zip and notifying client of progress. */
-        packageDownloader.execute();
+        downloadPackageJob.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         CodePushDownloadPackageResult downloadPackageResult;
         try {
-            downloadPackageResult = packageDownloader.get();
+            downloadPackageResult = downloadPackageJob.get();
         } catch (InterruptedException | ExecutionException e) {
             throw new CodePushDownloadPackageException(e);
+        }
+        if (downloadPackageResult.isFailed()) {
+            throw downloadPackageResult.getCodePushDownloadPackageException();
         }
         return downloadPackageResult;
     }
