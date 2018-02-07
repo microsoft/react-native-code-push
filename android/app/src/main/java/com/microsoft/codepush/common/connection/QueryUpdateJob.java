@@ -47,7 +47,8 @@ public class QueryUpdateJob extends BaseJob<CodePushUpdateResponse> {
         mRequestUrl = requestUrl;
     }
 
-    @Override protected CodePushUpdateResponse doInBackground(Void... voids) {
+    @Override
+    protected CodePushUpdateResponse doInBackground(Void... voids) {
         InputStream stream = null;
         Scanner scanner = null;
         HttpURLConnection connection;
