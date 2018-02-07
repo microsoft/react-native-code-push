@@ -57,7 +57,8 @@ public class ReportStatusJob extends BaseJob<CodePushReportStatusResult> {
         mReportType = reportType;
     }
 
-    @Override protected CodePushReportStatusResult doInBackground(Void... voids) {
+    @Override
+    protected CodePushReportStatusResult doInBackground(Void... voids) {
         OutputStream outputStream = null;
         OutputStreamWriter outputStreamWriter = null;
         InputStream stream = null;
