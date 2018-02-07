@@ -3,7 +3,7 @@ package com.microsoft.codepush.common.managers;
 import android.os.Environment;
 
 import com.microsoft.codepush.common.CodePushConstants;
-import com.microsoft.codepush.common.connection.PackageDownloader;
+import com.microsoft.codepush.common.connection.DownloadPackageJob;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPackageInfo;
@@ -14,7 +14,6 @@ import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
 import com.microsoft.codepush.common.exceptions.CodePushMergeException;
 import com.microsoft.codepush.common.exceptions.CodePushRollbackException;
 import com.microsoft.codepush.common.testutils.CommonTestPlatformUtils;
-import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
 import com.microsoft.codepush.common.utils.CodePushUpdateUtils;
 import com.microsoft.codepush.common.utils.CodePushUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
@@ -37,7 +36,6 @@ import static com.microsoft.codepush.common.testutils.UpdateManagerAndroidTestUt
 import static com.microsoft.codepush.common.testutils.UpdateManagerAndroidTestUtils.executeWorkflow;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
@@ -243,12 +241,12 @@ public class UpdateManagerAndroidTests {
      */
     @Test
     public void nullDownloadProgressCallBack() throws Exception {
-        PackageDownloader packageDownloader = new PackageDownloader(mFileUtils);
+        DownloadPackageJob downloadPackageJob = new DownloadPackageJob(mFileUtils);
         File downloadFolder = new File(Environment.getExternalStorageDirectory(), CODE_PUSH_FOLDER_PREFIX);
         downloadFolder.mkdirs();
         File downloadFilePath = new File(downloadFolder, CodePushConstants.DOWNLOAD_FILE_NAME);
-        packageDownloader.setParameters(FULL_PACKAGE_URL, downloadFilePath, null);
-        codePushUpdateManager.downloadPackage(FULL_PACKAGE_HASH, packageDownloader);
+        downloadPackageJob.setParameters(FULL_PACKAGE_URL, downloadFilePath, null);
+        codePushUpdateManager.downloadPackage(FULL_PACKAGE_HASH, downloadPackageJob);
     }
 
     /**
@@ -412,13 +410,12 @@ public class UpdateManagerAndroidTests {
     }
 
     /**
-     * Downloading files should return a {@link CodePushDownloadPackageException}
+     * Downloading files should throw a {@link CodePushDownloadPackageException}
      * if a {@link java.net.MalformedURLException} is thrown when attempting to download.
      */
-    @Test
+    @Test(expected = CodePushDownloadPackageException.class)
     public void downloadPackageFailsIfPackageDownloaderFails() throws Exception {
-        CodePushDownloadPackageResult codePushDownloadPackageResult = executeDownload(codePushUpdateManager, "fff", false, "/");
-        assertNotNull(codePushDownloadPackageResult.getCodePushDownloadPackageException());
+        executeDownload(codePushUpdateManager, "fff", false, "/");
     }
 
     /**

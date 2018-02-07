@@ -2,7 +2,7 @@ package com.microsoft.codepush.common.managers;
 
 import android.os.Environment;
 
-import com.microsoft.codepush.common.connection.PackageDownloader;
+import com.microsoft.codepush.common.connection.DownloadPackageJob;
 import com.microsoft.codepush.common.exceptions.CodePushDownloadPackageException;
 import com.microsoft.codepush.common.exceptions.CodePushSignatureVerificationException;
 import com.microsoft.codepush.common.exceptions.CodePushUnzipException;
@@ -83,7 +83,7 @@ public class UpdateManagerAndroidFileTests {
         CodePushUtils codePushUtils = CodePushUtils.getInstance(fileUtils);
         CodePushUpdateUtils codePushUpdateUtils = CodePushUpdateUtils.getInstance(fileUtils, codePushUtils);
         recreateUpdateManager(fileUtils, codePushUtils, codePushUpdateUtils);
-        codePushUpdateManager.downloadPackage("", mock(PackageDownloader.class));
+        codePushUpdateManager.downloadPackage("", mock(DownloadPackageJob.class));
     }
 
     /**

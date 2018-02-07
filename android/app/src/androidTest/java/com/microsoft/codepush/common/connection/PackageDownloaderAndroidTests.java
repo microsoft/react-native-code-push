@@ -29,7 +29,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * This class tests all the {@link PackageDownloader} scenarios.
+ * This class tests all the {@link DownloadPackageJob} scenarios.
  */
 public class PackageDownloaderAndroidTests {
 
@@ -45,14 +45,14 @@ public class PackageDownloaderAndroidTests {
      */
     @Test
     public void downloadFailsIfBytesMismatchMore() throws Exception {
-        PackageDownloader packageDownloader = createPackageDownloader(FULL_PACKAGE_URL);
+        DownloadPackageJob downloadPackageJob = createPackageDownloader(FULL_PACKAGE_URL);
         HttpURLConnection connectionMock = mock(HttpURLConnection.class);
         doReturn(100).when(connectionMock).getContentLength();
         BufferedInputStream bufferedInputStream = mock(BufferedInputStream.class);
         doReturn(-1).when(bufferedInputStream).read(any(byte[].class), anyInt(), anyInt());
         doReturn(bufferedInputStream).when(connectionMock).getInputStream();
-        doReturn(connectionMock).when(packageDownloader).createConnection(anyString());
-        checkDoInBackgroundFails(packageDownloader);
+        doReturn(connectionMock).when(downloadPackageJob).createConnection(anyString());
+        checkDoInBackgroundFails(downloadPackageJob);
     }
 
     /**
@@ -61,14 +61,14 @@ public class PackageDownloaderAndroidTests {
      */
     @Test
     public void downloadNotFailsIfBytesMismatchLess() throws Exception {
-        PackageDownloader packageDownloader = createPackageDownloader(FULL_PACKAGE_URL);
+        DownloadPackageJob downloadPackageJob = createPackageDownloader(FULL_PACKAGE_URL);
         HttpURLConnection realConnection = (HttpURLConnection) (new URL(FULL_PACKAGE_URL)).openConnection();
         BufferedInputStream realStream = new BufferedInputStream(realConnection.getInputStream());
         HttpURLConnection connectionMock = mock(HttpURLConnection.class);
         doReturn(-1).when(connectionMock).getContentLength();
         doReturn(realStream).when(connectionMock).getInputStream();
-        doReturn(connectionMock).when(packageDownloader).createConnection(anyString());
-        checkDoInBackgroundNotFails(packageDownloader);
+        doReturn(connectionMock).when(downloadPackageJob).createConnection(anyString());
+        checkDoInBackgroundNotFails(downloadPackageJob);
     }
 
     /**
@@ -77,14 +77,14 @@ public class PackageDownloaderAndroidTests {
      */
     @Test
     public void downloadFailsIfCloseFails() throws Exception {
-        PackageDownloader packageDownloader = createPackageDownloader(FULL_PACKAGE_URL);
+        DownloadPackageJob downloadPackageJob = createPackageDownloader(FULL_PACKAGE_URL);
         HttpURLConnection connectionMock = mock(HttpURLConnection.class);
         BufferedInputStream bufferedInputStream = mock(BufferedInputStream.class);
         doReturn(-1).when(bufferedInputStream).read(any(byte[].class), anyInt(), anyInt());
         doThrow(new IOException()).when(bufferedInputStream).close();
         doReturn(bufferedInputStream).when(connectionMock).getInputStream();
-        doReturn(connectionMock).when(packageDownloader).createConnection(anyString());
-        checkDoInBackgroundFails(packageDownloader);
+        doReturn(connectionMock).when(downloadPackageJob).createConnection(anyString());
+        checkDoInBackgroundFails(downloadPackageJob);
     }
 
     /**
@@ -95,14 +95,14 @@ public class PackageDownloaderAndroidTests {
      */
     @Test
     public void downloadDoubleFailureInputStream() throws Exception {
-        PackageDownloader packageDownloader = createPackageDownloader(FULL_PACKAGE_URL);
+        DownloadPackageJob downloadPackageJob = createPackageDownloader(FULL_PACKAGE_URL);
         HttpURLConnection connectionMock = mock(HttpURLConnection.class);
         BufferedInputStream bufferedInputStream = mock(BufferedInputStream.class);
         doReturn(-1).when(bufferedInputStream).read(any(byte[].class), anyInt(), anyInt());
         doThrow(new IOException()).when(bufferedInputStream).close();
         doThrow(new IOException()).when(connectionMock).getInputStream();
-        doReturn(connectionMock).when(packageDownloader).createConnection(anyString());
-        checkDoInBackgroundFails(packageDownloader);
+        doReturn(connectionMock).when(downloadPackageJob).createConnection(anyString());
+        checkDoInBackgroundFails(downloadPackageJob);
     }
 
     /**
@@ -110,14 +110,14 @@ public class PackageDownloaderAndroidTests {
      */
     @Test
     public void downloadSkipCycleTest() throws Exception {
-        PackageDownloader packageDownloader = createPackageDownloader(FULL_PACKAGE_URL);
+        DownloadPackageJob downloadPackageJob = createPackageDownloader(FULL_PACKAGE_URL);
         HttpURLConnection connectionMock = mock(HttpURLConnection.class);
         BufferedInputStream bufferedInputStream = mock(BufferedInputStream.class);
         when(bufferedInputStream.read(any(byte[].class), anyInt(), anyInt())).thenReturn(1).thenReturn(-1);
         doThrow(new IOException()).when(bufferedInputStream).close();
         doReturn(bufferedInputStream).when(connectionMock).getInputStream();
-        doReturn(connectionMock).when(packageDownloader).createConnection(anyString());
-        checkDoInBackgroundFails(packageDownloader);
+        doReturn(connectionMock).when(downloadPackageJob).createConnection(anyString());
+        checkDoInBackgroundFails(downloadPackageJob);
     }
 
     /**
@@ -129,8 +129,8 @@ public class PackageDownloaderAndroidTests {
         File codePushPath = new File(Environment.getExternalStorageDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX);
         File downloadFolder = new File(codePushPath.getPath());
         downloadFolder.mkdirs();
-        PackageDownloader packageDownloader = createPackageDownloader(FULL_PACKAGE_URL, downloadFolder);
-        checkDoInBackgroundFails(packageDownloader);
+        DownloadPackageJob downloadPackageJob = createPackageDownloader(FULL_PACKAGE_URL, downloadFolder);
+        checkDoInBackgroundFails(downloadPackageJob);
     }
 
     /**
@@ -144,14 +144,14 @@ public class PackageDownloaderAndroidTests {
         File codePushPath = new File(Environment.getExternalStorageDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX);
         File downloadFolder = new File(codePushPath.getPath());
         downloadFolder.mkdirs();
-        PackageDownloader packageDownloader = createPackageDownloader(FULL_PACKAGE_URL, downloadFolder);
+        DownloadPackageJob downloadPackageJob = createPackageDownloader(FULL_PACKAGE_URL, downloadFolder);
         HttpURLConnection connectionMock = mock(HttpURLConnection.class);
         BufferedInputStream bufferedInputStream = mock(BufferedInputStream.class);
         doReturn(0).when(bufferedInputStream).read(any(byte[].class), anyInt(), anyInt());
         doThrow(new IOException()).when(bufferedInputStream).close();
         doReturn(bufferedInputStream).when(connectionMock).getInputStream();
-        doReturn(connectionMock).when(packageDownloader).createConnection(anyString());
-        checkDoInBackgroundFails(packageDownloader);
+        doReturn(connectionMock).when(downloadPackageJob).createConnection(anyString());
+        checkDoInBackgroundFails(downloadPackageJob);
     }
 
     /**
@@ -162,14 +162,14 @@ public class PackageDownloaderAndroidTests {
      */
     @Test
     public void downloadDoubleFailureMismatch() throws Exception {
-        PackageDownloader packageDownloader = createPackageDownloader(FULL_PACKAGE_URL);
+        DownloadPackageJob downloadPackageJob = createPackageDownloader(FULL_PACKAGE_URL);
         HttpURLConnection connectionMock = mock(HttpURLConnection.class);
         BufferedInputStream bufferedInputStream = mock(BufferedInputStream.class);
         doReturn(-1).when(bufferedInputStream).read(any(byte[].class), anyInt(), anyInt());
         doThrow(new IOException()).when(bufferedInputStream).close();
         doReturn(bufferedInputStream).when(connectionMock).getInputStream();
         doReturn(100).when(connectionMock).getContentLength();
-        doReturn(connectionMock).when(packageDownloader).createConnection(anyString());
-        checkDoInBackgroundFails(packageDownloader);
+        doReturn(connectionMock).when(downloadPackageJob).createConnection(anyString());
+        checkDoInBackgroundFails(downloadPackageJob);
     }
 }
