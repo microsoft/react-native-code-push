@@ -4,7 +4,7 @@ import android.os.AsyncTask;
 
 import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.CodePushConfiguration;
-import com.microsoft.codepush.common.connection.QueryUpdateJob;
+import com.microsoft.codepush.common.connection.CheckForUpdateJob;
 import com.microsoft.codepush.common.connection.ReportStatusJob;
 import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
 import com.microsoft.codepush.common.datacontracts.CodePushDownloadStatusReport;
@@ -105,11 +105,11 @@ public class CodePushAcquisitionManager {
         CodePushUpdateRequest updateRequest = CodePushUpdateRequest.createUpdateRequest(mDeploymentKey, currentPackage, mClientUniqueId);
         try {
             final String requestUrl = mServerUrl + String.format(Locale.getDefault(), UPDATE_CHECK_ENDPOINT, mCodePushUtils.getQueryStringFromObject(updateRequest));
-            QueryUpdateJob queryUpdateJob = new QueryUpdateJob(mFileUtils, mCodePushUtils);
-            queryUpdateJob.setParameters(requestUrl);
-            queryUpdateJob.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            CheckForUpdateJob checkForUpdateJob = new CheckForUpdateJob(mFileUtils, mCodePushUtils);
+            checkForUpdateJob.setParameters(requestUrl);
+            checkForUpdateJob.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             try {
-                CodePushUpdateResponse codePushUpdateResponse = queryUpdateJob.get();
+                CodePushUpdateResponse codePushUpdateResponse = checkForUpdateJob.get();
                 if (codePushUpdateResponse.isFailed()) {
                     throw codePushUpdateResponse.getCodePushQueryUpdateException();
                 }
@@ -142,17 +142,15 @@ public class CodePushAcquisitionManager {
         deploymentStatusReport.setAppVersion(deploymentStatusReport.getLocalPackage() != null ? deploymentStatusReport.getLocalPackage().getAppVersion() : mAppVersion);
         deploymentStatusReport.setAppVersion(deploymentStatusReport.getLocalPackage() != null ? deploymentStatusReport.getLocalPackage().getLabel() : null);
         final String requestUrl = mServerUrl + REPORT_DEPLOYMENT_STATUS_ENDPOINT;
-        if (deploymentStatusReport.getLocalPackage() != null) {
-            switch (deploymentStatusReport.getStatus()) {
-                case SUCCEEDED:
-                case FAILED:
-                    break;
-                default: {
-                    if (deploymentStatusReport.getStatus() == null) {
-                        throw new CodePushReportStatusException("Missing status argument.", CodePushReportStatusException.ReportType.DEPLOY);
-                    } else {
-                        throw new CodePushReportStatusException("Unrecognized status \"" + deploymentStatusReport.getStatus().getValue() + "\".", CodePushReportStatusException.ReportType.DEPLOY);
-                    }
+        switch (deploymentStatusReport.getStatus()) {
+            case SUCCEEDED:
+            case FAILED:
+                break;
+            default: {
+                if (deploymentStatusReport.getStatus() == null) {
+                    throw new CodePushReportStatusException("Missing status argument.", CodePushReportStatusException.ReportType.DEPLOY);
+                } else {
+                    throw new CodePushReportStatusException("Unrecognized status \"" + deploymentStatusReport.getStatus().getValue() + "\".", CodePushReportStatusException.ReportType.DEPLOY);
                 }
             }
         }

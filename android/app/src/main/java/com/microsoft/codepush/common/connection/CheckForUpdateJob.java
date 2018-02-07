@@ -20,7 +20,7 @@ import static com.microsoft.codepush.common.CodePush.LOG_TAG;
 /**
  * Performs sending status reports to server.
  */
-public class QueryUpdateJob extends BaseHttpJob<CodePushUpdateResponse> {
+public class CheckForUpdateJob extends BaseHttpJob<CodePushUpdateResponse> {
 
     /**
      * Url to query update against.
@@ -28,12 +28,12 @@ public class QueryUpdateJob extends BaseHttpJob<CodePushUpdateResponse> {
     private String mRequestUrl;
 
     /**
-     * Creates an instance of {@link QueryUpdateJob}.
+     * Creates an instance of {@link CheckForUpdateJob}.
      *
      * @param fileUtils     instance of {@link FileUtils} to work with.
      * @param codePushUtils instance of {@link CodePushUtils} to work with.
      */
-    public QueryUpdateJob(FileUtils fileUtils, CodePushUtils codePushUtils) {
+    public CheckForUpdateJob(FileUtils fileUtils, CodePushUtils codePushUtils) {
         mFileUtils = fileUtils;
         mCodePushUtils = codePushUtils;
     }
