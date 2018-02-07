@@ -109,6 +109,29 @@ public class CodePushUtils {
     }
 
     /**
+     * Converts json string to specified class.
+     *
+     * @param stringObject json string.
+     * @param classOfT     the class of T.
+     * @param <T>          the type of the desired object.
+     * @return instance of T.
+     */
+    @SuppressWarnings("WeakerAccess")
+    public <T> T convertStringToObject(String stringObject, Class<T> classOfT) throws JsonSyntaxException {
+        return mGson.fromJson(stringObject, classOfT);
+    }
+
+    /**
+     * Converts {@link Object} instance to json string.
+     *
+     * @param object {@link JSONObject} instance.
+     * @return the json string.
+     */
+    public String convertObjectToJsonString(Object object) {
+        return mGson.toJsonTree(object).toString();
+    }
+
+    /**
      * Gets information from json file and converts it to an object of specified type.
      *
      * @param filePath path to file with json contents.
@@ -158,16 +181,6 @@ public class CodePushUtils {
     }
 
     /**
-     * Converts {@link Object} instance to json string.
-     *
-     * @param object {@link JSONObject} instance.
-     * @return the json string.
-     */
-    public String convertObjectToJsonString(Object object) {
-        return mGson.toJsonTree(object).toString();
-    }
-
-    /**
      * Converts {@link JSONObject} instance to specified class.
      *
      * @param jsonObject {@link JSONObject} instance.
@@ -180,19 +193,6 @@ public class CodePushUtils {
     }
 
     /**
-     * Converts json string to specified class.
-     *
-     * @param stringObject json string.
-     * @param classOfT     the class of T.
-     * @param <T>          the type of the desired object.
-     * @return instance of T.
-     */
-    @SuppressWarnings("WeakerAccess")
-    public <T> T convertStringToObject(String stringObject, Class<T> classOfT) throws JsonSyntaxException {
-        return mGson.fromJson(stringObject, classOfT);
-    }
-
-    /**
      * Converts object to query string using the following scheme: <br/>
      * <ul>
      * <li>object converts to {@link JSONObject};</li>
@@ -201,11 +201,12 @@ public class CodePushUtils {
      * <li>iterates through {@link Map}&lt;String, Object&gt; instance and builds query string.</li>
      * </ul>
      *
-     * @param object object.
+     * @param object      object.
+     * @param charsetName charset that will be used for url parts encoding. Recommended value: <code>"UTF-8"</code>
      * @return query string.
      * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
-    public String getQueryStringFromObject(Object object) throws CodePushMalformedDataException {
+    public String getQueryStringFromObject(Object object, String charsetName) throws CodePushMalformedDataException {
         JsonObject updateRequestJson = mGson.toJsonTree(object).getAsJsonObject();
         Map<String, Object> updateRequestMap = new HashMap<>();
         updateRequestMap = (Map<String, Object>) mGson.fromJson(updateRequestJson, updateRequestMap.getClass());
@@ -215,9 +216,9 @@ public class CodePushUtils {
                 sb.append('&');
             }
             try {
-                sb.append(URLEncoder.encode(e.getKey(), "UTF-8"))
+                sb.append(URLEncoder.encode(e.getKey(), charsetName))
                         .append('=')
-                        .append(URLEncoder.encode(e.getValue().toString(), "UTF-8"));
+                        .append(URLEncoder.encode(e.getValue().toString(), charsetName));
             } catch (UnsupportedEncodingException exception) {
                 throw new CodePushMalformedDataException("Error converting object to query string", exception);
             }

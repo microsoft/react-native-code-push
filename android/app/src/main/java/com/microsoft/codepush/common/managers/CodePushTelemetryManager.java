@@ -4,9 +4,9 @@ import com.microsoft.codepush.common.CodePushStatusReportIdentifier;
 import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 
+import static android.text.TextUtils.isEmpty;
 import static com.microsoft.codepush.common.enums.CodePushDeploymentStatus.FAILED;
 import static com.microsoft.codepush.common.enums.CodePushDeploymentStatus.SUCCEEDED;
-import static com.microsoft.codepush.common.utils.StringUtils.isNullOrEmpty;
 
 /**
  * Manager responsible for get/update telemetry reports on device.
@@ -130,7 +130,7 @@ public class CodePushTelemetryManager {
         if (statusReport.getStatus() != null && statusReport.getStatus() == FAILED) {
             return;
         }
-        if (!isNullOrEmpty(statusReport.getAppVersion())) {
+        if (!isEmpty(statusReport.getAppVersion())) {
             CodePushStatusReportIdentifier statusIdentifier = new CodePushStatusReportIdentifier(statusReport.getAppVersion());
             mSettingsManager.saveIdentifierOfReportedStatus(statusIdentifier);
         } else if (statusReport.getLocalPackage() != null) {

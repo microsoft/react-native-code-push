@@ -305,7 +305,7 @@ public class FileUtils {
     }
 
     /**
-     * Writes some content to a file.
+     * Writes some content to a file, existing file will be overwritten.
      *
      * @param content  content to be written to a file.
      * @param filePath path to a file.
@@ -314,7 +314,7 @@ public class FileUtils {
     public void writeStringToFile(String content, String filePath) throws IOException {
         FileWriter writer = null;
         try {
-            writer = new FileWriter(filePath);
+            writer = new FileWriter(filePath, false);
             writer.write(content);
         } finally {
             Exception e = finalizeResources(
