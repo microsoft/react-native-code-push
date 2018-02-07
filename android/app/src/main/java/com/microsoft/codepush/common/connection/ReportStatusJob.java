@@ -18,7 +18,7 @@ import javax.net.ssl.HttpsURLConnection;
 /**
  * Performs sending status reports to server.
  */
-public class ReportStatusJob extends BaseJob<CodePushReportStatusResult> {
+public class ReportStatusJob extends BaseHttpJob<CodePushReportStatusResult> {
 
     /**
      * Url to send report to.

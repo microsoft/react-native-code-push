@@ -20,7 +20,7 @@ import java.util.Arrays;
 /**
  * Downloads an update.
  */
-public class DownloadPackageJob extends BaseJob<CodePushDownloadPackageResult> {
+public class DownloadPackageJob extends BaseHttpJob<CodePushDownloadPackageResult> {
 
     /**
      * Header in the beginning of every zip file.

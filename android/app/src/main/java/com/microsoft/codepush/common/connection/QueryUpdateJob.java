@@ -20,7 +20,7 @@ import static com.microsoft.codepush.common.CodePush.LOG_TAG;
 /**
  * Performs sending status reports to server.
  */
-public class QueryUpdateJob extends BaseJob<CodePushUpdateResponse> {
+public class QueryUpdateJob extends BaseHttpJob<CodePushUpdateResponse> {
 
     /**
      * Url to query update against.

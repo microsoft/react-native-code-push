@@ -14,7 +14,7 @@ import java.net.URL;
  *
  * @param <T> type of the returned parameter.
  */
-public abstract class BaseJob<T> extends AsyncTask<Void, Void, T> {
+public abstract class BaseHttpJob<T> extends AsyncTask<Void, Void, T> {
 
     /**
      * Instance of {@link FileUtils} to work with.
