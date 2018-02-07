@@ -25,6 +25,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 /**
  * This class is for testing those {@link CodePushUpdateManager} test cases that depend on {@link FileUtils} methods failure.
@@ -116,5 +117,24 @@ public class UpdateManagerAndroidFileTests {
         doThrow(new IOException()).when(codePushUpdateUtils).verifyFolderHash(anyString(), anyString());
         recreateUpdateManager(fileUtils, codePushUtils, codePushUpdateUtils);
         codePushUpdateManager.verifySignature(null, PACKAGE_HASH, true);
+    }
+
+    /**
+     * Download package should throw a {@link CodePushDownloadPackageException} if an {@link InterruptedException} is thrown during {@link PackageDownloader#get()}.
+     * If executing an {@link android.os.AsyncTask} fails, downloading package should fail, too.
+     */
+    @Test(expected = CodePushDownloadPackageException.class)
+    public void downloadFailsIfPackageDownloaderFails() throws Exception {
+        FileUtils fileUtils = FileUtils.getInstance();
+        CodePushUtils codePushUtils = CodePushUtils.getInstance(fileUtils);
+        CodePushUpdateUtils codePushUpdateUtils = CodePushUpdateUtils.getInstance(fileUtils, codePushUtils);
+        CodePushUpdateManager codePushUpdateManager = new CodePushUpdateManager(new File(Environment.getExternalStorageDirectory(), "/Test").getPath(),
+                CommonTestPlatformUtils.getInstance(),
+                fileUtils, codePushUtils, codePushUpdateUtils);
+        codePushUpdateManager = spy(codePushUpdateManager);
+        doReturn(new File(Environment.getExternalStorageDirectory(), "/Test/HASH").getPath()).when(codePushUpdateManager).getPackageFolderPath(anyString());
+        PackageDownloader packageDownloader = mock(PackageDownloader.class);
+        when(packageDownloader.get()).thenThrow(new InterruptedException());
+        codePushUpdateManager.downloadPackage("", packageDownloader);
     }
 }

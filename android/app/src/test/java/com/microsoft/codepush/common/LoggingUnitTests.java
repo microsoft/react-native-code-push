@@ -9,13 +9,17 @@ import com.microsoft.codepush.common.datacontracts.CodePushUpdateRequest;
 import com.microsoft.codepush.common.datacontracts.CodePushUpdateResponse;
 import com.microsoft.codepush.common.utils.FileUtils;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.internal.verification.VerificationModeFactory;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
 
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -39,6 +43,13 @@ public class LoggingUnitTests {
     private final static boolean IS_DEBUG_ONLY = false;
     private final static boolean IS_FIRST_RUN = false;
     private final static String APP_ENTRY_POINT = "/www/index.html";
+
+    private FileUtils mFileUtils;
+
+    @Before
+    public void setUp() {
+        this.mFileUtils = FileUtils.getInstance();
+    }
 
     @Test
     public void testLogging() throws Exception {
@@ -75,5 +86,21 @@ public class LoggingUnitTests {
         /* We expect exactly 12 logged errors. */
         verifyStatic(VerificationModeFactory.times(12));
         AppCenterLog.error(eq(CodePush.LOG_TAG), anyString());
+    }
+
+    /**
+     * Checks {@link FileUtils#finalizeResources} logs custom error message.
+     */
+    @Test
+    public void testFinalizeResourcesLogging() {
+        mockStatic(AppCenterLog.class);
+        Closeable brokenResource = new Closeable() {
+            @Override
+            public void close() throws IOException {
+                throw new IOException();
+            }
+        };
+        mFileUtils.finalizeResources(Arrays.asList(brokenResource), "log me");
+        verifyStatic(VerificationModeFactory.times(1));
     }
 }
