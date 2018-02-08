@@ -1,13 +1,12 @@
 package com.microsoft.codepush.common.managers;
 
-import android.os.AsyncTask;
-
 import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.CodePush;
 import com.microsoft.codepush.common.CodePushConstants;
-import com.microsoft.codepush.common.connection.DownloadPackageJob;
+import com.microsoft.codepush.common.apirequests.ApiHttpRequest;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPackageInfo;
+import com.microsoft.codepush.common.exceptions.CodePushApiHttpRequestException;
 import com.microsoft.codepush.common.exceptions.CodePushDownloadPackageException;
 import com.microsoft.codepush.common.exceptions.CodePushGetPackageException;
 import com.microsoft.codepush.common.exceptions.CodePushInstallException;
@@ -17,8 +16,7 @@ import com.microsoft.codepush.common.exceptions.CodePushRollbackException;
 import com.microsoft.codepush.common.exceptions.CodePushSignatureVerificationException;
 import com.microsoft.codepush.common.exceptions.CodePushSignatureVerificationException.SignatureExceptionType;
 import com.microsoft.codepush.common.exceptions.CodePushUnzipException;
-import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
-import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
+import com.microsoft.codepush.common.datacontracts.CodePushDownloadPackageResult;
 import com.microsoft.codepush.common.utils.CodePushUpdateUtils;
 import com.microsoft.codepush.common.utils.CodePushUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
@@ -28,7 +26,6 @@ import org.json.JSONException;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Manager responsible for update read/write actions.
@@ -360,13 +357,12 @@ public class CodePushUpdateManager {
     /**
      * Downloads the update package.
      *
-     * @param packageHash       update package hash.
-     * @param downloadPackageJob instance of {@link DownloadPackageJob} to download the update.
-     *                          Note: all the parameters should be already set via {@link DownloadPackageJob#setParameters(String, File, DownloadProgressCallback)}.
+     * @param packageHash            update package hash.
+     * @param downloadPackageRequest instance of {@link ApiHttpRequest} to download the update.
      * @return downloaded package.
      * @throws CodePushDownloadPackageException an exception occurred during package downloading.
      */
-    public CodePushDownloadPackageResult downloadPackage(String packageHash, DownloadPackageJob downloadPackageJob) throws CodePushDownloadPackageException {
+    public CodePushDownloadPackageResult downloadPackage(String packageHash, ApiHttpRequest<CodePushDownloadPackageResult> downloadPackageRequest) throws CodePushDownloadPackageException {
         String newUpdateFolderPath = getPackageFolderPath(packageHash);
         if (mFileUtils.fileAtPathExists(newUpdateFolderPath)) {
 
@@ -380,15 +376,11 @@ public class CodePushUpdateManager {
         }
 
         /* Download the file while checking if it is a zip and notifying client of progress. */
-        downloadPackageJob.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         CodePushDownloadPackageResult downloadPackageResult;
         try {
-            downloadPackageResult = downloadPackageJob.get();
-        } catch (InterruptedException | ExecutionException e) {
+            downloadPackageResult = downloadPackageRequest.makeRequest();
+        } catch (CodePushApiHttpRequestException e) {
             throw new CodePushDownloadPackageException(e);
-        }
-        if (downloadPackageResult.isFailed()) {
-            throw downloadPackageResult.getCodePushDownloadPackageException();
         }
         return downloadPackageResult;
     }

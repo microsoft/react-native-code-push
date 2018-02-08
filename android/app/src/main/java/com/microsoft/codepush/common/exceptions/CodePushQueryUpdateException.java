@@ -3,7 +3,7 @@ package com.microsoft.codepush.common.exceptions;
 /**
  * An exception occurred during querying the update.
  */
-public class CodePushQueryUpdateException extends Exception {
+public class CodePushQueryUpdateException extends CodePushApiHttpRequestException {
 
     /**
      * Default error message.
