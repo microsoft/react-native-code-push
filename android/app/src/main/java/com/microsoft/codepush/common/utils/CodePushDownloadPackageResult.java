@@ -76,7 +76,7 @@ public class CodePushDownloadPackageResult {
      *
      * @return <code>true</code> if the package has not been downloaded successfully, <code>false</code> otherwise.
      */
-    public boolean isCorrupt() {
+    public boolean isFailed() {
         return codePushDownloadPackageException != null;
     }
 }
