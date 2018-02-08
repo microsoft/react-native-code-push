@@ -40,7 +40,7 @@ public class DataContractsUnitTests {
     @Test
     public void dataContractsTest() throws Exception {
 
- /* Check package. */
+        /* Check package. */
         CodePushPackage codePushPackage = new CodePushPackage();
         codePushPackage.setAppVersion(APP_VERSION);
         codePushPackage.setDeploymentKey(DEPLOYMENT_KEY);
