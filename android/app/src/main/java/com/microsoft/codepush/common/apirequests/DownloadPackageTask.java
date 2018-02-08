@@ -1,11 +1,11 @@
-package com.microsoft.codepush.common.connection;
+package com.microsoft.codepush.common.apirequests;
 
 import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.DownloadProgress;
 import com.microsoft.codepush.common.exceptions.CodePushDownloadPackageException;
 import com.microsoft.codepush.common.exceptions.CodePushFinalizeException;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
-import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
+import com.microsoft.codepush.common.datacontracts.CodePushDownloadPackageResult;
 import com.microsoft.codepush.common.utils.FileUtils;
 
 import java.io.BufferedInputStream;
@@ -20,48 +20,36 @@ import java.util.Arrays;
 /**
  * Downloads an update.
  */
-public class DownloadPackageJob extends BaseHttpJob<CodePushDownloadPackageResult> {
+public class DownloadPackageTask extends BaseHttpTask<CodePushDownloadPackageResult> {
 
     /**
      * Header in the beginning of every zip file.
      */
-    private final Integer ZIP_HEADER = 0x504b0304;
-
-    /**
-     * Url for downloading an update.
-     */
-    private String downloadUrlString;
+    private final static Integer ZIP_HEADER = 0x504b0304;
 
     /**
      * Path to download file to.
      */
-    private File downloadFile;
+    private File mDownloadFile;
 
     /**
      * Callback for download process.
      */
-    private DownloadProgressCallback downloadProgressCallback;
+    private DownloadProgressCallback mDownloadProgressCallback;
 
     /**
-     * Creates instance of {@link DownloadPackageJob}.
+     * Creates instance of {@link DownloadPackageTask}.
      *
-     * @param fileUtils instance of {@link FileUtils} to work with.
-     */
-    public DownloadPackageJob(FileUtils fileUtils) {
-        mFileUtils = fileUtils;
-    }
-
-    /**
-     * Sets the downloader required parameters.
-     *
-     * @param downloadUrlString        url for downloading an update.
+     * @param fileUtils                instance of {@link FileUtils} to work with.
+     * @param requestUrl               url for downloading an update.
      * @param downloadFile             path to download file to.
      * @param downloadProgressCallback callback for download progress.
      */
-    public void setParameters(String downloadUrlString, File downloadFile, DownloadProgressCallback downloadProgressCallback) {
-        this.downloadUrlString = downloadUrlString;
-        this.downloadFile = downloadFile;
-        this.downloadProgressCallback = downloadProgressCallback;
+    public DownloadPackageTask(FileUtils fileUtils, String requestUrl, File downloadFile, DownloadProgressCallback downloadProgressCallback) {
+        mFileUtils = fileUtils;
+        mRequestUrl = requestUrl;
+        mDownloadFile = downloadFile;
+        mDownloadProgressCallback = downloadProgressCallback;
     }
 
     @Override
@@ -71,17 +59,18 @@ public class DownloadPackageJob extends BaseHttpJob<CodePushDownloadPackageResul
         FileOutputStream fileOutputStream = null;
         BufferedOutputStream bufferedOutputStream = null;
         try {
-            connection = createConnection(downloadUrlString);
+            connection = createConnection(mRequestUrl);
         } catch (IOException e) {
 
             /* We can't throw custom errors from this function, so any error will be passed to the result. */
-            return new CodePushDownloadPackageResult(new CodePushDownloadPackageException(downloadUrlString, e));
+            mExecutionException = new CodePushDownloadPackageException(mRequestUrl, e);
+            return null;
         }
         try {
             long totalBytes = connection.getContentLength();
             long receivedBytes = 0;
             bufferedInputStream = new BufferedInputStream(connection.getInputStream());
-            fileOutputStream = new FileOutputStream(downloadFile);
+            fileOutputStream = new FileOutputStream(mDownloadFile);
             bufferedOutputStream = new BufferedOutputStream(fileOutputStream, CodePushConstants.DOWNLOAD_BUFFER_SIZE);
             byte[] data = new byte[CodePushConstants.DOWNLOAD_BUFFER_SIZE];
 
@@ -100,23 +89,25 @@ public class DownloadPackageJob extends BaseHttpJob<CodePushDownloadPackageResul
                 }
                 receivedBytes += numBytesRead;
                 bufferedOutputStream.write(data, 0, numBytesRead);
-                if (downloadProgressCallback != null) {
-                    downloadProgressCallback.call(new DownloadProgress(totalBytes, receivedBytes));
+                if (mDownloadProgressCallback != null) {
+                    mDownloadProgressCallback.call(new DownloadProgress(totalBytes, receivedBytes));
                 }
             }
             if (totalBytes >= 0 && totalBytes != receivedBytes) {
-                return new CodePushDownloadPackageResult(new CodePushDownloadPackageException(receivedBytes, totalBytes));
+                mExecutionException = new CodePushDownloadPackageException(receivedBytes, totalBytes);
+                return null;
             }
             boolean isZip = ByteBuffer.wrap(header).getInt() == ZIP_HEADER;
-            return new CodePushDownloadPackageResult(downloadFile, isZip);
+            return new CodePushDownloadPackageResult(mDownloadFile, isZip);
         } catch (IOException e) {
-            return new CodePushDownloadPackageResult(new CodePushDownloadPackageException(e));
+            mExecutionException = new CodePushDownloadPackageException(e);
+            return null;
         } finally {
             Exception e = mFileUtils.finalizeResources(
                     Arrays.asList(bufferedOutputStream, fileOutputStream, bufferedInputStream),
                     null);
             if (e != null) {
-                return new CodePushDownloadPackageResult(new CodePushDownloadPackageException(new CodePushFinalizeException(e)));
+                mFinalizeException = new CodePushFinalizeException(e);
             }
         }
     }

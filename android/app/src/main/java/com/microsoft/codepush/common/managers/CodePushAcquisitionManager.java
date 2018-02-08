@@ -1,11 +1,10 @@
 package com.microsoft.codepush.common.managers;
 
-import android.os.AsyncTask;
-
 import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.CodePushConfiguration;
-import com.microsoft.codepush.common.connection.CheckForUpdateJob;
-import com.microsoft.codepush.common.connection.ReportStatusJob;
+import com.microsoft.codepush.common.apirequests.ApiHttpRequest;
+import com.microsoft.codepush.common.apirequests.CheckForUpdateTask;
+import com.microsoft.codepush.common.apirequests.ReportStatusTask;
 import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
 import com.microsoft.codepush.common.datacontracts.CodePushDownloadStatusReport;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
@@ -14,6 +13,7 @@ import com.microsoft.codepush.common.datacontracts.CodePushReportStatusResult;
 import com.microsoft.codepush.common.datacontracts.CodePushUpdateRequest;
 import com.microsoft.codepush.common.datacontracts.CodePushUpdateResponse;
 import com.microsoft.codepush.common.datacontracts.CodePushUpdateResponseUpdateInfo;
+import com.microsoft.codepush.common.exceptions.CodePushApiHttpRequestException;
 import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
 import com.microsoft.codepush.common.exceptions.CodePushQueryUpdateException;
 import com.microsoft.codepush.common.exceptions.CodePushReportStatusException;
@@ -21,26 +21,27 @@ import com.microsoft.codepush.common.utils.CodePushUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
 
 import java.util.Locale;
-import java.util.concurrent.ExecutionException;
 
 import static com.microsoft.codepush.common.CodePush.LOG_TAG;
+import static com.microsoft.codepush.common.enums.ReportType.DEPLOY;
+import static com.microsoft.codepush.common.enums.ReportType.DOWNLOAD;
 
 public class CodePushAcquisitionManager {
 
     /**
      * Endpoint for sending {@link CodePushDownloadStatusReport}.
      */
-    final private String REPORT_DOWNLOAD_STATUS_ENDPOINT = "reportStatus/download";
+    final private static String REPORT_DOWNLOAD_STATUS_ENDPOINT = "reportStatus/download";
 
     /**
      * Endpoint for sending {@link CodePushDeploymentStatusReport}.
      */
-    final private String REPORT_DEPLOYMENT_STATUS_ENDPOINT = "reportStatus/deploy";
+    final private static String REPORT_DEPLOYMENT_STATUS_ENDPOINT = "reportStatus/deploy";
 
     /**
      * Query updates string pattern.
      */
-    final private String UPDATE_CHECK_ENDPOINT = "updateCheck?%s";
+    final private static String UPDATE_CHECK_ENDPOINT = "updateCheck?%s";
 
     /**
      * Server url.
@@ -105,14 +106,10 @@ public class CodePushAcquisitionManager {
         CodePushUpdateRequest updateRequest = CodePushUpdateRequest.createUpdateRequest(mDeploymentKey, currentPackage, mClientUniqueId);
         try {
             final String requestUrl = mServerUrl + String.format(Locale.getDefault(), UPDATE_CHECK_ENDPOINT, mCodePushUtils.getQueryStringFromObject(updateRequest, "UTF-8"));
-            CheckForUpdateJob checkForUpdateJob = new CheckForUpdateJob(mFileUtils, mCodePushUtils);
-            checkForUpdateJob.setParameters(requestUrl);
-            checkForUpdateJob.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            CheckForUpdateTask checkForUpdateTask = new CheckForUpdateTask(mFileUtils, mCodePushUtils, requestUrl);
+            ApiHttpRequest<CodePushUpdateResponse> checkForUpdateRequest = new ApiHttpRequest<>(checkForUpdateTask);
             try {
-                CodePushUpdateResponse codePushUpdateResponse = checkForUpdateJob.get();
-                if (codePushUpdateResponse.isFailed()) {
-                    throw codePushUpdateResponse.getCodePushQueryUpdateException();
-                }
+                CodePushUpdateResponse codePushUpdateResponse = checkForUpdateRequest.makeRequest();
                 CodePushUpdateResponseUpdateInfo updateInfo = codePushUpdateResponse.getUpdateInfo();
                 if (updateInfo.isUpdateAppVersion()) {
                     return CodePushRemotePackage.createDefaultRemotePackage(updateInfo.getAppVersion(), updateInfo.isUpdateAppVersion());
@@ -120,7 +117,7 @@ public class CodePushAcquisitionManager {
                     return null;
                 }
                 return CodePushRemotePackage.createRemotePackageFromUpdateInfo(mDeploymentKey, updateInfo);
-            } catch (ExecutionException | InterruptedException e) {
+            } catch (CodePushApiHttpRequestException e) {
                 throw new CodePushQueryUpdateException(e, currentPackage.getPackageHash());
             }
         } catch (CodePushMalformedDataException e) {
@@ -148,25 +145,21 @@ public class CodePushAcquisitionManager {
                 break;
             default: {
                 if (deploymentStatusReport.getStatus() == null) {
-                    throw new CodePushReportStatusException("Missing status argument.", CodePushReportStatusException.ReportType.DEPLOY);
+                    throw new CodePushReportStatusException("Missing status argument.", DEPLOY);
                 } else {
-                    throw new CodePushReportStatusException("Unrecognized status \"" + deploymentStatusReport.getStatus().getValue() + "\".", CodePushReportStatusException.ReportType.DEPLOY);
+                    throw new CodePushReportStatusException("Unrecognized status \"" + deploymentStatusReport.getStatus().getValue() + "\".", DEPLOY);
                 }
             }
         }
         deploymentStatusReport.setLocalPackage(deploymentStatusReport.getLocalPackage());
         final String deploymentStatusReportJsonString = mCodePushUtils.convertObjectToJsonString(deploymentStatusReport);
-        ReportStatusJob reportStatusJob = new ReportStatusJob(mFileUtils);
-        reportStatusJob.setParameters(requestUrl, deploymentStatusReportJsonString, CodePushReportStatusException.ReportType.DEPLOY);
-        reportStatusJob.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        ReportStatusTask reportStatusDeployTask = new ReportStatusTask(mFileUtils, requestUrl, deploymentStatusReportJsonString, DEPLOY);
+        ApiHttpRequest<CodePushReportStatusResult> reportStatusDeployRequest = new ApiHttpRequest<>(reportStatusDeployTask);
         try {
-            CodePushReportStatusResult codePushReportStatusResult = reportStatusJob.get();
+            CodePushReportStatusResult codePushReportStatusResult = reportStatusDeployRequest.makeRequest();
             AppCenterLog.info(LOG_TAG, "Report status deploy: " + codePushReportStatusResult.getResult());
-            if (codePushReportStatusResult.isFailed()) {
-                throw codePushReportStatusResult.getCodePushReportStatusException();
-            }
-        } catch (ExecutionException | InterruptedException e) {
-            throw new CodePushReportStatusException(e, CodePushReportStatusException.ReportType.DEPLOY);
+        } catch (CodePushApiHttpRequestException e) {
+            throw new CodePushReportStatusException(e, DEPLOY);
         }
     }
 
@@ -180,17 +173,13 @@ public class CodePushAcquisitionManager {
         final String requestUrl = mServerUrl + REPORT_DOWNLOAD_STATUS_ENDPOINT;
         final CodePushDownloadStatusReport downloadStatusReport = CodePushDownloadStatusReport.createReport(mClientUniqueId, mDeploymentKey, downloadedPackage.getLabel());
         final String downloadStatusReportJsonString = mCodePushUtils.convertObjectToJsonString(downloadStatusReport);
-        ReportStatusJob reportStatusJob = new ReportStatusJob(mFileUtils);
-        reportStatusJob.setParameters(requestUrl, downloadStatusReportJsonString, CodePushReportStatusException.ReportType.DOWNLOAD);
-        reportStatusJob.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        ReportStatusTask reportStatusDownloadTask = new ReportStatusTask(mFileUtils, requestUrl, downloadStatusReportJsonString, DOWNLOAD);
+        ApiHttpRequest<CodePushReportStatusResult> reportStatusDownloadRequest = new ApiHttpRequest<>(reportStatusDownloadTask);
         try {
-            CodePushReportStatusResult codePushReportStatusResult = reportStatusJob.get();
+            CodePushReportStatusResult codePushReportStatusResult = reportStatusDownloadRequest.makeRequest();
             AppCenterLog.info(LOG_TAG, "Report status download: " + codePushReportStatusResult.getResult());
-            if (codePushReportStatusResult.isFailed()) {
-                throw codePushReportStatusResult.getCodePushReportStatusException();
-            }
-        } catch (ExecutionException | InterruptedException e) {
-            throw new CodePushReportStatusException(e, CodePushReportStatusException.ReportType.DOWNLOAD);
+        } catch (CodePushApiHttpRequestException e) {
+            throw new CodePushReportStatusException(e, DOWNLOAD);
         }
     }
 }

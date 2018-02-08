@@ -3,7 +3,7 @@ package com.microsoft.codepush.common.exceptions;
 /**
  * An exception occurred during downloading the package.
  */
-public class CodePushDownloadPackageException extends Exception {
+public class CodePushDownloadPackageException extends CodePushApiHttpRequestException {
 
     /**
      * The default error message.
