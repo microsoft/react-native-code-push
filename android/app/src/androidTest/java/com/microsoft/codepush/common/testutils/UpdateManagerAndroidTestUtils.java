@@ -4,10 +4,10 @@ import android.os.Environment;
 
 import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.DownloadProgress;
-import com.microsoft.codepush.common.connection.DownloadPackageJob;
+import com.microsoft.codepush.common.apiRequests.DownloadPackageTask;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
 import com.microsoft.codepush.common.managers.CodePushUpdateManager;
-import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
+import com.microsoft.codepush.common.datacontracts.CodePushDownloadPackageResult;
 import com.microsoft.codepush.common.utils.FileUtils;
 
 import java.io.File;
@@ -34,7 +34,7 @@ public class UpdateManagerAndroidTestUtils {
      * @return result of the download.
      */
     public static CodePushDownloadPackageResult executeDownload(CodePushUpdateManager codePushUpdateManager, String packageHash, boolean verify, String url) throws Exception {
-        DownloadPackageJob downloadPackageJob = new DownloadPackageJob(FileUtils.getInstance());
+        DownloadPackageTask downloadPackageJob = new DownloadPackageTask(FileUtils.getInstance());
         DownloadProgressCallback downloadProgressCallback = mock(DownloadProgressCallback.class);
         File downloadFolder = new File(Environment.getExternalStorageDirectory(), CODE_PUSH_FOLDER_PREFIX);
         downloadFolder.mkdirs();

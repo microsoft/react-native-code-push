@@ -1,51 +1,11 @@
 package com.microsoft.codepush.common.exceptions;
 
-import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
-import com.microsoft.codepush.common.datacontracts.CodePushDownloadStatusReport;
+import com.microsoft.codepush.common.enums.ReportType;
 
 /**
  * An exception occurred during reporting the status to server.
  */
-public class CodePushReportStatusException extends Exception {
-
-    /**
-     * Type of the sent report.
-     */
-    public enum ReportType {
-
-        /**
-         * {@link CodePushDownloadStatusReport}.
-         */
-        DOWNLOAD("Error occurred during delivering download status report."),
-
-        /**
-         * {@link CodePushDeploymentStatusReport}.
-         */
-        DEPLOY("Error occurred during delivering deploy status report.");
-
-        /**
-         * Message describing the exception depending on the report type.
-         */
-        private final String message;
-
-        /**
-         * Creates instance of the enum using the provided message.
-         *
-         * @param message message describing the exception.
-         */
-        ReportType(String message) {
-            this.message = message;
-        }
-
-        /**
-         * Gets the message of the specified type.
-         *
-         * @return message.
-         */
-        public String getMessage() {
-            return this.message;
-        }
-    }
+public class CodePushReportStatusException extends CodePushApiHttpRequestException {
 
     /**
      * Creates an instance of the exception with default detail message and specified cause and report type.

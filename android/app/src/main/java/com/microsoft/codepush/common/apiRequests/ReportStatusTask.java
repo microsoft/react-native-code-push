@@ -1,8 +1,9 @@
-package com.microsoft.codepush.common.connection;
+package com.microsoft.codepush.common.apiRequests;
 
 import com.microsoft.codepush.common.datacontracts.CodePushReportStatusResult;
 import com.microsoft.codepush.common.exceptions.CodePushFinalizeException;
 import com.microsoft.codepush.common.exceptions.CodePushReportStatusException;
+import com.microsoft.codepush.common.enums.ReportType;
 import com.microsoft.codepush.common.utils.FileUtils;
 
 import java.io.IOException;
@@ -18,12 +19,7 @@ import javax.net.ssl.HttpsURLConnection;
 /**
  * Performs sending status reports to server.
  */
-public class ReportStatusJob extends BaseHttpJob<CodePushReportStatusResult> {
-
-    /**
-     * Url to send report to.
-     */
-    private String mRequestUrl;
+public class ReportStatusTask extends BaseHttpTask<CodePushReportStatusResult> {
 
     /**
      * Report as json string.
@@ -31,27 +27,20 @@ public class ReportStatusJob extends BaseHttpJob<CodePushReportStatusResult> {
     private String mJson;
 
     /**
-     * Type of the report as listen in {@link CodePushReportStatusException.ReportType}.
+     * Type of the report as listen in {@link ReportType}.
      */
-    private CodePushReportStatusException.ReportType mReportType;
+    private ReportType mReportType;
 
     /**
-     * Creates an instance of {@link ReportStatusJob}.
+     * Creates an instance of {@link ReportStatusTask}.
      *
-     * @param fileUtils instance of {@link FileUtils} to work with.
-     */
-    public ReportStatusJob(FileUtils fileUtils) {
-        mFileUtils = fileUtils;
-    }
-
-    /**
-     * Sets additional parameters to the request.
-     *
+     * @param fileUtils  instance of {@link FileUtils} to work with.
      * @param requestUrl url to send report to.
      * @param json       report as json string.
-     * @param reportType type of the report as listed in {@link CodePushReportStatusException.ReportType}.
+     * @param reportType type of the report as listed in {@link ReportType}.
      */
-    public void setParameters(String requestUrl, String json, CodePushReportStatusException.ReportType reportType) {
+    public ReportStatusTask(FileUtils fileUtils, String requestUrl, String json, ReportType reportType) {
+        mFileUtils = fileUtils;
         mRequestUrl = requestUrl;
         mJson = json;
         mReportType = reportType;
@@ -69,7 +58,8 @@ public class ReportStatusJob extends BaseHttpJob<CodePushReportStatusResult> {
         } catch (IOException e) {
 
             /* We can't throw custom errors from this function, so any error will be passed to the result. */
-            return CodePushReportStatusResult.createFailed(new CodePushReportStatusException(e, mReportType));
+            mExecutionException = new CodePushReportStatusException(e, mReportType);
+            return null;
         }
         try {
             connection.setDoInput(true);
@@ -92,20 +82,21 @@ public class ReportStatusJob extends BaseHttpJob<CodePushReportStatusResult> {
             scanner = new Scanner(stream).useDelimiter("\\A");
             String result = scanner.hasNext() ? scanner.next() : "";
             if (failed) {
-                CodePushReportStatusResult codePushReportStatusResult = CodePushReportStatusResult.createFailed(new CodePushReportStatusException(result, mReportType));
-                codePushReportStatusResult.setResult(result);
-                return codePushReportStatusResult;
+                mExecutionException = new CodePushReportStatusException(result, mReportType);
+                return null;
             } else {
                 return CodePushReportStatusResult.createSuccessful(result);
             }
         } catch (IOException e) {
-            return CodePushReportStatusResult.createFailed(new CodePushReportStatusException(e, mReportType));
+            mExecutionException = new CodePushReportStatusException(e, mReportType);
+            return null;
         } finally {
             Exception e = mFileUtils.finalizeResources(
                     Arrays.asList(outputStream, outputStreamWriter, stream, scanner),
                     null);
             if (e != null) {
-                return CodePushReportStatusResult.createFailed(new CodePushReportStatusException(new CodePushFinalizeException(e), mReportType));
+                Exception wrappedException = new CodePushReportStatusException(e, mReportType);
+                mFinalizeException = new CodePushFinalizeException(wrappedException);
             }
         }
     }

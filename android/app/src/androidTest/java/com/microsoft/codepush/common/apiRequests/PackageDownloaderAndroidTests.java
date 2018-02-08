@@ -1,11 +1,11 @@
-package com.microsoft.codepush.common.connection;
+package com.microsoft.codepush.common.apiRequests;
 
 import android.os.Environment;
 
 import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.exceptions.CodePushDownloadPackageException;
 import com.microsoft.codepush.common.exceptions.CodePushFinalizeException;
-import com.microsoft.codepush.common.utils.CodePushDownloadPackageResult;
+import com.microsoft.codepush.common.datacontracts.CodePushDownloadPackageResult;
 import com.microsoft.codepush.common.utils.FileUtils;
 
 import org.junit.Test;
@@ -29,7 +29,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
- * This class tests all the {@link DownloadPackageJob} scenarios.
+ * This class tests all the {@link DownloadPackageTask} scenarios.
  */
 public class PackageDownloaderAndroidTests {
 
@@ -45,7 +45,7 @@ public class PackageDownloaderAndroidTests {
      */
     @Test
     public void downloadFailsIfBytesMismatchMore() throws Exception {
-        DownloadPackageJob downloadPackageJob = createPackageDownloader(FULL_PACKAGE_URL);
+        DownloadPackageTask downloadPackageJob = createPackageDownloader(FULL_PACKAGE_URL);
         HttpURLConnection connectionMock = mock(HttpURLConnection.class);
         doReturn(100).when(connectionMock).getContentLength();
         BufferedInputStream bufferedInputStream = mock(BufferedInputStream.class);
@@ -61,7 +61,7 @@ public class PackageDownloaderAndroidTests {
      */
     @Test
     public void downloadNotFailsIfBytesMismatchLess() throws Exception {
-        DownloadPackageJob downloadPackageJob = createPackageDownloader(FULL_PACKAGE_URL);
+        DownloadPackageTask downloadPackageJob = createPackageDownloader(FULL_PACKAGE_URL);
         HttpURLConnection realConnection = (HttpURLConnection) (new URL(FULL_PACKAGE_URL)).openConnection();
         BufferedInputStream realStream = new BufferedInputStream(realConnection.getInputStream());
         HttpURLConnection connectionMock = mock(HttpURLConnection.class);
@@ -77,7 +77,7 @@ public class PackageDownloaderAndroidTests {
      */
     @Test
     public void downloadFailsIfCloseFails() throws Exception {
-        DownloadPackageJob downloadPackageJob = createPackageDownloader(FULL_PACKAGE_URL);
+        DownloadPackageTask downloadPackageJob = createPackageDownloader(FULL_PACKAGE_URL);
         HttpURLConnection connectionMock = mock(HttpURLConnection.class);
         BufferedInputStream bufferedInputStream = mock(BufferedInputStream.class);
         doReturn(-1).when(bufferedInputStream).read(any(byte[].class), anyInt(), anyInt());
@@ -95,7 +95,7 @@ public class PackageDownloaderAndroidTests {
      */
     @Test
     public void downloadDoubleFailureInputStream() throws Exception {
-        DownloadPackageJob downloadPackageJob = createPackageDownloader(FULL_PACKAGE_URL);
+        DownloadPackageTask downloadPackageJob = createPackageDownloader(FULL_PACKAGE_URL);
         HttpURLConnection connectionMock = mock(HttpURLConnection.class);
         BufferedInputStream bufferedInputStream = mock(BufferedInputStream.class);
         doReturn(-1).when(bufferedInputStream).read(any(byte[].class), anyInt(), anyInt());
@@ -110,7 +110,7 @@ public class PackageDownloaderAndroidTests {
      */
     @Test
     public void downloadSkipCycleTest() throws Exception {
-        DownloadPackageJob downloadPackageJob = createPackageDownloader(FULL_PACKAGE_URL);
+        DownloadPackageTask downloadPackageJob = createPackageDownloader(FULL_PACKAGE_URL);
         HttpURLConnection connectionMock = mock(HttpURLConnection.class);
         BufferedInputStream bufferedInputStream = mock(BufferedInputStream.class);
         when(bufferedInputStream.read(any(byte[].class), anyInt(), anyInt())).thenReturn(1).thenReturn(-1);
@@ -129,7 +129,7 @@ public class PackageDownloaderAndroidTests {
         File codePushPath = new File(Environment.getExternalStorageDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX);
         File downloadFolder = new File(codePushPath.getPath());
         downloadFolder.mkdirs();
-        DownloadPackageJob downloadPackageJob = createPackageDownloader(FULL_PACKAGE_URL, downloadFolder);
+        DownloadPackageTask downloadPackageJob = createPackageDownloader(FULL_PACKAGE_URL, downloadFolder);
         checkDoInBackgroundFails(downloadPackageJob);
     }
 
@@ -144,7 +144,7 @@ public class PackageDownloaderAndroidTests {
         File codePushPath = new File(Environment.getExternalStorageDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX);
         File downloadFolder = new File(codePushPath.getPath());
         downloadFolder.mkdirs();
-        DownloadPackageJob downloadPackageJob = createPackageDownloader(FULL_PACKAGE_URL, downloadFolder);
+        DownloadPackageTask downloadPackageJob = createPackageDownloader(FULL_PACKAGE_URL, downloadFolder);
         HttpURLConnection connectionMock = mock(HttpURLConnection.class);
         BufferedInputStream bufferedInputStream = mock(BufferedInputStream.class);
         doReturn(0).when(bufferedInputStream).read(any(byte[].class), anyInt(), anyInt());
@@ -162,7 +162,7 @@ public class PackageDownloaderAndroidTests {
      */
     @Test
     public void downloadDoubleFailureMismatch() throws Exception {
-        DownloadPackageJob downloadPackageJob = createPackageDownloader(FULL_PACKAGE_URL);
+        DownloadPackageTask downloadPackageJob = createPackageDownloader(FULL_PACKAGE_URL);
         HttpURLConnection connectionMock = mock(HttpURLConnection.class);
         BufferedInputStream bufferedInputStream = mock(BufferedInputStream.class);
         doReturn(-1).when(bufferedInputStream).read(any(byte[].class), anyInt(), anyInt());

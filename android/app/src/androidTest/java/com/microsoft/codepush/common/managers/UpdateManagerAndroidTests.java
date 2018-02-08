@@ -3,7 +3,7 @@ package com.microsoft.codepush.common.managers;
 import android.os.Environment;
 
 import com.microsoft.codepush.common.CodePushConstants;
-import com.microsoft.codepush.common.connection.DownloadPackageJob;
+import com.microsoft.codepush.common.apiRequests.DownloadPackageTask;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPackageInfo;
@@ -241,7 +241,7 @@ public class UpdateManagerAndroidTests {
      */
     @Test
     public void nullDownloadProgressCallBack() throws Exception {
-        DownloadPackageJob downloadPackageJob = new DownloadPackageJob(mFileUtils);
+        DownloadPackageTask downloadPackageJob = new DownloadPackageTask(mFileUtils);
         File downloadFolder = new File(Environment.getExternalStorageDirectory(), CODE_PUSH_FOLDER_PREFIX);
         downloadFolder.mkdirs();
         File downloadFilePath = new File(downloadFolder, CodePushConstants.DOWNLOAD_FILE_NAME);
