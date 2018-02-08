@@ -2,7 +2,7 @@ package com.microsoft.codepush.common.managers;
 
 import android.os.Environment;
 
-import com.microsoft.codepush.common.apiRequests.DownloadPackageTask;
+import com.microsoft.codepush.common.apirequests.DownloadPackageTask;
 import com.microsoft.codepush.common.exceptions.CodePushDownloadPackageException;
 import com.microsoft.codepush.common.testutils.CommonTestPlatformUtils;
 import com.microsoft.codepush.common.utils.CodePushUpdateUtils;

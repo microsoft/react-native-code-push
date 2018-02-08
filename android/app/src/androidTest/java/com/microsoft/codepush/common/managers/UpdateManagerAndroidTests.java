@@ -3,7 +3,7 @@ package com.microsoft.codepush.common.managers;
 import android.os.Environment;
 
 import com.microsoft.codepush.common.CodePushConstants;
-import com.microsoft.codepush.common.apiRequests.DownloadPackageTask;
+import com.microsoft.codepush.common.apirequests.DownloadPackageTask;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPackageInfo;

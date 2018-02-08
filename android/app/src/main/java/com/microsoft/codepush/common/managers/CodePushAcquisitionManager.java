@@ -2,9 +2,9 @@ package com.microsoft.codepush.common.managers;
 
 import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.CodePushConfiguration;
-import com.microsoft.codepush.common.apiRequests.ApiHttpRequest;
-import com.microsoft.codepush.common.apiRequests.CheckForUpdateTask;
-import com.microsoft.codepush.common.apiRequests.ReportStatusTask;
+import com.microsoft.codepush.common.apirequests.ApiHttpRequest;
+import com.microsoft.codepush.common.apirequests.CheckForUpdateTask;
+import com.microsoft.codepush.common.apirequests.ReportStatusTask;
 import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
 import com.microsoft.codepush.common.datacontracts.CodePushDownloadStatusReport;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;

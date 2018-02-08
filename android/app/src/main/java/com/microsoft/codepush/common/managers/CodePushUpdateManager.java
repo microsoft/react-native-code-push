@@ -3,7 +3,7 @@ package com.microsoft.codepush.common.managers;
 import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.CodePush;
 import com.microsoft.codepush.common.CodePushConstants;
-import com.microsoft.codepush.common.apiRequests.ApiHttpRequest;
+import com.microsoft.codepush.common.apirequests.ApiHttpRequest;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPackageInfo;
 import com.microsoft.codepush.common.exceptions.CodePushApiHttpRequestException;

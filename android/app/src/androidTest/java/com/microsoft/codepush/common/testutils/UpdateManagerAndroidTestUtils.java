@@ -4,7 +4,7 @@ import android.os.Environment;
 
 import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.DownloadProgress;
-import com.microsoft.codepush.common.apiRequests.DownloadPackageTask;
+import com.microsoft.codepush.common.apirequests.DownloadPackageTask;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
 import com.microsoft.codepush.common.managers.CodePushUpdateManager;
 import com.microsoft.codepush.common.datacontracts.CodePushDownloadPackageResult;

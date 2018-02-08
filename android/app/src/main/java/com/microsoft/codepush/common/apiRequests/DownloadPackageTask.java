@@ -1,4 +1,4 @@
-package com.microsoft.codepush.common.apiRequests;
+package com.microsoft.codepush.common.apirequests;
 
 import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.DownloadProgress;

@@ -1,4 +1,4 @@
-package com.microsoft.codepush.common.apiRequests;
+package com.microsoft.codepush.common.apirequests;
 
 import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.datacontracts.CodePushUpdateResponse;

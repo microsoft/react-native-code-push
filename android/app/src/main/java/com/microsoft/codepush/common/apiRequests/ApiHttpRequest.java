@@ -1,4 +1,4 @@
-package com.microsoft.codepush.common.apiRequests;
+package com.microsoft.codepush.common.apirequests;
 
 import android.os.AsyncTask;
 
