@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutionException;
  *
  * @param <T> result of execution of request.
  */
-public final class ApiHttpRequest<T> {
+public class ApiHttpRequest<T> {
 
     /**
      * Task for making request.
