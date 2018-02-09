@@ -236,10 +236,10 @@ public class FileAndroidTests {
     }
 
     /**
-     * {@link FileUtils#deleteFileOrFolderSilently(File)} should throw a {@link IOException}
+     * {@link FileUtils#deleteFileOrFolderSilently(File)} should not throw a {@link IOException}
      * if <code>listFiles</code> returned <code>null</code>.
      */
-    @Test(expected = IOException.class)
+    @Test
     public void deleteFileFailsIfListFilesFails() throws Exception {
         File testFile = mock(File.class);
         doReturn(null).when(testFile).listFiles();
@@ -248,10 +248,10 @@ public class FileAndroidTests {
     }
 
     /**
-     * {@link FileUtils#deleteFileOrFolderSilently(File)} should throw a {@link IOException}
+     * {@link FileUtils#deleteFileOrFolderSilently(File)} should not throw a {@link IOException}
      * if <code>delete</code> returned <code>null</code>.
      */
-    @Test(expected = IOException.class)
+    @Test
     public void deleteFileFailsIfDeleteFails() throws Exception {
         File testFile = mock(File.class);
         doReturn(false).when(testFile).delete();
@@ -259,10 +259,10 @@ public class FileAndroidTests {
     }
 
     /**
-     * {@link FileUtils#deleteFileOrFolderSilently(File)} should throw a {@link IOException}
+     * {@link FileUtils#deleteFileOrFolderSilently(File)} should not throw a {@link IOException}
      * if <code>delete</code> on child file returned <code>null</code>.
      */
-    @Test(expected = IOException.class)
+    @Test
     public void deleteFileFailsIfDeleteOnChildFails() throws Exception {
         File testFile = mock(File.class);
         doReturn(false).when(testFile).delete();

@@ -136,26 +136,26 @@ public class FileUtils {
      * @throws IOException read/write error occurred while accessing the file system.
      */
     @SuppressWarnings("WeakerAccess")
-    public void deleteFileOrFolderSilently(File file) throws IOException {
+    public void deleteFileOrFolderSilently(File file) {
 
         /* First, if this is a directory, delete all the files it contains. */
         if (file.isDirectory()) {
             File[] files = file.listFiles();
             if (files == null) {
-                throw new IOException("Pathname " + file.getAbsolutePath() + " doesn't denote a directory.");
+                //TODO track IOException("Pathname " + file.getAbsolutePath() + " doesn't denote a directory.");
             }
             for (File fileEntry : files) {
                 if (fileEntry.isDirectory()) {
                     deleteFileOrFolderSilently(fileEntry);
                 } else {
                     if (!fileEntry.delete()) {
-                        throw new IOException("Error deleting file " + file.getName());
+                        //TODO track new IOException("Error deleting file " + file.getName());
                     }
                 }
             }
         }
         if (!file.delete()) {
-            throw new IOException("Error deleting file " + file.getName());
+            //TODO track new IOException("Error deleting file " + file.getName());
         }
     }
 
