@@ -30,7 +30,8 @@ public class CodePushLogUtils {
                 AppCenterLog.error(LOG_TAG, throwable.getMessage());
             }
         } catch (Exception e) {
-            /* Do nothing. */
+
+            /* Do nothing because this exception can occur if crashes are simply not enabled, then just log it on device. */
         }
     }
 
@@ -39,7 +40,7 @@ public class CodePushLogUtils {
      *
      * @param throwable  exception instance.
      * @param properties additional properties.
-     * @param shouldLog <code>true</code> if log exception on device.
+     * @param shouldLog  <code>true</code> if log exception on device.
      */
     public static void trackException(@NonNull Throwable throwable, Map<String, String> properties, boolean shouldLog) {
         try {
@@ -49,7 +50,8 @@ public class CodePushLogUtils {
                 AppCenterLog.error(LOG_TAG, throwable.getMessage());
             }
         } catch (Exception e) {
-            /* Do nothing. */
+
+            /* Do nothing because this exception can occur if crashes are simply not enabled, then just log it on device. */
         }
     }
 }

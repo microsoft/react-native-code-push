@@ -29,14 +29,14 @@ public class CodePushDialog extends ReactContextBaseJavaModule {
      *
      * @param title           title of the dialog.
      * @param message         message to be displayed.
-     * @param button1Text     text on the left button.
-     * @param button2Text     test on the right button.
+     * @param positiveButtonText     text on the positive action button.
+     * @param negativeButtonText     test on the negative action button.
      * @param successCallback callback to handle "OK" events.
      * @param errorCallback   callback to handle "Discard" events.
      */
     @ReactMethod
-    public void showDialog(final String title, final String message, final String button1Text,
-                           final String button2Text, final Callback successCallback, Callback errorCallback) {
+    public void showDialog(final String title, final String message, final String positiveButtonText,
+                           final String negativeButtonText, final Callback successCallback, Callback errorCallback) {
         Activity currentActivity = getCurrentActivity();
         if (currentActivity == null) {
 
@@ -48,7 +48,7 @@ public class CodePushDialog extends ReactContextBaseJavaModule {
                     Activity currentActivity = getCurrentActivity();
                     if (currentActivity != null) {
                         getReactApplicationContext().removeLifecycleEventListener(this);
-                        showDialogInternal(title, message, button1Text, button2Text, successCallback, currentActivity);
+                        showDialogInternal(title, message, positiveButtonText, negativeButtonText, successCallback, currentActivity);
                     }
                 }
 
@@ -63,7 +63,7 @@ public class CodePushDialog extends ReactContextBaseJavaModule {
                 }
             });
         } else {
-            showDialogInternal(title, message, button1Text, button2Text, successCallback, currentActivity);
+            showDialogInternal(title, message, positiveButtonText, negativeButtonText, successCallback, currentActivity);
         }
     }
 
@@ -72,13 +72,13 @@ public class CodePushDialog extends ReactContextBaseJavaModule {
      *
      * @param title           title of the dialog.
      * @param message         message to be displayed.
-     * @param button1Text     text on the left button.
-     * @param button2Text     test on the right button.
+     * @param positiveButtonText     text on the positive action button.
+     * @param negativeButtonText     test on the negative action button.
      * @param successCallback callback to handle "OK" events.
      * @param currentActivity application activity.
      */
-    private void showDialogInternal(String title, String message, String button1Text,
-                                    String button2Text, final Callback successCallback, Activity currentActivity) {
+    private void showDialogInternal(String title, String message, String positiveButtonText,
+                                    String negativeButtonText, final Callback successCallback, Activity currentActivity) {
         AlertDialog.Builder builder = new AlertDialog.Builder(currentActivity);
         builder.setCancelable(false);
         DialogInterface.OnClickListener clickListener = new DialogInterface.OnClickListener() {
@@ -103,11 +103,11 @@ public class CodePushDialog extends ReactContextBaseJavaModule {
         if (message != null) {
             builder.setMessage(message);
         }
-        if (button1Text != null) {
-            builder.setPositiveButton(button1Text, clickListener);
+        if (positiveButtonText != null) {
+            builder.setPositiveButton(positiveButtonText, clickListener);
         }
-        if (button2Text != null) {
-            builder.setNegativeButton(button2Text, clickListener);
+        if (negativeButtonText != null) {
+            builder.setNegativeButton(negativeButtonText, clickListener);
         }
         try {
             AlertDialog dialog = builder.create();
