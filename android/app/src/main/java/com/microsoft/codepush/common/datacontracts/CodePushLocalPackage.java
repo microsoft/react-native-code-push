@@ -41,6 +41,11 @@ public class CodePushLocalPackage extends CodePushPackage {
     private Exception downloadException;
 
     /**
+     *
+     */
+    private String binaryModifiedTime;
+
+    /**
      * Creates an instance of the package which has had an error during download.
      *
      * @param downloadException exception that has occurred.
@@ -172,5 +177,13 @@ public class CodePushLocalPackage extends CodePushPackage {
      */
     public void setAppEntryPoint(String appEntryPoint) {
         this.appEntryPoint = appEntryPoint;
+    }
+
+    public String getBinaryModifiedTime() {
+        return binaryModifiedTime;
+    }
+
+    public void setBinaryModifiedTime(String binaryModifiedTime) {
+        this.binaryModifiedTime = binaryModifiedTime;
     }
 }

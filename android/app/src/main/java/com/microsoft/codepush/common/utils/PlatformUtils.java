@@ -1,5 +1,10 @@
 package com.microsoft.codepush.common.utils;
 
+import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
+import com.microsoft.codepush.common.exceptions.CodePushGeneralException;
+
+import java.io.IOException;
+
 /**
  * Interface describing the methods that should be implemented in platform-specific instances of utils.
  * It can be implemented via platform-specific singleton.
@@ -14,4 +19,8 @@ public interface PlatformUtils {
      * @return path to update folder.
      */
     String getUpdateFolderPath(String hash);
+
+    boolean isPackageLatest(CodePushLocalPackage packageMetadata, String currentAppVersion) throws CodePushGeneralException;
+
+    void clearDebugCache() throws IOException;
 }
