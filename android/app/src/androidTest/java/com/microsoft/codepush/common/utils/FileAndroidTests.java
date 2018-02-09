@@ -1,5 +1,7 @@
 package com.microsoft.codepush.common.utils;
 
+import com.microsoft.codepush.common.exceptions.CodePushFileException;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -201,7 +203,7 @@ public class FileAndroidTests {
      * Deleting files should throw an {@link IOException}
      * if pass <code>null</code> path to it.
      */
-    @Test(expected = IOException.class)
+    @Test(expected = CodePushFileException.class)
     public void deleteFailsIfPassNull() throws Exception {
         mFileUtils.deleteDirectoryAtPath(null);
     }
@@ -233,5 +235,42 @@ public class FileAndroidTests {
     public void tearDown() throws Exception {
         File testFolder = getTestingDirectory();
         testFolder.delete();
+    }
+
+    /**
+     * {@link FileUtils#deleteFileOrFolderSilently(File)} should throw a {@link CodePushFileException}
+     * if <code>listFiles</code> returned <code>null</code>.
+     */
+    @Test(expected = CodePushFileException.class)
+    public void tests() throws Exception {
+        File testFile = mock(File.class);
+        doReturn(null).when(testFile).listFiles();
+        doReturn(true).when(testFile).isDirectory();
+        mFileUtils.deleteFileOrFolderSilently(testFile);
+    }
+
+    /**
+     * {@link FileUtils#deleteFileOrFolderSilently(File)} should throw a {@link CodePushFileException}
+     * if <code>delete</code> returned <code>null</code>.
+     */
+    @Test(expected = CodePushFileException.class)
+    public void tests2() throws Exception {
+        File testFile = mock(File.class);
+        doReturn(false).when(testFile).delete();
+        mFileUtils.deleteFileOrFolderSilently(testFile);
+    }
+
+    /**
+     * {@link FileUtils#deleteFileOrFolderSilently(File)} should throw a {@link CodePushFileException}
+     * if <code>delete</code> on child file returned <code>null</code>.
+     */
+    @Test(expected = CodePushFileException.class)
+    public void tests3() throws Exception {
+        File testFile = mock(File.class);
+        doReturn(false).when(testFile).delete();
+        File newTestFile = mock(File.class);
+        doReturn(true).when(newTestFile).isDirectory();
+        doReturn(new File[]{testFile}).when(newTestFile).listFiles();
+        mFileUtils.deleteFileOrFolderSilently(newTestFile);
     }
 }

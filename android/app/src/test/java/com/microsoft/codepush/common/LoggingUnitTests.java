@@ -17,14 +17,11 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
@@ -71,20 +68,10 @@ public class LoggingUnitTests {
         codePushDeploymentStatusReport.setAppVersion(null);
         codePushDeploymentStatusReport.setPreviousDeploymentKey(null);
         codePushUpdateResponse.setUpdateInfo(null);
-        File testFile = mock(File.class);
-        doReturn(null).when(testFile).listFiles();
-        doReturn(true).when(testFile).isDirectory();
-        fileUtils.deleteFileOrFolderSilently(testFile);
-        testFile = mock(File.class);
-        doReturn(false).when(testFile).delete();
-        fileUtils.deleteFileOrFolderSilently(testFile);
-        File newTestFile = mock(File.class);
-        doReturn(true).when(newTestFile).isDirectory();
-        doReturn(new File[]{testFile}).when(newTestFile).listFiles();
-        fileUtils.deleteFileOrFolderSilently(newTestFile);
 
-        /* We expect exactly 12 logged errors. */
-        verifyStatic(VerificationModeFactory.times(12));
+
+        /* We expect exactly 9 logged errors. */
+        verifyStatic(VerificationModeFactory.times(9));
         AppCenterLog.error(eq(CodePush.LOG_TAG), anyString());
     }
 

@@ -4,6 +4,7 @@ import android.support.annotation.Nullable;
 
 import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.CodePush;
+import com.microsoft.codepush.common.exceptions.CodePushFileException;
 import com.microsoft.codepush.common.exceptions.CodePushFinalizeException;
 import com.microsoft.codepush.common.exceptions.CodePushFinalizeException.OperationType;
 
@@ -20,8 +21,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-import static com.microsoft.codepush.common.CodePush.LOG_TAG;
 
 /**
  * Class containing support methods simplifying work with files.
@@ -119,11 +118,11 @@ public class FileUtils {
      * Deletes directory located by the following path.
      *
      * @param directoryPath path to directory to be deleted. Can't be <code>null</code>.
-     * @throws IOException read/write error occurred while accessing the file system.
+     * @throws CodePushFileException read/write error occurred while accessing the file system.
      */
-    public void deleteDirectoryAtPath(String directoryPath) throws IOException {
+    public void deleteDirectoryAtPath(String directoryPath) throws CodePushFileException {
         if (directoryPath == null) {
-            throw new IOException("directoryPath cannot be null");
+            throw new CodePushFileException("directoryPath cannot be null");
         }
         File file = new File(directoryPath);
         if (file.exists()) {
@@ -137,27 +136,26 @@ public class FileUtils {
      * @param file path to file/folder to be deleted.
      */
     @SuppressWarnings("WeakerAccess")
-    public void deleteFileOrFolderSilently(File file) {
+    public void deleteFileOrFolderSilently(File file) throws CodePushFileException {
 
         /* First, if this is a directory, delete all the files it contains. */
         if (file.isDirectory()) {
             File[] files = file.listFiles();
             if (files == null) {
-                AppCenterLog.error(LOG_TAG, "Pathname " + file.getAbsolutePath() + " doesn't denote a directory.");
-                return;
+                throw new CodePushFileException("Pathname " + file.getAbsolutePath() + " doesn't denote a directory.");
             }
             for (File fileEntry : files) {
                 if (fileEntry.isDirectory()) {
                     deleteFileOrFolderSilently(fileEntry);
                 } else {
                     if (!fileEntry.delete()) {
-                        AppCenterLog.error(LOG_TAG, "Error deleting file " + file.getName());
+                        throw new CodePushFileException("Error deleting file " + file.getName());
                     }
                 }
             }
         }
         if (!file.delete()) {
-            AppCenterLog.error(LOG_TAG, "Error deleting file " + file.getName());
+            throw new CodePushFileException("Error deleting file " + file.getName());
         }
     }
 
@@ -215,7 +213,6 @@ public class FileUtils {
             Exception e = finalizeResources(
                     Arrays.asList(reader, fileInputStream),
                     "Error closing IO resources when reading file.");
-
             if (e != null) {
                 throw new CodePushFinalizeException(OperationType.READ, e);
             }
@@ -229,7 +226,7 @@ public class FileUtils {
      * @param destinationFolder path for the unzipped files to be saved.
      * @throws IOException read/write error occurred while accessing the file system.
      */
-    public void unzipFile(File zipFile, File destinationFolder) throws IOException {
+    public void unzipFile(File zipFile, File destinationFolder) throws IOException, CodePushFileException {
         FileInputStream fileStream = null;
         BufferedInputStream bufferedStream = null;
         ZipInputStream zipStream = null;
@@ -242,7 +239,7 @@ public class FileUtils {
                 deleteFileOrFolderSilently(destinationFolder);
             }
             if (!destinationFolder.mkdirs()) {
-                throw new IOException("Error creating folder for unzipping");
+                throw new CodePushFileException("Error creating folder for unzipping");
             }
             byte[] buffer = new byte[WRITE_BUFFER_SIZE];
             while ((entry = zipStream.getNextEntry()) != null) {
