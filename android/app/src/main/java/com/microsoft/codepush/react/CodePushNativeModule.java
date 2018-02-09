@@ -8,9 +8,9 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.microsoft.codepush.common.CodePushBaseCore;
 import com.microsoft.codepush.common.CodePushConfiguration;
 import com.microsoft.codepush.common.CodePushConstants;
-import com.microsoft.codepush.common.CodePushCore;
 import com.microsoft.codepush.common.DownloadProgress;
 import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
@@ -35,7 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A wrapper around {@link CodePushCore} specific for React.
+ * A wrapper around {@link CodePushBaseCore} specific for React.
  */
 public class CodePushNativeModule extends ReactContextBaseJavaModule implements CodePushDownloadProgressListener, CodePushSyncStatusListener, CodePushBinaryVersionMismatchListener {
 
@@ -60,9 +60,9 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
     private static boolean mNotifyBinaryVersionMismatch = false;
 
     /**
-     * Instance of {@link CodePushCore} containing basic android logic.
+     * Instance of {@link CodePushBaseCore} containing basic android logic.
      */
-    private CodePushCore mCodePushCore;
+    private CodePushBaseCore mCodePushCore;
 
     /**
      * Instance of {@link CodePushUtils} to work with.
@@ -78,9 +78,9 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
      * Creates an instance of {@link CodePushNativeModule}.
      *
      * @param reactContext application context.
-     * @param codePushCore instance of {@link CodePushCore}.
+     * @param codePushCore instance of {@link CodePushBaseCore}.
      */
-    public CodePushNativeModule(ReactApplicationContext reactContext, CodePushCore codePushCore) {
+    public CodePushNativeModule(ReactApplicationContext reactContext, CodePushBaseCore codePushCore) {
         super(reactContext);
         mCodePushCore = codePushCore;
         FileUtils fileUtils = FileUtils.getInstance();
