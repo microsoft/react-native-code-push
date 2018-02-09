@@ -3,9 +3,12 @@ package com.microsoft.codepush.common.utils;
 import android.support.annotation.NonNull;
 
 import com.microsoft.appcenter.crashes.Crashes;
+import com.microsoft.appcenter.utils.AppCenterLog;
 
 import java.lang.reflect.Method;
 import java.util.Map;
+
+import static com.microsoft.codepush.common.CodePush.LOG_TAG;
 
 /**
  * Utils for tracking in-app sdk exceptions.
@@ -23,6 +26,9 @@ public class CodePushLogUtils {
         try {
             Method method = Crashes.class.getMethod("trackException", Throwable.class);
             method.invoke(throwable);
+            if (shouldLog) {
+                AppCenterLog.error(LOG_TAG, throwable.getMessage());
+            }
         } catch (Exception e) {
             /* Do nothing. */
         }
@@ -39,6 +45,9 @@ public class CodePushLogUtils {
         try {
             Method method = Crashes.class.getMethod("trackException", Throwable.class, Map.class);
             method.invoke(throwable, properties);
+            if (shouldLog) {
+                AppCenterLog.error(LOG_TAG, throwable.getMessage());
+            }
         } catch (Exception e) {
             /* Do nothing. */
         }
