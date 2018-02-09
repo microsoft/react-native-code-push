@@ -1,7 +1,5 @@
 package com.microsoft.codepush.common.utils;
 
-import com.microsoft.codepush.common.exceptions.CodePushFileException;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -203,7 +201,7 @@ public class FileAndroidTests {
      * Deleting files should throw an {@link IOException}
      * if pass <code>null</code> path to it.
      */
-    @Test(expected = CodePushFileException.class)
+    @Test(expected = IOException.class)
     public void deleteFailsIfPassNull() throws Exception {
         mFileUtils.deleteDirectoryAtPath(null);
     }
@@ -238,10 +236,10 @@ public class FileAndroidTests {
     }
 
     /**
-     * {@link FileUtils#deleteFileOrFolderSilently(File)} should throw a {@link CodePushFileException}
+     * {@link FileUtils#deleteFileOrFolderSilently(File)} should throw a {@link IOException}
      * if <code>listFiles</code> returned <code>null</code>.
      */
-    @Test(expected = CodePushFileException.class)
+    @Test(expected = IOException.class)
     public void deleteFileFailsIfListFilesFails() throws Exception {
         File testFile = mock(File.class);
         doReturn(null).when(testFile).listFiles();
@@ -250,10 +248,10 @@ public class FileAndroidTests {
     }
 
     /**
-     * {@link FileUtils#deleteFileOrFolderSilently(File)} should throw a {@link CodePushFileException}
+     * {@link FileUtils#deleteFileOrFolderSilently(File)} should throw a {@link IOException}
      * if <code>delete</code> returned <code>null</code>.
      */
-    @Test(expected = CodePushFileException.class)
+    @Test(expected = IOException.class)
     public void deleteFileFailsIfDeleteFails() throws Exception {
         File testFile = mock(File.class);
         doReturn(false).when(testFile).delete();
@@ -261,10 +259,10 @@ public class FileAndroidTests {
     }
 
     /**
-     * {@link FileUtils#deleteFileOrFolderSilently(File)} should throw a {@link CodePushFileException}
+     * {@link FileUtils#deleteFileOrFolderSilently(File)} should throw a {@link IOException}
      * if <code>delete</code> on child file returned <code>null</code>.
      */
-    @Test(expected = CodePushFileException.class)
+    @Test(expected = IOException.class)
     public void deleteFileFailsIfDeleteOnChildFails() throws Exception {
         File testFile = mock(File.class);
         doReturn(false).when(testFile).delete();

@@ -8,7 +8,6 @@ import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPackageInfo;
 import com.microsoft.codepush.common.exceptions.CodePushApiHttpRequestException;
 import com.microsoft.codepush.common.exceptions.CodePushDownloadPackageException;
-import com.microsoft.codepush.common.exceptions.CodePushFileException;
 import com.microsoft.codepush.common.exceptions.CodePushGetPackageException;
 import com.microsoft.codepush.common.exceptions.CodePushInstallException;
 import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
@@ -306,7 +305,7 @@ public class CodePushUpdateManager {
             info.setCurrentPackage(info.getPreviousPackage());
             info.setPreviousPackage(null);
             updateCurrentPackageInfo(info);
-        } catch (CodePushFileException | IOException | CodePushMalformedDataException e) {
+        } catch (IOException | CodePushMalformedDataException e) {
             throw new CodePushRollbackException(e);
         }
     }
@@ -341,7 +340,7 @@ public class CodePushUpdateManager {
             }
             info.setCurrentPackage(packageHash);
             updateCurrentPackageInfo(info);
-        } catch (IOException | CodePushFileException | CodePushMalformedDataException e) {
+        } catch (IOException | CodePushMalformedDataException e) {
             throw new CodePushInstallException(e);
         }
     }
@@ -351,7 +350,7 @@ public class CodePushUpdateManager {
      *
      * @throws IOException read/write error occurred while accessing the file system.
      */
-    public void clearUpdates() throws CodePushFileException {
+    public void clearUpdates() throws IOException {
         mFileUtils.deleteDirectoryAtPath(getCodePushPath());
     }
 
@@ -371,7 +370,7 @@ public class CodePushUpdateManager {
              * uncleared due to a crash or error during the download or install process. */
             try {
                 mFileUtils.deleteDirectoryAtPath(newUpdateFolderPath);
-            } catch (CodePushFileException e) {
+            } catch (IOException e) {
                 throw new CodePushDownloadPackageException(e);
             }
         }
@@ -397,7 +396,7 @@ public class CodePushUpdateManager {
         try {
             mFileUtils.unzipFile(downloadFile, new File(unzippedFolderPath));
             mFileUtils.deleteFileOrFolderSilently(downloadFile);
-        } catch (IOException | CodePushFileException e) {
+        } catch (IOException e) {
             throw new CodePushUnzipException(e);
         }
     }
@@ -431,7 +430,7 @@ public class CodePushUpdateManager {
             }
             mFileUtils.copyDirectoryContents(new File(unzippedFolderPath), new File(newUpdateFolderPath));
             mFileUtils.deleteDirectoryAtPath(unzippedFolderPath);
-        } catch (IOException | CodePushFileException | CodePushMalformedDataException | JSONException e) {
+        } catch (IOException | CodePushMalformedDataException | JSONException e) {
             throw new CodePushMergeException(e);
         }
         String appEntryPoint = mCodePushUpdateUtils.findEntryPointInUpdateContents(newUpdateFolderPath, expectedEntryPointFileName);
