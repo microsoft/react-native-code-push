@@ -133,6 +133,7 @@ public class FileUtils {
      * Deletes file or folder throwing no errors if something goes wrong (errors will be logged instead).
      *
      * @param file path to file/folder to be deleted.
+     * @throws IOException read/write error occurred while accessing the file system.
      */
     @SuppressWarnings("WeakerAccess")
     public void deleteFileOrFolderSilently(File file) throws IOException {

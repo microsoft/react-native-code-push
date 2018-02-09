@@ -70,6 +70,7 @@ public class SettingsManager {
      * Each item represents an instance of {@link CodePushLocalPackage} that has failed to update.
      *
      * @return an array of failed updates.
+     * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
     public ArrayList<CodePushLocalPackage> getFailedUpdates() throws CodePushMalformedDataException {
         String failedUpdatesString = mSettings.getString(FAILED_UPDATES_KEY, null);
@@ -91,6 +92,7 @@ public class SettingsManager {
      * Gets object with pending update info.
      *
      * @return object with pending update info.
+     * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
     public CodePushPendingUpdate getPendingUpdate() throws CodePushMalformedDataException {
         String pendingUpdateString = mSettings.getString(PENDING_UPDATE_KEY, null);
@@ -109,6 +111,7 @@ public class SettingsManager {
      *
      * @param packageHash hash to check.
      * @return <code>true</code> if there is a failed update with provided hash, <code>false</code> otherwise.
+     * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
     public boolean existsFailedUpdate(String packageHash) throws CodePushMalformedDataException {
         List<CodePushLocalPackage> failedUpdates = getFailedUpdates();
@@ -128,6 +131,7 @@ public class SettingsManager {
      *
      * @param packageHash expected package hash of the pending update.
      * @return <code>true</code> if there is a pending update with the provided hash.
+     * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
     public boolean isPendingUpdate(String packageHash) throws CodePushMalformedDataException {
         CodePushPendingUpdate pendingUpdate = getPendingUpdate();
@@ -153,6 +157,7 @@ public class SettingsManager {
      * Adds another failed update info to the list of failed updates.
      *
      * @param failedPackage instance of failed {@link CodePushLocalPackage}.
+     * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
     public void saveFailedUpdate(CodePushLocalPackage failedPackage) throws CodePushMalformedDataException {
         ArrayList<CodePushLocalPackage> failedUpdates = getFailedUpdates();
