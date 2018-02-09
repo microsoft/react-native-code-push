@@ -242,7 +242,7 @@ public class FileAndroidTests {
      * if <code>listFiles</code> returned <code>null</code>.
      */
     @Test(expected = CodePushFileException.class)
-    public void tests() throws Exception {
+    public void deleteFileFailsIfListFilesFails() throws Exception {
         File testFile = mock(File.class);
         doReturn(null).when(testFile).listFiles();
         doReturn(true).when(testFile).isDirectory();
@@ -254,7 +254,7 @@ public class FileAndroidTests {
      * if <code>delete</code> returned <code>null</code>.
      */
     @Test(expected = CodePushFileException.class)
-    public void tests2() throws Exception {
+    public void deleteFileFailsIfDeleteFails() throws Exception {
         File testFile = mock(File.class);
         doReturn(false).when(testFile).delete();
         mFileUtils.deleteFileOrFolderSilently(testFile);
@@ -265,7 +265,7 @@ public class FileAndroidTests {
      * if <code>delete</code> on child file returned <code>null</code>.
      */
     @Test(expected = CodePushFileException.class)
-    public void tests3() throws Exception {
+    public void deleteFileFailsIfDeleteOnChildFails() throws Exception {
         File testFile = mock(File.class);
         doReturn(false).when(testFile).delete();
         File newTestFile = mock(File.class);
