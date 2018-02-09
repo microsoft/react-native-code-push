@@ -185,7 +185,6 @@ public class SettingsManager {
     public CodePushDeploymentStatusReport getStatusReportSavedForRetry() throws JSONException {
         String retryStatusReportString = mSettings.getString(RETRY_DEPLOYMENT_REPORT_KEY, null);
         if (retryStatusReportString != null) {
-            removeStatusReportSavedForRetry();
             JSONObject retryStatusReport = new JSONObject(retryStatusReportString);
             return mCodePushUtils.convertJsonObjectToObject(retryStatusReport, CodePushDeploymentStatusReport.class);
         }

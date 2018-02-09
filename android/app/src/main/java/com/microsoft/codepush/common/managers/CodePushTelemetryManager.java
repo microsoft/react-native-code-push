@@ -4,6 +4,8 @@ import com.microsoft.codepush.common.CodePushStatusReportIdentifier;
 import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 
+import org.json.JSONException;
+
 import static android.text.TextUtils.isEmpty;
 import static com.microsoft.codepush.common.enums.CodePushDeploymentStatus.FAILED;
 import static com.microsoft.codepush.common.enums.CodePushDeploymentStatus.SUCCEEDED;
@@ -156,5 +158,19 @@ public class CodePushTelemetryManager {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Gets status report already saved for retry it's sending.
+     *
+     * @return report saved for retry sending.
+     * @throws JSONException if there was error of deserialization of report from json document.
+     */
+    public CodePushDeploymentStatusReport getStatusReportSavedForRetry() throws JSONException {
+        CodePushDeploymentStatusReport report = mSettingsManager.getStatusReportSavedForRetry();
+        if (report != null) {
+            mSettingsManager.removeStatusReportSavedForRetry();
+        }
+        return report;
     }
 }

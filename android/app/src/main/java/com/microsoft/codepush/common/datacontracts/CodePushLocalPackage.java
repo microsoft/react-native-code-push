@@ -85,6 +85,22 @@ public class CodePushLocalPackage extends CodePushPackage {
         return codePushLocalPackage;
     }
 
+    public static CodePushLocalPackage createEmptyPackageForCheckForUpdateQuery(String appVersion) {
+        CodePushLocalPackage codePushLocalPackage = new CodePushLocalPackage();
+        codePushLocalPackage.setAppVersion(appVersion);
+        codePushLocalPackage.setDeploymentKey("");
+        codePushLocalPackage.setDescription("");
+        codePushLocalPackage.setFailedInstall(false);
+        codePushLocalPackage.setMandatory(false);
+        codePushLocalPackage.setLabel("");
+        codePushLocalPackage.setPackageHash("");
+        codePushLocalPackage.setPending(false);
+        codePushLocalPackage.setFirstRun(false);
+        codePushLocalPackage.setDebugOnly(false);
+        codePushLocalPackage.setAppEntryPoint("");
+        return codePushLocalPackage;
+    }
+
     /**
      * Gets whether this update is in a "pending" state and returns it.
      *
