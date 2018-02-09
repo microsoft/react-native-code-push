@@ -14,6 +14,7 @@ import com.microsoft.codepush.common.datacontracts.CodePushUpdateRequest;
 import com.microsoft.codepush.common.datacontracts.CodePushUpdateResponse;
 import com.microsoft.codepush.common.datacontracts.CodePushUpdateResponseUpdateInfo;
 import com.microsoft.codepush.common.exceptions.CodePushApiHttpRequestException;
+import com.microsoft.codepush.common.exceptions.CodePushIllegalArgumentException;
 import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
 import com.microsoft.codepush.common.exceptions.CodePushQueryUpdateException;
 import com.microsoft.codepush.common.exceptions.CodePushReportStatusException;
@@ -136,8 +137,12 @@ public class CodePushAcquisitionManager {
         /* TODO: Consider moving the following logic to some other place or removing it at all if useless. */
         deploymentStatusReport.setClientUniqueId(mClientUniqueId);
         deploymentStatusReport.setDeploymentKey(mDeploymentKey);
-        deploymentStatusReport.setAppVersion(deploymentStatusReport.getLocalPackage() != null ? deploymentStatusReport.getLocalPackage().getAppVersion() : mAppVersion);
-        deploymentStatusReport.setAppVersion(deploymentStatusReport.getLocalPackage() != null ? deploymentStatusReport.getLocalPackage().getLabel() : null);
+        try {
+            deploymentStatusReport.setAppVersion(deploymentStatusReport.getLocalPackage() != null ? deploymentStatusReport.getLocalPackage().getAppVersion() : mAppVersion);
+            deploymentStatusReport.setAppVersion(deploymentStatusReport.getLocalPackage() != null ? deploymentStatusReport.getLocalPackage().getLabel() : null);
+        } catch (CodePushIllegalArgumentException e) {
+            throw new CodePushReportStatusException(e, DEPLOY);
+        }
         final String requestUrl = mServerUrl + REPORT_DEPLOYMENT_STATUS_ENDPOINT;
         switch (deploymentStatusReport.getStatus()) {
             case SUCCEEDED:
