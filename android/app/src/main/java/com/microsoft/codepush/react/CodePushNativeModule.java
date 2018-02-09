@@ -1,7 +1,5 @@
 package com.microsoft.codepush.react;
 
-import android.os.AsyncTask;
-
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -10,55 +8,100 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
-import com.microsoft.codepush.react.datacontracts.CodePushSyncOptions;
-import com.microsoft.codepush.react.enums.CodePushInstallMode;
-import com.microsoft.codepush.react.datacontracts.CodePushLocalPackage;
-import com.microsoft.codepush.react.datacontracts.CodePushRemotePackage;
-import com.microsoft.codepush.react.datacontracts.CodePushStatusReport;
-import com.microsoft.codepush.react.enums.CodePushSyncStatus;
-import com.microsoft.codepush.react.enums.CodePushUpdateState;
-import com.microsoft.codepush.react.interfaces.CodePushBinaryVersionMismatchListener;
-import com.microsoft.codepush.react.interfaces.CodePushDownloadProgressListener;
-import com.microsoft.codepush.react.interfaces.CodePushSyncStatusListener;
+import com.microsoft.codepush.common.CodePushConfiguration;
+import com.microsoft.codepush.common.CodePushConstants;
+import com.microsoft.codepush.common.CodePushCore;
+import com.microsoft.codepush.common.DownloadProgress;
+import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
+import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
+import com.microsoft.codepush.common.datacontracts.CodePushRemotePackage;
+import com.microsoft.codepush.common.datacontracts.CodePushSyncOptions;
+import com.microsoft.codepush.common.enums.CodePushInstallMode;
+import com.microsoft.codepush.common.enums.CodePushSyncStatus;
+import com.microsoft.codepush.common.enums.CodePushUpdateState;
+import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
+import com.microsoft.codepush.common.interfaces.CodePushBinaryVersionMismatchListener;
+import com.microsoft.codepush.common.interfaces.CodePushDownloadProgressListener;
+import com.microsoft.codepush.common.interfaces.CodePushSyncStatusListener;
+import com.microsoft.codepush.common.utils.CodePushUpdateUtils;
+import com.microsoft.codepush.common.utils.CodePushUtils;
+import com.microsoft.codepush.common.utils.FileUtils;
 import com.microsoft.codepush.react.utils.CodePushRNUtils;
-import com.microsoft.codepush.react.utils.CodePushUpdateUtils;
-import com.microsoft.codepush.react.utils.CodePushUtils;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A wrapper around {@link CodePushCore} specific for React.
+ */
 public class CodePushNativeModule extends ReactContextBaseJavaModule implements CodePushDownloadProgressListener, CodePushSyncStatusListener, CodePushBinaryVersionMismatchListener {
+
+    /**
+     * Hash of the binary version update.
+     */
     private String mBinaryContentsHash = null;
+
+    /**
+     * Indicates whether notify about package download progress.
+     */
     private static boolean mNotifyDownloadProgress = false;
+
+    /**
+     * Indicates whether notify that sync status has changed.
+     */
     private static boolean mNotifySyncStatusChanged = false;
+
+    /**
+     * Indicated whether notify that binary version mismatch has happened.
+     */
     private static boolean mNotifyBinaryVersionMismatch = false;
 
+    /**
+     * Instance of {@link CodePushCore} containing basic android logic.
+     */
     private CodePushCore mCodePushCore;
 
+    /**
+     * Instance of {@link CodePushUtils} to work with.
+     */
+    private CodePushUtils mCodePushUtils;
+
+    /**
+     * Instance of {@link CodePushRNUtils} to work with.
+     */
+    private CodePushRNUtils mCodePushReactNativeUtils;
+
+    /**
+     * Creates an instance of {@link CodePushNativeModule}.
+     *
+     * @param reactContext application context.
+     * @param codePushCore instance of {@link CodePushCore}.
+     */
     public CodePushNativeModule(ReactApplicationContext reactContext, CodePushCore codePushCore) {
         super(reactContext);
-
         mCodePushCore = codePushCore;
+        FileUtils fileUtils = FileUtils.getInstance();
+        mCodePushUtils = CodePushUtils.getInstance(fileUtils);
+        CodePushUpdateUtils codePushUpdateUtils = CodePushUpdateUtils.getInstance(fileUtils, mCodePushUtils);
+        mCodePushReactNativeUtils = CodePushRNUtils.getInstance(mCodePushUtils);
 
-        // Initialize module state while we have a reference to the current context.
-        mBinaryContentsHash = CodePushUpdateUtils.getHashForBinaryContents(reactContext, mCodePushCore.isDebugMode());
+        /* Initialize module state while we have a reference to the current context. */
+        mBinaryContentsHash = codePushUpdateUtils.getHashForBinaryContents(reactContext, mCodePushCore.isDebugMode());
     }
 
     @Override
     public Map<String, Object> getConstants() {
         final Map<String, Object> constants = new HashMap<>();
-
         constants.put("codePushInstallModeImmediate", CodePushInstallMode.IMMEDIATE.getValue());
         constants.put("codePushInstallModeOnNextRestart", CodePushInstallMode.ON_NEXT_RESTART.getValue());
         constants.put("codePushInstallModeOnNextResume", CodePushInstallMode.ON_NEXT_RESUME.getValue());
         constants.put("codePushInstallModeOnNextSuspend", CodePushInstallMode.ON_NEXT_SUSPEND.getValue());
-
         constants.put("codePushUpdateStateRunning", CodePushUpdateState.RUNNING.getValue());
         constants.put("codePushUpdateStatePending", CodePushUpdateState.PENDING.getValue());
         constants.put("codePushUpdateStateLatest", CodePushUpdateState.LATEST.getValue());
-
         constants.put("codePushSyncStatusUpToDate", CodePushSyncStatus.UP_TO_DATE.getValue());
         constants.put("codePushSyncStatusUpdateInstalled", CodePushSyncStatus.UPDATE_INSTALLED.getValue());
         constants.put("codePushSyncStatusUpdateIgnored", CodePushSyncStatus.UPDATE_IGNORED.getValue());
@@ -68,222 +111,31 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
         constants.put("codePushSyncStatusAwaitingUserAction", CodePushSyncStatus.AWAITING_USER_ACTION.getValue());
         constants.put("codePushSyncStatusDownloadingPackage", CodePushSyncStatus.DOWNLOADING_PACKAGE.getValue());
         constants.put("codePushSyncStatusInstallingUpdate", CodePushSyncStatus.INSTALLING_UPDATE.getValue());
-
         return constants;
     }
 
     @Override
+
     public String getName() {
         return "CodePush";
     }
 
-    @ReactMethod
-    public void checkForUpdate(final String deploymentKey, final Promise promise) {
-        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                CodePushRemotePackage remotePackage = mCodePushCore.checkForUpdate(deploymentKey);
-                if (remotePackage != null) {
-                    JSONObject jsonObject = CodePushUtils.convertObjectToJsonObject(remotePackage);
-                    promise.resolve(CodePushRNUtils.convertJsonObjectToWritable(jsonObject));
-                } else {
-                    promise.resolve("");
-                }
-                return null;
-            }
-        };
-
-        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-
-    @ReactMethod
-    public void sync(
-            final ReadableMap syncOptionsMap,
-            final boolean notifySyncStatusChanged,
-            final boolean notifyDownloadProgress,
-            final boolean notifyBinaryVersionMismatch,
-            final Promise promise
-    ) {
-        mNotifySyncStatusChanged = notifySyncStatusChanged;
-        mNotifyDownloadProgress = notifyDownloadProgress;
-        mNotifyBinaryVersionMismatch = notifyBinaryVersionMismatch;
-        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                CodePushSyncOptions syncOptions = CodePushRNUtils.convertReadableToObject(syncOptionsMap, CodePushSyncOptions.class);
-                mCodePushCore.sync(syncOptions, promise);
-                return null;
-            }
-        };
-
-        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-
-    @ReactMethod
-    public void downloadUpdate(final ReadableMap updatePackage, final boolean notifyProgress, final Promise promise) {
-        mNotifyDownloadProgress = notifyProgress;
-        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                CodePushLocalPackage newPackage = mCodePushCore.downloadUpdate(
-                        CodePushRNUtils.convertReadableToObject(updatePackage, CodePushRemotePackage.class)
-                );
-
-                if (newPackage.DownloadException == null) {
-                    promise.resolve(CodePushRNUtils.convertObjectToWritableMap(newPackage));
-                } else {
-                    promise.reject(newPackage.DownloadException);
-                }
-
-                return null;
-            }
-        };
-
-        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-
-    @ReactMethod
-    public void getConfiguration(Promise promise) {
-        WritableMap configMap =  Arguments.createMap();
-        CodePushConfiguration nativeConfiguration = mCodePushCore.getConfiguration();
-        configMap.putString("appVersion", nativeConfiguration.AppVersion);
-        configMap.putString("clientUniqueId", nativeConfiguration.ClientUniqueId);
-        configMap.putString("deploymentKey", nativeConfiguration.DeploymentKey);
-        configMap.putString("serverUrl", nativeConfiguration.ServerUrl);
-
-        // The binary hash may be null in debug builds
-        if (mBinaryContentsHash != null) {
-            configMap.putString(CodePushConstants.PACKAGE_HASH_KEY, mBinaryContentsHash);
-        }
-
-        promise.resolve(configMap);
-    }
-
-    @ReactMethod
-    public void getUpdateMetadata(final int updateState, final Promise promise) {
-        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                CodePushLocalPackage currentPackage = mCodePushCore.getUpdateMetadata(CodePushUpdateState.values()[updateState]);
-                if (currentPackage != null) {
-                    promise.resolve(CodePushRNUtils.convertObjectToWritableMap(currentPackage));
-                } else {
-                    promise.resolve("");
-                }
-                return null;
-            }
-        };
-
-        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-
-    @ReactMethod
-    public void getNewStatusReport(final Promise promise) {
-        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                CodePushStatusReport statusReport = mCodePushCore.getNewStatusReport();
-                if (statusReport != null) {
-                    promise.resolve(CodePushRNUtils.convertObjectToWritableMap(statusReport));
-                } else {
-                    promise.resolve("");
-                }
-                return null;
-            }
-        };
-
-        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-
-    @ReactMethod
-    public void installUpdate(final ReadableMap updatePackage, final int installMode, final int minimumBackgroundDuration, final Promise promise) {
-        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-                mCodePushCore.installUpdate(
-                        CodePushRNUtils.convertReadableToObject(updatePackage, CodePushLocalPackage.class),
-                        CodePushInstallMode.values()[installMode],
-                        minimumBackgroundDuration);
-                promise.resolve("");
-                return null;
-            }
-        };
-
-        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-    }
-
-    @ReactMethod
-    public void isFailedUpdate(String packageHash, Promise promise) {
-        promise.resolve(mCodePushCore.isFailedUpdate(packageHash));
-    }
-
-    @ReactMethod
-    public void isFirstRun(String packageHash, Promise promise) {
-        promise.resolve(mCodePushCore.isFirstRun(packageHash));
-    }
-
-    @ReactMethod
-    public void removePendingUpdate(Promise promise) {
-        mCodePushCore.removePendingUpdate();
-        promise.resolve("");
-    }
-
-    @ReactMethod
-    public void recordStatusReported(ReadableMap statusReport) {
-        mCodePushCore.recordStatusReported(CodePushRNUtils.convertReadableToObject(statusReport, CodePushStatusReport.class));
-    }
-
-    @ReactMethod
-    public void restartApp(boolean onlyIfUpdateIsPending, Promise promise) {
-        promise.resolve(mCodePushCore.restartApp(onlyIfUpdateIsPending));
-    }
-
-    @ReactMethod
-    public void restartApplication(boolean onlyIfUpdateIsPending, Promise promise) {
-        promise.resolve(mCodePushCore.getRestartManager().restartApp(onlyIfUpdateIsPending));
-    }
-
-    @ReactMethod
-    public void clearPendingRestart() {
-        mCodePushCore.getRestartManager().clearPendingRestart();
-    }
-
-    @ReactMethod
-    public void disallowRestart() {
-        mCodePushCore.getRestartManager().disallow();
-    }
-
-    @ReactMethod
-    public void allowRestart() {
-        mCodePushCore.getRestartManager().allow();
-    }
-
-    @ReactMethod
-    public void saveStatusReportForRetry(ReadableMap statusReport) {
-        mCodePushCore.saveStatusReportForRetry(CodePushRNUtils.convertReadableToObject(statusReport, CodePushStatusReport.class));
-    }
-
-    @ReactMethod
-    // Replaces the current bundle with the one downloaded from removeBundleUrl.
-    // It is only to be used during tests. No-ops if the test configuration flag is not set.
-    public void downloadAndReplaceCurrentBundle(String remoteBundleUrl) {
-        mCodePushCore.downloadAndReplaceCurrentBundle(remoteBundleUrl);
-    }
-
-    public void syncStatusChanged(CodePushSyncStatus syncStatus) {
+    @Override
+    public void syncStatusChanged(CodePushSyncStatus codePushSyncStatus) {
         if (mNotifySyncStatusChanged) {
             getReactApplicationContext()
                     .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                    .emit(CodePushConstants.SYNC_STATUS_EVENT_NAME, syncStatus.getValue());
+                    .emit(CodePushConstants.SYNC_STATUS_EVENT_NAME, codePushSyncStatus.getValue());
         }
     }
 
+    @Override
     public void downloadProgressChanged(long receivedBytes, long totalBytes) {
         if (mNotifyDownloadProgress) {
             DownloadProgress downloadProgress = new DownloadProgress(totalBytes, receivedBytes);
             getReactApplicationContext()
                     .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                    .emit(CodePushConstants.DOWNLOAD_PROGRESS_EVENT_NAME, downloadProgress.createWritableMap());
+                    .emit(CodePushConstants.DOWNLOAD_PROGRESS_EVENT_NAME, mCodePushReactNativeUtils.convertDownloadProgressToWritableMap(downloadProgress));
         }
     }
 
@@ -294,5 +146,269 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
                     .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                     .emit(CodePushConstants.BINARY_VERSION_MISMATCH_EVENT_NAME, update);
         }
+    }
+
+    /**
+     * Checks if there is an update available by the provided deployment key.
+     *
+     * @param deploymentKey deployment key of the desired update.
+     * @param promise       js promise to handle results.
+     *                      Resolved, it waits for the instance of the {@link CodePushRemotePackage} converted to {@link WritableMap}.
+     */
+    @ReactMethod
+    public void checkForUpdate(String deploymentKey, Promise promise) {
+        try {
+            CodePushRemotePackage remotePackage = mCodePushCore.checkForUpdate(deploymentKey);
+            if (remotePackage != null) {
+                JSONObject jsonObject = mCodePushUtils.convertObjectToJsonObject(remotePackage);
+                promise.resolve(mCodePushReactNativeUtils.convertJsonObjectToWritable(jsonObject));
+            } else {
+                promise.resolve("");
+            }
+        } catch (JSONException | CodePushMalformedDataException e) {
+            promise.reject(e);
+        }
+    }
+
+    /**
+     * Performs synchronization.
+     *
+     * @param syncOptionsMap              instance of {@link ReadableMap} containing synchronization options.
+     *                                    Should be convertible to {@link CodePushSyncOptions}.
+     * @param notifySyncStatusChanged     <code>true</code> if notify that synchronization status has changed.
+     * @param notifyDownloadProgress      <code>true</code> if notify about package download progress.
+     * @param notifyBinaryVersionMismatch <code>true</code> if notify about the binary version mismatch.
+     * @param promise                     js promise to handle results.
+     *                                    Does not wait for any result except <code>reject</code> if necessary.
+     */
+    @ReactMethod
+    public void sync(ReadableMap syncOptionsMap, boolean notifySyncStatusChanged, boolean notifyDownloadProgress, boolean notifyBinaryVersionMismatch, Promise promise) {
+        mNotifySyncStatusChanged = notifySyncStatusChanged;
+        mNotifyDownloadProgress = notifyDownloadProgress;
+        mNotifyBinaryVersionMismatch = notifyBinaryVersionMismatch;
+        try {
+            CodePushSyncOptions syncOptions = mCodePushReactNativeUtils.convertReadableToObject(syncOptionsMap, CodePushSyncOptions.class);
+            mCodePushCore.sync(syncOptions, promise);
+        } catch (CodePushMalformedDataException e) {
+            promise.reject(e);
+        }
+    }
+
+    /**
+     * Performs an update download based on the metadata.
+     *
+     * @param updatePackage  instance of {@link ReadableMap} containing information about the update.
+     *                       Should be convertible to {@link CodePushRemotePackage}.
+     * @param notifyProgress <code>true</code> if notify about the download progress.
+     * @param promise        js promise to handle results.
+     *                       Resolved, it waits for the instance of the {@link CodePushLocalPackage} converted to {@link WritableMap}.
+     */
+    @ReactMethod
+    public void downloadUpdate(ReadableMap updatePackage, boolean notifyProgress, Promise promise) {
+        mNotifyDownloadProgress = notifyProgress;
+        try {
+            CodePushLocalPackage newPackage = mCodePushCore.downloadUpdate(
+                    mCodePushReactNativeUtils.convertReadableToObject(updatePackage, CodePushRemotePackage.class)
+            );
+            promise.resolve(mCodePushReactNativeUtils.convertObjectToWritableMap(newPackage));
+        } catch (CodePushMalformedDataException e) {
+            promise.reject(e);
+        }
+    }
+
+    /**
+     * Gets application configuration.
+     *
+     * @param promise js promise to handle results.
+     *                Resolved, it waits for the instance of the {@link CodePushConfiguration} converted to {@link WritableMap}.
+     */
+    @ReactMethod
+    public void getConfiguration(Promise promise) {
+        WritableMap configMap = Arguments.createMap();
+        CodePushConfiguration nativeConfiguration = mCodePushCore.getConfiguration();
+        configMap.putString("appVersion", nativeConfiguration.getAppVersion());
+        configMap.putString("clientUniqueId", nativeConfiguration.getClientUniqueId());
+        configMap.putString("deploymentKey", nativeConfiguration.getDeploymentKey());
+        configMap.putString("serverUrl", nativeConfiguration.getServerUrl());
+
+        /* The binary hash may be null in debug builds. */
+        if (mBinaryContentsHash != null) {
+            configMap.putString(CodePushConstants.PACKAGE_HASH_KEY, mBinaryContentsHash);
+        }
+        promise.resolve(configMap);
+    }
+
+    /**
+     * Gets information about currently installed update package.
+     *
+     * @param updateState index of the update state as listed in {@link CodePushUpdateState} enum.
+     * @param promise     js promise to handle results.
+     *                    Resolved, it waits for the {@link CodePushLocalPackage} instance converted to {@link WritableMap}.
+     */
+    @ReactMethod
+    public void getUpdateMetadata(int updateState, Promise promise) {
+        try {
+            CodePushLocalPackage currentPackage = mCodePushCore.getUpdateMetadata(CodePushUpdateState.values()[updateState]);
+            if (currentPackage != null) {
+                promise.resolve(mCodePushReactNativeUtils.convertObjectToWritableMap(currentPackage));
+            } else {
+                promise.resolve("");
+            }
+        } catch (CodePushMalformedDataException e) {
+            promise.reject(e);
+        }
+    }
+
+    /**
+     * Gets new update report.
+     *
+     * @param promise js promise to handle the results.
+     *                Resolved, it waits for the instance of the {@link CodePushDeploymentStatusReport} converted to {@link WritableMap}.
+     */
+    @ReactMethod
+    public void getNewStatusReport(Promise promise) {
+        //TODO: Make sure CodePushDeploymentStatusReport is treated correctly in js.
+        try {
+            CodePushDeploymentStatusReport statusReport = mCodePushCore.getNewStatusReport();
+            if (statusReport != null) {
+                promise.resolve(mCodePushReactNativeUtils.convertObjectToWritableMap(statusReport));
+            } else {
+                promise.resolve("");
+            }
+        } catch (CodePushMalformedDataException e) {
+            promise.reject(e);
+        }
+    }
+
+    /**
+     * Installs the desired update.
+     *
+     * @param updatePackage             instance of {@link ReadableMap} containing information about the update.
+     *                                  Should be convertible to {@link CodePushLocalPackage}.
+     * @param installMode               index of the install mode as listed in the {@link CodePushInstallMode} enum.
+     * @param minimumBackgroundDuration the minimum number of seconds that the app needs to have been in the background before restarting the app.
+     * @param promise                   js promise to handle the results.
+     *                                  Waits either for <code>resolve</code> with empty string indicating that the update has been installed or <code>reject</code> with error.
+     */
+    @ReactMethod
+    public void installUpdate(ReadableMap updatePackage, int installMode, int minimumBackgroundDuration, Promise promise) {
+        try {
+            mCodePushCore.installUpdate(
+                    mCodePushReactNativeUtils.convertReadableToObject(updatePackage, CodePushLocalPackage.class),
+                    CodePushInstallMode.values()[installMode],
+                    minimumBackgroundDuration);
+            promise.resolve("");
+        } catch (CodePushMalformedDataException e) {
+            promise.reject(e);
+        }
+    }
+
+    /**
+     * Checks whether the update with the following hash has failed.
+     *
+     * @param packageHash hash to check.
+     * @param promise     js promise to handle the results.
+     *                    Waits to be resolved with the boolean value.
+     */
+    @ReactMethod
+    public void isFailedUpdate(String packageHash, Promise promise) {
+        promise.resolve(mCodePushCore.isFailedUpdate(packageHash));
+    }
+
+    /**
+     * Checks whether this is the first time the update has been run after being installed.
+     *
+     * @param packageHash hash to checks.
+     * @param promise     js promise to handle the results.
+     *                    Waits to be resolved with the boolean value.
+     */
+    @ReactMethod
+    public void isFirstRun(String packageHash, Promise promise) {
+        promise.resolve(mCodePushCore.isFirstRun(packageHash));
+    }
+
+    /**
+     * Removes information about the pending update.
+     *
+     * @param promise js promise to handle the results.
+     *                Resolved no matter the result.
+     */
+    @ReactMethod
+    public void removePendingUpdate(Promise promise) {
+        mCodePushCore.removePendingUpdate();
+        promise.resolve("");
+    }
+
+    /**
+     * Performs an application restart.
+     *
+     * @param onlyIfUpdateIsPending restart only if update is pending.
+     * @param promise               js promise to handle the results.
+     *                              Waits to be resolved with the boolean value.
+     */
+    @ReactMethod
+    public void restartApplication(boolean onlyIfUpdateIsPending, Promise promise) {
+        promise.resolve(mCodePushCore.getRestartManager().restartApp(onlyIfUpdateIsPending));
+    }
+
+    /**
+     * Clears information about pending restarts.
+     */
+    @ReactMethod
+    public void clearPendingRestart() {
+        mCodePushCore.getRestartManager().clearPendingRestart();
+    }
+
+    /**
+     * Permits application to be restarted.
+     */
+    @ReactMethod
+    public void disallowRestart() {
+        mCodePushCore.getRestartManager().disallowRestarts();
+    }
+
+    /**
+     * Allows application to be restarted.
+     */
+    @ReactMethod
+    public void allowRestart() {
+        mCodePushCore.getRestartManager().allowRestarts();
+    }
+
+    /**
+     * Saves status report.
+     *
+     * @param statusReport instance of {@link ReadableMap} containing information about the update.
+     *                     Should be convertible to {@link CodePushDeploymentStatusReport}.
+     */
+    @ReactMethod
+    public void recordStatusReported(ReadableMap statusReport) {
+        //TODO: Check that sent object is convertible to CodePushDeploymentStatusReport.
+        try {
+            mCodePushCore.recordStatusReported(mCodePushReactNativeUtils.convertReadableToObject(statusReport, CodePushDeploymentStatusReport.class));
+        } catch (CodePushMalformedDataException e) {
+            //TODO: track this exception
+        }
+    }
+
+    @ReactMethod
+    public void saveStatusReportForRetry(ReadableMap statusReport) {
+        //TODO: Check that statusReport ReadableMap matches with the CodePUshDeploymentStatusReport.
+        try {
+            mCodePushCore.saveStatusReportForRetry(mCodePushReactNativeUtils.convertReadableToObject(statusReport, CodePushDeploymentStatusReport.class));
+        } catch (CodePushMalformedDataException e) {
+            //TODO: track this exception.
+        }
+    }
+
+    /**
+     * Replaces the current bundle with the one downloaded from removeBundleUrl.
+     * It is only to be used during tests. No-ops if the test configuration flag is not set.
+     *
+     * @param remoteBundleUrl url of the bundle.
+     */
+    @ReactMethod
+    public void downloadAndReplaceCurrentBundle(String remoteBundleUrl) {
+        mCodePushCore.downloadAndReplaceCurrentBundle(remoteBundleUrl);
     }
 }

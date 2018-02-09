@@ -17,4 +17,14 @@ public class CodePushMalformedDataException extends Exception {
     public CodePushMalformedDataException(String message, Throwable cause) {
         super(message, cause);
     }
+
+    /**
+     * Creates instance of the malformed CodePush data exception using
+     * <code>message</code> argument.
+     *
+     * @param message the message with explanation of error.
+     */
+    public CodePushMalformedDataException(String message) {
+        super(message);
+    }
 }
