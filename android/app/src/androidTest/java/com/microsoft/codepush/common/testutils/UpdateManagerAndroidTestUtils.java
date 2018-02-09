@@ -4,6 +4,7 @@ import android.os.Environment;
 
 import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.DownloadProgress;
+import com.microsoft.codepush.common.apirequests.ApiHttpRequest;
 import com.microsoft.codepush.common.apirequests.DownloadPackageTask;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
 import com.microsoft.codepush.common.managers.CodePushUpdateManager;
@@ -34,13 +35,13 @@ public class UpdateManagerAndroidTestUtils {
      * @return result of the download.
      */
     public static CodePushDownloadPackageResult executeDownload(CodePushUpdateManager codePushUpdateManager, String packageHash, boolean verify, String url) throws Exception {
-        DownloadPackageTask downloadPackageJob = new DownloadPackageTask(FileUtils.getInstance());
         DownloadProgressCallback downloadProgressCallback = mock(DownloadProgressCallback.class);
         File downloadFolder = new File(Environment.getExternalStorageDirectory(), CODE_PUSH_FOLDER_PREFIX);
         downloadFolder.mkdirs();
         File downloadFilePath = new File(downloadFolder, CodePushConstants.DOWNLOAD_FILE_NAME);
-        downloadPackageJob.setParameters(url, downloadFilePath, downloadProgressCallback);
-        CodePushDownloadPackageResult codePushDownloadPackageResult = codePushUpdateManager.downloadPackage(packageHash, downloadPackageJob);
+        DownloadPackageTask downloadPackageTask = new DownloadPackageTask(FileUtils.getInstance(), url, downloadFilePath, downloadProgressCallback);
+        ApiHttpRequest<CodePushDownloadPackageResult> apiHttpRequest = new ApiHttpRequest<>(downloadPackageTask);
+        CodePushDownloadPackageResult codePushDownloadPackageResult = codePushUpdateManager.downloadPackage(packageHash, apiHttpRequest);
         if (verify) {
             verify(downloadProgressCallback, timeout(5000).atLeast(1)).call(any(DownloadProgress.class));
         }
@@ -57,6 +58,7 @@ public class UpdateManagerAndroidTestUtils {
     public static void executeWorkflow(CodePushUpdateManager codePushUpdateManager, String packageHash, String url) throws Exception {
         CodePushDownloadPackageResult downloadPackageResult = executeDownload(codePushUpdateManager, packageHash, true, url);
         File downloadFile = downloadPackageResult.getDownloadFile();
+        assertEquals(true, downloadPackageResult.isZip());
         codePushUpdateManager.unzipPackage(downloadFile);
     }
 

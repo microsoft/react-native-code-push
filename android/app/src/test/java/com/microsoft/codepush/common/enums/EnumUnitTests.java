@@ -26,10 +26,14 @@ public class EnumUnitTests {
         CodePushUpdateState codePushUpdateState = CodePushUpdateState.LATEST;
         int updateStateValue = codePushUpdateState.getValue();
         assertEquals(2, updateStateValue);
+        ReportType reportType = ReportType.DEPLOY;
+        String message = reportType.getMessage();
+        assertEquals("Error occurred during delivering deploy status report.", message);
 
         /* Test <code>valueOf()</code> and <code>values()</code>. */
         assertEquals(3, CodePushCheckFrequency.values().length);
         assertEquals(2, CodePushDeploymentStatus.values().length);
+        assertEquals(2, ReportType.values().length);
         assertEquals(4, CodePushInstallMode.values().length);
         assertEquals(9, CodePushSyncStatus.values().length);
         assertEquals(3, CodePushUpdateState.values().length);
@@ -38,5 +42,6 @@ public class EnumUnitTests {
         assertEquals(CodePushInstallMode.IMMEDIATE, CodePushInstallMode.valueOf("IMMEDIATE"));
         assertEquals(CodePushSyncStatus.AWAITING_USER_ACTION, CodePushSyncStatus.valueOf("AWAITING_USER_ACTION"));
         assertEquals(CodePushCheckFrequency.MANUAL, CodePushCheckFrequency.valueOf("MANUAL"));
+        assertEquals(ReportType.DEPLOY, ReportType.valueOf("DEPLOY"));
     }
 }
