@@ -104,8 +104,8 @@ public class CodePushAcquisitionManager {
         if (currentPackage == null || currentPackage.getAppVersion() == null || currentPackage.getAppVersion().isEmpty()) {
             throw new CodePushQueryUpdateException("Calling common acquisition SDK with incorrect package");
         }
-        CodePushUpdateRequest updateRequest = CodePushUpdateRequest.createUpdateRequest(mDeploymentKey, currentPackage, mClientUniqueId);
         try {
+            CodePushUpdateRequest updateRequest = CodePushUpdateRequest.createUpdateRequest(mDeploymentKey, currentPackage, mClientUniqueId);
             final String requestUrl = mServerUrl + String.format(Locale.getDefault(), UPDATE_CHECK_ENDPOINT, mCodePushUtils.getQueryStringFromObject(updateRequest, "UTF-8"));
             CheckForUpdateTask checkForUpdateTask = new CheckForUpdateTask(mFileUtils, mCodePushUtils, requestUrl);
             ApiHttpRequest<CodePushUpdateResponse> checkForUpdateRequest = new ApiHttpRequest<>(checkForUpdateTask);
@@ -121,7 +121,7 @@ public class CodePushAcquisitionManager {
             } catch (CodePushApiHttpRequestException e) {
                 throw new CodePushQueryUpdateException(e, currentPackage.getPackageHash());
             }
-        } catch (CodePushMalformedDataException e) {
+        } catch (CodePushMalformedDataException | CodePushIllegalArgumentException e) {
             throw new CodePushQueryUpdateException(e, currentPackage.getPackageHash());
         }
     }
@@ -135,9 +135,9 @@ public class CodePushAcquisitionManager {
     public void reportStatusDeploy(CodePushDeploymentStatusReport deploymentStatusReport) throws CodePushReportStatusException {
 
         /* TODO: Consider moving the following logic to some other place or removing it at all if useless. */
-        deploymentStatusReport.setClientUniqueId(mClientUniqueId);
-        deploymentStatusReport.setDeploymentKey(mDeploymentKey);
         try {
+            deploymentStatusReport.setClientUniqueId(mClientUniqueId);
+            deploymentStatusReport.setDeploymentKey(mDeploymentKey);
             deploymentStatusReport.setAppVersion(deploymentStatusReport.getLocalPackage() != null ? deploymentStatusReport.getLocalPackage().getAppVersion() : mAppVersion);
             deploymentStatusReport.setAppVersion(deploymentStatusReport.getLocalPackage() != null ? deploymentStatusReport.getLocalPackage().getLabel() : null);
         } catch (CodePushIllegalArgumentException e) {
@@ -176,14 +176,14 @@ public class CodePushAcquisitionManager {
      */
     public void reportStatusDownload(CodePushLocalPackage downloadedPackage) throws CodePushReportStatusException {
         final String requestUrl = mServerUrl + REPORT_DOWNLOAD_STATUS_ENDPOINT;
-        final CodePushDownloadStatusReport downloadStatusReport = CodePushDownloadStatusReport.createReport(mClientUniqueId, mDeploymentKey, downloadedPackage.getLabel());
-        final String downloadStatusReportJsonString = mCodePushUtils.convertObjectToJsonString(downloadStatusReport);
-        ReportStatusTask reportStatusDownloadTask = new ReportStatusTask(mFileUtils, requestUrl, downloadStatusReportJsonString, DOWNLOAD);
-        ApiHttpRequest<CodePushReportStatusResult> reportStatusDownloadRequest = new ApiHttpRequest<>(reportStatusDownloadTask);
         try {
+            final CodePushDownloadStatusReport downloadStatusReport = CodePushDownloadStatusReport.createReport(mClientUniqueId, mDeploymentKey, downloadedPackage.getLabel());
+            final String downloadStatusReportJsonString = mCodePushUtils.convertObjectToJsonString(downloadStatusReport);
+            ReportStatusTask reportStatusDownloadTask = new ReportStatusTask(mFileUtils, requestUrl, downloadStatusReportJsonString, DOWNLOAD);
+            ApiHttpRequest<CodePushReportStatusResult> reportStatusDownloadRequest = new ApiHttpRequest<>(reportStatusDownloadTask);
             CodePushReportStatusResult codePushReportStatusResult = reportStatusDownloadRequest.makeRequest();
             AppCenterLog.info(LOG_TAG, "Report status download: " + codePushReportStatusResult.getResult());
-        } catch (CodePushApiHttpRequestException e) {
+        } catch (CodePushApiHttpRequestException | CodePushIllegalArgumentException e) {
             throw new CodePushReportStatusException(e, DOWNLOAD);
         }
     }

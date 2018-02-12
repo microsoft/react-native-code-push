@@ -3,6 +3,7 @@ package com.microsoft.codepush.common.managers;
 import com.microsoft.codepush.common.CodePushStatusReportIdentifier;
 import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
+import com.microsoft.codepush.common.exceptions.CodePushIllegalArgumentException;
 
 import static android.text.TextUtils.isEmpty;
 import static com.microsoft.codepush.common.enums.CodePushDeploymentStatus.FAILED;
@@ -33,7 +34,7 @@ public class CodePushTelemetryManager {
      * @param appVersion current app version.
      * @return new binary update report.
      */
-    public CodePushDeploymentStatusReport buildBinaryUpdateReport(String appVersion) {
+    public CodePushDeploymentStatusReport buildBinaryUpdateReport(String appVersion) throws CodePushIllegalArgumentException {
         CodePushStatusReportIdentifier previousStatusReportIdentifier = mSettingsManager.getPreviousStatusReportIdentifier();
         CodePushDeploymentStatusReport report = null;
         if (previousStatusReportIdentifier == null) {
@@ -72,7 +73,7 @@ public class CodePushTelemetryManager {
      * @param currentPackage current local package information.
      * @return new update report.
      */
-    public CodePushDeploymentStatusReport buildUpdateReport(CodePushLocalPackage currentPackage) {
+    public CodePushDeploymentStatusReport buildUpdateReport(CodePushLocalPackage currentPackage) throws CodePushIllegalArgumentException {
         CodePushStatusReportIdentifier currentPackageIdentifier = buildPackageStatusReportIdentifier(currentPackage);
         CodePushStatusReportIdentifier previousStatusReportIdentifier = mSettingsManager.getPreviousStatusReportIdentifier();
         CodePushDeploymentStatusReport report = null;
