@@ -186,7 +186,7 @@ public class CodePushUpdateUtils {
      * @param isDebugMode is application running in debug mode.
      * @return hash value.
      */
-    public String getHashForBinaryContents(Context context, boolean isDebugMode) {
+    public String getHashForBinaryContents(Context context, boolean isDebugMode) throws CodePushMalformedDataException {
         try {
             return mCodePushUtils.getStringFromInputStream(context.getAssets().open(CodePushConstants.CODE_PUSH_HASH_FILE_NAME));
         } catch (IOException e) {
@@ -197,7 +197,7 @@ public class CodePushUpdateUtils {
 
                     /* Only print this message in "Release" mode. In "Debug", we may not have the
                      * hash if the build skips bundling the files. */
-                    AppCenterLog.error(CodePush.LOG_TAG, "Unable to get the hash of the binary's bundled resources - \"codepush.gradle\" may have not been added to the build definition.");
+                    throw new CodePushMalformedDataException("Unable to get the hash of the binary's bundled resources - \"codepush.gradle\" may have not been added to the build definition.", ex);
                 }
             }
             return null;

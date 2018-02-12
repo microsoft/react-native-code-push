@@ -395,10 +395,10 @@ public class CodePushUpdateManager {
         String unzippedFolderPath = getUnzippedFolderPath();
         try {
             mFileUtils.unzipFile(downloadFile, new File(unzippedFolderPath));
+            mFileUtils.deleteFileOrFolderSilently(downloadFile);
         } catch (IOException e) {
             throw new CodePushUnzipException(e);
         }
-        mFileUtils.deleteFileOrFolderSilently(downloadFile);
     }
 
     /**

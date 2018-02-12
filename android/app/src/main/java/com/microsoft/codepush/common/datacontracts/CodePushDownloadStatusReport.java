@@ -1,8 +1,7 @@
 package com.microsoft.codepush.common.datacontracts;
 
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.appcenter.utils.AppCenterLog;
-import com.microsoft.codepush.common.CodePush;
+import com.microsoft.codepush.common.exceptions.CodePushIllegalArgumentException;
 
 /**
  * Represents a report sent after downloading package.
@@ -36,7 +35,7 @@ public class CodePushDownloadStatusReport {
      * @param label          internal label automatically given to the update by the CodePush server.
      * @return instance of {@link CodePushDownloadStatusReport}.
      */
-    public static CodePushDownloadStatusReport createReport(final String clientUniqueId, final String deploymentKey, final String label) {
+    public static CodePushDownloadStatusReport createReport(final String clientUniqueId, final String deploymentKey, final String label) throws CodePushIllegalArgumentException {
         CodePushDownloadStatusReport codePushDownloadStatusReport = new CodePushDownloadStatusReport();
         codePushDownloadStatusReport.setClientUniqueId(clientUniqueId);
         codePushDownloadStatusReport.setDeploymentKey(deploymentKey);
@@ -76,11 +75,11 @@ public class CodePushDownloadStatusReport {
      *
      * @param label the internal label automatically given to the update by the CodePush server.
      */
-    public void setLabel(String label) {
+    public void setLabel(String label) throws CodePushIllegalArgumentException {
         if (label != null) {
             this.label = label;
         } else {
-            AppCenterLog.error(CodePush.LOG_TAG, "\"label\" property cannot be null.");
+            throw new CodePushIllegalArgumentException(this.getClass().getName(), "label");
         }
     }
 
@@ -90,11 +89,11 @@ public class CodePushDownloadStatusReport {
      * @param clientUniqueId the id of the device.
      */
     @SuppressWarnings("WeakerAccess")
-    public void setClientUniqueId(String clientUniqueId) {
+    public void setClientUniqueId(String clientUniqueId) throws CodePushIllegalArgumentException {
         if (clientUniqueId != null) {
             this.clientUniqueId = clientUniqueId;
         } else {
-            AppCenterLog.error(CodePush.LOG_TAG, "\"clientUniqueId\" property cannot be null.");
+            throw new CodePushIllegalArgumentException(this.getClass().getName(), "clientUniqueId");
         }
     }
 
@@ -104,11 +103,11 @@ public class CodePushDownloadStatusReport {
      * @param deploymentKey the deployment key to use to query the CodePush server for an update.
      */
     @SuppressWarnings("WeakerAccess")
-    public void setDeploymentKey(String deploymentKey) {
+    public void setDeploymentKey(String deploymentKey) throws CodePushIllegalArgumentException {
         if (deploymentKey != null) {
             this.deploymentKey = deploymentKey;
         } else {
-            AppCenterLog.error(CodePush.LOG_TAG, "\"deploymentKey\" property cannot be null.");
+            throw new CodePushIllegalArgumentException(this.getClass().getName(), "deploymentKey");
         }
     }
 }

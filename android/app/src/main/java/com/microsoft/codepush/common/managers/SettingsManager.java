@@ -4,12 +4,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.google.gson.JsonSyntaxException;
-import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.CodePushStatusReportIdentifier;
 import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPendingUpdate;
+import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
 import com.microsoft.codepush.common.utils.CodePushUtils;
 
 import org.json.JSONException;
@@ -18,8 +18,6 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import static com.microsoft.codepush.common.CodePush.LOG_TAG;
 
 /**
  * Manager responsible for saving and retrieving settings in local repository.
@@ -72,8 +70,9 @@ public class SettingsManager {
      * Each item represents an instance of {@link CodePushLocalPackage} that has failed to update.
      *
      * @return an array of failed updates.
+     * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
-    public ArrayList<CodePushLocalPackage> getFailedUpdates() {
+    public ArrayList<CodePushLocalPackage> getFailedUpdates() throws CodePushMalformedDataException {
         String failedUpdatesString = mSettings.getString(FAILED_UPDATES_KEY, null);
         if (failedUpdatesString == null) {
             return new ArrayList<>();
@@ -83,11 +82,9 @@ public class SettingsManager {
         } catch (JsonSyntaxException e) {
 
             /* Unrecognized data format, clear and replace with expected format. */
-            AppCenterLog.error(LOG_TAG, "Unable to parse failed updates metadata " + failedUpdatesString +
-                    " stored in SharedPreferences");
             List<CodePushLocalPackage> emptyArray = new ArrayList<>();
             mSettings.edit().putString(FAILED_UPDATES_KEY, mCodePushUtils.convertObjectToJsonString(emptyArray)).apply();
-            return new ArrayList<>();
+            throw new CodePushMalformedDataException("Unable to parse failed updates metadata " + failedUpdatesString + " stored in SharedPreferences", e);
         }
     }
 
@@ -95,8 +92,9 @@ public class SettingsManager {
      * Gets object with pending update info.
      *
      * @return object with pending update info.
+     * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
-    public CodePushPendingUpdate getPendingUpdate() {
+    public CodePushPendingUpdate getPendingUpdate() throws CodePushMalformedDataException {
         String pendingUpdateString = mSettings.getString(PENDING_UPDATE_KEY, null);
         if (pendingUpdateString == null) {
             return null;
@@ -104,9 +102,7 @@ public class SettingsManager {
         try {
             return mCodePushUtils.convertStringToObject(pendingUpdateString, CodePushPendingUpdate.class);
         } catch (JsonSyntaxException e) {
-            AppCenterLog.error(LOG_TAG, "Unable to parse pending update metadata " + pendingUpdateString +
-                    " stored in SharedPreferences");
-            return null;
+            throw new CodePushMalformedDataException("Unable to parse pending update metadata " + pendingUpdateString + " stored in SharedPreferences", e);
         }
     }
 
@@ -115,8 +111,9 @@ public class SettingsManager {
      *
      * @param packageHash hash to check.
      * @return <code>true</code> if there is a failed update with provided hash, <code>false</code> otherwise.
+     * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
-    public boolean existsFailedUpdate(String packageHash) {
+    public boolean existsFailedUpdate(String packageHash) throws CodePushMalformedDataException {
         List<CodePushLocalPackage> failedUpdates = getFailedUpdates();
         if (packageHash != null) {
             for (CodePushLocalPackage failedPackage : failedUpdates) {
@@ -134,8 +131,9 @@ public class SettingsManager {
      *
      * @param packageHash expected package hash of the pending update.
      * @return <code>true</code> if there is a pending update with the provided hash.
+     * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
-    public boolean isPendingUpdate(String packageHash) {
+    public boolean isPendingUpdate(String packageHash) throws CodePushMalformedDataException {
         CodePushPendingUpdate pendingUpdate = getPendingUpdate();
         return pendingUpdate != null && pendingUpdate.isPendingUpdateLoading() &&
                 (packageHash == null || pendingUpdate.getPendingUpdateHash().equals(packageHash));
@@ -159,8 +157,9 @@ public class SettingsManager {
      * Adds another failed update info to the list of failed updates.
      *
      * @param failedPackage instance of failed {@link CodePushLocalPackage}.
+     * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
-    public void saveFailedUpdate(CodePushLocalPackage failedPackage) {
+    public void saveFailedUpdate(CodePushLocalPackage failedPackage) throws CodePushMalformedDataException {
         ArrayList<CodePushLocalPackage> failedUpdates = getFailedUpdates();
         failedUpdates.add(failedPackage);
         String failedUpdatesString = mCodePushUtils.convertObjectToJsonString(failedUpdates);
