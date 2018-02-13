@@ -196,7 +196,7 @@ public abstract class CodePushBaseCore {
     @SuppressLint("StaticFieldLeak")
     protected static CodePushBaseCore mCurrentInstance;
 
-    CodePushBaseCore(
+    protected CodePushBaseCore(
             @NonNull String deploymentKey,
             @NonNull Context context,
             boolean isDebugMode,
@@ -789,7 +789,7 @@ public abstract class CodePushBaseCore {
              * variable instead of relying on a closure below, so that any
              * subsequent resume-based installs could override it. */
             mState.mMinimumBackgroundDuration = minimumBackgroundDuration;
-            handleInstallModesForUpdateInstall();
+            handleInstallModesForUpdateInstall(installMode);
         }
     }
 
@@ -958,7 +958,6 @@ public abstract class CodePushBaseCore {
     }
 
     public CodePushLocalPackage downloadUpdate(final CodePushRemotePackage updatePackage) throws CodePushNativeApiCallException {
-
         try {
             String binaryModifiedTime = "" + mPlatformUtils.getBinaryResourcesModifiedTime();
             String appEntryPoint = null;
@@ -976,6 +975,7 @@ public abstract class CodePushBaseCore {
             }
             CodePushLocalPackage newPackage = createLocalPackage(false, false, true, false, appEntryPoint, updatePackage);
             newPackage.setBinaryModifiedTime(binaryModifiedTime);
+
             newPackage = mUpdateManager.getPackage(updatePackage.getPackageHash());
 
             return newPackage;
@@ -991,5 +991,5 @@ public abstract class CodePushBaseCore {
     /**
      * Performs all work needed to be done on native side to support install modes but {@link CodePushInstallMode#ON_NEXT_RESTART}.
      */
-    protected abstract void handleInstallModesForUpdateInstall();
+    protected abstract void handleInstallModesForUpdateInstall(CodePushInstallMode installMode);
 }

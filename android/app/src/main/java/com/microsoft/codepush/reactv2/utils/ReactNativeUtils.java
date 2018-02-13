@@ -8,6 +8,7 @@ import com.microsoft.codepush.common.utils.PlatformUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.Callable;
 
 import static com.microsoft.codepush.common.CodePushConstants.CODE_PUSH_APK_BUILD_TIME_KEY;
 
@@ -54,7 +55,8 @@ public class ReactNativeUtils implements PlatformUtils {
         }
     }
 
-    private long getBinaryResourcesModifiedTime() throws NumberFormatException {
+    @Override
+    public long getBinaryResourcesModifiedTime() throws NumberFormatException {
         String packageName = mContext.getPackageName();
         int codePushApkBuildTimeId = mContext.getResources().getIdentifier(CODE_PUSH_APK_BUILD_TIME_KEY, "string", packageName);
 
