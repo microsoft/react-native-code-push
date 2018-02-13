@@ -43,6 +43,7 @@ public class CodePushLocalPackage extends CodePushPackage {
     /**
      *
      */
+    @SerializedName("binaryModifiedTime")
     private String binaryModifiedTime;
 
     /**

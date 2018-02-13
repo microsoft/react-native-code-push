@@ -184,6 +184,20 @@ public class CodePushUpdateManager {
     }
 
     /**
+     * Gets file for package download.
+     *
+     * @return file for package download.
+     * @throws IOException if read/write error occurred while accessing the file system.
+     */
+    public File getPackageDownloadFile() throws IOException {
+        File downloadFolder = new File(getCodePushPath());
+        if (!downloadFolder.mkdirs()) {
+            throw new IOException("Couldn't create directory" + downloadFolder.getAbsolutePath() + " for downloading file");
+        }
+        return new File(downloadFolder, CodePushConstants.DOWNLOAD_FILE_NAME);
+    }
+
+    /**
      * Gets entry path to the application.
      *
      * @param entryFileName file name of the entry file.
@@ -426,7 +440,9 @@ public class CodePushUpdateManager {
                     mCodePushUpdateUtils.copyNecessaryFilesFromCurrentPackage(diffManifestFilePath, currentPackageFolderPath, newUpdateFolderPath);
                 }
                 File diffManifestFile = new File(diffManifestFilePath);
-                diffManifestFile.delete();
+                if (!diffManifestFile.delete()) {
+                    throw new CodePushMergeException("Couldn't delete diff manifest file " + diffManifestFilePath);
+                }
             }
             mFileUtils.copyDirectoryContents(new File(unzippedFolderPath), new File(newUpdateFolderPath));
             mFileUtils.deleteDirectoryAtPath(unzippedFolderPath);
@@ -439,7 +455,9 @@ public class CodePushUpdateManager {
         } else {
             if (mFileUtils.fileAtPathExists(newUpdateMetadataPath)) {
                 File metadataFileFromOldUpdate = new File(newUpdateMetadataPath);
-                metadataFileFromOldUpdate.delete();
+                if (metadataFileFromOldUpdate.delete()) {
+                    throw new CodePushMergeException("Couldn't delete metadata file from old update " + newUpdateMetadataPath);
+                }
             }
             if (isDiffUpdate) {
                 AppCenterLog.info(CodePush.LOG_TAG, "Applying diff update.");
