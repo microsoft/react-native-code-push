@@ -11,26 +11,33 @@ import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactRootView;
 import com.facebook.react.bridge.JSBundleLoader;
+import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.modules.core.ChoreographerCompat;
 import com.facebook.react.modules.core.ReactChoreographer;
+import com.facebook.react.uimanager.ViewManager;
 import com.microsoft.appcenter.utils.AppCenterLog;
-import com.microsoft.codepush.common.CodePushBaseCore;
 import com.microsoft.codepush.common.DownloadProgress;
+import com.microsoft.codepush.common.core.CodePushBaseCore;
+import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.enums.CodePushInstallMode;
 import com.microsoft.codepush.common.exceptions.CodePushGeneralException;
+import com.microsoft.codepush.common.exceptions.CodePushGetPackageException;
 import com.microsoft.codepush.common.exceptions.CodePushInitializeException;
-import com.microsoft.codepush.common.interfaces.AppEntryPointProvider;
+import com.microsoft.codepush.common.exceptions.CodePushNativeApiCallException;
+import com.microsoft.codepush.common.interfaces.CodePushAppEntryPointProvider;
 import com.microsoft.codepush.common.interfaces.CodePushConfirmationDialog;
+import com.microsoft.codepush.common.interfaces.CodePushPlatformUtils;
+import com.microsoft.codepush.common.interfaces.CodePushPublicKeyProvider;
 import com.microsoft.codepush.common.interfaces.CodePushRestartListener;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
-import com.microsoft.codepush.common.interfaces.PublicKeyProvider;
 import com.microsoft.codepush.common.utils.CodePushLogUtils;
-import com.microsoft.codepush.common.utils.PlatformUtils;
 import com.microsoft.codepush.reactv2.interfaces.ReactInstanceHolder;
+import com.microsoft.codepush.reactv2.utils.ReactPlatformUtils;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Date;
@@ -39,22 +46,19 @@ import java.util.concurrent.Callable;
 
 import static com.microsoft.codepush.common.CodePush.LOG_TAG;
 
+/**
+ * React-specific instance of {@link CodePushBaseCore}.
+ */
+@SuppressWarnings("unused")
 public class ReactNativeCore extends CodePushBaseCore {
+
+    private static final String DEFAULT_JS_BUNDLE_NAME = "index.android.bundle";
+    private static final String ASSETS_BUNDLE_PREFIX = "assets://";
 
     /**
      * Instance of {@link ReactInstanceHolder}.
      */
     private static ReactInstanceHolder sReactInstanceHolder;
-
-    /**
-     * Instance of {@link CodePushNativeModule} to work with.
-     */
-    private static CodePushNativeModule sCodePushModule;
-
-    /**
-     * Instance of {@link CodePushDialog} to work with.
-     */
-    private static CodePushDialog sDialogModule;
 
     /**
      * Instance of the {@link ReactApplicationContext}.
@@ -76,9 +80,9 @@ public class ReactNativeCore extends CodePushBaseCore {
             @NonNull Context context,
             boolean isDebugMode,
             String serverUrl,
-            PublicKeyProvider publicKeyProvider,
-            AppEntryPointProvider appEntryPointProvider,
-            PlatformUtils platformUtils,
+            CodePushPublicKeyProvider publicKeyProvider,
+            CodePushAppEntryPointProvider appEntryPointProvider,
+            CodePushPlatformUtils platformUtils,
             CodePushRestartListener restartListener,
             CodePushConfirmationDialog confirmationDialog
     ) throws CodePushInitializeException {
@@ -99,7 +103,7 @@ public class ReactNativeCore extends CodePushBaseCore {
      *
      * @return instance of {@link ReactInstanceHolder}.
      */
-    static ReactInstanceManager getReactInstanceManager() {
+    private static ReactInstanceManager getReactInstanceManager() {
         if (sReactInstanceHolder == null) {
             return null;
         }
@@ -114,14 +118,63 @@ public class ReactNativeCore extends CodePushBaseCore {
      */
     public List<NativeModule> createNativeModules(ReactApplicationContext reactApplicationContext) {
         sReactApplicationContext = reactApplicationContext;
-        sCodePushModule = new CodePushNativeModule(sReactApplicationContext, this);
-        sDialogModule = new CodePushDialog(sReactApplicationContext);
-        addSyncStatusListener(sCodePushModule);
-        addDownloadProgressListener(sCodePushModule);
+        CodePushNativeModule codePushModule = new CodePushNativeModule(sReactApplicationContext, this);
+        CodePushDialog dialogModule = new CodePushDialog(sReactApplicationContext);
+        addSyncStatusListener(codePushModule);
+        addDownloadProgressListener(codePushModule);
         List<NativeModule> nativeModules = new ArrayList<>();
-        nativeModules.add(sCodePushModule);
-        nativeModules.add(sDialogModule);
+        nativeModules.add(codePushModule);
+        nativeModules.add(dialogModule);
         return nativeModules;
+    }
+
+    @Override
+    public List<Class<? extends JavaScriptModule>> createJSModules() {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public List<ViewManager> createViewManagers(ReactApplicationContext reactApplicationContext) {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public String getJSBundleFile() throws CodePushNativeApiCallException {
+        return getJSBundleFile(DEFAULT_JS_BUNDLE_NAME);
+    }
+
+    @Override
+    public String getJSBundleFile(String assetsBundleFileName) throws CodePushNativeApiCallException {
+        String binaryJsBundleUrl = ASSETS_BUNDLE_PREFIX + assetsBundleFileName;
+        try {
+            String packageFilePath = mManagers.mUpdateManager.getCurrentPackageEntryPath(assetsBundleFileName);
+            if (packageFilePath == null) {
+
+                /* There has not been any downloaded updates. */
+                AppCenterLog.info(LOG_TAG, "Loading JS bundle from \"" + binaryJsBundleUrl + "\"");
+                mState.mIsRunningBinaryVersion = true;
+                return binaryJsBundleUrl;
+            }
+            CodePushLocalPackage packageMetadata = mManagers.mUpdateManager.getCurrentPackage();
+            if (ReactPlatformUtils.getInstance().isPackageLatest(packageMetadata, mAppVersion, mContext)) {
+                AppCenterLog.info(LOG_TAG, "Loading JS bundle from \"" + binaryJsBundleUrl + "\"");
+                mState.mIsRunningBinaryVersion = true;
+                return packageFilePath;
+            } else {
+
+                /* The binary version is newer. */
+                mState.mDidUpdate = false;
+                boolean hasBinaryVersionChanged = !mAppVersion.equals(packageMetadata.getAppVersion());
+                if (!this.mIsDebugMode || hasBinaryVersionChanged) {
+                    this.clearUpdates();
+                }
+                AppCenterLog.info(LOG_TAG, "Loading JS bundle from \"" + binaryJsBundleUrl + "\"");
+                mState.mIsRunningBinaryVersion = true;
+                return binaryJsBundleUrl;
+            }
+        } catch (CodePushGetPackageException | CodePushGeneralException | IOException e) {
+            throw new CodePushNativeApiCallException(e);
+        }
     }
 
     /**
@@ -130,16 +183,23 @@ public class ReactNativeCore extends CodePushBaseCore {
      * This fix also relates to https://github.com/Microsoft/react-native-code-push/issues/878
      *
      * @param instanceManager instance of {@link ReactInstanceHolder}.
+     * @throws CodePushNativeApiCallException exception occurred when performing the operation.
      */
-    private void resetReactRootViews(ReactInstanceManager instanceManager) throws NoSuchFieldException, IllegalAccessException {
-        Field mAttachedRootViewsField = instanceManager.getClass().getDeclaredField("mAttachedRootViews");
-        mAttachedRootViewsField.setAccessible(true);
-        List<ReactRootView> mAttachedRootViews = (List<ReactRootView>) mAttachedRootViewsField.get(instanceManager);
-        for (ReactRootView reactRootView : mAttachedRootViews) {
-            reactRootView.removeAllViews();
-            reactRootView.setId(View.NO_ID);
+    private void resetReactRootViews(ReactInstanceManager instanceManager) throws CodePushNativeApiCallException {
+        try {
+            Field mAttachedRootViewsField = instanceManager.getClass().getDeclaredField("mAttachedRootViews");
+            mAttachedRootViewsField.setAccessible(true);
+            List<ReactRootView> mAttachedRootViews = (List<ReactRootView>) mAttachedRootViewsField.get(instanceManager);
+            for (ReactRootView reactRootView : mAttachedRootViews) {
+                reactRootView.removeAllViews();
+                reactRootView.setId(View.NO_ID);
+            }
+            mAttachedRootViewsField.set(instanceManager, mAttachedRootViews);
+        } catch (NoSuchFieldException e) {
+            throw new CodePushNativeApiCallException(e);
+        } catch (IllegalAccessException e) {
+            throw new CodePushNativeApiCallException(e);
         }
-        mAttachedRootViewsField.set(instanceManager, mAttachedRootViews);
     }
 
     /**
@@ -166,10 +226,13 @@ public class ReactNativeCore extends CodePushBaseCore {
         }
     }
 
-    /*
+    /**
      * Use reflection to find the ReactInstanceManager. See #556 for a proposal for a less brittle way to approach this.
+     *
+     * @return returns instance of {@link ReactInstanceManager}.
+     * @throws CodePushNativeApiCallException exception occurred when performing the operation.
      */
-    private ReactInstanceManager resolveInstanceManager() throws NoSuchFieldException, IllegalAccessException {
+    private ReactInstanceManager resolveInstanceManager() throws CodePushNativeApiCallException {
         ReactInstanceManager instanceManager = ReactNativeCore.getReactInstanceManager();
         if (instanceManager != null) {
             return instanceManager;
@@ -188,8 +251,9 @@ public class ReactNativeCore extends CodePushBaseCore {
      *
      * @param instanceManager    instance of {@link ReactInstanceManager}.
      * @param latestJSBundleFile path to the latest js bundle file.
+     * @throws CodePushNativeApiCallException exception occurred when performing the operation.
      */
-    private void setJSBundle(ReactInstanceManager instanceManager, String latestJSBundleFile) throws IllegalAccessException {
+    private void setJSBundle(ReactInstanceManager instanceManager, String latestJSBundleFile) throws CodePushNativeApiCallException {
 
         /* Use reflection to find and set the appropriate fields on ReactInstanceManager. See #556 for a proposal for a less brittle way to approach this. */
         try {
@@ -203,7 +267,7 @@ public class ReactNativeCore extends CodePushBaseCore {
             bundleLoaderField.setAccessible(true);
             bundleLoaderField.set(instanceManager, latestJSBundleLoader);
         } catch (Exception e) {
-            CodePushLogUtils.trackException(new CodePushGeneralException("Unable to set JSBundle - CodePush may not support this version of React Native", e));
+            throw new CodePushNativeApiCallException(new CodePushGeneralException("Unable to set JSBundle - CodePush may not support this version of React Native", e));
         }
     }
 
@@ -219,7 +283,7 @@ public class ReactNativeCore extends CodePushBaseCore {
                     @Override
                     public void run() {
                         AppCenterLog.info(LOG_TAG, "Loading bundle on suspend");
-                        mRestartManager.restartApp(false);
+                        mManagers.mRestartManager.restartApp(false);
                     }
                 };
 
@@ -233,7 +297,7 @@ public class ReactNativeCore extends CodePushBaseCore {
                         if (installMode == CodePushInstallMode.IMMEDIATE
                                 || durationInBackground >= mState.mMinimumBackgroundDuration) {
                             AppCenterLog.info(LOG_TAG, "Loading bundle on resume");
-                            mRestartManager.restartApp(false);
+                            mManagers.mRestartManager.restartApp(false);
                         }
                     }
                 }
@@ -243,7 +307,7 @@ public class ReactNativeCore extends CodePushBaseCore {
 
                     /* Save the current time so that when the app is later resumed, we can detect how long it was in the background. */
                     lastPausedDate = new Date();
-                    if (installMode == CodePushInstallMode.ON_NEXT_SUSPEND && mSettingsManager.isPendingUpdate(null)) {
+                    if (installMode == CodePushInstallMode.ON_NEXT_SUSPEND && mManagers.mSettingsManager.isPendingUpdate(null)) {
                         appSuspendHandler.postDelayed(loadBundleRunnable, mState.mMinimumBackgroundDuration * 1000);
                     }
                 }
@@ -259,7 +323,7 @@ public class ReactNativeCore extends CodePushBaseCore {
     }
 
     @Override
-    protected void retrySendStatusReportOnAppResume(final Callable<Void> sender) throws Exception {
+    protected void retrySendStatusReportOnAppResume(final Callable<Void> sender) {
         if (mLifecycleEventListenerForReport == null) {
             mLifecycleEventListenerForReport = new LifecycleEventListener() {
 

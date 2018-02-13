@@ -3,6 +3,7 @@ package com.microsoft.codepush.common.managers;
 import com.microsoft.codepush.common.CodePushStatusReportIdentifier;
 import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
+import com.microsoft.codepush.common.datacontracts.CodePushPackage;
 
 import org.json.JSONException;
 
@@ -82,7 +83,7 @@ public class CodePushTelemetryManager {
             if (previousStatusReportIdentifier == null) {
                 mSettingsManager.removeStatusReportSavedForRetry();
                 report = new CodePushDeploymentStatusReport();
-                report.setLocalPackage(currentPackage);
+                report.setPackage(currentPackage);
                 report.setStatus(SUCCEEDED);
             } else {
 
@@ -93,14 +94,14 @@ public class CodePushTelemetryManager {
                     if (previousStatusReportIdentifier.hasDeploymentKey()) {
                         String previousDeploymentKey = previousStatusReportIdentifier.getDeploymentKey();
                         String previousLabel = previousStatusReportIdentifier.getVersionLabel();
-                        report.setLocalPackage(currentPackage);
+                        report.setPackage(currentPackage);
                         report.setStatus(SUCCEEDED);
                         report.setPreviousDeploymentKey(previousDeploymentKey);
                         report.setPreviousLabelOrAppVersion(previousLabel);
                     } else {
 
                         /* Previous status report was with a binary app version. */
-                        report.setLocalPackage(currentPackage);
+                        report.setPackage(currentPackage);
                         report.setStatus(SUCCEEDED);
                         report.setPreviousLabelOrAppVersion(previousStatusReportIdentifier.getVersionLabel());
                     }
@@ -116,9 +117,9 @@ public class CodePushTelemetryManager {
      * @param lastFailedPackage current local package information.
      * @return new rollback report.
      */
-    public CodePushDeploymentStatusReport buildRollbackReport(CodePushLocalPackage lastFailedPackage) {
+    public CodePushDeploymentStatusReport buildRollbackReport(CodePushPackage lastFailedPackage) {
         CodePushDeploymentStatusReport report = new CodePushDeploymentStatusReport();
-        report.setLocalPackage(lastFailedPackage);
+        report.setPackage(lastFailedPackage);
         report.setStatus(FAILED);
         return report;
     }
@@ -135,8 +136,8 @@ public class CodePushTelemetryManager {
         if (!isEmpty(statusReport.getAppVersion())) {
             CodePushStatusReportIdentifier statusIdentifier = new CodePushStatusReportIdentifier(statusReport.getAppVersion());
             mSettingsManager.saveIdentifierOfReportedStatus(statusIdentifier);
-        } else if (statusReport.getLocalPackage() != null) {
-            CodePushStatusReportIdentifier packageIdentifier = buildPackageStatusReportIdentifier(statusReport.getLocalPackage());
+        } else if (statusReport.getPackage() != null) {
+            CodePushStatusReportIdentifier packageIdentifier = buildPackageStatusReportIdentifier(statusReport.getPackage());
             mSettingsManager.saveIdentifierOfReportedStatus(packageIdentifier);
         }
     }
@@ -147,7 +148,7 @@ public class CodePushTelemetryManager {
      * @param updatePackage local package.
      * @return status report identifier.
      */
-    private CodePushStatusReportIdentifier buildPackageStatusReportIdentifier(CodePushLocalPackage updatePackage) {
+    private CodePushStatusReportIdentifier buildPackageStatusReportIdentifier(CodePushPackage updatePackage) {
 
         /* Because deploymentKeys can be dynamically switched, we use a
            combination of the deploymentKey and label as the packageIdentifier. */

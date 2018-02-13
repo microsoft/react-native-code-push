@@ -8,10 +8,10 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
-import com.microsoft.codepush.common.CodePushBaseCore;
 import com.microsoft.codepush.common.CodePushConfiguration;
 import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.DownloadProgress;
+import com.microsoft.codepush.common.core.CodePushBaseCore;
 import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushRemotePackage;
@@ -19,7 +19,6 @@ import com.microsoft.codepush.common.datacontracts.CodePushSyncOptions;
 import com.microsoft.codepush.common.enums.CodePushInstallMode;
 import com.microsoft.codepush.common.enums.CodePushSyncStatus;
 import com.microsoft.codepush.common.enums.CodePushUpdateState;
-import com.microsoft.codepush.common.exceptions.CodePushGetUpdateMetadataException;
 import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
 import com.microsoft.codepush.common.exceptions.CodePushNativeApiCallException;
 import com.microsoft.codepush.common.interfaces.CodePushBinaryVersionMismatchListener;
@@ -34,7 +33,6 @@ import com.microsoft.codepush.reactv2.utils.ReactConvertUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -259,7 +257,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
             } else {
                 promise.resolve("");
             }
-        } catch (CodePushMalformedDataException | CodePushGetUpdateMetadataException e) {
+        } catch (CodePushMalformedDataException | CodePushNativeApiCallException e) {
             promise.reject(e);
         }
     }
@@ -330,7 +328,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
     public void isFirstRun(String packageHash, Promise promise) {
         try {
             promise.resolve(mCodePushCore.isFirstRun(packageHash));
-        } catch (IOException | CodePushMalformedDataException e) {
+        } catch (CodePushNativeApiCallException e) {
             promise.resolve(false);
         }
     }
@@ -405,16 +403,5 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
         } catch (CodePushMalformedDataException | CodePushNativeApiCallException e) {
             CodePushLogUtils.trackException(e);
         }
-    }
-
-    /**
-     * Replaces the current bundle with the one downloaded from removeBundleUrl.
-     * It is only to be used during tests. No-ops if the test configuration flag is not set.
-     *
-     * @param remoteBundleUrl url of the bundle.
-     */
-    @ReactMethod
-    public void downloadAndReplaceCurrentBundle(String remoteBundleUrl) {
-        mCodePushCore.downloadAndReplaceCurrentBundle(remoteBundleUrl);
     }
 }

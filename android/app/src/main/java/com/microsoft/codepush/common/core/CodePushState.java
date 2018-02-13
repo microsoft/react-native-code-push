@@ -1,4 +1,4 @@
-package com.microsoft.codepush.common;
+package com.microsoft.codepush.common.core;
 
 import com.microsoft.codepush.common.enums.CodePushInstallMode;
 
