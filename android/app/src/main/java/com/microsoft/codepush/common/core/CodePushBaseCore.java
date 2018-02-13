@@ -242,6 +242,290 @@ public abstract class CodePushBaseCore implements CodePushAPI {
         }
     }
 
+    @Override
+    public void addSyncStatusListener(CodePushSyncStatusListener syncStatusListener) {
+        mListeners.mSyncStatusListeners.add(syncStatusListener);
+    }
+
+    @Override
+    public void addDownloadProgressListener(CodePushDownloadProgressListener downloadProgressListener) {
+        mListeners.mDownloadProgressListeners.add(downloadProgressListener);
+    }
+
+    @Override
+    @SuppressWarnings("WeakerAccess")
+    public CodePushConfiguration getNativeConfiguration() {
+        CodePushConfiguration configuration = new CodePushConfiguration();
+        configuration.setAppVersion(mAppVersion);
+
+        /* TODO can we just use InstanceId#getId ? */
+        configuration.setClientUniqueId(Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID));
+        configuration.setDeploymentKey(mDeploymentKey);
+        configuration.setServerUrl(mServerUrl);
+        configuration.setPackageHash(mUtilities.mUpdateUtils.getHashForBinaryContents(mContext, mIsDebugMode));
+        return configuration;
+    }
+
+    @Override
+    public CodePushLocalPackage getUpdateMetadata() throws CodePushNativeApiCallException {
+        return getUpdateMetadata(RUNNING);
+    }
+
+    @Override
+    @SuppressWarnings("WeakerAccess")
+    public CodePushLocalPackage getUpdateMetadata(CodePushUpdateState updateState) throws CodePushNativeApiCallException {
+        if (updateState == null) {
+            updateState = RUNNING;
+        }
+        CodePushLocalPackage currentPackage;
+        try {
+            currentPackage = mManagers.mUpdateManager.getCurrentPackage();
+        } catch (CodePushGetPackageException e) {
+            throw new CodePushNativeApiCallException(e);
+        }
+        if (currentPackage == null) {
+            return null;
+        }
+        Boolean currentUpdateIsPending = false;
+        Boolean isDebugOnly = false;
+        if (!isEmpty(currentPackage.getPackageHash())) {
+            String currentHash = currentPackage.getPackageHash();
+            currentUpdateIsPending = mManagers.mSettingsManager.isPendingUpdate(currentHash);
+        }
+        if (updateState == PENDING && !currentUpdateIsPending) {
+
+            /* The caller wanted a pending update but there isn't currently one. */
+            return null;
+        } else if (updateState == RUNNING && currentUpdateIsPending) {
+
+            /* The caller wants the running update, but the current one is pending, so we need to grab the previous. */
+            CodePushLocalPackage previousPackage;
+            try {
+                previousPackage = mManagers.mUpdateManager.getPreviousPackage();
+            } catch (CodePushGetPackageException e) {
+                throw new CodePushNativeApiCallException(e);
+            }
+            if (previousPackage == null) {
+                return null;
+            }
+            return previousPackage;
+        } else {
+
+            /*
+             * The current package satisfies the request:
+             * 1) Caller wanted a pending, and there is a pending update
+             * 2) Caller wanted the running update, and there isn't a pending
+             * 3) Caller wants the latest update, regardless if it's pending or not
+             */
+            if (mState.mIsRunningBinaryVersion) {
+
+                /*
+                 * This only matters in Debug builds. Since we do not clear "outdated" updates,
+                 * we need to indicate to the JS side that somehow we have a current update on
+                 * disk that is not actually running.
+                 */
+                isDebugOnly = true;
+            }
+
+            /* Enable differentiating pending vs. non-pending updates */
+            String packageHash = currentPackage.getPackageHash();
+            currentPackage.setFailedInstall(existsFailedUpdate(packageHash));
+            currentPackage.setFirstRun(isFirstRun(packageHash));
+            currentPackage.setPending(currentUpdateIsPending);
+            currentPackage.setDebugOnly(isDebugOnly);
+            return currentPackage;
+        }
+    }
+
+    @Override
+    @SuppressWarnings("WeakerAccess")
+    public CodePushLocalPackage getCurrentPackage() throws CodePushNativeApiCallException {
+        return getUpdateMetadata(LATEST);
+    }
+
+    @Override
+    public CodePushRemotePackage checkForUpdate() throws CodePushNativeApiCallException {
+        CodePushConfiguration nativeConfiguration = getNativeConfiguration();
+        return checkForUpdate(nativeConfiguration.getDeploymentKey());
+    }
+
+    @Override
+    @SuppressWarnings("WeakerAccess")
+    public CodePushRemotePackage checkForUpdate(String deploymentKey) throws CodePushNativeApiCallException {
+        CodePushConfiguration config = getNativeConfiguration();
+        config.setDeploymentKey(deploymentKey != null ? deploymentKey : config.getDeploymentKey());
+        CodePushLocalPackage localPackage;
+        localPackage = getCurrentPackage();
+        CodePushLocalPackage queryPackage;
+        if (localPackage == null) {
+            queryPackage = CodePushLocalPackage.createEmptyPackageForCheckForUpdateQuery(config.getAppVersion());
+        } else {
+            queryPackage = localPackage;
+        }
+        CodePushRemotePackage update;
+        try {
+            update = new CodePushAcquisitionManager(mUtilities.mUtils, mUtilities.mFileUtils)
+                    .queryUpdateWithCurrentPackage(config, queryPackage);
+        } catch (CodePushQueryUpdateException e) {
+            throw new CodePushNativeApiCallException(e);
+        }
+        if (update == null || update.isUpdateAppVersion() ||
+                localPackage != null && (update.getPackageHash().equals(localPackage.getPackageHash())) ||
+                (localPackage == null || localPackage.isDebugOnly()) && config.getPackageHash().equals(update.getPackageHash())) {
+            if (update != null && update.isUpdateAppVersion()) {
+                AppCenterLog.info(LOG_TAG, "An update is available but it is not targeting the binary version of your app.");
+                notifyAboutBinaryVersionMismatchChange(update);
+            }
+            return null;
+        } else {
+            if (deploymentKey != null) {
+                update.setDeploymentKey(deploymentKey);
+            }
+            update.setFailedInstall(existsFailedUpdate(update.getPackageHash()));
+            return update;
+        }
+    }
+
+    @Override
+    public void sync() throws CodePushNativeApiCallException {
+        sync(new CodePushSyncOptions());
+    }
+
+    @Override
+    public void sync(CodePushSyncOptions synchronizationOptions) throws CodePushNativeApiCallException {
+        if (mState.mSyncInProgress) {
+            notifyAboutSyncStatusChange(SYNC_IN_PROGRESS);
+            AppCenterLog.info(CodePush.LOG_TAG, "Sync already in progress.");
+            return;
+        }
+        final CodePushSyncOptions syncOptions = synchronizationOptions == null ? new CodePushSyncOptions(mDeploymentKey) : synchronizationOptions;
+        if (isEmpty(syncOptions.getDeploymentKey())) {
+            syncOptions.setDeploymentKey(mDeploymentKey);
+        }
+        if (syncOptions.getInstallMode() == null) {
+            syncOptions.setInstallMode(ON_NEXT_RESTART);
+        }
+        if (syncOptions.getMandatoryInstallMode() == null) {
+            syncOptions.setMandatoryInstallMode(IMMEDIATE);
+        }
+
+        /* minimumBackgroundDuration, ignoreFailedUpdates are primitives and always have default value */
+        if (syncOptions.getCheckFrequency() == null) {
+            syncOptions.setCheckFrequency(ON_APP_START);
+        }
+        final CodePushConfiguration configuration = getNativeConfiguration();
+        if (syncOptions.getDeploymentKey() != null) {
+            configuration.setDeploymentKey(syncOptions.getDeploymentKey());
+        }
+        mState.mSyncInProgress = true;
+        notifyApplicationReady();
+        notifyAboutSyncStatusChange(CHECKING_FOR_UPDATE);
+        final CodePushRemotePackage remotePackage = checkForUpdate(syncOptions.getDeploymentKey());
+        final boolean updateShouldBeIgnored =
+                remotePackage != null && (remotePackage.isFailedInstall() && syncOptions.getIgnoreFailedUpdates());
+        if (remotePackage == null || updateShouldBeIgnored) {
+            if (updateShouldBeIgnored) {
+                AppCenterLog.info(CodePush.LOG_TAG, "An update is available, but it is being ignored due to having been previously rolled back.");
+            }
+            CodePushLocalPackage currentPackage = getCurrentPackage();
+            if (currentPackage != null && currentPackage.isPending()) {
+                notifyAboutSyncStatusChange(UPDATE_INSTALLED);
+            } else {
+                notifyAboutSyncStatusChange(UP_TO_DATE);
+            }
+        } else if (syncOptions.getUpdateDialog() != null) {
+            CodePushUpdateDialog updateDialogOptions = syncOptions.getUpdateDialog();
+            String message;
+            String acceptButtonText;
+            String declineButtonText = updateDialogOptions.getOptionalIgnoreButtonLabel();
+            if (remotePackage.isMandatory()) {
+                message = updateDialogOptions.getMandatoryUpdateMessage();
+                acceptButtonText = updateDialogOptions.getMandatoryContinueButtonLabel();
+            } else {
+                message = updateDialogOptions.getOptionalUpdateMessage();
+                acceptButtonText = updateDialogOptions.getOptionalInstallButtonLabel();
+            }
+            if (updateDialogOptions.getAppendReleaseDescription() && !isEmpty(remotePackage.getDescription())) {
+                message = updateDialogOptions.getDescriptionPrefix() + " " + remotePackage.getDescription();
+            }
+
+            /* Ask user whether he want to install update or ignore it. */
+            notifyAboutSyncStatusChange(AWAITING_USER_ACTION);
+            mConfirmationDialog.shouldInstallUpdate(updateDialogOptions.getTitle(), message, acceptButtonText, declineButtonText, new CodePushConfirmationCallback() {
+                @Override public void onResult(boolean userAcceptsProposal) {
+                    if (userAcceptsProposal) {
+                        try {
+                            doDownloadAndInstall(remotePackage, syncOptions, configuration);
+                            mState.mSyncInProgress = false;
+                        } catch (Exception e) {
+                            notifyAboutSyncStatusChange(UNKNOWN_ERROR);
+                            mState.mSyncInProgress = false;
+                            CodePushLogUtils.trackException(new CodePushNativeApiCallException(e));
+                        }
+                    } else {
+                        notifyAboutSyncStatusChange(UPDATE_IGNORED);
+                        mState.mSyncInProgress = false;
+                    }
+                }
+
+                @Override public void throwError(CodePushGeneralException e) {
+                    notifyAboutSyncStatusChange(UNKNOWN_ERROR);
+                    mState.mSyncInProgress = false;
+                    CodePushLogUtils.trackException(new CodePushNativeApiCallException(e));
+                }
+            });
+        } else {
+            try {
+                doDownloadAndInstall(remotePackage, syncOptions, configuration);
+            } catch (Exception e) {
+                notifyAboutSyncStatusChange(UNKNOWN_ERROR);
+                mState.mSyncInProgress = false;
+                throw new CodePushNativeApiCallException(e);
+            }
+        }
+        mState.mSyncInProgress = false;
+    }
+
+    @Override
+    @SuppressWarnings("WeakerAccess")
+    public void notifyApplicationReady() throws CodePushNativeApiCallException {
+        mManagers.mSettingsManager.removePendingUpdate();
+        final CodePushDeploymentStatusReport statusReport = getNewStatusReport();
+        if (statusReport != null) {
+            tryReportStatus(statusReport);
+        }
+    }
+
+    @Override
+    public CodePushAcquisitionManager getAcquisitionSdk() {
+        return mManagers.mAcquisitionManager;
+    }
+
+    @Override
+    public void log(String message) {
+        AppCenterLog.info(LOG_TAG, message);
+    }
+
+    @Override
+    public void restartApp() {
+        mManagers.mRestartManager.restartApp(true);
+    }
+
+    @Override
+    public void restartApp(boolean onlyIfUpdateIsPending) {
+        mManagers.mRestartManager.restartApp(onlyIfUpdateIsPending);
+    }
+
+    @Override
+    public void disallowRestart() {
+        mManagers.mRestartManager.disallowRestarts();
+    }
+
+    @Override
+    public void allowRestart() {
+        mManagers.mRestartManager.allowRestarts();
+    }
+
     /**
      * Gets current app version.
      *
@@ -258,24 +542,6 @@ public abstract class CodePushBaseCore implements CodePushAPI {
      */
     public void setAppVersion(String appVersion) {
         this.mAppVersion = appVersion;
-    }
-
-    /**
-     * Adds listener for sync status change event.
-     *
-     * @param syncStatusListener listener for sync status change event.
-     */
-    public void addSyncStatusListener(CodePushSyncStatusListener syncStatusListener) {
-        mListeners.mSyncStatusListeners.add(syncStatusListener);
-    }
-
-    /**
-     * Adds listener for download progress change event.
-     *
-     * @param downloadProgressListener listener for download progress change event.
-     */
-    public void addDownloadProgressListener(CodePushDownloadProgressListener downloadProgressListener) {
-        mListeners.mDownloadProgressListeners.add(downloadProgressListener);
     }
 
     /**
@@ -429,24 +695,6 @@ public abstract class CodePushBaseCore implements CodePushAPI {
     }
 
     /**
-     * Gets native CodePush configuration.
-     *
-     * @return native CodePush configuration.
-     */
-    @SuppressWarnings("WeakerAccess")
-    public CodePushConfiguration getNativeConfiguration() {
-        CodePushConfiguration configuration = new CodePushConfiguration();
-        configuration.setAppVersion(mAppVersion);
-
-        /* TODO can we just use InstanceId#getId ? */
-        configuration.setClientUniqueId(Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID));
-        configuration.setDeploymentKey(mDeploymentKey);
-        configuration.setServerUrl(mServerUrl);
-        configuration.setPackageHash(mUtilities.mUpdateUtils.getHashForBinaryContents(mContext, mIsDebugMode));
-        return configuration;
-    }
-
-    /**
      * Checks whether an update with the following hash has failed.
      *
      * @param packageHash hash to check.
@@ -473,266 +721,6 @@ public abstract class CodePushBaseCore implements CodePushAPI {
         } catch (IOException | CodePushMalformedDataException e) {
             throw new CodePushNativeApiCallException(e);
         }
-    }
-
-    /**
-     * Retrieves the metadata for an installed update (e.g. description, mandatory)
-     * whose state matches {@link CodePushUpdateState#RUNNING}.
-     *
-     * @return installed update metadata.
-     * @throws CodePushNativeApiCallException if error occurred during the operation.
-     */
-    public CodePushLocalPackage getUpdateMetadata() throws CodePushNativeApiCallException {
-        return getUpdateMetadata(RUNNING);
-    }
-
-    /**
-     * Retrieves the metadata for an installed update (e.g. description, mandatory)
-     * whose state matches the specified <code>updateState</code> parameter.
-     *
-     * @param updateState current update state.
-     * @return installed update metadata.
-     * @throws CodePushNativeApiCallException if error occurred during the operation.
-     */
-    @SuppressWarnings("WeakerAccess")
-    public CodePushLocalPackage getUpdateMetadata(CodePushUpdateState updateState) throws CodePushNativeApiCallException {
-        if (updateState == null) {
-            updateState = RUNNING;
-        }
-        CodePushLocalPackage currentPackage;
-        try {
-            currentPackage = mManagers.mUpdateManager.getCurrentPackage();
-        } catch (CodePushGetPackageException e) {
-            throw new CodePushNativeApiCallException(e);
-        }
-        if (currentPackage == null) {
-            return null;
-        }
-        Boolean currentUpdateIsPending = false;
-        Boolean isDebugOnly = false;
-        if (!isEmpty(currentPackage.getPackageHash())) {
-            String currentHash = currentPackage.getPackageHash();
-            currentUpdateIsPending = mManagers.mSettingsManager.isPendingUpdate(currentHash);
-        }
-        if (updateState == PENDING && !currentUpdateIsPending) {
-
-            /* The caller wanted a pending update but there isn't currently one. */
-            return null;
-        } else if (updateState == RUNNING && currentUpdateIsPending) {
-
-            /* The caller wants the running update, but the current one is pending, so we need to grab the previous. */
-            CodePushLocalPackage previousPackage;
-            try {
-                previousPackage = mManagers.mUpdateManager.getPreviousPackage();
-            } catch (CodePushGetPackageException e) {
-                throw new CodePushNativeApiCallException(e);
-            }
-            if (previousPackage == null) {
-                return null;
-            }
-            return previousPackage;
-        } else {
-
-            /*
-             * The current package satisfies the request:
-             * 1) Caller wanted a pending, and there is a pending update
-             * 2) Caller wanted the running update, and there isn't a pending
-             * 3) Caller wants the latest update, regardless if it's pending or not
-             */
-            if (mState.mIsRunningBinaryVersion) {
-
-                /*
-                 * This only matters in Debug builds. Since we do not clear "outdated" updates,
-                 * we need to indicate to the JS side that somehow we have a current update on
-                 * disk that is not actually running.
-                 */
-                isDebugOnly = true;
-            }
-
-            /* Enable differentiating pending vs. non-pending updates */
-            String packageHash = currentPackage.getPackageHash();
-            currentPackage.setFailedInstall(existsFailedUpdate(packageHash));
-            currentPackage.setFirstRun(isFirstRun(packageHash));
-            currentPackage.setPending(currentUpdateIsPending);
-            currentPackage.setDebugOnly(isDebugOnly);
-            return currentPackage;
-        }
-    }
-
-    /**
-     * Gets current installed package.
-     *
-     * @return current installed package.
-     * @throws CodePushNativeApiCallException if error occurred during the execution of operation.
-     */
-    @SuppressWarnings("WeakerAccess")
-    public CodePushLocalPackage getCurrentPackage() throws CodePushNativeApiCallException {
-        return getUpdateMetadata(LATEST);
-    }
-
-    /**
-     * Asks the CodePush service whether the configured app deployment has an update available
-     * using deploymentKey already set in constructor.
-     *
-     * @return remote package info if there is an update, <code>null</code> otherwise.
-     * @throws CodePushNativeApiCallException if error occurred during the execution of operation.
-     */
-    public CodePushRemotePackage checkForUpdate() throws CodePushNativeApiCallException {
-        CodePushConfiguration nativeConfiguration = getNativeConfiguration();
-        return checkForUpdate(nativeConfiguration.getDeploymentKey());
-    }
-
-    /**
-     * Asks the CodePush service whether the configured app deployment has an update available
-     * using specified deployment key.
-     *
-     * @param deploymentKey deployment key to use.
-     * @return remote package info if there is an update, <code>null</code> otherwise.
-     * @throws CodePushNativeApiCallException if error occurred during the execution of operation.
-     */
-    @SuppressWarnings("WeakerAccess")
-    public CodePushRemotePackage checkForUpdate(String deploymentKey) throws CodePushNativeApiCallException {
-        CodePushConfiguration config = getNativeConfiguration();
-        config.setDeploymentKey(deploymentKey != null ? deploymentKey : config.getDeploymentKey());
-        CodePushLocalPackage localPackage;
-        localPackage = getCurrentPackage();
-        CodePushLocalPackage queryPackage;
-        if (localPackage == null) {
-            queryPackage = CodePushLocalPackage.createEmptyPackageForCheckForUpdateQuery(config.getAppVersion());
-        } else {
-            queryPackage = localPackage;
-        }
-        CodePushRemotePackage update;
-        try {
-            update = new CodePushAcquisitionManager(mUtilities.mUtils, mUtilities.mFileUtils)
-                    .queryUpdateWithCurrentPackage(config, queryPackage);
-        } catch (CodePushQueryUpdateException e) {
-            throw new CodePushNativeApiCallException(e);
-        }
-        if (update == null || update.isUpdateAppVersion() ||
-                localPackage != null && (update.getPackageHash().equals(localPackage.getPackageHash())) ||
-                (localPackage == null || localPackage.isDebugOnly()) && config.getPackageHash().equals(update.getPackageHash())) {
-            if (update != null && update.isUpdateAppVersion()) {
-                AppCenterLog.info(LOG_TAG, "An update is available but it is not targeting the binary version of your app.");
-                notifyAboutBinaryVersionMismatchChange(update);
-            }
-            return null;
-        } else {
-            if (deploymentKey != null) {
-                update.setDeploymentKey(deploymentKey);
-            }
-            update.setFailedInstall(existsFailedUpdate(update.getPackageHash()));
-            return update;
-        }
-    }
-
-    /**
-     * Synchronizes your app assets with the latest release to the configured deployment using default sync options.
-     *
-     * @throws CodePushNativeApiCallException if error occurred during the execution of operation.
-     */
-    public void sync() throws CodePushNativeApiCallException {
-        sync(new CodePushSyncOptions());
-    }
-
-    /**
-     * Synchronizes your app assets with the latest release to the configured deployment.
-     *
-     * @param synchronizationOptions sync options.
-     * @throws CodePushNativeApiCallException if error occurred during the execution of operation.
-     */
-    public void sync(CodePushSyncOptions synchronizationOptions) throws CodePushNativeApiCallException {
-        if (mState.mSyncInProgress) {
-            notifyAboutSyncStatusChange(SYNC_IN_PROGRESS);
-            AppCenterLog.info(CodePush.LOG_TAG, "Sync already in progress.");
-            return;
-        }
-        final CodePushSyncOptions syncOptions = synchronizationOptions == null ? new CodePushSyncOptions(mDeploymentKey) : synchronizationOptions;
-        if (isEmpty(syncOptions.getDeploymentKey())) {
-            syncOptions.setDeploymentKey(mDeploymentKey);
-        }
-        if (syncOptions.getInstallMode() == null) {
-            syncOptions.setInstallMode(ON_NEXT_RESTART);
-        }
-        if (syncOptions.getMandatoryInstallMode() == null) {
-            syncOptions.setMandatoryInstallMode(IMMEDIATE);
-        }
-
-        /* minimumBackgroundDuration, ignoreFailedUpdates are primitives and always have default value */
-        if (syncOptions.getCheckFrequency() == null) {
-            syncOptions.setCheckFrequency(ON_APP_START);
-        }
-        final CodePushConfiguration configuration = getNativeConfiguration();
-        if (syncOptions.getDeploymentKey() != null) {
-            configuration.setDeploymentKey(syncOptions.getDeploymentKey());
-        }
-        mState.mSyncInProgress = true;
-        notifyApplicationReady();
-        notifyAboutSyncStatusChange(CHECKING_FOR_UPDATE);
-        final CodePushRemotePackage remotePackage = checkForUpdate(syncOptions.getDeploymentKey());
-        final boolean updateShouldBeIgnored =
-                remotePackage != null && (remotePackage.isFailedInstall() && syncOptions.getIgnoreFailedUpdates());
-        if (remotePackage == null || updateShouldBeIgnored) {
-            if (updateShouldBeIgnored) {
-                AppCenterLog.info(CodePush.LOG_TAG, "An update is available, but it is being ignored due to having been previously rolled back.");
-            }
-            CodePushLocalPackage currentPackage = getCurrentPackage();
-            if (currentPackage != null && currentPackage.isPending()) {
-                notifyAboutSyncStatusChange(UPDATE_INSTALLED);
-            } else {
-                notifyAboutSyncStatusChange(UP_TO_DATE);
-            }
-        } else if (syncOptions.getUpdateDialog() != null) {
-            CodePushUpdateDialog updateDialogOptions = syncOptions.getUpdateDialog();
-            String message;
-            String acceptButtonText;
-            String declineButtonText = updateDialogOptions.getOptionalIgnoreButtonLabel();
-            if (remotePackage.isMandatory()) {
-                message = updateDialogOptions.getMandatoryUpdateMessage();
-                acceptButtonText = updateDialogOptions.getMandatoryContinueButtonLabel();
-            } else {
-                message = updateDialogOptions.getOptionalUpdateMessage();
-                acceptButtonText = updateDialogOptions.getOptionalInstallButtonLabel();
-            }
-            if (updateDialogOptions.getAppendReleaseDescription() && !isEmpty(remotePackage.getDescription())) {
-                message = updateDialogOptions.getDescriptionPrefix() + " " + remotePackage.getDescription();
-            }
-
-            /* Ask user whether he want to install update or ignore it. */
-            notifyAboutSyncStatusChange(AWAITING_USER_ACTION);
-            mConfirmationDialog.shouldInstallUpdate(updateDialogOptions.getTitle(), message, acceptButtonText, declineButtonText, new CodePushConfirmationCallback() {
-                @Override public void onResult(boolean userAcceptsProposal) {
-                    if (userAcceptsProposal) {
-                        try {
-                            doDownloadAndInstall(remotePackage, syncOptions, configuration);
-                            mState.mSyncInProgress = false;
-                        } catch (Exception e) {
-                            notifyAboutSyncStatusChange(UNKNOWN_ERROR);
-                            mState.mSyncInProgress = false;
-                            CodePushLogUtils.trackException(new CodePushNativeApiCallException(e));
-                        }
-                    } else {
-                        notifyAboutSyncStatusChange(UPDATE_IGNORED);
-                        mState.mSyncInProgress = false;
-                    }
-                }
-
-                @Override public void throwError(CodePushGeneralException e) {
-                    notifyAboutSyncStatusChange(UNKNOWN_ERROR);
-                    mState.mSyncInProgress = false;
-                    CodePushLogUtils.trackException(new CodePushNativeApiCallException(e));
-                }
-            });
-        } else {
-            try {
-                doDownloadAndInstall(remotePackage, syncOptions, configuration);
-            } catch (Exception e) {
-                notifyAboutSyncStatusChange(UNKNOWN_ERROR);
-                mState.mSyncInProgress = false;
-                throw new CodePushNativeApiCallException(e);
-            }
-        }
-        mState.mSyncInProgress = false;
     }
 
     /**
@@ -801,21 +789,6 @@ public abstract class CodePushBaseCore implements CodePushAPI {
              * subsequent resume-based installs could override it. */
             mState.mMinimumBackgroundDuration = minimumBackgroundDuration;
             handleInstallModesForUpdateInstall(installMode);
-        }
-    }
-
-    /**
-     * Notifies the CodePush runtime that a freshly installed update should be considered successful,
-     * and therefore, an automatic client-side rollback isn't necessary.
-     *
-     * @throws CodePushNativeApiCallException if error occurred during the execution of operation.
-     */
-    @SuppressWarnings("WeakerAccess")
-    public void notifyApplicationReady() throws CodePushNativeApiCallException {
-        mManagers.mSettingsManager.removePendingUpdate();
-        final CodePushDeploymentStatusReport statusReport = getNewStatusReport();
-        if (statusReport != null) {
-            tryReportStatus(statusReport);
         }
     }
 
@@ -997,36 +970,6 @@ public abstract class CodePushBaseCore implements CodePushAPI {
             mManagers.mSettingsManager.saveFailedUpdate(updatePackage);
             throw new CodePushNativeApiCallException(e);
         }
-    }
-
-    @Override
-    public CodePushAcquisitionManager getAcquisitionSdk() {
-        return mManagers.mAcquisitionManager;
-    }
-
-    @Override
-    public void log(String message) {
-        AppCenterLog.info(LOG_TAG, message);
-    }
-
-    @Override
-    public void restartApp() {
-        mManagers.mRestartManager.restartApp(true);
-    }
-
-    @Override
-    public void restartApp(boolean onlyIfUpdateIsPending) {
-        mManagers.mRestartManager.restartApp(onlyIfUpdateIsPending);
-    }
-
-    @Override
-    public void disallowRestart() {
-        mManagers.mRestartManager.disallowRestarts();
-    }
-
-    @Override
-    public void allowRestart() {
-        mManagers.mRestartManager.allowRestarts();
     }
 
     /**
