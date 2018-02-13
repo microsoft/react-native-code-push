@@ -1,8 +1,7 @@
 package com.microsoft.codepush.common.datacontracts;
 
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.appcenter.utils.AppCenterLog;
-import com.microsoft.codepush.common.CodePush;
+import com.microsoft.codepush.common.exceptions.CodePushIllegalArgumentException;
 
 /**
  * A request class for querying for updates.
@@ -54,7 +53,7 @@ public class CodePushUpdateRequest {
      * @return instance of the {@link CodePushUpdateRequest}.
      */
     public static CodePushUpdateRequest createUpdateRequest(final String deploymentKey,
-                                                            final CodePushLocalPackage codePushPackage, final String clientUniqueId) {
+                                                            final CodePushLocalPackage codePushPackage, final String clientUniqueId) throws CodePushIllegalArgumentException {
         CodePushUpdateRequest codePushUpdateRequest = new CodePushUpdateRequest();
         codePushUpdateRequest.setAppVersion(codePushPackage.getAppVersion());
         codePushUpdateRequest.setDeploymentKey(deploymentKey);
@@ -78,11 +77,11 @@ public class CodePushUpdateRequest {
      *
      * @param deploymentKey the deployment key you want to query for an update against.
      */
-    public void setDeploymentKey(String deploymentKey) {
+    public void setDeploymentKey(String deploymentKey) throws CodePushIllegalArgumentException {
         if (deploymentKey != null) {
             this.deploymentKey = deploymentKey;
         } else {
-            AppCenterLog.error(CodePush.LOG_TAG, "\"deploymentKey\" property cannot be null.");
+            throw new CodePushIllegalArgumentException(this.getClass().getName(), "deploymentKey");
         }
     }
 
@@ -100,11 +99,11 @@ public class CodePushUpdateRequest {
      *
      * @param appVersion the current app version.
      */
-    public void setAppVersion(String appVersion) {
+    public void setAppVersion(String appVersion) throws CodePushIllegalArgumentException {
         if (appVersion != null) {
             this.appVersion = appVersion;
         } else {
-            AppCenterLog.error(CodePush.LOG_TAG, "\"appVersion\" property cannot be null.");
+            throw new CodePushIllegalArgumentException(this.getClass().getName(), "appVersion");
         }
     }
 

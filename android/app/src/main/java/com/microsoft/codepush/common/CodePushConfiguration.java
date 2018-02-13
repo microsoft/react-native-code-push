@@ -1,6 +1,6 @@
 package com.microsoft.codepush.common;
 
-import com.microsoft.appcenter.utils.AppCenterLog;
+import com.microsoft.codepush.common.exceptions.CodePushIllegalArgumentException;
 
 /**
  * Provides info regarding current app state and settings.
@@ -84,11 +84,11 @@ public final class CodePushConfiguration {
      * @param appVersion the appVersion value to set.
      * @return this instance.
      */
-    public CodePushConfiguration setAppVersion(final String appVersion) {
+    public CodePushConfiguration setAppVersion(final String appVersion) throws CodePushIllegalArgumentException {
         if (appVersion != null) {
             this.appVersion = appVersion;
         } else {
-            AppCenterLog.error(CodePush.LOG_TAG, "\"appVersion\" property cannot be null.");
+            throw new CodePushIllegalArgumentException(this.getClass().getName(), "appVersion");
         }
         return this;
     }
@@ -99,11 +99,11 @@ public final class CodePushConfiguration {
      * @param clientUniqueId the clientUniqueId value to set.
      * @return this instance.
      */
-    public CodePushConfiguration setClientUniqueId(final String clientUniqueId) {
+    public CodePushConfiguration setClientUniqueId(final String clientUniqueId) throws CodePushIllegalArgumentException {
         if (clientUniqueId != null) {
             this.clientUniqueId = clientUniqueId;
         } else {
-            AppCenterLog.error(CodePush.LOG_TAG, "\"clientUniqueId\" property cannot be null.");
+            throw new CodePushIllegalArgumentException(this.getClass().getName(), "clientUniqueId");
         }
         return this;
     }
@@ -114,11 +114,11 @@ public final class CodePushConfiguration {
      * @param deploymentKey the deploymentKey value to set.
      * @return this instance.
      */
-    public CodePushConfiguration setDeploymentKey(final String deploymentKey) {
+    public CodePushConfiguration setDeploymentKey(final String deploymentKey) throws CodePushIllegalArgumentException {
         if (deploymentKey != null) {
             this.deploymentKey = deploymentKey;
         } else {
-            AppCenterLog.error(CodePush.LOG_TAG, "\"deploymentKey\" property cannot be null.");
+            throw new CodePushIllegalArgumentException(this.getClass().getName(), "deploymentKey");
         }
         return this;
     }
@@ -129,11 +129,11 @@ public final class CodePushConfiguration {
      * @param serverUrl the serverUrl value to set.
      * @return this instance.
      */
-    public CodePushConfiguration setServerUrl(final String serverUrl) {
+    public CodePushConfiguration setServerUrl(final String serverUrl) throws CodePushIllegalArgumentException {
         if (serverUrl != null) {
             this.serverUrl = serverUrl;
         } else {
-            AppCenterLog.error(CodePush.LOG_TAG, "\"serverUrl\" property cannot be null.");
+            throw new CodePushIllegalArgumentException(this.getClass().getName(), "serverUrl");
         }
         return this;
     }

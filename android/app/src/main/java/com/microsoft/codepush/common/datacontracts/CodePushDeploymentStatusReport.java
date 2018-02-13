@@ -1,9 +1,8 @@
 package com.microsoft.codepush.common.datacontracts;
 
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.appcenter.utils.AppCenterLog;
-import com.microsoft.codepush.common.CodePush;
 import com.microsoft.codepush.common.enums.CodePushDeploymentStatus;
+import com.microsoft.codepush.common.exceptions.CodePushIllegalArgumentException;
 
 /**
  * Represents a report about the deployment.
@@ -54,11 +53,11 @@ public class CodePushDeploymentStatusReport extends CodePushDownloadStatusReport
      *
      * @param appVersion the version of the app that was deployed.
      */
-    public void setAppVersion(String appVersion) {
+    public void setAppVersion(String appVersion) throws CodePushIllegalArgumentException {
         if (appVersion != null) {
             this.appVersion = appVersion;
         } else {
-            AppCenterLog.error(CodePush.LOG_TAG, "\"appVersion\" property cannot be null.");
+            throw new CodePushIllegalArgumentException(this.getClass().getName(), "appVersion");
         }
     }
 
@@ -76,11 +75,11 @@ public class CodePushDeploymentStatusReport extends CodePushDownloadStatusReport
      *
      * @param previousDeploymentKey deployment key used when deploying the previous package.
      */
-    public void setPreviousDeploymentKey(String previousDeploymentKey) {
+    public void setPreviousDeploymentKey(String previousDeploymentKey) throws CodePushIllegalArgumentException {
         if (previousDeploymentKey != null) {
             this.previousDeploymentKey = previousDeploymentKey;
         } else {
-            AppCenterLog.error(CodePush.LOG_TAG, "\"previousDeploymentKey\" property cannot be null.");
+            throw new CodePushIllegalArgumentException(this.getClass().getName(), "previousDeploymentKey");
         }
     }
 

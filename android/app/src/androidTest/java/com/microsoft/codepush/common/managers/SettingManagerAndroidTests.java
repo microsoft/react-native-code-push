@@ -9,6 +9,7 @@ import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPendingUpdate;
 import com.microsoft.codepush.common.enums.CodePushDeploymentStatus;
+import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
 import com.microsoft.codepush.common.testutils.CommonSettingsCompatibilityUtils;
 import com.microsoft.codepush.common.utils.CodePushUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
@@ -89,14 +90,13 @@ public class SettingManagerAndroidTests {
     }
 
     /**
-     * {@link SettingsManager#getPendingUpdate()} should return <code>null</code>
+     * {@link SettingsManager#getPendingUpdate()} should throw a {@link CodePushMalformedDataException}
      * if a {@link JsonSyntaxException} is thrown during parsing pending info.
      */
-    @Test
+    @Test(expected = CodePushMalformedDataException.class)
     public void pendingUpdateParseError() throws Exception {
         CommonSettingsCompatibilityUtils.saveStringToPending("abc", InstrumentationRegistry.getContext());
-        CodePushPendingUpdate codePushPendingUpdate = mSettingsManager.getPendingUpdate();
-        assertNull(codePushPendingUpdate);
+        mSettingsManager.getPendingUpdate();
     }
 
     /**
@@ -172,14 +172,13 @@ public class SettingManagerAndroidTests {
     }
 
     /**
-     * {@link SettingsManager#getFailedUpdates()} should return empty array
+     * {@link SettingsManager#getFailedUpdates()} should throw a {@link CodePushMalformedDataException}
      * if a {@link JsonSyntaxException} is thrown during parsing failed updates info.
      */
-    @Test
+    @Test(expected = CodePushMalformedDataException.class)
     public void failedUpdateParseError() throws Exception {
         CommonSettingsCompatibilityUtils.saveStringToFailed("abc", InstrumentationRegistry.getContext());
-        List<CodePushLocalPackage> codePushLocalPackages = mSettingsManager.getFailedUpdates();
-        assertEquals(0, codePushLocalPackages.size());
+        mSettingsManager.getFailedUpdates();
     }
 
     /**
