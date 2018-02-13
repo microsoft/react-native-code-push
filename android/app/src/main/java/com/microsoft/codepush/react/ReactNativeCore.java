@@ -1,8 +1,10 @@
 package com.microsoft.codepush.react;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.view.View;
 
 import com.facebook.react.ReactApplication;
@@ -12,15 +14,21 @@ import com.facebook.react.bridge.JSBundleLoader;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.uimanager.ReactChoreographer;
+import com.facebook.react.modules.core.ChoreographerCompat;
+import com.facebook.react.modules.core.ReactChoreographer;
 import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.CodePushBaseCore;
 import com.microsoft.codepush.common.DownloadProgress;
 import com.microsoft.codepush.common.enums.CodePushInstallMode;
+import com.microsoft.codepush.common.exceptions.CodePushInitializeException;
+import com.microsoft.codepush.common.interfaces.AppEntryPointProvider;
+import com.microsoft.codepush.common.interfaces.CodePushConfirmationDialog;
+import com.microsoft.codepush.common.interfaces.CodePushRestartListener;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
+import com.microsoft.codepush.common.interfaces.PublicKeyProvider;
+import com.microsoft.codepush.common.utils.PlatformUtils;
 import com.microsoft.codepush.react.interfaces.ReactInstanceHolder;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Date;
@@ -47,11 +55,6 @@ public class ReactNativeCore extends CodePushBaseCore {
     private static CodePushDialog sDialogModule;
 
     /**
-     * Instance of the {@link ReactNativeCore}.
-     */
-    private static ReactNativeCore INSTANCE;
-
-    /**
      * Instance of the {@link ReactApplicationContext}.
      */
     private static ReactApplicationContext sReactApplicationContext;
@@ -65,6 +68,20 @@ public class ReactNativeCore extends CodePushBaseCore {
      * Listener for lifecycle events for report.
      */
     private LifecycleEventListener mLifecycleEventListenerForReport = null;
+
+    ReactNativeCore(
+            @NonNull String deploymentKey,
+            @NonNull Context context,
+            boolean isDebugMode,
+            String serverUrl,
+            PublicKeyProvider publicKeyProvider,
+            AppEntryPointProvider appEntryPointProvider,
+            PlatformUtils platformUtils,
+            CodePushRestartListener restartListener,
+            CodePushConfirmationDialog confirmationDialog
+    ) throws CodePushInitializeException {
+        super(deploymentKey, context, isDebugMode, serverUrl, publicKeyProvider, appEntryPointProvider, platformUtils, restartListener, confirmationDialog);
+    }
 
     /**
      * Sets instance holder.
@@ -178,7 +195,7 @@ public class ReactNativeCore extends CodePushBaseCore {
             if (latestJSBundleFile.toLowerCase().startsWith("assets://")) {
                 latestJSBundleLoader = JSBundleLoader.createAssetLoader(sReactApplicationContext, latestJSBundleFile, false);
             } else {
-                latestJSBundleLoader = JSBundleLoader.createFileLoader(mContext, latestJSBundleFile);
+                latestJSBundleLoader = JSBundleLoader.createFileLoader(latestJSBundleFile);
             }
             Field bundleLoaderField = instanceManager.getClass().getDeclaredField("mBundleLoader");
             bundleLoaderField.setAccessible(true);
@@ -187,20 +204,6 @@ public class ReactNativeCore extends CodePushBaseCore {
 
             //TODO: track exception "Unable to set JSBundle - CodePush may not support this version of React Native"
             throw new IllegalAccessException("Could not set JSBundle");
-        }
-    }
-
-    /**
-     * Clears debug cache if in debug mode.
-     */
-    public void clearDebugCacheIfNeeded() {
-        if (mIsDebugMode && mSettingsManager.isPendingUpdate(null)) {
-
-            /* This needs to be kept in sync with https://github.com/facebook/react-native/blob/master/ReactAndroid/src/main/java/com/facebook/react/devsupport/DevSupportManager.java#L78. */
-            File cachedDevBundle = new File(mContext.getFilesDir(), "ReactNativeDevBundle.js");
-            if (cachedDevBundle.exists()) {
-                cachedDevBundle.delete();
-            }
         }
     }
 
@@ -262,7 +265,11 @@ public class ReactNativeCore extends CodePushBaseCore {
 
                 @Override
                 public void onHostResume() {
-                    sender.call();
+                    try {
+                        sender.call();
+                    } catch (Exception e) {
+                        //TODO: track exception.
+                    }
                 }
 
                 @Override
@@ -291,6 +298,7 @@ public class ReactNativeCore extends CodePushBaseCore {
         return new DownloadProgressCallback() {
             private boolean hasScheduledNextFrame = false;
             private DownloadProgress latestDownloadProgress = null;
+
             @Override
             public void call(final DownloadProgress downloadProgress) {
                 latestDownloadProgress = downloadProgress;
