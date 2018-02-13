@@ -1,6 +1,8 @@
 package com.microsoft.codepush.react;
 
 import android.app.Activity;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 
 import com.facebook.react.ReactApplication;
@@ -10,13 +12,22 @@ import com.facebook.react.bridge.JSBundleLoader;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.uimanager.ReactChoreographer;
+import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.CodePushBaseCore;
+import com.microsoft.codepush.common.DownloadProgress;
+import com.microsoft.codepush.common.enums.CodePushInstallMode;
+import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
 import com.microsoft.codepush.react.interfaces.ReactInstanceHolder;
 
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Callable;
+
+import static com.microsoft.codepush.common.CodePush.LOG_TAG;
 
 public class ReactNativeCore extends CodePushBaseCore {
 
@@ -191,5 +202,129 @@ public class ReactNativeCore extends CodePushBaseCore {
                 cachedDevBundle.delete();
             }
         }
+    }
+
+    @Override
+    public void handleInstallModesForUpdateInstall(final CodePushInstallMode installMode) {
+        if (mLifecycleEventListener == null) {
+
+            /* Ensure we do not add the listener twice. */
+            mLifecycleEventListener = new LifecycleEventListener() {
+                private Date lastPausedDate = null;
+                private Handler appSuspendHandler = new Handler(Looper.getMainLooper());
+                private Runnable loadBundleRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        AppCenterLog.info(LOG_TAG, "Loading bundle on suspend");
+                        mRestartManager.restartApp(false);
+                    }
+                };
+
+                @Override
+                public void onHostResume() {
+                    appSuspendHandler.removeCallbacks(loadBundleRunnable);
+
+                    /* As of RN 36, the resume handler fires immediately if the app is in the foreground, so explicitly wait for it to be backgrounded first. */
+                    if (lastPausedDate != null) {
+                        long durationInBackground = (new Date().getTime() - lastPausedDate.getTime()) / 1000;
+                        if (installMode == CodePushInstallMode.IMMEDIATE
+                                || durationInBackground >= mState.mMinimumBackgroundDuration) {
+                            AppCenterLog.info(LOG_TAG, "Loading bundle on resume");
+                            mRestartManager.restartApp(false);
+                        }
+                    }
+                }
+
+                @Override
+                public void onHostPause() {
+
+                    /* Save the current time so that when the app is later resumed, we can detect how long it was in the background. */
+                    lastPausedDate = new Date();
+                    if (installMode == CodePushInstallMode.ON_NEXT_SUSPEND && mSettingsManager.isPendingUpdate(null)) {
+                        appSuspendHandler.postDelayed(loadBundleRunnable, mState.mMinimumBackgroundDuration * 1000);
+                    }
+                }
+
+                @Override
+                public void onHostDestroy() {
+                }
+            };
+            if (sReactApplicationContext != null) {
+                sReactApplicationContext.addLifecycleEventListener(mLifecycleEventListener);
+            }
+        }
+    }
+
+    @Override
+    protected void retrySendStatusReportOnAppResume(final Callable<Void> sender) throws Exception {
+        if (mLifecycleEventListenerForReport == null) {
+            mLifecycleEventListenerForReport = new LifecycleEventListener() {
+
+                @Override
+                public void onHostResume() {
+                    sender.call();
+                }
+
+                @Override
+                public void onHostPause() {
+
+                }
+
+                @Override
+                public void onHostDestroy() {
+
+                }
+            };
+            sReactApplicationContext.addLifecycleEventListener(mLifecycleEventListenerForReport);
+        }
+    }
+
+    @Override
+    protected void clearScheduledAttemptsToRetrySendStatusReport() {
+        if (mLifecycleEventListenerForReport != null) {
+            clearLifecycleEventListenerForReport();
+        }
+    }
+
+    @Override
+    protected DownloadProgressCallback getDownloadProgressCallbackForUpdateDownload() {
+        return new DownloadProgressCallback() {
+            private boolean hasScheduledNextFrame = false;
+            private DownloadProgress latestDownloadProgress = null;
+            @Override
+            public void call(final DownloadProgress downloadProgress) {
+                latestDownloadProgress = downloadProgress;
+
+                /* If the download is completed, synchronously send the last event. */
+                if (latestDownloadProgress.isCompleted()) {
+                    notifyAboutDownloadProgressChange(downloadProgress.getReceivedBytes(), downloadProgress.getTotalBytes());
+                    return;
+                }
+                if (hasScheduledNextFrame) {
+                    return;
+                }
+                hasScheduledNextFrame = true;
+
+                /* if ReactNative app wasn't been initialized, no need to send download progress to it. */
+                if (sReactApplicationContext != null) {
+                    sReactApplicationContext.runOnUiQueueThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ReactChoreographer.getInstance().postFrameCallback(ReactChoreographer.CallbackType.TIMERS_EVENTS, new ChoreographerCompat.FrameCallback() {
+                                @Override
+                                public void doFrame(long frameTimeNanos) {
+                                    if (!latestDownloadProgress.isCompleted()) {
+                                        notifyAboutDownloadProgressChange(downloadProgress.getReceivedBytes(), downloadProgress.getTotalBytes());
+                                    }
+                                    hasScheduledNextFrame = false;
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    notifyAboutDownloadProgressChange(downloadProgress.getReceivedBytes(), downloadProgress.getTotalBytes());
+                }
+            }
+        };
     }
 }
