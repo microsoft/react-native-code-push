@@ -2,8 +2,8 @@ package com.microsoft.codepush.common.utils;
 
 import android.content.Context;
 
+import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.exceptions.CodePushGeneralException;
-import com.microsoft.codepush.react.datacontracts.CodePushLocalPackage;
 
 import java.io.IOException;
 
