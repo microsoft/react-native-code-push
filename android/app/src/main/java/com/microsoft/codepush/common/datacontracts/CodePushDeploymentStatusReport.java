@@ -34,10 +34,8 @@ public class CodePushDeploymentStatusReport extends CodePushDownloadStatusReport
     @SerializedName("status")
     private CodePushDeploymentStatus status;
 
-    /**
-     * Non-serializable field, temporarily stores information about installed/failed package.
-     */
-    private transient CodePushLocalPackage localPackage;
+    @SerializedName("package")
+    private transient CodePushPackage aPackage;
 
     /**
      * Gets the version of the app that was deployed and returns it.
@@ -124,16 +122,16 @@ public class CodePushDeploymentStatusReport extends CodePushDownloadStatusReport
      *
      * @return local installed package.
      */
-    public CodePushLocalPackage getLocalPackage() {
-        return localPackage;
+    public CodePushPackage getPackage() {
+        return aPackage;
     }
 
     /**
      * Gets local installed/failed package, (will not be serialized).
      *
-     * @param localPackage local installed/failed package, (will not be serialized).
+     * @param aPackage local installed/failed package, (will not be serialized).
      */
-    public void setLocalPackage(CodePushLocalPackage localPackage) {
-        this.localPackage = localPackage;
+    public void setPackage(CodePushPackage aPackage) {
+        this.aPackage = aPackage;
     }
 }

@@ -1,6 +1,6 @@
 package com.microsoft.codepush.common.interfaces;
 
-import com.microsoft.codepush.common.exceptions.CodePushGeneralException;
+import com.microsoft.codepush.common.exceptions.CodePushPlatformUtilsException;
 
 /**
  * Represents interface for update install confirmation dialog.
@@ -15,7 +15,7 @@ public interface CodePushConfirmationDialog {
      * @param acceptText  text for accept button.
      * @param declineText text for decline button.
      * @return true if user accepts proposal, false otherwise.
-     * @throws CodePushGeneralException if error occured during the asking.
+     * @throws CodePushPlatformUtilsException if error occured during the asking.
      */
-    boolean shouldInstallUpdate(String title, String message, String acceptText, String declineText) throws CodePushGeneralException;
+    boolean shouldInstallUpdate(String title, String message, String acceptText, String declineText) throws CodePushPlatformUtilsException;
 }

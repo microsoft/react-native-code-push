@@ -418,6 +418,8 @@ public class CodePushUpdateManager {
     /**
      * Merges contents with the current update based on the manifest.
      *
+     * @param newUpdateFolderPath        directory for new update.
+     * @param newUpdateMetadataPath      path to update metadata file for new update.
      * @param newUpdateHash              hash of the new update package.
      * @param stringPublicKey            public key used to verify signature.
      *                                   Can be <code>null</code> if code signing is not enabled.
@@ -425,9 +427,7 @@ public class CodePushUpdateManager {
      * @return actual new app entry point.
      * @throws CodePushMergeException an exception occurred during merging.
      */
-    public String mergeDiff(String newUpdateHash, String stringPublicKey, String expectedEntryPointFileName) throws CodePushMergeException {
-        String newUpdateFolderPath = getPackageFolderPath(newUpdateHash);
-        String newUpdateMetadataPath = mFileUtils.appendPathComponent(newUpdateFolderPath, CodePushConstants.PACKAGE_FILE_NAME);
+    public String mergeDiff(String newUpdateFolderPath, String newUpdateMetadataPath, String newUpdateHash, String stringPublicKey, String expectedEntryPointFileName) throws CodePushMergeException {
         String unzippedFolderPath = getUnzippedFolderPath();
         String diffManifestFilePath = mFileUtils.appendPathComponent(unzippedFolderPath, CodePushConstants.DIFF_MANIFEST_FILE_NAME);
 

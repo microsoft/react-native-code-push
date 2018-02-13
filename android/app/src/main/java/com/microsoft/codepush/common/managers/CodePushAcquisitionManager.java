@@ -128,8 +128,8 @@ public class CodePushAcquisitionManager {
         /* TODO: Consider moving the following logic to some other place or removing it at all if useless. */
         deploymentStatusReport.setClientUniqueId(clientUniqueId);
         deploymentStatusReport.setDeploymentKey(deploymentKey);
-        deploymentStatusReport.setAppVersion(deploymentStatusReport.getLocalPackage() != null ? deploymentStatusReport.getLocalPackage().getAppVersion() : appVersion);
-        deploymentStatusReport.setAppVersion(deploymentStatusReport.getLocalPackage() != null ? deploymentStatusReport.getLocalPackage().getLabel() : null);
+        deploymentStatusReport.setAppVersion(deploymentStatusReport.getPackage() != null ? deploymentStatusReport.getPackage().getAppVersion() : appVersion);
+        deploymentStatusReport.setAppVersion(deploymentStatusReport.getPackage() != null ? deploymentStatusReport.getPackage().getLabel() : null);
         final String requestUrl = serverUrl + REPORT_DEPLOYMENT_STATUS_ENDPOINT;
         switch (deploymentStatusReport.getStatus()) {
             case SUCCEEDED:
@@ -143,7 +143,7 @@ public class CodePushAcquisitionManager {
                 }
             }
         }
-        deploymentStatusReport.setLocalPackage(deploymentStatusReport.getLocalPackage());
+        deploymentStatusReport.setPackage(deploymentStatusReport.getPackage());
         final String deploymentStatusReportJsonString = mCodePushUtils.convertObjectToJsonString(deploymentStatusReport);
         ReportStatusTask reportStatusDeployTask = new ReportStatusTask(mFileUtils, requestUrl, deploymentStatusReportJsonString, DEPLOY);
         ApiHttpRequest<CodePushReportStatusResult> reportStatusDeployRequest = new ApiHttpRequest<>(reportStatusDeployTask);

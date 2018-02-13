@@ -1,10 +1,9 @@
 package com.microsoft.codepush.common.utils;
 
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
-import com.microsoft.codepush.common.exceptions.CodePushGeneralException;
+import com.microsoft.codepush.common.exceptions.CodePushPlatformUtilsException;
 
 import java.io.IOException;
-import java.util.concurrent.Callable;
 
 /**
  * Interface describing the methods that should be implemented in platform-specific instances of utils.
@@ -21,9 +20,9 @@ public interface PlatformUtils {
      */
     String getUpdateFolderPath(String hash);
 
-    boolean isPackageLatest(CodePushLocalPackage packageMetadata, String currentAppVersion) throws CodePushGeneralException;
+    boolean isPackageLatest(CodePushLocalPackage packageMetadata, String currentAppVersion) throws CodePushPlatformUtilsException;
 
-    long getBinaryResourcesModifiedTime() throws NumberFormatException;
+    long getBinaryResourcesModifiedTime() throws CodePushPlatformUtilsException;
 
     void clearDebugCache() throws IOException;
 }
