@@ -37,7 +37,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A wrapper around {@link CodePushBaseCore} specific for React.
+ * A wrapper around {@link CodePushBaseCore} for interaction with js code.
  */
 @SuppressWarnings("unused")
 public class CodePushNativeModule extends ReactContextBaseJavaModule implements CodePushDownloadProgressListener, CodePushSyncStatusListener, CodePushBinaryVersionMismatchListener {
