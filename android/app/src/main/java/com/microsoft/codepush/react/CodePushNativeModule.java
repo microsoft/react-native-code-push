@@ -19,7 +19,9 @@ import com.microsoft.codepush.common.datacontracts.CodePushSyncOptions;
 import com.microsoft.codepush.common.enums.CodePushInstallMode;
 import com.microsoft.codepush.common.enums.CodePushSyncStatus;
 import com.microsoft.codepush.common.enums.CodePushUpdateState;
+import com.microsoft.codepush.common.exceptions.CodePushGetUpdateMetadataException;
 import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
+import com.microsoft.codepush.common.exceptions.CodePushNativeApiCallException;
 import com.microsoft.codepush.common.interfaces.CodePushBinaryVersionMismatchListener;
 import com.microsoft.codepush.common.interfaces.CodePushDownloadProgressListener;
 import com.microsoft.codepush.common.interfaces.CodePushSyncStatusListener;
@@ -165,7 +167,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
             } else {
                 promise.resolve("");
             }
-        } catch (JSONException | CodePushMalformedDataException e) {
+        } catch (JSONException | CodePushMalformedDataException | CodePushNativeApiCallException e) {
             promise.reject(e);
         }
     }
@@ -254,7 +256,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
             } else {
                 promise.resolve("");
             }
-        } catch (CodePushMalformedDataException e) {
+        } catch (CodePushMalformedDataException | CodePushGetUpdateMetadataException e) {
             promise.reject(e);
         }
     }
@@ -267,7 +269,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
      */
     @ReactMethod
     public void getNewStatusReport(Promise promise) {
-        //TODO: Make sure CodePushDeploymentStatusReport is treated correctly in js.
+        //TODO: Make sure CodePushDeploymentStatusReport is treated correctly in js. +
         try {
             CodePushDeploymentStatusReport statusReport = mCodePushCore.getNewStatusReport();
             if (statusReport != null) {
@@ -383,7 +385,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
      */
     @ReactMethod
     public void recordStatusReported(ReadableMap statusReport) {
-        //TODO: Check that sent object is convertible to CodePushDeploymentStatusReport.
+        //TODO: Check that sent object is convertible to CodePushDeploymentStatusReport.+
         try {
             mCodePushCore.recordStatusReported(mCodePushReactNativeUtils.convertReadableToObject(statusReport, CodePushDeploymentStatusReport.class));
         } catch (CodePushMalformedDataException e) {
@@ -393,7 +395,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
 
     @ReactMethod
     public void saveStatusReportForRetry(ReadableMap statusReport) {
-        //TODO: Check that statusReport ReadableMap matches with the CodePUshDeploymentStatusReport.
+        //TODO: Check that statusReport ReadableMap matches with the CodePUshDeploymentStatusReport.+
         try {
             mCodePushCore.saveStatusReportForRetry(mCodePushReactNativeUtils.convertReadableToObject(statusReport, CodePushDeploymentStatusReport.class));
         } catch (CodePushMalformedDataException e) {

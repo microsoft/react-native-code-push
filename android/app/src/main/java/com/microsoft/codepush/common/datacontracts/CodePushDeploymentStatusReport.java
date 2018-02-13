@@ -35,8 +35,9 @@ public class CodePushDeploymentStatusReport extends CodePushDownloadStatusReport
     private CodePushDeploymentStatus status;
 
     /**
-     * Non-serializable field, temporarily stores information about installed/failed package.
+     * Temporarily stores information about installed/failed package.
      */
+    @SerializedName("package")
     private transient CodePushLocalPackage localPackage;
 
     /**
