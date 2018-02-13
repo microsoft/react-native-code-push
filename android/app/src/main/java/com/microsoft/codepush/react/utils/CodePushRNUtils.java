@@ -1,254 +1,224 @@
 package com.microsoft.codepush.react.utils;
 
+import android.util.Log;
+
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.NoSuchKeyException;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.ReadableMapKeySetIterator;
 import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.bridge.WritableNativeMap;
-import com.microsoft.codepush.common.DownloadProgress;
-import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
-import com.microsoft.codepush.common.utils.CodePushUtils;
+
+import com.microsoft.codepush.react.CodePushConstants;
+import com.microsoft.codepush.react.exceptions.CodePushMalformedDataException;
+import com.microsoft.codepush.react.exceptions.CodePushUnknownException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.Iterator;
 
-public class CodePushRNUtils {
+public class CodePushRNUtils extends CodePushUtils {
 
-    /**
-     * Instance of the {@link CodePushUtils} to work with.
-     */
-    private CodePushUtils mCodePushUtils;
-
-    /**
-     * Sigleton instance of the {@link CodePushRNUtils}.
-     */
-    private static CodePushRNUtils INSTANCE;
-
-    /**
-     * Private constructor to prevent creating utils manually.
-     */
-    private CodePushRNUtils() {
+    public static void log(String message) {
+        Log.d(CodePushConstants.REACT_NATIVE_LOG_TAG, "[CodePush] " + message);
     }
 
-    /**
-     * Provides instance of the utils class.
-     *
-     * @return instance.
-     */
-    public static CodePushRNUtils getInstance(CodePushUtils codePushUtils) {
-        if (INSTANCE == null) {
-            INSTANCE = new CodePushRNUtils();
-        }
-        INSTANCE.mCodePushUtils = codePushUtils;
-        return INSTANCE;
-    }
-
-    /**
-     * Converts a {@link JSONArray} to a {@link WritableArray}.
-     *
-     * @param jsonArray instance of {@link JSONArray}.
-     * @return instance of {@link WritableArray}.
-     * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
-     */
-    private WritableArray convertJsonArrayToWritable(JSONArray jsonArray) throws CodePushMalformedDataException {
-        WritableArray writableArray = Arguments.createArray();
-        try {
-            for (int i = 0; i < jsonArray.length(); i++) {
-                Object object = jsonArray.get(i);
-                if (object instanceof JSONObject)
-                    writableArray.pushMap(convertJsonObjectToWritable((JSONObject) object));
-                else if (object instanceof JSONArray)
-                    writableArray.pushArray(convertJsonArrayToWritable((JSONArray) object));
-                else if (object instanceof String)
-                    writableArray.pushString((String) object);
-                else if (object instanceof Double)
-                    writableArray.pushDouble((Double) object);
-                else if (object instanceof Integer)
-                    writableArray.pushInt((Integer) object);
-                else if (object instanceof Boolean)
-                    writableArray.pushBoolean((Boolean) object);
-                else if (object == null)
-                    writableArray.pushNull();
-            }
-        } catch (JSONException e) {
-            throw new CodePushMalformedDataException("Error when converting json array to writable.", e);
-        }
-        return writableArray;
-    }
-
-    /**
-     * Converts a {@link JSONObject} to a {@link WritableArray}.
-     *
-     * @param jsonObject instance of {@link JSONObject}.
-     * @return instance of {@link WritableMap}.
-     * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
-     */
-    public WritableMap convertJsonObjectToWritable(JSONObject jsonObject) throws CodePushMalformedDataException {
-        WritableMap writableMap = Arguments.createMap();
-        Iterator<String> iterator = jsonObject.keys();
-        while (iterator.hasNext()) {
-            String key = iterator.next();
+    public static WritableArray convertJsonArrayToWritable(JSONArray jsonArr) {
+        WritableArray arr = Arguments.createArray();
+        for (int i=0; i<jsonArr.length(); i++) {
+            Object obj = null;
             try {
-                Object object = jsonObject.get(key);
-                if (object instanceof JSONObject)
-                    writableMap.putMap(key, convertJsonObjectToWritable((JSONObject) object));
-                else if (object instanceof JSONArray)
-                    writableMap.putArray(key, convertJsonArrayToWritable((JSONArray) object));
-                else if (object instanceof String)
-                    writableMap.putString(key, (String) object);
-                else if (object instanceof Double)
-                    writableMap.putDouble(key, (Double) object);
-                else if (object instanceof Integer)
-                    writableMap.putInt(key, (Integer) object);
-                else if (object instanceof Boolean)
-                    writableMap.putBoolean(key, (Boolean) object);
-                else if (object == null)
-                    writableMap.putNull(key);
-            } catch (JSONException e) {
-                throw new CodePushMalformedDataException("Error when converting json object to writable.", e);
+                obj = jsonArr.get(i);
+            } catch (JSONException jsonException) {
+                // Should not happen.
+                throw new CodePushUnknownException(i + " should be within bounds of array " + jsonArr.toString(), jsonException);
             }
+
+            if (obj instanceof JSONObject)
+                arr.pushMap(convertJsonObjectToWritable((JSONObject) obj));
+            else if (obj instanceof JSONArray)
+                arr.pushArray(convertJsonArrayToWritable((JSONArray) obj));
+            else if (obj instanceof String)
+                arr.pushString((String) obj);
+            else if (obj instanceof Double)
+                arr.pushDouble((Double) obj);
+            else if (obj instanceof Integer)
+                arr.pushInt((Integer) obj);
+            else if (obj instanceof Boolean)
+                arr.pushBoolean((Boolean) obj);
+            else if (obj == null)
+                arr.pushNull();
+            else
+                throw new CodePushUnknownException("Unrecognized object: " + obj);
         }
-        return writableMap;
+
+        return arr;
     }
 
-    /**
-     * Converts a {@link ReadableArray} to a {@link JSONArray}.
-     *
-     * @param readableArray instance of {@link ReadableArray}.
-     * @return instance of {@link JSONArray}.
-     * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
-     */
-    private JSONArray convertReadableToJsonArray(ReadableArray readableArray) throws CodePushMalformedDataException {
-        JSONArray jsonArray = new JSONArray();
-        for (int i = 0; i < readableArray.size(); i++) {
-            ReadableType readableType = readableArray.getType(i);
-            switch (readableType) {
+    public static WritableMap convertJsonObjectToWritable(JSONObject jsonObj) {
+        WritableMap map = Arguments.createMap();
+        Iterator<String> it = jsonObj.keys();
+        while(it.hasNext()){
+            String key = it.next();
+            Object obj = null;
+            try {
+                obj = jsonObj.get(key);
+            } catch (JSONException jsonException) {
+                // Should not happen.
+                throw new CodePushUnknownException("Key " + key + " should exist in " + jsonObj.toString() + ".", jsonException);
+            }
+
+            if (obj instanceof JSONObject)
+                map.putMap(key, convertJsonObjectToWritable((JSONObject) obj));
+            else if (obj instanceof JSONArray)
+                map.putArray(key, convertJsonArrayToWritable((JSONArray) obj));
+            else if (obj instanceof String)
+                map.putString(key, (String) obj);
+            else if (obj instanceof Double)
+                map.putDouble(key, (Double) obj);
+            else if (obj instanceof Integer)
+                map.putInt(key, (Integer) obj);
+            else if (obj instanceof Boolean)
+                map.putBoolean(key, (Boolean) obj);
+            else if (obj == null)
+                map.putNull(key);
+            else
+                throw new CodePushUnknownException("Unrecognized object: " + obj);
+        }
+
+        return map;
+    }
+
+    public static JSONArray convertReadableToJsonArray(ReadableArray arr) {
+        JSONArray jsonArr = new JSONArray();
+        for (int i=0; i<arr.size(); i++) {
+            ReadableType type = arr.getType(i);
+            switch (type) {
                 case Map:
-                    jsonArray.put(convertReadableToJsonObject(readableArray.getMap(i)));
+                    jsonArr.put(convertReadableToJsonObject(arr.getMap(i)));
                     break;
                 case Array:
-                    jsonArray.put(convertReadableToJsonArray(readableArray.getArray(i)));
+                    jsonArr.put(convertReadableToJsonArray(arr.getArray(i)));
                     break;
                 case String:
-                    jsonArray.put(readableArray.getString(i));
+                    jsonArr.put(arr.getString(i));
                     break;
                 case Number:
-                    Double number = readableArray.getDouble(i);
+                    Double number = arr.getDouble(i);
                     if ((number == Math.floor(number)) && !Double.isInfinite(number)) {
-
-                        /* This is a whole number. */
-                        jsonArray.put(number.longValue());
+                        // This is a whole number.
+                        jsonArr.put(number.longValue());
                     } else {
                         try {
-                            jsonArray.put(number.doubleValue());
-                        } catch (JSONException e) {
-                            throw new CodePushMalformedDataException("Error when converting readable to json array.", e);
+                            jsonArr.put(number.doubleValue());
+                        } catch (JSONException jsonException) {
+                            throw new CodePushUnknownException("Unable to put value " + arr.getDouble(i) + " in JSONArray");
                         }
                     }
                     break;
                 case Boolean:
-                    jsonArray.put(readableArray.getBoolean(i));
+                    jsonArr.put(arr.getBoolean(i));
                     break;
                 case Null:
-                    jsonArray.put(null);
+                    jsonArr.put(null);
                     break;
             }
         }
-        return jsonArray;
+
+        return jsonArr;
     }
 
-    /**
-     * Converts a {@link ReadableMap} to an object of specified type.
-     *
-     * @param readableMap instance of {@link ReadableMap}.
-     * @param classOfT    class of the desired type.
-     * @param <T>         type of the object to be converted to.
-     * @return instance of {@link T}.
-     * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
-     */
-    public <T> T convertReadableToObject(ReadableMap readableMap, Class<T> classOfT) throws CodePushMalformedDataException {
-        return mCodePushUtils.convertJsonObjectToObject(convertReadableToJsonObject(readableMap), classOfT);
+    public static <T> T convertReadableToObject(ReadableMap map, Class<T> classOfT) {
+        return CodePushUtils.convertJsonObjectToObject(convertReadableToJsonObject(map), classOfT);
     }
 
-    /**
-     * Converts a {@link ReadableMap} to a {@link JSONObject}.
-     *
-     * @param readableMap instance of {@link ReadableMap}.
-     * @return instance of {@link JSONObject}.
-     * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
-     */
-    private JSONObject convertReadableToJsonObject(ReadableMap readableMap) throws CodePushMalformedDataException {
-        JSONObject jsonObject = new JSONObject();
-        ReadableMapKeySetIterator readableMapKeySetIterator = readableMap.keySetIterator();
-        while (readableMapKeySetIterator.hasNextKey()) {
-            String key = readableMapKeySetIterator.nextKey();
-            ReadableType type = readableMap.getType(key);
+    public static JSONObject convertReadableToJsonObject(ReadableMap map) {
+        JSONObject jsonObj = new JSONObject();
+        ReadableMapKeySetIterator it = map.keySetIterator();
+        while (it.hasNextKey()) {
+            String key = it.nextKey();
+            ReadableType type = map.getType(key);
             try {
                 switch (type) {
                     case Map:
-                        jsonObject.put(key, convertReadableToJsonObject(readableMap.getMap(key)));
+                        jsonObj.put(key, convertReadableToJsonObject(map.getMap(key)));
                         break;
                     case Array:
-                        jsonObject.put(key, convertReadableToJsonArray(readableMap.getArray(key)));
+                        jsonObj.put(key, convertReadableToJsonArray(map.getArray(key)));
                         break;
                     case String:
-                        jsonObject.put(key, readableMap.getString(key));
+                        jsonObj.put(key, map.getString(key));
                         break;
                     case Number:
-                        jsonObject.put(key, readableMap.getDouble(key));
+                        jsonObj.put(key, map.getDouble(key));
                         break;
                     case Boolean:
-                        jsonObject.put(key, readableMap.getBoolean(key));
+                        jsonObj.put(key, map.getBoolean(key));
                         break;
                     case Null:
-                        jsonObject.put(key, null);
+                        jsonObj.put(key, null);
                         break;
                     default:
-                        throw new CodePushMalformedDataException("Unrecognized type: " + type + " of key: " + key);
+                        throw new CodePushUnknownException("Unrecognized type: " + type + " of key: " + key);
                 }
             } catch (JSONException jsonException) {
-                throw new CodePushMalformedDataException("Error setting key: " + key + " in JSONObject", jsonException);
+                throw new CodePushUnknownException("Error setting key: " + key + " in JSONObject", jsonException);
             }
         }
-        return jsonObject;
+
+        return jsonObj;
     }
 
-    /**
-     * Converts an object to {@link WritableMap}.
-     *
-     * @param object object of any type.
-     * @return instance of {@link WritableMap}.
-     * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
-     */
-    public WritableMap convertObjectToWritableMap(Object object) throws CodePushMalformedDataException {
+    public static void logBundleUrl(String path) {
+        //TODO use Appcenter.log
+        log("Loading JS bundle from \"" + path + "\"");
+    }
+
+    public static String tryGetString(ReadableMap map, String key) {
         try {
-            return convertJsonObjectToWritable(mCodePushUtils.convertObjectToJsonObject(object));
-        } catch (JSONException e) {
-            throw new CodePushMalformedDataException("Error when converting object to writable map.", e);
+            return map.getString(key);
+        } catch (NoSuchKeyException e) {
+            return null;
         }
     }
 
-    /**
-     * Converts an object of {@link DownloadProgress} type to {@link WritableMap}.
-     *
-     * @param downloadProgress instance of {@link DownloadProgress}.
-     * @return instance of {@link WritableMap}.
-     */
-    public WritableMap convertDownloadProgressToWritableMap(DownloadProgress downloadProgress) {
-        WritableMap map = new WritableNativeMap();
-        if (downloadProgress.getTotalBytes() < Integer.MAX_VALUE) {
-            map.putInt("totalBytes", (int) downloadProgress.getTotalBytes());
-            map.putInt("receivedBytes", (int) downloadProgress.getReceivedBytes());
-        } else {
-            map.putDouble("totalBytes", downloadProgress.getTotalBytes());
-            map.putDouble("receivedBytes", downloadProgress.getReceivedBytes());
+    public static <T> T convertWritableMapToObject(WritableMap writableMap, Class<T> classOfT) {
+        try {
+            JSONObject jsonObject = new JSONObject(writableMap.toString()).optJSONObject("NativeMap");
+            return CodePushUtils.convertJsonObjectToObject(jsonObject, classOfT);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            throw new CodePushMalformedDataException(e.toString(), e);
         }
-        return map;
+    }
+
+    public static WritableMap convertObjectToWritableMap(Object object) {
+        return convertJsonObjectToWritable(CodePushUtils.convertObjectToJsonObject(object));
+    }
+
+    public static String findJSBundleInUpdateContents(String folderPath, String expectedFileName) {
+        File folder = new File(folderPath);
+        File[] folderFiles = folder.listFiles();
+        for (File file : folderFiles) {
+            String fullFilePath = FileUtils.appendPathComponent(folderPath, file.getName());
+            if (file.isDirectory()) {
+                String mainBundlePathInSubFolder = findJSBundleInUpdateContents(fullFilePath, expectedFileName);
+                if (mainBundlePathInSubFolder != null) {
+                    return FileUtils.appendPathComponent(file.getName(), mainBundlePathInSubFolder);
+                }
+            } else {
+                String fileName = file.getName();
+                if (fileName.equals(expectedFileName)) {
+                    return fileName;
+                }
+            }
+        }
+
+        return null;
     }
 }
