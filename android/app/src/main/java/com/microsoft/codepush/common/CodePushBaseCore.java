@@ -992,4 +992,29 @@ public abstract class CodePushBaseCore {
      * Performs all work needed to be done on native side to support install modes but {@link CodePushInstallMode#ON_NEXT_RESTART}.
      */
     protected abstract void handleInstallModesForUpdateInstall(CodePushInstallMode installMode);
+
+    /**
+     * Returns instance of {@link CodePushRestartManager}.
+     *
+     * @return instance of {@link CodePushRestartManager}.
+     */
+    public CodePushRestartManager getRestartManager() {
+        return mRestartManager;
+    }
+
+    /**
+     * Returns whether application is running in debug mode.
+     *
+     * @return whether application is running in debug mode.
+     */
+    public boolean isDebugMode() {
+        return mIsDebugMode;
+    }
+
+    /**
+     * Removes pending updates information.
+     */
+    public void removePendingUpdate() {
+        mSettingsManager.removePendingUpdate();
+    }
 }

@@ -316,7 +316,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
      */
     @ReactMethod
     public void isFailedUpdate(String packageHash, Promise promise) {
-        promise.resolve(mCodePushCore.isFailedUpdate(packageHash));
+        promise.resolve(mCodePushCore.existsFailedUpdate(packageHash));
     }
 
     /**
