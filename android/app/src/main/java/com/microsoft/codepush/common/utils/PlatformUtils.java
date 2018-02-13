@@ -4,6 +4,7 @@ import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.exceptions.CodePushGeneralException;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
 
 /**
  * Interface describing the methods that should be implemented in platform-specific instances of utils.
@@ -21,6 +22,8 @@ public interface PlatformUtils {
     String getUpdateFolderPath(String hash);
 
     boolean isPackageLatest(CodePushLocalPackage packageMetadata, String currentAppVersion) throws CodePushGeneralException;
+
+    long getBinaryResourcesModifiedTime() throws NumberFormatException;
 
     void clearDebugCache() throws IOException;
 }

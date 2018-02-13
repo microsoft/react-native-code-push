@@ -9,7 +9,9 @@ import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.CodePushStatusReportIdentifier;
 import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
+import com.microsoft.codepush.common.datacontracts.CodePushPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPendingUpdate;
+import com.microsoft.codepush.common.datacontracts.CodePushRemotePackage;
 import com.microsoft.codepush.common.utils.CodePushUtils;
 
 import org.json.JSONException;
@@ -69,17 +71,17 @@ public class SettingsManager {
 
     /**
      * Gets an array with containing failed updates info arranged by time of the failure ascending.
-     * Each item represents an instance of {@link CodePushLocalPackage} that has failed to update.
+     * Each item represents an instance of {@link CodePushPackage} that has failed to update.
      *
      * @return an array of failed updates.
      */
-    public ArrayList<CodePushLocalPackage> getFailedUpdates() {
+    public ArrayList<CodePushPackage> getFailedUpdates() {
         String failedUpdatesString = mSettings.getString(FAILED_UPDATES_KEY, null);
         if (failedUpdatesString == null) {
             return new ArrayList<>();
         }
         try {
-            return new ArrayList<>(Arrays.asList(mCodePushUtils.convertStringToObject(failedUpdatesString, CodePushLocalPackage[].class)));
+            return new ArrayList<>(Arrays.asList(mCodePushUtils.convertStringToObject(failedUpdatesString, CodePushPackage[].class)));
         } catch (JsonSyntaxException e) {
 
             /* Unrecognized data format, clear and replace with expected format. */
@@ -117,9 +119,9 @@ public class SettingsManager {
      * @return <code>true</code> if there is a failed update with provided hash, <code>false</code> otherwise.
      */
     public boolean existsFailedUpdate(String packageHash) {
-        List<CodePushLocalPackage> failedUpdates = getFailedUpdates();
+        List<CodePushPackage> failedUpdates = getFailedUpdates();
         if (packageHash != null) {
-            for (CodePushLocalPackage failedPackage : failedUpdates) {
+            for (CodePushPackage failedPackage : failedUpdates) {
                 if (packageHash.equals(failedPackage.getPackageHash())) {
                     return true;
                 }
@@ -158,10 +160,10 @@ public class SettingsManager {
     /**
      * Adds another failed update info to the list of failed updates.
      *
-     * @param failedPackage instance of failed {@link CodePushLocalPackage}.
+     * @param failedPackage instance of failed {@link CodePushRemotePackage}.
      */
-    public void saveFailedUpdate(CodePushLocalPackage failedPackage) {
-        ArrayList<CodePushLocalPackage> failedUpdates = getFailedUpdates();
+    public void saveFailedUpdate(CodePushPackage failedPackage) {
+        ArrayList<CodePushPackage> failedUpdates = getFailedUpdates();
         failedUpdates.add(failedPackage);
         String failedUpdatesString = mCodePushUtils.convertObjectToJsonString(failedUpdates);
         mSettings.edit().putString(FAILED_UPDATES_KEY, failedUpdatesString).apply();

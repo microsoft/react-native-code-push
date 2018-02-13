@@ -28,4 +28,9 @@ public class CodePushState {
      * Indicates whether sync already in progress.
      */
     public boolean mSyncInProgress;
+
+    /**
+     * Minimum background duration value.
+     */
+    public int mMinimumBackgroundDuration;
 }
