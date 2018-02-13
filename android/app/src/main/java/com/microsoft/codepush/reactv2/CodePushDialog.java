@@ -9,12 +9,17 @@ import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.microsoft.codepush.common.exceptions.CodePushGeneralException;
+import com.microsoft.codepush.common.interfaces.CodePushConfirmationCallback;
+import com.microsoft.codepush.common.interfaces.CodePushConfirmationDialog;
 import com.microsoft.codepush.common.utils.CodePushLogUtils;
+
+import java.util.Arrays;
 
 /**
  * Represents a react native dialog.
  */
-public class CodePushDialog extends ReactContextBaseJavaModule {
+public class CodePushDialog extends ReactContextBaseJavaModule implements CodePushConfirmationDialog {
 
     /**
      * Creates an instance of the {@link CodePushDialog}.
@@ -121,5 +126,27 @@ public class CodePushDialog extends ReactContextBaseJavaModule {
     @Override
     public String getName() {
         return "CodePushDialog";
+    }
+
+    @Override
+    public void shouldInstallUpdate(String title, String message, String acceptText, String declineText, final CodePushConfirmationCallback codePushConfirmationCallback) {
+        final Callback successCallback = new Callback() {
+            @Override
+            public void invoke(Object... args) {
+                String buttonNumber = args[0].toString();
+                if (buttonNumber.equals("0")) {
+                    codePushConfirmationCallback.onResult(true);
+                } else if (buttonNumber.equals("1")) {
+                    codePushConfirmationCallback.onResult(false);
+                }
+            }
+        };
+        final Callback errorCallback = new Callback() {
+            @Override
+            public void invoke(Object... args) {
+                codePushConfirmationCallback.throwError(new CodePushGeneralException("Exception occurred when showing a dialog. Args: " + Arrays.toString(args)));
+            }
+        };
+        showDialog(title, message, acceptText, declineText, successCallback, errorCallback);
     }
 }

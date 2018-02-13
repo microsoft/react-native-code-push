@@ -35,6 +35,7 @@ import com.microsoft.codepush.common.exceptions.CodePushRollbackException;
 import com.microsoft.codepush.common.exceptions.CodePushUnzipException;
 import com.microsoft.codepush.common.interfaces.AppEntryPointProvider;
 import com.microsoft.codepush.common.interfaces.CodePushBinaryVersionMismatchListener;
+import com.microsoft.codepush.common.interfaces.CodePushConfirmationCallback;
 import com.microsoft.codepush.common.interfaces.CodePushConfirmationDialog;
 import com.microsoft.codepush.common.interfaces.CodePushDownloadProgressListener;
 import com.microsoft.codepush.common.interfaces.CodePushRestartListener;
@@ -46,6 +47,7 @@ import com.microsoft.codepush.common.managers.CodePushRestartManager;
 import com.microsoft.codepush.common.managers.CodePushTelemetryManager;
 import com.microsoft.codepush.common.managers.CodePushUpdateManager;
 import com.microsoft.codepush.common.managers.SettingsManager;
+import com.microsoft.codepush.common.utils.CodePushLogUtils;
 import com.microsoft.codepush.common.utils.CodePushUpdateUtils;
 import com.microsoft.codepush.common.utils.CodePushUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
@@ -632,18 +634,16 @@ public abstract class CodePushBaseCore {
     /**
      * Synchronizes your app assets with the latest release to the configured deployment.
      *
-     * @param syncOptions sync options.
+     * @param synchronizationOptions sync options.
      * @throws CodePushNativeApiCallException if error occurred during the execution of operation.
      */
-    public void sync(CodePushSyncOptions syncOptions) throws CodePushNativeApiCallException {
+    public void sync(CodePushSyncOptions synchronizationOptions) throws CodePushNativeApiCallException {
         if (mState.mSyncInProgress) {
             notifyAboutSyncStatusChange(SYNC_IN_PROGRESS);
             AppCenterLog.info(CodePush.LOG_TAG, "Sync already in progress.");
             return;
         }
-        if (syncOptions == null) {
-            syncOptions = new CodePushSyncOptions(mDeploymentKey);
-        }
+        final CodePushSyncOptions syncOptions = synchronizationOptions == null ? new CodePushSyncOptions(mDeploymentKey) : synchronizationOptions;
         if (isEmpty(syncOptions.getDeploymentKey())) {
             syncOptions.setDeploymentKey(mDeploymentKey);
         }
@@ -658,7 +658,7 @@ public abstract class CodePushBaseCore {
         if (syncOptions.getCheckFrequency() == null) {
             syncOptions.setCheckFrequency(ON_APP_START);
         }
-        CodePushConfiguration configuration = getNativeConfiguration();
+        final CodePushConfiguration configuration = getNativeConfiguration();
         if (syncOptions.getDeploymentKey() != null) {
             configuration.setDeploymentKey(syncOptions.getDeploymentKey());
         }
@@ -707,28 +707,29 @@ public abstract class CodePushBaseCore {
 
             /* Ask user whether he want to install update or ignore it. */
             notifyAboutSyncStatusChange(AWAITING_USER_ACTION);
-            boolean userAcceptsProposal;
-            try {
-                userAcceptsProposal = mConfirmationDialog.shouldInstallUpdate(updateDialogOptions.getTitle(), message, acceptButtonText, declineButtonText);
-            } catch (CodePushGeneralException e) {
-                notifyAboutSyncStatusChange(UNKNOWN_ERROR);
-                mState.mSyncInProgress = false;
-                throw new CodePushNativeApiCallException(e);
-            }
-            if (userAcceptsProposal) {
-                try {
-                    doDownloadAndInstall(remotePackage, syncOptions, configuration);
-                    mState.mSyncInProgress = false;
-                } catch (Exception e) {
-                    notifyAboutSyncStatusChange(UNKNOWN_ERROR);
-                    mState.mSyncInProgress = false;
-                    throw new CodePushNativeApiCallException(e);
-                }
-            } else {
-                notifyAboutSyncStatusChange(UPDATE_IGNORED);
-                mState.mSyncInProgress = false;
-            }
+                mConfirmationDialog.shouldInstallUpdate(updateDialogOptions.getTitle(), message, acceptButtonText, declineButtonText, new CodePushConfirmationCallback() {
+                    @Override public void onResult(boolean userAcceptsProposal){
+                        if (userAcceptsProposal) {
+                            try {
+                                doDownloadAndInstall(remotePackage, syncOptions, configuration);
+                                mState.mSyncInProgress = false;
+                            } catch (Exception e) {
+                                notifyAboutSyncStatusChange(UNKNOWN_ERROR);
+                                mState.mSyncInProgress = false;
+                                CodePushLogUtils.trackException(new CodePushNativeApiCallException(e));
+                            }
+                        } else {
+                            notifyAboutSyncStatusChange(UPDATE_IGNORED);
+                            mState.mSyncInProgress = false;
+                        }
+                    }
 
+                    @Override public void throwError(CodePushGeneralException e) {
+                        notifyAboutSyncStatusChange(UNKNOWN_ERROR);
+                        mState.mSyncInProgress = false;
+                        CodePushLogUtils.trackException(new CodePushNativeApiCallException(e));
+                    }
+                });
         } else {
             try {
                 doDownloadAndInstall(remotePackage, syncOptions, configuration);
