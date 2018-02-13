@@ -1,6 +1,5 @@
 package com.microsoft.codepush.common.core;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -164,13 +163,6 @@ public abstract class CodePushBaseCore implements CodePushAPI {
     protected CodePushConfirmationDialog mConfirmationDialog;
 
     /**
-     * Self-reference to the current instance.
-     */
-    @SuppressLint("StaticFieldLeak")
-    @SuppressWarnings("WeakerAccess")
-    protected static CodePushBaseCore mCurrentInstance;
-
-    /**
      * Creates instance of CodePushBaseCore.
      *
      * @param deploymentKey         deployment key.
@@ -230,9 +222,6 @@ public abstract class CodePushBaseCore implements CodePushAPI {
         /* Initialize confirmation dialog for update install */
         mConfirmationDialog = confirmationDialog;
 
-        /* Set current instance. */
-        mCurrentInstance = this;
-
         /* Initialize state */
         mState = new CodePushState();
 
@@ -265,10 +254,10 @@ public abstract class CodePushBaseCore implements CodePushAPI {
     /**
      * Sets current app version.
      *
-     * @param mAppVersion current app version.
+     * @param appVersion current app version.
      */
-    public void setAppVersion(String mAppVersion) {
-        this.mAppVersion = mAppVersion;
+    public void setAppVersion(String appVersion) {
+        this.mAppVersion = appVersion;
     }
 
     /**
@@ -384,8 +373,7 @@ public abstract class CodePushBaseCore implements CodePushAPI {
     @SuppressWarnings("WeakerAccess")
     protected void initializeUpdateAfterRestart() throws CodePushGetPackageException, CodePushRollbackException, CodePushPlatformUtilsException {
 
-        /* Reset the state which indicates that
-         * the app was just freshly updated. */
+        /* Reset the state which indicates that the app was just freshly updated. */
         mState.mDidUpdate = false;
         CodePushPendingUpdate pendingUpdate = mManagers.mSettingsManager.getPendingUpdate();
         if (pendingUpdate != null) {
@@ -432,7 +420,7 @@ public abstract class CodePushBaseCore implements CodePushAPI {
     /**
      * Clears any saved updates on device.
      *
-     * @throws IOException if i/o error occurred while accessing the file system.
+     * @throws IOException read/write error occurred while accessing the file system.
      */
     protected void clearUpdates() throws IOException {
         mManagers.mUpdateManager.clearUpdates();
@@ -900,22 +888,6 @@ public abstract class CodePushBaseCore implements CodePushAPI {
     }
 
     /**
-     * Retries to send status report on app resume using platform-specific way for it.
-     * Use <code>sender.call()</code> to invoke sending of report.
-     *
-     * @param sender task that sends status report.
-     * @throws Exception if error occurred during the process.
-     */
-    @SuppressWarnings("WeakerAccess")
-    protected abstract void retrySendStatusReportOnAppResume(Callable<Void> sender) throws Exception;
-
-    /**
-     * Clears any scheduled attempts to retry send status report.
-     */
-    @SuppressWarnings("WeakerAccess")
-    protected abstract void clearScheduledAttemptsToRetrySendStatusReport();
-
-    /**
      * Retrieves status report for sending.
      *
      * @return status report for sending.
@@ -1058,16 +1030,11 @@ public abstract class CodePushBaseCore implements CodePushAPI {
     }
 
     /**
-     * Gets {@link DownloadProgressCallback} for update downloading that could be used for platform-specific actions.
+     * Removes pending update.
      */
-    @SuppressWarnings("WeakerAccess")
-    protected abstract DownloadProgressCallback getDownloadProgressCallbackForUpdateDownload();
-
-    /**
-     * Performs all work needed to be done on native side to support install modes but {@link CodePushInstallMode#ON_NEXT_RESTART}.
-     */
-    @SuppressWarnings("WeakerAccess")
-    protected abstract void handleInstallModesForUpdateInstall(CodePushInstallMode installMode);
+    public void removePendingUpdate() {
+        mManagers.mSettingsManager.removePendingUpdate();
+    }
 
     /**
      * Returns instance of {@link CodePushRestartManager}.
@@ -1088,9 +1055,30 @@ public abstract class CodePushBaseCore implements CodePushAPI {
     }
 
     /**
-     * Removes pending updates information.
+     * Gets {@link DownloadProgressCallback} for update downloading that could be used for platform-specific actions.
      */
-    public void removePendingUpdate() {
-        mManagers.mSettingsManager.removePendingUpdate();
-    }
+    @SuppressWarnings("WeakerAccess")
+    protected abstract DownloadProgressCallback getDownloadProgressCallbackForUpdateDownload();
+
+    /**
+     * Performs all work needed to be done on native side to support install modes but {@link CodePushInstallMode#ON_NEXT_RESTART}.
+     */
+    @SuppressWarnings("WeakerAccess")
+    protected abstract void handleInstallModesForUpdateInstall(CodePushInstallMode installMode);
+
+    /**
+     * Removes pending updates information.
+     * Retries to send status report on app resume using platform-specific way for it.
+     * Use <code>sender.call()</code> to invoke sending of report.
+     *
+     * @param sender task that sends status report.
+     */
+    @SuppressWarnings("WeakerAccess")
+    protected abstract void retrySendStatusReportOnAppResume(Callable<Void> sender);
+
+    /**
+     * Clears any scheduled attempts to retry send status report.
+     */
+    @SuppressWarnings("WeakerAccess")
+    protected abstract void clearScheduledAttemptsToRetrySendStatusReport();
 }

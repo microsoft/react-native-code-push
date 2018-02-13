@@ -2,6 +2,9 @@ package com.microsoft.codepush.common.core;
 
 import com.microsoft.codepush.common.enums.CodePushInstallMode;
 
+/**
+ * Incapsulates state of {@link CodePushBaseCore}.
+ */
 public class CodePushState {
 
     /**
