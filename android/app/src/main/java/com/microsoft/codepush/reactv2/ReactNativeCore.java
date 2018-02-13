@@ -52,7 +52,14 @@ import static com.microsoft.codepush.common.CodePush.LOG_TAG;
 @SuppressWarnings("unused")
 public class ReactNativeCore extends CodePushBaseCore {
 
+    /**
+     * Default file name for javascript bundle.
+     */
     private static final String DEFAULT_JS_BUNDLE_NAME = "index.android.bundle";
+
+    /**
+     * Prefix to access the bundle.
+     */
     private static final String ASSETS_BUNDLE_PREFIX = "assets://";
 
     /**
@@ -89,33 +96,7 @@ public class ReactNativeCore extends CodePushBaseCore {
         super(deploymentKey, context, isDebugMode, serverUrl, publicKeyProvider, appEntryPointProvider, platformUtils, restartListener, confirmationDialog);
     }
 
-    /**
-     * Sets instance holder.
-     *
-     * @param reactInstanceHolder instance of {@link ReactInstanceHolder}.
-     */
-    public static void setReactInstanceHolder(ReactInstanceHolder reactInstanceHolder) {
-        sReactInstanceHolder = reactInstanceHolder;
-    }
-
-    /**
-     * Gets instance of {@link ReactInstanceHolder}.
-     *
-     * @return instance of {@link ReactInstanceHolder}.
-     */
-    private static ReactInstanceManager getReactInstanceManager() {
-        if (sReactInstanceHolder == null) {
-            return null;
-        }
-        return sReactInstanceHolder.getReactInstanceManager();
-    }
-
-    /**
-     * Creates react-specific modules.
-     *
-     * @param reactApplicationContext app context.
-     * @return {@link List} of {@link NativeModule} instances.
-     */
+    @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactApplicationContext) {
         sReactApplicationContext = reactApplicationContext;
         CodePushNativeModule codePushModule = new CodePushNativeModule(sReactApplicationContext, this);
@@ -174,100 +155,6 @@ public class ReactNativeCore extends CodePushBaseCore {
             }
         } catch (CodePushGetPackageException | CodePushGeneralException | IOException e) {
             throw new CodePushNativeApiCallException(e);
-        }
-    }
-
-    /**
-     * This workaround has been implemented in order to fix https://github.com/facebook/react-native/issues/14533
-     * resetReactRootViews allows to call recreateReactContextInBackground without any exceptions
-     * This fix also relates to https://github.com/Microsoft/react-native-code-push/issues/878
-     *
-     * @param instanceManager instance of {@link ReactInstanceHolder}.
-     * @throws CodePushNativeApiCallException exception occurred when performing the operation.
-     */
-    private void resetReactRootViews(ReactInstanceManager instanceManager) throws CodePushNativeApiCallException {
-        try {
-            Field mAttachedRootViewsField = instanceManager.getClass().getDeclaredField("mAttachedRootViews");
-            mAttachedRootViewsField.setAccessible(true);
-            List<ReactRootView> mAttachedRootViews = (List<ReactRootView>) mAttachedRootViewsField.get(instanceManager);
-            for (ReactRootView reactRootView : mAttachedRootViews) {
-                reactRootView.removeAllViews();
-                reactRootView.setId(View.NO_ID);
-            }
-            mAttachedRootViewsField.set(instanceManager, mAttachedRootViews);
-        } catch (NoSuchFieldException e) {
-            throw new CodePushNativeApiCallException(e);
-        } catch (IllegalAccessException e) {
-            throw new CodePushNativeApiCallException(e);
-        }
-    }
-
-    /**
-     * Removes basic lifecycle listener.
-     */
-    private void clearLifecycleEventListener() {
-
-        /* Remove LifecycleEventListener to prevent infinite restart loop. */
-        if (mLifecycleEventListener != null) {
-            sReactApplicationContext.removeLifecycleEventListener(mLifecycleEventListener);
-            mLifecycleEventListener = null;
-        }
-    }
-
-    /**
-     * Removes lifecycle listener attached for report.
-     */
-    private void clearLifecycleEventListenerForReport() {
-
-        /* Remove LifecycleEventListener to prevent infinite restart loop. */
-        if (mLifecycleEventListenerForReport != null) {
-            sReactApplicationContext.removeLifecycleEventListener(mLifecycleEventListenerForReport);
-            mLifecycleEventListenerForReport = null;
-        }
-    }
-
-    /**
-     * Use reflection to find the ReactInstanceManager. See #556 for a proposal for a less brittle way to approach this.
-     *
-     * @return returns instance of {@link ReactInstanceManager}.
-     * @throws CodePushNativeApiCallException exception occurred when performing the operation.
-     */
-    private ReactInstanceManager resolveInstanceManager() throws CodePushNativeApiCallException {
-        ReactInstanceManager instanceManager = ReactNativeCore.getReactInstanceManager();
-        if (instanceManager != null) {
-            return instanceManager;
-        }
-        final Activity currentActivity = sReactApplicationContext.getCurrentActivity();
-        if (currentActivity == null) {
-            return null;
-        }
-        ReactApplication reactApplication = (ReactApplication) currentActivity.getApplication();
-        instanceManager = reactApplication.getReactNativeHost().getReactInstanceManager();
-        return instanceManager;
-    }
-
-    /**
-     * Sets js bundle file.
-     *
-     * @param instanceManager    instance of {@link ReactInstanceManager}.
-     * @param latestJSBundleFile path to the latest js bundle file.
-     * @throws CodePushNativeApiCallException exception occurred when performing the operation.
-     */
-    private void setJSBundle(ReactInstanceManager instanceManager, String latestJSBundleFile) throws CodePushNativeApiCallException {
-
-        /* Use reflection to find and set the appropriate fields on ReactInstanceManager. See #556 for a proposal for a less brittle way to approach this. */
-        try {
-            JSBundleLoader latestJSBundleLoader;
-            if (latestJSBundleFile.toLowerCase().startsWith("assets://")) {
-                latestJSBundleLoader = JSBundleLoader.createAssetLoader(sReactApplicationContext, latestJSBundleFile, false);
-            } else {
-                latestJSBundleLoader = JSBundleLoader.createFileLoader(latestJSBundleFile);
-            }
-            Field bundleLoaderField = instanceManager.getClass().getDeclaredField("mBundleLoader");
-            bundleLoaderField.setAccessible(true);
-            bundleLoaderField.set(instanceManager, latestJSBundleLoader);
-        } catch (Exception e) {
-            throw new CodePushNativeApiCallException(new CodePushGeneralException("Unable to set JSBundle - CodePush may not support this version of React Native", e));
         }
     }
 
@@ -398,5 +285,120 @@ public class ReactNativeCore extends CodePushBaseCore {
                 }
             }
         };
+    }
+
+    /**
+     * Sets instance holder.
+     *
+     * @param reactInstanceHolder instance of {@link ReactInstanceHolder}.
+     */
+    public static void setReactInstanceHolder(ReactInstanceHolder reactInstanceHolder) {
+        sReactInstanceHolder = reactInstanceHolder;
+    }
+
+    /**
+     * Gets instance of {@link ReactInstanceHolder}.
+     *
+     * @return instance of {@link ReactInstanceHolder}.
+     */
+    private static ReactInstanceManager getReactInstanceManager() {
+        if (sReactInstanceHolder == null) {
+            return null;
+        }
+        return sReactInstanceHolder.getReactInstanceManager();
+    }
+
+    /**
+     * This workaround has been implemented in order to fix https://github.com/facebook/react-native/issues/14533
+     * resetReactRootViews allows to call recreateReactContextInBackground without any exceptions
+     * This fix also relates to https://github.com/Microsoft/react-native-code-push/issues/878
+     *
+     * @param instanceManager instance of {@link ReactInstanceHolder}.
+     * @throws CodePushNativeApiCallException exception occurred when performing the operation.
+     */
+    private void resetReactRootViews(ReactInstanceManager instanceManager) throws CodePushNativeApiCallException {
+        try {
+            Field mAttachedRootViewsField = instanceManager.getClass().getDeclaredField("mAttachedRootViews");
+            mAttachedRootViewsField.setAccessible(true);
+            List<ReactRootView> mAttachedRootViews = (List<ReactRootView>) mAttachedRootViewsField.get(instanceManager);
+            for (ReactRootView reactRootView : mAttachedRootViews) {
+                reactRootView.removeAllViews();
+                reactRootView.setId(View.NO_ID);
+            }
+            mAttachedRootViewsField.set(instanceManager, mAttachedRootViews);
+        } catch (NoSuchFieldException e) {
+            throw new CodePushNativeApiCallException(e);
+        } catch (IllegalAccessException e) {
+            throw new CodePushNativeApiCallException(e);
+        }
+    }
+
+    /**
+     * Removes basic lifecycle listener.
+     */
+    private void clearLifecycleEventListener() {
+
+        /* Remove LifecycleEventListener to prevent infinite restart loop. */
+        if (mLifecycleEventListener != null) {
+            sReactApplicationContext.removeLifecycleEventListener(mLifecycleEventListener);
+            mLifecycleEventListener = null;
+        }
+    }
+
+    /**
+     * Removes lifecycle listener attached for report.
+     */
+    private void clearLifecycleEventListenerForReport() {
+
+        /* Remove LifecycleEventListener to prevent infinite restart loop. */
+        if (mLifecycleEventListenerForReport != null) {
+            sReactApplicationContext.removeLifecycleEventListener(mLifecycleEventListenerForReport);
+            mLifecycleEventListenerForReport = null;
+        }
+    }
+
+    /**
+     * Use reflection to find the ReactInstanceManager. See #556 for a proposal for a less brittle way to approach this.
+     *
+     * @return returns instance of {@link ReactInstanceManager}.
+     * @throws CodePushNativeApiCallException exception occurred when performing the operation.
+     */
+    private ReactInstanceManager resolveInstanceManager() throws CodePushNativeApiCallException {
+        ReactInstanceManager instanceManager = ReactNativeCore.getReactInstanceManager();
+        if (instanceManager != null) {
+            return instanceManager;
+        }
+        final Activity currentActivity = sReactApplicationContext.getCurrentActivity();
+        if (currentActivity == null) {
+            return null;
+        }
+        ReactApplication reactApplication = (ReactApplication) currentActivity.getApplication();
+        instanceManager = reactApplication.getReactNativeHost().getReactInstanceManager();
+        return instanceManager;
+    }
+
+    /**
+     * Sets js bundle file.
+     *
+     * @param instanceManager    instance of {@link ReactInstanceManager}.
+     * @param latestJSBundleFile path to the latest js bundle file.
+     * @throws CodePushNativeApiCallException exception occurred when performing the operation.
+     */
+    private void setJSBundle(ReactInstanceManager instanceManager, String latestJSBundleFile) throws CodePushNativeApiCallException {
+
+        /* Use reflection to find and set the appropriate fields on ReactInstanceManager. See #556 for a proposal for a less brittle way to approach this. */
+        try {
+            JSBundleLoader latestJSBundleLoader;
+            if (latestJSBundleFile.toLowerCase().startsWith("assets://")) {
+                latestJSBundleLoader = JSBundleLoader.createAssetLoader(sReactApplicationContext, latestJSBundleFile, false);
+            } else {
+                latestJSBundleLoader = JSBundleLoader.createFileLoader(latestJSBundleFile);
+            }
+            Field bundleLoaderField = instanceManager.getClass().getDeclaredField("mBundleLoader");
+            bundleLoaderField.setAccessible(true);
+            bundleLoaderField.set(instanceManager, latestJSBundleLoader);
+        } catch (Exception e) {
+            throw new CodePushNativeApiCallException(new CodePushGeneralException("Unable to set JSBundle - CodePush may not support this version of React Native", e));
+        }
     }
 }
