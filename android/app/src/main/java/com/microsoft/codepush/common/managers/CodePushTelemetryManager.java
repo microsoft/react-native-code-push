@@ -36,7 +36,7 @@ public class CodePushTelemetryManager {
      * @param appVersion current app version.
      * @return new binary update report.
      */
-    public CodePushDeploymentStatusReport buildBinaryUpdateReport(String appVersion) {
+    public CodePushDeploymentStatusReport buildBinaryUpdateReport(String appVersion) throws CodePushIllegalArgumentException {
         CodePushStatusReportIdentifier previousStatusReportIdentifier = mSettingsManager.getPreviousStatusReportIdentifier();
         CodePushDeploymentStatusReport report = null;
         if (previousStatusReportIdentifier == null) {
@@ -75,7 +75,7 @@ public class CodePushTelemetryManager {
      * @param currentPackage current local package information.
      * @return new update report.
      */
-    public CodePushDeploymentStatusReport buildUpdateReport(CodePushLocalPackage currentPackage) {
+    public CodePushDeploymentStatusReport buildUpdateReport(CodePushLocalPackage currentPackage) throws CodePushIllegalArgumentException {
         CodePushStatusReportIdentifier currentPackageIdentifier = buildPackageStatusReportIdentifier(currentPackage);
         CodePushStatusReportIdentifier previousStatusReportIdentifier = mSettingsManager.getPreviousStatusReportIdentifier();
         CodePushDeploymentStatusReport report = null;

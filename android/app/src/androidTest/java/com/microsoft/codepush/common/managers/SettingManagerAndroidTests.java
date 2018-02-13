@@ -3,9 +3,13 @@ package com.microsoft.codepush.common.managers;
 import android.support.test.InstrumentationRegistry;
 
 import com.google.gson.JsonSyntaxException;
+import com.microsoft.codepush.common.CodePushStatusReportIdentifier;
+import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPendingUpdate;
+import com.microsoft.codepush.common.enums.CodePushDeploymentStatus;
+import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
 import com.microsoft.codepush.common.testutils.CommonSettingsCompatibilityUtils;
 import com.microsoft.codepush.common.utils.CodePushUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
@@ -86,14 +90,13 @@ public class SettingManagerAndroidTests {
     }
 
     /**
-     * {@link SettingsManager#getPendingUpdate()} should return <code>null</code>
+     * {@link SettingsManager#getPendingUpdate()} should throw a {@link CodePushMalformedDataException}
      * if a {@link JsonSyntaxException} is thrown during parsing pending info.
      */
-    @Test
+    @Test(expected = CodePushMalformedDataException.class)
     public void pendingUpdateParseError() throws Exception {
         CommonSettingsCompatibilityUtils.saveStringToPending("abc", InstrumentationRegistry.getContext());
-        CodePushPendingUpdate codePushPendingUpdate = mSettingsManager.getPendingUpdate();
-        assertNull(codePushPendingUpdate);
+        mSettingsManager.getPendingUpdate();
     }
 
     /**
@@ -169,14 +172,13 @@ public class SettingManagerAndroidTests {
     }
 
     /**
-     * {@link SettingsManager#getFailedUpdates()} should return empty array
+     * {@link SettingsManager#getFailedUpdates()} should throw a {@link CodePushMalformedDataException}
      * if a {@link JsonSyntaxException} is thrown during parsing failed updates info.
      */
-    @Test
+    @Test(expected = CodePushMalformedDataException.class)
     public void failedUpdateParseError() throws Exception {
         CommonSettingsCompatibilityUtils.saveStringToFailed("abc", InstrumentationRegistry.getContext());
-        List<CodePushLocalPackage> codePushLocalPackages = mSettingsManager.getFailedUpdates();
-        assertEquals(0, codePushLocalPackages.size());
+        mSettingsManager.getFailedUpdates();
     }
 
     /**
@@ -187,5 +189,34 @@ public class SettingManagerAndroidTests {
         mSettingsManager.removeFailedUpdates();
         List<CodePushLocalPackage> codePushLocalPackages = mSettingsManager.getFailedUpdates();
         assertEquals(0, codePushLocalPackages.size());
+    }
+
+    /**
+     * Tests workflow save identifier -> get identifier.
+     */
+    @Test
+    public void identifierTest() throws Exception {
+        mSettingsManager.saveIdentifierOfReportedStatus(new CodePushStatusReportIdentifier("123", "1.2"));
+        CodePushStatusReportIdentifier codePushStatusReportIdentifier = mSettingsManager.getPreviousStatusReportIdentifier();
+        assertEquals(codePushStatusReportIdentifier.getDeploymentKey(), "123");
+    }
+
+    /**
+     * Tests workflow save status report -> get status report -> remove report -> get report and assert that it is <code>null</code>.
+     */
+    @Test
+    public void statusReportTest() throws Exception {
+        CodePushDeploymentStatusReport codePushDeploymentStatusReport = new CodePushDeploymentStatusReport();
+        codePushDeploymentStatusReport.setAppVersion("1.2");
+        codePushDeploymentStatusReport.setStatus(CodePushDeploymentStatus.SUCCEEDED);
+        codePushDeploymentStatusReport.setPreviousDeploymentKey("123");
+        codePushDeploymentStatusReport.setPreviousLabelOrAppVersion("1.2");
+        codePushDeploymentStatusReport.setClientUniqueId("111");
+        mSettingsManager.saveStatusReportForRetry(codePushDeploymentStatusReport);
+        codePushDeploymentStatusReport = mSettingsManager.getStatusReportSavedForRetry();
+        assertEquals(codePushDeploymentStatusReport.getAppVersion(), "1.2");
+        mSettingsManager.removeStatusReportSavedForRetry();
+        codePushDeploymentStatusReport = mSettingsManager.getStatusReportSavedForRetry();
+        assertNull(codePushDeploymentStatusReport);
     }
 }

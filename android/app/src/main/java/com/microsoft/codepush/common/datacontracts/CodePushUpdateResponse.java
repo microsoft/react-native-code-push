@@ -1,9 +1,7 @@
 package com.microsoft.codepush.common.datacontracts;
 
 import com.google.gson.annotations.SerializedName;
-import com.microsoft.appcenter.utils.AppCenterLog;
-import com.microsoft.codepush.common.CodePush;
-import com.microsoft.codepush.common.exceptions.CodePushQueryUpdateException;
+import com.microsoft.codepush.common.exceptions.CodePushIllegalArgumentException;
 
 /**
  * A response class containing info about the update.
@@ -30,11 +28,11 @@ public class CodePushUpdateResponse {
      *
      * @param updateInfo information about the existing update.
      */
-    public void setUpdateInfo(CodePushUpdateResponseUpdateInfo updateInfo) {
+    public void setUpdateInfo(CodePushUpdateResponseUpdateInfo updateInfo) throws CodePushIllegalArgumentException {
         if (updateInfo != null) {
             this.updateInfo = updateInfo;
         } else {
-            AppCenterLog.error(CodePush.LOG_TAG, "\"updateInfo\" property cannot be null.");
+            throw new CodePushIllegalArgumentException(this.getClass().getName(), "updateInfo");
         }
     }
 }

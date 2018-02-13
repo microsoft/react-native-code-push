@@ -14,6 +14,7 @@ import com.microsoft.codepush.common.datacontracts.CodePushUpdateRequest;
 import com.microsoft.codepush.common.datacontracts.CodePushUpdateResponse;
 import com.microsoft.codepush.common.datacontracts.CodePushUpdateResponseUpdateInfo;
 import com.microsoft.codepush.common.exceptions.CodePushApiHttpRequestException;
+import com.microsoft.codepush.common.exceptions.CodePushIllegalArgumentException;
 import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
 import com.microsoft.codepush.common.exceptions.CodePushQueryUpdateException;
 import com.microsoft.codepush.common.exceptions.CodePushReportStatusException;
@@ -90,6 +91,7 @@ public class CodePushAcquisitionManager {
         String clientUniqueId = configuration.getClientUniqueId();
         CodePushUpdateRequest updateRequest = CodePushUpdateRequest.createUpdateRequest(deploymentKey, currentPackage, clientUniqueId);
         try {
+            CodePushUpdateRequest updateRequest = CodePushUpdateRequest.createUpdateRequest(mDeploymentKey, currentPackage, mClientUniqueId);
             final String requestUrl = serverUrl + String.format(Locale.getDefault(), UPDATE_CHECK_ENDPOINT, mCodePushUtils.getQueryStringFromObject(updateRequest, "UTF-8"));
             CheckForUpdateTask checkForUpdateTask = new CheckForUpdateTask(mFileUtils, mCodePushUtils, requestUrl);
             ApiHttpRequest<CodePushUpdateResponse> checkForUpdateRequest = new ApiHttpRequest<>(checkForUpdateTask);
@@ -105,7 +107,7 @@ public class CodePushAcquisitionManager {
             } catch (CodePushApiHttpRequestException e) {
                 throw new CodePushQueryUpdateException(e, currentPackage.getPackageHash());
             }
-        } catch (CodePushMalformedDataException e) {
+        } catch (CodePushMalformedDataException | CodePushIllegalArgumentException e) {
             throw new CodePushQueryUpdateException(e, currentPackage.getPackageHash());
         }
     }
@@ -126,10 +128,14 @@ public class CodePushAcquisitionManager {
         String clientUniqueId = configuration.getClientUniqueId();
 
         /* TODO: Consider moving the following logic to some other place or removing it at all if useless. */
-        deploymentStatusReport.setClientUniqueId(clientUniqueId);
-        deploymentStatusReport.setDeploymentKey(deploymentKey);
-        deploymentStatusReport.setAppVersion(deploymentStatusReport.getPackage() != null ? deploymentStatusReport.getPackage().getAppVersion() : appVersion);
-        deploymentStatusReport.setAppVersion(deploymentStatusReport.getPackage() != null ? deploymentStatusReport.getPackage().getLabel() : null);
+        try {
+            deploymentStatusReport.setClientUniqueId(clientUniqueId);
+            deploymentStatusReport.setDeploymentKey(deploymentKey);
+            deploymentStatusReport.setAppVersion(deploymentStatusReport.getPackage() != null ? deploymentStatusReport.getPackage().getAppVersion() : appVersion);
+            deploymentStatusReport.setAppVersion(deploymentStatusReport.getPackage() != null ? deploymentStatusReport.getPackage().getLabel() : null);
+        } catch (CodePushIllegalArgumentException e) {
+            throw new CodePushReportStatusException(e, DEPLOY);
+        }
         final String requestUrl = serverUrl + REPORT_DEPLOYMENT_STATUS_ENDPOINT;
         switch (deploymentStatusReport.getStatus()) {
             case SUCCEEDED:
@@ -169,14 +175,14 @@ public class CodePushAcquisitionManager {
         String deploymentKey = configuration.getDeploymentKey();
         String clientUniqueId = configuration.getClientUniqueId();
         final String requestUrl = serverUrl + REPORT_DOWNLOAD_STATUS_ENDPOINT;
-        final CodePushDownloadStatusReport downloadStatusReport = CodePushDownloadStatusReport.createReport(clientUniqueId, deploymentKey, downloadedPackage.getLabel());
-        final String downloadStatusReportJsonString = mCodePushUtils.convertObjectToJsonString(downloadStatusReport);
-        ReportStatusTask reportStatusDownloadTask = new ReportStatusTask(mFileUtils, requestUrl, downloadStatusReportJsonString, DOWNLOAD);
-        ApiHttpRequest<CodePushReportStatusResult> reportStatusDownloadRequest = new ApiHttpRequest<>(reportStatusDownloadTask);
         try {
+            final CodePushDownloadStatusReport downloadStatusReport = CodePushDownloadStatusReport.createReport(clientUniqueId, deploymentKey, downloadedPackage.getLabel());
+            final String downloadStatusReportJsonString = mCodePushUtils.convertObjectToJsonString(downloadStatusReport);
+            ReportStatusTask reportStatusDownloadTask = new ReportStatusTask(mFileUtils, requestUrl, downloadStatusReportJsonString, DOWNLOAD);
+            ApiHttpRequest<CodePushReportStatusResult> reportStatusDownloadRequest = new ApiHttpRequest<>(reportStatusDownloadTask);
             CodePushReportStatusResult codePushReportStatusResult = reportStatusDownloadRequest.makeRequest();
             AppCenterLog.info(LOG_TAG, "Report status download: " + codePushReportStatusResult.getResult());
-        } catch (CodePushApiHttpRequestException e) {
+        } catch (CodePushApiHttpRequestException | CodePushIllegalArgumentException e) {
             throw new CodePushReportStatusException(e, DOWNLOAD);
         }
     }
