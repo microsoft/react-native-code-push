@@ -19,6 +19,7 @@ import com.microsoft.codepush.common.datacontracts.CodePushSyncOptions;
 import com.microsoft.codepush.common.enums.CodePushInstallMode;
 import com.microsoft.codepush.common.enums.CodePushSyncStatus;
 import com.microsoft.codepush.common.enums.CodePushUpdateState;
+import com.microsoft.codepush.common.exceptions.CodePushApiHttpRequestException;
 import com.microsoft.codepush.common.exceptions.CodePushGetUpdateMetadataException;
 import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
 import com.microsoft.codepush.common.exceptions.CodePushNativeApiCallException;
@@ -28,17 +29,19 @@ import com.microsoft.codepush.common.interfaces.CodePushSyncStatusListener;
 import com.microsoft.codepush.common.utils.CodePushUpdateUtils;
 import com.microsoft.codepush.common.utils.CodePushUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
-import com.microsoft.codepush.reactv2.utils.CodePushRNUtils;
+import com.microsoft.codepush.reactv2.utils.ReactConvertUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * A wrapper around {@link CodePushBaseCore} specific for React.
  */
+@SuppressWarnings("unused")
 public class CodePushNativeModule extends ReactContextBaseJavaModule implements CodePushDownloadProgressListener, CodePushSyncStatusListener, CodePushBinaryVersionMismatchListener {
 
     /**
@@ -72,9 +75,9 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
     private CodePushUtils mCodePushUtils;
 
     /**
-     * Instance of {@link CodePushRNUtils} to work with.
+     * Instance of {@link ReactConvertUtils} to work with.
      */
-    private CodePushRNUtils mCodePushReactNativeUtils;
+    private ReactConvertUtils mReactConvertUtils;
 
     /**
      * Creates an instance of {@link CodePushNativeModule}.
@@ -88,7 +91,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
         FileUtils fileUtils = FileUtils.getInstance();
         mCodePushUtils = CodePushUtils.getInstance(fileUtils);
         CodePushUpdateUtils codePushUpdateUtils = CodePushUpdateUtils.getInstance(fileUtils, mCodePushUtils);
-        mCodePushReactNativeUtils = CodePushRNUtils.getInstance(mCodePushUtils);
+        mReactConvertUtils = ReactConvertUtils.getInstance(mCodePushUtils);
 
         /* Initialize module state while we have a reference to the current context. */
         mBinaryContentsHash = codePushUpdateUtils.getHashForBinaryContents(reactContext, mCodePushCore.isDebugMode());
@@ -137,7 +140,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
             DownloadProgress downloadProgress = new DownloadProgress(totalBytes, receivedBytes);
             getReactApplicationContext()
                     .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                    .emit(CodePushConstants.DOWNLOAD_PROGRESS_EVENT_NAME, mCodePushReactNativeUtils.convertDownloadProgressToWritableMap(downloadProgress));
+                    .emit(CodePushConstants.DOWNLOAD_PROGRESS_EVENT_NAME, mReactConvertUtils.convertDownloadProgressToWritableMap(downloadProgress));
         }
     }
 
@@ -163,7 +166,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
             CodePushRemotePackage remotePackage = mCodePushCore.checkForUpdate(deploymentKey);
             if (remotePackage != null) {
                 JSONObject jsonObject = mCodePushUtils.convertObjectToJsonObject(remotePackage);
-                promise.resolve(mCodePushReactNativeUtils.convertJsonObjectToWritable(jsonObject));
+                promise.resolve(mReactConvertUtils.convertJsonObjectToWritable(jsonObject));
             } else {
                 promise.resolve("");
             }
@@ -189,9 +192,9 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
         mNotifyDownloadProgress = notifyDownloadProgress;
         mNotifyBinaryVersionMismatch = notifyBinaryVersionMismatch;
         try {
-            CodePushSyncOptions syncOptions = mCodePushReactNativeUtils.convertReadableToObject(syncOptionsMap, CodePushSyncOptions.class);
-            mCodePushCore.sync(syncOptions, promise);
-        } catch (CodePushMalformedDataException e) {
+            CodePushSyncOptions syncOptions = mReactConvertUtils.convertReadableToObject(syncOptionsMap, CodePushSyncOptions.class);
+            mCodePushCore.sync(syncOptions);
+        } catch (CodePushMalformedDataException | CodePushNativeApiCallException e) {
             promise.reject(e);
         }
     }
@@ -210,10 +213,10 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
         mNotifyDownloadProgress = notifyProgress;
         try {
             CodePushLocalPackage newPackage = mCodePushCore.downloadUpdate(
-                    mCodePushReactNativeUtils.convertReadableToObject(updatePackage, CodePushRemotePackage.class)
+                    mReactConvertUtils.convertReadableToObject(updatePackage, CodePushRemotePackage.class)
             );
-            promise.resolve(mCodePushReactNativeUtils.convertObjectToWritableMap(newPackage));
-        } catch (CodePushMalformedDataException e) {
+            promise.resolve(mReactConvertUtils.convertObjectToWritableMap(newPackage));
+        } catch (CodePushMalformedDataException | CodePushNativeApiCallException e) {
             promise.reject(e);
         }
     }
@@ -227,7 +230,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
     @ReactMethod
     public void getConfiguration(Promise promise) {
         WritableMap configMap = Arguments.createMap();
-        CodePushConfiguration nativeConfiguration = mCodePushCore.getConfiguration();
+        CodePushConfiguration nativeConfiguration = mCodePushCore.getNativeConfiguration();
         configMap.putString("appVersion", nativeConfiguration.getAppVersion());
         configMap.putString("clientUniqueId", nativeConfiguration.getClientUniqueId());
         configMap.putString("deploymentKey", nativeConfiguration.getDeploymentKey());
@@ -252,7 +255,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
         try {
             CodePushLocalPackage currentPackage = mCodePushCore.getUpdateMetadata(CodePushUpdateState.values()[updateState]);
             if (currentPackage != null) {
-                promise.resolve(mCodePushReactNativeUtils.convertObjectToWritableMap(currentPackage));
+                promise.resolve(mReactConvertUtils.convertObjectToWritableMap(currentPackage));
             } else {
                 promise.resolve("");
             }
@@ -269,15 +272,14 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
      */
     @ReactMethod
     public void getNewStatusReport(Promise promise) {
-        //TODO: Make sure CodePushDeploymentStatusReport is treated correctly in js. +
         try {
             CodePushDeploymentStatusReport statusReport = mCodePushCore.getNewStatusReport();
             if (statusReport != null) {
-                promise.resolve(mCodePushReactNativeUtils.convertObjectToWritableMap(statusReport));
+                promise.resolve(mReactConvertUtils.convertObjectToWritableMap(statusReport));
             } else {
                 promise.resolve("");
             }
-        } catch (CodePushMalformedDataException e) {
+        } catch (CodePushMalformedDataException | CodePushNativeApiCallException e) {
             promise.reject(e);
         }
     }
@@ -296,11 +298,11 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
     public void installUpdate(ReadableMap updatePackage, int installMode, int minimumBackgroundDuration, Promise promise) {
         try {
             mCodePushCore.installUpdate(
-                    mCodePushReactNativeUtils.convertReadableToObject(updatePackage, CodePushLocalPackage.class),
+                    mReactConvertUtils.convertReadableToObject(updatePackage, CodePushLocalPackage.class),
                     CodePushInstallMode.values()[installMode],
                     minimumBackgroundDuration);
             promise.resolve("");
-        } catch (CodePushMalformedDataException e) {
+        } catch (CodePushMalformedDataException | CodePushNativeApiCallException e) {
             promise.reject(e);
         }
     }
@@ -326,7 +328,11 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
      */
     @ReactMethod
     public void isFirstRun(String packageHash, Promise promise) {
-        promise.resolve(mCodePushCore.isFirstRun(packageHash));
+        try {
+            promise.resolve(mCodePushCore.isFirstRun(packageHash));
+        } catch (IOException | CodePushMalformedDataException e)  {
+            promise.resolve(false);
+        }
     }
 
     /**
@@ -385,9 +391,8 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
      */
     @ReactMethod
     public void recordStatusReported(ReadableMap statusReport) {
-        //TODO: Check that sent object is convertible to CodePushDeploymentStatusReport.+
         try {
-            mCodePushCore.recordStatusReported(mCodePushReactNativeUtils.convertReadableToObject(statusReport, CodePushDeploymentStatusReport.class));
+            mCodePushCore.saveReportedStatus(mReactConvertUtils.convertReadableToObject(statusReport, CodePushDeploymentStatusReport.class));
         } catch (CodePushMalformedDataException e) {
             //TODO: track this exception
         }
@@ -395,10 +400,9 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
 
     @ReactMethod
     public void saveStatusReportForRetry(ReadableMap statusReport) {
-        //TODO: Check that statusReport ReadableMap matches with the CodePUshDeploymentStatusReport.+
         try {
-            mCodePushCore.saveStatusReportForRetry(mCodePushReactNativeUtils.convertReadableToObject(statusReport, CodePushDeploymentStatusReport.class));
-        } catch (CodePushMalformedDataException e) {
+            mCodePushCore.saveStatusReportForRetry(mReactConvertUtils.convertReadableToObject(statusReport, CodePushDeploymentStatusReport.class));
+        } catch (CodePushMalformedDataException | CodePushNativeApiCallException e) {
             //TODO: track this exception.
         }
     }

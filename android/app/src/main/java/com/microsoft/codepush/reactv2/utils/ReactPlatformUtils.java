@@ -15,9 +15,13 @@ import static com.microsoft.codepush.common.CodePushConstants.CODE_PUSH_APK_BUIL
 
 /**
  * React-specific instance of {@link PlatformUtils}.
+ * Represents bridge between {@link com.microsoft.codepush.common} and {@link com.microsoft.codepush.react}.
  */
 public class ReactPlatformUtils implements PlatformUtils {
 
+    /**
+     * Instance of {@link ReactPlatformUtils}. Singleton.
+     */
     private static ReactPlatformUtils INSTANCE;
 
     /**
@@ -63,7 +67,8 @@ public class ReactPlatformUtils implements PlatformUtils {
         }
     }
 
-    @Override public long getBinaryResourcesModifiedTime(Context context) throws NumberFormatException {
+    @Override
+    public long getBinaryResourcesModifiedTime(Context context) throws NumberFormatException {
         String packageName = context.getPackageName();
         int codePushApkBuildTimeId = context.getResources().getIdentifier(CODE_PUSH_APK_BUILD_TIME_KEY, "string", packageName);
 

@@ -18,7 +18,10 @@ import org.json.JSONObject;
 
 import java.util.Iterator;
 
-public class CodePushRNUtils {
+/**
+ * Utils for managing convert operation within react module.
+ */
+public class ReactConvertUtils {
 
     /**
      * Instance of the {@link CodePushUtils} to work with.
@@ -26,14 +29,14 @@ public class CodePushRNUtils {
     private CodePushUtils mCodePushUtils;
 
     /**
-     * Sigleton instance of the {@link CodePushRNUtils}.
+     * Sigleton instance of the {@link ReactConvertUtils}.
      */
-    private static CodePushRNUtils INSTANCE;
+    private static ReactConvertUtils INSTANCE;
 
     /**
      * Private constructor to prevent creating utils manually.
      */
-    private CodePushRNUtils() {
+    private ReactConvertUtils() {
     }
 
     /**
@@ -41,9 +44,9 @@ public class CodePushRNUtils {
      *
      * @return instance.
      */
-    public static CodePushRNUtils getInstance(CodePushUtils codePushUtils) {
+    public static ReactConvertUtils getInstance(CodePushUtils codePushUtils) {
         if (INSTANCE == null) {
-            INSTANCE = new CodePushRNUtils();
+            INSTANCE = new ReactConvertUtils();
         }
         INSTANCE.mCodePushUtils = codePushUtils;
         return INSTANCE;
