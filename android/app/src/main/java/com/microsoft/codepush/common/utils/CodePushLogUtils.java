@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 
 import com.microsoft.appcenter.crashes.Crashes;
 import com.microsoft.appcenter.utils.AppCenterLog;
+import com.microsoft.codepush.common.exceptions.CodePushGeneralException;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -15,6 +16,35 @@ import static com.microsoft.codepush.common.CodePush.LOG_TAG;
  * Represents wrapper on {@link Crashes} methods.
  */
 public class CodePushLogUtils {
+
+    /**
+     * Represents wrapper on {@link Crashes#trackException(Throwable, Map)} method. Automatically tracks exception in logs, too.
+     *
+     * @param throwable exception instance.
+     */
+    public static void trackException(Throwable throwable) {
+        trackException(throwable, true);
+    }
+
+    /**
+     * Represents wrapper on {@link Crashes#trackException(Throwable, Map)} method.
+     * Automatically tracks exception in logs, too.
+     *
+     * @param message message to log (instance of {@link CodePushGeneralException} is created automatically).
+     */
+    public static void trackException(String message) {
+        trackException(new CodePushGeneralException(message), true);
+    }
+
+    /**
+     * Represents wrapper on {@link Crashes#trackException(Throwable, Map)} method. Automatically tracks exception in logs, too.
+     *
+     * @param throwable  exception instance.
+     * @param properties additional properties.
+     */
+    public static void trackException(@NonNull Throwable throwable, Map<String, String> properties) {
+        trackException(throwable, properties, true);
+    }
 
     /**
      * Represents wrapper on {@link Crashes#trackException(Throwable)} method.

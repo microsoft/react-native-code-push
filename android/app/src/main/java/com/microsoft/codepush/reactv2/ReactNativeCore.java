@@ -20,12 +20,14 @@ import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.CodePushBaseCore;
 import com.microsoft.codepush.common.DownloadProgress;
 import com.microsoft.codepush.common.enums.CodePushInstallMode;
+import com.microsoft.codepush.common.exceptions.CodePushGeneralException;
 import com.microsoft.codepush.common.exceptions.CodePushInitializeException;
 import com.microsoft.codepush.common.interfaces.AppEntryPointProvider;
 import com.microsoft.codepush.common.interfaces.CodePushConfirmationDialog;
 import com.microsoft.codepush.common.interfaces.CodePushRestartListener;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
 import com.microsoft.codepush.common.interfaces.PublicKeyProvider;
+import com.microsoft.codepush.common.utils.CodePushLogUtils;
 import com.microsoft.codepush.common.utils.PlatformUtils;
 import com.microsoft.codepush.reactv2.interfaces.ReactInstanceHolder;
 
@@ -201,9 +203,7 @@ public class ReactNativeCore extends CodePushBaseCore {
             bundleLoaderField.setAccessible(true);
             bundleLoaderField.set(instanceManager, latestJSBundleLoader);
         } catch (Exception e) {
-
-            //TODO: track exception "Unable to set JSBundle - CodePush may not support this version of React Native"
-            throw new IllegalAccessException("Could not set JSBundle");
+            CodePushLogUtils.trackException(new CodePushGeneralException("Unable to set JSBundle - CodePush may not support this version of React Native", e));
         }
     }
 
@@ -268,7 +268,7 @@ public class ReactNativeCore extends CodePushBaseCore {
                     try {
                         sender.call();
                     } catch (Exception e) {
-                        //TODO: track exception.
+                        CodePushLogUtils.trackException(e);
                     }
                 }
 

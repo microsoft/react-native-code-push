@@ -19,13 +19,13 @@ import com.microsoft.codepush.common.datacontracts.CodePushSyncOptions;
 import com.microsoft.codepush.common.enums.CodePushInstallMode;
 import com.microsoft.codepush.common.enums.CodePushSyncStatus;
 import com.microsoft.codepush.common.enums.CodePushUpdateState;
-import com.microsoft.codepush.common.exceptions.CodePushApiHttpRequestException;
 import com.microsoft.codepush.common.exceptions.CodePushGetUpdateMetadataException;
 import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
 import com.microsoft.codepush.common.exceptions.CodePushNativeApiCallException;
 import com.microsoft.codepush.common.interfaces.CodePushBinaryVersionMismatchListener;
 import com.microsoft.codepush.common.interfaces.CodePushDownloadProgressListener;
 import com.microsoft.codepush.common.interfaces.CodePushSyncStatusListener;
+import com.microsoft.codepush.common.utils.CodePushLogUtils;
 import com.microsoft.codepush.common.utils.CodePushUpdateUtils;
 import com.microsoft.codepush.common.utils.CodePushUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
@@ -330,7 +330,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
     public void isFirstRun(String packageHash, Promise promise) {
         try {
             promise.resolve(mCodePushCore.isFirstRun(packageHash));
-        } catch (IOException | CodePushMalformedDataException e)  {
+        } catch (IOException | CodePushMalformedDataException e) {
             promise.resolve(false);
         }
     }
@@ -394,7 +394,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
         try {
             mCodePushCore.saveReportedStatus(mReactConvertUtils.convertReadableToObject(statusReport, CodePushDeploymentStatusReport.class));
         } catch (CodePushMalformedDataException e) {
-            //TODO: track this exception
+            CodePushLogUtils.trackException(e);
         }
     }
 
@@ -403,7 +403,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
         try {
             mCodePushCore.saveStatusReportForRetry(mReactConvertUtils.convertReadableToObject(statusReport, CodePushDeploymentStatusReport.class));
         } catch (CodePushMalformedDataException | CodePushNativeApiCallException e) {
-            //TODO: track this exception.
+            CodePushLogUtils.trackException(e);
         }
     }
 

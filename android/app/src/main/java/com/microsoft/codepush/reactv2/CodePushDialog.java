@@ -9,6 +9,7 @@ import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.microsoft.codepush.common.utils.CodePushLogUtils;
 
 /**
  * Represents a react native dialog.
@@ -27,12 +28,12 @@ public class CodePushDialog extends ReactContextBaseJavaModule {
     /**
      * Displays dialog with the provided options.
      *
-     * @param title           title of the dialog.
-     * @param message         message to be displayed.
-     * @param positiveButtonText     text on the positive action button.
-     * @param negativeButtonText     test on the negative action button.
-     * @param successCallback callback to handle "OK" events.
-     * @param errorCallback   callback to handle "Discard" events.
+     * @param title              title of the dialog.
+     * @param message            message to be displayed.
+     * @param positiveButtonText text on the positive action button.
+     * @param negativeButtonText test on the negative action button.
+     * @param successCallback    callback to handle "OK" events.
+     * @param errorCallback      callback to handle "Discard" events.
      */
     @ReactMethod
     public void showDialog(final String title, final String message, final String positiveButtonText,
@@ -70,12 +71,12 @@ public class CodePushDialog extends ReactContextBaseJavaModule {
     /**
      * Internal method for actually showing the dialog.
      *
-     * @param title           title of the dialog.
-     * @param message         message to be displayed.
-     * @param positiveButtonText     text on the positive action button.
-     * @param negativeButtonText     test on the negative action button.
-     * @param successCallback callback to handle "OK" events.
-     * @param currentActivity application activity.
+     * @param title              title of the dialog.
+     * @param message            message to be displayed.
+     * @param positiveButtonText text on the positive action button.
+     * @param negativeButtonText test on the negative action button.
+     * @param successCallback    callback to handle "OK" events.
+     * @param currentActivity    application activity.
      */
     private void showDialogInternal(String title, String message, String positiveButtonText,
                                     String negativeButtonText, final Callback successCallback, Activity currentActivity) {
@@ -93,7 +94,7 @@ public class CodePushDialog extends ReactContextBaseJavaModule {
                         successCallback.invoke(1);
                         break;
                     default:
-                        //TODO: track the exception here cause can't be thrown. "Unknown button ID pressed."
+                        CodePushLogUtils.trackException("Unknown button ID pressed.");
                 }
             }
         };
@@ -113,7 +114,7 @@ public class CodePushDialog extends ReactContextBaseJavaModule {
             AlertDialog dialog = builder.create();
             dialog.show();
         } catch (Exception e) {
-            //TODO: track
+            CodePushLogUtils.trackException(e);
         }
     }
 
