@@ -46,7 +46,7 @@ public class CodePushSyncOptions {
      * Specifies whether to ignore failed updates.
      * Defaults to <code>true</code>.
      */
-    private boolean ignoreFailedUpdates;
+    private boolean ignoreFailedUpdates = true;
 
     /**
      * An "options" object used to determine whether a confirmation dialog should be displayed to the end user when an update is available,
@@ -76,6 +76,13 @@ public class CodePushSyncOptions {
         setMinimumBackgroundDuration(0);
         setIgnoreFailedUpdates(true);
         setCheckFrequency(CodePushCheckFrequency.ON_APP_START);
+    }
+
+    /**
+     * Creates default instance of sync options.
+     */
+    public CodePushSyncOptions() {
+        this(null);
     }
 
     /**
