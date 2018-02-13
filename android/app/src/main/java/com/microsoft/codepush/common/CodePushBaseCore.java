@@ -314,7 +314,7 @@ public abstract class CodePushBaseCore {
      *
      * @param syncStatus sync status.
      */
-    private void notifyAboutSyncStatusChange(CodePushSyncStatus syncStatus) {
+    protected void notifyAboutSyncStatusChange(CodePushSyncStatus syncStatus) {
         for (CodePushSyncStatusListener syncStatusListener : mSyncStatusListeners) {
             syncStatusListener.syncStatusChanged(syncStatus);
         }
@@ -366,7 +366,7 @@ public abstract class CodePushBaseCore {
      * @param receivedBytes received amount of bytes.
      * @param totalBytes    total amount of bytes.
      */
-    private void notifyAboutDownloadProgressChange(long receivedBytes, long totalBytes) {
+    protected void notifyAboutDownloadProgressChange(long receivedBytes, long totalBytes) {
         for (CodePushDownloadProgressListener downloadProgressListener : mDownloadProgressListeners) {
             downloadProgressListener.downloadProgressChanged(receivedBytes, totalBytes);
         }
@@ -377,7 +377,7 @@ public abstract class CodePushBaseCore {
      *
      * @param update remote package.
      */
-    private void binaryVersionMismatchChange(CodePushRemotePackage update) {
+    protected void notifyAboutBinaryVersionMismatchChange(CodePushRemotePackage update) {
         for (CodePushBinaryVersionMismatchListener listener : mBinaryVersionMismatchListeners) {
             listener.binaryVersionMismatchChanged(update);
         }
@@ -608,7 +608,7 @@ public abstract class CodePushBaseCore {
                 (localPackage == null || localPackage.isDebugOnly()) && config.getPackageHash().equals(update.getPackageHash())) {
             if (update != null && update.isUpdateAppVersion()) {
                 AppCenterLog.info(LOG_TAG, "An update is available but it is not targeting the binary version of your app.");
-                binaryVersionMismatchChange(update);
+                notifyAboutBinaryVersionMismatchChange(update);
             }
             return null;
         } else {
