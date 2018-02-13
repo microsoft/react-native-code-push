@@ -88,113 +88,113 @@ public abstract class CodePushBaseCore {
     /**
      * Deployment key for checking for updates.
      */
-    private String mDeploymentKey;
+    protected String mDeploymentKey;
 
     /**
      * CodePush server URL.
      */
-    private static String mServerUrl = "https://codepush.azurewebsites.net/";
+    protected static String mServerUrl = "https://codepush.azurewebsites.net/";
 
     /**
      * Public key for code signing verification.
      */
-    private static String mPublicKey;
+    protected static String mPublicKey;
 
     /**
      * Path to bundle
      */
-    private final String mAppEntryPoint;
+    protected final String mAppEntryPoint;
 
     /**
      * Application context.
      */
-    private Context mContext;
+    protected Context mContext;
 
     /**
      * Indicates whether application is running in debug mode.
      */
-    private final boolean mIsDebugMode;
+    protected final boolean mIsDebugMode;
 
     /**
      * Current app version.
      */
-    private String mAppVersion;
+    protected String mAppVersion;
 
     /**
      * Current state of CodePush update.
      */
-    private CodePushState mState;
+    protected CodePushState mState;
 
     /**
      * Instance of {@link CodePushUtils}.
      */
-    private final CodePushUtils mUtils;
+    protected final CodePushUtils mUtils;
 
     /**
      * Instance of {@link FileUtils}.
      */
-    private final FileUtils mFileUtils;
+    protected final FileUtils mFileUtils;
 
     /**
      * Instance of {@link CodePushUpdateUtils}.
      */
-    private final CodePushUpdateUtils mUpdateUtils;
+    protected final CodePushUpdateUtils mUpdateUtils;
 
     /**
      * Instance of {@link PlatformUtils}.
      */
-    private final PlatformUtils mPlatformUtils;
+    protected final PlatformUtils mPlatformUtils;
 
     /**
      * Instance of {@link CodePushUpdateManager}.
      */
-    private CodePushUpdateManager mUpdateManager;
+    protected CodePushUpdateManager mUpdateManager;
 
     /**
      * Instance of {@link CodePushTelemetryManager}.
      */
-    private CodePushTelemetryManager mTelemetryManager;
+    protected CodePushTelemetryManager mTelemetryManager;
 
     /**
      * Instance of {@link SettingsManager}.
      */
-    private SettingsManager mSettingsManager;
+    protected SettingsManager mSettingsManager;
 
     /**
      * Instance of {@link CodePushRestartManager}.
      */
-    private CodePushRestartManager mRestartManager;
+    protected CodePushRestartManager mRestartManager;
 
     /**
      * Instance of {@link CodePushAcquisitionManager}.
      */
-    private CodePushAcquisitionManager mAcquisitionManager;
+    protected CodePushAcquisitionManager mAcquisitionManager;
 
     /**
      * Instance of {@link CodePushConfirmationDialog}.
      */
-    private CodePushConfirmationDialog mConfirmationDialog;
+    protected CodePushConfirmationDialog mConfirmationDialog;
 
     /**
      * List of {@link CodePushSyncStatusListener}.
      */
-    private List<CodePushSyncStatusListener> mSyncStatusListeners = new ArrayList<>();
+    protected List<CodePushSyncStatusListener> mSyncStatusListeners = new ArrayList<>();
 
     /**
      * List of {@link CodePushDownloadProgressListener}.
      */
-    private List<CodePushDownloadProgressListener> mDownloadProgressListeners = new ArrayList<>();
+    protected List<CodePushDownloadProgressListener> mDownloadProgressListeners = new ArrayList<>();
 
     /**
      * List of {@link CodePushBinaryVersionMismatchListener}.
      */
-    private List<CodePushBinaryVersionMismatchListener> mBinaryVersionMismatchListeners = new ArrayList<>();
+    protected List<CodePushBinaryVersionMismatchListener> mBinaryVersionMismatchListeners = new ArrayList<>();
 
     /**
      * Self-reference to the current instance.
      */
     @SuppressLint("StaticFieldLeak")
-    private static CodePushBaseCore mCurrentInstance;
+    protected static CodePushBaseCore mCurrentInstance;
 
     CodePushBaseCore(
             @NonNull String deploymentKey,
