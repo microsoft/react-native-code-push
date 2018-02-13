@@ -35,14 +35,14 @@ import com.microsoft.codepush.common.exceptions.CodePushQueryUpdateException;
 import com.microsoft.codepush.common.exceptions.CodePushReportStatusException;
 import com.microsoft.codepush.common.exceptions.CodePushRollbackException;
 import com.microsoft.codepush.common.exceptions.CodePushUnzipException;
-import com.microsoft.codepush.common.interfaces.AppEntryPointProvider;
+import com.microsoft.codepush.common.interfaces.CodePushAppEntryPointProvider;
 import com.microsoft.codepush.common.interfaces.CodePushBinaryVersionMismatchListener;
 import com.microsoft.codepush.common.interfaces.CodePushConfirmationDialog;
 import com.microsoft.codepush.common.interfaces.CodePushDownloadProgressListener;
 import com.microsoft.codepush.common.interfaces.CodePushRestartListener;
 import com.microsoft.codepush.common.interfaces.CodePushSyncStatusListener;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
-import com.microsoft.codepush.common.interfaces.PublicKeyProvider;
+import com.microsoft.codepush.common.interfaces.CodePushPublicKeyProvider;
 import com.microsoft.codepush.common.managers.CodePushAcquisitionManager;
 import com.microsoft.codepush.common.managers.CodePushRestartManager;
 import com.microsoft.codepush.common.managers.CodePushTelemetryManager;
@@ -51,7 +51,7 @@ import com.microsoft.codepush.common.managers.SettingsManager;
 import com.microsoft.codepush.common.utils.CodePushUpdateUtils;
 import com.microsoft.codepush.common.utils.CodePushUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
-import com.microsoft.codepush.common.utils.PlatformUtils;
+import com.microsoft.codepush.common.interfaces.CodePushPlatformUtils;
 
 import org.json.JSONException;
 
@@ -173,9 +173,9 @@ public abstract class CodePushBaseCore {
      * @param context               application context.
      * @param isDebugMode           indicates whether application is running in debug mode.
      * @param serverUrl             CodePush server url.
-     * @param publicKeyProvider     instance of {@link PublicKeyProvider}.
-     * @param appEntryPointProvider instance of {@link AppEntryPointProvider}.
-     * @param platformUtils         instance of {@link PlatformUtils}.
+     * @param publicKeyProvider     instance of {@link CodePushPublicKeyProvider}.
+     * @param appEntryPointProvider instance of {@link CodePushAppEntryPointProvider}.
+     * @param platformUtils         instance of {@link CodePushPlatformUtils}.
      * @param restartListener       implementation of {@link CodePushRestartListener}.
      * @param confirmationDialog    instance of {@link CodePushConfirmationDialog}.
      * @throws CodePushInitializeException if error occurred during the initialization.
@@ -185,9 +185,9 @@ public abstract class CodePushBaseCore {
             @NonNull Context context,
             boolean isDebugMode,
             String serverUrl,
-            PublicKeyProvider publicKeyProvider,
-            AppEntryPointProvider appEntryPointProvider,
-            PlatformUtils platformUtils,
+            CodePushPublicKeyProvider publicKeyProvider,
+            CodePushAppEntryPointProvider appEntryPointProvider,
+            CodePushPlatformUtils platformUtils,
             CodePushRestartListener restartListener,
             CodePushConfirmationDialog confirmationDialog
     ) throws CodePushInitializeException {
@@ -374,7 +374,7 @@ public abstract class CodePushBaseCore {
      * Initializes update after app restart.
      *
      * @throws CodePushGetPackageException    if error occurred during the getting current package.
-     * @throws CodePushPlatformUtilsException if error occurred during usage of {@link PlatformUtils}.
+     * @throws CodePushPlatformUtilsException if error occurred during usage of {@link CodePushPlatformUtils}.
      * @throws CodePushRollbackException      if error occurred during rolling back of package.
      */
     @SuppressWarnings("WeakerAccess")

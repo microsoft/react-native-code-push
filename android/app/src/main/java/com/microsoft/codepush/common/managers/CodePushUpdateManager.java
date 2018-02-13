@@ -20,7 +20,7 @@ import com.microsoft.codepush.common.datacontracts.CodePushDownloadPackageResult
 import com.microsoft.codepush.common.utils.CodePushUpdateUtils;
 import com.microsoft.codepush.common.utils.CodePushUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
-import com.microsoft.codepush.common.utils.PlatformUtils;
+import com.microsoft.codepush.common.interfaces.CodePushPlatformUtils;
 
 import org.json.JSONException;
 
@@ -35,7 +35,7 @@ public class CodePushUpdateManager {
     /**
      * Platform-specific utils implementation.
      */
-    private PlatformUtils mPlatformUtils;
+    private CodePushPlatformUtils mPlatformUtils;
 
     /**
      * Instance of {@link FileUtils} to work with.
@@ -66,12 +66,12 @@ public class CodePushUpdateManager {
      * Creates instance of CodePushUpdateManager.
      *
      * @param documentsDirectory  path for storing files.
-     * @param platformUtils       instance of {@link PlatformUtils} to work with.
+     * @param platformUtils       instance of {@link CodePushPlatformUtils} to work with.
      * @param fileUtils           instance of {@link FileUtils} to work with.
      * @param codePushUtils       instance of {@link CodePushUtils} to work with.
      * @param codePushUpdateUtils instance of {@link CodePushUpdateUtils} to work with.
      */
-    public CodePushUpdateManager(String documentsDirectory, PlatformUtils platformUtils, FileUtils fileUtils, CodePushUtils codePushUtils, CodePushUpdateUtils codePushUpdateUtils) {
+    public CodePushUpdateManager(String documentsDirectory, CodePushPlatformUtils platformUtils, FileUtils fileUtils, CodePushUtils codePushUtils, CodePushUpdateUtils codePushUpdateUtils) {
         mPlatformUtils = platformUtils;
         mFileUtils = fileUtils;
         mCodePushUpdateUtils = codePushUpdateUtils;

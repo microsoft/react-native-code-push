@@ -17,7 +17,7 @@ import com.microsoft.codepush.common.testutils.CommonTestPlatformUtils;
 import com.microsoft.codepush.common.utils.CodePushUpdateUtils;
 import com.microsoft.codepush.common.utils.CodePushUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
-import com.microsoft.codepush.common.utils.PlatformUtils;
+import com.microsoft.codepush.common.interfaces.CodePushPlatformUtils;
 
 import org.junit.Before;
 import org.junit.FixMethodOrder;
@@ -110,7 +110,7 @@ public class UpdateManagerAndroidTests {
 
     @Before
     public void setUp() throws Exception {
-        PlatformUtils platformUtils = CommonTestPlatformUtils.getInstance();
+        CodePushPlatformUtils platformUtils = CommonTestPlatformUtils.getInstance();
         mFileUtils = FileUtils.getInstance();
         mCodePushUtils = CodePushUtils.getInstance(mFileUtils);
         CodePushUpdateUtils codePushUpdateUtils = CodePushUpdateUtils.getInstance(mFileUtils, mCodePushUtils);

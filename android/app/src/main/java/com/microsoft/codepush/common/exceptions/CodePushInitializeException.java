@@ -3,14 +3,14 @@ package com.microsoft.codepush.common.exceptions;
 import android.content.Context;
 
 import com.microsoft.codepush.common.core.CodePushBaseCore;
-import com.microsoft.codepush.common.interfaces.AppEntryPointProvider;
+import com.microsoft.codepush.common.interfaces.CodePushAppEntryPointProvider;
 import com.microsoft.codepush.common.interfaces.CodePushConfirmationDialog;
 import com.microsoft.codepush.common.interfaces.CodePushRestartListener;
-import com.microsoft.codepush.common.interfaces.PublicKeyProvider;
-import com.microsoft.codepush.common.utils.PlatformUtils;
+import com.microsoft.codepush.common.interfaces.CodePushPublicKeyProvider;
+import com.microsoft.codepush.common.interfaces.CodePushPlatformUtils;
 
 /**
- * Exception class for handling {@link CodePushBaseCore#CodePushBaseCore(String, Context, boolean, String, PublicKeyProvider, AppEntryPointProvider, PlatformUtils, CodePushRestartListener, CodePushConfirmationDialog)} exceptions.
+ * Exception class for handling {@link CodePushBaseCore#CodePushBaseCore(String, Context, boolean, String, CodePushPublicKeyProvider, CodePushAppEntryPointProvider, CodePushPlatformUtils, CodePushRestartListener, CodePushConfirmationDialog)} exceptions.
  */
 public class CodePushInitializeException extends Exception {
 

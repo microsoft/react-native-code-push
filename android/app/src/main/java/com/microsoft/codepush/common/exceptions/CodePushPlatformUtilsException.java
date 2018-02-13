@@ -1,9 +1,9 @@
 package com.microsoft.codepush.common.exceptions;
 
-import com.microsoft.codepush.common.utils.PlatformUtils;
+import com.microsoft.codepush.common.interfaces.CodePushPlatformUtils;
 
 /**
- * Exception class for handling {@link PlatformUtils} exceptions.
+ * Exception class for handling {@link CodePushPlatformUtils} exceptions.
  */
 public class CodePushPlatformUtilsException extends Exception {
 
