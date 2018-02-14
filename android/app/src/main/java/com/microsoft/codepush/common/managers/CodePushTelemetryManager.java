@@ -4,6 +4,7 @@ import com.microsoft.codepush.common.CodePushStatusReportIdentifier;
 import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPackage;
+import com.microsoft.codepush.common.exceptions.CodePushIllegalArgumentException;
 
 import org.json.JSONException;
 

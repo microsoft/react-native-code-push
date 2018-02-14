@@ -89,9 +89,8 @@ public class CodePushAcquisitionManager {
         String serverUrl = fixServerUrl(configuration.getServerUrl());
         String deploymentKey = configuration.getDeploymentKey();
         String clientUniqueId = configuration.getClientUniqueId();
-        CodePushUpdateRequest updateRequest = CodePushUpdateRequest.createUpdateRequest(deploymentKey, currentPackage, clientUniqueId);
         try {
-            CodePushUpdateRequest updateRequest = CodePushUpdateRequest.createUpdateRequest(mDeploymentKey, currentPackage, mClientUniqueId);
+            CodePushUpdateRequest updateRequest = CodePushUpdateRequest.createUpdateRequest(deploymentKey, currentPackage, clientUniqueId);
             final String requestUrl = serverUrl + String.format(Locale.getDefault(), UPDATE_CHECK_ENDPOINT, mCodePushUtils.getQueryStringFromObject(updateRequest, "UTF-8"));
             CheckForUpdateTask checkForUpdateTask = new CheckForUpdateTask(mFileUtils, mCodePushUtils, requestUrl);
             ApiHttpRequest<CodePushUpdateResponse> checkForUpdateRequest = new ApiHttpRequest<>(checkForUpdateTask);

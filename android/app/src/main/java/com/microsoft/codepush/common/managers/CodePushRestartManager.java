@@ -1,6 +1,7 @@
 package com.microsoft.codepush.common.managers;
 
 import com.microsoft.appcenter.utils.AppCenterLog;
+import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
 import com.microsoft.codepush.common.interfaces.CodePushRestartListener;
 
 import java.util.LinkedList;
@@ -45,7 +46,7 @@ public class CodePushRestartManager {
     /**
      * Allows the manager to perform restarts and performs them if there are pending.
      */
-    public void allowRestarts() {
+    public void allowRestarts() throws CodePushMalformedDataException {
         AppCenterLog.info(LOG_TAG, "Re-allowing restarts");
         mAllowed = true;
         if (mRestartQueue.size() > 0) {
@@ -77,7 +78,7 @@ public class CodePushRestartManager {
      * @param onlyIfUpdateIsPending if <code>true</code>, performs restart only if there is a pending update.
      * @return <code>true</code> if application has restarted successfully.
      */
-    public boolean restartApp(boolean onlyIfUpdateIsPending) {
+    public boolean restartApp(boolean onlyIfUpdateIsPending) throws CodePushMalformedDataException {
         if (mRestartInProgress) {
             AppCenterLog.info(LOG_TAG, "Restart request queued until the current restart is completed");
             mRestartQueue.add(onlyIfUpdateIsPending);

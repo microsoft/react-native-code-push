@@ -1,5 +1,7 @@
 package com.microsoft.codepush.common.interfaces;
 
+import com.microsoft.codepush.common.exceptions.CodePushInvalidPublicKeyException;
+
 /**
  * Represents interface for provider of public key.
  */
@@ -10,5 +12,5 @@ public interface CodePushPublicKeyProvider {
      *
      * @return public key.
      */
-    String getPublicKey();
+    String getPublicKey() throws CodePushInvalidPublicKeyException;
 }
