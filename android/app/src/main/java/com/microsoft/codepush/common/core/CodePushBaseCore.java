@@ -113,7 +113,12 @@ public abstract class CodePushBaseCore {
      * Entry point for application.
      */
     @SuppressWarnings("WeakerAccess")
-    protected final String mAppEntryPoint;
+    protected String mAppEntryPoint;
+
+    /**
+     * Entry point provider.
+     */
+    protected CodePushAppEntryPointProvider mAppEntryPointProvider;
 
     /**
      * Application context.
@@ -199,7 +204,6 @@ public abstract class CodePushBaseCore {
         }
         try {
             mPublicKey = publicKeyProvider.getPublicKey();
-            mAppEntryPoint = appEntryPointProvider.getAppEntryPoint();
             PackageInfo pInfo = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
             mAppVersion = pInfo.versionName;
         } catch (PackageManager.NameNotFoundException | CodePushInvalidPublicKeyException e) {
@@ -233,7 +237,6 @@ public abstract class CodePushBaseCore {
         });
         CodePushAcquisitionManager acquisitionManager = new CodePushAcquisitionManager(utils, fileUtils);
         mManagers = new CodePushManagers(updateManager, telemetryManager, settingsManager, restartManager, acquisitionManager);
-        mCurrentInstance = this;
 
         /* Initialize state */
         mState = new CodePushState();
@@ -250,6 +253,15 @@ public abstract class CodePushBaseCore {
         try {
             initializeUpdateAfterRestart();
         } catch (CodePushGetPackageException | CodePushPlatformUtilsException | CodePushRollbackException | CodePushGeneralException | CodePushMalformedDataException e) {
+            throw new CodePushInitializeException(e);
+        }
+        mCurrentInstance = this;
+
+        /* appEntryPointProvider.getAppEntryPoint() implementation for RN uses static instance on CodePushBaseCore
+         * so we place it here to avoid null pointer reference. */
+        try {
+            mAppEntryPoint = appEntryPointProvider.getAppEntryPoint();
+        } catch (CodePushNativeApiCallException e) {
             throw new CodePushInitializeException(e);
         }
     }
@@ -551,7 +563,8 @@ public abstract class CodePushBaseCore {
             /* Ask user whether he want to install update or ignore it. */
             notifyAboutSyncStatusChange(AWAITING_USER_ACTION);
             mConfirmationDialog.shouldInstallUpdate(updateDialogOptions.getTitle(), message, acceptButtonText, declineButtonText, new CodePushConfirmationCallback() {
-                @Override public void onResult(boolean userAcceptsProposal) {
+                @Override
+                public void onResult(boolean userAcceptsProposal) {
                     if (userAcceptsProposal) {
                         try {
                             doDownloadAndInstall(remotePackage, syncOptions, configuration);
@@ -567,7 +580,8 @@ public abstract class CodePushBaseCore {
                     }
                 }
 
-                @Override public void throwError(CodePushGeneralException e) {
+                @Override
+                public void throwError(CodePushGeneralException e) {
                     notifyAboutSyncStatusChange(UNKNOWN_ERROR);
                     mState.mSyncInProgress = false;
                     CodePushLogUtils.trackException(new CodePushNativeApiCallException(e));
@@ -1194,13 +1208,4 @@ public abstract class CodePushBaseCore {
      * Loads application.
      */
     protected abstract void loadApp();
-
-    /**
-     * Gets a link to the specified javascript bundle file.
-     *
-     * @param assetsBundleFileName custom bundle file name.
-     * @return link starting with "assets://" and leading to javascript bundle file.
-     * @throws CodePushNativeApiCallException exception occurred when performing the operation.
-     */
-    public abstract String getJSBundleFileInternal(String assetsBundleFileName) throws CodePushNativeApiCallException;
 }

@@ -34,6 +34,9 @@ public class CodePushReactPublicKeyProvider implements CodePushPublicKeyProvider
 
     @Override
     public String getPublicKey() throws CodePushInvalidPublicKeyException {
+        if (mPublicKeyResourceDescriptor == null) {
+            return null;
+        }
         String publicKey;
         try {
             publicKey = mContext.getString(mPublicKeyResourceDescriptor);

@@ -34,7 +34,7 @@ public interface CodePushPlatformUtils {
     boolean isPackageLatest(CodePushLocalPackage packageMetadata, String currentAppVersion, Context context) throws CodePushGeneralException;
 
     /**
-     * gets binary version apk build time.
+     * Gets binary version apk build time.
      *
      * @param context application context.
      * @return time in ms.

@@ -32,9 +32,9 @@ import java.util.List;
 public class CodePush implements ReactPackage, Serializable {
 
     /**
-     * Instance of {@link ReactNativeCore}.
+     * Instance of {@link CodePushReactNativeCore}.
      */
-    private static ReactNativeCore mReactNativeCore;
+    private static CodePushReactNativeCore mReactNativeCore;
 
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactApplicationContext) {
@@ -64,7 +64,7 @@ public class CodePush implements ReactPackage, Serializable {
      */
     @Deprecated
     public CodePush(String deploymentKey, Context context, boolean isDebugMode) throws CodePushInitializeException {
-        mReactNativeCore = new ReactNativeCore(
+        mReactNativeCore = new CodePushReactNativeCore(
                 deploymentKey,
                 context,
                 isDebugMode,
@@ -79,7 +79,7 @@ public class CodePush implements ReactPackage, Serializable {
      */
     @Deprecated
     public CodePush(String deploymentKey, Context context, boolean isDebugMode, String serverUrl) throws CodePushInitializeException {
-        mReactNativeCore = new ReactNativeCore(
+        mReactNativeCore = new CodePushReactNativeCore(
                 deploymentKey,
                 context,
                 isDebugMode,
@@ -94,7 +94,7 @@ public class CodePush implements ReactPackage, Serializable {
      */
     @Deprecated
     public CodePush(String deploymentKey, Context context, boolean isDebugMode, int publicKeyResourceDescriptor) throws CodePushInitializeException {
-        mReactNativeCore = new ReactNativeCore(
+        mReactNativeCore = new CodePushReactNativeCore(
                 deploymentKey,
                 context,
                 isDebugMode,
@@ -109,7 +109,7 @@ public class CodePush implements ReactPackage, Serializable {
      */
     @Deprecated
     public CodePush(String deploymentKey, Context context, boolean isDebugMode, @NonNull String serverUrl, Integer publicKeyResourceDescriptor) throws CodePushInitializeException {
-        mReactNativeCore = new ReactNativeCore(
+        mReactNativeCore = new CodePushReactNativeCore(
                 deploymentKey,
                 context,
                 isDebugMode,
@@ -138,7 +138,7 @@ public class CodePush implements ReactPackage, Serializable {
             @Nullable Integer publicKeyResourceDescriptor,
             @Nullable String entryPointName
     ) throws CodePushInitializeException {
-        mReactNativeCore = new ReactNativeCore(
+        mReactNativeCore = new CodePushReactNativeCore(
                 deploymentKey,
                 context,
                 isDebugMode,
@@ -166,7 +166,7 @@ public class CodePush implements ReactPackage, Serializable {
      * @throws CodePushNativeApiCallException exception occurred when performing the operation.
      */
     public static String getJSBundleFile() throws CodePushNativeApiCallException {
-        return ReactNativeCore.getJSBundleFile();
+        return CodePushReactNativeCore.getJSBundleFile();
     }
 
     /**
@@ -177,7 +177,7 @@ public class CodePush implements ReactPackage, Serializable {
      * @throws CodePushNativeApiCallException exception occurred when performing the operation.
      */
     public static String getJSBundleFile(String assetsBundleFileName) throws CodePushNativeApiCallException {
-        return ReactNativeCore.getJSBundleFile(assetsBundleFileName);
+        return CodePushReactNativeCore.getJSBundleFile(assetsBundleFileName);
     }
 
     /**
@@ -187,7 +187,7 @@ public class CodePush implements ReactPackage, Serializable {
      */
     public static void setReactInstanceHolder(ReactInstanceHolder reactInstanceHolder) {
         //todo remove or not?
-        ReactNativeCore.setReactInstanceHolder(reactInstanceHolder);
+        CodePushReactNativeCore.setReactInstanceHolder(reactInstanceHolder);
     }
 
     /**
