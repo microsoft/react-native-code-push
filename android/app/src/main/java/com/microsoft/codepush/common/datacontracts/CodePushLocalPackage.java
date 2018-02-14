@@ -17,7 +17,7 @@ public class CodePushLocalPackage extends CodePushPackage {
     private boolean isPending;
 
     /**
-     * Indicates the path to the application entry point.
+     * The path to the application entry point (e.g. android.js.bundle for RN, index.html for Cordova).
      */
     @SerializedName("appEntryPoint")
     private String appEntryPoint;
@@ -35,22 +35,10 @@ public class CodePushLocalPackage extends CodePushPackage {
     private boolean isDebugOnly;
 
     /**
-     * An exception that has occurred during downloading (can be null if package has been successfully downloaded).
-     */
-    @Expose
-    private Exception downloadException;
-
-    /**
-     * Creates an instance of the package which has had an error during download.
      *
-     * @param downloadException exception that has occurred.
-     * @return instance of the {@link CodePushLocalPackage}.
      */
-    public static CodePushLocalPackage createFailedLocalPackage(Exception downloadException) {
-        CodePushLocalPackage codePushLocalPackage = new CodePushLocalPackage();
-        codePushLocalPackage.setDownloadException(downloadException);
-        return codePushLocalPackage;
-    }
+    @SerializedName("binaryModifiedTime")
+    private String binaryModifiedTime;
 
     /**
      * Creates an instance of the package from basic package.
@@ -59,6 +47,7 @@ public class CodePushLocalPackage extends CodePushPackage {
      * @param isFirstRun      whether this is the first time the update has been run after being installed.
      * @param isPending       whether this update is in a "pending" state.
      * @param isDebugOnly     whether this package is intended for debug mode.
+     * @param appEntryPoint   the path to the application entry point (e.g. android.js.bundle for RN, index.html for Cordova).
      * @param codePushPackage basic package containing the information.
      * @return instance of the {@link CodePushLocalPackage}.
      */
@@ -77,6 +66,22 @@ public class CodePushLocalPackage extends CodePushPackage {
         codePushLocalPackage.setFirstRun(isFirstRun);
         codePushLocalPackage.setDebugOnly(isDebugOnly);
         codePushLocalPackage.setAppEntryPoint(appEntryPoint);
+        return codePushLocalPackage;
+    }
+
+    public static CodePushLocalPackage createEmptyPackageForCheckForUpdateQuery(String appVersion) {
+        CodePushLocalPackage codePushLocalPackage = new CodePushLocalPackage();
+        codePushLocalPackage.setAppVersion(appVersion);
+        codePushLocalPackage.setDeploymentKey("");
+        codePushLocalPackage.setDescription("");
+        codePushLocalPackage.setFailedInstall(false);
+        codePushLocalPackage.setMandatory(false);
+        codePushLocalPackage.setLabel("");
+        codePushLocalPackage.setPackageHash("");
+        codePushLocalPackage.setPending(false);
+        codePushLocalPackage.setFirstRun(false);
+        codePushLocalPackage.setDebugOnly(false);
+        codePushLocalPackage.setAppEntryPoint("");
         return codePushLocalPackage;
     }
 
@@ -138,25 +143,6 @@ public class CodePushLocalPackage extends CodePushPackage {
     }
 
     /**
-     * Gets the an exception that has occurred during downloading (can be null if package has been successfully downloaded).
-     *
-     * @return exception that has occurred during downloading (can be null if package has been successfully downloaded).
-     */
-    public Exception getDownloadException() {
-        return downloadException;
-    }
-
-    /**
-     * Sets the exception that has occurred during downloading (can be null if package has been successfully downloaded).
-     *
-     * @param downloadException exception that has occurred during downloading (can be null if package has been successfully downloaded).
-     */
-    @SuppressWarnings("WeakerAccess")
-    public void setDownloadException(Exception downloadException) {
-        this.downloadException = downloadException;
-    }
-
-    /**
      * Gets the value of the path to the application entry point.
      *
      * @return the path to the application entry point.
@@ -172,5 +158,13 @@ public class CodePushLocalPackage extends CodePushPackage {
      */
     public void setAppEntryPoint(String appEntryPoint) {
         this.appEntryPoint = appEntryPoint;
+    }
+
+    public String getBinaryModifiedTime() {
+        return binaryModifiedTime;
+    }
+
+    public void setBinaryModifiedTime(String binaryModifiedTime) {
+        this.binaryModifiedTime = binaryModifiedTime;
     }
 }

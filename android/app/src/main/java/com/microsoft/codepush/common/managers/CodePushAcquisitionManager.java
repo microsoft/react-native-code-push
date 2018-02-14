@@ -45,26 +45,6 @@ public class CodePushAcquisitionManager {
     final private static String UPDATE_CHECK_ENDPOINT = "updateCheck?%s";
 
     /**
-     * Server url.
-     */
-    private String mServerUrl;
-
-    /**
-     * Version of the app from configuration.
-     */
-    private String mAppVersion;
-
-    /**
-     * Device id.
-     */
-    private String mClientUniqueId;
-
-    /**
-     * Current deployment key from configuration.
-     */
-    private String mDeploymentKey;
-
-    /**
      * Instance of {@link CodePushUtils} to work with.
      */
     private CodePushUtils mCodePushUtils;
@@ -77,36 +57,42 @@ public class CodePushAcquisitionManager {
     /**
      * Creates an instance of {@link CodePushAcquisitionManager}.
      *
-     * @param configuration current application configuration.
      * @param codePushUtils instance of {@link CodePushUtils} to work with.
      * @param fileUtils     instance of {@link FileUtils} to work with.
      */
-    public CodePushAcquisitionManager(CodePushConfiguration configuration, CodePushUtils codePushUtils, FileUtils fileUtils) {
+    public CodePushAcquisitionManager(CodePushUtils codePushUtils, FileUtils fileUtils) {
         mCodePushUtils = codePushUtils;
         mFileUtils = fileUtils;
-        mServerUrl = configuration.getServerUrl();
-        if (!mServerUrl.endsWith("/")) {
-            mServerUrl += "/";
+    }
+
+    private String fixServerUrl(String serverUrl) {
+        if (!serverUrl.endsWith("/")) {
+            serverUrl += "/";
         }
-        mAppVersion = configuration.getAppVersion();
-        mClientUniqueId = configuration.getClientUniqueId();
-        mDeploymentKey = configuration.getDeploymentKey();
+        return serverUrl;
     }
 
     /**
      * Sends a request to server for updates of the current package.
      *
+     * @param configuration  current application configuration.
      * @param currentPackage instance of {@link CodePushLocalPackage}.
      * @return {@link CodePushRemotePackage} or <code>null</code> if there is no update.
      * @throws CodePushQueryUpdateException exception occurred during querying for update.
      */
-    public CodePushRemotePackage queryUpdateWithCurrentPackage(CodePushLocalPackage currentPackage) throws CodePushQueryUpdateException {
+    public CodePushRemotePackage queryUpdateWithCurrentPackage(CodePushConfiguration configuration, CodePushLocalPackage currentPackage) throws CodePushQueryUpdateException {
         if (currentPackage == null || currentPackage.getAppVersion() == null || currentPackage.getAppVersion().isEmpty()) {
             throw new CodePushQueryUpdateException("Calling common acquisition SDK with incorrect package");
         }
+
+        /* Extract parameters from configuration */
+        String serverUrl = fixServerUrl(configuration.getServerUrl());
+        String deploymentKey = configuration.getDeploymentKey();
+        String clientUniqueId = configuration.getClientUniqueId();
+        CodePushUpdateRequest updateRequest = CodePushUpdateRequest.createUpdateRequest(deploymentKey, currentPackage, clientUniqueId);
         try {
             CodePushUpdateRequest updateRequest = CodePushUpdateRequest.createUpdateRequest(mDeploymentKey, currentPackage, mClientUniqueId);
-            final String requestUrl = mServerUrl + String.format(Locale.getDefault(), UPDATE_CHECK_ENDPOINT, mCodePushUtils.getQueryStringFromObject(updateRequest, "UTF-8"));
+            final String requestUrl = serverUrl + String.format(Locale.getDefault(), UPDATE_CHECK_ENDPOINT, mCodePushUtils.getQueryStringFromObject(updateRequest, "UTF-8"));
             CheckForUpdateTask checkForUpdateTask = new CheckForUpdateTask(mFileUtils, mCodePushUtils, requestUrl);
             ApiHttpRequest<CodePushUpdateResponse> checkForUpdateRequest = new ApiHttpRequest<>(checkForUpdateTask);
             try {
@@ -117,7 +103,7 @@ public class CodePushAcquisitionManager {
                 } else if (!updateInfo.isAvailable()) {
                     return null;
                 }
-                return CodePushRemotePackage.createRemotePackageFromUpdateInfo(mDeploymentKey, updateInfo);
+                return CodePushRemotePackage.createRemotePackageFromUpdateInfo(deploymentKey, updateInfo);
             } catch (CodePushApiHttpRequestException e) {
                 throw new CodePushQueryUpdateException(e, currentPackage.getPackageHash());
             }
@@ -129,21 +115,28 @@ public class CodePushAcquisitionManager {
     /**
      * Sends deployment status to server.
      *
+     * @param configuration          current application configuration.
      * @param deploymentStatusReport instance of {@link CodePushDeploymentStatusReport}.
      * @throws CodePushReportStatusException exception occurred when sending the status.
      */
-    public void reportStatusDeploy(CodePushDeploymentStatusReport deploymentStatusReport) throws CodePushReportStatusException {
+    public void reportStatusDeploy(CodePushConfiguration configuration, CodePushDeploymentStatusReport deploymentStatusReport) throws CodePushReportStatusException {
+
+        /* Extract parameters from configuration */
+        String appVersion = configuration.getAppVersion();
+        String serverUrl = fixServerUrl(configuration.getServerUrl());
+        String deploymentKey = configuration.getDeploymentKey();
+        String clientUniqueId = configuration.getClientUniqueId();
 
         /* TODO: Consider moving the following logic to some other place or removing it at all if useless. */
         try {
-            deploymentStatusReport.setClientUniqueId(mClientUniqueId);
-            deploymentStatusReport.setDeploymentKey(mDeploymentKey);
-            deploymentStatusReport.setAppVersion(deploymentStatusReport.getLocalPackage() != null ? deploymentStatusReport.getLocalPackage().getAppVersion() : mAppVersion);
-            deploymentStatusReport.setAppVersion(deploymentStatusReport.getLocalPackage() != null ? deploymentStatusReport.getLocalPackage().getLabel() : null);
+            deploymentStatusReport.setClientUniqueId(clientUniqueId);
+            deploymentStatusReport.setDeploymentKey(deploymentKey);
+            deploymentStatusReport.setAppVersion(deploymentStatusReport.getPackage() != null ? deploymentStatusReport.getPackage().getAppVersion() : appVersion);
+            deploymentStatusReport.setAppVersion(deploymentStatusReport.getPackage() != null ? deploymentStatusReport.getPackage().getLabel() : null);
         } catch (CodePushIllegalArgumentException e) {
             throw new CodePushReportStatusException(e, DEPLOY);
         }
-        final String requestUrl = mServerUrl + REPORT_DEPLOYMENT_STATUS_ENDPOINT;
+        final String requestUrl = serverUrl + REPORT_DEPLOYMENT_STATUS_ENDPOINT;
         switch (deploymentStatusReport.getStatus()) {
             case SUCCEEDED:
             case FAILED:
@@ -156,7 +149,7 @@ public class CodePushAcquisitionManager {
                 }
             }
         }
-        deploymentStatusReport.setLocalPackage(deploymentStatusReport.getLocalPackage());
+        deploymentStatusReport.setPackage(deploymentStatusReport.getPackage());
         final String deploymentStatusReportJsonString = mCodePushUtils.convertObjectToJsonString(deploymentStatusReport);
         ReportStatusTask reportStatusDeployTask = new ReportStatusTask(mFileUtils, requestUrl, deploymentStatusReportJsonString, DEPLOY);
         ApiHttpRequest<CodePushReportStatusResult> reportStatusDeployRequest = new ApiHttpRequest<>(reportStatusDeployTask);
@@ -171,13 +164,19 @@ public class CodePushAcquisitionManager {
     /**
      * Sends download status to server.
      *
+     * @param configuration     current application configuration.
      * @param downloadedPackage instance of {@link CodePushLocalPackage} that has been downloaded.
      * @throws CodePushReportStatusException exception occurred when sending the status.
      */
-    public void reportStatusDownload(CodePushLocalPackage downloadedPackage) throws CodePushReportStatusException {
-        final String requestUrl = mServerUrl + REPORT_DOWNLOAD_STATUS_ENDPOINT;
+    public void reportStatusDownload(CodePushConfiguration configuration, CodePushLocalPackage downloadedPackage) throws CodePushReportStatusException {
+
+        /* Extract parameters from configuration */
+        String serverUrl = fixServerUrl(configuration.getServerUrl());
+        String deploymentKey = configuration.getDeploymentKey();
+        String clientUniqueId = configuration.getClientUniqueId();
+        final String requestUrl = serverUrl + REPORT_DOWNLOAD_STATUS_ENDPOINT;
         try {
-            final CodePushDownloadStatusReport downloadStatusReport = CodePushDownloadStatusReport.createReport(mClientUniqueId, mDeploymentKey, downloadedPackage.getLabel());
+            final CodePushDownloadStatusReport downloadStatusReport = CodePushDownloadStatusReport.createReport(clientUniqueId, deploymentKey, downloadedPackage.getLabel());
             final String downloadStatusReportJsonString = mCodePushUtils.convertObjectToJsonString(downloadStatusReport);
             ReportStatusTask reportStatusDownloadTask = new ReportStatusTask(mFileUtils, requestUrl, downloadStatusReportJsonString, DOWNLOAD);
             ApiHttpRequest<CodePushReportStatusResult> reportStatusDownloadRequest = new ApiHttpRequest<>(reportStatusDownloadTask);

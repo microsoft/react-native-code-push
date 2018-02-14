@@ -8,7 +8,9 @@ import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.CodePushStatusReportIdentifier;
 import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
+import com.microsoft.codepush.common.datacontracts.CodePushPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPendingUpdate;
+import com.microsoft.codepush.common.datacontracts.CodePushRemotePackage;
 import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
 import com.microsoft.codepush.common.utils.CodePushUtils;
 
@@ -67,18 +69,18 @@ public class SettingsManager {
 
     /**
      * Gets an array with containing failed updates info arranged by time of the failure ascending.
-     * Each item represents an instance of {@link CodePushLocalPackage} that has failed to update.
+     * Each item represents an instance of {@link CodePushPackage} that has failed to update.
      *
      * @return an array of failed updates.
      * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
-    public ArrayList<CodePushLocalPackage> getFailedUpdates() throws CodePushMalformedDataException {
+    public ArrayList<CodePushPackage> getFailedUpdates() throws CodePushMalformedDataException {
         String failedUpdatesString = mSettings.getString(FAILED_UPDATES_KEY, null);
         if (failedUpdatesString == null) {
             return new ArrayList<>();
         }
         try {
-            return new ArrayList<>(Arrays.asList(mCodePushUtils.convertStringToObject(failedUpdatesString, CodePushLocalPackage[].class)));
+            return new ArrayList<>(Arrays.asList(mCodePushUtils.convertStringToObject(failedUpdatesString, CodePushPackage[].class)));
         } catch (JsonSyntaxException e) {
 
             /* Unrecognized data format, clear and replace with expected format. */
@@ -114,9 +116,9 @@ public class SettingsManager {
      * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
     public boolean existsFailedUpdate(String packageHash) throws CodePushMalformedDataException {
-        List<CodePushLocalPackage> failedUpdates = getFailedUpdates();
+        List<CodePushPackage> failedUpdates = getFailedUpdates();
         if (packageHash != null) {
-            for (CodePushLocalPackage failedPackage : failedUpdates) {
+            for (CodePushPackage failedPackage : failedUpdates) {
                 if (packageHash.equals(failedPackage.getPackageHash())) {
                     return true;
                 }
@@ -156,11 +158,11 @@ public class SettingsManager {
     /**
      * Adds another failed update info to the list of failed updates.
      *
-     * @param failedPackage instance of failed {@link CodePushLocalPackage}.
+     * @param failedPackage instance of failed {@link CodePushRemotePackage}.
      * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
-    public void saveFailedUpdate(CodePushLocalPackage failedPackage) throws CodePushMalformedDataException {
-        ArrayList<CodePushLocalPackage> failedUpdates = getFailedUpdates();
+    public void saveFailedUpdate(CodePushPackage failedPackage) throws CodePushMalformedDataException {
+        ArrayList<CodePushPackage> failedUpdates = getFailedUpdates();
         failedUpdates.add(failedPackage);
         String failedUpdatesString = mCodePushUtils.convertObjectToJsonString(failedUpdates);
         mSettings.edit().putString(FAILED_UPDATES_KEY, failedUpdatesString).apply();
@@ -184,7 +186,6 @@ public class SettingsManager {
     public CodePushDeploymentStatusReport getStatusReportSavedForRetry() throws JSONException {
         String retryStatusReportString = mSettings.getString(RETRY_DEPLOYMENT_REPORT_KEY, null);
         if (retryStatusReportString != null) {
-            removeStatusReportSavedForRetry();
             JSONObject retryStatusReport = new JSONObject(retryStatusReportString);
             return mCodePushUtils.convertJsonObjectToObject(retryStatusReport, CodePushDeploymentStatusReport.class);
         }
