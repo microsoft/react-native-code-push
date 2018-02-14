@@ -90,9 +90,13 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
         mCodePushUtils = CodePushUtils.getInstance(fileUtils);
         CodePushUpdateUtils codePushUpdateUtils = CodePushUpdateUtils.getInstance(fileUtils, mCodePushUtils);
         mReactConvertUtils = ReactConvertUtils.getInstance(mCodePushUtils);
+        try {
 
-        /* Initialize module state while we have a reference to the current context. */
-        mBinaryContentsHash = codePushUpdateUtils.getHashForBinaryContents(reactContext, mCodePushCore.isDebugMode());
+            /* Initialize module state while we have a reference to the current context. */
+            mBinaryContentsHash = codePushUpdateUtils.getHashForBinaryContents(reactContext, mCodePushCore.isDebugMode());
+        } catch (CodePushMalformedDataException e) {
+            CodePushLogUtils.trackException(e);
+        }
     }
 
     @Override
@@ -228,11 +232,15 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
     @ReactMethod
     public void getConfiguration(Promise promise) {
         WritableMap configMap = Arguments.createMap();
-        CodePushConfiguration nativeConfiguration = mCodePushCore.getNativeConfiguration();
-        configMap.putString("appVersion", nativeConfiguration.getAppVersion());
-        configMap.putString("clientUniqueId", nativeConfiguration.getClientUniqueId());
-        configMap.putString("deploymentKey", nativeConfiguration.getDeploymentKey());
-        configMap.putString("serverUrl", nativeConfiguration.getServerUrl());
+        try {
+            CodePushConfiguration nativeConfiguration = mCodePushCore.getNativeConfiguration();
+            configMap.putString("appVersion", nativeConfiguration.getAppVersion());
+            configMap.putString("clientUniqueId", nativeConfiguration.getClientUniqueId());
+            configMap.putString("deploymentKey", nativeConfiguration.getDeploymentKey());
+            configMap.putString("serverUrl", nativeConfiguration.getServerUrl());
+        } catch (CodePushNativeApiCallException e) {
+            promise.reject(e);
+        }
 
         /* The binary hash may be null in debug builds. */
         if (mBinaryContentsHash != null) {
@@ -314,7 +322,11 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
      */
     @ReactMethod
     public void isFailedUpdate(String packageHash, Promise promise) {
-        promise.resolve(mCodePushCore.existsFailedUpdate(packageHash));
+        try {
+            promise.resolve(mCodePushCore.existsFailedUpdate(packageHash));
+        } catch (CodePushNativeApiCallException e) {
+            promise.reject(e);
+        }
     }
 
     /**
@@ -354,7 +366,11 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
      */
     @ReactMethod
     public void restartApplication(boolean onlyIfUpdateIsPending, Promise promise) {
-        promise.resolve(mCodePushCore.getRestartManager().restartApp(onlyIfUpdateIsPending));
+        try {
+            promise.resolve(mCodePushCore.restartApp(onlyIfUpdateIsPending));
+        } catch (CodePushNativeApiCallException e) {
+            promise.reject(e);
+        }
     }
 
     /**
@@ -378,7 +394,11 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
      */
     @ReactMethod
     public void allowRestart() {
-        mCodePushCore.getRestartManager().allowRestarts();
+        try {
+            mCodePushCore.allowRestart();
+        } catch (CodePushNativeApiCallException e) {
+            CodePushLogUtils.trackException(e);
+        }
     }
 
     /**

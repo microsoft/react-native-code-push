@@ -26,6 +26,7 @@ import com.microsoft.codepush.common.enums.CodePushInstallMode;
 import com.microsoft.codepush.common.exceptions.CodePushGeneralException;
 import com.microsoft.codepush.common.exceptions.CodePushGetPackageException;
 import com.microsoft.codepush.common.exceptions.CodePushInitializeException;
+import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
 import com.microsoft.codepush.common.exceptions.CodePushNativeApiCallException;
 import com.microsoft.codepush.common.interfaces.CodePushAppEntryPointProvider;
 import com.microsoft.codepush.common.interfaces.CodePushConfirmationDialog;
@@ -182,7 +183,11 @@ public class ReactNativeCore extends CodePushBaseCore {
                     @Override
                     public void run() {
                         AppCenterLog.info(LOG_TAG, "Loading bundle on suspend");
-                        mManagers.mRestartManager.restartApp(false);
+                        try {
+                            mManagers.mRestartManager.restartApp(false);
+                        } catch (CodePushMalformedDataException e) {
+                            CodePushLogUtils.trackException(e);
+                        }
                     }
                 };
 
@@ -196,7 +201,11 @@ public class ReactNativeCore extends CodePushBaseCore {
                         if (installMode == CodePushInstallMode.IMMEDIATE
                                 || durationInBackground >= mState.mMinimumBackgroundDuration) {
                             AppCenterLog.info(LOG_TAG, "Loading bundle on resume");
-                            mManagers.mRestartManager.restartApp(false);
+                            try {
+                                mManagers.mRestartManager.restartApp(false);
+                            } catch (CodePushMalformedDataException e) {
+                                CodePushLogUtils.trackException(e);
+                            }
                         }
                     }
                 }
@@ -206,8 +215,12 @@ public class ReactNativeCore extends CodePushBaseCore {
 
                     /* Save the current time so that when the app is later resumed, we can detect how long it was in the background. */
                     lastPausedDate = new Date();
-                    if (installMode == CodePushInstallMode.ON_NEXT_SUSPEND && mManagers.mSettingsManager.isPendingUpdate(null)) {
-                        appSuspendHandler.postDelayed(loadBundleRunnable, mState.mMinimumBackgroundDuration * 1000);
+                    try {
+                        if (installMode == CodePushInstallMode.ON_NEXT_SUSPEND && mManagers.mSettingsManager.isPendingUpdate(null)) {
+                            appSuspendHandler.postDelayed(loadBundleRunnable, mState.mMinimumBackgroundDuration * 1000);
+                        }
+                    } catch (CodePushMalformedDataException e) {
+                        CodePushLogUtils.trackException(e);
                     }
                 }
 
@@ -262,7 +275,7 @@ public class ReactNativeCore extends CodePushBaseCore {
     }
 
     @Override
-    protected void loadBundle() {
+    protected void loadApp() {
         try {
             clearLifecycleEventListener();
             mUtilities.mPlatformUtils.clearDebugCache(mContext);

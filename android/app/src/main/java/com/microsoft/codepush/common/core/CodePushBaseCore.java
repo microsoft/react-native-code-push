@@ -25,8 +25,10 @@ import com.microsoft.codepush.common.enums.CodePushUpdateState;
 import com.microsoft.codepush.common.exceptions.CodePushDownloadPackageException;
 import com.microsoft.codepush.common.exceptions.CodePushGeneralException;
 import com.microsoft.codepush.common.exceptions.CodePushGetPackageException;
+import com.microsoft.codepush.common.exceptions.CodePushIllegalArgumentException;
 import com.microsoft.codepush.common.exceptions.CodePushInitializeException;
 import com.microsoft.codepush.common.exceptions.CodePushInstallException;
+import com.microsoft.codepush.common.exceptions.CodePushInvalidPublicKeyException;
 import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
 import com.microsoft.codepush.common.exceptions.CodePushMergeException;
 import com.microsoft.codepush.common.exceptions.CodePushNativeApiCallException;
@@ -190,12 +192,12 @@ public abstract class CodePushBaseCore {
         if (serverUrl != null) {
             mServerUrl = serverUrl;
         }
-        mPublicKey = publicKeyProvider.getPublicKey();
-        mAppEntryPoint = appEntryPointProvider.getAppEntryPoint();
         try {
+            mPublicKey = publicKeyProvider.getPublicKey();
+            mAppEntryPoint = appEntryPointProvider.getAppEntryPoint();
             PackageInfo pInfo = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
             mAppVersion = pInfo.versionName;
-        } catch (PackageManager.NameNotFoundException e) {
+        } catch (PackageManager.NameNotFoundException | CodePushInvalidPublicKeyException e) {
             throw new CodePushInitializeException("Unable to get package info for " + mContext.getPackageName(), e);
         }
 
@@ -211,12 +213,13 @@ public abstract class CodePushBaseCore {
         final SettingsManager settingsManager = new SettingsManager(mContext, utils);
         CodePushTelemetryManager telemetryManager = new CodePushTelemetryManager(settingsManager);
         CodePushRestartManager restartManager = new CodePushRestartManager(new CodePushRestartListener() {
-            @Override public boolean onRestart(boolean onlyIfUpdateIsPending) {
+            @Override
+            public boolean onRestart(boolean onlyIfUpdateIsPending) throws CodePushMalformedDataException {
 
                 /* If this is an unconditional restart request, or there
                 /* is current pending update, then reload the app. */
                 if (!onlyIfUpdateIsPending || settingsManager.isPendingUpdate(null)) {
-                    loadBundle();
+                    loadApp();
                     return true;
                 }
 
@@ -228,20 +231,19 @@ public abstract class CodePushBaseCore {
 
         /* Initialize state */
         mState = new CodePushState();
+        try {
 
-        /* Clear debug cache if needed. */
-        if (mIsDebugMode && mManagers.mSettingsManager.isPendingUpdate(null)) {
-            try {
+            /* Clear debug cache if needed. */
+            if (mIsDebugMode && mManagers.mSettingsManager.isPendingUpdate(null)) {
                 mUtilities.mPlatformUtils.clearDebugCache(mContext);
-            } catch (IOException e) {
-                throw new CodePushInitializeException(e);
             }
+        } catch (IOException | CodePushMalformedDataException e) {
+            throw new CodePushInitializeException(e);
         }
-
         /* Initialize update after restart. */
         try {
             initializeUpdateAfterRestart();
-        } catch (CodePushGetPackageException | CodePushPlatformUtilsException | CodePushRollbackException | CodePushGeneralException e) {
+        } catch (CodePushGetPackageException | CodePushPlatformUtilsException | CodePushRollbackException | CodePushGeneralException | CodePushMalformedDataException e) {
             throw new CodePushInitializeException(e);
         }
     }
@@ -270,15 +272,19 @@ public abstract class CodePushBaseCore {
      * @return native CodePush configuration.
      */
     @SuppressWarnings("WeakerAccess")
-    public CodePushConfiguration getNativeConfiguration() {
+    public CodePushConfiguration getNativeConfiguration() throws CodePushNativeApiCallException {
         CodePushConfiguration configuration = new CodePushConfiguration();
-        configuration.setAppVersion(mAppVersion);
+        try {
+            configuration.setAppVersion(mAppVersion);
 
         /* TODO can we just use InstanceId#getId ? */
-        configuration.setClientUniqueId(Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID));
-        configuration.setDeploymentKey(mDeploymentKey);
-        configuration.setServerUrl(mServerUrl);
-        configuration.setPackageHash(mUtilities.mUpdateUtils.getHashForBinaryContents(mContext, mIsDebugMode));
+            configuration.setClientUniqueId(Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID));
+            configuration.setDeploymentKey(mDeploymentKey);
+            configuration.setServerUrl(mServerUrl);
+            configuration.setPackageHash(mUtilities.mUpdateUtils.getHashForBinaryContents(mContext, mIsDebugMode));
+        } catch (CodePushIllegalArgumentException | CodePushMalformedDataException e) {
+            throw new CodePushNativeApiCallException(e);
+        }
         return configuration;
     }
 
@@ -319,7 +325,11 @@ public abstract class CodePushBaseCore {
         Boolean isDebugOnly = false;
         if (!isEmpty(currentPackage.getPackageHash())) {
             String currentHash = currentPackage.getPackageHash();
-            currentUpdateIsPending = mManagers.mSettingsManager.isPendingUpdate(currentHash);
+            try {
+                currentUpdateIsPending = mManagers.mSettingsManager.isPendingUpdate(currentHash);
+            } catch (CodePushMalformedDataException e) {
+                throw new CodePushNativeApiCallException(e);
+            }
         }
         if (updateState == PENDING && !currentUpdateIsPending) {
 
@@ -401,7 +411,11 @@ public abstract class CodePushBaseCore {
     @SuppressWarnings("WeakerAccess")
     public CodePushRemotePackage checkForUpdate(String deploymentKey) throws CodePushNativeApiCallException {
         CodePushConfiguration config = getNativeConfiguration();
-        config.setDeploymentKey(deploymentKey != null ? deploymentKey : config.getDeploymentKey());
+        try {
+            config.setDeploymentKey(deploymentKey != null ? deploymentKey : config.getDeploymentKey());
+        } catch (CodePushIllegalArgumentException e) {
+            throw new CodePushNativeApiCallException(e);
+        }
         CodePushLocalPackage localPackage;
         localPackage = getCurrentPackage();
         CodePushLocalPackage queryPackage;
@@ -472,7 +486,11 @@ public abstract class CodePushBaseCore {
         }
         final CodePushConfiguration configuration = getNativeConfiguration();
         if (syncOptions.getDeploymentKey() != null) {
-            configuration.setDeploymentKey(syncOptions.getDeploymentKey());
+            try {
+                configuration.setDeploymentKey(syncOptions.getDeploymentKey());
+            } catch (CodePushIllegalArgumentException e) {
+                throw new CodePushNativeApiCallException(e);
+            }
         }
         mState.mSyncInProgress = true;
         notifyApplicationReady();
@@ -579,8 +597,12 @@ public abstract class CodePushBaseCore {
     /**
      * Attempts to restart the application.
      */
-    public void restartApp() {
-        mManagers.mRestartManager.restartApp(true);
+    public void restartApp() throws CodePushNativeApiCallException {
+        try {
+            mManagers.mRestartManager.restartApp(true);
+        } catch (CodePushMalformedDataException e) {
+            throw new CodePushNativeApiCallException(e);
+        }
     }
 
     /**
@@ -588,8 +610,12 @@ public abstract class CodePushBaseCore {
      *
      * @param onlyIfUpdateIsPending if <code>true</code>, restart is performed only if update is pending.
      */
-    public void restartApp(boolean onlyIfUpdateIsPending) {
-        mManagers.mRestartManager.restartApp(onlyIfUpdateIsPending);
+    public boolean restartApp(boolean onlyIfUpdateIsPending) throws CodePushNativeApiCallException {
+        try {
+            return mManagers.mRestartManager.restartApp(onlyIfUpdateIsPending);
+        } catch (CodePushMalformedDataException e) {
+            throw new CodePushNativeApiCallException(e);
+        }
     }
 
     /**
@@ -602,8 +628,12 @@ public abstract class CodePushBaseCore {
     /**
      * Allows restarts.
      */
-    public void allowRestart() {
-        mManagers.mRestartManager.allowRestarts();
+    public void allowRestart() throws CodePushNativeApiCallException {
+        try {
+            mManagers.mRestartManager.allowRestarts();
+        } catch (CodePushMalformedDataException e) {
+            throw new CodePushNativeApiCallException(e);
+        }
     }
 
     /**
@@ -717,7 +747,7 @@ public abstract class CodePushBaseCore {
      * @throws CodePushRollbackException      if error occurred during rolling back of package.
      */
     @SuppressWarnings("WeakerAccess")
-    protected void initializeUpdateAfterRestart() throws CodePushGetPackageException, CodePushRollbackException, CodePushPlatformUtilsException, CodePushGeneralException {
+    protected void initializeUpdateAfterRestart() throws CodePushGetPackageException, CodePushRollbackException, CodePushPlatformUtilsException, CodePushGeneralException, CodePushMalformedDataException {
 
         /* Reset the state which indicates that the app was just freshly updated. */
         mState.mDidUpdate = false;
@@ -756,7 +786,7 @@ public abstract class CodePushBaseCore {
      * @throws CodePushGetPackageException if error occurred during getting current update.
      * @throws CodePushRollbackException   if error occurred during rolling back of package.
      */
-    private void rollbackPackage() throws CodePushGetPackageException, CodePushRollbackException {
+    private void rollbackPackage() throws CodePushGetPackageException, CodePushRollbackException, CodePushMalformedDataException {
         CodePushLocalPackage failedPackage = mManagers.mUpdateManager.getCurrentPackage();
         mManagers.mSettingsManager.saveFailedUpdate(failedPackage);
         mManagers.mUpdateManager.rollbackPackage();
@@ -781,8 +811,12 @@ public abstract class CodePushBaseCore {
      * @return <code>true</code> if there is a failed update with provided hash, <code>false</code> otherwise.
      */
     @SuppressWarnings("WeakerAccess")
-    public boolean existsFailedUpdate(String packageHash) {
-        return mManagers.mSettingsManager.existsFailedUpdate(packageHash);
+    public boolean existsFailedUpdate(String packageHash) throws CodePushNativeApiCallException {
+        try {
+            return mManagers.mSettingsManager.existsFailedUpdate(packageHash);
+        } catch (CodePushMalformedDataException e) {
+            throw new CodePushNativeApiCallException(e);
+        }
     }
 
     /**
@@ -826,7 +860,11 @@ public abstract class CodePushBaseCore {
         notifyAboutSyncStatusChange(UPDATE_INSTALLED);
         mState.mSyncInProgress = false;
         if (resolvedInstallMode == IMMEDIATE) {
-            mManagers.mRestartManager.restartApp(false);
+            try {
+                mManagers.mRestartManager.restartApp(false);
+            } catch (CodePushMalformedDataException e) {
+                throw new CodePushNativeApiCallException(e);
+            }
         } else {
             mManagers.mRestartManager.clearPendingRestart();
         }
@@ -844,7 +882,7 @@ public abstract class CodePushBaseCore {
     public void installUpdate(final CodePushLocalPackage updatePackage, final CodePushInstallMode installMode, final int minimumBackgroundDuration) throws CodePushNativeApiCallException {
         try {
             mManagers.mUpdateManager.installPackage(updatePackage.getPackageHash(), mManagers.mSettingsManager.isPendingUpdate(null));
-        } catch (CodePushInstallException e) {
+        } catch (CodePushInstallException | CodePushMalformedDataException e) {
             throw new CodePushNativeApiCallException(e);
         }
         String pendingHash = updatePackage.getPackageHash();
@@ -894,7 +932,7 @@ public abstract class CodePushBaseCore {
                 mManagers.mAcquisitionManager.reportStatusDeploy(configuration, statusReport);
                 saveReportedStatus(statusReport);
             }
-        } catch (CodePushReportStatusException e) {
+        } catch (CodePushReportStatusException | CodePushIllegalArgumentException e) {
 
             /* In order to do not lose original exception if another one will be thrown during the retry
              * we need to wrap it */
@@ -950,13 +988,17 @@ public abstract class CodePushBaseCore {
     public CodePushDeploymentStatusReport getNewStatusReport() throws CodePushNativeApiCallException {
         if (mState.mNeedToReportRollback) {
             mState.mNeedToReportRollback = false;
-            ArrayList<CodePushPackage> failedUpdates = mManagers.mSettingsManager.getFailedUpdates();
-            if (failedUpdates != null && failedUpdates.size() > 0) {
-                CodePushPackage lastFailedPackage = failedUpdates.get(failedUpdates.size() - 1);
-                CodePushDeploymentStatusReport failedStatusReport = mManagers.mTelemetryManager.buildRollbackReport(lastFailedPackage);
-                if (failedStatusReport != null) {
-                    return failedStatusReport;
+            try {
+                ArrayList<CodePushPackage> failedUpdates = mManagers.mSettingsManager.getFailedUpdates();
+                if (failedUpdates != null && failedUpdates.size() > 0) {
+                    CodePushPackage lastFailedPackage = failedUpdates.get(failedUpdates.size() - 1);
+                    CodePushDeploymentStatusReport failedStatusReport = mManagers.mTelemetryManager.buildRollbackReport(lastFailedPackage);
+                    if (failedStatusReport != null) {
+                        return failedStatusReport;
+                    }
                 }
+            } catch (CodePushMalformedDataException e) {
+                throw new CodePushNativeApiCallException(e);
             }
         } else if (mState.mDidUpdate) {
             CodePushLocalPackage currentPackage;
@@ -966,16 +1008,24 @@ public abstract class CodePushBaseCore {
                 throw new CodePushNativeApiCallException(e);
             }
             if (currentPackage != null) {
-                CodePushDeploymentStatusReport newPackageStatusReport =
-                        mManagers.mTelemetryManager.buildUpdateReport(currentPackage);
-                if (newPackageStatusReport != null) {
-                    return newPackageStatusReport;
+                try {
+                    CodePushDeploymentStatusReport newPackageStatusReport =
+                            mManagers.mTelemetryManager.buildUpdateReport(currentPackage);
+                    if (newPackageStatusReport != null) {
+                        return newPackageStatusReport;
+                    }
+                } catch (CodePushIllegalArgumentException e) {
+                    throw new CodePushNativeApiCallException(e);
                 }
             }
         } else if (mState.mIsRunningBinaryVersion) {
-            CodePushDeploymentStatusReport newAppVersionStatusReport = mManagers.mTelemetryManager.buildBinaryUpdateReport(mAppVersion);
-            if (newAppVersionStatusReport != null) {
-                return newAppVersionStatusReport;
+            try {
+                CodePushDeploymentStatusReport newAppVersionStatusReport = mManagers.mTelemetryManager.buildBinaryUpdateReport(mAppVersion);
+                if (newAppVersionStatusReport != null) {
+                    return newAppVersionStatusReport;
+                }
+            } catch (CodePushIllegalArgumentException e) {
+                throw new CodePushNativeApiCallException(e);
             }
         } else {
             CodePushDeploymentStatusReport retryStatusReport;
@@ -1047,7 +1097,11 @@ public abstract class CodePushBaseCore {
             mUtilities.mUtils.writeObjectToJsonFile(updatePackage, newUpdateMetadataPath);
             return newPackage;
         } catch (IOException | CodePushDownloadPackageException | CodePushUnzipException | CodePushMergeException e) {
-            mManagers.mSettingsManager.saveFailedUpdate(updatePackage);
+            try {
+                mManagers.mSettingsManager.saveFailedUpdate(updatePackage);
+            } catch (CodePushMalformedDataException ex) {
+                throw new CodePushNativeApiCallException(ex);
+            }
             throw new CodePushNativeApiCallException(e);
         }
     }
@@ -1105,7 +1159,15 @@ public abstract class CodePushBaseCore {
     @SuppressWarnings("WeakerAccess")
     protected abstract void clearScheduledAttemptsToRetrySendStatusReport();
 
+    /**
+     * Sets the actual confirmation dialog to use.
+     *
+     * @param dialog instance of {@link CodePushConfirmationDialog}.
+     */
     protected abstract void setConfirmationDialog(CodePushConfirmationDialog dialog);
 
-    protected abstract void loadBundle();
+    /**
+     * Loads application.
+     */
+    protected abstract void loadApp();
 }
