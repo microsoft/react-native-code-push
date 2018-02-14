@@ -7,6 +7,7 @@ import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushUpdateRequest;
 import com.microsoft.codepush.common.datacontracts.CodePushUpdateResponse;
+import com.microsoft.codepush.common.exceptions.CodePushIllegalArgumentException;
 import com.microsoft.codepush.common.utils.FileUtils;
 
 import org.junit.Before;
@@ -17,14 +18,9 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
@@ -51,41 +47,56 @@ public class LoggingUnitTests {
         this.mFileUtils = FileUtils.getInstance();
     }
 
-    @Test
-    public void testLogging() throws Exception {
-        FileUtils fileUtils = FileUtils.getInstance();
+    @Test(expected = CodePushIllegalArgumentException.class)
+    public void testUpdateRequestAppVersionNull() throws Exception {
         CodePushPackage codePushPackage = new CodePushPackage();
         CodePushLocalPackage codePushLocalPackage = CodePushLocalPackage.createLocalPackage(FAILED_INSTALL, IS_FIRST_RUN, IS_PENDING, IS_DEBUG_ONLY, APP_ENTRY_POINT, codePushPackage);
         CodePushUpdateRequest codePushUpdateRequest = CodePushUpdateRequest.createUpdateRequest(DEPLOYMENT_KEY, codePushLocalPackage, CLIENT_UNIQUE_ID);
-        CodePushDownloadStatusReport codePushDownloadStatusReport = CodePushDownloadStatusReport.createReport(CLIENT_UNIQUE_ID, DEPLOYMENT_KEY, LABEL);
-        CodePushDeploymentStatusReport codePushDeploymentStatusReport = new CodePushDeploymentStatusReport();
-        CodePushUpdateResponse codePushUpdateResponse = new CodePushUpdateResponse();
-
-         /* Verify errors are logged. */
-        mockStatic(AppCenterLog.class);
-        codePushUpdateRequest.setDeploymentKey(null);
         codePushUpdateRequest.setAppVersion(null);
-        codePushDownloadStatusReport.setLabel(null);
-        codePushDownloadStatusReport.setClientUniqueId(null);
-        codePushDownloadStatusReport.setDeploymentKey(null);
-        codePushDeploymentStatusReport.setAppVersion(null);
-        codePushDeploymentStatusReport.setPreviousDeploymentKey(null);
-        codePushUpdateResponse.setUpdateInfo(null);
-        File testFile = mock(File.class);
-        doReturn(null).when(testFile).listFiles();
-        doReturn(true).when(testFile).isDirectory();
-        fileUtils.deleteFileOrFolderSilently(testFile);
-        testFile = mock(File.class);
-        doReturn(false).when(testFile).delete();
-        fileUtils.deleteFileOrFolderSilently(testFile);
-        File newTestFile = mock(File.class);
-        doReturn(true).when(newTestFile).isDirectory();
-        doReturn(new File[]{testFile}).when(newTestFile).listFiles();
-        fileUtils.deleteFileOrFolderSilently(newTestFile);
+    }
 
-        /* We expect exactly 12 logged errors. */
-        verifyStatic(VerificationModeFactory.times(12));
-        AppCenterLog.error(eq(CodePush.LOG_TAG), anyString());
+    @Test(expected = CodePushIllegalArgumentException.class)
+    public void testUpdateRequestDeploymentKeyNull() throws Exception {
+        CodePushPackage codePushPackage = new CodePushPackage();
+        CodePushLocalPackage codePushLocalPackage = CodePushLocalPackage.createLocalPackage(FAILED_INSTALL, IS_FIRST_RUN, IS_PENDING, IS_DEBUG_ONLY, APP_ENTRY_POINT, codePushPackage);
+        CodePushUpdateRequest codePushUpdateRequest = CodePushUpdateRequest.createUpdateRequest(DEPLOYMENT_KEY, codePushLocalPackage, CLIENT_UNIQUE_ID);
+        codePushUpdateRequest.setDeploymentKey(null);
+    }
+
+    @Test(expected = CodePushIllegalArgumentException.class)
+    public void testDownloadReportLabelNull() throws Exception {
+        CodePushDownloadStatusReport codePushDownloadStatusReport = CodePushDownloadStatusReport.createReport(CLIENT_UNIQUE_ID, DEPLOYMENT_KEY, LABEL);
+        codePushDownloadStatusReport.setLabel(null);
+    }
+
+    @Test(expected = CodePushIllegalArgumentException.class)
+    public void testDownloadReportClientIdNull() throws Exception {
+        CodePushDownloadStatusReport codePushDownloadStatusReport = CodePushDownloadStatusReport.createReport(CLIENT_UNIQUE_ID, DEPLOYMENT_KEY, LABEL);
+        codePushDownloadStatusReport.setClientUniqueId(null);
+    }
+
+    @Test(expected = CodePushIllegalArgumentException.class)
+    public void testDownloadReportDeploymentKeyNull() throws Exception {
+        CodePushDownloadStatusReport codePushDownloadStatusReport = CodePushDownloadStatusReport.createReport(CLIENT_UNIQUE_ID, DEPLOYMENT_KEY, LABEL);
+        codePushDownloadStatusReport.setDeploymentKey(null);
+    }
+
+    @Test(expected = CodePushIllegalArgumentException.class)
+    public void testDeploymentReportAppVersionNull() throws Exception {
+        CodePushDeploymentStatusReport codePushDeploymentStatusReport = new CodePushDeploymentStatusReport();
+        codePushDeploymentStatusReport.setAppVersion(null);
+    }
+
+    @Test(expected = CodePushIllegalArgumentException.class)
+    public void testDeploymentReportPreviousKeyNull() throws Exception {
+        CodePushDeploymentStatusReport codePushDeploymentStatusReport = new CodePushDeploymentStatusReport();
+        codePushDeploymentStatusReport.setPreviousDeploymentKey(null);
+    }
+
+    @Test(expected = CodePushIllegalArgumentException.class)
+    public void testUpdateResponseUpdateInfoNull() throws Exception {
+        CodePushUpdateResponse codePushUpdateResponse = new CodePushUpdateResponse();
+        codePushUpdateResponse.setUpdateInfo(null);
     }
 
     /**

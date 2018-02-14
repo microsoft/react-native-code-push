@@ -3,6 +3,9 @@ package com.microsoft.codepush.common.managers;
 import com.microsoft.codepush.common.CodePushStatusReportIdentifier;
 import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
+import com.microsoft.codepush.common.datacontracts.CodePushPackage;
+
+import org.json.JSONException;
 
 import static android.text.TextUtils.isEmpty;
 import static com.microsoft.codepush.common.enums.CodePushDeploymentStatus.FAILED;
@@ -33,7 +36,7 @@ public class CodePushTelemetryManager {
      * @param appVersion current app version.
      * @return new binary update report.
      */
-    public CodePushDeploymentStatusReport buildBinaryUpdateReport(String appVersion) {
+    public CodePushDeploymentStatusReport buildBinaryUpdateReport(String appVersion) throws CodePushIllegalArgumentException {
         CodePushStatusReportIdentifier previousStatusReportIdentifier = mSettingsManager.getPreviousStatusReportIdentifier();
         CodePushDeploymentStatusReport report = null;
         if (previousStatusReportIdentifier == null) {
@@ -72,7 +75,7 @@ public class CodePushTelemetryManager {
      * @param currentPackage current local package information.
      * @return new update report.
      */
-    public CodePushDeploymentStatusReport buildUpdateReport(CodePushLocalPackage currentPackage) {
+    public CodePushDeploymentStatusReport buildUpdateReport(CodePushLocalPackage currentPackage) throws CodePushIllegalArgumentException {
         CodePushStatusReportIdentifier currentPackageIdentifier = buildPackageStatusReportIdentifier(currentPackage);
         CodePushStatusReportIdentifier previousStatusReportIdentifier = mSettingsManager.getPreviousStatusReportIdentifier();
         CodePushDeploymentStatusReport report = null;
@@ -80,7 +83,7 @@ public class CodePushTelemetryManager {
             if (previousStatusReportIdentifier == null) {
                 mSettingsManager.removeStatusReportSavedForRetry();
                 report = new CodePushDeploymentStatusReport();
-                report.setLocalPackage(currentPackage);
+                report.setPackage(currentPackage);
                 report.setStatus(SUCCEEDED);
             } else {
 
@@ -91,14 +94,14 @@ public class CodePushTelemetryManager {
                     if (previousStatusReportIdentifier.hasDeploymentKey()) {
                         String previousDeploymentKey = previousStatusReportIdentifier.getDeploymentKey();
                         String previousLabel = previousStatusReportIdentifier.getVersionLabel();
-                        report.setLocalPackage(currentPackage);
+                        report.setPackage(currentPackage);
                         report.setStatus(SUCCEEDED);
                         report.setPreviousDeploymentKey(previousDeploymentKey);
                         report.setPreviousLabelOrAppVersion(previousLabel);
                     } else {
 
                         /* Previous status report was with a binary app version. */
-                        report.setLocalPackage(currentPackage);
+                        report.setPackage(currentPackage);
                         report.setStatus(SUCCEEDED);
                         report.setPreviousLabelOrAppVersion(previousStatusReportIdentifier.getVersionLabel());
                     }
@@ -114,9 +117,9 @@ public class CodePushTelemetryManager {
      * @param lastFailedPackage current local package information.
      * @return new rollback report.
      */
-    public CodePushDeploymentStatusReport buildRollbackReport(CodePushLocalPackage lastFailedPackage) {
+    public CodePushDeploymentStatusReport buildRollbackReport(CodePushPackage lastFailedPackage) {
         CodePushDeploymentStatusReport report = new CodePushDeploymentStatusReport();
-        report.setLocalPackage(lastFailedPackage);
+        report.setPackage(lastFailedPackage);
         report.setStatus(FAILED);
         return report;
     }
@@ -133,8 +136,8 @@ public class CodePushTelemetryManager {
         if (!isEmpty(statusReport.getAppVersion())) {
             CodePushStatusReportIdentifier statusIdentifier = new CodePushStatusReportIdentifier(statusReport.getAppVersion());
             mSettingsManager.saveIdentifierOfReportedStatus(statusIdentifier);
-        } else if (statusReport.getLocalPackage() != null) {
-            CodePushStatusReportIdentifier packageIdentifier = buildPackageStatusReportIdentifier(statusReport.getLocalPackage());
+        } else if (statusReport.getPackage() != null) {
+            CodePushStatusReportIdentifier packageIdentifier = buildPackageStatusReportIdentifier(statusReport.getPackage());
             mSettingsManager.saveIdentifierOfReportedStatus(packageIdentifier);
         }
     }
@@ -145,7 +148,7 @@ public class CodePushTelemetryManager {
      * @param updatePackage local package.
      * @return status report identifier.
      */
-    private CodePushStatusReportIdentifier buildPackageStatusReportIdentifier(CodePushLocalPackage updatePackage) {
+    private CodePushStatusReportIdentifier buildPackageStatusReportIdentifier(CodePushPackage updatePackage) {
 
         /* Because deploymentKeys can be dynamically switched, we use a
            combination of the deploymentKey and label as the packageIdentifier. */
@@ -156,5 +159,19 @@ public class CodePushTelemetryManager {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Gets status report already saved for retry it's sending.
+     *
+     * @return report saved for retry sending.
+     * @throws JSONException if there was error of deserialization of report from json document.
+     */
+    public CodePushDeploymentStatusReport getStatusReportSavedForRetry() throws JSONException {
+        CodePushDeploymentStatusReport report = mSettingsManager.getStatusReportSavedForRetry();
+        if (report != null) {
+            mSettingsManager.removeStatusReportSavedForRetry();
+        }
+        return report;
     }
 }

@@ -3,7 +3,7 @@ package com.microsoft.codepush.common.interfaces;
 /**
  * Interface for providing information about application entry point.
  */
-public interface AppEntryPointProvider {
+public interface CodePushAppEntryPointProvider {
 
     /**
      * Gets location of application entry point.

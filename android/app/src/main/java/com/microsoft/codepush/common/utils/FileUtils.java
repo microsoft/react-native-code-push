@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static com.microsoft.codepush.common.CodePush.LOG_TAG;
-
 /**
  * Class containing support methods simplifying work with files.
  */
@@ -135,6 +133,7 @@ public class FileUtils {
      * Deletes file or folder throwing no errors if something goes wrong (errors will be logged instead).
      *
      * @param file path to file/folder to be deleted.
+     * @throws IOException read/write error occurred while accessing the file system.
      */
     @SuppressWarnings("WeakerAccess")
     public void deleteFileOrFolderSilently(File file) {
@@ -143,7 +142,7 @@ public class FileUtils {
         if (file.isDirectory()) {
             File[] files = file.listFiles();
             if (files == null) {
-                AppCenterLog.error(LOG_TAG, "Pathname " + file.getAbsolutePath() + " doesn't denote a directory.");
+                //TODO track IOException("Pathname " + file.getAbsolutePath() + " doesn't denote a directory.");
                 return;
             }
             for (File fileEntry : files) {
@@ -151,13 +150,15 @@ public class FileUtils {
                     deleteFileOrFolderSilently(fileEntry);
                 } else {
                     if (!fileEntry.delete()) {
-                        AppCenterLog.error(LOG_TAG, "Error deleting file " + file.getName());
+                        //TODO track new IOException("Error deleting file " + file.getName());
+                        return;
                     }
                 }
             }
         }
         if (!file.delete()) {
-            AppCenterLog.error(LOG_TAG, "Error deleting file " + file.getName());
+            //TODO track new IOException("Error deleting file " + file.getName());
+            return;
         }
     }
 

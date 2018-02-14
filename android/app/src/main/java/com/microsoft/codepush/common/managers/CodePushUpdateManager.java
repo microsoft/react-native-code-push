@@ -20,7 +20,7 @@ import com.microsoft.codepush.common.datacontracts.CodePushDownloadPackageResult
 import com.microsoft.codepush.common.utils.CodePushUpdateUtils;
 import com.microsoft.codepush.common.utils.CodePushUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
-import com.microsoft.codepush.common.utils.PlatformUtils;
+import com.microsoft.codepush.common.interfaces.CodePushPlatformUtils;
 
 import org.json.JSONException;
 
@@ -35,7 +35,7 @@ public class CodePushUpdateManager {
     /**
      * Platform-specific utils implementation.
      */
-    private PlatformUtils mPlatformUtils;
+    private CodePushPlatformUtils mPlatformUtils;
 
     /**
      * Instance of {@link FileUtils} to work with.
@@ -66,12 +66,12 @@ public class CodePushUpdateManager {
      * Creates instance of CodePushUpdateManager.
      *
      * @param documentsDirectory  path for storing files.
-     * @param platformUtils       instance of {@link PlatformUtils} to work with.
+     * @param platformUtils       instance of {@link CodePushPlatformUtils} to work with.
      * @param fileUtils           instance of {@link FileUtils} to work with.
      * @param codePushUtils       instance of {@link CodePushUtils} to work with.
      * @param codePushUpdateUtils instance of {@link CodePushUpdateUtils} to work with.
      */
-    public CodePushUpdateManager(String documentsDirectory, PlatformUtils platformUtils, FileUtils fileUtils, CodePushUtils codePushUtils, CodePushUpdateUtils codePushUpdateUtils) {
+    public CodePushUpdateManager(String documentsDirectory, CodePushPlatformUtils platformUtils, FileUtils fileUtils, CodePushUtils codePushUtils, CodePushUpdateUtils codePushUpdateUtils) {
         mPlatformUtils = platformUtils;
         mFileUtils = fileUtils;
         mCodePushUpdateUtils = codePushUpdateUtils;
@@ -181,6 +181,20 @@ public class CodePushUpdateManager {
      */
     public String getPackageFolderPath(String packageHash) {
         return mFileUtils.appendPathComponent(getCodePushPath(), packageHash);
+    }
+
+    /**
+     * Gets file for package download.
+     *
+     * @return file for package download.
+     * @throws IOException if read/write error occurred while accessing the file system.
+     */
+    public File getPackageDownloadFile() throws IOException {
+        File downloadFolder = new File(getCodePushPath());
+        if (!downloadFolder.mkdirs()) {
+            throw new IOException("Couldn't create directory" + downloadFolder.getAbsolutePath() + " for downloading file");
+        }
+        return new File(downloadFolder, CodePushConstants.DOWNLOAD_FILE_NAME);
     }
 
     /**
@@ -395,15 +409,17 @@ public class CodePushUpdateManager {
         String unzippedFolderPath = getUnzippedFolderPath();
         try {
             mFileUtils.unzipFile(downloadFile, new File(unzippedFolderPath));
+            mFileUtils.deleteFileOrFolderSilently(downloadFile);
         } catch (IOException e) {
             throw new CodePushUnzipException(e);
         }
-        mFileUtils.deleteFileOrFolderSilently(downloadFile);
     }
 
     /**
      * Merges contents with the current update based on the manifest.
      *
+     * @param newUpdateFolderPath        directory for new update.
+     * @param newUpdateMetadataPath      path to update metadata file for new update.
      * @param newUpdateHash              hash of the new update package.
      * @param stringPublicKey            public key used to verify signature.
      *                                   Can be <code>null</code> if code signing is not enabled.
@@ -411,9 +427,7 @@ public class CodePushUpdateManager {
      * @return actual new app entry point.
      * @throws CodePushMergeException an exception occurred during merging.
      */
-    public String mergeDiff(String newUpdateHash, String stringPublicKey, String expectedEntryPointFileName) throws CodePushMergeException {
-        String newUpdateFolderPath = getPackageFolderPath(newUpdateHash);
-        String newUpdateMetadataPath = mFileUtils.appendPathComponent(newUpdateFolderPath, CodePushConstants.PACKAGE_FILE_NAME);
+    public String mergeDiff(String newUpdateFolderPath, String newUpdateMetadataPath, String newUpdateHash, String stringPublicKey, String expectedEntryPointFileName) throws CodePushMergeException {
         String unzippedFolderPath = getUnzippedFolderPath();
         String diffManifestFilePath = mFileUtils.appendPathComponent(unzippedFolderPath, CodePushConstants.DIFF_MANIFEST_FILE_NAME);
 
@@ -426,7 +440,9 @@ public class CodePushUpdateManager {
                     mCodePushUpdateUtils.copyNecessaryFilesFromCurrentPackage(diffManifestFilePath, currentPackageFolderPath, newUpdateFolderPath);
                 }
                 File diffManifestFile = new File(diffManifestFilePath);
-                diffManifestFile.delete();
+                if (!diffManifestFile.delete()) {
+                    throw new CodePushMergeException("Couldn't delete diff manifest file " + diffManifestFilePath);
+                }
             }
             mFileUtils.copyDirectoryContents(new File(unzippedFolderPath), new File(newUpdateFolderPath));
             mFileUtils.deleteDirectoryAtPath(unzippedFolderPath);
@@ -439,7 +455,9 @@ public class CodePushUpdateManager {
         } else {
             if (mFileUtils.fileAtPathExists(newUpdateMetadataPath)) {
                 File metadataFileFromOldUpdate = new File(newUpdateMetadataPath);
-                metadataFileFromOldUpdate.delete();
+                if (metadataFileFromOldUpdate.delete()) {
+                    throw new CodePushMergeException("Couldn't delete metadata file from old update " + newUpdateMetadataPath);
+                }
             }
             if (isDiffUpdate) {
                 AppCenterLog.info(CodePush.LOG_TAG, "Applying diff update.");

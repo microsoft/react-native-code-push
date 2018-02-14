@@ -234,4 +234,41 @@ public class FileAndroidTests {
         File testFolder = getTestingDirectory();
         testFolder.delete();
     }
+
+    /**
+     * {@link FileUtils#deleteFileOrFolderSilently(File)} should not throw a {@link IOException}
+     * if <code>listFiles</code> returned <code>null</code>.
+     */
+    @Test
+    public void deleteFileFailsIfListFilesFails() throws Exception {
+        File testFile = mock(File.class);
+        doReturn(null).when(testFile).listFiles();
+        doReturn(true).when(testFile).isDirectory();
+        mFileUtils.deleteFileOrFolderSilently(testFile);
+    }
+
+    /**
+     * {@link FileUtils#deleteFileOrFolderSilently(File)} should not throw a {@link IOException}
+     * if <code>delete</code> returned <code>null</code>.
+     */
+    @Test
+    public void deleteFileFailsIfDeleteFails() throws Exception {
+        File testFile = mock(File.class);
+        doReturn(false).when(testFile).delete();
+        mFileUtils.deleteFileOrFolderSilently(testFile);
+    }
+
+    /**
+     * {@link FileUtils#deleteFileOrFolderSilently(File)} should not throw a {@link IOException}
+     * if <code>delete</code> on child file returned <code>null</code>.
+     */
+    @Test
+    public void deleteFileFailsIfDeleteOnChildFails() throws Exception {
+        File testFile = mock(File.class);
+        doReturn(false).when(testFile).delete();
+        File newTestFile = mock(File.class);
+        doReturn(true).when(newTestFile).isDirectory();
+        doReturn(new File[]{testFile}).when(newTestFile).listFiles();
+        mFileUtils.deleteFileOrFolderSilently(newTestFile);
+    }
 }
