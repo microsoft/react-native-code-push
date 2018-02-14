@@ -7,8 +7,9 @@ import com.microsoft.codepush.common.managers.CodePushUpdateManager;
 import com.microsoft.codepush.common.managers.SettingsManager;
 
 /**
- * Incapsulates managers that {@link CodePushBaseCore} is using.
+ * Encapsulates managers that {@link CodePushBaseCore} is using.
  */
+@SuppressWarnings("WeakerAccess")
 public class CodePushManagers {
 
     /**

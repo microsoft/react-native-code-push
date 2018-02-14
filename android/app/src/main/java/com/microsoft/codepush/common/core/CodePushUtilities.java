@@ -6,8 +6,9 @@ import com.microsoft.codepush.common.utils.FileUtils;
 import com.microsoft.codepush.common.interfaces.CodePushPlatformUtils;
 
 /**
- * Incapsulates utilities that {@link CodePushBaseCore} is using.
+ * Encapsulates utilities that {@link CodePushBaseCore} is using.
  */
+@SuppressWarnings("WeakerAccess")
 public class CodePushUtilities {
 
     /**

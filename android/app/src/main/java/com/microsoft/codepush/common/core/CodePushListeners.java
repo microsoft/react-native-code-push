@@ -8,9 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Incapsulates listeners that {@link CodePushBaseCore} is using.
+ * Encapsulates listeners that {@link CodePushBaseCore} is using.
  */
+@SuppressWarnings("WeakerAccess")
 public class CodePushListeners {
+
     /**
      * List of {@link CodePushSyncStatusListener}.
      */

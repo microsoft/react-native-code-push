@@ -15,5 +15,4 @@ public interface CodePushConfirmationDialog {
      * @param codePushConfirmationCallback callback for delivering results of the proposal.
      */
     void shouldInstallUpdate(String title, String message, String acceptText, String declineText, CodePushConfirmationCallback codePushConfirmationCallback);
-
 }
