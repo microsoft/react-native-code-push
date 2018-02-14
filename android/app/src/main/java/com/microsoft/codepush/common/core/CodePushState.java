@@ -5,6 +5,7 @@ import com.microsoft.codepush.common.enums.CodePushInstallMode;
 /**
  * Incapsulates state of {@link CodePushBaseCore}.
  */
+@SuppressWarnings("WeakerAccess")
 public class CodePushState {
 
     /**
