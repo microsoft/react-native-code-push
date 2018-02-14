@@ -267,6 +267,24 @@ public abstract class CodePushBaseCore {
     }
 
     /**
+     * Removes listener for sync status change event.
+     *
+     * @param syncStatusListener listener for sync status change event.
+     */
+    public void removeSyncStatusListener(CodePushSyncStatusListener syncStatusListener) {
+        mListeners.mSyncStatusListeners.remove(syncStatusListener);
+    }
+
+    /**
+     * Removes listener for download progress change event.
+     *
+     * @param downloadProgressListener listener for download progress change event.
+     */
+    public void removeDownloadProgressListener(CodePushDownloadProgressListener downloadProgressListener) {
+        mListeners.mDownloadProgressListeners.remove(downloadProgressListener);
+    }
+
+    /**
      * Gets native CodePush configuration.
      *
      * @return native CodePush configuration.
@@ -595,11 +613,11 @@ public abstract class CodePushBaseCore {
     }
 
     /**
-     * Attempts to restart the application.
+     * Attempts to restart the application unconditionally (whether there is pending update is ignored).
      */
     public void restartApp() throws CodePushNativeApiCallException {
         try {
-            mManagers.mRestartManager.restartApp(true);
+            mManagers.mRestartManager.restartApp(false);
         } catch (CodePushMalformedDataException e) {
             throw new CodePushNativeApiCallException(e);
         }

@@ -159,31 +159,74 @@ public class CodePush implements ReactPackage, Serializable {
         return new CodePushBuilder(deploymentKey, context);
     }
 
+    /**
+     * Gets a link to the default javascript bundle file.
+     *
+     * @return link starting with "assets://" and leading to javascript bundle file.
+     * @throws CodePushNativeApiCallException exception occurred when performing the operation.
+     */
     public static String getJSBundleFile() throws CodePushNativeApiCallException {
         return mReactNativeCore.getJSBundleFile();
     }
 
+    /**
+     * Gets a link to the specified javascript bundle file.
+     *
+     * @param assetsBundleFileName custom bundle file name.
+     * @return link starting with "assets://" and leading to javascript bundle file.
+     * @throws CodePushNativeApiCallException exception occurred when performing the operation.
+     */
     public static String getJSBundleFile(String assetsBundleFileName) throws CodePushNativeApiCallException {
         return mReactNativeCore.getJSBundleFile(assetsBundleFileName);
     }
 
+    /**
+     * Sets instance holder.
+     *
+     * @param reactInstanceHolder instance of {@link ReactInstanceHolder}.
+     */
     public static void setReactInstanceHolder(ReactInstanceHolder reactInstanceHolder) {
         //todo remove or not?
         mReactNativeCore.setReactInstanceHolder(reactInstanceHolder);
     }
 
+    /**
+     * Gets native CodePush configuration.
+     *
+     * @return native CodePush configuration.
+     */
     public CodePushConfiguration getConfiguration() throws CodePushNativeApiCallException {
         return mReactNativeCore.getNativeConfiguration();
     }
 
+    /**
+     * Gets instance of {@link CodePushAcquisitionManager}.
+     *
+     * @return instance of {@link CodePushAcquisitionManager}.
+     */
     public CodePushAcquisitionManager getAcquisitionSdk() {
         return mReactNativeCore.getAcquisitionSdk();
     }
 
+    /**
+     * Asks the CodePush service whether the configured app deployment has an update available
+     * using deploymentKey already set in constructor.
+     *
+     * @return remote package info if there is an update, <code>null</code> otherwise.
+     * @throws CodePushNativeApiCallException if error occurred during the execution of operation.
+     */
     public CodePushRemotePackage checkForUpdate() throws CodePushNativeApiCallException {
         return mReactNativeCore.checkForUpdate();
     }
 
+    /**
+     * Asks the CodePush service whether the configured app deployment has an update available
+     * using specified deployment key.
+     *
+     * @param deploymentKey deployment key to use.
+     * @return remote package info if there is an update, <code>null</code> otherwise.
+     * @throws CodePushNativeApiCallException if error occurred during the execution of operation.
+     */
     public CodePushRemotePackage checkForUpdate(String deploymentKey) throws CodePushNativeApiCallException {
         return mReactNativeCore.checkForUpdate(deploymentKey);
     }
@@ -196,51 +239,130 @@ public class CodePush implements ReactPackage, Serializable {
         return mReactNativeCore.getCurrentPackage();
     }
 
+    /**
+     * Retrieves the metadata for an installed update (e.g. description, mandatory)
+     * whose state matches the specified <code>updateState</code> parameter.
+     *
+     * @param updateState current update state.
+     * @return installed update metadata.
+     * @throws CodePushNativeApiCallException if error occurred during the operation.
+     */
     public CodePushLocalPackage getUpdateMetadata(CodePushUpdateState updateState) throws CodePushNativeApiCallException {
         return mReactNativeCore.getUpdateMetadata(updateState);
     }
 
+    /**
+     * Retrieves the metadata for an installed update (e.g. description, mandatory)
+     * whose state matches {@link CodePushUpdateState#RUNNING}.
+     *
+     * @return installed update metadata.
+     * @throws CodePushNativeApiCallException if error occurred during the operation.
+     */
     public CodePushLocalPackage getUpdateMetadata() throws CodePushNativeApiCallException {
         return mReactNativeCore.getUpdateMetadata(CodePushUpdateState.RUNNING);
     }
 
+    /**
+     * Logs custom message on device.
+     *
+     * @param message message to be logged.
+     */
     public static void log(String message) {
         mReactNativeCore.log(message);
     }
 
+    /**
+     * Notifies the CodePush runtime that a freshly installed update should be considered successful,
+     * and therefore, an automatic client-side rollback isn't necessary.
+     *
+     * @throws CodePushNativeApiCallException if error occurred during the execution of operation.
+     */
     public void notifyApplicationReady() throws CodePushNativeApiCallException {
         mReactNativeCore.notifyApplicationReady();
     }
 
+    /**
+     * Attempts to restart the application unconditionally (whether there is pending update is ignored).
+     */
     public void restartApp() throws CodePushNativeApiCallException {
-        mReactNativeCore.restartApp(false);
+        mReactNativeCore.restartApp();
     }
 
+    /**
+     * Attempts to restart the application.
+     *
+     * @param onlyIfUpdateIsPending if <code>true</code>, restart is performed only if update is pending.
+     */
     public void restartApp(boolean onlyIfUpdateIsPending) throws CodePushNativeApiCallException {
         mReactNativeCore.restartApp(onlyIfUpdateIsPending);
     }
 
+    /**
+     * Permits restarts.
+     */
     public void disallowRestart() {
         mReactNativeCore.disallowRestart();
     }
 
+    /**
+     * Allows restarts.
+     */
     public void allowRestart() throws CodePushNativeApiCallException {
         mReactNativeCore.allowRestart();
     }
 
+    /**
+     * Synchronizes your app assets with the latest release to the configured deployment using default sync options.
+     *
+     * @throws CodePushNativeApiCallException if error occurred during the execution of operation.
+     */
     public void sync() throws CodePushNativeApiCallException {
         mReactNativeCore.sync();
     }
 
+    /**
+     * Synchronizes your app assets with the latest release to the configured deployment.
+     *
+     * @param syncOptions sync options.
+     * @throws CodePushNativeApiCallException if error occurred during the execution of operation.
+     */
     public void sync(CodePushSyncOptions syncOptions) throws CodePushNativeApiCallException {
         mReactNativeCore.sync(syncOptions);
     }
 
+    /**
+     * Adds listener for sync status change event.
+     *
+     * @param syncStatusListener listener for sync status change event.
+     */
     public void addSyncStatusListener(CodePushSyncStatusListener syncStatusListener) {
         mReactNativeCore.addSyncStatusListener(syncStatusListener);
     }
 
+    /**
+     * Adds listener for download progress change event.
+     *
+     * @param downloadProgressListener listener for download progress change event.
+     */
     public void addDownloadProgressListener(CodePushDownloadProgressListener downloadProgressListener) {
         mReactNativeCore.addDownloadProgressListener(downloadProgressListener);
+    }
+
+    /**
+     * Removes listener for sync status change event.
+     *
+     * @param syncStatusListener listener for sync status change event.
+     */
+    public void removeSyncStatusListener(CodePushSyncStatusListener syncStatusListener) {
+        mReactNativeCore.removeSyncStatusListener(syncStatusListener);
+    }
+
+    /**
+     * Removes listener for download progress change event.
+     *
+     * @param downloadProgressListener listener for download progress change event.
+     */
+    public void removeDownloadProgressListener(CodePushDownloadProgressListener downloadProgressListener) {
+        mReactNativeCore.removeDownloadProgressListener(downloadProgressListener);
     }
 }
