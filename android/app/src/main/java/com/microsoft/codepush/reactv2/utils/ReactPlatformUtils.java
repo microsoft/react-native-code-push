@@ -78,7 +78,8 @@ public class ReactPlatformUtils implements PlatformUtils {
         return Long.parseLong(codePushApkBuildTime);
     }
 
-    @Override public void clearDebugCache(Context context) throws IOException {
+    @Override 
+    public void clearDebugCache(Context context) throws IOException {
 
         /* This needs to be kept in sync with https://github.com/facebook/react-native/blob/master/ReactAndroid/src/main/java/com/facebook/react/devsupport/DevSupportManager.java#L78 */
         File cachedDevBundle = new File(context.getFilesDir(), "ReactNativeDevBundle.js");
