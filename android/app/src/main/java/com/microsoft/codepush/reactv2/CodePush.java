@@ -166,7 +166,7 @@ public class CodePush implements ReactPackage, Serializable {
      * @throws CodePushNativeApiCallException exception occurred when performing the operation.
      */
     public static String getJSBundleFile() throws CodePushNativeApiCallException {
-        return mReactNativeCore.getJSBundleFile();
+        return ReactNativeCore.getJSBundleFile();
     }
 
     /**
@@ -177,7 +177,7 @@ public class CodePush implements ReactPackage, Serializable {
      * @throws CodePushNativeApiCallException exception occurred when performing the operation.
      */
     public static String getJSBundleFile(String assetsBundleFileName) throws CodePushNativeApiCallException {
-        return mReactNativeCore.getJSBundleFile(assetsBundleFileName);
+        return ReactNativeCore.getJSBundleFile(assetsBundleFileName);
     }
 
     /**
@@ -187,7 +187,7 @@ public class CodePush implements ReactPackage, Serializable {
      */
     public static void setReactInstanceHolder(ReactInstanceHolder reactInstanceHolder) {
         //todo remove or not?
-        mReactNativeCore.setReactInstanceHolder(reactInstanceHolder);
+        ReactNativeCore.setReactInstanceHolder(reactInstanceHolder);
     }
 
     /**

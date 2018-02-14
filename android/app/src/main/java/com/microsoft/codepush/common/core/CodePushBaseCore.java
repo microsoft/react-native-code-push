@@ -164,6 +164,11 @@ public abstract class CodePushBaseCore {
     protected CodePushConfirmationDialog mConfirmationDialog;
 
     /**
+     * Current instance of {@link CodePushBaseCore}.
+     */
+    protected static CodePushBaseCore mCurrentInstance;
+
+    /**
      * Creates instance of CodePushBaseCore.
      *
      * @param deploymentKey         deployment key.
@@ -228,6 +233,7 @@ public abstract class CodePushBaseCore {
         });
         CodePushAcquisitionManager acquisitionManager = new CodePushAcquisitionManager(utils, fileUtils);
         mManagers = new CodePushManagers(updateManager, telemetryManager, settingsManager, restartManager, acquisitionManager);
+        mCurrentInstance = this;
 
         /* Initialize state */
         mState = new CodePushState();
@@ -1188,4 +1194,13 @@ public abstract class CodePushBaseCore {
      * Loads application.
      */
     protected abstract void loadApp();
+
+    /**
+     * Gets a link to the specified javascript bundle file.
+     *
+     * @param assetsBundleFileName custom bundle file name.
+     * @return link starting with "assets://" and leading to javascript bundle file.
+     * @throws CodePushNativeApiCallException exception occurred when performing the operation.
+     */
+    public abstract String getJSBundleFileInternal(String assetsBundleFileName) throws CodePushNativeApiCallException;
 }

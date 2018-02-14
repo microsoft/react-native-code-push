@@ -127,7 +127,7 @@ public class ReactNativeCore extends CodePushBaseCore {
      * @return link starting with "assets://" and leading to javascript bundle file.
      * @throws CodePushNativeApiCallException exception occurred when performing the operation.
      */
-    public String getJSBundleFile() throws CodePushNativeApiCallException {
+    public static String getJSBundleFile() throws CodePushNativeApiCallException {
         return getJSBundleFile(DEFAULT_JS_BUNDLE_NAME);
     }
 
@@ -138,7 +138,16 @@ public class ReactNativeCore extends CodePushBaseCore {
      * @return link starting with "assets://" and leading to javascript bundle file.
      * @throws CodePushNativeApiCallException exception occurred when performing the operation.
      */
-    public String getJSBundleFile(String assetsBundleFileName) throws CodePushNativeApiCallException {
+    public static String getJSBundleFile(String assetsBundleFileName) throws CodePushNativeApiCallException {
+        if (mCurrentInstance == null) {
+            throw new CodePushNativeApiCallException("A CodePush instance has not been created yet. Have you added it to your app's list of ReactPackages?");
+        }
+
+        return mCurrentInstance.getJSBundleFileInternal(assetsBundleFileName);
+    }
+
+    @Override
+    public String getJSBundleFileInternal(String assetsBundleFileName) throws CodePushNativeApiCallException {
         String binaryJsBundleUrl = ASSETS_BUNDLE_PREFIX + assetsBundleFileName;
         try {
             String packageFilePath = mManagers.mUpdateManager.getCurrentPackageEntryPath(assetsBundleFileName);
@@ -326,6 +335,7 @@ public class ReactNativeCore extends CodePushBaseCore {
             /* no-op to prevent any null pointer exceptions. */
             return;
         }
+        mCurrentInstance = null;
         currentActivity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
