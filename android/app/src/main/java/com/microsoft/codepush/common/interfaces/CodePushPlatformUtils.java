@@ -1,7 +1,9 @@
 package com.microsoft.codepush.common.interfaces;
 
+import android.content.Context;
+
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
-import com.microsoft.codepush.common.exceptions.CodePushPlatformUtilsException;
+import com.microsoft.codepush.common.exceptions.CodePushGeneralException;
 
 import java.io.IOException;
 
@@ -21,27 +23,30 @@ public interface CodePushPlatformUtils {
     String getUpdateFolderPath(String hash);
 
     /**
-     * Indicates whether specified package is latest.
+     * Checks whether the specified package is latest.
      *
-     * @param packageMetadata   package metadata.
-     * @param currentAppVersion current app version to compare with.
-     * @return true, if package is latest, false otherwise.
-     * @throws CodePushPlatformUtilsException if error occurred during the execution of operation.
+     * @param packageMetadata   info about the package to be checked.
+     * @param currentAppVersion version of the currently installed application.
+     * @param context           application context.
+     * @return <code>true</code> if package is latest.
+     * @throws CodePushGeneralException some exception that might occur.
      */
-    boolean isPackageLatest(CodePushLocalPackage packageMetadata, String currentAppVersion) throws CodePushPlatformUtilsException;
+    boolean isPackageLatest(CodePushLocalPackage packageMetadata, String currentAppVersion, Context context) throws CodePushGeneralException;
 
     /**
-     * Returns information about package modified time from binary resources.
+     * gets binary version apk build time.
      *
-     * @return information about package modified time from binary resources.
-     * @throws CodePushPlatformUtilsException if error occurred during the execution of operation.
+     * @param context application context.
+     * @return time in ms.
+     * @throws NumberFormatException exception parsing time.
      */
-    long getBinaryResourcesModifiedTime() throws CodePushPlatformUtilsException;
+    long getBinaryResourcesModifiedTime(Context context) throws NumberFormatException;
 
     /**
-     * Clears cache that is used for debugging.
+     * Clears debug cache files.
      *
-     * @throws IOException if read/write error occurred while accessing the file system.
+     * @param context application context.
+     * @throws IOException exception occurred during read/write operations.
      */
-    void clearDebugCache() throws IOException;
+    void clearDebugCache(Context context) throws IOException;
 }

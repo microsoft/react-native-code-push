@@ -54,7 +54,6 @@ import com.microsoft.codepush.common.utils.CodePushLogUtils;
 import com.microsoft.codepush.common.utils.CodePushUpdateUtils;
 import com.microsoft.codepush.common.utils.CodePushUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
-import com.microsoft.codepush.reactv2.CodePushAPI;
 
 import org.json.JSONException;
 
@@ -88,7 +87,7 @@ import static com.microsoft.codepush.common.enums.CodePushUpdateState.RUNNING;
 /**
  * Base core for CodePush. Singleton.
  */
-public abstract class CodePushBaseCore implements CodePushAPI {
+public abstract class CodePushBaseCore {
 
     /**
      * Deployment key for checking for updates.
@@ -172,8 +171,6 @@ public abstract class CodePushBaseCore implements CodePushAPI {
      * @param publicKeyProvider     instance of {@link CodePushPublicKeyProvider}.
      * @param appEntryPointProvider instance of {@link CodePushAppEntryPointProvider}.
      * @param platformUtils         instance of {@link CodePushPlatformUtils}.
-     * @param restartListener       implementation of {@link CodePushRestartListener}.
-     * @param confirmationDialog    instance of {@link CodePushConfirmationDialog}.
      * @throws CodePushInitializeException if error occurred during the initialization.
      */
     protected CodePushBaseCore(
@@ -183,9 +180,7 @@ public abstract class CodePushBaseCore implements CodePushAPI {
             String serverUrl,
             CodePushPublicKeyProvider publicKeyProvider,
             CodePushAppEntryPointProvider appEntryPointProvider,
-            CodePushPlatformUtils platformUtils,
-            CodePushRestartListener restartListener,
-            CodePushConfirmationDialog confirmationDialog
+            CodePushPlatformUtils platformUtils
     ) throws CodePushInitializeException {
 
         /* Initialize configuration. */
@@ -213,14 +208,23 @@ public abstract class CodePushBaseCore implements CodePushAPI {
         /* Initialize managers. */
         String documentsDirectory = mContext.getFilesDir().getAbsolutePath();
         CodePushUpdateManager updateManager = new CodePushUpdateManager(documentsDirectory, platformUtils, fileUtils, utils, updateUtils);
-        SettingsManager settingsManager = new SettingsManager(mContext, utils);
+        final SettingsManager settingsManager = new SettingsManager(mContext, utils);
         CodePushTelemetryManager telemetryManager = new CodePushTelemetryManager(settingsManager);
-        CodePushRestartManager restartManager = new CodePushRestartManager(restartListener);
+        CodePushRestartManager restartManager = new CodePushRestartManager(new CodePushRestartListener() {
+            @Override public boolean onRestart(boolean onlyIfUpdateIsPending) {
+
+                /* If this is an unconditional restart request, or there
+                /* is current pending update, then reload the app. */
+                if (!onlyIfUpdateIsPending || settingsManager.isPendingUpdate(null)) {
+                    loadBundle();
+                    return true;
+                }
+
+                return false;
+            }
+        });
         CodePushAcquisitionManager acquisitionManager = new CodePushAcquisitionManager(utils, fileUtils);
         mManagers = new CodePushManagers(updateManager, telemetryManager, settingsManager, restartManager, acquisitionManager);
-
-        /* Initialize confirmation dialog for update install */
-        mConfirmationDialog = confirmationDialog;
 
         /* Initialize state */
         mState = new CodePushState();
@@ -228,7 +232,7 @@ public abstract class CodePushBaseCore implements CodePushAPI {
         /* Clear debug cache if needed. */
         if (mIsDebugMode && mManagers.mSettingsManager.isPendingUpdate(null)) {
             try {
-                mUtilities.mPlatformUtils.clearDebugCache();
+                mUtilities.mPlatformUtils.clearDebugCache(mContext);
             } catch (IOException e) {
                 throw new CodePushInitializeException(e);
             }
@@ -237,22 +241,34 @@ public abstract class CodePushBaseCore implements CodePushAPI {
         /* Initialize update after restart. */
         try {
             initializeUpdateAfterRestart();
-        } catch (CodePushGetPackageException | CodePushPlatformUtilsException | CodePushRollbackException e) {
+        } catch (CodePushGetPackageException | CodePushPlatformUtilsException | CodePushRollbackException | CodePushGeneralException e) {
             throw new CodePushInitializeException(e);
         }
     }
 
-    @Override
+    /**
+     * Adds listener for sync status change event.
+     *
+     * @param syncStatusListener listener for sync status change event.
+     */
     public void addSyncStatusListener(CodePushSyncStatusListener syncStatusListener) {
         mListeners.mSyncStatusListeners.add(syncStatusListener);
     }
 
-    @Override
+    /**
+     * Adds listener for download progress change event.
+     *
+     * @param downloadProgressListener listener for download progress change event.
+     */
     public void addDownloadProgressListener(CodePushDownloadProgressListener downloadProgressListener) {
         mListeners.mDownloadProgressListeners.add(downloadProgressListener);
     }
 
-    @Override
+    /**
+     * Gets native CodePush configuration.
+     *
+     * @return native CodePush configuration.
+     */
     @SuppressWarnings("WeakerAccess")
     public CodePushConfiguration getNativeConfiguration() {
         CodePushConfiguration configuration = new CodePushConfiguration();
@@ -266,12 +282,25 @@ public abstract class CodePushBaseCore implements CodePushAPI {
         return configuration;
     }
 
-    @Override
+    /**
+     * Retrieves the metadata for an installed update (e.g. description, mandatory)
+     * whose state matches {@link CodePushUpdateState#RUNNING}.
+     *
+     * @return installed update metadata.
+     * @throws CodePushNativeApiCallException if error occurred during the operation.
+     */
     public CodePushLocalPackage getUpdateMetadata() throws CodePushNativeApiCallException {
         return getUpdateMetadata(RUNNING);
     }
 
-    @Override
+    /**
+     * Retrieves the metadata for an installed update (e.g. description, mandatory)
+     * whose state matches the specified <code>updateState</code> parameter.
+     *
+     * @param updateState current update state.
+     * @return installed update metadata.
+     * @throws CodePushNativeApiCallException if error occurred during the operation.
+     */
     @SuppressWarnings("WeakerAccess")
     public CodePushLocalPackage getUpdateMetadata(CodePushUpdateState updateState) throws CodePushNativeApiCallException {
         if (updateState == null) {
@@ -337,19 +366,38 @@ public abstract class CodePushBaseCore implements CodePushAPI {
         }
     }
 
-    @Override
+    /**
+     * Gets current installed package.
+     *
+     * @return current installed package.
+     * @throws CodePushNativeApiCallException if error occurred during the execution of operation.
+     * @deprecated use {@link #getUpdateMetadata()} instead.
+     */
     @SuppressWarnings("WeakerAccess")
     public CodePushLocalPackage getCurrentPackage() throws CodePushNativeApiCallException {
         return getUpdateMetadata(LATEST);
     }
 
-    @Override
+    /**
+     * Asks the CodePush service whether the configured app deployment has an update available
+     * using deploymentKey already set in constructor.
+     *
+     * @return remote package info if there is an update, <code>null</code> otherwise.
+     * @throws CodePushNativeApiCallException if error occurred during the execution of operation.
+     */
     public CodePushRemotePackage checkForUpdate() throws CodePushNativeApiCallException {
         CodePushConfiguration nativeConfiguration = getNativeConfiguration();
         return checkForUpdate(nativeConfiguration.getDeploymentKey());
     }
 
-    @Override
+    /**
+     * Asks the CodePush service whether the configured app deployment has an update available
+     * using specified deployment key.
+     *
+     * @param deploymentKey deployment key to use.
+     * @return remote package info if there is an update, <code>null</code> otherwise.
+     * @throws CodePushNativeApiCallException if error occurred during the execution of operation.
+     */
     @SuppressWarnings("WeakerAccess")
     public CodePushRemotePackage checkForUpdate(String deploymentKey) throws CodePushNativeApiCallException {
         CodePushConfiguration config = getNativeConfiguration();
@@ -386,12 +434,21 @@ public abstract class CodePushBaseCore implements CodePushAPI {
         }
     }
 
-    @Override
+    /**
+     * Synchronizes your app assets with the latest release to the configured deployment using default sync options.
+     *
+     * @throws CodePushNativeApiCallException if error occurred during the execution of operation.
+     */
     public void sync() throws CodePushNativeApiCallException {
         sync(new CodePushSyncOptions());
     }
 
-    @Override
+    /**
+     * Synchronizes your app assets with the latest release to the configured deployment.
+     *
+     * @param synchronizationOptions sync options.
+     * @throws CodePushNativeApiCallException if error occurred during the execution of operation.
+     */
     public void sync(CodePushSyncOptions synchronizationOptions) throws CodePushNativeApiCallException {
         if (mState.mSyncInProgress) {
             notifyAboutSyncStatusChange(SYNC_IN_PROGRESS);
@@ -486,7 +543,12 @@ public abstract class CodePushBaseCore implements CodePushAPI {
         mState.mSyncInProgress = false;
     }
 
-    @Override
+    /**
+     * Notifies the CodePush runtime that a freshly installed update should be considered successful,
+     * and therefore, an automatic client-side rollback isn't necessary.
+     *
+     * @throws CodePushNativeApiCallException if error occurred during the execution of operation.
+     */
     @SuppressWarnings("WeakerAccess")
     public void notifyApplicationReady() throws CodePushNativeApiCallException {
         mManagers.mSettingsManager.removePendingUpdate();
@@ -496,32 +558,50 @@ public abstract class CodePushBaseCore implements CodePushAPI {
         }
     }
 
-    @Override
+    /**
+     * Gets instance of {@link CodePushAcquisitionManager}.
+     *
+     * @return instance of {@link CodePushAcquisitionManager}.
+     */
     public CodePushAcquisitionManager getAcquisitionSdk() {
         return mManagers.mAcquisitionManager;
     }
 
-    @Override
+    /**
+     * Logs custom message on device.
+     *
+     * @param message message to be logged.
+     */
     public void log(String message) {
         AppCenterLog.info(LOG_TAG, message);
     }
 
-    @Override
+    /**
+     * Attempts to restart the application.
+     */
     public void restartApp() {
         mManagers.mRestartManager.restartApp(true);
     }
 
-    @Override
+    /**
+     * Attempts to restart the application.
+     *
+     * @param onlyIfUpdateIsPending if <code>true</code>, restart is performed only if update is pending.
+     */
     public void restartApp(boolean onlyIfUpdateIsPending) {
         mManagers.mRestartManager.restartApp(onlyIfUpdateIsPending);
     }
 
-    @Override
+    /**
+     * Permits restarts.
+     */
     public void disallowRestart() {
         mManagers.mRestartManager.disallowRestarts();
     }
 
-    @Override
+    /**
+     * Allows restarts.
+     */
     public void allowRestart() {
         mManagers.mRestartManager.allowRestarts();
     }
@@ -637,14 +717,14 @@ public abstract class CodePushBaseCore implements CodePushAPI {
      * @throws CodePushRollbackException      if error occurred during rolling back of package.
      */
     @SuppressWarnings("WeakerAccess")
-    protected void initializeUpdateAfterRestart() throws CodePushGetPackageException, CodePushRollbackException, CodePushPlatformUtilsException {
+    protected void initializeUpdateAfterRestart() throws CodePushGetPackageException, CodePushRollbackException, CodePushPlatformUtilsException, CodePushGeneralException {
 
         /* Reset the state which indicates that the app was just freshly updated. */
         mState.mDidUpdate = false;
         CodePushPendingUpdate pendingUpdate = mManagers.mSettingsManager.getPendingUpdate();
         if (pendingUpdate != null) {
             CodePushLocalPackage packageMetadata = mManagers.mUpdateManager.getCurrentPackage();
-            if (packageMetadata == null || !mUtilities.mPlatformUtils.isPackageLatest(packageMetadata, mAppVersion) &&
+            if (packageMetadata == null || !mUtilities.mPlatformUtils.isPackageLatest(packageMetadata, mAppVersion, mContext) &&
                     !mAppVersion.equals(packageMetadata.getAppVersion())) {
                 AppCenterLog.info(LOG_TAG, "Skipping initializeUpdateAfterRestart(), binary version is newer.");
                 return;
@@ -946,7 +1026,7 @@ public abstract class CodePushBaseCore implements CodePushAPI {
     @SuppressWarnings("WeakerAccess")
     public CodePushLocalPackage downloadUpdate(final CodePushRemotePackage updatePackage) throws CodePushNativeApiCallException {
         try {
-            String binaryModifiedTime = "" + mUtilities.mPlatformUtils.getBinaryResourcesModifiedTime();
+            String binaryModifiedTime = "" + mUtilities.mPlatformUtils.getBinaryResourcesModifiedTime(mContext);
             String appEntryPoint = null;
             String downloadUrl = updatePackage.getDownloadUrl();
             File downloadFile = mManagers.mUpdateManager.getPackageDownloadFile();
@@ -966,7 +1046,7 @@ public abstract class CodePushBaseCore implements CodePushAPI {
             newPackage.setBinaryModifiedTime(binaryModifiedTime);
             mUtilities.mUtils.writeObjectToJsonFile(updatePackage, newUpdateMetadataPath);
             return newPackage;
-        } catch (IOException | CodePushDownloadPackageException | CodePushUnzipException | CodePushMergeException | CodePushPlatformUtilsException e) {
+        } catch (IOException | CodePushDownloadPackageException | CodePushUnzipException | CodePushMergeException e) {
             mManagers.mSettingsManager.saveFailedUpdate(updatePackage);
             throw new CodePushNativeApiCallException(e);
         }
@@ -1024,4 +1104,8 @@ public abstract class CodePushBaseCore implements CodePushAPI {
      */
     @SuppressWarnings("WeakerAccess")
     protected abstract void clearScheduledAttemptsToRetrySendStatusReport();
+
+    protected abstract void setConfirmationDialog(CodePushConfirmationDialog dialog);
+
+    protected abstract void loadBundle();
 }

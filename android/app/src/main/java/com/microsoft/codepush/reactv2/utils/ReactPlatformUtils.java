@@ -6,7 +6,7 @@ import android.os.Environment;
 import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.exceptions.CodePushGeneralException;
-import com.microsoft.codepush.common.utils.PlatformUtils;
+import com.microsoft.codepush.common.interfaces.CodePushPlatformUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,10 +14,10 @@ import java.io.IOException;
 import static com.microsoft.codepush.common.CodePushConstants.CODE_PUSH_APK_BUILD_TIME_KEY;
 
 /**
- * React-specific instance of {@link PlatformUtils}.
+ * React-specific instance of {@link CodePushPlatformUtils}.
  * Represents bridge between {@link com.microsoft.codepush.common} and {@link com.microsoft.codepush.react}.
  */
-public class ReactPlatformUtils implements PlatformUtils {
+public class ReactPlatformUtils implements CodePushPlatformUtils {
 
     /**
      * Instance of {@link ReactPlatformUtils}. Singleton.

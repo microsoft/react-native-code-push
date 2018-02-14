@@ -31,7 +31,6 @@ import com.microsoft.codepush.common.interfaces.CodePushAppEntryPointProvider;
 import com.microsoft.codepush.common.interfaces.CodePushConfirmationDialog;
 import com.microsoft.codepush.common.interfaces.CodePushPlatformUtils;
 import com.microsoft.codepush.common.interfaces.CodePushPublicKeyProvider;
-import com.microsoft.codepush.common.interfaces.CodePushRestartListener;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
 import com.microsoft.codepush.common.utils.CodePushLogUtils;
 import com.microsoft.codepush.reactv2.interfaces.ReactInstanceHolder;
@@ -89,14 +88,17 @@ public class ReactNativeCore extends CodePushBaseCore {
             String serverUrl,
             CodePushPublicKeyProvider publicKeyProvider,
             CodePushAppEntryPointProvider appEntryPointProvider,
-            CodePushPlatformUtils platformUtils,
-            CodePushRestartListener restartListener,
-            CodePushConfirmationDialog confirmationDialog
+            CodePushPlatformUtils platformUtils
     ) throws CodePushInitializeException {
-        super(deploymentKey, context, isDebugMode, serverUrl, publicKeyProvider, appEntryPointProvider, platformUtils, restartListener, confirmationDialog);
+        super(deploymentKey, context, isDebugMode, serverUrl, publicKeyProvider, appEntryPointProvider, platformUtils);
     }
 
-    @Override
+    /**
+     * Creates react-specific modules.
+     *
+     * @param reactApplicationContext app context.
+     * @return {@link List} of {@link NativeModule} instances.
+     */
     public List<NativeModule> createNativeModules(ReactApplicationContext reactApplicationContext) {
         sReactApplicationContext = reactApplicationContext;
         CodePushNativeModule codePushModule = new CodePushNativeModule(sReactApplicationContext, this);
@@ -106,25 +108,35 @@ public class ReactNativeCore extends CodePushBaseCore {
         List<NativeModule> nativeModules = new ArrayList<>();
         nativeModules.add(codePushModule);
         nativeModules.add(dialogModule);
+        setConfirmationDialog(dialogModule);
         return nativeModules;
     }
 
-    @Override
     public List<Class<? extends JavaScriptModule>> createJSModules() {
         return new ArrayList<>();
     }
 
-    @Override
     public List<ViewManager> createViewManagers(ReactApplicationContext reactApplicationContext) {
         return new ArrayList<>();
     }
 
-    @Override
+    /**
+     * Gets a link to the default javascript bundle file.
+     *
+     * @return link starting with "assets://" and leading to javascript bundle file.
+     * @throws CodePushNativeApiCallException exception occurred when performing the operation.
+     */
     public String getJSBundleFile() throws CodePushNativeApiCallException {
         return getJSBundleFile(DEFAULT_JS_BUNDLE_NAME);
     }
 
-    @Override
+    /**
+     * Gets a link to the specified javascript bundle file.
+     *
+     * @param assetsBundleFileName custom bundle file name.
+     * @return link starting with "assets://" and leading to javascript bundle file.
+     * @throws CodePushNativeApiCallException exception occurred when performing the operation.
+     */
     public String getJSBundleFile(String assetsBundleFileName) throws CodePushNativeApiCallException {
         String binaryJsBundleUrl = ASSETS_BUNDLE_PREFIX + assetsBundleFileName;
         try {
@@ -242,6 +254,71 @@ public class ReactNativeCore extends CodePushBaseCore {
         if (mLifecycleEventListenerForReport != null) {
             clearLifecycleEventListenerForReport();
         }
+    }
+
+    @Override
+    protected void setConfirmationDialog(CodePushConfirmationDialog dialog) {
+        mConfirmationDialog = dialog;
+    }
+
+    @Override
+    protected void loadBundle() {
+        try {
+            clearLifecycleEventListener();
+            mUtilities.mPlatformUtils.clearDebugCache(mContext);
+
+            /* #1) Get the ReactInstanceManager instance, which is what includes the
+            /*     logic to reload the current React context. */
+            final ReactInstanceManager instanceManager = resolveInstanceManager();
+            if (instanceManager == null) {
+                return;
+            }
+            String latestJSBundleFile = getJSBundleFile(mAppEntryPoint);
+
+            /* #2) Update the locally stored JS bundle file path. */
+            setJSBundle(instanceManager, latestJSBundleFile);
+
+            /* #3) Get the context creation method and fire it on the UI thread (which RN enforces). */
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+
+                        /* We don't need to resetReactRootViews anymore
+                        /* due the issue https://github.com/facebook/react-native/issues/14533
+                        /* has been fixed in RN 0.46.0
+                        /* resetReactRootViews(instanceManager); */
+                        instanceManager.recreateReactContextInBackground();
+                        initializeUpdateAfterRestart();
+                    } catch (Exception e) {
+
+                        /* The recreation method threw an unknown exception so just simply fallback to restarting the Activity (if it exists). */
+                        loadBundleLegacy();
+                    }
+                }
+            });
+
+        } catch (Exception e) {
+
+            /* Our reflection logic failed somewhere so fall back to restarting the Activity (if it exists). */
+            loadBundleLegacy();
+        }
+    }
+
+    private void loadBundleLegacy() {
+        final Activity currentActivity = sReactApplicationContext.getCurrentActivity();
+        if (currentActivity == null) {
+
+            /* The currentActivity can be null if it is backgrounded / destroyed, so we simply
+            /* no-op to prevent any null pointer exceptions. */
+            return;
+        }
+        currentActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                currentActivity.recreate();
+            }
+        });
     }
 
     @Override
