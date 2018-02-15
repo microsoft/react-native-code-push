@@ -1,11 +1,14 @@
 package com.microsoft.codepush.common.core;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 
+import com.microsoft.appcenter.AppCenter;
+import com.microsoft.appcenter.crashes.Crashes;
 import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.CodePush;
 import com.microsoft.codepush.common.CodePushConfiguration;
@@ -116,11 +119,6 @@ public abstract class CodePushBaseCore {
     protected String mAppEntryPoint;
 
     /**
-     * Entry point provider.
-     */
-    protected CodePushAppEntryPointProvider mAppEntryPointProvider;
-
-    /**
      * Application context.
      */
     @SuppressWarnings("WeakerAccess")
@@ -174,7 +172,9 @@ public abstract class CodePushBaseCore {
     protected static CodePushBaseCore mCurrentInstance;
 
     /**
-     * Creates instance of CodePushBaseCore.
+     * Creates instance of {@link CodePushBaseCore}. Default constructor.
+     * We pass {@link Application} and app secret here, too, because we can't initialize AppCenter in anotehr constructor and then call this.
+     * However, AppCenter must be initialized before creating anything else.
      *
      * @param deploymentKey         deployment key.
      * @param context               application context.
@@ -183,7 +183,9 @@ public abstract class CodePushBaseCore {
      * @param publicKeyProvider     instance of {@link CodePushPublicKeyProvider}.
      * @param appEntryPointProvider instance of {@link CodePushAppEntryPointProvider}.
      * @param platformUtils         instance of {@link CodePushPlatformUtils}.
-     * @throws CodePushInitializeException if error occurred during the initialization.
+     * @param application           application instance.
+     * @param appSecret             the value of app secret from AppCenter portal to configure {@link Crashes} sdk.
+     * @throws CodePushInitializeException error occurred during the initialization.
      */
     protected CodePushBaseCore(
             @NonNull String deploymentKey,
@@ -192,12 +194,18 @@ public abstract class CodePushBaseCore {
             String serverUrl,
             CodePushPublicKeyProvider publicKeyProvider,
             CodePushAppEntryPointProvider appEntryPointProvider,
-            CodePushPlatformUtils platformUtils
+            CodePushPlatformUtils platformUtils,
+            Application application,
+            String appSecret
     ) throws CodePushInitializeException {
+        if (appSecret != null) {
+            AppCenter.start(application, appSecret, Crashes.class);
+            CodePushLogUtils.setEnabled(true);
+        }
 
         /* Initialize configuration. */
         mDeploymentKey = deploymentKey;
-        mContext = context.getApplicationContext();
+        mContext = context;
         mIsDebugMode = isDebugMode;
         if (serverUrl != null) {
             mServerUrl = serverUrl;
@@ -264,6 +272,32 @@ public abstract class CodePushBaseCore {
         } catch (CodePushNativeApiCallException e) {
             throw new CodePushInitializeException(e);
         }
+    }
+
+    /**
+     * Creates instance of {@link CodePushBaseCore} for those who want to track exceptions (includes additional parameters).
+     *
+     * @param deploymentKey         deployment key.
+     * @param application           application instance.
+     * @param isDebugMode           indicates whether application is running in debug mode.
+     * @param serverUrl             CodePush server url.
+     * @param appSecret             the value of app secret from AppCenter portal to configure {@link Crashes} sdk.
+     * @param publicKeyProvider     instance of {@link CodePushPublicKeyProvider}.
+     * @param appEntryPointProvider instance of {@link CodePushAppEntryPointProvider}.
+     * @param platformUtils         instance of {@link CodePushPlatformUtils}.
+     * @throws CodePushInitializeException error occurred during the initialization.
+     */
+    protected CodePushBaseCore(
+            @NonNull String deploymentKey,
+            @NonNull Application application,
+            boolean isDebugMode,
+            String serverUrl,
+            String appSecret,
+            CodePushPublicKeyProvider publicKeyProvider,
+            CodePushAppEntryPointProvider appEntryPointProvider,
+            CodePushPlatformUtils platformUtils
+    ) throws CodePushInitializeException {
+        this(deploymentKey, application.getApplicationContext(), isDebugMode, serverUrl, publicKeyProvider, appEntryPointProvider, platformUtils, application, appSecret);
     }
 
     /**

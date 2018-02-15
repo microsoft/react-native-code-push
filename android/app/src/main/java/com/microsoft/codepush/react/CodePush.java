@@ -1,5 +1,6 @@
 package com.microsoft.codepush.react;
 
+import android.app.Application;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -9,6 +10,7 @@ import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.uimanager.ViewManager;
+import com.microsoft.appcenter.crashes.Crashes;
 import com.microsoft.codepush.common.CodePushConfiguration;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushRemotePackage;
@@ -93,6 +95,22 @@ public class CodePush implements ReactPackage, Serializable {
      * @deprecated use {@link #builder} instead
      */
     @Deprecated
+    public CodePush(String deploymentKey, Application application, boolean isDebugMode, String serverUrl, String appSecret) throws CodePushInitializeException {
+        mReactNativeCore = new CodePushReactNativeCore(
+                deploymentKey,
+                application,
+                isDebugMode,
+                serverUrl,
+                appSecret,
+                new CodePushReactPublicKeyProvider(null, application.getApplicationContext()),
+                new CodePushReactAppEntryPointProvider(null),
+                ReactPlatformUtils.getInstance());
+    }
+
+    /**
+     * @deprecated use {@link #builder} instead
+     */
+    @Deprecated
     public CodePush(String deploymentKey, Context context, boolean isDebugMode, int publicKeyResourceDescriptor) throws CodePushInitializeException {
         mReactNativeCore = new CodePushReactNativeCore(
                 deploymentKey,
@@ -116,6 +134,54 @@ public class CodePush implements ReactPackage, Serializable {
                 serverUrl,
                 new CodePushReactPublicKeyProvider(publicKeyResourceDescriptor, context),
                 new CodePushReactAppEntryPointProvider(null),
+                ReactPlatformUtils.getInstance());
+    }
+
+    /**
+     * @deprecated use {@link #builder} instead
+     */
+    @Deprecated
+    public CodePush(String deploymentKey, Application application, boolean isDebugMode, @NonNull String serverUrl, String appSecret, Integer publicKeyResourceDescriptor) throws CodePushInitializeException {
+        mReactNativeCore = new CodePushReactNativeCore(
+                deploymentKey,
+                application,
+                isDebugMode,
+                serverUrl,
+                appSecret,
+                new CodePushReactPublicKeyProvider(publicKeyResourceDescriptor, application.getApplicationContext()),
+                new CodePushReactAppEntryPointProvider(null),
+                ReactPlatformUtils.getInstance());
+    }
+
+    /**
+     * Creates instance of {@link CodePush} for those who want to track exceptions (includes additional parameters).
+     *
+     * @param deploymentKey               application deployment key.
+     * @param application                 application instance.
+     * @param isDebugMode                 whether the application is running in debug mode.
+     * @param serverUrl                   CodePush server url.
+     * @param publicKeyResourceDescriptor public-key related resource descriptor.
+     * @param appSecret                   the value of app secret from AppCenter portal to configure {@link Crashes} sdk.
+     * @param entryPointName              path to the application entry point.
+     * @throws CodePushInitializeException initialization exception.
+     */
+    public CodePush(
+            @NonNull String deploymentKey,
+            @NonNull Application application,
+            boolean isDebugMode,
+            @Nullable String serverUrl,
+            @Nullable Integer publicKeyResourceDescriptor,
+            @Nullable String appSecret,
+            @Nullable String entryPointName
+    ) throws CodePushInitializeException {
+        mReactNativeCore = new CodePushReactNativeCore(
+                deploymentKey,
+                application,
+                isDebugMode,
+                serverUrl,
+                appSecret,
+                new CodePushReactPublicKeyProvider(publicKeyResourceDescriptor, application.getApplicationContext()),
+                new CodePushReactAppEntryPointProvider(entryPointName),
                 ReactPlatformUtils.getInstance());
     }
 
@@ -146,6 +212,18 @@ public class CodePush implements ReactPackage, Serializable {
                 new CodePushReactPublicKeyProvider(publicKeyResourceDescriptor, context),
                 new CodePushReactAppEntryPointProvider(entryPointName),
                 ReactPlatformUtils.getInstance());
+    }
+
+    /**
+     * Creates builder for this class for those who want to track exceptions.
+     *
+     * @param deploymentKey application deployment key.
+     * @param application   application instance.
+     * @param appSecret     the value of app secret from AppCenter portal to configure {@link Crashes} sdk.
+     * @return instance of {@link CodePushBuilder}.
+     */
+    public static CodePushBuilder builder(String deploymentKey, Application application, String appSecret) {
+        return new CodePushBuilder(deploymentKey, application, appSecret);
     }
 
     /**
