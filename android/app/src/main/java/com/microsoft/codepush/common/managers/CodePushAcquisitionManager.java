@@ -126,12 +126,11 @@ public class CodePushAcquisitionManager {
         String deploymentKey = configuration.getDeploymentKey();
         String clientUniqueId = configuration.getClientUniqueId();
 
-        /* TODO: Consider moving the following logic to some other place or removing it at all if useless. */
         try {
             deploymentStatusReport.setClientUniqueId(clientUniqueId);
             deploymentStatusReport.setDeploymentKey(deploymentKey);
             deploymentStatusReport.setAppVersion(deploymentStatusReport.getPackage() != null ? deploymentStatusReport.getPackage().getAppVersion() : appVersion);
-            deploymentStatusReport.setAppVersion(deploymentStatusReport.getPackage() != null ? deploymentStatusReport.getPackage().getLabel() : null);
+            deploymentStatusReport.setLabel(deploymentStatusReport.getPackage() != null ? deploymentStatusReport.getPackage().getLabel() : null);
         } catch (CodePushIllegalArgumentException e) {
             throw new CodePushReportStatusException(e, DEPLOY);
         }

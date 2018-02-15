@@ -313,7 +313,6 @@ public abstract class CodePushBaseCore {
         try {
             configuration.setAppVersion(mAppVersion);
 
-        /* TODO can we just use InstanceId#getId ? */
             configuration.setClientUniqueId(Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID));
             configuration.setDeploymentKey(mDeploymentKey);
             configuration.setServerUrl(mServerUrl);
@@ -996,8 +995,7 @@ public abstract class CodePushBaseCore {
     private void retrySendStatusReport(CodePushDeploymentStatusReport statusReport) throws CodePushNativeApiCallException {
 
         /* Try again when the app resumes */
-        /* TODO check that statusReport.toString() will be serialized into JSON string! */
-        AppCenterLog.info(CodePush.LOG_TAG, "Report status failed: " + statusReport.toString());
+        AppCenterLog.info(CodePush.LOG_TAG, "Report status failed: " + mUtilities.mUtils.convertObjectToJsonString(statusReport));
         saveStatusReportForRetry(statusReport);
         Callable<Void> sender = new Callable<Void>() {
             @Override
