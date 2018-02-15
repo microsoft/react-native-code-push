@@ -88,7 +88,7 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
      * Creates instance of the {@link CodePushReactNativeCore} for those who want to track exceptions (includes additional parameters).
      *
      * @param deploymentKey         application deployment key.
-     * @param application           application instance.
+     * @param application           application instance (pass <code>null</code> if you don't need {@link Crashes} integration for tracking exceptions).
      * @param isDebugMode           indicates whether application is running in debug mode.
      * @param serverUrl             CodePush server url.
      * @param appSecret             the value of app secret from AppCenter portal to configure {@link Crashes} sdk.

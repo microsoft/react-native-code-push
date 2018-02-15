@@ -183,7 +183,7 @@ public abstract class CodePushBaseCore {
      * @param publicKeyProvider     instance of {@link CodePushPublicKeyProvider}.
      * @param appEntryPointProvider instance of {@link CodePushAppEntryPointProvider}.
      * @param platformUtils         instance of {@link CodePushPlatformUtils}.
-     * @param application           application instance.
+     * @param application           application instance (pass <code>null</code> if you don't need {@link Crashes} integration for tracking exceptions).
      * @param appSecret             the value of app secret from AppCenter portal to configure {@link Crashes} sdk.
      * @throws CodePushInitializeException error occurred during the initialization.
      */
@@ -205,7 +205,7 @@ public abstract class CodePushBaseCore {
 
         /* Initialize configuration. */
         mDeploymentKey = deploymentKey;
-        mContext = context;
+        mContext = context.getApplicationContext();
         mIsDebugMode = isDebugMode;
         if (serverUrl != null) {
             mServerUrl = serverUrl;
@@ -278,7 +278,7 @@ public abstract class CodePushBaseCore {
      * Creates instance of {@link CodePushBaseCore} for those who want to track exceptions (includes additional parameters).
      *
      * @param deploymentKey         deployment key.
-     * @param application           application instance.
+     * @param application           application instance (pass <code>null</code> if you don't need {@link Crashes} integration for tracking exceptions).
      * @param isDebugMode           indicates whether application is running in debug mode.
      * @param serverUrl             CodePush server url.
      * @param appSecret             the value of app secret from AppCenter portal to configure {@link Crashes} sdk.
