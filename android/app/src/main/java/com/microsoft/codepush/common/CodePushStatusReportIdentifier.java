@@ -50,6 +50,9 @@ public class CodePushStatusReportIdentifier {
      * @return {@link CodePushStatusReportIdentifier} instance if it could be parsed, <code>null</code> otherwise.
      */
     public static CodePushStatusReportIdentifier fromString(String stringIdentifier) {
+        if (stringIdentifier == null) {
+            return null;
+        }
         String[] parsedIdentifier = stringIdentifier.split(":");
         if (parsedIdentifier.length == 1) {
             String versionLabel = parsedIdentifier[0];
