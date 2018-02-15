@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">nativeApp</string>
+    <string name="title_activity_er">er</string>
+    <string name="CheckForUpdate">CheckForUpdate</string>
+</resources>
