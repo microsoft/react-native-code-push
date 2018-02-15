@@ -36,7 +36,7 @@ public class ReactActivity extends Activity implements DefaultHardwareBackBtnHan
         }
 
         ReactRootView mReactRootView = new ReactRootView(this);
-        mReactRootView.startReactApplication(mReactInstanceManager, "MyReactnativeApp", null);
+        mReactRootView.startReactApplication(mReactInstanceManager, "nativeapp", null);
         setContentView(mReactRootView);
     }
 

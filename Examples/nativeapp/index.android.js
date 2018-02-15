@@ -159,4 +159,4 @@ let codePushOptions = { checkFrequency: CodePush.CheckFrequency.MANUAL };
 
 CodePushDemoApp = CodePush(codePushOptions)(CodePushDemoApp);
 
-AppRegistry.registerComponent("MyReactbrownfieldApp", () => CodePushDemoApp);
+AppRegistry.registerComponent("nativeapp", () => CodePushDemoApp);
