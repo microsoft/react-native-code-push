@@ -4,6 +4,7 @@ import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.CodePush;
 import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.apirequests.ApiHttpRequest;
+import com.microsoft.codepush.common.datacontracts.CodePushDownloadPackageResult;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPackageInfo;
 import com.microsoft.codepush.common.exceptions.CodePushApiHttpRequestException;
@@ -16,11 +17,10 @@ import com.microsoft.codepush.common.exceptions.CodePushRollbackException;
 import com.microsoft.codepush.common.exceptions.CodePushSignatureVerificationException;
 import com.microsoft.codepush.common.exceptions.CodePushSignatureVerificationException.SignatureExceptionType;
 import com.microsoft.codepush.common.exceptions.CodePushUnzipException;
-import com.microsoft.codepush.common.datacontracts.CodePushDownloadPackageResult;
+import com.microsoft.codepush.common.interfaces.CodePushPlatformUtils;
 import com.microsoft.codepush.common.utils.CodePushUpdateUtils;
 import com.microsoft.codepush.common.utils.CodePushUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
-import com.microsoft.codepush.common.interfaces.CodePushPlatformUtils;
 
 import org.json.JSONException;
 
@@ -470,8 +470,6 @@ public class CodePushUpdateManager {
                 throw new CodePushMergeException(e);
             }
             return appEntryPoint;
-
-            /* TODO: Remember to rewrite this logic: mCodePushUtils.setJSONValueForKey(updatePackage, CodePushConstants.RELATIVE_BUNDLE_PATH_KEY, appEntryPoint); */
         }
     }
 

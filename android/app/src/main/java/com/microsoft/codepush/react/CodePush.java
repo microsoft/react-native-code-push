@@ -264,7 +264,6 @@ public class CodePush implements ReactPackage, Serializable {
      * @param reactInstanceHolder instance of {@link ReactInstanceHolder}.
      */
     public static void setReactInstanceHolder(ReactInstanceHolder reactInstanceHolder) {
-        //todo remove or not?
         CodePushReactNativeCore.setReactInstanceHolder(reactInstanceHolder);
     }
 
