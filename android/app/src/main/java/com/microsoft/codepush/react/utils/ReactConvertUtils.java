@@ -1,4 +1,4 @@
-package com.microsoft.codepush.reactv2.utils;
+package com.microsoft.codepush.react.utils;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableArray;
