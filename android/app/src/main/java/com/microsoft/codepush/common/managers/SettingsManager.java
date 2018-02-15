@@ -217,7 +217,10 @@ public class SettingsManager {
      */
     public CodePushStatusReportIdentifier getPreviousStatusReportIdentifier() {
         String identifierString = mSettings.getString(LAST_DEPLOYMENT_REPORT_KEY, null);
-        return CodePushStatusReportIdentifier.fromString(identifierString);
+        if (identifierString != null) {
+            return CodePushStatusReportIdentifier.fromString(identifierString);
+        }
+        return null;
     }
 
     /**
