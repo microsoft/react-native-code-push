@@ -246,7 +246,10 @@ public abstract class CodePushBaseCore {
         });
         CodePushAcquisitionManager acquisitionManager = new CodePushAcquisitionManager(utils, fileUtils);
         mManagers = new CodePushManagers(updateManager, telemetryManager, settingsManager, restartManager, acquisitionManager);
-
+        
+        /* Initializes listeners */
+        mListeners = new CodePushListeners();
+        
         /* Initialize state */
         mState = new CodePushState();
         try {

@@ -16,13 +16,13 @@ import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushRemotePackage;
 import com.microsoft.codepush.common.exceptions.CodePushInitializeException;
 import com.microsoft.codepush.common.exceptions.CodePushNativeApiCallException;
-import com.microsoft.codepush.reactv2.CodePush;
+import com.microsoft.codepush.react.CodePush;
 
 public class NativeActivity extends Activity {
 
     private static final int OVERLAY_PERMISSION_REQ_CODE = 2;
 
-    private static com.microsoft.codepush.reactv2.CodePush codePushInstance;
+    private static com.microsoft.codepush.react.CodePush codePushInstance;
 
     private static boolean restartSwitch = false;
 
