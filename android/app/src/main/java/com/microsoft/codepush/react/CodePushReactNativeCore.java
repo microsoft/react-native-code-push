@@ -1,4 +1,4 @@
-package com.microsoft.codepush.reactv2;
+package com.microsoft.codepush.react;
 
 import android.app.Activity;
 import android.content.Context;
@@ -34,8 +34,8 @@ import com.microsoft.codepush.common.interfaces.CodePushPlatformUtils;
 import com.microsoft.codepush.common.interfaces.CodePushPublicKeyProvider;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
 import com.microsoft.codepush.common.utils.CodePushLogUtils;
-import com.microsoft.codepush.reactv2.interfaces.ReactInstanceHolder;
-import com.microsoft.codepush.reactv2.utils.ReactPlatformUtils;
+import com.microsoft.codepush.react.interfaces.ReactInstanceHolder;
+import com.microsoft.codepush.react.utils.ReactPlatformUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
