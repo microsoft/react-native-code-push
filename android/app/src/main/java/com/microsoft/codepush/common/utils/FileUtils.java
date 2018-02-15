@@ -142,7 +142,7 @@ public class FileUtils {
         if (file.isDirectory()) {
             File[] files = file.listFiles();
             if (files == null) {
-                //TODO track IOException("Pathname " + file.getAbsolutePath() + " doesn't denote a directory.");
+                CodePushLogUtils.trackException(new IOException("Pathname " + file.getAbsolutePath() + " doesn't denote a directory."));
                 return;
             }
             for (File fileEntry : files) {
@@ -150,14 +150,14 @@ public class FileUtils {
                     deleteFileOrFolderSilently(fileEntry);
                 } else {
                     if (!fileEntry.delete()) {
-                        //TODO track new IOException("Error deleting file " + file.getName());
+                        CodePushLogUtils.trackException(new IOException("Error deleting file " + file.getName()));
                         return;
                     }
                 }
             }
         }
         if (!file.delete()) {
-            //TODO track new IOException("Error deleting file " + file.getName());
+            CodePushLogUtils.trackException(new IOException("Error deleting file " + file.getName()));
             return;
         }
     }

@@ -1,6 +1,7 @@
 package com.microsoft.codepush.react;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -18,6 +19,7 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.modules.core.ChoreographerCompat;
 import com.facebook.react.modules.core.ReactChoreographer;
 import com.facebook.react.uimanager.ViewManager;
+import com.microsoft.appcenter.crashes.Crashes;
 import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.DownloadProgress;
 import com.microsoft.codepush.common.core.CodePushBaseCore;
@@ -82,6 +84,45 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
      */
     private LifecycleEventListener mLifecycleEventListenerForReport = null;
 
+    /**
+     * Creates instance of the {@link CodePushReactNativeCore} for those who want to track exceptions (includes additional parameters).
+     *
+     * @param deploymentKey         application deployment key.
+     * @param application           application instance (pass <code>null</code> if you don't need {@link Crashes} integration for tracking exceptions).
+     * @param isDebugMode           indicates whether application is running in debug mode.
+     * @param serverUrl             CodePush server url.
+     * @param appSecret             the value of app secret from AppCenter portal to configure {@link Crashes} sdk.
+     *                              Pass <code>null</code> if you don't need {@link Crashes} integration for tracking exceptions.
+     * @param publicKeyProvider     instance of {@link CodePushPublicKeyProvider}.
+     * @param appEntryPointProvider instance of {@link CodePushAppEntryPointProvider}.
+     * @param platformUtils         instance of {@link CodePushPlatformUtils}.
+     * @throws CodePushInitializeException error occurred during the initialization.
+     */
+    CodePushReactNativeCore(
+            @NonNull String deploymentKey,
+            @NonNull Application application,
+            boolean isDebugMode,
+            String serverUrl,
+            String appSecret,
+            CodePushPublicKeyProvider publicKeyProvider,
+            CodePushAppEntryPointProvider appEntryPointProvider,
+            CodePushPlatformUtils platformUtils
+    ) throws CodePushInitializeException {
+        super(deploymentKey, application, isDebugMode, serverUrl, appSecret, publicKeyProvider, appEntryPointProvider, platformUtils);
+    }
+
+    /**
+     * Creates instance of the {@link CodePushReactNativeCore}. Default constructor.
+     *
+     * @param deploymentKey         application deployment key.
+     * @param context               application context.
+     * @param isDebugMode           indicates whether application is running in debug mode.
+     * @param serverUrl             CodePush server url.
+     * @param publicKeyProvider     instance of {@link CodePushPublicKeyProvider}.
+     * @param appEntryPointProvider instance of {@link CodePushAppEntryPointProvider}.
+     * @param platformUtils         instance of {@link CodePushPlatformUtils}.
+     * @throws CodePushInitializeException error occurred during the initialization.
+     */
     CodePushReactNativeCore(
             @NonNull String deploymentKey,
             @NonNull Context context,
@@ -91,7 +132,7 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
             CodePushAppEntryPointProvider appEntryPointProvider,
             CodePushPlatformUtils platformUtils
     ) throws CodePushInitializeException {
-        super(deploymentKey, context, isDebugMode, serverUrl, publicKeyProvider, appEntryPointProvider, platformUtils);
+        super(deploymentKey, context, isDebugMode, serverUrl, publicKeyProvider, appEntryPointProvider, platformUtils, null, null);
     }
 
     /**

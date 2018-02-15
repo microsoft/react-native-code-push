@@ -2,6 +2,7 @@ package com.microsoft.codepush.common.utils;
 
 import android.support.annotation.NonNull;
 
+import com.microsoft.appcenter.AppCenter;
 import com.microsoft.appcenter.crashes.Crashes;
 import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.exceptions.CodePushGeneralException;
@@ -16,6 +17,20 @@ import static com.microsoft.codepush.common.CodePush.LOG_TAG;
  * Represents wrapper on {@link Crashes} methods.
  */
 public class CodePushLogUtils {
+
+    /**
+     * Whether usage of {@link AppCenter} for tracking exceptions is enabled.
+     * AppCenter usage is enabled if user has passed the appSecret and AppCenter has started.
+     */
+    private static boolean sEnabled;
+
+    /**
+     * Sets whether AppCenter usage is enabled.
+     * @param enabled whether AppCenter usage is enabled.
+     */
+    public static void setEnabled(boolean enabled) {
+        sEnabled = enabled;
+    }
 
     /**
      * Represents wrapper on {@link Crashes#trackException(Throwable, Map)} method. Automatically tracks exception in logs, too.
@@ -54,8 +69,10 @@ public class CodePushLogUtils {
      */
     public static void trackException(Throwable throwable, boolean shouldLog) {
         try {
-            Method method = Crashes.class.getMethod("trackException", Throwable.class);
-            method.invoke(throwable);
+            if (sEnabled) {
+                Method method = Crashes.class.getMethod("trackException", Throwable.class);
+                method.invoke(throwable);
+            }
             if (shouldLog) {
                 AppCenterLog.error(LOG_TAG, throwable.getMessage());
             }
@@ -74,8 +91,10 @@ public class CodePushLogUtils {
      */
     public static void trackException(@NonNull Throwable throwable, Map<String, String> properties, boolean shouldLog) {
         try {
-            Method method = Crashes.class.getMethod("trackException", Throwable.class, Map.class);
-            method.invoke(throwable, properties);
+            if (sEnabled) {
+                Method method = Crashes.class.getMethod("trackException", Throwable.class, Map.class);
+                method.invoke(throwable, properties);
+            }
             if (shouldLog) {
                 AppCenterLog.error(LOG_TAG, throwable.getMessage());
             }

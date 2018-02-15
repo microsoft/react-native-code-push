@@ -1,7 +1,9 @@
 package com.microsoft.codepush.react;
 
+import android.app.Application;
 import android.content.Context;
 
+import com.microsoft.appcenter.crashes.Crashes;
 import com.microsoft.codepush.common.exceptions.CodePushInitializeException;
 
 /**
@@ -13,6 +15,11 @@ public class CodePushBuilder {
      * Application deployment key.
      */
     private String mDeploymentKey;
+
+    /**
+     * Application instance.
+     */
+    private Application mApplication;
 
     /**
      * Application context.
@@ -40,14 +47,32 @@ public class CodePushBuilder {
     private String mAppEntryPoint;
 
     /**
+     * The value of app secret from AppCenter portal to configure {@link Crashes} sdk.
+     */
+    private String mAppSecret;
+
+    /**
      * Creates a builder with initial parameters.
      *
      * @param deploymentKey application deployment key.
      * @param context       application context.
      */
     public CodePushBuilder(String deploymentKey, Context context) {
-        this.mDeploymentKey = deploymentKey;
-        this.mContext = context;
+        mDeploymentKey = deploymentKey;
+        mContext = context;
+    }
+
+    /**
+     * Creates a builder with initial parameters for those who want to track exceptions.
+     *
+     * @param deploymentKey application deployment key.
+     * @param application   application instance.
+     * @param appSecret     the value of app secret from AppCenter portal to configure {@link Crashes} sdk.
+     */
+    public CodePushBuilder(String deploymentKey, Application application, String appSecret) {
+        mDeploymentKey = deploymentKey;
+        mApplication = application;
+        mAppSecret = appSecret;
     }
 
     /**
@@ -57,7 +82,7 @@ public class CodePushBuilder {
      * @return instance of {@link CodePushBuilder}.
      */
     public CodePushBuilder setIsDebugMode(boolean isDebugMode) {
-        this.mIsDebugMode = isDebugMode;
+        mIsDebugMode = isDebugMode;
         return this;
     }
 
@@ -68,7 +93,7 @@ public class CodePushBuilder {
      * @return instance of {@link CodePushBuilder}.
      */
     public CodePushBuilder setServerUrl(String serverUrl) {
-        this.mServerUrl = serverUrl;
+        mServerUrl = serverUrl;
         return this;
     }
 
@@ -79,7 +104,7 @@ public class CodePushBuilder {
      * @return instance of {@link CodePushBuilder}.
      */
     public CodePushBuilder setPublicKeyResourceDescriptor(Integer publicKeyResourceDescriptor) {
-        this.mPublicKeyResourceDescriptor = publicKeyResourceDescriptor;
+        mPublicKeyResourceDescriptor = publicKeyResourceDescriptor;
         return this;
     }
 
@@ -90,7 +115,7 @@ public class CodePushBuilder {
      * @return instance of {@link CodePushBuilder}.
      */
     public CodePushBuilder setAppEntryPoint(String appEntryPoint) {
-        this.mAppEntryPoint = appEntryPoint;
+        mAppEntryPoint = appEntryPoint;
         return this;
     }
 
@@ -101,13 +126,25 @@ public class CodePushBuilder {
      * @throws CodePushInitializeException initialization exception.
      */
     public CodePush build() throws CodePushInitializeException {
-        return new CodePush(
-                this.mDeploymentKey,
-                this.mContext,
-                this.mIsDebugMode,
-                this.mServerUrl,
-                this.mPublicKeyResourceDescriptor,
-                this.mAppEntryPoint
-        );
+        if (mAppSecret == null) {
+            return new CodePush(
+                    this.mDeploymentKey,
+                    this.mContext,
+                    this.mIsDebugMode,
+                    this.mServerUrl,
+                    this.mPublicKeyResourceDescriptor,
+                    this.mAppEntryPoint
+            );
+        } else {
+            return new CodePush(
+                    this.mDeploymentKey,
+                    this.mApplication,
+                    this.mIsDebugMode,
+                    this.mServerUrl,
+                    this.mPublicKeyResourceDescriptor,
+                    this.mAppSecret,
+                    this.mAppEntryPoint
+            );
+        }
     }
 }
