@@ -173,7 +173,7 @@ public abstract class CodePushBaseCore {
 
     /**
      * Creates instance of {@link CodePushBaseCore}. Default constructor.
-     * We pass {@link Application} and app secret here, too, because we can't initialize AppCenter in anotehr constructor and then call this.
+     * We pass {@link Application} and app secret here, too, because we can't initialize AppCenter in another constructor and then call this.
      * However, AppCenter must be initialized before creating anything else.
      *
      * @param deploymentKey         deployment key.
