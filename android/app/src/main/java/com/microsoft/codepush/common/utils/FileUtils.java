@@ -216,7 +216,6 @@ public class FileUtils {
             Exception e = finalizeResources(
                     Arrays.asList(reader, fileInputStream),
                     "Error closing IO resources when reading file.");
-
             if (e != null) {
                 throw new CodePushFinalizeException(OperationType.READ, e);
             }
