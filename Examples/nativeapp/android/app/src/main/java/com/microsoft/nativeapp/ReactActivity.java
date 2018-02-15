@@ -11,7 +11,7 @@ import com.facebook.react.common.LifecycleState;
 import com.facebook.react.modules.core.DefaultHardwareBackBtnHandler;
 import com.facebook.react.shell.MainReactPackage;
 import com.microsoft.codepush.common.exceptions.CodePushNativeApiCallException;
-import com.microsoft.codepush.reactv2.CodePush;
+import com.microsoft.codepush.react.CodePush;
 
 public class ReactActivity extends Activity implements DefaultHardwareBackBtnHandler {
     private ReactInstanceManager mReactInstanceManager;
