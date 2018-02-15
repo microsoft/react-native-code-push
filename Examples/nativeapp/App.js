@@ -97,7 +97,7 @@ class CodePushDemoApp extends Component {
     return (
       <View style={styles.container}>
         <Text style={styles.welcome}>
-          Welcome to CodePush!signed1
+          Welcome to CodePush!
        </Text>
         <TouchableOpacity onPress={this.sync.bind(this)}>
           <Text style={styles.syncButton}>Press for background sync</Text>
@@ -159,4 +159,4 @@ let codePushOptions = { checkFrequency: CodePush.CheckFrequency.MANUAL };
 
 CodePushDemoApp = CodePush(codePushOptions)(CodePushDemoApp);
 
-AppRegistry.registerComponent("nativeapp", () => CodePushDemoApp);
+export default CodePushDemoApp;
