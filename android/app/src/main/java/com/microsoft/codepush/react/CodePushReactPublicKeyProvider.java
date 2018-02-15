@@ -1,4 +1,4 @@
-package com.microsoft.codepush.reactv2;
+package com.microsoft.codepush.react;
 
 import android.content.Context;
 import android.content.res.Resources;

@@ -1,7 +1,8 @@
-package com.microsoft.codepush.reactv2;
+package com.microsoft.codepush.react;
 
 import com.microsoft.codepush.common.exceptions.CodePushNativeApiCallException;
 import com.microsoft.codepush.common.interfaces.CodePushAppEntryPointProvider;
+import com.microsoft.codepush.react.CodePush;
 
 /**
  * React-specific implementation of {@link CodePushAppEntryPointProvider}.
