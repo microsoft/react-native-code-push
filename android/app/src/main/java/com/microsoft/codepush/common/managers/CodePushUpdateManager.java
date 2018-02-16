@@ -191,8 +191,10 @@ public class CodePushUpdateManager {
      */
     public File getPackageDownloadFile() throws IOException {
         File downloadFolder = new File(getCodePushPath());
-        if (!downloadFolder.mkdirs()) {
-            throw new IOException("Couldn't create directory" + downloadFolder.getAbsolutePath() + " for downloading file");
+        if (!downloadFolder.exists()) {
+            if (!downloadFolder.mkdirs()) {
+                throw new IOException("Couldn't create directory" + downloadFolder.getAbsolutePath() + " for downloading file");
+            }
         }
         return new File(downloadFolder, CodePushConstants.DOWNLOAD_FILE_NAME);
     }

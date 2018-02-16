@@ -57,7 +57,7 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
     /**
      * Default file name for javascript bundle.
      */
-    private static final String DEFAULT_JS_BUNDLE_NAME = "index.android.bundle";
+    public static final String DEFAULT_JS_BUNDLE_NAME = "index.android.bundle";
 
     /**
      * Prefix to access the bundle.

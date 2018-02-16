@@ -927,7 +927,7 @@ public abstract class CodePushBaseCore {
         try {
             mManagers.mAcquisitionManager.reportStatusDownload(configuration, localPackage);
         } catch (CodePushReportStatusException e) {
-            throw new CodePushNativeApiCallException(e);
+            CodePushLogUtils.trackException(e);
         }
         CodePushInstallMode resolvedInstallMode = localPackage.isMandatory() ? syncOptions.getMandatoryInstallMode() : syncOptions.getInstallMode();
         mState.mCurrentInstallModeInProgress = resolvedInstallMode;
