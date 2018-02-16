@@ -3,6 +3,8 @@ package com.microsoft.codepush.react;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.os.AsyncTask;
+import android.util.Log;
 
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.LifecycleEventListener;
@@ -42,7 +44,7 @@ public class CodePushDialog extends ReactContextBaseJavaModule implements CodePu
      */
     @ReactMethod
     public void showDialog(final String title, final String message, final String positiveButtonText,
-                           final String negativeButtonText, final Callback successCallback, Callback errorCallback) {
+                           final String negativeButtonText, final Callback successCallback, final Callback errorCallback) {
         Activity currentActivity = getCurrentActivity();
         if (currentActivity == null) {
 
@@ -54,7 +56,7 @@ public class CodePushDialog extends ReactContextBaseJavaModule implements CodePu
                     Activity currentActivity = getCurrentActivity();
                     if (currentActivity != null) {
                         getReactApplicationContext().removeLifecycleEventListener(this);
-                        showDialogInternal(title, message, positiveButtonText, negativeButtonText, successCallback, currentActivity);
+                        showDialogInternal(title, message, positiveButtonText, negativeButtonText, successCallback, errorCallback, currentActivity);
                     }
                 }
 
@@ -69,7 +71,7 @@ public class CodePushDialog extends ReactContextBaseJavaModule implements CodePu
                 }
             });
         } else {
-            showDialogInternal(title, message, positiveButtonText, negativeButtonText, successCallback, currentActivity);
+            showDialogInternal(title, message, positiveButtonText, negativeButtonText, successCallback, errorCallback, currentActivity);
         }
     }
 
@@ -83,9 +85,9 @@ public class CodePushDialog extends ReactContextBaseJavaModule implements CodePu
      * @param successCallback    callback to handle "OK" events.
      * @param currentActivity    application activity.
      */
-    private void showDialogInternal(String title, String message, String positiveButtonText,
-                                    String negativeButtonText, final Callback successCallback, Activity currentActivity) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(currentActivity);
+    private void showDialogInternal(final String title, final String message, final String positiveButtonText,
+                                    final String negativeButtonText, final Callback successCallback, final Callback errorCallback, final Activity currentActivity) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(currentActivity);
         builder.setCancelable(false);
         DialogInterface.OnClickListener clickListener = new DialogInterface.OnClickListener() {
             @Override
@@ -93,13 +95,13 @@ public class CodePushDialog extends ReactContextBaseJavaModule implements CodePu
                 dialog.cancel();
                 switch (which) {
                     case DialogInterface.BUTTON_POSITIVE:
-                        successCallback.invoke(0);
+                        successCallback.invoke(true);
                         break;
                     case DialogInterface.BUTTON_NEGATIVE:
-                        successCallback.invoke(1);
+                        successCallback.invoke(false);
                         break;
                     default:
-                        CodePushLogUtils.trackException("Unknown button ID pressed.");
+                        errorCallback.invoke("Unknown button ID pressed.");
                 }
             }
         };
@@ -119,7 +121,7 @@ public class CodePushDialog extends ReactContextBaseJavaModule implements CodePu
             AlertDialog dialog = builder.create();
             dialog.show();
         } catch (Exception e) {
-            CodePushLogUtils.trackException(e);
+            errorCallback.invoke(e.getMessage(), Log.getStackTraceString(e));
         }
     }
 
@@ -133,12 +135,8 @@ public class CodePushDialog extends ReactContextBaseJavaModule implements CodePu
         final Callback successCallback = new Callback() {
             @Override
             public void invoke(Object... args) {
-                String buttonNumber = args[0].toString();
-                if (buttonNumber.equals("0")) {
-                    codePushConfirmationCallback.onResult(true);
-                } else if (buttonNumber.equals("1")) {
-                    codePushConfirmationCallback.onResult(false);
-                }
+                boolean result = (boolean)args[0];
+                codePushConfirmationCallback.onResult(result);
             }
         };
         final Callback errorCallback = new Callback() {

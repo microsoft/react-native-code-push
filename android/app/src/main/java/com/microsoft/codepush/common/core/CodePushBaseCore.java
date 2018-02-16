@@ -4,8 +4,11 @@ import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.microsoft.appcenter.AppCenter;
 import com.microsoft.appcenter.crashes.Crashes;
@@ -575,10 +578,10 @@ public abstract class CodePushBaseCore {
                 notifyAboutSyncStatusChange(UP_TO_DATE);
             }
         } else if (syncOptions.getUpdateDialog() != null) {
-            CodePushUpdateDialog updateDialogOptions = syncOptions.getUpdateDialog();
+            final CodePushUpdateDialog updateDialogOptions = syncOptions.getUpdateDialog();
             String message;
-            String acceptButtonText;
-            String declineButtonText = updateDialogOptions.getOptionalIgnoreButtonLabel();
+            final String acceptButtonText;
+            final String declineButtonText = updateDialogOptions.getOptionalIgnoreButtonLabel();
             if (remotePackage.isMandatory()) {
                 message = updateDialogOptions.getMandatoryUpdateMessage();
                 acceptButtonText = updateDialogOptions.getMandatoryContinueButtonLabel();
@@ -592,29 +595,36 @@ public abstract class CodePushBaseCore {
 
             /* Ask user whether he want to install update or ignore it. */
             notifyAboutSyncStatusChange(AWAITING_USER_ACTION);
-            mConfirmationDialog.shouldInstallUpdate(updateDialogOptions.getTitle(), message, acceptButtonText, declineButtonText, new CodePushConfirmationCallback() {
+            final String finalMessage = message;
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
-                public void onResult(boolean userAcceptsProposal) {
-                    if (userAcceptsProposal) {
-                        try {
-                            doDownloadAndInstall(remotePackage, syncOptions, configuration);
-                            mState.mSyncInProgress = false;
-                        } catch (Exception e) {
+                public void run() {
+                    mConfirmationDialog.shouldInstallUpdate(updateDialogOptions.getTitle(), finalMessage, acceptButtonText, declineButtonText, new CodePushConfirmationCallback() {
+
+                        @Override
+                        public void onResult(boolean userAcceptsProposal) {
+                            if (userAcceptsProposal) {
+                                try {
+                                    doDownloadAndInstall(remotePackage, syncOptions, configuration);
+                                    mState.mSyncInProgress = false;
+                                } catch (Exception e) {
+                                    notifyAboutSyncStatusChange(UNKNOWN_ERROR);
+                                    mState.mSyncInProgress = false;
+                                    CodePushLogUtils.trackException(new CodePushNativeApiCallException(e));
+                                }
+                            } else {
+                                notifyAboutSyncStatusChange(UPDATE_IGNORED);
+                                mState.mSyncInProgress = false;
+                            }
+                        }
+
+                        @Override
+                        public void throwError(CodePushGeneralException e) {
                             notifyAboutSyncStatusChange(UNKNOWN_ERROR);
                             mState.mSyncInProgress = false;
                             CodePushLogUtils.trackException(new CodePushNativeApiCallException(e));
                         }
-                    } else {
-                        notifyAboutSyncStatusChange(UPDATE_IGNORED);
-                        mState.mSyncInProgress = false;
-                    }
-                }
-
-                @Override
-                public void throwError(CodePushGeneralException e) {
-                    notifyAboutSyncStatusChange(UNKNOWN_ERROR);
-                    mState.mSyncInProgress = false;
-                    CodePushLogUtils.trackException(new CodePushNativeApiCallException(e));
+                    });
                 }
             });
         } else {
@@ -625,8 +635,9 @@ public abstract class CodePushBaseCore {
                 mState.mSyncInProgress = false;
                 throw new CodePushNativeApiCallException(e);
             }
+            mState.mSyncInProgress = false;
         }
-        mState.mSyncInProgress = false;
+
     }
 
     /**
