@@ -67,9 +67,9 @@ public class DownloadPackageTask extends BaseHttpTask<CodePushDownloadPackageRes
             return null;
         }
         try {
+            bufferedInputStream = new BufferedInputStream(connection.getInputStream());
             long totalBytes = connection.getContentLength();
             long receivedBytes = 0;
-            bufferedInputStream = new BufferedInputStream(connection.getInputStream());
             fileOutputStream = new FileOutputStream(mDownloadFile);
             bufferedOutputStream = new BufferedOutputStream(fileOutputStream, CodePushConstants.DOWNLOAD_BUFFER_SIZE);
             byte[] data = new byte[CodePushConstants.DOWNLOAD_BUFFER_SIZE];

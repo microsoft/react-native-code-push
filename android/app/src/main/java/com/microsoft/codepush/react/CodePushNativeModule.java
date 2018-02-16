@@ -26,6 +26,7 @@ import com.microsoft.codepush.common.exceptions.CodePushNativeApiCallException;
 import com.microsoft.codepush.common.interfaces.CodePushBinaryVersionMismatchListener;
 import com.microsoft.codepush.common.interfaces.CodePushDownloadProgressListener;
 import com.microsoft.codepush.common.interfaces.CodePushSyncStatusListener;
+import com.microsoft.codepush.common.managers.CodePushRestartManager;
 import com.microsoft.codepush.common.utils.CodePushLogUtils;
 import com.microsoft.codepush.common.utils.CodePushUpdateUtils;
 import com.microsoft.codepush.common.utils.CodePushUtils;
@@ -401,7 +402,23 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
     }
 
     /**
-     * Performs an application restart.
+     * Performs a "clean" app restart without usage of {@link CodePushRestartManager}.
+     *
+     * @param onlyIfUpdateIsPending restart only if update is pending.
+     * @param promise               js promise to handle the results.
+     *                              Waits to be resolved with the boolean value.
+     */
+    @ReactMethod
+    public void restartApp(boolean onlyIfUpdateIsPending, Promise promise) {
+        try {
+            promise.resolve(mCodePushCore.restartInternal(onlyIfUpdateIsPending));
+        } catch (CodePushMalformedDataException e) {
+            promise.reject(e);
+        }
+    }
+
+    /**
+     * Performs an application restart using {@link CodePushRestartManager}.
      *
      * @param onlyIfUpdateIsPending restart only if update is pending.
      * @param promise               js promise to handle the results.

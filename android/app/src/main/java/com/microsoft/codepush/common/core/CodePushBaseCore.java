@@ -233,15 +233,7 @@ public abstract class CodePushBaseCore {
         CodePushRestartManager restartManager = new CodePushRestartManager(new CodePushRestartListener() {
             @Override
             public boolean onRestart(boolean onlyIfUpdateIsPending) throws CodePushMalformedDataException {
-
-                /* If this is an unconditional restart request, or there
-                /* is current pending update, then reload the app. */
-                if (!onlyIfUpdateIsPending || settingsManager.isPendingUpdate(null)) {
-                    loadApp();
-                    return true;
-                }
-
-                return false;
+                return restartInternal(onlyIfUpdateIsPending);
             }
         });
         CodePushAcquisitionManager acquisitionManager = new CodePushAcquisitionManager(utils, fileUtils);
@@ -668,6 +660,25 @@ public abstract class CodePushBaseCore {
      */
     public void log(String message) {
         AppCenterLog.info(LOG_TAG, message);
+    }
+
+    /**
+     * Performs just the restart itself.
+     *
+     * @param onlyIfUpdateIsPending restart only if update is pending or unconditionally.
+     * @return <code>true</code> if restarted successfully.
+     * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
+     */
+    public boolean restartInternal(boolean onlyIfUpdateIsPending) throws CodePushMalformedDataException {
+
+        /* If this is an unconditional restart request, or there
+        * is current pending update, then reload the app. */
+        if (!onlyIfUpdateIsPending || mManagers.mSettingsManager.isPendingUpdate(null)) {
+            loadApp();
+            return true;
+        }
+
+        return false;
     }
 
     /**

@@ -1,13 +1,12 @@
 package com.microsoft.nativeapp;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.view.KeyEvent;
 import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
 
 import com.facebook.react.BuildConfig;
 import com.facebook.react.ReactInstanceManager;
@@ -48,6 +47,7 @@ public class ReactActivity extends AppCompatActivity implements DefaultHardwareB
         } catch (CodePushNativeApiCallException e) {
             e.printStackTrace();
         }
+        CodePush.setReactInstanceManager(mReactInstanceManager);
 
         ReactRootView mReactRootView = new ReactRootView(this);
         mReactRootView.startReactApplication(mReactInstanceManager, "nativeapp", null);

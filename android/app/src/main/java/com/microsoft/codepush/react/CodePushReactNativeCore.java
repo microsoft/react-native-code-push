@@ -70,6 +70,11 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
     private static ReactInstanceHolder sReactInstanceHolder;
 
     /**
+     * Instance of {@link ReactInstanceManager}.
+     */
+    private static ReactInstanceManager sReactInstanceManager;
+
+    /**
      * Instance of the {@link ReactApplicationContext}.
      */
     private static ReactApplicationContext sReactApplicationContext;
@@ -443,9 +448,19 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
      * Sets instance holder.
      *
      * @param reactInstanceHolder instance of {@link ReactInstanceHolder}.
+     * @deprecated Please use {@link CodePushReactNativeCore#setReactInstanceManager(ReactInstanceManager)} instead.
      */
     public static void setReactInstanceHolder(ReactInstanceHolder reactInstanceHolder) {
         sReactInstanceHolder = reactInstanceHolder;
+    }
+
+    /**
+     * Sets instance manager.
+     *
+     * @param reactInstanceManager instance of {@link ReactInstanceManager}.
+     */
+    public static void setReactInstanceManager(ReactInstanceManager reactInstanceManager) {
+        sReactInstanceManager = reactInstanceManager;
     }
 
     /**
@@ -453,9 +468,13 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
      *
      * @return instance of {@link ReactInstanceHolder}.
      */
-    private static ReactInstanceManager getReactInstanceManager() {
+
+    private static ReactInstanceManager getReactInstanceManager() throws CodePushNativeApiCallException {
         if (sReactInstanceHolder == null) {
-            return null;
+            if (sReactInstanceManager == null) {
+                throw new CodePushNativeApiCallException("You haven't set up neither ReactInstanceManger nor ReactInstanceHolder. Please refer to the documentation for more info.");
+            }
+            return sReactInstanceManager;
         }
         return sReactInstanceHolder.getReactInstanceManager();
     }

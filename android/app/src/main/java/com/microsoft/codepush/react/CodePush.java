@@ -5,6 +5,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.NativeModule;
@@ -260,9 +261,19 @@ public class CodePush implements ReactPackage, Serializable {
      * Sets instance holder.
      *
      * @param reactInstanceHolder instance of {@link ReactInstanceHolder}.
+     * @deprecated Please use {@link CodePush#setReactInstanceManager(ReactInstanceManager)} instead.
      */
     public static void setReactInstanceHolder(ReactInstanceHolder reactInstanceHolder) {
         CodePushReactNativeCore.setReactInstanceHolder(reactInstanceHolder);
+    }
+
+    /**
+     * Sets instance manager.
+     *
+     * @param reactInstanceManager instance of {@link ReactInstanceManager}.
+     */
+    public static void setReactInstanceManager(ReactInstanceManager reactInstanceManager) {
+        CodePushReactNativeCore.setReactInstanceManager(reactInstanceManager);
     }
 
     /**
