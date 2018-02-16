@@ -177,7 +177,7 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
      * @param assetsBundleFileName custom bundle file name.
      * @return link starting with "assets://" and leading to javascript bundle file.
      */
-    public static String getJSBundleFile(String assetsBundleFileName) throws CodePushNativeApiCallException {
+    public static String getJSBundleFile(String assetsBundleFileName) {
         if (mCurrentInstance == null) {
             Exception e = new CodePushNativeApiCallException("A CodePush instance has not been created yet. Have you added it to your app's list of ReactPackages?");
             CodePushLogUtils.trackException(e);
