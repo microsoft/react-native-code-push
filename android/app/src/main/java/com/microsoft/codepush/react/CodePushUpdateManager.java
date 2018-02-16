@@ -163,11 +163,11 @@ public class CodePushUpdateManager {
         try {
             URL downloadUrl = new URL(downloadUrlString);
             connection = (HttpURLConnection) (downloadUrl.openConnection());
+            bin = new BufferedInputStream(connection.getInputStream());
 
             long totalBytes = connection.getContentLength();
             long receivedBytes = 0;
 
-            bin = new BufferedInputStream(connection.getInputStream());
             File downloadFolder = new File(getCodePushPath());
             downloadFolder.mkdirs();
             downloadFile = new File(downloadFolder, CodePushConstants.DOWNLOAD_FILE_NAME);
