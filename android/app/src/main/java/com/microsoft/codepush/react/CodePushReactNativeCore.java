@@ -166,9 +166,8 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
      * Gets a link to the default javascript bundle file.
      *
      * @return link starting with "assets://" and leading to javascript bundle file.
-     * @throws CodePushNativeApiCallException exception occurred when performing the operation.
      */
-    public static String getJSBundleFile() throws CodePushNativeApiCallException {
+    public static String getJSBundleFile() {
         return getJSBundleFile(DEFAULT_JS_BUNDLE_NAME);
     }
 
@@ -177,14 +176,20 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
      *
      * @param assetsBundleFileName custom bundle file name.
      * @return link starting with "assets://" and leading to javascript bundle file.
-     * @throws CodePushNativeApiCallException exception occurred when performing the operation.
      */
     public static String getJSBundleFile(String assetsBundleFileName) throws CodePushNativeApiCallException {
         if (mCurrentInstance == null) {
-            throw new CodePushNativeApiCallException("A CodePush instance has not been created yet. Have you added it to your app's list of ReactPackages?");
+            Exception e = new CodePushNativeApiCallException("A CodePush instance has not been created yet. Have you added it to your app's list of ReactPackages?");
+            CodePushLogUtils.trackException(e);
+            throw new RuntimeException(e);
         }
 
-        return ((CodePushReactNativeCore) mCurrentInstance).getJSBundleFileInternal(assetsBundleFileName);
+        try {
+            return ((CodePushReactNativeCore) mCurrentInstance).getJSBundleFileInternal(assetsBundleFileName);
+        } catch (CodePushNativeApiCallException e) {
+            CodePushLogUtils.trackException(e);
+            throw new RuntimeException(e);
+        }
     }
 
     /**

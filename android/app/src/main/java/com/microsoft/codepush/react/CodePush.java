@@ -241,9 +241,8 @@ public class CodePush implements ReactPackage, Serializable {
      * Gets a link to the default javascript bundle file.
      *
      * @return link starting with "assets://" and leading to javascript bundle file.
-     * @throws CodePushNativeApiCallException exception occurred when performing the operation.
      */
-    public static String getJSBundleFile() throws CodePushNativeApiCallException {
+    public static String getJSBundleFile() {
         return CodePushReactNativeCore.getJSBundleFile();
     }
 
@@ -252,9 +251,8 @@ public class CodePush implements ReactPackage, Serializable {
      *
      * @param assetsBundleFileName custom bundle file name.
      * @return link starting with "assets://" and leading to javascript bundle file.
-     * @throws CodePushNativeApiCallException exception occurred when performing the operation.
      */
-    public static String getJSBundleFile(String assetsBundleFileName) throws CodePushNativeApiCallException {
+    public static String getJSBundleFile(String assetsBundleFileName) {
         return CodePushReactNativeCore.getJSBundleFile(assetsBundleFileName);
     }
 
