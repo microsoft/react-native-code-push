@@ -8,6 +8,6 @@
   "dependencies": {
     "react": "^16.2.0",
     "react-native": "^0.53.0",
-    "react-native-code-push": "github:microsoft/react-native-code-push#brownfield-apps-dev"
+    "react-native-code-push": "github:microsoft/react-native-code-push#brownfield-apps-dev-fixes"
   }
 }
