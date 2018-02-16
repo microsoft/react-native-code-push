@@ -562,82 +562,82 @@ public abstract class CodePushBaseCore {
             }
         }
         mState.mSyncInProgress = true;
-        notifyApplicationReady();
-        notifyAboutSyncStatusChange(CHECKING_FOR_UPDATE);
-        final CodePushRemotePackage remotePackage = checkForUpdate(syncOptions.getDeploymentKey());
-        final boolean updateShouldBeIgnored =
-                remotePackage != null && (remotePackage.isFailedInstall() && syncOptions.getIgnoreFailedUpdates());
-        if (remotePackage == null || updateShouldBeIgnored) {
-            if (updateShouldBeIgnored) {
-                AppCenterLog.info(CodePush.LOG_TAG, "An update is available, but it is being ignored due to having been previously rolled back.");
-            }
-            CodePushLocalPackage currentPackage = getCurrentPackage();
-            if (currentPackage != null && currentPackage.isPending()) {
-                notifyAboutSyncStatusChange(UPDATE_INSTALLED);
-            } else {
-                notifyAboutSyncStatusChange(UP_TO_DATE);
-            }
-        } else if (syncOptions.getUpdateDialog() != null) {
-            final CodePushUpdateDialog updateDialogOptions = syncOptions.getUpdateDialog();
-            String message;
-            final String acceptButtonText;
-            final String declineButtonText = updateDialogOptions.getOptionalIgnoreButtonLabel();
-            if (remotePackage.isMandatory()) {
-                message = updateDialogOptions.getMandatoryUpdateMessage();
-                acceptButtonText = updateDialogOptions.getMandatoryContinueButtonLabel();
-            } else {
-                message = updateDialogOptions.getOptionalUpdateMessage();
-                acceptButtonText = updateDialogOptions.getOptionalInstallButtonLabel();
-            }
-            if (updateDialogOptions.getAppendReleaseDescription() && !isEmpty(remotePackage.getDescription())) {
-                message = updateDialogOptions.getDescriptionPrefix() + " " + remotePackage.getDescription();
-            }
-
-            /* Ask user whether he want to install update or ignore it. */
-            notifyAboutSyncStatusChange(AWAITING_USER_ACTION);
-            final String finalMessage = message;
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                @Override
-                public void run() {
-                    mConfirmationDialog.shouldInstallUpdate(updateDialogOptions.getTitle(), finalMessage, acceptButtonText, declineButtonText, new CodePushConfirmationCallback() {
-
-                        @Override
-                        public void onResult(boolean userAcceptsProposal) {
-                            if (userAcceptsProposal) {
-                                try {
-                                    doDownloadAndInstall(remotePackage, syncOptions, configuration);
-                                    mState.mSyncInProgress = false;
-                                } catch (Exception e) {
-                                    notifyAboutSyncStatusChange(UNKNOWN_ERROR);
-                                    mState.mSyncInProgress = false;
-                                    CodePushLogUtils.trackException(new CodePushNativeApiCallException(e));
-                                }
-                            } else {
-                                notifyAboutSyncStatusChange(UPDATE_IGNORED);
-                                mState.mSyncInProgress = false;
-                            }
-                        }
-
-                        @Override
-                        public void throwError(CodePushGeneralException e) {
-                            notifyAboutSyncStatusChange(UNKNOWN_ERROR);
-                            mState.mSyncInProgress = false;
-                            CodePushLogUtils.trackException(new CodePushNativeApiCallException(e));
-                        }
-                    });
+        try {
+            notifyApplicationReady();
+            notifyAboutSyncStatusChange(CHECKING_FOR_UPDATE);
+            final CodePushRemotePackage remotePackage = checkForUpdate(syncOptions.getDeploymentKey());
+            final boolean updateShouldBeIgnored =
+                    remotePackage != null && (remotePackage.isFailedInstall() && syncOptions.getIgnoreFailedUpdates());
+            if (remotePackage == null || updateShouldBeIgnored) {
+                if (updateShouldBeIgnored) {
+                    AppCenterLog.info(CodePush.LOG_TAG, "An update is available, but it is being ignored due to having been previously rolled back.");
                 }
-            });
-        } else {
-            try {
-                doDownloadAndInstall(remotePackage, syncOptions, configuration);
-            } catch (Exception e) {
-                notifyAboutSyncStatusChange(UNKNOWN_ERROR);
+                CodePushLocalPackage currentPackage = getCurrentPackage();
+                if (currentPackage != null && currentPackage.isPending()) {
+                    notifyAboutSyncStatusChange(UPDATE_INSTALLED);
+                } else {
+                    notifyAboutSyncStatusChange(UP_TO_DATE);
+                }
                 mState.mSyncInProgress = false;
-                throw new CodePushNativeApiCallException(e);
-            }
-            mState.mSyncInProgress = false;
-        }
+            } else if (syncOptions.getUpdateDialog() != null) {
+                final CodePushUpdateDialog updateDialogOptions = syncOptions.getUpdateDialog();
+                String message;
+                final String acceptButtonText;
+                final String declineButtonText = updateDialogOptions.getOptionalIgnoreButtonLabel();
+                if (remotePackage.isMandatory()) {
+                    message = updateDialogOptions.getMandatoryUpdateMessage();
+                    acceptButtonText = updateDialogOptions.getMandatoryContinueButtonLabel();
+                } else {
+                    message = updateDialogOptions.getOptionalUpdateMessage();
+                    acceptButtonText = updateDialogOptions.getOptionalInstallButtonLabel();
+                }
+                if (updateDialogOptions.getAppendReleaseDescription() && !isEmpty(remotePackage.getDescription())) {
+                    message = updateDialogOptions.getDescriptionPrefix() + " " + remotePackage.getDescription();
+                }
 
+                /* Ask user whether he want to install update or ignore it. */
+                notifyAboutSyncStatusChange(AWAITING_USER_ACTION);
+                final String finalMessage = message;
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mConfirmationDialog.shouldInstallUpdate(updateDialogOptions.getTitle(), finalMessage, acceptButtonText, declineButtonText, new CodePushConfirmationCallback() {
+
+                            @Override
+                            public void onResult(boolean userAcceptsProposal) {
+                                if (userAcceptsProposal) {
+                                    try {
+                                        doDownloadAndInstall(remotePackage, syncOptions, configuration);
+                                        mState.mSyncInProgress = false;
+                                    } catch (Exception e) {
+                                        notifyAboutSyncStatusChange(UNKNOWN_ERROR);
+                                        mState.mSyncInProgress = false;
+                                        CodePushLogUtils.trackException(new CodePushNativeApiCallException(e));
+                                    }
+                                } else {
+                                    notifyAboutSyncStatusChange(UPDATE_IGNORED);
+                                    mState.mSyncInProgress = false;
+                                }
+                            }
+
+                            @Override
+                            public void throwError(CodePushGeneralException e) {
+                                notifyAboutSyncStatusChange(UNKNOWN_ERROR);
+                                mState.mSyncInProgress = false;
+                                CodePushLogUtils.trackException(new CodePushNativeApiCallException(e));
+                            }
+                        });
+                    }
+                });
+            } else {
+                doDownloadAndInstall(remotePackage, syncOptions, configuration);
+                mState.mSyncInProgress = false;
+            }
+        } catch (Exception e) {
+            notifyAboutSyncStatusChange(UNKNOWN_ERROR);
+            mState.mSyncInProgress = false;
+            throw new CodePushNativeApiCallException(e);
+        }
     }
 
     /**
