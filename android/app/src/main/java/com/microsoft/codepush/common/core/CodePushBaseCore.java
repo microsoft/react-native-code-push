@@ -8,7 +8,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.microsoft.appcenter.AppCenter;
 import com.microsoft.appcenter.crashes.Crashes;
@@ -1191,7 +1190,7 @@ public abstract class CodePushBaseCore {
             }
             CodePushLocalPackage newPackage = createLocalPackage(false, false, true, false, appEntryPoint, updatePackage);
             newPackage.setBinaryModifiedTime(binaryModifiedTime);
-            mUtilities.mUtils.writeObjectToJsonFile(updatePackage, newUpdateMetadataPath);
+            mUtilities.mUtils.writeObjectToJsonFile(newPackage, newUpdateMetadataPath);
             return newPackage;
         } catch (IOException | CodePushDownloadPackageException | CodePushUnzipException | CodePushMergeException e) {
             try {
