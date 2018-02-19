@@ -486,7 +486,8 @@ public class CodePushUpdateManager {
      */
     public void verifySignature(String stringPublicKey, String newUpdateHash, boolean isDiffUpdate) throws CodePushSignatureVerificationException {
         try {
-            String newUpdateFolderPath = mPlatformUtils.getUpdateFolderPath(newUpdateHash);
+            File packageFolder = new File(getCodePushPath(), newUpdateHash);
+            String newUpdateFolderPath = new File(packageFolder, "CodePush").getPath();
             boolean isSignatureVerificationEnabled = (stringPublicKey != null);
             String signaturePath = mCodePushUpdateUtils.getJWTFilePath(newUpdateFolderPath);
             boolean isSignatureAppearedInApp = mFileUtils.fileAtPathExists(signaturePath);
