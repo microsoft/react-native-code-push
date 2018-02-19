@@ -457,7 +457,7 @@ public class CodePushUpdateManager {
         } else {
             if (mFileUtils.fileAtPathExists(newUpdateMetadataPath)) {
                 File metadataFileFromOldUpdate = new File(newUpdateMetadataPath);
-                if (metadataFileFromOldUpdate.delete()) {
+                if (!metadataFileFromOldUpdate.delete()) {
                     throw new CodePushMergeException("Couldn't delete metadata file from old update " + newUpdateMetadataPath);
                 }
             }

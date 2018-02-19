@@ -74,7 +74,7 @@ public class CodePushLogUtils {
                 method.invoke(throwable);
             }
             if (shouldLog) {
-                AppCenterLog.error(LOG_TAG, throwable.getMessage());
+                AppCenterLog.error(LOG_TAG, throwable.getMessage(), throwable);
             }
         } catch (Exception e) {
 
@@ -96,7 +96,7 @@ public class CodePushLogUtils {
                 method.invoke(throwable, properties);
             }
             if (shouldLog) {
-                AppCenterLog.error(LOG_TAG, throwable.getMessage());
+                AppCenterLog.error(LOG_TAG, throwable.getMessage(), throwable);
             }
         } catch (Exception e) {
 
