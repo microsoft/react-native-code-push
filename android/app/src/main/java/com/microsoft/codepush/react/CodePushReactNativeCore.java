@@ -35,6 +35,7 @@ import com.microsoft.codepush.common.interfaces.CodePushConfirmationDialog;
 import com.microsoft.codepush.common.interfaces.CodePushPlatformUtils;
 import com.microsoft.codepush.common.interfaces.CodePushPublicKeyProvider;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
+import com.microsoft.codepush.common.utils.CodePushLogUtils;
 import com.microsoft.codepush.react.interfaces.ReactInstanceHolder;
 import com.microsoft.codepush.react.utils.ReactPlatformUtils;
 
@@ -474,7 +475,7 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
     private static ReactInstanceManager getReactInstanceManager() throws CodePushNativeApiCallException {
         if (sReactInstanceHolder == null) {
             if (sReactInstanceManager == null) {
-                throw new CodePushNativeApiCallException("You haven't set up neither ReactInstanceManger nor ReactInstanceHolder. Please refer to the documentation for more info.");
+                AppCenterLog.info(LOG_TAG, "You haven't set up neither ReactInstanceManger nor ReactInstanceHolder. Please refer to the documentation for more info.");
             }
             return sReactInstanceManager;
         }
