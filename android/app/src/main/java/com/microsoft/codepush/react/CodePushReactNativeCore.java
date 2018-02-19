@@ -35,7 +35,6 @@ import com.microsoft.codepush.common.interfaces.CodePushConfirmationDialog;
 import com.microsoft.codepush.common.interfaces.CodePushPlatformUtils;
 import com.microsoft.codepush.common.interfaces.CodePushPublicKeyProvider;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
-import com.microsoft.codepush.common.utils.CodePushLogUtils;
 import com.microsoft.codepush.react.interfaces.ReactInstanceHolder;
 import com.microsoft.codepush.react.utils.ReactPlatformUtils;
 
@@ -47,6 +46,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import static com.microsoft.codepush.common.CodePush.LOG_TAG;
+import static com.microsoft.codepush.common.utils.CodePushLogUtils.trackException;
 
 /**
  * React-specific instance of {@link CodePushBaseCore}.
@@ -372,6 +372,7 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
                     } catch (Exception e) {
 
                         /* The recreation method threw an unknown exception so just simply fallback to restarting the Activity (if it exists). */
+                        trackException(e);
                         loadBundleLegacy();
                     }
                 }
@@ -380,6 +381,7 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
         } catch (Exception e) {
 
             /* Our reflection logic failed somewhere so fall back to restarting the Activity (if it exists). */
+            trackException(e);
             loadBundleLegacy();
         }
     }
