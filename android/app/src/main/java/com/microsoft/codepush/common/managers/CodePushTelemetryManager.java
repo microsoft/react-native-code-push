@@ -4,6 +4,7 @@ import com.microsoft.codepush.common.CodePushStatusReportIdentifier;
 import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushPackage;
+import com.microsoft.codepush.common.enums.CodePushDeploymentStatus;
 import com.microsoft.codepush.common.exceptions.CodePushIllegalArgumentException;
 
 import org.json.JSONException;
@@ -46,6 +47,8 @@ public class CodePushTelemetryManager {
             mSettingsManager.removeStatusReportSavedForRetry();
             report = new CodePushDeploymentStatusReport();
             report.setAppVersion(appVersion);
+            report.setLabel("");
+            report.setStatus(CodePushDeploymentStatus.SUCCEEDED);
         } else {
             boolean identifierHasDeploymentKey = previousStatusReportIdentifier.hasDeploymentKey();
             String identifierLabel = previousStatusReportIdentifier.getVersionLabelOrEmpty();
