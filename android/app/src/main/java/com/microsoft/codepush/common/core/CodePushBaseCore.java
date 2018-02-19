@@ -1025,7 +1025,7 @@ public abstract class CodePushBaseCore {
                 } else {
                     AppCenterLog.info(CodePush.LOG_TAG, "Reporting CodePush update rollback (" + statusReport.getLabel() + ")");
                 }
-                configuration.setDeploymentKey(statusReport.getPackage().getDeploymentKey());
+                configuration.setDeploymentKey(statusReport.getPackage() == null ? statusReport.getDeploymentKey() : statusReport.getPackage().getDeploymentKey());
                 mManagers.mAcquisitionManager.reportStatusDeploy(configuration, statusReport);
                 saveReportedStatus(statusReport);
             }
