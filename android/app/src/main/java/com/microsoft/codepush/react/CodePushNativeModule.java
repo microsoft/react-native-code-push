@@ -39,6 +39,8 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.microsoft.codepush.common.utils.CodePushLogUtils.trackException;
+
 /**
  * A wrapper around {@link CodePushBaseCore} for interaction with js code.
  */
@@ -98,7 +100,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
             /* Initialize module state while we have a reference to the current context. */
             mBinaryContentsHash = codePushUpdateUtils.getHashForBinaryContents(reactContext, mCodePushCore.isDebugMode());
         } catch (CodePushMalformedDataException e) {
-            CodePushLogUtils.trackException(e);
+            trackException(e);
         }
     }
 
@@ -178,6 +180,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
                         promise.resolve("");
                     }
                 } catch (JSONException | CodePushMalformedDataException | CodePushNativeApiCallException e) {
+                    trackException(e);
                     promise.reject(e);
                 }
                 return null;
@@ -209,6 +212,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
                     CodePushSyncOptions syncOptions = mReactConvertUtils.convertReadableToObject(syncOptionsMap, CodePushSyncOptions.class);
                     mCodePushCore.sync(syncOptions);
                 } catch (CodePushMalformedDataException | CodePushNativeApiCallException e) {
+                    trackException(e);
                     promise.reject(e);
                 }
                 return null;
@@ -238,6 +242,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
                     );
                     promise.resolve(mReactConvertUtils.convertObjectToWritableMap(newPackage));
                 } catch (CodePushMalformedDataException | CodePushNativeApiCallException e) {
+                    trackException(e);
                     promise.reject(e);
                 }
                 return null;
@@ -262,6 +267,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
             configMap.putString("deploymentKey", nativeConfiguration.getDeploymentKey());
             configMap.putString("serverUrl", nativeConfiguration.getServerUrl());
         } catch (CodePushNativeApiCallException e) {
+            trackException(e);
             promise.reject(e);
         }
 
@@ -292,6 +298,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
                         promise.resolve("");
                     }
                 } catch (CodePushMalformedDataException | CodePushNativeApiCallException e) {
+                    trackException(e);
                     promise.reject(e);
                 }
                 return null;
@@ -319,6 +326,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
                         promise.resolve("");
                     }
                 } catch (CodePushMalformedDataException | CodePushNativeApiCallException e) {
+                    trackException(e);
                     promise.reject(e);
                 }
                 return null;
@@ -349,6 +357,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
                             minimumBackgroundDuration);
                     promise.resolve("");
                 } catch (CodePushMalformedDataException | CodePushNativeApiCallException e) {
+                    trackException(e);
                     promise.reject(e);
                 }
                 return null;
@@ -369,6 +378,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
         try {
             promise.resolve(mCodePushCore.existsFailedUpdate(packageHash));
         } catch (CodePushNativeApiCallException e) {
+            trackException(e);
             promise.reject(e);
         }
     }
@@ -385,6 +395,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
         try {
             promise.resolve(mCodePushCore.isFirstRun(packageHash));
         } catch (CodePushNativeApiCallException e) {
+            trackException(e);
             promise.resolve(false);
         }
     }
@@ -413,6 +424,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
         try {
             promise.resolve(mCodePushCore.restartInternal(onlyIfUpdateIsPending));
         } catch (CodePushMalformedDataException e) {
+            trackException(e);
             promise.reject(e);
         }
     }
@@ -429,6 +441,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
         try {
             promise.resolve(mCodePushCore.restartApp(onlyIfUpdateIsPending));
         } catch (CodePushNativeApiCallException e) {
+            trackException(e);
             promise.reject(e);
         }
     }
@@ -457,7 +470,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
         try {
             mCodePushCore.allowRestart();
         } catch (CodePushNativeApiCallException e) {
-            CodePushLogUtils.trackException(e);
+            trackException(e);
         }
     }
 
@@ -472,7 +485,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
         try {
             mCodePushCore.saveReportedStatus(mReactConvertUtils.convertReadableToObject(statusReport, CodePushDeploymentStatusReport.class));
         } catch (CodePushMalformedDataException e) {
-            CodePushLogUtils.trackException(e);
+            trackException(e);
         }
     }
 
@@ -481,7 +494,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
         try {
             mCodePushCore.saveStatusReportForRetry(mReactConvertUtils.convertReadableToObject(statusReport, CodePushDeploymentStatusReport.class));
         } catch (CodePushMalformedDataException | CodePushNativeApiCallException e) {
-            CodePushLogUtils.trackException(e);
+            trackException(e);
         }
     }
 }
