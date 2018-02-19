@@ -18,6 +18,7 @@ import com.microsoft.codepush.common.exceptions.CodePushIllegalArgumentException
 import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
 import com.microsoft.codepush.common.exceptions.CodePushQueryUpdateException;
 import com.microsoft.codepush.common.exceptions.CodePushReportStatusException;
+import com.microsoft.codepush.common.utils.CodePushLogUtils;
 import com.microsoft.codepush.common.utils.CodePushUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
 
@@ -130,9 +131,9 @@ public class CodePushAcquisitionManager {
             deploymentStatusReport.setClientUniqueId(clientUniqueId);
             deploymentStatusReport.setDeploymentKey(deploymentKey);
             deploymentStatusReport.setAppVersion(deploymentStatusReport.getPackage() != null ? deploymentStatusReport.getPackage().getAppVersion() : appVersion);
-            deploymentStatusReport.setLabel(deploymentStatusReport.getPackage() != null ? deploymentStatusReport.getPackage().getLabel() : null);
+            deploymentStatusReport.setLabel(deploymentStatusReport.getPackage() != null ? deploymentStatusReport.getPackage().getLabel() : deploymentStatusReport.getLabel());
         } catch (CodePushIllegalArgumentException e) {
-            throw new CodePushReportStatusException(e, DEPLOY);
+            CodePushLogUtils.trackException(new CodePushReportStatusException(e, DEPLOY));
         }
         final String requestUrl = serverUrl + REPORT_DEPLOYMENT_STATUS_ENDPOINT;
         switch (deploymentStatusReport.getStatus()) {
@@ -141,9 +142,9 @@ public class CodePushAcquisitionManager {
                 break;
             default: {
                 if (deploymentStatusReport.getStatus() == null) {
-                    throw new CodePushReportStatusException("Missing status argument.", DEPLOY);
+                    CodePushLogUtils.trackException(new CodePushReportStatusException("Missing status argument.", DEPLOY));
                 } else {
-                    throw new CodePushReportStatusException("Unrecognized status \"" + deploymentStatusReport.getStatus().getValue() + "\".", DEPLOY);
+                    CodePushLogUtils.trackException(new CodePushReportStatusException("Unrecognized status \"" + deploymentStatusReport.getStatus().getValue() + "\".", DEPLOY));
                 }
             }
         }
@@ -155,7 +156,7 @@ public class CodePushAcquisitionManager {
             CodePushReportStatusResult codePushReportStatusResult = reportStatusDeployRequest.makeRequest();
             AppCenterLog.info(LOG_TAG, "Report status deploy: " + codePushReportStatusResult.getResult());
         } catch (CodePushApiHttpRequestException e) {
-            throw new CodePushReportStatusException(e, DEPLOY);
+            CodePushLogUtils.trackException(new CodePushReportStatusException(e, DEPLOY));
         }
     }
 
