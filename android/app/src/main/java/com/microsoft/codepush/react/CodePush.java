@@ -22,7 +22,6 @@ import com.microsoft.codepush.common.exceptions.CodePushNativeApiCallException;
 import com.microsoft.codepush.common.interfaces.CodePushDownloadProgressListener;
 import com.microsoft.codepush.common.interfaces.CodePushSyncStatusListener;
 import com.microsoft.codepush.common.managers.CodePushAcquisitionManager;
-import com.microsoft.codepush.common.utils.CodePushLogUtils;
 import com.microsoft.codepush.react.interfaces.ReactInstanceHolder;
 import com.microsoft.codepush.react.utils.ReactPlatformUtils;
 
@@ -77,6 +76,27 @@ public class CodePush implements ReactPackage, Serializable {
                     isDebugMode,
                     null,
                     new CodePushReactPublicKeyProvider(null, context),
+                    new CodePushReactAppEntryPointProvider(null),
+                    ReactPlatformUtils.getInstance());
+        } catch (CodePushInitializeException e) {
+            trackException(e);
+            throw e;
+        }
+    }
+
+    /**
+     * @deprecated use {@link #builder} instead
+     */
+    @Deprecated
+    public CodePush(String deploymentKey, Application application, boolean isDebugMode, String appSecret) throws CodePushInitializeException {
+        try {
+            mReactNativeCore = new CodePushReactNativeCore(
+                    deploymentKey,
+                    application,
+                    isDebugMode,
+                    null,
+                    appSecret,
+                    new CodePushReactPublicKeyProvider(null, application.getApplicationContext()),
                     new CodePushReactAppEntryPointProvider(null),
                     ReactPlatformUtils.getInstance());
         } catch (CodePushInitializeException e) {
