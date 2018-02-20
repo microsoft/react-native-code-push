@@ -70,8 +70,9 @@ public class CodePushLogUtils {
     public static void trackException(Throwable throwable, boolean shouldLog) {
         try {
             if (sEnabled) {
-                Method method = Crashes.class.getMethod("trackException", Throwable.class);
-                method.invoke(throwable);
+                Method method = Crashes.class.getDeclaredMethod("trackException", Throwable.class);
+                method.setAccessible(true);
+                method.invoke(null, throwable);
             }
             if (shouldLog) {
                 AppCenterLog.error(LOG_TAG, throwable.getMessage(), throwable);
@@ -92,8 +93,9 @@ public class CodePushLogUtils {
     public static void trackException(@NonNull Throwable throwable, Map<String, String> properties, boolean shouldLog) {
         try {
             if (sEnabled) {
-                Method method = Crashes.class.getMethod("trackException", Throwable.class, Map.class);
-                method.invoke(throwable, properties);
+                Method method = Crashes.class.getDeclaredMethod("trackException", Throwable.class, Map.class);
+                method.setAccessible(true);
+                method.invoke(null, throwable, properties);
             }
             if (shouldLog) {
                 AppCenterLog.error(LOG_TAG, throwable.getMessage(), throwable);
