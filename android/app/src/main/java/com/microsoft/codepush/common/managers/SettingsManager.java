@@ -137,7 +137,7 @@ public class SettingsManager {
      */
     public boolean isPendingUpdate(String packageHash) throws CodePushMalformedDataException {
         CodePushPendingUpdate pendingUpdate = getPendingUpdate();
-        return pendingUpdate != null && pendingUpdate.isPendingUpdateLoading() &&
+        return pendingUpdate != null && !pendingUpdate.isPendingUpdateLoading() &&
                 (packageHash == null || pendingUpdate.getPendingUpdateHash().equals(packageHash));
     }
 
