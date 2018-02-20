@@ -203,6 +203,7 @@ public abstract class CodePushBaseCore {
     ) throws CodePushInitializeException {
         if (appSecret != null) {
             AppCenter.start(application, appSecret, Crashes.class);
+            Crashes.setEnabled(true);
             CodePushLogUtils.setEnabled(true);
         }
 
