@@ -49,6 +49,7 @@ import com.microsoft.codepush.common.interfaces.CodePushConfirmationDialog;
 import com.microsoft.codepush.common.interfaces.CodePushDownloadProgressListener;
 import com.microsoft.codepush.common.interfaces.CodePushPlatformUtils;
 import com.microsoft.codepush.common.interfaces.CodePushPublicKeyProvider;
+import com.microsoft.codepush.common.interfaces.CodePushRestartHandler;
 import com.microsoft.codepush.common.interfaces.CodePushRestartListener;
 import com.microsoft.codepush.common.interfaces.CodePushSyncStatusListener;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
@@ -233,10 +234,10 @@ public abstract class CodePushBaseCore {
         CodePushUpdateManager updateManager = new CodePushUpdateManager(documentsDirectory, platformUtils, fileUtils, utils, updateUtils);
         final SettingsManager settingsManager = new SettingsManager(mContext, utils);
         CodePushTelemetryManager telemetryManager = new CodePushTelemetryManager(settingsManager);
-        CodePushRestartManager restartManager = new CodePushRestartManager(new CodePushRestartListener() {
+        CodePushRestartManager restartManager = new CodePushRestartManager(new CodePushRestartHandler() {
             @Override
-            public boolean onRestart(boolean onlyIfUpdateIsPending) throws CodePushMalformedDataException {
-                return restartInternal(onlyIfUpdateIsPending);
+            public void performRestart(CodePushRestartListener codePushRestartListener, boolean onlyIfUpdateIsPending) throws CodePushMalformedDataException {
+                restartInternal(codePushRestartListener, onlyIfUpdateIsPending);
             }
         });
         CodePushAcquisitionManager acquisitionManager = new CodePushAcquisitionManager(utils, fileUtils);
@@ -676,16 +677,17 @@ public abstract class CodePushBaseCore {
     /**
      * Performs just the restart itself.
      *
-     * @param onlyIfUpdateIsPending restart only if update is pending or unconditionally.
+     * @param onlyIfUpdateIsPending   restart only if update is pending or unconditionally.
+     * @param codePushRestartListener listener to notify that the application has restarted.
      * @return <code>true</code> if restarted successfully.
      * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
-    public boolean restartInternal(boolean onlyIfUpdateIsPending) throws CodePushMalformedDataException {
+    public boolean restartInternal(CodePushRestartListener codePushRestartListener, boolean onlyIfUpdateIsPending) throws CodePushMalformedDataException {
 
         /* If this is an unconditional restart request, or there
         * is current pending update, then reload the app. */
         if (!onlyIfUpdateIsPending || mManagers.mSettingsManager.isPendingUpdate(null)) {
-            loadApp();
+            loadApp(codePushRestartListener);
             return true;
         }
 
@@ -1268,6 +1270,8 @@ public abstract class CodePushBaseCore {
 
     /**
      * Loads application.
+     *
+     * @param codePushRestartListener listener to notify that the app is loaded.
      */
-    protected abstract void loadApp();
+    protected abstract void loadApp(CodePushRestartListener codePushRestartListener);
 }

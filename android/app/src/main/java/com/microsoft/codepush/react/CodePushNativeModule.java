@@ -27,7 +27,6 @@ import com.microsoft.codepush.common.interfaces.CodePushBinaryVersionMismatchLis
 import com.microsoft.codepush.common.interfaces.CodePushDownloadProgressListener;
 import com.microsoft.codepush.common.interfaces.CodePushSyncStatusListener;
 import com.microsoft.codepush.common.managers.CodePushRestartManager;
-import com.microsoft.codepush.common.utils.CodePushLogUtils;
 import com.microsoft.codepush.common.utils.CodePushUpdateUtils;
 import com.microsoft.codepush.common.utils.CodePushUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
@@ -442,7 +441,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
     @ReactMethod
     public void restartApp(boolean onlyIfUpdateIsPending, Promise promise) {
         try {
-            promise.resolve(mCodePushCore.restartInternal(onlyIfUpdateIsPending));
+            promise.resolve(mCodePushCore.restartInternal(null, onlyIfUpdateIsPending));
         } catch (CodePushMalformedDataException e) {
             trackException(e);
             promise.reject(e);

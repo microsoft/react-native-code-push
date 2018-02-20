@@ -34,6 +34,7 @@ import com.microsoft.codepush.common.interfaces.CodePushAppEntryPointProvider;
 import com.microsoft.codepush.common.interfaces.CodePushConfirmationDialog;
 import com.microsoft.codepush.common.interfaces.CodePushPlatformUtils;
 import com.microsoft.codepush.common.interfaces.CodePushPublicKeyProvider;
+import com.microsoft.codepush.common.interfaces.CodePushRestartListener;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
 import com.microsoft.codepush.common.utils.CodePushLogUtils;
 import com.microsoft.codepush.react.interfaces.ReactInstanceHolder;
@@ -342,7 +343,7 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
     }
 
     @Override
-    protected void loadApp() {
+    protected void loadApp(final CodePushRestartListener codePushRestartListener) {
         try {
             clearLifecycleEventListener();
             mUtilities.mPlatformUtils.clearDebugCache(mContext);
@@ -370,6 +371,9 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
                         /* resetReactRootViews(instanceManager); */
                         instanceManager.recreateReactContextInBackground();
                         initializeUpdateAfterRestart();
+                        if (codePushRestartListener != null) {
+                            codePushRestartListener.onRestartFinished();
+                        }
                     } catch (Exception e) {
 
                         /* The recreation method threw an unknown exception so just simply fallback to restarting the Activity (if it exists). */
