@@ -135,6 +135,7 @@ async function syncNative(syncOptions = null, syncStatusChangeCallback, download
   }
 
   try {
+    await CodePush.notifyApplicationReady();
     await NativeCodePush.sync(syncOptions, !!syncStatusChangeCallback, !!downloadProgressCallback, !!handleBinaryVersionMismatchCallback);
   } catch (error) {
     typeof syncStatusChangeCallback === "function" && syncStatusChangeCallback(CodePush.SyncStatus.UNKNOWN_ERROR);
@@ -422,7 +423,6 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
 
   try {
     await CodePush.notifyApplicationReady();
-
     syncStatusChangeCallback(CodePush.SyncStatus.CHECKING_FOR_UPDATE);
     const remotePackage = await checkForUpdate(syncOptions.deploymentKey, handleBinaryVersionMismatchCallback);
 
