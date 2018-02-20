@@ -451,21 +451,6 @@ public class CodePush implements ReactPackage, Serializable {
     }
 
     /**
-     * Notifies the CodePush runtime that a freshly installed update should be considered successful,
-     * and therefore, an automatic client-side rollback isn't necessary.
-     *
-     * @throws CodePushNativeApiCallException if error occurred during the execution of operation.
-     */
-    public void notifyApplicationReady() throws CodePushNativeApiCallException {
-        try {
-            mReactNativeCore.notifyApplicationReady();
-        } catch (CodePushNativeApiCallException e) {
-            trackException(e);
-            throw e;
-        }
-    }
-
-    /**
      * Attempts to restart the application unconditionally (whether there is pending update is ignored).
      */
     public void restartApp() throws CodePushNativeApiCallException {

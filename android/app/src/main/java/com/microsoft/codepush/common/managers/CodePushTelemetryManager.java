@@ -134,6 +134,8 @@ public class CodePushTelemetryManager {
      * @param statusReport report to save.
      */
     public void saveReportedStatus(CodePushDeploymentStatusReport statusReport) {
+
+        /* We don't need to record rollback reports, so exit early if that's what was specified. */
         if (statusReport.getStatus() != null && statusReport.getStatus() == FAILED) {
             return;
         }

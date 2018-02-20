@@ -563,7 +563,6 @@ public abstract class CodePushBaseCore {
         }
         mState.mSyncInProgress = true;
         try {
-            notifyApplicationReady();
             notifyAboutSyncStatusChange(CHECKING_FOR_UPDATE);
             final CodePushRemotePackage remotePackage = checkForUpdate(syncOptions.getDeploymentKey());
             final boolean updateShouldBeIgnored =
@@ -1031,8 +1030,8 @@ public abstract class CodePushBaseCore {
                 }
                 configuration.setDeploymentKey(statusReport.getPackage() == null ? statusReport.getDeploymentKey() : statusReport.getPackage().getDeploymentKey());
                 mManagers.mAcquisitionManager.reportStatusDeploy(configuration, statusReport);
-                saveReportedStatus(statusReport);
             }
+            saveReportedStatus(statusReport);
         } catch (CodePushReportStatusException | CodePushIllegalArgumentException e) {
 
             /* In order to do not lose original exception if another one will be thrown during the retry
