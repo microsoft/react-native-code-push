@@ -160,6 +160,26 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
     }
 
     /**
+     * Notifies the CodePush runtime that a freshly installed update should be considered successful,
+     * and therefore, an automatic client-side rollback isn't necessary.
+     */
+    @ReactMethod
+    public void notifyApplicationReady() {
+        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    mCodePushCore.notifyApplicationReady();
+                } catch (CodePushNativeApiCallException e) {
+                    trackException(e);
+                }
+                return null;
+            }
+        };
+        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    /**
      * Checks if there is an update available by the provided deployment key.
      *
      * @param deploymentKey deployment key of the desired update.
