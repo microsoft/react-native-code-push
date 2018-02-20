@@ -800,6 +800,8 @@ public abstract class CodePushBaseCore {
                     AppCenterLog.info(LOG_TAG, "Update is installed and will be run on the next app restart.");
                 } else if (mState.mCurrentInstallModeInProgress == ON_NEXT_RESUME) {
                     AppCenterLog.info(LOG_TAG, "Update is installed and will be run after the app has been in the background for at least " + mState.mMinimumBackgroundDuration + " seconds.");
+                } else if (mState.mCurrentInstallModeInProgress == IMMEDIATE) {
+                    AppCenterLog.info(LOG_TAG, "Update is installed and will be run right now.");
                 } else {
                     AppCenterLog.info(LOG_TAG, "Update is installed and will be run when the app next resumes.");
                 }
