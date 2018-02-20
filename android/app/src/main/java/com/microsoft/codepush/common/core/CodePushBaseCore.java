@@ -1023,10 +1023,11 @@ public abstract class CodePushBaseCore {
                 AppCenterLog.info(CodePush.LOG_TAG, "Reporting binary update (" + statusReport.getAppVersion() + ")");
                 mManagers.mAcquisitionManager.reportStatusDeploy(configuration, statusReport);
             } else {
+                String label = statusReport.getPackage() != null ? statusReport.getPackage().getLabel() : statusReport.getLabel();
                 if (statusReport.getStatus().equals(SUCCEEDED)) {
-                    AppCenterLog.info(CodePush.LOG_TAG, "Reporting CodePush update success (" + statusReport.getLabel() + ")");
+                    AppCenterLog.info(CodePush.LOG_TAG, "Reporting CodePush update success (" + label + ")");
                 } else {
-                    AppCenterLog.info(CodePush.LOG_TAG, "Reporting CodePush update rollback (" + statusReport.getLabel() + ")");
+                    AppCenterLog.info(CodePush.LOG_TAG, "Reporting CodePush update rollback (" + label + ")");
                 }
                 configuration.setDeploymentKey(statusReport.getPackage() == null ? statusReport.getDeploymentKey() : statusReport.getPackage().getDeploymentKey());
                 mManagers.mAcquisitionManager.reportStatusDeploy(configuration, statusReport);
