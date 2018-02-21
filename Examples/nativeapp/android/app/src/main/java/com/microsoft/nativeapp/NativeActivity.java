@@ -30,7 +30,7 @@ public class NativeActivity extends Activity {
         if (codePushInstance == null) {
             try {
                 codePushInstance = new CodePush(
-                        "hvm05O3aAG-KJA3zR7NaBjPm7C0Ka4c23a71-4e6c-4f9b-8f95-4fb15b6dd8b5",
+                        "deployment-key-here",
                         getApplication(),
                         BuildConfig.DEBUG,
                         "bfcfbe35-eba6-4567-8078-cf53103f6c04"
