@@ -54,8 +54,6 @@ public class DataContractsUnitTests {
         /* Check local package. */
         CodePushLocalPackage codePushLocalPackage = CodePushLocalPackage.createLocalPackage(FAILED_INSTALL, IS_FIRST_RUN, IS_PENDING, IS_DEBUG_ONLY, APP_ENTRY_POINT, codePushPackage);
         checkLocalPackage(codePushLocalPackage);
-        CodePushLocalPackage failedPackage = CodePushLocalPackage.createFailedLocalPackage(new Exception(ERROR));
-        assertEquals(ERROR, failedPackage.getDownloadException().getMessage());
 
         /* Check download report. */
         CodePushDownloadStatusReport codePushDownloadStatusReport = CodePushDownloadStatusReport.createReport(CLIENT_UNIQUE_ID, DEPLOYMENT_KEY, LABEL);
@@ -70,8 +68,9 @@ public class DataContractsUnitTests {
         codePushDeploymentStatusReport.setPreviousDeploymentKey(PREVIOUS_DEPLOYMENT_KEY);
         codePushDeploymentStatusReport.setPreviousLabelOrAppVersion(PREVIOUS_LABEL);
         codePushDeploymentStatusReport.setStatus(CodePushDeploymentStatus.SUCCEEDED);
-        codePushDeploymentStatusReport.setLocalPackage(codePushLocalPackage);
-        assertEquals(codePushLocalPackage, codePushDeploymentStatusReport.getLocalPackage());
+        // TODO there should be CodePushPackage instance instead!!!
+        codePushDeploymentStatusReport.setPackage(codePushLocalPackage);
+        assertEquals(codePushLocalPackage, codePushDeploymentStatusReport.getPackage());
         checkDeploymentReport(codePushDeploymentStatusReport);
 
         /* Check update response info. */

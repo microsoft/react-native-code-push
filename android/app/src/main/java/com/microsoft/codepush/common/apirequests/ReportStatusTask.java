@@ -71,6 +71,8 @@ public class ReportStatusTask extends BaseHttpTask<CodePushReportStatusResult> {
             outputStream = connection.getOutputStream();
             outputStreamWriter = new OutputStreamWriter(outputStream, "UTF-8");
             outputStreamWriter.write(mJson);
+            outputStreamWriter.flush();
+            outputStreamWriter.close();
             boolean failed;
             if (connection.getResponseCode() == HttpsURLConnection.HTTP_OK) {
                 stream = connection.getInputStream();
@@ -92,7 +94,7 @@ public class ReportStatusTask extends BaseHttpTask<CodePushReportStatusResult> {
             return null;
         } finally {
             Exception e = mFileUtils.finalizeResources(
-                    Arrays.asList(outputStream, outputStreamWriter, stream, scanner),
+                    Arrays.asList(outputStream, stream, scanner),
                     null);
             if (e != null) {
                 Exception wrappedException = new CodePushReportStatusException(e, mReportType);

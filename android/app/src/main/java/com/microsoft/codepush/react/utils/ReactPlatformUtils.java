@@ -43,13 +43,6 @@ public class ReactPlatformUtils implements CodePushPlatformUtils {
     }
 
     @Override
-    public String getUpdateFolderPath(String hash) {
-        File codePushFolder = new File(Environment.getExternalStorageDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX);
-        File packageFolder = new File(codePushFolder, hash);
-        return new File(packageFolder, "CodePush").getPath();
-    }
-
-    @Override
     public boolean isPackageLatest(CodePushLocalPackage packageMetadata, String currentAppVersion, Context context) throws CodePushGeneralException {
         try {
             Long binaryModifiedDateDuringPackageInstall = null;

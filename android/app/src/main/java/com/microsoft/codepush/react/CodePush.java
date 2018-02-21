@@ -5,6 +5,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.NativeModule;
@@ -27,6 +28,8 @@ import com.microsoft.codepush.react.utils.ReactPlatformUtils;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.microsoft.codepush.common.utils.CodePushLogUtils.trackException;
 
 /**
  * A class exposing CodePush API to users.
@@ -66,14 +69,40 @@ public class CodePush implements ReactPackage, Serializable {
      */
     @Deprecated
     public CodePush(String deploymentKey, Context context, boolean isDebugMode) throws CodePushInitializeException {
-        mReactNativeCore = new CodePushReactNativeCore(
-                deploymentKey,
-                context,
-                isDebugMode,
-                null,
-                new CodePushReactPublicKeyProvider(null, context),
-                new CodePushReactAppEntryPointProvider(null),
-                ReactPlatformUtils.getInstance());
+        try {
+            mReactNativeCore = new CodePushReactNativeCore(
+                    deploymentKey,
+                    context,
+                    isDebugMode,
+                    null,
+                    new CodePushReactPublicKeyProvider(null, context),
+                    new CodePushReactAppEntryPointProvider(null),
+                    ReactPlatformUtils.getInstance());
+        } catch (CodePushInitializeException e) {
+            trackException(e);
+            throw e;
+        }
+    }
+
+    /**
+     * @deprecated use {@link #builder} instead
+     */
+    @Deprecated
+    public CodePush(String deploymentKey, Application application, boolean isDebugMode, String appSecret) throws CodePushInitializeException {
+        try {
+            mReactNativeCore = new CodePushReactNativeCore(
+                    deploymentKey,
+                    application,
+                    isDebugMode,
+                    null,
+                    appSecret,
+                    new CodePushReactPublicKeyProvider(null, application.getApplicationContext()),
+                    new CodePushReactAppEntryPointProvider(null),
+                    ReactPlatformUtils.getInstance());
+        } catch (CodePushInitializeException e) {
+            trackException(e);
+            throw e;
+        }
     }
 
     /**
@@ -81,14 +110,19 @@ public class CodePush implements ReactPackage, Serializable {
      */
     @Deprecated
     public CodePush(String deploymentKey, Context context, boolean isDebugMode, String serverUrl) throws CodePushInitializeException {
-        mReactNativeCore = new CodePushReactNativeCore(
-                deploymentKey,
-                context,
-                isDebugMode,
-                serverUrl,
-                new CodePushReactPublicKeyProvider(null, context),
-                new CodePushReactAppEntryPointProvider(null),
-                ReactPlatformUtils.getInstance());
+        try {
+            mReactNativeCore = new CodePushReactNativeCore(
+                    deploymentKey,
+                    context,
+                    isDebugMode,
+                    serverUrl,
+                    new CodePushReactPublicKeyProvider(null, context),
+                    new CodePushReactAppEntryPointProvider(null),
+                    ReactPlatformUtils.getInstance());
+        } catch (CodePushInitializeException e) {
+            trackException(e);
+            throw e;
+        }
     }
 
     /**
@@ -96,15 +130,20 @@ public class CodePush implements ReactPackage, Serializable {
      */
     @Deprecated
     public CodePush(String deploymentKey, Application application, boolean isDebugMode, String serverUrl, String appSecret) throws CodePushInitializeException {
-        mReactNativeCore = new CodePushReactNativeCore(
-                deploymentKey,
-                application,
-                isDebugMode,
-                serverUrl,
-                appSecret,
-                new CodePushReactPublicKeyProvider(null, application.getApplicationContext()),
-                new CodePushReactAppEntryPointProvider(null),
-                ReactPlatformUtils.getInstance());
+        try {
+            mReactNativeCore = new CodePushReactNativeCore(
+                    deploymentKey,
+                    application,
+                    isDebugMode,
+                    serverUrl,
+                    appSecret,
+                    new CodePushReactPublicKeyProvider(null, application.getApplicationContext()),
+                    new CodePushReactAppEntryPointProvider(null),
+                    ReactPlatformUtils.getInstance());
+        } catch (CodePushInitializeException e) {
+            trackException(e);
+            throw e;
+        }
     }
 
     /**
@@ -112,14 +151,19 @@ public class CodePush implements ReactPackage, Serializable {
      */
     @Deprecated
     public CodePush(String deploymentKey, Context context, boolean isDebugMode, int publicKeyResourceDescriptor) throws CodePushInitializeException {
-        mReactNativeCore = new CodePushReactNativeCore(
-                deploymentKey,
-                context,
-                isDebugMode,
-                null,
-                new CodePushReactPublicKeyProvider(publicKeyResourceDescriptor, context),
-                new CodePushReactAppEntryPointProvider(null),
-                ReactPlatformUtils.getInstance());
+        try {
+            mReactNativeCore = new CodePushReactNativeCore(
+                    deploymentKey,
+                    context,
+                    isDebugMode,
+                    null,
+                    new CodePushReactPublicKeyProvider(publicKeyResourceDescriptor, context),
+                    new CodePushReactAppEntryPointProvider(null),
+                    ReactPlatformUtils.getInstance());
+        } catch (CodePushInitializeException e) {
+            trackException(e);
+            throw e;
+        }
     }
 
     /**
@@ -127,14 +171,19 @@ public class CodePush implements ReactPackage, Serializable {
      */
     @Deprecated
     public CodePush(String deploymentKey, Context context, boolean isDebugMode, @NonNull String serverUrl, Integer publicKeyResourceDescriptor) throws CodePushInitializeException {
-        mReactNativeCore = new CodePushReactNativeCore(
-                deploymentKey,
-                context,
-                isDebugMode,
-                serverUrl,
-                new CodePushReactPublicKeyProvider(publicKeyResourceDescriptor, context),
-                new CodePushReactAppEntryPointProvider(null),
-                ReactPlatformUtils.getInstance());
+        try {
+            mReactNativeCore = new CodePushReactNativeCore(
+                    deploymentKey,
+                    context,
+                    isDebugMode,
+                    serverUrl,
+                    new CodePushReactPublicKeyProvider(publicKeyResourceDescriptor, context),
+                    new CodePushReactAppEntryPointProvider(null),
+                    ReactPlatformUtils.getInstance());
+        } catch (CodePushInitializeException e) {
+            trackException(e);
+            throw e;
+        }
     }
 
     /**
@@ -142,15 +191,20 @@ public class CodePush implements ReactPackage, Serializable {
      */
     @Deprecated
     public CodePush(String deploymentKey, Application application, boolean isDebugMode, @NonNull String serverUrl, String appSecret, Integer publicKeyResourceDescriptor) throws CodePushInitializeException {
-        mReactNativeCore = new CodePushReactNativeCore(
-                deploymentKey,
-                application,
-                isDebugMode,
-                serverUrl,
-                appSecret,
-                new CodePushReactPublicKeyProvider(publicKeyResourceDescriptor, application.getApplicationContext()),
-                new CodePushReactAppEntryPointProvider(null),
-                ReactPlatformUtils.getInstance());
+        try {
+            mReactNativeCore = new CodePushReactNativeCore(
+                    deploymentKey,
+                    application,
+                    isDebugMode,
+                    serverUrl,
+                    appSecret,
+                    new CodePushReactPublicKeyProvider(publicKeyResourceDescriptor, application.getApplicationContext()),
+                    new CodePushReactAppEntryPointProvider(null),
+                    ReactPlatformUtils.getInstance());
+        } catch (CodePushInitializeException e) {
+            trackException(e);
+            throw e;
+        }
     }
 
     /**
@@ -174,15 +228,20 @@ public class CodePush implements ReactPackage, Serializable {
             @Nullable String appSecret,
             @Nullable String entryPointName
     ) throws CodePushInitializeException {
-        mReactNativeCore = new CodePushReactNativeCore(
-                deploymentKey,
-                application,
-                isDebugMode,
-                serverUrl,
-                appSecret,
-                new CodePushReactPublicKeyProvider(publicKeyResourceDescriptor, application.getApplicationContext()),
-                new CodePushReactAppEntryPointProvider(entryPointName),
-                ReactPlatformUtils.getInstance());
+        try {
+            mReactNativeCore = new CodePushReactNativeCore(
+                    deploymentKey,
+                    application,
+                    isDebugMode,
+                    serverUrl,
+                    appSecret,
+                    new CodePushReactPublicKeyProvider(publicKeyResourceDescriptor, application.getApplicationContext()),
+                    new CodePushReactAppEntryPointProvider(entryPointName),
+                    ReactPlatformUtils.getInstance());
+        } catch (CodePushInitializeException e) {
+            trackException(e);
+            throw e;
+        }
     }
 
     /**
@@ -204,14 +263,19 @@ public class CodePush implements ReactPackage, Serializable {
             @Nullable Integer publicKeyResourceDescriptor,
             @Nullable String entryPointName
     ) throws CodePushInitializeException {
-        mReactNativeCore = new CodePushReactNativeCore(
-                deploymentKey,
-                context,
-                isDebugMode,
-                serverUrl,
-                new CodePushReactPublicKeyProvider(publicKeyResourceDescriptor, context),
-                new CodePushReactAppEntryPointProvider(entryPointName),
-                ReactPlatformUtils.getInstance());
+        try {
+            mReactNativeCore = new CodePushReactNativeCore(
+                    deploymentKey,
+                    context,
+                    isDebugMode,
+                    serverUrl,
+                    new CodePushReactPublicKeyProvider(publicKeyResourceDescriptor, context),
+                    new CodePushReactAppEntryPointProvider(entryPointName),
+                    ReactPlatformUtils.getInstance());
+        } catch (CodePushInitializeException e) {
+            trackException(e);
+            throw e;
+        }
     }
 
     /**
@@ -241,9 +305,8 @@ public class CodePush implements ReactPackage, Serializable {
      * Gets a link to the default javascript bundle file.
      *
      * @return link starting with "assets://" and leading to javascript bundle file.
-     * @throws CodePushNativeApiCallException exception occurred when performing the operation.
      */
-    public static String getJSBundleFile() throws CodePushNativeApiCallException {
+    public static String getJSBundleFile() {
         return CodePushReactNativeCore.getJSBundleFile();
     }
 
@@ -252,9 +315,8 @@ public class CodePush implements ReactPackage, Serializable {
      *
      * @param assetsBundleFileName custom bundle file name.
      * @return link starting with "assets://" and leading to javascript bundle file.
-     * @throws CodePushNativeApiCallException exception occurred when performing the operation.
      */
-    public static String getJSBundleFile(String assetsBundleFileName) throws CodePushNativeApiCallException {
+    public static String getJSBundleFile(String assetsBundleFileName) {
         return CodePushReactNativeCore.getJSBundleFile(assetsBundleFileName);
     }
 
@@ -262,9 +324,19 @@ public class CodePush implements ReactPackage, Serializable {
      * Sets instance holder.
      *
      * @param reactInstanceHolder instance of {@link ReactInstanceHolder}.
+     * @deprecated Please use {@link CodePush#setReactInstanceManager(ReactInstanceManager)} instead.
      */
     public static void setReactInstanceHolder(ReactInstanceHolder reactInstanceHolder) {
         CodePushReactNativeCore.setReactInstanceHolder(reactInstanceHolder);
+    }
+
+    /**
+     * Sets instance manager.
+     *
+     * @param reactInstanceManager instance of {@link ReactInstanceManager}.
+     */
+    public static void setReactInstanceManager(ReactInstanceManager reactInstanceManager) {
+        CodePushReactNativeCore.setReactInstanceManager(reactInstanceManager);
     }
 
     /**
@@ -273,7 +345,12 @@ public class CodePush implements ReactPackage, Serializable {
      * @return native CodePush configuration.
      */
     public CodePushConfiguration getConfiguration() throws CodePushNativeApiCallException {
-        return mReactNativeCore.getNativeConfiguration();
+        try {
+            return mReactNativeCore.getNativeConfiguration();
+        } catch (CodePushNativeApiCallException e) {
+            trackException(e);
+            throw e;
+        }
     }
 
     /**
@@ -293,7 +370,12 @@ public class CodePush implements ReactPackage, Serializable {
      * @throws CodePushNativeApiCallException if error occurred during the execution of operation.
      */
     public CodePushRemotePackage checkForUpdate() throws CodePushNativeApiCallException {
-        return mReactNativeCore.checkForUpdate();
+        try {
+            return mReactNativeCore.checkForUpdate();
+        } catch (CodePushNativeApiCallException e) {
+            trackException(e);
+            throw e;
+        }
     }
 
     /**
@@ -305,7 +387,12 @@ public class CodePush implements ReactPackage, Serializable {
      * @throws CodePushNativeApiCallException if error occurred during the execution of operation.
      */
     public CodePushRemotePackage checkForUpdate(String deploymentKey) throws CodePushNativeApiCallException {
-        return mReactNativeCore.checkForUpdate(deploymentKey);
+        try {
+            return mReactNativeCore.checkForUpdate(deploymentKey);
+        } catch (CodePushNativeApiCallException e) {
+            trackException(e);
+            throw e;
+        }
     }
 
     /**
@@ -313,7 +400,12 @@ public class CodePush implements ReactPackage, Serializable {
      */
     @Deprecated
     public CodePushLocalPackage getCurrentPackage() throws CodePushNativeApiCallException {
-        return mReactNativeCore.getCurrentPackage();
+        try {
+            return mReactNativeCore.getCurrentPackage();
+        } catch (CodePushNativeApiCallException e) {
+            trackException(e);
+            throw e;
+        }
     }
 
     /**
@@ -325,7 +417,12 @@ public class CodePush implements ReactPackage, Serializable {
      * @throws CodePushNativeApiCallException if error occurred during the operation.
      */
     public CodePushLocalPackage getUpdateMetadata(CodePushUpdateState updateState) throws CodePushNativeApiCallException {
-        return mReactNativeCore.getUpdateMetadata(updateState);
+        try {
+            return mReactNativeCore.getUpdateMetadata(updateState);
+        } catch (CodePushNativeApiCallException e) {
+            trackException(e);
+            throw e;
+        }
     }
 
     /**
@@ -336,7 +433,12 @@ public class CodePush implements ReactPackage, Serializable {
      * @throws CodePushNativeApiCallException if error occurred during the operation.
      */
     public CodePushLocalPackage getUpdateMetadata() throws CodePushNativeApiCallException {
-        return mReactNativeCore.getUpdateMetadata(CodePushUpdateState.RUNNING);
+        try {
+            return mReactNativeCore.getUpdateMetadata(CodePushUpdateState.RUNNING);
+        } catch (CodePushNativeApiCallException e) {
+            trackException(e);
+            throw e;
+        }
     }
 
     /**
@@ -349,20 +451,15 @@ public class CodePush implements ReactPackage, Serializable {
     }
 
     /**
-     * Notifies the CodePush runtime that a freshly installed update should be considered successful,
-     * and therefore, an automatic client-side rollback isn't necessary.
-     *
-     * @throws CodePushNativeApiCallException if error occurred during the execution of operation.
-     */
-    public void notifyApplicationReady() throws CodePushNativeApiCallException {
-        mReactNativeCore.notifyApplicationReady();
-    }
-
-    /**
      * Attempts to restart the application unconditionally (whether there is pending update is ignored).
      */
     public void restartApp() throws CodePushNativeApiCallException {
-        mReactNativeCore.restartApp();
+        try {
+            mReactNativeCore.restartApp();
+        } catch (CodePushNativeApiCallException e) {
+            trackException(e);
+            throw e;
+        }
     }
 
     /**
@@ -371,7 +468,12 @@ public class CodePush implements ReactPackage, Serializable {
      * @param onlyIfUpdateIsPending if <code>true</code>, restart is performed only if update is pending.
      */
     public void restartApp(boolean onlyIfUpdateIsPending) throws CodePushNativeApiCallException {
-        mReactNativeCore.restartApp(onlyIfUpdateIsPending);
+        try {
+            mReactNativeCore.restartApp(onlyIfUpdateIsPending);
+        } catch (CodePushNativeApiCallException e) {
+            trackException(e);
+            throw e;
+        }
     }
 
     /**
@@ -385,7 +487,12 @@ public class CodePush implements ReactPackage, Serializable {
      * Allows restarts.
      */
     public void allowRestart() throws CodePushNativeApiCallException {
-        mReactNativeCore.allowRestart();
+        try {
+            mReactNativeCore.allowRestart();
+        } catch (CodePushNativeApiCallException e) {
+            trackException(e);
+            throw e;
+        }
     }
 
     /**
@@ -394,7 +501,12 @@ public class CodePush implements ReactPackage, Serializable {
      * @throws CodePushNativeApiCallException if error occurred during the execution of operation.
      */
     public void sync() throws CodePushNativeApiCallException {
-        mReactNativeCore.sync();
+        try {
+            mReactNativeCore.sync();
+        } catch (CodePushNativeApiCallException e) {
+            trackException(e);
+            throw e;
+        }
     }
 
     /**
@@ -404,7 +516,12 @@ public class CodePush implements ReactPackage, Serializable {
      * @throws CodePushNativeApiCallException if error occurred during the execution of operation.
      */
     public void sync(CodePushSyncOptions syncOptions) throws CodePushNativeApiCallException {
-        mReactNativeCore.sync(syncOptions);
+        try {
+            mReactNativeCore.sync(syncOptions);
+        } catch (CodePushNativeApiCallException e) {
+            trackException(e);
+            throw e;
+        }
     }
 
     /**

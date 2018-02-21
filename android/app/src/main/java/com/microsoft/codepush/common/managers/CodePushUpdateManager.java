@@ -191,8 +191,10 @@ public class CodePushUpdateManager {
      */
     public File getPackageDownloadFile() throws IOException {
         File downloadFolder = new File(getCodePushPath());
-        if (!downloadFolder.mkdirs()) {
-            throw new IOException("Couldn't create directory" + downloadFolder.getAbsolutePath() + " for downloading file");
+        if (!downloadFolder.exists()) {
+            if (!downloadFolder.mkdirs()) {
+                throw new IOException("Couldn't create directory" + downloadFolder.getAbsolutePath() + " for downloading file");
+            }
         }
         return new File(downloadFolder, CodePushConstants.DOWNLOAD_FILE_NAME);
     }
@@ -455,7 +457,7 @@ public class CodePushUpdateManager {
         } else {
             if (mFileUtils.fileAtPathExists(newUpdateMetadataPath)) {
                 File metadataFileFromOldUpdate = new File(newUpdateMetadataPath);
-                if (metadataFileFromOldUpdate.delete()) {
+                if (!metadataFileFromOldUpdate.delete()) {
                     throw new CodePushMergeException("Couldn't delete metadata file from old update " + newUpdateMetadataPath);
                 }
             }
@@ -484,7 +486,8 @@ public class CodePushUpdateManager {
      */
     public void verifySignature(String stringPublicKey, String newUpdateHash, boolean isDiffUpdate) throws CodePushSignatureVerificationException {
         try {
-            String newUpdateFolderPath = mPlatformUtils.getUpdateFolderPath(newUpdateHash);
+            File packageFolder = new File(getCodePushPath(), newUpdateHash);
+            String newUpdateFolderPath = new File(packageFolder, "CodePush").getPath();
             boolean isSignatureVerificationEnabled = (stringPublicKey != null);
             String signaturePath = mCodePushUpdateUtils.getJWTFilePath(newUpdateFolderPath);
             boolean isSignatureAppearedInApp = mFileUtils.fileAtPathExists(signaturePath);

@@ -137,7 +137,7 @@ public class SettingsManager {
      */
     public boolean isPendingUpdate(String packageHash) throws CodePushMalformedDataException {
         CodePushPendingUpdate pendingUpdate = getPendingUpdate();
-        return pendingUpdate != null && pendingUpdate.isPendingUpdateLoading() &&
+        return pendingUpdate != null && !pendingUpdate.isPendingUpdateLoading() &&
                 (packageHash == null || pendingUpdate.getPendingUpdateHash().equals(packageHash));
     }
 
@@ -217,7 +217,10 @@ public class SettingsManager {
      */
     public CodePushStatusReportIdentifier getPreviousStatusReportIdentifier() {
         String identifierString = mSettings.getString(LAST_DEPLOYMENT_REPORT_KEY, null);
-        return CodePushStatusReportIdentifier.fromString(identifierString);
+        if (identifierString != null) {
+            return CodePushStatusReportIdentifier.fromString(identifierString);
+        }
+        return null;
     }
 
     /**

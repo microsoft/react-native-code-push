@@ -14,15 +14,6 @@ import java.io.IOException;
 public interface CodePushPlatformUtils {
 
     /**
-     * Gets path of the update folder specific for each platform.
-     * F. i., it should be "CodePush/" for RN and "www/" for Cordova.
-     *
-     * @param hash hash of the update needed to be retrieved.
-     * @return path to update folder.
-     */
-    String getUpdateFolderPath(String hash);
-
-    /**
      * Checks whether the specified package is latest.
      *
      * @param packageMetadata   info about the package to be checked.

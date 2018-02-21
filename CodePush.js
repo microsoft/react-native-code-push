@@ -135,6 +135,7 @@ async function syncNative(syncOptions = null, syncStatusChangeCallback, download
   }
 
   try {
+    await CodePush.notifyApplicationReady();
     await NativeCodePush.sync(syncOptions, !!syncStatusChangeCallback, !!downloadProgressCallback, !!handleBinaryVersionMismatchCallback);
   } catch (error) {
     typeof syncStatusChangeCallback === "function" && syncStatusChangeCallback(CodePush.SyncStatus.UNKNOWN_ERROR);
@@ -231,11 +232,13 @@ const notifyApplicationReady = (() => {
 })();
 
 async function notifyApplicationReadyInternal() {
+  if (typeof NativeCodePush.notifyApplicationReady === "function") {
+    await NativeCodePush.notifyApplicationReady();
+    return;
+  }
   await NativeCodePush.removePendingUpdate();
   const statusReport = await NativeCodePush.getNewStatusReport();
   statusReport && tryReportStatus(statusReport); // Don't wait for this to complete.
-
-  return statusReport;
 }
 
 async function tryReportStatus(statusReport, resumeListener) {
@@ -420,7 +423,6 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
 
   try {
     await CodePush.notifyApplicationReady();
-
     syncStatusChangeCallback(CodePush.SyncStatus.CHECKING_FOR_UPDATE);
     const remotePackage = await checkForUpdate(syncOptions.deploymentKey, handleBinaryVersionMismatchCallback);
 

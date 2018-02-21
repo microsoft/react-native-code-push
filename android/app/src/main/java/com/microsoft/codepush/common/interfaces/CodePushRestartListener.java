@@ -8,10 +8,9 @@ import com.microsoft.codepush.common.exceptions.CodePushMalformedDataException;
 public interface CodePushRestartListener {
 
     /**
-     * Called when application is ready to load a new bundle.
+     * Called when application has performed a restart.
      *
-     * @param onlyIfUpdateIsPending <code>true</code> if restart only if update is pending.
-     * @return <code>true</code> if application restarted successfully.
+     * @throws CodePushMalformedDataException error thrown when the actual data is broken.
      */
-    boolean onRestart(boolean onlyIfUpdateIsPending) throws CodePushMalformedDataException;
+    void onRestartFinished() throws CodePushMalformedDataException;
 }

@@ -1,11 +1,15 @@
 package com.microsoft.codepush.common.testutils;
 
+import android.content.Context;
 import android.os.Environment;
 
 import com.microsoft.codepush.common.CodePushConstants;
+import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
+import com.microsoft.codepush.common.exceptions.CodePushGeneralException;
 import com.microsoft.codepush.common.interfaces.CodePushPlatformUtils;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Platform specific implementation of utils (only for testing).
@@ -35,13 +39,21 @@ public class CommonTestPlatformUtils implements CodePushPlatformUtils {
         return INSTANCE;
     }
 
-    /**
-     * Returns folder path of update package (cordova-specific for testing).
-     *
-     * @param hash hash of the desired update.
-     * @return test folder path of update package.
-     */
-    @Override public String getUpdateFolderPath(String hash) {
-        return new File(new File(new File(Environment.getExternalStorageDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX), hash), "www").getPath();
+    //TODO Implement test for this method
+    @Override
+    public boolean isPackageLatest(CodePushLocalPackage packageMetadata, String currentAppVersion, Context context) throws CodePushGeneralException {
+        return false;
+    }
+
+    //TODO Implement test for this method
+    @Override
+    public long getBinaryResourcesModifiedTime(Context context) throws NumberFormatException {
+        return 0;
+    }
+
+    //TODO Implement test for this method
+    @Override
+    public void clearDebugCache(Context context) throws IOException {
+
     }
 }

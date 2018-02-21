@@ -34,6 +34,7 @@ import com.microsoft.codepush.common.interfaces.CodePushAppEntryPointProvider;
 import com.microsoft.codepush.common.interfaces.CodePushConfirmationDialog;
 import com.microsoft.codepush.common.interfaces.CodePushPlatformUtils;
 import com.microsoft.codepush.common.interfaces.CodePushPublicKeyProvider;
+import com.microsoft.codepush.common.interfaces.CodePushRestartListener;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
 import com.microsoft.codepush.common.utils.CodePushLogUtils;
 import com.microsoft.codepush.react.interfaces.ReactInstanceHolder;
@@ -47,6 +48,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import static com.microsoft.codepush.common.CodePush.LOG_TAG;
+import static com.microsoft.codepush.common.utils.CodePushLogUtils.trackException;
 
 /**
  * React-specific instance of {@link CodePushBaseCore}.
@@ -57,7 +59,7 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
     /**
      * Default file name for javascript bundle.
      */
-    private static final String DEFAULT_JS_BUNDLE_NAME = "index.android.bundle";
+    public static final String DEFAULT_JS_BUNDLE_NAME = "index.android.bundle";
 
     /**
      * Prefix to access the bundle.
@@ -68,6 +70,11 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
      * Instance of {@link ReactInstanceHolder}.
      */
     private static ReactInstanceHolder sReactInstanceHolder;
+
+    /**
+     * Instance of {@link ReactInstanceManager}.
+     */
+    private static ReactInstanceManager sReactInstanceManager;
 
     /**
      * Instance of the {@link ReactApplicationContext}.
@@ -166,9 +173,8 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
      * Gets a link to the default javascript bundle file.
      *
      * @return link starting with "assets://" and leading to javascript bundle file.
-     * @throws CodePushNativeApiCallException exception occurred when performing the operation.
      */
-    public static String getJSBundleFile() throws CodePushNativeApiCallException {
+    public static String getJSBundleFile() {
         return getJSBundleFile(DEFAULT_JS_BUNDLE_NAME);
     }
 
@@ -177,14 +183,20 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
      *
      * @param assetsBundleFileName custom bundle file name.
      * @return link starting with "assets://" and leading to javascript bundle file.
-     * @throws CodePushNativeApiCallException exception occurred when performing the operation.
      */
-    public static String getJSBundleFile(String assetsBundleFileName) throws CodePushNativeApiCallException {
+    public static String getJSBundleFile(String assetsBundleFileName) {
         if (mCurrentInstance == null) {
-            throw new CodePushNativeApiCallException("A CodePush instance has not been created yet. Have you added it to your app's list of ReactPackages?");
+            Exception e = new CodePushNativeApiCallException("A CodePush instance has not been created yet. Have you added it to your app's list of ReactPackages?");
+            CodePushLogUtils.trackException(e);
+            throw new RuntimeException(e);
         }
 
-        return ((CodePushReactNativeCore) mCurrentInstance).getJSBundleFileInternal(assetsBundleFileName);
+        try {
+            return ((CodePushReactNativeCore) mCurrentInstance).getJSBundleFileInternal(assetsBundleFileName);
+        } catch (CodePushNativeApiCallException e) {
+            CodePushLogUtils.trackException(e);
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -331,7 +343,7 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
     }
 
     @Override
-    protected void loadApp() {
+    protected void loadApp(final CodePushRestartListener codePushRestartListener) {
         try {
             clearLifecycleEventListener();
             mUtilities.mPlatformUtils.clearDebugCache(mContext);
@@ -359,9 +371,13 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
                         /* resetReactRootViews(instanceManager); */
                         instanceManager.recreateReactContextInBackground();
                         initializeUpdateAfterRestart();
+                        if (codePushRestartListener != null) {
+                            codePushRestartListener.onRestartFinished();
+                        }
                     } catch (Exception e) {
 
                         /* The recreation method threw an unknown exception so just simply fallback to restarting the Activity (if it exists). */
+                        trackException(e);
                         loadBundleLegacy();
                     }
                 }
@@ -370,6 +386,7 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
         } catch (Exception e) {
 
             /* Our reflection logic failed somewhere so fall back to restarting the Activity (if it exists). */
+            trackException(e);
             loadBundleLegacy();
         }
     }
@@ -438,9 +455,19 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
      * Sets instance holder.
      *
      * @param reactInstanceHolder instance of {@link ReactInstanceHolder}.
+     * @deprecated Please use {@link CodePushReactNativeCore#setReactInstanceManager(ReactInstanceManager)} instead.
      */
     public static void setReactInstanceHolder(ReactInstanceHolder reactInstanceHolder) {
         sReactInstanceHolder = reactInstanceHolder;
+    }
+
+    /**
+     * Sets instance manager.
+     *
+     * @param reactInstanceManager instance of {@link ReactInstanceManager}.
+     */
+    public static void setReactInstanceManager(ReactInstanceManager reactInstanceManager) {
+        sReactInstanceManager = reactInstanceManager;
     }
 
     /**
@@ -448,9 +475,13 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
      *
      * @return instance of {@link ReactInstanceHolder}.
      */
-    private static ReactInstanceManager getReactInstanceManager() {
+
+    private static ReactInstanceManager getReactInstanceManager() throws CodePushNativeApiCallException {
         if (sReactInstanceHolder == null) {
-            return null;
+            if (sReactInstanceManager == null) {
+                AppCenterLog.info(LOG_TAG, "You haven't set up neither ReactInstanceManger nor ReactInstanceHolder. Please refer to the documentation for more info.");
+            }
+            return sReactInstanceManager;
         }
         return sReactInstanceHolder.getReactInstanceManager();
     }

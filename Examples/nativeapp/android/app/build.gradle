@@ -2,7 +2,8 @@ apply plugin: 'com.android.application'
 
 
 project.ext.react = [
-    bundleInDebug: true
+    bundleInDebug: true,
+    entryFile: "index.js"
 ]
 
 apply from: "../../node_modules/react-native/react.gradle"

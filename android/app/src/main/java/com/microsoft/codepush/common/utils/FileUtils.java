@@ -271,8 +271,10 @@ public class FileUtils {
      */
     public void unzipSingleFile(ZipEntry entry, File file, byte[] buffer, ZipInputStream zipStream) throws IOException {
         if (entry.isDirectory()) {
-            if (!file.mkdirs()) {
-                throw new IOException("Error while unzipping. Cannot create directory.");
+            if (!file.exists()) {
+                if (!file.mkdirs()) {
+                    throw new IOException("Error while unzipping. Cannot create directory.");
+                }
             }
         } else {
             File parent = file.getParentFile();

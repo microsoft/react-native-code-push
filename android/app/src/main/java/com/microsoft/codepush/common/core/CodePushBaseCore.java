@@ -4,6 +4,8 @@ import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 
@@ -47,6 +49,7 @@ import com.microsoft.codepush.common.interfaces.CodePushConfirmationDialog;
 import com.microsoft.codepush.common.interfaces.CodePushDownloadProgressListener;
 import com.microsoft.codepush.common.interfaces.CodePushPlatformUtils;
 import com.microsoft.codepush.common.interfaces.CodePushPublicKeyProvider;
+import com.microsoft.codepush.common.interfaces.CodePushRestartHandler;
 import com.microsoft.codepush.common.interfaces.CodePushRestartListener;
 import com.microsoft.codepush.common.interfaces.CodePushSyncStatusListener;
 import com.microsoft.codepush.common.interfaces.DownloadProgressCallback;
@@ -201,6 +204,7 @@ public abstract class CodePushBaseCore {
     ) throws CodePushInitializeException {
         if (appSecret != null) {
             AppCenter.start(application, appSecret, Crashes.class);
+            Crashes.setEnabled(true);
             CodePushLogUtils.setEnabled(true);
         }
 
@@ -230,23 +234,18 @@ public abstract class CodePushBaseCore {
         CodePushUpdateManager updateManager = new CodePushUpdateManager(documentsDirectory, platformUtils, fileUtils, utils, updateUtils);
         final SettingsManager settingsManager = new SettingsManager(mContext, utils);
         CodePushTelemetryManager telemetryManager = new CodePushTelemetryManager(settingsManager);
-        CodePushRestartManager restartManager = new CodePushRestartManager(new CodePushRestartListener() {
+        CodePushRestartManager restartManager = new CodePushRestartManager(new CodePushRestartHandler() {
             @Override
-            public boolean onRestart(boolean onlyIfUpdateIsPending) throws CodePushMalformedDataException {
-
-                /* If this is an unconditional restart request, or there
-                /* is current pending update, then reload the app. */
-                if (!onlyIfUpdateIsPending || settingsManager.isPendingUpdate(null)) {
-                    loadApp();
-                    return true;
-                }
-
-                return false;
+            public void performRestart(CodePushRestartListener codePushRestartListener, boolean onlyIfUpdateIsPending) throws CodePushMalformedDataException {
+                restartInternal(codePushRestartListener, onlyIfUpdateIsPending);
             }
         });
         CodePushAcquisitionManager acquisitionManager = new CodePushAcquisitionManager(utils, fileUtils);
         mManagers = new CodePushManagers(updateManager, telemetryManager, settingsManager, restartManager, acquisitionManager);
-
+        
+        /* Initializes listeners */
+        mListeners = new CodePushListeners();
+        
         /* Initialize state */
         mState = new CodePushState();
         try {
@@ -564,74 +563,81 @@ public abstract class CodePushBaseCore {
             }
         }
         mState.mSyncInProgress = true;
-        notifyApplicationReady();
-        notifyAboutSyncStatusChange(CHECKING_FOR_UPDATE);
-        final CodePushRemotePackage remotePackage = checkForUpdate(syncOptions.getDeploymentKey());
-        final boolean updateShouldBeIgnored =
-                remotePackage != null && (remotePackage.isFailedInstall() && syncOptions.getIgnoreFailedUpdates());
-        if (remotePackage == null || updateShouldBeIgnored) {
-            if (updateShouldBeIgnored) {
-                AppCenterLog.info(CodePush.LOG_TAG, "An update is available, but it is being ignored due to having been previously rolled back.");
-            }
-            CodePushLocalPackage currentPackage = getCurrentPackage();
-            if (currentPackage != null && currentPackage.isPending()) {
-                notifyAboutSyncStatusChange(UPDATE_INSTALLED);
-            } else {
-                notifyAboutSyncStatusChange(UP_TO_DATE);
-            }
-        } else if (syncOptions.getUpdateDialog() != null) {
-            CodePushUpdateDialog updateDialogOptions = syncOptions.getUpdateDialog();
-            String message;
-            String acceptButtonText;
-            String declineButtonText = updateDialogOptions.getOptionalIgnoreButtonLabel();
-            if (remotePackage.isMandatory()) {
-                message = updateDialogOptions.getMandatoryUpdateMessage();
-                acceptButtonText = updateDialogOptions.getMandatoryContinueButtonLabel();
-            } else {
-                message = updateDialogOptions.getOptionalUpdateMessage();
-                acceptButtonText = updateDialogOptions.getOptionalInstallButtonLabel();
-            }
-            if (updateDialogOptions.getAppendReleaseDescription() && !isEmpty(remotePackage.getDescription())) {
-                message = updateDialogOptions.getDescriptionPrefix() + " " + remotePackage.getDescription();
-            }
-
-            /* Ask user whether he want to install update or ignore it. */
-            notifyAboutSyncStatusChange(AWAITING_USER_ACTION);
-            mConfirmationDialog.shouldInstallUpdate(updateDialogOptions.getTitle(), message, acceptButtonText, declineButtonText, new CodePushConfirmationCallback() {
-                @Override
-                public void onResult(boolean userAcceptsProposal) {
-                    if (userAcceptsProposal) {
-                        try {
-                            doDownloadAndInstall(remotePackage, syncOptions, configuration);
-                            mState.mSyncInProgress = false;
-                        } catch (Exception e) {
-                            notifyAboutSyncStatusChange(UNKNOWN_ERROR);
-                            mState.mSyncInProgress = false;
-                            CodePushLogUtils.trackException(new CodePushNativeApiCallException(e));
-                        }
-                    } else {
-                        notifyAboutSyncStatusChange(UPDATE_IGNORED);
-                        mState.mSyncInProgress = false;
-                    }
+        try {
+            notifyAboutSyncStatusChange(CHECKING_FOR_UPDATE);
+            final CodePushRemotePackage remotePackage = checkForUpdate(syncOptions.getDeploymentKey());
+            final boolean updateShouldBeIgnored =
+                    remotePackage != null && (remotePackage.isFailedInstall() && syncOptions.getIgnoreFailedUpdates());
+            if (remotePackage == null || updateShouldBeIgnored) {
+                if (updateShouldBeIgnored) {
+                    AppCenterLog.info(CodePush.LOG_TAG, "An update is available, but it is being ignored due to having been previously rolled back.");
                 }
-
-                @Override
-                public void throwError(CodePushGeneralException e) {
-                    notifyAboutSyncStatusChange(UNKNOWN_ERROR);
-                    mState.mSyncInProgress = false;
-                    CodePushLogUtils.trackException(new CodePushNativeApiCallException(e));
+                CodePushLocalPackage currentPackage = getCurrentPackage();
+                if (currentPackage != null && currentPackage.isPending()) {
+                    notifyAboutSyncStatusChange(UPDATE_INSTALLED);
+                } else {
+                    notifyAboutSyncStatusChange(UP_TO_DATE);
                 }
-            });
-        } else {
-            try {
-                doDownloadAndInstall(remotePackage, syncOptions, configuration);
-            } catch (Exception e) {
-                notifyAboutSyncStatusChange(UNKNOWN_ERROR);
                 mState.mSyncInProgress = false;
-                throw new CodePushNativeApiCallException(e);
+            } else if (syncOptions.getUpdateDialog() != null) {
+                final CodePushUpdateDialog updateDialogOptions = syncOptions.getUpdateDialog();
+                String message;
+                final String acceptButtonText;
+                final String declineButtonText = updateDialogOptions.getOptionalIgnoreButtonLabel();
+                if (remotePackage.isMandatory()) {
+                    message = updateDialogOptions.getMandatoryUpdateMessage();
+                    acceptButtonText = updateDialogOptions.getMandatoryContinueButtonLabel();
+                } else {
+                    message = updateDialogOptions.getOptionalUpdateMessage();
+                    acceptButtonText = updateDialogOptions.getOptionalInstallButtonLabel();
+                }
+                if (updateDialogOptions.getAppendReleaseDescription() && !isEmpty(remotePackage.getDescription())) {
+                    message = updateDialogOptions.getDescriptionPrefix() + " " + remotePackage.getDescription();
+                }
+
+                /* Ask user whether he want to install update or ignore it. */
+                notifyAboutSyncStatusChange(AWAITING_USER_ACTION);
+                final String finalMessage = message;
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mConfirmationDialog.shouldInstallUpdate(updateDialogOptions.getTitle(), finalMessage, acceptButtonText, declineButtonText, new CodePushConfirmationCallback() {
+
+                            @Override
+                            public void onResult(boolean userAcceptsProposal) {
+                                if (userAcceptsProposal) {
+                                    try {
+                                        doDownloadAndInstall(remotePackage, syncOptions, configuration);
+                                        mState.mSyncInProgress = false;
+                                    } catch (Exception e) {
+                                        notifyAboutSyncStatusChange(UNKNOWN_ERROR);
+                                        mState.mSyncInProgress = false;
+                                        CodePushLogUtils.trackException(new CodePushNativeApiCallException(e));
+                                    }
+                                } else {
+                                    notifyAboutSyncStatusChange(UPDATE_IGNORED);
+                                    mState.mSyncInProgress = false;
+                                }
+                            }
+
+                            @Override
+                            public void throwError(CodePushGeneralException e) {
+                                notifyAboutSyncStatusChange(UNKNOWN_ERROR);
+                                mState.mSyncInProgress = false;
+                                CodePushLogUtils.trackException(new CodePushNativeApiCallException(e));
+                            }
+                        });
+                    }
+                });
+            } else {
+                doDownloadAndInstall(remotePackage, syncOptions, configuration);
+                mState.mSyncInProgress = false;
             }
+        } catch (Exception e) {
+            notifyAboutSyncStatusChange(UNKNOWN_ERROR);
+            mState.mSyncInProgress = false;
+            throw new CodePushNativeApiCallException(e);
         }
-        mState.mSyncInProgress = false;
     }
 
     /**
@@ -665,6 +671,26 @@ public abstract class CodePushBaseCore {
      */
     public void log(String message) {
         AppCenterLog.info(LOG_TAG, message);
+    }
+
+    /**
+     * Performs just the restart itself.
+     *
+     * @param onlyIfUpdateIsPending   restart only if update is pending or unconditionally.
+     * @param codePushRestartListener listener to notify that the application has restarted.
+     * @return <code>true</code> if restarted successfully.
+     * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
+     */
+    public boolean restartInternal(CodePushRestartListener codePushRestartListener, boolean onlyIfUpdateIsPending) throws CodePushMalformedDataException {
+
+        /* If this is an unconditional restart request, or there
+        * is current pending update, then reload the app. */
+        if (!onlyIfUpdateIsPending || mManagers.mSettingsManager.isPendingUpdate(null)) {
+            loadApp(codePushRestartListener);
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -774,9 +800,11 @@ public abstract class CodePushBaseCore {
             case UPDATE_INSTALLED: {
                 if (mState.mCurrentInstallModeInProgress == ON_NEXT_RESTART) {
                     AppCenterLog.info(LOG_TAG, "Update is installed and will be run on the next app restart.");
-                } else if (mState.mCurrentInstallModeInProgress == ON_NEXT_RESUME) {
+                } else if (mState.mCurrentInstallModeInProgress == ON_NEXT_SUSPEND) {
                     AppCenterLog.info(LOG_TAG, "Update is installed and will be run after the app has been in the background for at least " + mState.mMinimumBackgroundDuration + " seconds.");
-                } else {
+                } else if (mState.mCurrentInstallModeInProgress == IMMEDIATE) {
+                    AppCenterLog.info(LOG_TAG, "Update is installed and will be run right now.");
+                } else if (mState.mCurrentInstallModeInProgress == ON_NEXT_RESUME) {
                     AppCenterLog.info(LOG_TAG, "Update is installed and will be run when the app next resumes.");
                 }
                 break;
@@ -924,7 +952,7 @@ public abstract class CodePushBaseCore {
         try {
             mManagers.mAcquisitionManager.reportStatusDownload(configuration, localPackage);
         } catch (CodePushReportStatusException e) {
-            throw new CodePushNativeApiCallException(e);
+            CodePushLogUtils.trackException(e);
         }
         CodePushInstallMode resolvedInstallMode = localPackage.isMandatory() ? syncOptions.getMandatoryInstallMode() : syncOptions.getInstallMode();
         mState.mCurrentInstallModeInProgress = resolvedInstallMode;
@@ -996,15 +1024,16 @@ public abstract class CodePushBaseCore {
                 AppCenterLog.info(CodePush.LOG_TAG, "Reporting binary update (" + statusReport.getAppVersion() + ")");
                 mManagers.mAcquisitionManager.reportStatusDeploy(configuration, statusReport);
             } else {
+                String label = statusReport.getPackage() != null ? statusReport.getPackage().getLabel() : statusReport.getLabel();
                 if (statusReport.getStatus().equals(SUCCEEDED)) {
-                    AppCenterLog.info(CodePush.LOG_TAG, "Reporting CodePush update success (" + statusReport.getLabel() + ")");
+                    AppCenterLog.info(CodePush.LOG_TAG, "Reporting CodePush update success (" + label + ")");
                 } else {
-                    AppCenterLog.info(CodePush.LOG_TAG, "Reporting CodePush update rollback (" + statusReport.getLabel() + ")");
+                    AppCenterLog.info(CodePush.LOG_TAG, "Reporting CodePush update rollback (" + label + ")");
                 }
-                configuration.setDeploymentKey(statusReport.getPackage().getDeploymentKey());
+                configuration.setDeploymentKey(statusReport.getPackage() == null ? statusReport.getDeploymentKey() : statusReport.getPackage().getDeploymentKey());
                 mManagers.mAcquisitionManager.reportStatusDeploy(configuration, statusReport);
-                saveReportedStatus(statusReport);
             }
+            saveReportedStatus(statusReport);
         } catch (CodePushReportStatusException | CodePushIllegalArgumentException e) {
 
             /* In order to do not lose original exception if another one will be thrown during the retry
@@ -1166,7 +1195,7 @@ public abstract class CodePushBaseCore {
             }
             CodePushLocalPackage newPackage = createLocalPackage(false, false, true, false, appEntryPoint, updatePackage);
             newPackage.setBinaryModifiedTime(binaryModifiedTime);
-            mUtilities.mUtils.writeObjectToJsonFile(updatePackage, newUpdateMetadataPath);
+            mUtilities.mUtils.writeObjectToJsonFile(newPackage, newUpdateMetadataPath);
             return newPackage;
         } catch (IOException | CodePushDownloadPackageException | CodePushUnzipException | CodePushMergeException e) {
             try {
@@ -1240,6 +1269,8 @@ public abstract class CodePushBaseCore {
 
     /**
      * Loads application.
+     *
+     * @param codePushRestartListener listener to notify that the app is loaded.
      */
-    protected abstract void loadApp();
+    protected abstract void loadApp(CodePushRestartListener codePushRestartListener);
 }

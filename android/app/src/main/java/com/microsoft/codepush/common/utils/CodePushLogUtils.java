@@ -1,14 +1,11 @@
 package com.microsoft.codepush.common.utils;
 
-import android.support.annotation.NonNull;
-
 import com.microsoft.appcenter.AppCenter;
 import com.microsoft.appcenter.crashes.Crashes;
 import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.exceptions.CodePushGeneralException;
 
 import java.lang.reflect.Method;
-import java.util.Map;
 
 import static com.microsoft.codepush.common.CodePush.LOG_TAG;
 
@@ -33,7 +30,7 @@ public class CodePushLogUtils {
     }
 
     /**
-     * Represents wrapper on {@link Crashes#trackException(Throwable, Map)} method. Automatically tracks exception in logs, too.
+     * Represents wrapper on {@link Crashes#saveUncaughtException(Thread, Throwable)} method. Automatically tracks exception in logs, too.
      *
      * @param throwable exception instance.
      */
@@ -42,7 +39,7 @@ public class CodePushLogUtils {
     }
 
     /**
-     * Represents wrapper on {@link Crashes#trackException(Throwable, Map)} method.
+     * Represents wrapper on {@link Crashes#saveUncaughtException(Thread, Throwable)} method.
      * Automatically tracks exception in logs, too.
      *
      * @param message message to log (instance of {@link CodePushGeneralException} is created automatically).
@@ -52,17 +49,7 @@ public class CodePushLogUtils {
     }
 
     /**
-     * Represents wrapper on {@link Crashes#trackException(Throwable, Map)} method. Automatically tracks exception in logs, too.
-     *
-     * @param throwable  exception instance.
-     * @param properties additional properties.
-     */
-    public static void trackException(@NonNull Throwable throwable, Map<String, String> properties) {
-        trackException(throwable, properties, true);
-    }
-
-    /**
-     * Represents wrapper on {@link Crashes#trackException(Throwable)} method.
+     * Represents wrapper on {@link Crashes#saveUncaughtException(Thread, Throwable)} method.
      *
      * @param throwable exception instance.
      * @param shouldLog <code>true</code> if log exception on device.
@@ -70,33 +57,12 @@ public class CodePushLogUtils {
     public static void trackException(Throwable throwable, boolean shouldLog) {
         try {
             if (sEnabled) {
-                Method method = Crashes.class.getMethod("trackException", Throwable.class);
-                method.invoke(throwable);
+                Method method = Crashes.class.getDeclaredMethod("saveUncaughtException", Thread.class, Throwable.class);
+                method.setAccessible(true);
+                method.invoke(Crashes.getInstance(), Thread.currentThread(), throwable);
             }
             if (shouldLog) {
-                AppCenterLog.error(LOG_TAG, throwable.getMessage());
-            }
-        } catch (Exception e) {
-
-            /* Do nothing because this exception can occur if crashes are simply not enabled, then just log it on device. */
-        }
-    }
-
-    /**
-     * Represents wrapper on {@link Crashes#trackException(Throwable, Map)} method.
-     *
-     * @param throwable  exception instance.
-     * @param properties additional properties.
-     * @param shouldLog  <code>true</code> if log exception on device.
-     */
-    public static void trackException(@NonNull Throwable throwable, Map<String, String> properties, boolean shouldLog) {
-        try {
-            if (sEnabled) {
-                Method method = Crashes.class.getMethod("trackException", Throwable.class, Map.class);
-                method.invoke(throwable, properties);
-            }
-            if (shouldLog) {
-                AppCenterLog.error(LOG_TAG, throwable.getMessage());
+                AppCenterLog.error(LOG_TAG, throwable.getMessage(), throwable);
             }
         } catch (Exception e) {
 

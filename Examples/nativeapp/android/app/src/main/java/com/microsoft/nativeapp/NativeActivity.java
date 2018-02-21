@@ -16,13 +16,13 @@ import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.datacontracts.CodePushRemotePackage;
 import com.microsoft.codepush.common.exceptions.CodePushInitializeException;
 import com.microsoft.codepush.common.exceptions.CodePushNativeApiCallException;
-import com.microsoft.codepush.reactv2.CodePush;
+import com.microsoft.codepush.react.CodePush;
 
 public class NativeActivity extends Activity {
 
     private static final int OVERLAY_PERMISSION_REQ_CODE = 2;
 
-    private static com.microsoft.codepush.reactv2.CodePush codePushInstance;
+    private static com.microsoft.codepush.react.CodePush codePushInstance;
 
     private static boolean restartSwitch = false;
 
@@ -30,9 +30,10 @@ public class NativeActivity extends Activity {
         if (codePushInstance == null) {
             try {
                 codePushInstance = new CodePush(
-                        "hvm05O3aAG-KJA3zR7NaBjPm7C0Ka4c23a71-4e6c-4f9b-8f95-4fb15b6dd8b5",
-                        getApplicationContext(),
-                        BuildConfig.DEBUG
+                        "deployment-key-here",
+                        getApplication(),
+                        BuildConfig.DEBUG,
+                        "bfcfbe35-eba6-4567-8078-cf53103f6c04"
                 );
             } catch (CodePushInitializeException e) {
                 e.printStackTrace();

@@ -1,5 +1,7 @@
 package com.microsoft.codepush.react;
 
+import android.os.AsyncTask;
+
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -24,7 +26,7 @@ import com.microsoft.codepush.common.exceptions.CodePushNativeApiCallException;
 import com.microsoft.codepush.common.interfaces.CodePushBinaryVersionMismatchListener;
 import com.microsoft.codepush.common.interfaces.CodePushDownloadProgressListener;
 import com.microsoft.codepush.common.interfaces.CodePushSyncStatusListener;
-import com.microsoft.codepush.common.utils.CodePushLogUtils;
+import com.microsoft.codepush.common.managers.CodePushRestartManager;
 import com.microsoft.codepush.common.utils.CodePushUpdateUtils;
 import com.microsoft.codepush.common.utils.CodePushUtils;
 import com.microsoft.codepush.common.utils.FileUtils;
@@ -35,6 +37,8 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.microsoft.codepush.common.utils.CodePushLogUtils.trackException;
 
 /**
  * A wrapper around {@link CodePushBaseCore} for interaction with js code.
@@ -95,7 +99,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
             /* Initialize module state while we have a reference to the current context. */
             mBinaryContentsHash = codePushUpdateUtils.getHashForBinaryContents(reactContext, mCodePushCore.isDebugMode());
         } catch (CodePushMalformedDataException e) {
-            CodePushLogUtils.trackException(e);
+            trackException(e);
         }
     }
 
@@ -122,7 +126,6 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
     }
 
     @Override
-
     public String getName() {
         return "CodePush";
     }
@@ -156,6 +159,26 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
     }
 
     /**
+     * Notifies the CodePush runtime that a freshly installed update should be considered successful,
+     * and therefore, an automatic client-side rollback isn't necessary.
+     */
+    @ReactMethod
+    public void notifyApplicationReady() {
+        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    mCodePushCore.notifyApplicationReady();
+                } catch (CodePushNativeApiCallException e) {
+                    trackException(e);
+                }
+                return null;
+            }
+        };
+        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    /**
      * Checks if there is an update available by the provided deployment key.
      *
      * @param deploymentKey deployment key of the desired update.
@@ -163,18 +186,26 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
      *                      Resolved, it waits for the instance of the {@link CodePushRemotePackage} converted to {@link WritableMap}.
      */
     @ReactMethod
-    public void checkForUpdate(String deploymentKey, Promise promise) {
-        try {
-            CodePushRemotePackage remotePackage = mCodePushCore.checkForUpdate(deploymentKey);
-            if (remotePackage != null) {
-                JSONObject jsonObject = mCodePushUtils.convertObjectToJsonObject(remotePackage);
-                promise.resolve(mReactConvertUtils.convertJsonObjectToWritable(jsonObject));
-            } else {
-                promise.resolve("");
+    public void checkForUpdate(final String deploymentKey, final Promise promise) {
+        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    CodePushRemotePackage remotePackage = mCodePushCore.checkForUpdate(deploymentKey);
+                    if (remotePackage != null) {
+                        JSONObject jsonObject = mCodePushUtils.convertObjectToJsonObject(remotePackage);
+                        promise.resolve(mReactConvertUtils.convertJsonObjectToWritable(jsonObject));
+                    } else {
+                        promise.resolve("");
+                    }
+                } catch (JSONException | CodePushMalformedDataException | CodePushNativeApiCallException e) {
+                    trackException(e);
+                    promise.reject(e);
+                }
+                return null;
             }
-        } catch (JSONException | CodePushMalformedDataException | CodePushNativeApiCallException e) {
-            promise.reject(e);
-        }
+        };
+        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     /**
@@ -189,16 +220,24 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
      *                                    Does not wait for any result except <code>reject</code> if necessary.
      */
     @ReactMethod
-    public void sync(ReadableMap syncOptionsMap, boolean notifySyncStatusChanged, boolean notifyDownloadProgress, boolean notifyBinaryVersionMismatch, Promise promise) {
+    public void sync(final ReadableMap syncOptionsMap, boolean notifySyncStatusChanged, boolean notifyDownloadProgress, boolean notifyBinaryVersionMismatch, final Promise promise) {
         mNotifySyncStatusChanged = notifySyncStatusChanged;
         mNotifyDownloadProgress = notifyDownloadProgress;
         mNotifyBinaryVersionMismatch = notifyBinaryVersionMismatch;
-        try {
-            CodePushSyncOptions syncOptions = mReactConvertUtils.convertReadableToObject(syncOptionsMap, CodePushSyncOptions.class);
-            mCodePushCore.sync(syncOptions);
-        } catch (CodePushMalformedDataException | CodePushNativeApiCallException e) {
-            promise.reject(e);
-        }
+        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    CodePushSyncOptions syncOptions = mReactConvertUtils.convertReadableToObject(syncOptionsMap, CodePushSyncOptions.class);
+                    mCodePushCore.sync(syncOptions);
+                } catch (CodePushMalformedDataException | CodePushNativeApiCallException e) {
+                    trackException(e);
+                    promise.reject(e);
+                }
+                return null;
+            }
+        };
+        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     /**
@@ -211,16 +250,24 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
      *                       Resolved, it waits for the instance of the {@link CodePushLocalPackage} converted to {@link WritableMap}.
      */
     @ReactMethod
-    public void downloadUpdate(ReadableMap updatePackage, boolean notifyProgress, Promise promise) {
+    public void downloadUpdate(final ReadableMap updatePackage, boolean notifyProgress, final Promise promise) {
         mNotifyDownloadProgress = notifyProgress;
-        try {
-            CodePushLocalPackage newPackage = mCodePushCore.downloadUpdate(
-                    mReactConvertUtils.convertReadableToObject(updatePackage, CodePushRemotePackage.class)
-            );
-            promise.resolve(mReactConvertUtils.convertObjectToWritableMap(newPackage));
-        } catch (CodePushMalformedDataException | CodePushNativeApiCallException e) {
-            promise.reject(e);
-        }
+        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    CodePushLocalPackage newPackage = mCodePushCore.downloadUpdate(
+                            mReactConvertUtils.convertReadableToObject(updatePackage, CodePushRemotePackage.class)
+                    );
+                    promise.resolve(mReactConvertUtils.convertObjectToWritableMap(newPackage));
+                } catch (CodePushMalformedDataException | CodePushNativeApiCallException e) {
+                    trackException(e);
+                    promise.reject(e);
+                }
+                return null;
+            }
+        };
+        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     /**
@@ -239,6 +286,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
             configMap.putString("deploymentKey", nativeConfiguration.getDeploymentKey());
             configMap.putString("serverUrl", nativeConfiguration.getServerUrl());
         } catch (CodePushNativeApiCallException e) {
+            trackException(e);
             promise.reject(e);
         }
 
@@ -257,17 +305,25 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
      *                    Resolved, it waits for the {@link CodePushLocalPackage} instance converted to {@link WritableMap}.
      */
     @ReactMethod
-    public void getUpdateMetadata(int updateState, Promise promise) {
-        try {
-            CodePushLocalPackage currentPackage = mCodePushCore.getUpdateMetadata(CodePushUpdateState.values()[updateState]);
-            if (currentPackage != null) {
-                promise.resolve(mReactConvertUtils.convertObjectToWritableMap(currentPackage));
-            } else {
-                promise.resolve("");
+    public void getUpdateMetadata(final int updateState, final Promise promise) {
+        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    CodePushLocalPackage currentPackage = mCodePushCore.getUpdateMetadata(CodePushUpdateState.values()[updateState]);
+                    if (currentPackage != null) {
+                        promise.resolve(mReactConvertUtils.convertObjectToWritableMap(currentPackage));
+                    } else {
+                        promise.resolve("");
+                    }
+                } catch (CodePushMalformedDataException | CodePushNativeApiCallException e) {
+                    trackException(e);
+                    promise.reject(e);
+                }
+                return null;
             }
-        } catch (CodePushMalformedDataException | CodePushNativeApiCallException e) {
-            promise.reject(e);
-        }
+        };
+        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     /**
@@ -277,17 +333,25 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
      *                Resolved, it waits for the instance of the {@link CodePushDeploymentStatusReport} converted to {@link WritableMap}.
      */
     @ReactMethod
-    public void getNewStatusReport(Promise promise) {
-        try {
-            CodePushDeploymentStatusReport statusReport = mCodePushCore.getNewStatusReport();
-            if (statusReport != null) {
-                promise.resolve(mReactConvertUtils.convertObjectToWritableMap(statusReport));
-            } else {
-                promise.resolve("");
+    public void getNewStatusReport(final Promise promise) {
+        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    CodePushDeploymentStatusReport statusReport = mCodePushCore.getNewStatusReport();
+                    if (statusReport != null) {
+                        promise.resolve(mReactConvertUtils.convertObjectToWritableMap(statusReport));
+                    } else {
+                        promise.resolve("");
+                    }
+                } catch (CodePushMalformedDataException | CodePushNativeApiCallException e) {
+                    trackException(e);
+                    promise.reject(e);
+                }
+                return null;
             }
-        } catch (CodePushMalformedDataException | CodePushNativeApiCallException e) {
-            promise.reject(e);
-        }
+        };
+        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     /**
@@ -301,16 +365,24 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
      *                                  Waits either for <code>resolve</code> with empty string indicating that the update has been installed or <code>reject</code> with error.
      */
     @ReactMethod
-    public void installUpdate(ReadableMap updatePackage, int installMode, int minimumBackgroundDuration, Promise promise) {
-        try {
-            mCodePushCore.installUpdate(
-                    mReactConvertUtils.convertReadableToObject(updatePackage, CodePushLocalPackage.class),
-                    CodePushInstallMode.values()[installMode],
-                    minimumBackgroundDuration);
-            promise.resolve("");
-        } catch (CodePushMalformedDataException | CodePushNativeApiCallException e) {
-            promise.reject(e);
-        }
+    public void installUpdate(final ReadableMap updatePackage, final int installMode, final int minimumBackgroundDuration, final Promise promise) {
+        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                try {
+                    mCodePushCore.installUpdate(
+                            mReactConvertUtils.convertReadableToObject(updatePackage, CodePushLocalPackage.class),
+                            CodePushInstallMode.values()[installMode],
+                            minimumBackgroundDuration);
+                    promise.resolve("");
+                } catch (CodePushMalformedDataException | CodePushNativeApiCallException e) {
+                    trackException(e);
+                    promise.reject(e);
+                }
+                return null;
+            }
+        };
+        asyncTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     /**
@@ -325,6 +397,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
         try {
             promise.resolve(mCodePushCore.existsFailedUpdate(packageHash));
         } catch (CodePushNativeApiCallException e) {
+            trackException(e);
             promise.reject(e);
         }
     }
@@ -341,6 +414,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
         try {
             promise.resolve(mCodePushCore.isFirstRun(packageHash));
         } catch (CodePushNativeApiCallException e) {
+            trackException(e);
             promise.resolve(false);
         }
     }
@@ -358,7 +432,24 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
     }
 
     /**
-     * Performs an application restart.
+     * Performs a "clean" app restart without usage of {@link CodePushRestartManager}.
+     *
+     * @param onlyIfUpdateIsPending restart only if update is pending.
+     * @param promise               js promise to handle the results.
+     *                              Waits to be resolved with the boolean value.
+     */
+    @ReactMethod
+    public void restartApp(boolean onlyIfUpdateIsPending, Promise promise) {
+        try {
+            promise.resolve(mCodePushCore.restartInternal(null, onlyIfUpdateIsPending));
+        } catch (CodePushMalformedDataException e) {
+            trackException(e);
+            promise.reject(e);
+        }
+    }
+
+    /**
+     * Performs an application restart using {@link CodePushRestartManager}.
      *
      * @param onlyIfUpdateIsPending restart only if update is pending.
      * @param promise               js promise to handle the results.
@@ -369,6 +460,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
         try {
             promise.resolve(mCodePushCore.restartApp(onlyIfUpdateIsPending));
         } catch (CodePushNativeApiCallException e) {
+            trackException(e);
             promise.reject(e);
         }
     }
@@ -397,7 +489,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
         try {
             mCodePushCore.allowRestart();
         } catch (CodePushNativeApiCallException e) {
-            CodePushLogUtils.trackException(e);
+            trackException(e);
         }
     }
 
@@ -412,7 +504,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
         try {
             mCodePushCore.saveReportedStatus(mReactConvertUtils.convertReadableToObject(statusReport, CodePushDeploymentStatusReport.class));
         } catch (CodePushMalformedDataException e) {
-            CodePushLogUtils.trackException(e);
+            trackException(e);
         }
     }
 
@@ -421,7 +513,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule implements 
         try {
             mCodePushCore.saveStatusReportForRetry(mReactConvertUtils.convertReadableToObject(statusReport, CodePushDeploymentStatusReport.class));
         } catch (CodePushMalformedDataException | CodePushNativeApiCallException e) {
-            CodePushLogUtils.trackException(e);
+            trackException(e);
         }
     }
 }
