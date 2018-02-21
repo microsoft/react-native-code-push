@@ -115,9 +115,9 @@ public class SettingManagerAndroidTests {
     @Test
     public void failedUpdateCompatibilityTest() throws Exception {
         mSettingsManager.removeFailedUpdates();
-        CodePushLocalPackage codePushLocalPackage = createLocalPackage(PACKAGE_HASH);
+        CodePushPackage codePushLocalPackage = createPackage(PACKAGE_HASH);
         CommonSettingsCompatibilityUtils.saveFailedUpdate(mCodePushUtils.convertObjectToJsonObject(codePushLocalPackage), InstrumentationRegistry.getContext());
-        List<CodePushLocalPackage> codePushLocalPackages = mSettingsManager.getFailedUpdates();
+        List<CodePushPackage> codePushLocalPackages = mSettingsManager.getFailedUpdates();
         codePushLocalPackage = codePushLocalPackages.get(0);
         assertEquals(codePushLocalPackage.getDeploymentKey(), DEPLOYMENT_KEY);
         codePushLocalPackage = createLocalPackage("123");
@@ -134,6 +134,11 @@ public class SettingManagerAndroidTests {
      * @return instance of {@link CodePushLocalPackage}.
      */
     private CodePushLocalPackage createLocalPackage(String packageHash) {
+        CodePushPackage codePushPackage = createPackage(packageHash);
+        return CodePushLocalPackage.createLocalPackage(false, false, false, false, "", codePushPackage);
+    }
+
+    private CodePushPackage createPackage(String packageHash) {
         CodePushPackage codePushPackage = new CodePushPackage();
         codePushPackage.setAppVersion(APP_VERSION);
         codePushPackage.setDeploymentKey(DEPLOYMENT_KEY);
@@ -142,7 +147,7 @@ public class SettingManagerAndroidTests {
         codePushPackage.setLabel(LABEL);
         codePushPackage.setMandatory(IS_MANDATORY);
         codePushPackage.setPackageHash(packageHash);
-        return CodePushLocalPackage.createLocalPackage(false, false, false, false, "", codePushPackage);
+        return codePushPackage;
     }
 
     /**
@@ -151,13 +156,13 @@ public class SettingManagerAndroidTests {
     @Test
     public void failedUpdateTest() throws Exception {
         mSettingsManager.removeFailedUpdates();
-        CodePushLocalPackage codePushLocalPackage = createLocalPackage("newHash");
-        mSettingsManager.saveFailedUpdate(codePushLocalPackage);
-        codePushLocalPackage = createLocalPackage(PACKAGE_HASH);
-        mSettingsManager.saveFailedUpdate(codePushLocalPackage);
-        List<CodePushLocalPackage> codePushLocalPackages = mSettingsManager.getFailedUpdates();
-        codePushLocalPackage = codePushLocalPackages.get(0);
-        assertEquals(codePushLocalPackage.getDeploymentKey(), DEPLOYMENT_KEY);
+        CodePushPackage codePushPackage = createPackage("newHash");
+        mSettingsManager.saveFailedUpdate(codePushPackage);
+        codePushPackage = createLocalPackage(PACKAGE_HASH);
+        mSettingsManager.saveFailedUpdate(codePushPackage);
+        List<CodePushPackage> codePushPackages = mSettingsManager.getFailedUpdates();
+        codePushPackage = codePushPackages.get(0);
+        assertEquals(codePushPackage.getDeploymentKey(), DEPLOYMENT_KEY);
         assertTrue(mSettingsManager.existsFailedUpdate(PACKAGE_HASH));
         assertFalse(mSettingsManager.existsFailedUpdate(null));
     }
@@ -187,8 +192,8 @@ public class SettingManagerAndroidTests {
     @Test
     public void failedUpdateIsNull() throws Exception {
         mSettingsManager.removeFailedUpdates();
-        List<CodePushLocalPackage> codePushLocalPackages = mSettingsManager.getFailedUpdates();
-        assertEquals(0, codePushLocalPackages.size());
+        List<CodePushPackage> codePushPackages = mSettingsManager.getFailedUpdates();
+        assertEquals(0, codePushPackages.size());
     }
 
     /**
