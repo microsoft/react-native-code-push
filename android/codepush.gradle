@@ -1,4 +1,4 @@
-// Adapted from https://raw.githubusercontent.com/facebook/react-native/master/local-cli/generator-android/templates/src/app/react.gradle
+// Adapted from https://raw.githubusercontent.com/facebook/react-native/d16ff3bd8b92fa84a9007bf5ebedd8153e4c089d/react.gradle
 
 import java.nio.file.Paths;
 
@@ -43,8 +43,9 @@ gradle.projectsEvaluated {
         def generateBundledResourcesHash;
 
         if (variant.hasProperty("bundleJsAndAssets")) {
-            jsBundleDir = file("$buildDir/generated/assets/react/${targetPath}")
-            resourcesDir = file("$buildDir/generated/res/react/${targetPath}")
+            def reactBundleTask = variant.bundleJsAndAssets
+            jsBundleDir = reactBundleTask.generatedAssetsFolders[0].absolutePath
+            resourcesDir = reactBundleTask.generatedResFolders[0].absolutePath
             jsBundleFile = file("$jsBundleDir/$bundleAssetName")
 
             generateBundledResourcesHash = tasks.create(
