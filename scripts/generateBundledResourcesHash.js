@@ -27,12 +27,16 @@ var jsBundleFilePath = process.argv[3];
 var assetsDir = process.argv[4];
 var tempFileName = process.argv[5];
 
-var tempFileLocalPath = path.join(require("os").tmpdir(), tempFileName);
+var oldFileToModifiedTimeMap = {};
+if (tempFileName) {
+    var tempFileLocalPath = path.join(require("os").tmpdir(), tempFileName);
+    oldFileToModifiedTimeMap = require(tempFileLocalPath);
+    fs.unlinkSync(tempFileLocalPath);
+}
 var resourceFiles = [];
 
 getFilesInFolder(resourcesDir, resourceFiles);
 
-var oldFileToModifiedTimeMap = require(tempFileLocalPath);
 var newFileToModifiedTimeMap = {};
 
 resourceFiles.forEach(function(resourceFile) {
@@ -115,5 +119,3 @@ function fileExists(file) {
     try { return fs.statSync(file).isFile(); }
     catch (e) { return false; }
 }
-
-fs.unlinkSync(tempFileLocalPath);

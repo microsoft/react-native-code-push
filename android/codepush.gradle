@@ -1,10 +1,11 @@
-// Adapted from https://raw.githubusercontent.com/facebook/react-native/master/local-cli/generator-android/templates/src/app/react.gradle
+// Adapted from https://raw.githubusercontent.com/facebook/react-native/d16ff3bd8b92fa84a9007bf5ebedd8153e4c089d/react.gradle
 
 import java.nio.file.Paths;
 
 def config = project.hasProperty("react") ? project.react : [];
 def bundleAssetName = config.bundleAssetName ?: "index.android.bundle"
 
+// because elvis operator
 def elvisFile(thing) {
     return thing ? file(thing) : null;
 }
@@ -17,37 +18,58 @@ void runBefore(String dependentTaskName, Task task) {
 }
 
 gradle.projectsEvaluated {
-    def buildTypes = android.buildTypes.collect { type -> type.name }
     android.buildTypes.each {
         // to prevent incorrect long value restoration from strings.xml we need to wrap it with double quotes
         // https://github.com/Microsoft/cordova-plugin-code-push/issues/264
         it.resValue 'string', "CODE_PUSH_APK_BUILD_TIME", String.format("\"%d\"", System.currentTimeMillis())
     }
-    def productFlavors = android.productFlavors.collect { flavor -> flavor.name }
-    if (!productFlavors) productFlavors.add('')
-    def nodeModulesPath;
-    if (config.root) {
-        nodeModulesPath = Paths.get(config.root, "/node_modules");
-    }
-    else if (project.hasProperty('nodeModulesPath')) {
-        nodeModulesPath = project.nodeModulesPath
-    } else {
-        nodeModulesPath = "../../node_modules";
-    }
+    
+    android.applicationVariants.all { variant ->
+        def nodeModulesPath;
+        if (config.root) {
+            nodeModulesPath = Paths.get(config.root, "/node_modules");
+        } else if (project.hasProperty('nodeModulesPath')) {
+            nodeModulesPath = project.nodeModulesPath
+        } else {
+            nodeModulesPath = "../../node_modules";
+        }
 
-    productFlavors.each { productFlavorName ->
-        buildTypes.each { buildTypeName ->
-            def targetName = "${productFlavorName.capitalize()}${buildTypeName.capitalize()}"
-            def targetPath = productFlavorName ?
-                    "${productFlavorName}/${buildTypeName}" :
-                    "${buildTypeName}"
+        def targetName = variant.name.capitalize()
+        def targetPath = variant.dirName
 
+        def jsBundleDir;
+        def resourcesDir;
+        def jsBundleFile;
+
+        // Additional node commandline arguments
+        def nodeExecutableAndArgs = config.nodeExecutableAndArgs ?: ["node"]
+        def extraPackagerArgs = config.extraPackagerArgs ?: []
+
+        // Make this task run right after the bundle task
+        def generateBundledResourcesHash;
+
+        if (variant.hasProperty("bundleJsAndAssets")) {
+            def reactBundleTask = variant.bundleJsAndAssets
+            jsBundleDir = reactBundleTask.generatedAssetsFolders[0].absolutePath
+            resourcesDir = reactBundleTask.generatedResFolders[0].absolutePath
+            jsBundleFile = file("$jsBundleDir/$bundleAssetName")
+
+            generateBundledResourcesHash = tasks.create(
+                    name: "generateBundledResourcesHash${targetName}",
+                    type: Exec) {
+                commandLine (*nodeExecutableAndArgs, "${nodeModulesPath}/react-native-code-push/scripts/generateBundledResourcesHash.js", resourcesDir, jsBundleFile, jsBundleDir)
+
+                enabled config."bundleIn${targetName}" ||
+                config."bundleIn${variant.buildType.name.capitalize()}" ?:
+                targetName.toLowerCase().contains("release")
+            }   
+        } else {
             def jsBundleDirConfigName = "jsBundleDir${targetName}"
-            def jsBundleDir = elvisFile(config."$jsBundleDirConfigName") ?:
+            jsBundleDir = elvisFile(config."$jsBundleDirConfigName") ?:
                     file("$buildDir/intermediates/assets/${targetPath}")
 
             def resourcesDirConfigName = "resourcesDir${targetName}"
-            def resourcesDir = elvisFile(config."${resourcesDirConfigName}") ?:
+            resourcesDir = elvisFile(config."${resourcesDirConfigName}") ?:
                     file("$buildDir/intermediates/res/merged/${targetPath}")
 
             // In case version of 'Android Plugin for Gradle'' is lower than 1.3.0 
@@ -56,13 +78,16 @@ gradle.projectsEvaluated {
             if (!resourcesDir.exists() && file("$buildDir/intermediates/res/${targetPath}").exists()) {
                 resourcesDir = file("$buildDir/intermediates/res/${targetPath}")
             }
-            
-            def jsBundleFile = file("$jsBundleDir/$bundleAssetName")
+
+            jsBundleFile = file("$jsBundleDir/$bundleAssetName")
 
             def resourcesMapTempFileName = "CodePushResourcesMap-" + java.util.UUID.randomUUID().toString().substring(0,8) + ".json"
 
-            // Additional node commandline arguments
-            def nodeExecutableAndArgs = config.nodeExecutableAndArgs ?: ["node"]
+            generateBundledResourcesHash = tasks.create(
+                    name: "generateBundledResourcesHash${targetName}",
+                    type: Exec) {
+                commandLine (*nodeExecutableAndArgs, "${nodeModulesPath}/react-native-code-push/scripts/generateBundledResourcesHash.js", resourcesDir, jsBundleFile, jsBundleDir, resourcesMapTempFileName)
+            }
 
             // Make this task run right before the bundle task
             def recordFilesBeforeBundleCommand = tasks.create(
@@ -75,21 +100,14 @@ gradle.projectsEvaluated {
             recordFilesBeforeBundleCommand.dependsOn("merge${targetName}Assets")
             runBefore("bundle${targetName}JsAndAssets", recordFilesBeforeBundleCommand)
 
-            // Make this task run right after the bundle task
-            def generateBundledResourcesHash = tasks.create(
-                    name: "generateBundledResourcesHash${targetName}",
-                    type: Exec) {
-                commandLine (*nodeExecutableAndArgs, "${nodeModulesPath}/react-native-code-push/scripts/generateBundledResourcesHash.js", resourcesDir, "$jsBundleDir/$bundleAssetName", jsBundleDir, resourcesMapTempFileName)
-            }
-
             // We need to generate and record the resources map, but we use it to generate the bundle hash
             generateBundledResourcesHash.dependsOn("recordFilesBeforeBundleCommand${targetName}")
-
-            generateBundledResourcesHash.dependsOn("bundle${targetName}JsAndAssets")
-            runBefore("processArmeabi-v7a${targetName}Resources", generateBundledResourcesHash)
-            runBefore("processX86${targetName}Resources", generateBundledResourcesHash)
-            runBefore("processUniversal${targetName}Resources", generateBundledResourcesHash)
-            runBefore("process${targetName}Resources", generateBundledResourcesHash)
         }
+
+        generateBundledResourcesHash.dependsOn("bundle${targetName}JsAndAssets")
+        runBefore("processArmeabi-v7a${targetName}Resources", generateBundledResourcesHash)
+        runBefore("processX86${targetName}Resources", generateBundledResourcesHash)
+        runBefore("processUniversal${targetName}Resources", generateBundledResourcesHash)
+        runBefore("process${targetName}Resources", generateBundledResourcesHash)
     }
 }
