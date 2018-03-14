@@ -28,10 +28,10 @@ var assetsDir = process.argv[4];
 var tempFileName = process.argv[5];
 
 var oldFileToModifiedTimeMap = {};
+var tempFileLocalPath = null;
 if (tempFileName) {
-    var tempFileLocalPath = path.join(require("os").tmpdir(), tempFileName);
+    tempFileLocalPath = path.join(require("os").tmpdir(), tempFileName);
     oldFileToModifiedTimeMap = require(tempFileLocalPath);
-    fs.unlinkSync(tempFileLocalPath);
 }
 var resourceFiles = [];
 
@@ -118,4 +118,8 @@ function addFileToManifest(folder, assetFile, manifest, done) {
 function fileExists(file) {
     try { return fs.statSync(file).isFile(); }
     catch (e) { return false; }
+}
+
+if (tempFileLocalPath) {
+    fs.unlinkSync(tempFileLocalPath);
 }
