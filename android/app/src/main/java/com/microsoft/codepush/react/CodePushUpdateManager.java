@@ -163,6 +163,7 @@ public class CodePushUpdateManager {
         try {
             URL downloadUrl = new URL(downloadUrlString);
             connection = (HttpURLConnection) (downloadUrl.openConnection());
+            connection.setRequestProperty("Accept-Encoding", "identity");
             bin = new BufferedInputStream(connection.getInputStream());
 
             long totalBytes = connection.getContentLength();
