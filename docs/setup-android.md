@@ -311,6 +311,55 @@ public class MainApplication extends NavigationApplication implements ReactInsta
     }
 }
 ```
+If you are using [WIX React Native Navigation **version 2.x**](https://github.com/nfl/react-native-navigation/tree/v2) based application, please do the following steps to integrate CodePush:
+
+1. As per React Native Navigation's documentation, `MainActivity.java` should extend `NavigationActivity`, no changes required to incorporate CodePush:
+
+```java
+import com.reactnativenavigation.NavigationActivity;
+
+public class MainActivity extends NavigationActivity {
+
+}
+```
+
+2. Update the `MainApplication.java` file to use CodePush via the following changes:
+
+```java
+// ...
+import com.facebook.react.ReactInstanceManager;
+
+// Add CodePush imports
+import com.microsoft.codepush.react.CodePush;
+
+public class MainApplication extends NavigationApplication {
+
+    @Override
+    public boolean isDebug() {
+        return BuildConfig.DEBUG;
+    }
+
+    @Override
+    protected ReactGateway createReactGateway() {
+        ReactNativeHost host = new NavigationReactNativeHost(this, isDebug(), createAdditionalReactPackages()) {
+            @javax.annotation.Nullable
+            @Override
+            protected String getJSBundleFile() {
+                return CodePush.getJSBundleFile();
+            }
+            
+        };
+        return new ReactGateway(this, isDebug(), host);
+    }
+
+    @Override
+    public List<ReactPackage> createAdditionalReactPackages() {
+        return Arrays.<ReactPackage>asList(
+	    new CodePush("deployment-key-here", getApplicationContext(), isDebug())
+	    //,MainReactPackage , etc...
+    }
+}
+```
 
 #### Code Signing setup
 
