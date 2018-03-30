@@ -385,21 +385,17 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
 
       return await new Promise((resolve, reject) => {
         let message = null;
-        const dialogButtons = [{
-          text: null,
-          onPress:() => {
-            doDownloadAndInstall()
-              .then(resolve, reject);
-          }
-        }];
+        let installButtonText = null;
+
+        const dialogButtons = [];
 
         if (remotePackage.isMandatory) {
           message = syncOptions.updateDialog.mandatoryUpdateMessage;
-          dialogButtons[0].text = syncOptions.updateDialog.mandatoryContinueButtonLabel;
+          installButtonText = syncOptions.updateDialog.mandatoryContinueButtonLabel;
         } else {
           message = syncOptions.updateDialog.optionalUpdateMessage;
-          dialogButtons[0].text = syncOptions.updateDialog.optionalInstallButtonLabel;
-          // Since this is an optional update, add another button
+          installButtonText = syncOptions.updateDialog.optionalInstallButtonLabel;
+          // Since this is an optional update, add a button
           // to allow the end-user to ignore it
           dialogButtons.push({
             text: syncOptions.updateDialog.optionalIgnoreButtonLabel,
@@ -409,6 +405,16 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
             }
           });
         }
+        
+        // Since the install button should be placed to the 
+        // right of any other button, add it last
+        dialogButtons.push({
+          text: installButtonText,
+          onPress:() => {
+            doDownloadAndInstall()
+              .then(resolve, reject);
+          }
+        })
 
         // If the update has a description, and the developer
         // explicitly chose to display it, then set that as the message
