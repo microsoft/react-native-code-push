@@ -311,7 +311,7 @@ public class MainApplication extends NavigationApplication implements ReactInsta
     }
 }
 ```
-If you are using [WIX React Native Navigation **version 2.x**](https://github.com/nfl/react-native-navigation/tree/v2) based application, please do the following steps to integrate CodePush:
+If you are using [WIX React Native Navigation **version 2.x**](https://github.com/wix/react-native-navigation/tree/v2) based application, please do the following steps to integrate CodePush:
 
 1. As per React Native Navigation's documentation, `MainActivity.java` should extend `NavigationActivity`, no changes required to incorporate CodePush:
 
