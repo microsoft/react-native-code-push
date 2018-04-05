@@ -171,7 +171,7 @@ In order to configure Public Key for bundle verification you need to add record 
   <dict>
     <!-- ...other configs... -->
 
-    <key>CodePushPublicKey</key>
+    <key>CodePushDeploymentKey</key>
         <string>-----BEGIN PUBLIC KEY-----
 MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBANkWYydPuyOumR/sn2agNBVDnzyRpM16NAUpYPGxNgjSEp0etkDNgzzdzyvyl+OsAGBYF3jCxYOXozum+uV5hQECAwEAAQ==
 -----END PUBLIC KEY-----</string>
