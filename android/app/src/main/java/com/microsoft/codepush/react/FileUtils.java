@@ -47,7 +47,7 @@ public class FileUtils {
                         if (fromBufferedStream != null) fromBufferedStream.close();
                         if (destStream != null) destStream.close();
                     } catch (IOException e) {
-                        throw new CodePushUnknownException("Error closing IO resources.", e);
+                        CodePushUtils.log("Error closing IO resources. " + e);
                     }
                 }
             }
