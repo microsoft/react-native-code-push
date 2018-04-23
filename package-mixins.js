@@ -1,6 +1,7 @@
 import { AcquisitionManager as Sdk } from "code-push/script/acquisition-sdk";
 import { NativeEventEmitter } from "react-native";
 import RestartManager from "./RestartManager";
+import log from "./logging";
 
 // This function is used to augment remote and local
 // package objects with additional functionality/properties
@@ -30,7 +31,14 @@ module.exports = (NativeCodePush) => {
           Object.keys(updatePackageCopy).forEach((key) => (typeof updatePackageCopy[key] === 'function') && delete updatePackageCopy[key]);
 
           const downloadedPackage = await NativeCodePush.downloadUpdate(updatePackageCopy, !!downloadProgressCallback);
-          reportStatusDownload && reportStatusDownload(this);
+
+          if (reportStatusDownload) {
+            reportStatusDownload(this)
+            .catch((err) => {
+              log(`Report download status failed: ${err}`);
+            });
+          }
+
           return { ...downloadedPackage, ...local };
         } finally {
           downloadProgressSubscription && downloadProgressSubscription.remove();
