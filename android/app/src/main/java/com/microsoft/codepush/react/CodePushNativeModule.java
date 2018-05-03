@@ -535,4 +535,9 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             }
         }
     }
+
+    @ReactMethod
+    public void clearUpdates() {
+        mCodePush.clearUpdates();
+    }
 }
