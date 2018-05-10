@@ -14,7 +14,6 @@ import com.facebook.react.ReactRootView;
 import com.facebook.react.common.LifecycleState;
 import com.facebook.react.modules.core.DefaultHardwareBackBtnHandler;
 import com.facebook.react.shell.MainReactPackage;
-import com.microsoft.codepush.common.exceptions.CodePushNativeApiCallException;
 import com.microsoft.codepush.react.CodePush;
 
 public class ReactActivity extends AppCompatActivity implements DefaultHardwareBackBtnHandler {
@@ -35,18 +34,14 @@ public class ReactActivity extends AppCompatActivity implements DefaultHardwareB
 
         CodePush codePushInstance = (CodePush) getIntent().getSerializableExtra("CodePushInstance");
 
-        try {
-            mReactInstanceManager = ReactInstanceManager.builder()
-                    .setApplication(getApplication())
-                    .addPackage(new MainReactPackage())
-                    .addPackage(codePushInstance)
-                    .setUseDeveloperSupport(BuildConfig.DEBUG)
-                    .setInitialLifecycleState(LifecycleState.RESUMED)
-                    .setJSBundleFile(CodePush.getJSBundleFile("index.android.bundle"))
-                    .build();
-        } catch (CodePushNativeApiCallException e) {
-            e.printStackTrace();
-        }
+        mReactInstanceManager = ReactInstanceManager.builder()
+                .setApplication(getApplication())
+                .addPackage(new MainReactPackage())
+                .addPackage(codePushInstance)
+                .setUseDeveloperSupport(BuildConfig.DEBUG)
+                .setInitialLifecycleState(LifecycleState.RESUMED)
+                .setJSBundleFile(CodePush.getJSBundleFile("index.android.bundle"))
+                .build();
         CodePush.setReactInstanceManager(mReactInstanceManager);
 
         ReactRootView mReactRootView = new ReactRootView(this);

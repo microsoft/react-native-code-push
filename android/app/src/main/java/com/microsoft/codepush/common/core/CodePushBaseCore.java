@@ -14,6 +14,7 @@ import com.microsoft.appcenter.crashes.Crashes;
 import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.CodePush;
 import com.microsoft.codepush.common.CodePushConfiguration;
+import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.apirequests.ApiHttpRequest;
 import com.microsoft.codepush.common.apirequests.DownloadPackageTask;
 import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
@@ -104,6 +105,12 @@ public abstract class CodePushBaseCore {
     protected String mDeploymentKey;
 
     /**
+     * CodePush base directory.
+     */
+    @SuppressWarnings("WeakerAccess")
+    protected String mBaseDirectory;
+
+    /**
      * CodePush server URL.
      */
     @SuppressWarnings("WeakerAccess")
@@ -132,6 +139,12 @@ public abstract class CodePushBaseCore {
      */
     @SuppressWarnings("WeakerAccess")
     protected final boolean mIsDebugMode;
+
+    /**
+     * Current app name.
+     */
+    @SuppressWarnings("WeakerAccess")
+    protected String mAppName;
 
     /**
      * Current app version.
@@ -181,26 +194,32 @@ public abstract class CodePushBaseCore {
      *
      * @param deploymentKey         deployment key.
      * @param context               application context.
-     * @param isDebugMode           indicates whether application is running in debug mode.
-     * @param serverUrl             CodePush server url.
-     * @param publicKeyProvider     instance of {@link CodePushPublicKeyProvider}.
-     * @param appEntryPointProvider instance of {@link CodePushAppEntryPointProvider}.
-     * @param platformUtils         instance of {@link CodePushPlatformUtils}.
      * @param application           application instance (pass <code>null</code> if you don't need {@link Crashes} integration for tracking exceptions).
      * @param appSecret             the value of app secret from AppCenter portal to configure {@link Crashes} sdk.
      *                              Pass <code>null</code> if you don't need {@link Crashes} integration for tracking exceptions.
+     * @param isDebugMode           indicates whether application is running in debug mode.
+     * @param baseDirectory         Base directory for CodePush files.
+     * @param serverUrl             CodePush server url.
+     * @param appName               application name.
+     * @param appVersion            application version.
+     * @param publicKeyProvider     instance of {@link CodePushPublicKeyProvider}.
+     * @param appEntryPointProvider instance of {@link CodePushAppEntryPointProvider}.
+     * @param platformUtils         instance of {@link CodePushPlatformUtils}.
      * @throws CodePushInitializeException error occurred during the initialization.
      */
     protected CodePushBaseCore(
             @NonNull String deploymentKey,
             @NonNull Context context,
+            Application application,
+            String appSecret,
             boolean isDebugMode,
+            String baseDirectory,
             String serverUrl,
+            String appName,
+            String appVersion,
             CodePushPublicKeyProvider publicKeyProvider,
             CodePushAppEntryPointProvider appEntryPointProvider,
-            CodePushPlatformUtils platformUtils,
-            Application application,
-            String appSecret
+            CodePushPlatformUtils platformUtils
     ) throws CodePushInitializeException {
         if (appSecret != null) {
             AppCenter.start(application, appSecret, Crashes.class);
@@ -211,16 +230,26 @@ public abstract class CodePushBaseCore {
         /* Initialize configuration. */
         mDeploymentKey = deploymentKey;
         mContext = context.getApplicationContext();
+        mBaseDirectory = baseDirectory != null ? baseDirectory : mContext.getFilesDir().getAbsolutePath();
         mIsDebugMode = isDebugMode;
         if (serverUrl != null) {
             mServerUrl = serverUrl;
         }
-        try {
-            mPublicKey = publicKeyProvider.getPublicKey();
-            PackageInfo pInfo = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
-            mAppVersion = pInfo.versionName;
-        } catch (PackageManager.NameNotFoundException | CodePushInvalidPublicKeyException e) {
-            throw new CodePushInitializeException("Unable to get package info for " + mContext.getPackageName(), e);
+
+        if (appName != null) {
+            mAppName = appName;
+        }
+
+        if (appVersion != null) {
+            mAppVersion = appVersion;
+        } else {
+            try {
+                mPublicKey = publicKeyProvider.getPublicKey();
+                PackageInfo pInfo = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
+                mAppVersion = pInfo.versionName;
+            } catch (PackageManager.NameNotFoundException | CodePushInvalidPublicKeyException e) {
+                throw new CodePushInitializeException("Unable to get package info for " + mContext.getPackageName(), e);
+            }
         }
 
         /* Initialize utilities. */
@@ -230,9 +259,14 @@ public abstract class CodePushBaseCore {
         mUtilities = new CodePushUtilities(utils, fileUtils, updateUtils, platformUtils);
 
         /* Initialize managers. */
-        String documentsDirectory = mContext.getFilesDir().getAbsolutePath();
-        CodePushUpdateManager updateManager = new CodePushUpdateManager(documentsDirectory, platformUtils, fileUtils, utils, updateUtils);
-        final SettingsManager settingsManager = new SettingsManager(mContext, utils);
+        CodePushConfiguration configuration;
+        try {
+            configuration = getNativeConfiguration();
+        } catch (CodePushNativeApiCallException e) {
+            throw new CodePushInitializeException("Unable to get native configuration for " + mContext.getPackageName(), e);
+        }
+        CodePushUpdateManager updateManager = new CodePushUpdateManager(baseDirectory, platformUtils, fileUtils, utils, updateUtils, configuration);
+        final SettingsManager settingsManager = new SettingsManager(mContext, utils, configuration);
         CodePushTelemetryManager telemetryManager = new CodePushTelemetryManager(settingsManager);
         CodePushRestartManager restartManager = new CodePushRestartManager(new CodePushRestartHandler() {
             @Override
@@ -278,11 +312,14 @@ public abstract class CodePushBaseCore {
      * Creates instance of {@link CodePushBaseCore} for those who want to track exceptions (includes additional parameters).
      *
      * @param deploymentKey         deployment key.
-     * @param application           application instance (pass <code>null</code> if you don't need {@link Crashes} integration for tracking exceptions).
-     * @param isDebugMode           indicates whether application is running in debug mode.
-     * @param serverUrl             CodePush server url.
+     * @param application           application instance.
      * @param appSecret             the value of app secret from AppCenter portal to configure {@link Crashes} sdk.
      *                              Pass <code>null</code> if you don't need {@link Crashes} integration for tracking exceptions.
+     * @param isDebugMode           indicates whether application is running in debug mode.
+     * @param baseDirectory         Base directory for CodePush files.
+     * @param serverUrl             CodePush server url.
+     * @param appName               application name.
+     * @param appVersion            application version.
      * @param publicKeyProvider     instance of {@link CodePushPublicKeyProvider}.
      * @param appEntryPointProvider instance of {@link CodePushAppEntryPointProvider}.
      * @param platformUtils         instance of {@link CodePushPlatformUtils}.
@@ -291,14 +328,18 @@ public abstract class CodePushBaseCore {
     protected CodePushBaseCore(
             @NonNull String deploymentKey,
             @NonNull Application application,
-            boolean isDebugMode,
-            String serverUrl,
             String appSecret,
+            boolean isDebugMode,
+            String baseDirectory,
+            String serverUrl,
+            String appName,
+            String appVersion,
             CodePushPublicKeyProvider publicKeyProvider,
             CodePushAppEntryPointProvider appEntryPointProvider,
             CodePushPlatformUtils platformUtils
     ) throws CodePushInitializeException {
-        this(deploymentKey, application.getApplicationContext(), isDebugMode, serverUrl, publicKeyProvider, appEntryPointProvider, platformUtils, application, appSecret);
+        this(deploymentKey, application.getApplicationContext(), application, appSecret, isDebugMode, baseDirectory, serverUrl,
+                appName, appVersion, publicKeyProvider, appEntryPointProvider, platformUtils);
     }
 
     /**
@@ -346,10 +387,12 @@ public abstract class CodePushBaseCore {
     public CodePushConfiguration getNativeConfiguration() throws CodePushNativeApiCallException {
         CodePushConfiguration configuration = new CodePushConfiguration();
         try {
+            configuration.setAppName(mAppName != null ? mAppName : CodePushConstants.CODE_PUSH_DEFAULT_APP_NAME);
             configuration.setAppVersion(mAppVersion);
 
             configuration.setClientUniqueId(Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID));
             configuration.setDeploymentKey(mDeploymentKey);
+            configuration.setBaseDirectory(mBaseDirectory);
             configuration.setServerUrl(mServerUrl);
             configuration.setPackageHash(mUtilities.mUpdateUtils.getHashForBinaryContents(mContext, mIsDebugMode));
         } catch (CodePushIllegalArgumentException | CodePushMalformedDataException e) {
@@ -503,7 +546,7 @@ public abstract class CodePushBaseCore {
         }
         if (update == null || update.isUpdateAppVersion() ||
                 localPackage != null && (update.getPackageHash().equals(localPackage.getPackageHash())) ||
-                (localPackage == null || localPackage.isDebugOnly()) && config.getPackageHash().equals(update.getPackageHash())) {
+                (localPackage == null || localPackage.isDebugOnly()) && update.getPackageHash().equals(config.getPackageHash())) {
             if (update != null && update.isUpdateAppVersion()) {
                 AppCenterLog.info(LOG_TAG, "An update is available but it is not targeting the binary version of your app.");
                 notifyAboutBinaryVersionMismatchChange(update);

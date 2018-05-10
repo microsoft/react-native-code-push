@@ -29,12 +29,9 @@ public class NativeActivity extends Activity {
     private void initializeCodePush() {
         if (codePushInstance == null) {
             try {
-                codePushInstance = new CodePush(
-                        "deployment-key-here",
-                        getApplication(),
-                        BuildConfig.DEBUG,
-                        "bfcfbe35-eba6-4567-8078-cf53103f6c04"
-                );
+                codePushInstance = CodePush.builder("deployment-key-here", getApplication())
+                        .setIsDebugMode(BuildConfig.DEBUG)
+                        .build();
             } catch (CodePushInitializeException e) {
                 e.printStackTrace();
             }

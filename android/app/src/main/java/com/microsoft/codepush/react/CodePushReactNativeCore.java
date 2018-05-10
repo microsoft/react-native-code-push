@@ -95,11 +95,14 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
      * Creates instance of the {@link CodePushReactNativeCore} for those who want to track exceptions (includes additional parameters).
      *
      * @param deploymentKey         application deployment key.
-     * @param application           application instance (pass <code>null</code> if you don't need {@link Crashes} integration for tracking exceptions).
-     * @param isDebugMode           indicates whether application is running in debug mode.
-     * @param serverUrl             CodePush server url.
+     * @param application           application instance.
      * @param appSecret             the value of app secret from AppCenter portal to configure {@link Crashes} sdk.
      *                              Pass <code>null</code> if you don't need {@link Crashes} integration for tracking exceptions.
+     * @param isDebugMode           indicates whether application is running in debug mode.
+     * @param baseDirectory         Base directory for CodePush files.
+     * @param serverUrl             CodePush server url.
+     * @param appName               application name.
+     * @param appVersion            application version.
      * @param publicKeyProvider     instance of {@link CodePushPublicKeyProvider}.
      * @param appEntryPointProvider instance of {@link CodePushAppEntryPointProvider}.
      * @param platformUtils         instance of {@link CodePushPlatformUtils}.
@@ -108,14 +111,18 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
     CodePushReactNativeCore(
             @NonNull String deploymentKey,
             @NonNull Application application,
-            boolean isDebugMode,
-            String serverUrl,
             String appSecret,
+            boolean isDebugMode,
+            String baseDirectory,
+            String serverUrl,
+            String appName,
+            String appVersion,
             CodePushPublicKeyProvider publicKeyProvider,
             CodePushAppEntryPointProvider appEntryPointProvider,
             CodePushPlatformUtils platformUtils
     ) throws CodePushInitializeException {
-        super(deploymentKey, application, isDebugMode, serverUrl, appSecret, publicKeyProvider, appEntryPointProvider, platformUtils);
+        super(deploymentKey, application, appSecret, isDebugMode, baseDirectory, serverUrl, appName,
+                appVersion, publicKeyProvider, appEntryPointProvider, platformUtils);
     }
 
     /**
@@ -124,7 +131,10 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
      * @param deploymentKey         application deployment key.
      * @param context               application context.
      * @param isDebugMode           indicates whether application is running in debug mode.
+     * @param baseDirectory         Base directory for CodePush files.
      * @param serverUrl             CodePush server url.
+     * @param appName               application name.
+     * @param appVersion            application version.
      * @param publicKeyProvider     instance of {@link CodePushPublicKeyProvider}.
      * @param appEntryPointProvider instance of {@link CodePushAppEntryPointProvider}.
      * @param platformUtils         instance of {@link CodePushPlatformUtils}.
@@ -134,12 +144,16 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
             @NonNull String deploymentKey,
             @NonNull Context context,
             boolean isDebugMode,
+            String baseDirectory,
             String serverUrl,
+            String appName,
+            String appVersion,
             CodePushPublicKeyProvider publicKeyProvider,
             CodePushAppEntryPointProvider appEntryPointProvider,
             CodePushPlatformUtils platformUtils
     ) throws CodePushInitializeException {
-        super(deploymentKey, context, isDebugMode, serverUrl, publicKeyProvider, appEntryPointProvider, platformUtils, null, null);
+        super(deploymentKey, context, null, null, isDebugMode, baseDirectory, serverUrl,
+                appName, appVersion, publicKeyProvider, appEntryPointProvider, platformUtils);
     }
 
     /**

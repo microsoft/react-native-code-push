@@ -12,6 +12,11 @@ public final class CodePushConstants {
     public static final String BINARY_MODIFIED_TIME_KEY = "binaryModifiedTime";
 
     /**
+     * Default app name if not provided when building CodePush instance.
+     */
+    public static final String CODE_PUSH_DEFAULT_APP_NAME = "CodePush";
+
+    /**
      * Root folder name inside each update.
      */
     public static final String CODE_PUSH_FOLDER_PREFIX = "CodePush";

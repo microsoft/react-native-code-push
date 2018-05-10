@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.google.gson.JsonSyntaxException;
+import com.microsoft.codepush.common.CodePushConfiguration;
 import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.CodePushStatusReportIdentifier;
 import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
@@ -30,6 +31,11 @@ public class SettingsManager {
      * Instance of {@link CodePushUtils} to work with.
      */
     private CodePushUtils mCodePushUtils;
+
+    /**
+     * Instance of {@link CodePushConfiguration} to work with.
+     */
+    private CodePushConfiguration mCodePushConfiguration;
 
     /**
      * Key for getting/storing info about failed CodePush updates.
@@ -61,10 +67,12 @@ public class SettingsManager {
      *
      * @param applicationContext current application context.
      * @param codePushUtils      instance of {@link CodePushUtils} to work with.
+     * @param codePushConfiguration instance of {@link CodePushConfiguration} to work with.
      */
-    public SettingsManager(Context applicationContext, CodePushUtils codePushUtils) {
-        mSettings = applicationContext.getSharedPreferences(CodePushConstants.CODE_PUSH_PREFERENCES, 0);
+    public SettingsManager(Context applicationContext, CodePushUtils codePushUtils, CodePushConfiguration codePushConfiguration) {
         mCodePushUtils = codePushUtils;
+        mCodePushConfiguration = codePushConfiguration;
+        mSettings = applicationContext.getSharedPreferences(CodePushConstants.CODE_PUSH_PREFERENCES, 0);
     }
 
     /**
@@ -75,7 +83,7 @@ public class SettingsManager {
      * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
     public ArrayList<CodePushPackage> getFailedUpdates() throws CodePushMalformedDataException {
-        String failedUpdatesString = mSettings.getString(FAILED_UPDATES_KEY, null);
+        String failedUpdatesString = mSettings.getString(getAppSpecificPrefix() + FAILED_UPDATES_KEY, null);
         if (failedUpdatesString == null) {
             return new ArrayList<>();
         }
@@ -85,7 +93,7 @@ public class SettingsManager {
 
             /* Unrecognized data format, clear and replace with expected format. */
             List<CodePushLocalPackage> emptyArray = new ArrayList<>();
-            mSettings.edit().putString(FAILED_UPDATES_KEY, mCodePushUtils.convertObjectToJsonString(emptyArray)).apply();
+            mSettings.edit().putString(getAppSpecificPrefix() + FAILED_UPDATES_KEY, mCodePushUtils.convertObjectToJsonString(emptyArray)).apply();
             throw new CodePushMalformedDataException("Unable to parse failed updates metadata " + failedUpdatesString + " stored in SharedPreferences", e);
         }
     }
@@ -97,7 +105,7 @@ public class SettingsManager {
      * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
     public CodePushPendingUpdate getPendingUpdate() throws CodePushMalformedDataException {
-        String pendingUpdateString = mSettings.getString(PENDING_UPDATE_KEY, null);
+        String pendingUpdateString = mSettings.getString(getAppSpecificPrefix() + PENDING_UPDATE_KEY, null);
         if (pendingUpdateString == null) {
             return null;
         }
@@ -145,14 +153,14 @@ public class SettingsManager {
      * Removes information about failed updates.
      */
     public void removeFailedUpdates() {
-        mSettings.edit().remove(FAILED_UPDATES_KEY).apply();
+        mSettings.edit().remove(getAppSpecificPrefix() + FAILED_UPDATES_KEY).apply();
     }
 
     /**
      * Removes information about the pending update.
      */
     public void removePendingUpdate() {
-        mSettings.edit().remove(PENDING_UPDATE_KEY).apply();
+        mSettings.edit().remove(getAppSpecificPrefix() + PENDING_UPDATE_KEY).apply();
     }
 
     /**
@@ -165,7 +173,7 @@ public class SettingsManager {
         ArrayList<CodePushPackage> failedUpdates = getFailedUpdates();
         failedUpdates.add(failedPackage);
         String failedUpdatesString = mCodePushUtils.convertObjectToJsonString(failedUpdates);
-        mSettings.edit().putString(FAILED_UPDATES_KEY, failedUpdatesString).apply();
+        mSettings.edit().putString(getAppSpecificPrefix() + FAILED_UPDATES_KEY, failedUpdatesString).apply();
     }
 
     /**
@@ -174,7 +182,7 @@ public class SettingsManager {
      * @param pendingUpdate instance of the {@link CodePushPendingUpdate}.
      */
     public void savePendingUpdate(CodePushPendingUpdate pendingUpdate) {
-        mSettings.edit().putString(PENDING_UPDATE_KEY, mCodePushUtils.convertObjectToJsonString(pendingUpdate)).apply();
+        mSettings.edit().putString(getAppSpecificPrefix() + PENDING_UPDATE_KEY, mCodePushUtils.convertObjectToJsonString(pendingUpdate)).apply();
     }
 
     /**
@@ -184,7 +192,7 @@ public class SettingsManager {
      * @throws JSONException if there was error of deserialization of report from json document.
      */
     public CodePushDeploymentStatusReport getStatusReportSavedForRetry() throws JSONException {
-        String retryStatusReportString = mSettings.getString(RETRY_DEPLOYMENT_REPORT_KEY, null);
+        String retryStatusReportString = mSettings.getString(getAppSpecificPrefix() + RETRY_DEPLOYMENT_REPORT_KEY, null);
         if (retryStatusReportString != null) {
             JSONObject retryStatusReport = new JSONObject(retryStatusReportString);
             return mCodePushUtils.convertJsonObjectToObject(retryStatusReport, CodePushDeploymentStatusReport.class);
@@ -200,14 +208,14 @@ public class SettingsManager {
      */
     public void saveStatusReportForRetry(CodePushDeploymentStatusReport statusReport) throws JSONException {
         JSONObject statusReportJSON = mCodePushUtils.convertObjectToJsonObject(statusReport);
-        mSettings.edit().putString(RETRY_DEPLOYMENT_REPORT_KEY, statusReportJSON.toString()).apply();
+        mSettings.edit().putString(getAppSpecificPrefix() + RETRY_DEPLOYMENT_REPORT_KEY, statusReportJSON.toString()).apply();
     }
 
     /**
      * Remove status report that was saved for retry of it's sending.
      */
     public void removeStatusReportSavedForRetry() {
-        mSettings.edit().remove(RETRY_DEPLOYMENT_REPORT_KEY).apply();
+        mSettings.edit().remove(getAppSpecificPrefix() + RETRY_DEPLOYMENT_REPORT_KEY).apply();
     }
 
     /**
@@ -216,7 +224,7 @@ public class SettingsManager {
      * @return previously saved status report identifier.
      */
     public CodePushStatusReportIdentifier getPreviousStatusReportIdentifier() {
-        String identifierString = mSettings.getString(LAST_DEPLOYMENT_REPORT_KEY, null);
+        String identifierString = mSettings.getString(getAppSpecificPrefix() + LAST_DEPLOYMENT_REPORT_KEY, null);
         if (identifierString != null) {
             return CodePushStatusReportIdentifier.fromString(identifierString);
         }
@@ -229,7 +237,15 @@ public class SettingsManager {
      * @param identifier identifier of already sent status report.
      */
     public void saveIdentifierOfReportedStatus(CodePushStatusReportIdentifier identifier) {
-        mSettings.edit().putString(LAST_DEPLOYMENT_REPORT_KEY, identifier.toString()).apply();
+        mSettings.edit().putString(getAppSpecificPrefix() + LAST_DEPLOYMENT_REPORT_KEY, identifier.toString()).apply();
     }
 
+    /**
+     * Returns app-specific prefix for preferences keys.
+     *
+     * @return preference key prefix to get app specific preferences
+     */
+    private String getAppSpecificPrefix() {
+        return mCodePushConfiguration != null ? mCodePushConfiguration.getAppName() + "-" : "";
+    }
 }

@@ -8,7 +8,12 @@ import com.microsoft.codepush.common.exceptions.CodePushIllegalArgumentException
 public final class CodePushConfiguration {
 
     /**
-     * Value of <code>versionName</code> parameter from <code>build.gradle</code>.
+     * Application name, if provided.
+     */
+    private String appName;
+
+    /**
+     * Semantic version for app for use when getting updates, if provided.
      */
     private String appVersion;
 
@@ -23,6 +28,11 @@ public final class CodePushConfiguration {
     private String deploymentKey;
 
     /**
+     * CodePush base directory, if provided.
+     */
+    private String baseDirectory;
+
+    /**
      * CodePush acquisition server URL.
      */
     private String serverUrl;
@@ -34,7 +44,16 @@ public final class CodePushConfiguration {
     private String packageHash;
 
     /**
-     * Get the appVersion value.
+     * Get the appName value. May not be set.
+     *
+     * @return appName value.
+     */
+    public String getAppName() {
+        return this.appName;
+    }
+
+    /**
+     * Get the appVersion value. May not be set.
      *
      * @return appVersion value.
      */
@@ -61,6 +80,15 @@ public final class CodePushConfiguration {
     }
 
     /**
+     * Get the baseDirectory value. May not be set.
+     *
+     * @return the baseDirectory value.
+     */
+    public String getBaseDirectory() {
+        return this.baseDirectory;
+    }
+
+    /**
      * Get the serverUrl value.
      *
      * @return the serverUrl value.
@@ -76,6 +104,21 @@ public final class CodePushConfiguration {
      */
     public String getPackageHash() {
         return this.packageHash;
+    }
+
+    /**
+     * Set the appName value.
+     *
+     * @param appName the appName value to set.
+     * @return this instance.
+     */
+    public CodePushConfiguration setAppName(final String appName) throws CodePushIllegalArgumentException {
+        if (appName != null) {
+            this.appName = appName;
+        } else {
+            throw new CodePushIllegalArgumentException(this.getClass().getName(), "appName");
+        }
+        return this;
     }
 
     /**
@@ -119,6 +162,21 @@ public final class CodePushConfiguration {
             this.deploymentKey = deploymentKey;
         } else {
             throw new CodePushIllegalArgumentException(this.getClass().getName(), "deploymentKey");
+        }
+        return this;
+    }
+
+    /**
+     * Set the baseDirectory value.
+     *
+     * @param baseDirectory the baseDirectory value to set.
+     * @return this instance.
+     */
+    public CodePushConfiguration setBaseDirectory(final String baseDirectory) throws CodePushIllegalArgumentException {
+        if (baseDirectory != null) {
+            this.baseDirectory = baseDirectory;
+        } else {
+            throw new CodePushIllegalArgumentException(this.getClass().getName(), "baseDirectory");
         }
         return this;
     }

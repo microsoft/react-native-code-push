@@ -2,6 +2,7 @@ package com.microsoft.codepush.common.managers;
 
 import com.microsoft.appcenter.utils.AppCenterLog;
 import com.microsoft.codepush.common.CodePush;
+import com.microsoft.codepush.common.CodePushConfiguration;
 import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.apirequests.ApiHttpRequest;
 import com.microsoft.codepush.common.datacontracts.CodePushDownloadPackageResult;
@@ -63,6 +64,11 @@ public class CodePushUpdateManager {
     private String mDocumentsDirectory;
 
     /**
+     * CodePush configuration for instance.
+     */
+    private CodePushConfiguration mCodePushConfiguration;
+
+    /**
      * Creates instance of CodePushUpdateManager.
      *
      * @param documentsDirectory  path for storing files.
@@ -70,13 +76,16 @@ public class CodePushUpdateManager {
      * @param fileUtils           instance of {@link FileUtils} to work with.
      * @param codePushUtils       instance of {@link CodePushUtils} to work with.
      * @param codePushUpdateUtils instance of {@link CodePushUpdateUtils} to work with.
+     * @param codePushConfiguration instance of {@link CodePushConfiguration} to work with.
      */
-    public CodePushUpdateManager(String documentsDirectory, CodePushPlatformUtils platformUtils, FileUtils fileUtils, CodePushUtils codePushUtils, CodePushUpdateUtils codePushUpdateUtils) {
+    public CodePushUpdateManager(String documentsDirectory, CodePushPlatformUtils platformUtils, FileUtils fileUtils,
+                                 CodePushUtils codePushUtils, CodePushUpdateUtils codePushUpdateUtils, CodePushConfiguration codePushConfiguration) {
         mPlatformUtils = platformUtils;
         mFileUtils = fileUtils;
         mCodePushUpdateUtils = codePushUpdateUtils;
         mCodePushUtils = codePushUtils;
         mDocumentsDirectory = documentsDirectory;
+        mCodePushConfiguration = codePushConfiguration;
     }
 
     /**
@@ -112,7 +121,7 @@ public class CodePushUpdateManager {
      * @return application-specific folder.
      */
     private String getCodePushPath() {
-        String codePushPath = mFileUtils.appendPathComponent(getDocumentsDirectory(), CodePushConstants.CODE_PUSH_FOLDER_PREFIX);
+        String codePushPath = mFileUtils.appendPathComponent(getDocumentsDirectory(), mCodePushConfiguration.getAppName());
         if (sTestConfigurationFlag) {
             codePushPath = mFileUtils.appendPathComponent(codePushPath, "TestPackages");
         }
@@ -410,8 +419,19 @@ public class CodePushUpdateManager {
     public void unzipPackage(File downloadFile) throws CodePushUnzipException {
         String unzippedFolderPath = getUnzippedFolderPath();
         try {
+            File unzippedFolder = new File(unzippedFolderPath);
             mFileUtils.unzipFile(downloadFile, new File(unzippedFolderPath));
             mFileUtils.deleteFileOrFolderSilently(downloadFile);
+
+            // Rename app package directory to match configured app name
+            for (File file : unzippedFolder.listFiles()) {
+                if (file.isDirectory()) {
+                    if (!file.renameTo(new File(unzippedFolder, mCodePushConfiguration.getAppName()))) {
+                        throw new IOException("Unable to rename package file.");
+                    }
+                    return;
+                }
+            }
         } catch (IOException e) {
             throw new CodePushUnzipException(e);
         }
@@ -487,7 +507,7 @@ public class CodePushUpdateManager {
     public void verifySignature(String stringPublicKey, String newUpdateHash, boolean isDiffUpdate) throws CodePushSignatureVerificationException {
         try {
             File packageFolder = new File(getCodePushPath(), newUpdateHash);
-            String newUpdateFolderPath = new File(packageFolder, "CodePush").getPath();
+            String newUpdateFolderPath = new File(packageFolder, mCodePushConfiguration.getAppName()).getPath();
             boolean isSignatureVerificationEnabled = (stringPublicKey != null);
             String signaturePath = mCodePushUpdateUtils.getJWTFilePath(newUpdateFolderPath);
             boolean isSignatureAppearedInApp = mFileUtils.fileAtPathExists(signaturePath);
