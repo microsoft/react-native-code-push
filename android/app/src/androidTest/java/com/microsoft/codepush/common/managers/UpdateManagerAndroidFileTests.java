@@ -2,6 +2,8 @@ package com.microsoft.codepush.common.managers;
 
 import android.os.Environment;
 
+import com.microsoft.codepush.common.CodePushConfiguration;
+import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.apirequests.ApiHttpRequest;
 import com.microsoft.codepush.common.apirequests.DownloadPackageTask;
 import com.microsoft.codepush.common.datacontracts.CodePushDownloadPackageResult;
@@ -59,7 +61,8 @@ public class UpdateManagerAndroidFileTests {
         FileUtils fileUtils = FileUtils.getInstance();
         CodePushUtils codePushUtils = CodePushUtils.getInstance(fileUtils);
         CodePushUpdateUtils codePushUpdateUtils = CodePushUpdateUtils.getInstance(fileUtils, codePushUtils);
-        recreateUpdateManager(fileUtils, codePushUtils, codePushUpdateUtils);
+        CodePushConfiguration codePushConfiguration = new CodePushConfiguration();
+        recreateUpdateManager(fileUtils, codePushUtils, codePushUpdateUtils, codePushConfiguration);
     }
 
     /**
@@ -69,8 +72,10 @@ public class UpdateManagerAndroidFileTests {
      * @param codePushUtils       mocked instance of {@link CodePushUtils}.
      * @param codePushUpdateUtils mocked instance of {@link CodePushUpdateUtils}.
      */
-    private void recreateUpdateManager(FileUtils fileUtils, CodePushUtils codePushUtils, CodePushUpdateUtils codePushUpdateUtils) {
-        codePushUpdateManager = new CodePushUpdateManager(new File(Environment.getExternalStorageDirectory(), "/Test").getPath(), mPlatformUtils, fileUtils, codePushUtils, codePushUpdateUtils);
+    private void recreateUpdateManager(FileUtils fileUtils, CodePushUtils codePushUtils, CodePushUpdateUtils codePushUpdateUtils,
+                                       CodePushConfiguration codePushConfiguration) {
+        codePushUpdateManager = new CodePushUpdateManager(new File(Environment.getExternalStorageDirectory(), "/Test").getPath(),
+                mPlatformUtils, fileUtils, codePushUtils, codePushUpdateUtils, codePushConfiguration);
     }
 
     /**
@@ -86,7 +91,9 @@ public class UpdateManagerAndroidFileTests {
         doReturn(true).when(fileUtils).fileAtPathExists(anyString());
         CodePushUtils codePushUtils = CodePushUtils.getInstance(fileUtils);
         CodePushUpdateUtils codePushUpdateUtils = CodePushUpdateUtils.getInstance(fileUtils, codePushUtils);
-        recreateUpdateManager(fileUtils, codePushUtils, codePushUpdateUtils);
+        CodePushConfiguration codePushConfiguration = new CodePushConfiguration();
+        codePushConfiguration.setAppName(CodePushConstants.CODE_PUSH_DEFAULT_APP_NAME);
+        recreateUpdateManager(fileUtils, codePushUtils, codePushUpdateUtils, codePushConfiguration);
         codePushUpdateManager.downloadPackage("", mock(ApiHttpRequest.class));
     }
 
@@ -101,7 +108,8 @@ public class UpdateManagerAndroidFileTests {
         doThrow(new IOException()).when(fileUtils).unzipFile(any(File.class), any(File.class));
         CodePushUtils codePushUtils = CodePushUtils.getInstance(fileUtils);
         CodePushUpdateUtils codePushUpdateUtils = CodePushUpdateUtils.getInstance(fileUtils, codePushUtils);
-        recreateUpdateManager(fileUtils, codePushUtils, codePushUpdateUtils);
+        CodePushConfiguration codePushConfiguration = new CodePushConfiguration();
+        recreateUpdateManager(fileUtils, codePushUtils, codePushUpdateUtils, codePushConfiguration);
         codePushUpdateManager = spy(codePushUpdateManager);
         doReturn("").when(codePushUpdateManager).getUnzippedFolderPath();
         codePushUpdateManager.unzipPackage(mock(File.class));
@@ -118,7 +126,9 @@ public class UpdateManagerAndroidFileTests {
         CodePushUpdateUtils codePushUpdateUtils = CodePushUpdateUtils.getInstance(fileUtils, codePushUtils);
         codePushUpdateUtils = spy(codePushUpdateUtils);
         doThrow(new IOException()).when(codePushUpdateUtils).verifyFolderHash(anyString(), anyString());
-        recreateUpdateManager(fileUtils, codePushUtils, codePushUpdateUtils);
+        CodePushConfiguration codePushConfiguration = new CodePushConfiguration();
+        codePushConfiguration.setAppName(CodePushConstants.CODE_PUSH_DEFAULT_APP_NAME);
+        recreateUpdateManager(fileUtils, codePushUtils, codePushUpdateUtils, codePushConfiguration);
         codePushUpdateManager.verifySignature(null, PACKAGE_HASH, true);
     }
 }

@@ -3,6 +3,7 @@ package com.microsoft.codepush.common.testutils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.microsoft.codepush.common.CodePushConfiguration;
 import com.microsoft.codepush.common.CodePushConstants;
 
 import org.json.JSONArray;
@@ -41,9 +42,9 @@ public class CommonSettingsCompatibilityUtils {
      * @param failedPackage {@link JSONObject} containing failed package.
      * @param context       application context.
      */
-    public static void saveFailedUpdate(JSONObject failedPackage, Context context) throws JSONException {
+    public static void saveFailedUpdate(CodePushConfiguration codePushConfiguration, JSONObject failedPackage, Context context) throws JSONException {
         SharedPreferences mSettings = context.getSharedPreferences(CodePushConstants.CODE_PUSH_PREFERENCES, 0);
-        String failedUpdatesString = mSettings.getString(FAILED_UPDATES_KEY, null);
+        String failedUpdatesString = mSettings.getString(getAppSpecificPrefix(codePushConfiguration) + FAILED_UPDATES_KEY, null);
         JSONArray failedUpdates;
         if (failedUpdatesString == null) {
             failedUpdates = new JSONArray();
@@ -51,7 +52,7 @@ public class CommonSettingsCompatibilityUtils {
             failedUpdates = new JSONArray(failedUpdatesString);
         }
         failedUpdates.put(failedPackage);
-        mSettings.edit().putString(FAILED_UPDATES_KEY, failedUpdates.toString()).commit();
+        mSettings.edit().putString(getAppSpecificPrefix(codePushConfiguration) + FAILED_UPDATES_KEY, failedUpdates.toString()).commit();
     }
 
     /**
@@ -61,12 +62,12 @@ public class CommonSettingsCompatibilityUtils {
      * @param isLoading   whether this update is loading.
      * @param context     application context.
      */
-    public static void savePendingUpdate(String packageHash, boolean isLoading, Context context) throws JSONException {
+    public static void savePendingUpdate(CodePushConfiguration codePushConfiguration, String packageHash, boolean isLoading, Context context) throws JSONException {
         SharedPreferences mSettings = context.getSharedPreferences(CodePushConstants.CODE_PUSH_PREFERENCES, 0);
         JSONObject pendingUpdate = new JSONObject();
         pendingUpdate.put(PENDING_UPDATE_HASH_KEY, packageHash);
         pendingUpdate.put(PENDING_UPDATE_IS_LOADING_KEY, isLoading);
-        mSettings.edit().putString(PENDING_UPDATE_KEY, pendingUpdate.toString()).commit();
+        mSettings.edit().putString(getAppSpecificPrefix(codePushConfiguration) + PENDING_UPDATE_KEY, pendingUpdate.toString()).commit();
     }
 
     /**
@@ -75,9 +76,9 @@ public class CommonSettingsCompatibilityUtils {
      * @param fakeString string to be saved.
      * @param context    application context.
      */
-    public static void saveStringToPending(String fakeString, Context context) {
+    public static void saveStringToPending(CodePushConfiguration codePushConfiguration, String fakeString, Context context) {
         SharedPreferences mSettings = context.getSharedPreferences(CodePushConstants.CODE_PUSH_PREFERENCES, 0);
-        mSettings.edit().putString(PENDING_UPDATE_KEY, fakeString).commit();
+        mSettings.edit().putString(getAppSpecificPrefix(codePushConfiguration) + PENDING_UPDATE_KEY, fakeString).commit();
     }
 
     /**
@@ -86,8 +87,17 @@ public class CommonSettingsCompatibilityUtils {
      * @param fakeString string to be saved.
      * @param context    application context.
      */
-    public static void saveStringToFailed(String fakeString, Context context) {
+    public static void saveStringToFailed(CodePushConfiguration codePushConfiguration, String fakeString, Context context) {
         SharedPreferences mSettings = context.getSharedPreferences(CodePushConstants.CODE_PUSH_PREFERENCES, 0);
-        mSettings.edit().putString(FAILED_UPDATES_KEY, fakeString).commit();
+        mSettings.edit().putString(getAppSpecificPrefix(codePushConfiguration) + FAILED_UPDATES_KEY, fakeString).commit();
+    }
+
+    /**
+     * Returns app-specific prefix for preferences keys.
+     *
+     * @return preference key prefix to get app specific preferences
+     */
+    private static String getAppSpecificPrefix(CodePushConfiguration codePushConfiguration) {
+        return codePushConfiguration != null ? codePushConfiguration.getAppName() + "-" : "";
     }
 }

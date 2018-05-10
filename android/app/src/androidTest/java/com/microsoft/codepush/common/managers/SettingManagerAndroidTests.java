@@ -3,6 +3,7 @@ package com.microsoft.codepush.common.managers;
 import android.support.test.InstrumentationRegistry;
 
 import com.google.gson.JsonSyntaxException;
+import com.microsoft.codepush.common.CodePushConfiguration;
 import com.microsoft.codepush.common.CodePushStatusReportIdentifier;
 import com.microsoft.codepush.common.datacontracts.CodePushDeploymentStatusReport;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
@@ -29,6 +30,7 @@ public class SettingManagerAndroidTests {
     private final static String DEPLOYMENT_KEY = "ABC123";
     private final static String LABEL = "awesome package";
     private final static boolean FAILED_INSTALL = false;
+    private final static String APP_NAME = "app";
     private final static String APP_VERSION = "2.2.1";
     private final static String DESCRIPTION = "short description";
     private final static boolean IS_MANDATORY = true;
@@ -40,6 +42,11 @@ public class SettingManagerAndroidTests {
     private CodePushUtils mCodePushUtils;
 
     /**
+     * Instance of {@link CodePushConfiguration} to work with.
+     */
+    private CodePushConfiguration mCodePushConfiguration;
+
+    /**
      * Instance of {@link SettingsManager} to work with.
      */
     private SettingsManager mSettingsManager;
@@ -47,7 +54,9 @@ public class SettingManagerAndroidTests {
     @Before
     public void setUp() throws Exception {
         mCodePushUtils = CodePushUtils.getInstance(FileUtils.getInstance());
-        mSettingsManager = new SettingsManager(InstrumentationRegistry.getContext(), mCodePushUtils);
+        mCodePushConfiguration = new CodePushConfiguration();
+        mCodePushConfiguration.setAppName(APP_NAME);
+        mSettingsManager = new SettingsManager(InstrumentationRegistry.getContext(), mCodePushUtils, mCodePushConfiguration);
     }
 
     /**
@@ -55,10 +64,10 @@ public class SettingManagerAndroidTests {
      */
     @Test
     public void pendingUpdateCompatibilityTest() throws Exception {
-        CommonSettingsCompatibilityUtils.savePendingUpdate(PACKAGE_HASH, true, InstrumentationRegistry.getContext());
+        CommonSettingsCompatibilityUtils.savePendingUpdate(mCodePushConfiguration, PACKAGE_HASH, false, InstrumentationRegistry.getContext());
         CodePushPendingUpdate codePushPendingUpdate = mSettingsManager.getPendingUpdate();
         assertEquals(codePushPendingUpdate.getPendingUpdateHash(), PACKAGE_HASH);
-        assertEquals(codePushPendingUpdate.isPendingUpdateLoading(), true);
+        assertEquals(codePushPendingUpdate.isPendingUpdateLoading(), false);
         assertTrue(mSettingsManager.isPendingUpdate(PACKAGE_HASH));
         assertFalse(mSettingsManager.isPendingUpdate(""));
         assertTrue(mSettingsManager.isPendingUpdate(null));
@@ -76,7 +85,7 @@ public class SettingManagerAndroidTests {
         codePushPendingUpdate = mSettingsManager.getPendingUpdate();
         assertEquals(codePushPendingUpdate.getPendingUpdateHash(), PACKAGE_HASH);
         assertEquals(codePushPendingUpdate.isPendingUpdateLoading(), false);
-        assertFalse(mSettingsManager.isPendingUpdate(PACKAGE_HASH));
+        assertTrue(mSettingsManager.isPendingUpdate(PACKAGE_HASH));
     }
 
     /**
@@ -95,7 +104,7 @@ public class SettingManagerAndroidTests {
      */
     @Test(expected = CodePushMalformedDataException.class)
     public void pendingUpdateParseError() throws Exception {
-        CommonSettingsCompatibilityUtils.saveStringToPending("abc", InstrumentationRegistry.getContext());
+        CommonSettingsCompatibilityUtils.saveStringToPending(mCodePushConfiguration, "abc", InstrumentationRegistry.getContext());
         mSettingsManager.getPendingUpdate();
     }
 
@@ -116,12 +125,12 @@ public class SettingManagerAndroidTests {
     public void failedUpdateCompatibilityTest() throws Exception {
         mSettingsManager.removeFailedUpdates();
         CodePushPackage codePushLocalPackage = createPackage(PACKAGE_HASH);
-        CommonSettingsCompatibilityUtils.saveFailedUpdate(mCodePushUtils.convertObjectToJsonObject(codePushLocalPackage), InstrumentationRegistry.getContext());
+        CommonSettingsCompatibilityUtils.saveFailedUpdate(mCodePushConfiguration, mCodePushUtils.convertObjectToJsonObject(codePushLocalPackage), InstrumentationRegistry.getContext());
         List<CodePushPackage> codePushLocalPackages = mSettingsManager.getFailedUpdates();
         codePushLocalPackage = codePushLocalPackages.get(0);
         assertEquals(codePushLocalPackage.getDeploymentKey(), DEPLOYMENT_KEY);
         codePushLocalPackage = createLocalPackage("123");
-        CommonSettingsCompatibilityUtils.saveFailedUpdate(mCodePushUtils.convertObjectToJsonObject(codePushLocalPackage), InstrumentationRegistry.getContext());
+        CommonSettingsCompatibilityUtils.saveFailedUpdate(mCodePushConfiguration, mCodePushUtils.convertObjectToJsonObject(codePushLocalPackage), InstrumentationRegistry.getContext());
         codePushLocalPackages = mSettingsManager.getFailedUpdates();
         codePushLocalPackage = codePushLocalPackages.get(1);
         assertEquals(codePushLocalPackage.getPackageHash(), "123");
@@ -182,7 +191,7 @@ public class SettingManagerAndroidTests {
      */
     @Test(expected = CodePushMalformedDataException.class)
     public void failedUpdateParseError() throws Exception {
-        CommonSettingsCompatibilityUtils.saveStringToFailed("abc", InstrumentationRegistry.getContext());
+        CommonSettingsCompatibilityUtils.saveStringToFailed(mCodePushConfiguration, "abc", InstrumentationRegistry.getContext());
         mSettingsManager.getFailedUpdates();
     }
 

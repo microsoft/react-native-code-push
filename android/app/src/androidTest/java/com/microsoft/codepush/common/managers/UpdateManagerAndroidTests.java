@@ -2,6 +2,7 @@ package com.microsoft.codepush.common.managers;
 
 import android.os.Environment;
 
+import com.microsoft.codepush.common.CodePushConfiguration;
 import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.apirequests.ApiHttpRequest;
 import com.microsoft.codepush.common.apirequests.DownloadPackageTask;
@@ -116,7 +117,11 @@ public class UpdateManagerAndroidTests {
         mFileUtils = FileUtils.getInstance();
         mCodePushUtils = CodePushUtils.getInstance(mFileUtils);
         CodePushUpdateUtils codePushUpdateUtils = CodePushUpdateUtils.getInstance(mFileUtils, mCodePushUtils);
-        codePushUpdateManager = new CodePushUpdateManager(Environment.getExternalStorageDirectory().getPath(), platformUtils, mFileUtils, mCodePushUtils, codePushUpdateUtils);
+        CodePushConfiguration codePushConfiguration = new CodePushConfiguration();
+        codePushConfiguration.setBaseDirectory(Environment.getExternalStorageDirectory().getPath());
+        codePushConfiguration.setAppName(CodePushConstants.CODE_PUSH_FOLDER_PREFIX);
+        codePushConfiguration.setAppVersion("1.2");
+        codePushUpdateManager = new CodePushUpdateManager(Environment.getExternalStorageDirectory().getPath(), platformUtils, mFileUtils, mCodePushUtils, codePushUpdateUtils, codePushConfiguration);
         CodePushPackage codePushPackage = new CodePushPackage();
         codePushPackage.setAppVersion("1.2");
         codePushPackage.setPackageHash(FULL_PACKAGE_HASH);

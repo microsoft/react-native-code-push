@@ -2,6 +2,7 @@ package com.microsoft.codepush.common.managers;
 
 import android.os.Environment;
 
+import com.microsoft.codepush.common.CodePushConfiguration;
 import com.microsoft.codepush.common.apirequests.ApiHttpRequest;
 import com.microsoft.codepush.common.apirequests.DownloadPackageTask;
 import com.microsoft.codepush.common.datacontracts.CodePushDownloadPackageResult;
@@ -36,9 +37,11 @@ public class UpdateManagerUnitTests {
         FileUtils fileUtils = FileUtils.getInstance();
         CodePushUtils codePushUtils = CodePushUtils.getInstance(fileUtils);
         CodePushUpdateUtils codePushUpdateUtils = CodePushUpdateUtils.getInstance(fileUtils, codePushUtils);
+        CodePushConfiguration codePushConfiguration = new CodePushConfiguration();
+        codePushConfiguration.setAppName("Test");
         CodePushUpdateManager codePushUpdateManager = new CodePushUpdateManager(new File(Environment.getExternalStorageDirectory(), "/Test").getPath(),
                 CommonTestPlatformUtils.getInstance(),
-                fileUtils, codePushUtils, codePushUpdateUtils);
+                fileUtils, codePushUtils, codePushUpdateUtils, codePushConfiguration);
         codePushUpdateManager = spy(codePushUpdateManager);
         doReturn(new File(Environment.getExternalStorageDirectory(), "/Test/HASH").getPath()).when(codePushUpdateManager).getPackageFolderPath(anyString());
         DownloadPackageTask packageDownloader = mock(DownloadPackageTask.class, CALLS_REAL_METHODS);

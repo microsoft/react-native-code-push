@@ -19,6 +19,8 @@ public class ConfigurationUnitTests {
     private final static String CLIENT_UNIQUE_ID = "YHFv65";
     private final static String DEPLOYMENT_KEY = "ABC123";
     private final static String APP_VERSION = "2.2.1";
+    private final static String APP_NAME = "APP";
+    private final static String BASE_DIR = "/directory";
     private final static String PACKAGE_HASH = "HASH";
     private final static String SERVER_URL = "https";
 
@@ -31,15 +33,19 @@ public class ConfigurationUnitTests {
     public void correctConfigurationTest() throws Exception {
         CodePushConfiguration correctConfig = new CodePushConfiguration();
         correctConfig.setAppVersion(APP_VERSION)
+                .setAppName(APP_NAME)
                 .setClientUniqueId(CLIENT_UNIQUE_ID)
                 .setDeploymentKey(DEPLOYMENT_KEY)
                 .setPackageHash(PACKAGE_HASH)
-                .setServerUrl(SERVER_URL);
+                .setServerUrl(SERVER_URL)
+                .setBaseDirectory(BASE_DIR);
         assertEquals(APP_VERSION, correctConfig.getAppVersion());
+        assertEquals(APP_NAME, correctConfig.getAppName());
         assertEquals(CLIENT_UNIQUE_ID, correctConfig.getClientUniqueId());
         assertEquals(DEPLOYMENT_KEY, correctConfig.getDeploymentKey());
         assertEquals(PACKAGE_HASH, correctConfig.getPackageHash());
         assertEquals(SERVER_URL, correctConfig.getServerUrl());
+        assertEquals(BASE_DIR, correctConfig.getBaseDirectory());
 
         /* Package hash can be null. */
         correctConfig.setPackageHash(null);
@@ -50,6 +56,12 @@ public class ConfigurationUnitTests {
     public void wrongConfigurationAppVersionNull() throws Exception {
         CodePushConfiguration wrongConfig = new CodePushConfiguration();
         wrongConfig.setAppVersion(null);
+    }
+
+    @Test(expected = CodePushIllegalArgumentException.class)
+    public void wrongConfigurationAppNameNull() throws Exception {
+        CodePushConfiguration wrongConfig = new CodePushConfiguration();
+        wrongConfig.setAppName(null);
     }
 
     @Test(expected = CodePushIllegalArgumentException.class)
@@ -68,5 +80,11 @@ public class ConfigurationUnitTests {
     public void wrongConfigurationServerUrlNull() throws Exception {
         CodePushConfiguration wrongConfig = new CodePushConfiguration();
         wrongConfig.setServerUrl(null);
+    }
+
+    @Test(expected = CodePushIllegalArgumentException.class)
+    public void wrongConfigurationBaseDirectoryNull() throws Exception {
+        CodePushConfiguration wrongConfig = new CodePushConfiguration();
+        wrongConfig.setBaseDirectory(null);
     }
 }
