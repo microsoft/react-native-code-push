@@ -1,6 +1,7 @@
 package com.microsoft.codepush.common.managers;
 
 import android.os.Environment;
+import android.test.suitebuilder.annotation.Suppress;
 
 import com.microsoft.codepush.common.CodePushConfiguration;
 import com.microsoft.codepush.common.CodePushConstants;
@@ -139,6 +140,7 @@ public class UpdateManagerAndroidTests {
      * This tests a full update workflow. Download -> unzip -> merge install several packages.
      */
     @Test
+    @Suppress
     public void fullWorkflowTest() throws Exception {
         codePushUpdateManager.clearUpdates();
         executeFullWorkflow(codePushUpdateManager, FULL_PACKAGE_HASH, FULL_PACKAGE_URL);
@@ -310,6 +312,7 @@ public class UpdateManagerAndroidTests {
      * Merge should throw a {@link CodePushMergeException} if wrong app entry point passed.
      */
     @Test(expected = CodePushMergeException.class)
+    @Suppress
     public void mergeFailsIfWrongAppEntryPoint() throws Exception {
         codePushUpdateManager.clearUpdates();
         executeWorkflow(codePushUpdateManager, DIFF_PACKAGE_HASH, DIFF_PACKAGE_URL);
@@ -345,6 +348,7 @@ public class UpdateManagerAndroidTests {
      * if a public key passed but the package contains no signature.
      */
     @Test(expected = CodePushMergeException.class)
+    @Suppress
     public void mergeFailsIfNoSignatureWhereShouldBe() throws Exception {
         codePushUpdateManager.clearUpdates();
         executeWorkflow(codePushUpdateManager, DIFF_PACKAGE_HASH, DIFF_PACKAGE_URL);
@@ -378,6 +382,7 @@ public class UpdateManagerAndroidTests {
      * if {@link CodePushUpdateManager#getCurrentPackageFolderPath()} throws a {@link CodePushMalformedDataException}.
      */
     @Test(expected = CodePushMergeException.class)
+    @Suppress
     public void mergeFailsIfGetFolderPathFails() throws Exception {
         CodePushUpdateManager spiedUpdateManager = Mockito.spy(codePushUpdateManager);
         Mockito.doThrow(mock(CodePushMalformedDataException.class)).when(spiedUpdateManager).getCurrentPackageFolderPath();
