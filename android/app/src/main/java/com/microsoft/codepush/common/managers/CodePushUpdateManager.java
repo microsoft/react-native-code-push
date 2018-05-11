@@ -420,7 +420,7 @@ public class CodePushUpdateManager {
         String unzippedFolderPath = getUnzippedFolderPath();
         try {
             File unzippedFolder = new File(unzippedFolderPath);
-            mFileUtils.unzipFile(downloadFile, new File(unzippedFolderPath));
+            mFileUtils.unzipFile(downloadFile, unzippedFolder);
             mFileUtils.deleteFileOrFolderSilently(downloadFile);
 
             // Rename app package directory to match configured app name

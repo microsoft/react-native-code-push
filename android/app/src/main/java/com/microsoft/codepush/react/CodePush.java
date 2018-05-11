@@ -57,6 +57,178 @@ public class CodePush implements ReactPackage, Serializable {
     }
 
     /**
+     * @deprecated use {@link #builder} instead
+     */
+    @Deprecated
+    public CodePush(String deploymentKey, Context context) throws CodePushInitializeException {
+        this(deploymentKey, context, false);
+    }
+
+    /**
+     * @deprecated use {@link #builder} instead
+     */
+    @Deprecated
+    public CodePush(String deploymentKey, Context context, boolean isDebugMode) throws CodePushInitializeException {
+        try {
+            mReactNativeCore = new CodePushReactNativeCore(
+                    deploymentKey,
+                    context,
+                    isDebugMode,
+                    null,
+                    null,
+                    null,
+                    null,
+                    new CodePushReactPublicKeyProvider(null, context),
+                    new CodePushReactAppEntryPointProvider(null),
+                    ReactPlatformUtils.getInstance());
+        } catch (CodePushInitializeException e) {
+            trackException(e);
+            throw e;
+        }
+    }
+
+    /**
+     * @deprecated use {@link #builder} instead
+     */
+    @Deprecated
+    public CodePush(String deploymentKey, Application application, boolean isDebugMode, String appSecret) throws CodePushInitializeException {
+        try {
+            mReactNativeCore = new CodePushReactNativeCore(
+                    deploymentKey,
+                    application,
+                    appSecret,
+                    isDebugMode,
+                    null,
+                    null,
+                    null,
+                    null,
+                    new CodePushReactPublicKeyProvider(null, application.getApplicationContext()),
+                    new CodePushReactAppEntryPointProvider(null),
+                    ReactPlatformUtils.getInstance());
+        } catch (CodePushInitializeException e) {
+            trackException(e);
+            throw e;
+        }
+    }
+
+    /**
+     * @deprecated use {@link #builder} instead
+     */
+    @Deprecated
+    public CodePush(String deploymentKey, Context context, boolean isDebugMode, String serverUrl) throws CodePushInitializeException {
+        try {
+            mReactNativeCore = new CodePushReactNativeCore(
+                    deploymentKey,
+                    context,
+                    isDebugMode,
+                    null,
+                    serverUrl,
+                    null,
+                    null,
+                    new CodePushReactPublicKeyProvider(null, context),
+                    new CodePushReactAppEntryPointProvider(null),
+                    ReactPlatformUtils.getInstance());
+        } catch (CodePushInitializeException e) {
+            trackException(e);
+            throw e;
+        }
+    }
+
+    /**
+     * @deprecated use {@link #builder} instead
+     */
+    @Deprecated
+    public CodePush(String deploymentKey, Application application, boolean isDebugMode, String serverUrl, String appSecret) throws CodePushInitializeException {
+        try {
+            mReactNativeCore = new CodePushReactNativeCore(
+                    deploymentKey,
+                    application,
+                    appSecret,
+                    isDebugMode,
+                    null,
+                    serverUrl,
+                    null,
+                    null,
+                    new CodePushReactPublicKeyProvider(null, application.getApplicationContext()),
+                    new CodePushReactAppEntryPointProvider(null),
+                    ReactPlatformUtils.getInstance());
+        } catch (CodePushInitializeException e) {
+            trackException(e);
+            throw e;
+        }
+    }
+
+    /**
+     * @deprecated use {@link #builder} instead
+     */
+    @Deprecated
+    public CodePush(String deploymentKey, Context context, boolean isDebugMode, int publicKeyResourceDescriptor) throws CodePushInitializeException {
+        try {
+            mReactNativeCore = new CodePushReactNativeCore(
+                    deploymentKey,
+                    context,
+                    isDebugMode,
+                    null,
+                    null,
+                    null,
+                    null,
+                    new CodePushReactPublicKeyProvider(publicKeyResourceDescriptor, context),
+                    new CodePushReactAppEntryPointProvider(null),
+                    ReactPlatformUtils.getInstance());
+        } catch (CodePushInitializeException e) {
+            trackException(e);
+            throw e;
+        }
+    }
+
+    /**
+     * @deprecated use {@link #builder} instead
+     */
+    @Deprecated
+    public CodePush(String deploymentKey, Context context, boolean isDebugMode, @NonNull String serverUrl, Integer publicKeyResourceDescriptor) throws CodePushInitializeException {
+        try {
+            mReactNativeCore = new CodePushReactNativeCore(
+                    deploymentKey,
+                    context,
+                    isDebugMode,
+                    null,
+                    serverUrl,
+                    null,
+                    null,
+                    new CodePushReactPublicKeyProvider(publicKeyResourceDescriptor, context),
+                    new CodePushReactAppEntryPointProvider(null),
+                    ReactPlatformUtils.getInstance());
+        } catch (CodePushInitializeException e) {
+            trackException(e);
+            throw e;
+        }
+    }
+
+    /**
+     * @deprecated use {@link #builder} instead
+     */
+    @Deprecated
+    public CodePush(String deploymentKey, Application application, boolean isDebugMode, @NonNull String serverUrl, String appSecret, Integer publicKeyResourceDescriptor) throws CodePushInitializeException {
+        try {
+            mReactNativeCore = new CodePushReactNativeCore(
+                    deploymentKey,
+                    application,
+                    appSecret,
+                    isDebugMode,
+                    null,
+                    serverUrl,
+                    null,
+                    null,
+                    new CodePushReactPublicKeyProvider(publicKeyResourceDescriptor, application.getApplicationContext()),
+                    new CodePushReactAppEntryPointProvider(null),
+                    ReactPlatformUtils.getInstance());
+        } catch (CodePushInitializeException e) {
+            trackException(e);
+            throw e;
+        }
+    }
+
+    /**
      * Creates instance of {@link CodePush} for those who want to track exceptions (includes additional parameters).
      *
      * @param deploymentKey               application deployment key.
