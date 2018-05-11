@@ -265,7 +265,7 @@ public abstract class CodePushBaseCore {
         } catch (CodePushNativeApiCallException e) {
             throw new CodePushInitializeException("Unable to get native configuration for " + mContext.getPackageName(), e);
         }
-        CodePushUpdateManager updateManager = new CodePushUpdateManager(baseDirectory, platformUtils, fileUtils, utils, updateUtils, configuration);
+        CodePushUpdateManager updateManager = new CodePushUpdateManager(mBaseDirectory, platformUtils, fileUtils, utils, updateUtils, configuration);
         final SettingsManager settingsManager = new SettingsManager(mContext, utils, configuration);
         CodePushTelemetryManager telemetryManager = new CodePushTelemetryManager(settingsManager);
         CodePushRestartManager restartManager = new CodePushRestartManager(new CodePushRestartHandler() {
