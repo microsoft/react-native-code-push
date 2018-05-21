@@ -262,7 +262,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                     e.printStackTrace();
                     mSettingsManager.saveFailedUpdate(CodePushUtils.convertReadableToJsonObject(updatePackage));
                     promise.reject(e);
-                } catch (Exception e) {
+                } catch (CodePushUnknownException e) {
                     e.printStackTrace();
                     promise.reject(e);
                 }
@@ -289,7 +289,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             }
 
             promise.resolve(configMap);
-        } catch(Exception e) {
+        } catch(CodePushUnknownException e) {
             e.printStackTrace();
             promise.reject(e);
         }
@@ -346,7 +346,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                         CodePushUtils.setJSONValueForKey(currentPackage, "isPending", currentUpdateIsPending);
                         promise.resolve(CodePushUtils.convertJsonObjectToWritable(currentPackage));
                     }
-                } catch(Exception e) {
+                } catch(CodePushUnknownException e) {
                     e.printStackTrace();
                     promise.reject(e);
                 }
@@ -404,7 +404,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                     }
 
                     promise.resolve("");
-                } catch(Exception e) {
+                } catch(CodePushUnknownException e) {
                     e.printStackTrace();
                     promise.reject(e);
                 }
@@ -491,7 +491,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                     }
 
                     promise.resolve("");
-                } catch(Exception e) {
+                } catch(CodePushUnknownException e) {
                     e.printStackTrace();
                     promise.reject(e);
                 }
@@ -507,7 +507,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
     public void isFailedUpdate(String packageHash, Promise promise) {
         try {
             promise.resolve(mSettingsManager.isFailedHash(packageHash));
-        } catch(Exception e) {
+        } catch(CodePushUnknownException e) {
             e.printStackTrace();
             promise.reject(e);
         }
@@ -521,7 +521,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                     && packageHash.length() > 0
                     && packageHash.equals(mUpdateManager.getCurrentPackageHash());
             promise.resolve(isFirstRun);
-        } catch(Exception e) {
+        } catch(CodePushUnknownException e) {
             e.printStackTrace();
             promise.reject(e);
         }
@@ -532,7 +532,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         try {
             mSettingsManager.removePendingUpdate();
             promise.resolve("");
-        } catch(Exception e) {
+        } catch(CodePushUnknownException e) {
             e.printStackTrace();
             promise.reject(e);
         }
@@ -542,7 +542,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
     public void recordStatusReported(ReadableMap statusReport) {
         try {
             mTelemetryManager.recordStatusReported(statusReport);
-        } catch(Exception e) {
+        } catch(CodePushUnknownException e) {
             e.printStackTrace();
         }
     }
@@ -559,7 +559,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             }
 
             promise.resolve(false);
-        } catch(Exception e) {
+        } catch(CodePushUnknownException e) {
             e.printStackTrace();
             promise.reject(e);
         }
@@ -569,7 +569,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
     public void saveStatusReportForRetry(ReadableMap statusReport) {
         try {
             mTelemetryManager.saveStatusReportForRetry(statusReport);
-        } catch(Exception e) {
+        } catch(CodePushUnknownException e) {
             e.printStackTrace();
         }
     }
@@ -586,7 +586,9 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                     throw new CodePushUnknownException("Unable to replace current bundle", e);
                 }
             }
-        } catch(Exception e) {
+        } catch(CodePushUnknownException e) {
+            e.printStackTrace();
+        } catch(CodePushMalformedDataException e) {
             e.printStackTrace();
         }
     }
