@@ -57,16 +57,20 @@ public class CodePushDialog extends ReactContextBaseJavaModule{
         DialogInterface.OnClickListener clickListener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-                switch (which) {
-                    case DialogInterface.BUTTON_POSITIVE:
-                        successCallback.invoke(0);
-                        break;
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        successCallback.invoke(1);
-                        break;
-                    default:
-                        throw new CodePushUnknownException("Unknown button ID pressed.");
+                try {
+                    dialog.cancel();
+                    switch (which) {
+                        case DialogInterface.BUTTON_POSITIVE:
+                            successCallback.invoke(0);
+                            break;
+                        case DialogInterface.BUTTON_NEGATIVE:
+                            successCallback.invoke(1);
+                            break;
+                        default:
+                            throw new CodePushUnknownException("Unknown button ID pressed.");
+                    }
+                } catch (Throwable e) {
+                    CodePushUtils.log(e);
                 }
             }
         };
