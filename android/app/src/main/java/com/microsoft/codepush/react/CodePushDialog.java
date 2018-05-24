@@ -20,7 +20,7 @@ public class CodePushDialog extends ReactContextBaseJavaModule{
     public void showDialog(final String title, final String message, final String button1Text,
                            final String button2Text, final Callback successCallback, Callback errorCallback) {
         Activity currentActivity = getCurrentActivity();
-        if (currentActivity == null) {
+        if (currentActivity == null || currentActivity.isFinishing()) {
             // If getCurrentActivity is null, it could be because the app is backgrounded,
             // so we show the dialog when the app resumes)
             getReactApplicationContext().addLifecycleEventListener(new LifecycleEventListener() {
@@ -57,16 +57,20 @@ public class CodePushDialog extends ReactContextBaseJavaModule{
         DialogInterface.OnClickListener clickListener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-                switch (which) {
-                    case DialogInterface.BUTTON_POSITIVE:
-                        successCallback.invoke(0);
-                        break;
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        successCallback.invoke(1);
-                        break;
-                    default:
-                        throw new CodePushUnknownException("Unknown button ID pressed.");
+                try {
+                    dialog.cancel();
+                    switch (which) {
+                        case DialogInterface.BUTTON_POSITIVE:
+                            successCallback.invoke(0);
+                            break;
+                        case DialogInterface.BUTTON_NEGATIVE:
+                            successCallback.invoke(1);
+                            break;
+                        default:
+                            throw new CodePushUnknownException("Unknown button ID pressed.");
+                    }
+                } catch (Throwable e) {
+                    CodePushUtils.log(e);
                 }
             }
         };
