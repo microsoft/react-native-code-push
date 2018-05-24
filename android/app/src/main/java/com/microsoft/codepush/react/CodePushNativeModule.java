@@ -255,14 +255,11 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
 
                     JSONObject newPackage = mUpdateManager.getPackage(CodePushUtils.tryGetString(updatePackage, CodePushConstants.PACKAGE_HASH_KEY));
                     promise.resolve(CodePushUtils.convertJsonObjectToWritable(newPackage));
-                } catch (IOException e) {
-                    CodePushUtils.log(e);
-                    promise.reject(e);
                 } catch (CodePushInvalidUpdateException e) {
                     CodePushUtils.log(e);
                     mSettingsManager.saveFailedUpdate(CodePushUtils.convertReadableToJsonObject(updatePackage));
                     promise.reject(e);
-                } catch (CodePushUnknownException e) {
+                } catch (IOException | CodePushUnknownException e) {
                     CodePushUtils.log(e);
                     promise.reject(e);
                 }
@@ -586,9 +583,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                     throw new CodePushUnknownException("Unable to replace current bundle", e);
                 }
             }
-        } catch(CodePushUnknownException e) {
-            CodePushUtils.log(e);
-        } catch(CodePushMalformedDataException e) {
+        } catch(CodePushUnknownException | CodePushMalformedDataException e) {
             CodePushUtils.log(e);
         }
     }
