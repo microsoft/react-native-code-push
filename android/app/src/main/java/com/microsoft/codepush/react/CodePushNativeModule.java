@@ -255,12 +255,12 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
 
                     JSONObject newPackage = mUpdateManager.getPackage(CodePushUtils.tryGetString(updatePackage, CodePushConstants.PACKAGE_HASH_KEY));
                     promise.resolve(CodePushUtils.convertJsonObjectToWritable(newPackage));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    promise.reject(e);
                 } catch (CodePushInvalidUpdateException e) {
-                    e.printStackTrace();
+                    CodePushUtils.log(e);
                     mSettingsManager.saveFailedUpdate(CodePushUtils.convertReadableToJsonObject(updatePackage));
+                    promise.reject(e);
+                } catch (IOException | CodePushUnknownException e) {
+                    CodePushUtils.log(e);
                     promise.reject(e);
                 }
 
@@ -273,18 +273,23 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void getConfiguration(Promise promise) {
-        WritableMap configMap =  Arguments.createMap();
-        configMap.putString("appVersion", mCodePush.getAppVersion());
-        configMap.putString("clientUniqueId", mClientUniqueId);
-        configMap.putString("deploymentKey", mCodePush.getDeploymentKey());
-        configMap.putString("serverUrl", mCodePush.getServerUrl());
+        try {
+            WritableMap configMap =  Arguments.createMap();
+            configMap.putString("appVersion", mCodePush.getAppVersion());
+            configMap.putString("clientUniqueId", mClientUniqueId);
+            configMap.putString("deploymentKey", mCodePush.getDeploymentKey());
+            configMap.putString("serverUrl", mCodePush.getServerUrl());
 
-        // The binary hash may be null in debug builds
-        if (mBinaryContentsHash != null) {
-            configMap.putString(CodePushConstants.PACKAGE_HASH_KEY, mBinaryContentsHash);
+            // The binary hash may be null in debug builds
+            if (mBinaryContentsHash != null) {
+                configMap.putString(CodePushConstants.PACKAGE_HASH_KEY, mBinaryContentsHash);
+            }
+
+            promise.resolve(configMap);
+        } catch(CodePushUnknownException e) {
+            CodePushUtils.log(e);
+            promise.reject(e);
         }
-
-        promise.resolve(configMap);
     }
 
     @ReactMethod
@@ -292,50 +297,55 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                JSONObject currentPackage = mUpdateManager.getCurrentPackage();
+                try {
+                    JSONObject currentPackage = mUpdateManager.getCurrentPackage();
 
-                if (currentPackage == null) {
-                    promise.resolve(null);
-                    return null;
-                }
-
-                Boolean currentUpdateIsPending = false;
-
-                if (currentPackage.has(CodePushConstants.PACKAGE_HASH_KEY)) {
-                    String currentHash = currentPackage.optString(CodePushConstants.PACKAGE_HASH_KEY, null);
-                    currentUpdateIsPending = mSettingsManager.isPendingUpdate(currentHash);
-                }
-
-                if (updateState == CodePushUpdateState.PENDING.getValue() && !currentUpdateIsPending) {
-                    // The caller wanted a pending update
-                    // but there isn't currently one.
-                    promise.resolve(null);
-                } else if (updateState == CodePushUpdateState.RUNNING.getValue() && currentUpdateIsPending) {
-                    // The caller wants the running update, but the current
-                    // one is pending, so we need to grab the previous.
-                    JSONObject previousPackage = mUpdateManager.getPreviousPackage();
-
-                    if (previousPackage == null) {
+                    if (currentPackage == null) {
                         promise.resolve(null);
                         return null;
                     }
 
-                    promise.resolve(CodePushUtils.convertJsonObjectToWritable(previousPackage));
-                } else {
-                    // The current package satisfies the request:
-                    // 1) Caller wanted a pending, and there is a pending update
-                    // 2) Caller wanted the running update, and there isn't a pending
-                    // 3) Caller wants the latest update, regardless if it's pending or not
-                    if (mCodePush.isRunningBinaryVersion()) {
-                        // This only matters in Debug builds. Since we do not clear "outdated" updates,
-                        // we need to indicate to the JS side that somehow we have a current update on
-                        // disk that is not actually running.
-                        CodePushUtils.setJSONValueForKey(currentPackage, "_isDebugOnly", true);
+                    Boolean currentUpdateIsPending = false;
+
+                    if (currentPackage.has(CodePushConstants.PACKAGE_HASH_KEY)) {
+                        String currentHash = currentPackage.optString(CodePushConstants.PACKAGE_HASH_KEY, null);
+                        currentUpdateIsPending = mSettingsManager.isPendingUpdate(currentHash);
                     }
 
-                    // Enable differentiating pending vs. non-pending updates
-                    CodePushUtils.setJSONValueForKey(currentPackage, "isPending", currentUpdateIsPending);
-                    promise.resolve(CodePushUtils.convertJsonObjectToWritable(currentPackage));
+                    if (updateState == CodePushUpdateState.PENDING.getValue() && !currentUpdateIsPending) {
+                        // The caller wanted a pending update
+                        // but there isn't currently one.
+                        promise.resolve(null);
+                    } else if (updateState == CodePushUpdateState.RUNNING.getValue() && currentUpdateIsPending) {
+                        // The caller wants the running update, but the current
+                        // one is pending, so we need to grab the previous.
+                        JSONObject previousPackage = mUpdateManager.getPreviousPackage();
+
+                        if (previousPackage == null) {
+                            promise.resolve(null);
+                            return null;
+                        }
+
+                        promise.resolve(CodePushUtils.convertJsonObjectToWritable(previousPackage));
+                    } else {
+                        // The current package satisfies the request:
+                        // 1) Caller wanted a pending, and there is a pending update
+                        // 2) Caller wanted the running update, and there isn't a pending
+                        // 3) Caller wants the latest update, regardless if it's pending or not
+                        if (mCodePush.isRunningBinaryVersion()) {
+                            // This only matters in Debug builds. Since we do not clear "outdated" updates,
+                            // we need to indicate to the JS side that somehow we have a current update on
+                            // disk that is not actually running.
+                            CodePushUtils.setJSONValueForKey(currentPackage, "_isDebugOnly", true);
+                        }
+
+                        // Enable differentiating pending vs. non-pending updates
+                        CodePushUtils.setJSONValueForKey(currentPackage, "isPending", currentUpdateIsPending);
+                        promise.resolve(CodePushUtils.convertJsonObjectToWritable(currentPackage));
+                    }
+                } catch(CodePushUnknownException e) {
+                    CodePushUtils.log(e);
+                    promise.reject(e);
                 }
 
                 return null;
@@ -350,46 +360,51 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                if (mCodePush.needToReportRollback()) {
-                    mCodePush.setNeedToReportRollback(false);
-                    JSONArray failedUpdates = mSettingsManager.getFailedUpdates();
-                    if (failedUpdates != null && failedUpdates.length() > 0) {
-                        try {
-                            JSONObject lastFailedPackageJSON = failedUpdates.getJSONObject(failedUpdates.length() - 1);
-                            WritableMap lastFailedPackage = CodePushUtils.convertJsonObjectToWritable(lastFailedPackageJSON);
-                            WritableMap failedStatusReport = mTelemetryManager.getRollbackReport(lastFailedPackage);
-                            if (failedStatusReport != null) {
-                                promise.resolve(failedStatusReport);
+                try {
+                    if (mCodePush.needToReportRollback()) {
+                        mCodePush.setNeedToReportRollback(false);
+                        JSONArray failedUpdates = mSettingsManager.getFailedUpdates();
+                        if (failedUpdates != null && failedUpdates.length() > 0) {
+                            try {
+                                JSONObject lastFailedPackageJSON = failedUpdates.getJSONObject(failedUpdates.length() - 1);
+                                WritableMap lastFailedPackage = CodePushUtils.convertJsonObjectToWritable(lastFailedPackageJSON);
+                                WritableMap failedStatusReport = mTelemetryManager.getRollbackReport(lastFailedPackage);
+                                if (failedStatusReport != null) {
+                                    promise.resolve(failedStatusReport);
+                                    return null;
+                                }
+                            } catch (JSONException e) {
+                                throw new CodePushUnknownException("Unable to read failed updates information stored in SharedPreferences.", e);
+                            }
+                        }
+                    } else if (mCodePush.didUpdate()) {
+                        JSONObject currentPackage = mUpdateManager.getCurrentPackage();
+                        if (currentPackage != null) {
+                            WritableMap newPackageStatusReport = mTelemetryManager.getUpdateReport(CodePushUtils.convertJsonObjectToWritable(currentPackage));
+                            if (newPackageStatusReport != null) {
+                                promise.resolve(newPackageStatusReport);
                                 return null;
                             }
-                        } catch (JSONException e) {
-                            throw new CodePushUnknownException("Unable to read failed updates information stored in SharedPreferences.", e);
                         }
-                    }
-                } else if (mCodePush.didUpdate()) {
-                    JSONObject currentPackage = mUpdateManager.getCurrentPackage();
-                    if (currentPackage != null) {
-                        WritableMap newPackageStatusReport = mTelemetryManager.getUpdateReport(CodePushUtils.convertJsonObjectToWritable(currentPackage));
-                        if (newPackageStatusReport != null) {
-                            promise.resolve(newPackageStatusReport);
+                    } else if (mCodePush.isRunningBinaryVersion()) {
+                        WritableMap newAppVersionStatusReport = mTelemetryManager.getBinaryUpdateReport(mCodePush.getAppVersion());
+                        if (newAppVersionStatusReport != null) {
+                            promise.resolve(newAppVersionStatusReport);
+                            return null;
+                        }
+                    } else {
+                        WritableMap retryStatusReport = mTelemetryManager.getRetryStatusReport();
+                        if (retryStatusReport != null) {
+                            promise.resolve(retryStatusReport);
                             return null;
                         }
                     }
-                } else if (mCodePush.isRunningBinaryVersion()) {
-                    WritableMap newAppVersionStatusReport = mTelemetryManager.getBinaryUpdateReport(mCodePush.getAppVersion());
-                    if (newAppVersionStatusReport != null) {
-                        promise.resolve(newAppVersionStatusReport);
-                        return null;
-                    }
-                } else {
-                    WritableMap retryStatusReport = mTelemetryManager.getRetryStatusReport();
-                    if (retryStatusReport != null) {
-                        promise.resolve(retryStatusReport);
-                        return null;
-                    }
-                }
 
-                promise.resolve("");
+                    promise.resolve("");
+                } catch(CodePushUnknownException e) {
+                    CodePushUtils.log(e);
+                    promise.reject(e);
+                }
                 return null;
             }
         };
@@ -402,76 +417,81 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                mUpdateManager.installPackage(CodePushUtils.convertReadableToJsonObject(updatePackage), mSettingsManager.isPendingUpdate(null));
+                try {
+                    mUpdateManager.installPackage(CodePushUtils.convertReadableToJsonObject(updatePackage), mSettingsManager.isPendingUpdate(null));
 
-                String pendingHash = CodePushUtils.tryGetString(updatePackage, CodePushConstants.PACKAGE_HASH_KEY);
-                if (pendingHash == null) {
-                    throw new CodePushUnknownException("Update package to be installed has no hash.");
-                } else {
-                    mSettingsManager.savePendingUpdate(pendingHash, /* isLoading */false);
-                }
+                    String pendingHash = CodePushUtils.tryGetString(updatePackage, CodePushConstants.PACKAGE_HASH_KEY);
+                    if (pendingHash == null) {
+                        throw new CodePushUnknownException("Update package to be installed has no hash.");
+                    } else {
+                        mSettingsManager.savePendingUpdate(pendingHash, /* isLoading */false);
+                    }
 
-                if (installMode == CodePushInstallMode.ON_NEXT_RESUME.getValue() ||
-                    // We also add the resume listener if the installMode is IMMEDIATE, because
-                    // if the current activity is backgrounded, we want to reload the bundle when
-                    // it comes back into the foreground.
-                    installMode == CodePushInstallMode.IMMEDIATE.getValue() ||
-                    installMode == CodePushInstallMode.ON_NEXT_SUSPEND.getValue()) {
+                    if (installMode == CodePushInstallMode.ON_NEXT_RESUME.getValue() ||
+                        // We also add the resume listener if the installMode is IMMEDIATE, because
+                        // if the current activity is backgrounded, we want to reload the bundle when
+                        // it comes back into the foreground.
+                        installMode == CodePushInstallMode.IMMEDIATE.getValue() ||
+                        installMode == CodePushInstallMode.ON_NEXT_SUSPEND.getValue()) {
 
-                    // Store the minimum duration on the native module as an instance
-                    // variable instead of relying on a closure below, so that any
-                    // subsequent resume-based installs could override it.
-                    CodePushNativeModule.this.mMinimumBackgroundDuration = minimumBackgroundDuration;
+                        // Store the minimum duration on the native module as an instance
+                        // variable instead of relying on a closure below, so that any
+                        // subsequent resume-based installs could override it.
+                        CodePushNativeModule.this.mMinimumBackgroundDuration = minimumBackgroundDuration;
 
-                    if (mLifecycleEventListener == null) {
-                        // Ensure we do not add the listener twice.
-                        mLifecycleEventListener = new LifecycleEventListener() {
-                            private Date lastPausedDate = null;
-                            private Handler appSuspendHandler = new Handler(Looper.getMainLooper());
-                            private Runnable loadBundleRunnable = new Runnable() {
+                        if (mLifecycleEventListener == null) {
+                            // Ensure we do not add the listener twice.
+                            mLifecycleEventListener = new LifecycleEventListener() {
+                                private Date lastPausedDate = null;
+                                private Handler appSuspendHandler = new Handler(Looper.getMainLooper());
+                                private Runnable loadBundleRunnable = new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        CodePushUtils.log("Loading bundle on suspend");
+                                        loadBundle();
+                                    }
+                                };
+
                                 @Override
-                                public void run() {
-                                    CodePushUtils.log("Loading bundle on suspend");
-                                    loadBundle();
+                                public void onHostResume() {
+                                    appSuspendHandler.removeCallbacks(loadBundleRunnable);
+                                    // As of RN 36, the resume handler fires immediately if the app is in
+                                    // the foreground, so explicitly wait for it to be backgrounded first
+                                    if (lastPausedDate != null) {
+                                        long durationInBackground = (new Date().getTime() - lastPausedDate.getTime()) / 1000;
+                                        if (installMode == CodePushInstallMode.IMMEDIATE.getValue()
+                                                || durationInBackground >= CodePushNativeModule.this.mMinimumBackgroundDuration) {
+                                            CodePushUtils.log("Loading bundle on resume");
+                                            loadBundle();
+                                        }
+                                    }
+                                }
+
+                                @Override
+                                public void onHostPause() {
+                                    // Save the current time so that when the app is later
+                                    // resumed, we can detect how long it was in the background.
+                                    lastPausedDate = new Date();
+
+                                    if (installMode == CodePushInstallMode.ON_NEXT_SUSPEND.getValue() && mSettingsManager.isPendingUpdate(null)) {
+                                        appSuspendHandler.postDelayed(loadBundleRunnable, minimumBackgroundDuration * 1000);
+                                    }
+                                }
+
+                                @Override
+                                public void onHostDestroy() {
                                 }
                             };
 
-                            @Override
-                            public void onHostResume() {
-                                appSuspendHandler.removeCallbacks(loadBundleRunnable);
-                                // As of RN 36, the resume handler fires immediately if the app is in
-                                // the foreground, so explicitly wait for it to be backgrounded first
-                                if (lastPausedDate != null) {
-                                    long durationInBackground = (new Date().getTime() - lastPausedDate.getTime()) / 1000;
-                                    if (installMode == CodePushInstallMode.IMMEDIATE.getValue()
-                                            || durationInBackground >= CodePushNativeModule.this.mMinimumBackgroundDuration) {
-                                        CodePushUtils.log("Loading bundle on resume");
-                                        loadBundle();
-                                    }
-                                }
-                            }
-
-                            @Override
-                            public void onHostPause() {
-                                // Save the current time so that when the app is later
-                                // resumed, we can detect how long it was in the background.
-                                lastPausedDate = new Date();
-
-                                if (installMode == CodePushInstallMode.ON_NEXT_SUSPEND.getValue() && mSettingsManager.isPendingUpdate(null)) {
-                                    appSuspendHandler.postDelayed(loadBundleRunnable, minimumBackgroundDuration * 1000);
-                                }
-                            }
-
-                            @Override
-                            public void onHostDestroy() {
-                            }
-                        };
-
-                        getReactApplicationContext().addLifecycleEventListener(mLifecycleEventListener);
+                            getReactApplicationContext().addLifecycleEventListener(mLifecycleEventListener);
+                        }
                     }
-                }
 
-                promise.resolve("");
+                    promise.resolve("");
+                } catch(CodePushUnknownException e) {
+                    CodePushUtils.log(e);
+                    promise.reject(e);
+                }
 
                 return null;
             }
@@ -482,57 +502,89 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void isFailedUpdate(String packageHash, Promise promise) {
-        promise.resolve(mSettingsManager.isFailedHash(packageHash));
+        try {
+            promise.resolve(mSettingsManager.isFailedHash(packageHash));
+        } catch(CodePushUnknownException e) {
+            CodePushUtils.log(e);
+            promise.reject(e);
+        }
     }
 
     @ReactMethod
     public void isFirstRun(String packageHash, Promise promise) {
-        boolean isFirstRun = mCodePush.didUpdate()
-                && packageHash != null
-                && packageHash.length() > 0
-                && packageHash.equals(mUpdateManager.getCurrentPackageHash());
-        promise.resolve(isFirstRun);
+        try {
+            boolean isFirstRun = mCodePush.didUpdate()
+                    && packageHash != null
+                    && packageHash.length() > 0
+                    && packageHash.equals(mUpdateManager.getCurrentPackageHash());
+            promise.resolve(isFirstRun);
+        } catch(CodePushUnknownException e) {
+            CodePushUtils.log(e);
+            promise.reject(e);
+        }
     }
 
     @ReactMethod
     public void notifyApplicationReady(Promise promise) {
-        mSettingsManager.removePendingUpdate();
-        promise.resolve("");
+        try {
+            mSettingsManager.removePendingUpdate();
+            promise.resolve("");
+        } catch(CodePushUnknownException e) {
+            CodePushUtils.log(e);
+            promise.reject(e);
+        }
     }
 
     @ReactMethod
     public void recordStatusReported(ReadableMap statusReport) {
-        mTelemetryManager.recordStatusReported(statusReport);
+        try {
+            mTelemetryManager.recordStatusReported(statusReport);
+        } catch(CodePushUnknownException e) {
+            CodePushUtils.log(e);
+        }
     }
 
     @ReactMethod
     public void restartApp(boolean onlyIfUpdateIsPending, Promise promise) {
-        // If this is an unconditional restart request, or there
-        // is current pending update, then reload the app.
-        if (!onlyIfUpdateIsPending || mSettingsManager.isPendingUpdate(null)) {
-            loadBundle();
-            promise.resolve(true);
-            return;
-        }
+        try {
+            // If this is an unconditional restart request, or there
+            // is current pending update, then reload the app.
+            if (!onlyIfUpdateIsPending || mSettingsManager.isPendingUpdate(null)) {
+                loadBundle();
+                promise.resolve(true);
+                return;
+            }
 
-        promise.resolve(false);
+            promise.resolve(false);
+        } catch(CodePushUnknownException e) {
+            CodePushUtils.log(e);
+            promise.reject(e);
+        }
     }
 
     @ReactMethod
     public void saveStatusReportForRetry(ReadableMap statusReport) {
-        mTelemetryManager.saveStatusReportForRetry(statusReport);
+        try {
+            mTelemetryManager.saveStatusReportForRetry(statusReport);
+        } catch(CodePushUnknownException e) {
+            CodePushUtils.log(e);
+        }
     }
 
     @ReactMethod
     // Replaces the current bundle with the one downloaded from removeBundleUrl.
     // It is only to be used during tests. No-ops if the test configuration flag is not set.
     public void downloadAndReplaceCurrentBundle(String remoteBundleUrl) {
-        if (mCodePush.isUsingTestConfiguration()) {
-            try {
-                mUpdateManager.downloadAndReplaceCurrentBundle(remoteBundleUrl, mCodePush.getAssetsBundleFileName());
-            } catch (IOException e) {
-                throw new CodePushUnknownException("Unable to replace current bundle", e);
+        try {
+            if (mCodePush.isUsingTestConfiguration()) {
+                try {
+                    mUpdateManager.downloadAndReplaceCurrentBundle(remoteBundleUrl, mCodePush.getAssetsBundleFileName());
+                } catch (IOException e) {
+                    throw new CodePushUnknownException("Unable to replace current bundle", e);
+                }
             }
+        } catch(CodePushUnknownException | CodePushMalformedDataException e) {
+            CodePushUtils.log(e);
         }
     }
 }
