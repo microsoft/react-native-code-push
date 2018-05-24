@@ -20,7 +20,7 @@ public class CodePushDialog extends ReactContextBaseJavaModule{
     public void showDialog(final String title, final String message, final String button1Text,
                            final String button2Text, final Callback successCallback, Callback errorCallback) {
         Activity currentActivity = getCurrentActivity();
-        if (currentActivity == null) {
+        if (currentActivity == null || currentActivity.isFinishing()) {
             // If getCurrentActivity is null, it could be because the app is backgrounded,
             // so we show the dialog when the app resumes)
             getReactApplicationContext().addLifecycleEventListener(new LifecycleEventListener() {
