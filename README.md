@@ -205,7 +205,7 @@ To further remain in compliance with Apple's guidelines we suggest that App Stor
 
 > Apps must not force users to rate the app, review the app, download other apps, or other similar actions in order to access functionality, content, or use of the app.
 
-This is not necessarely the case for `updateDialog`, since it won't force the user to download the new version, but at least you should be aware of that ruling if you decide to show it.
+This is not necessarily the case for `updateDialog`, since it won't force the user to download the new version, but at least you should be aware of that ruling if you decide to show it.
 
 ## Releasing Updates
 
