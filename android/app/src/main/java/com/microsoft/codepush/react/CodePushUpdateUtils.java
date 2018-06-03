@@ -3,11 +3,9 @@ package com.microsoft.codepush.react;
 import android.content.Context;
 import android.util.Base64;
 
-import java.security.interfaces.*;
-
-import com.nimbusds.jose.*;
-import com.nimbusds.jose.crypto.*;
-import com.nimbusds.jwt.*;
+import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.crypto.RSASSAVerifier;
+import com.nimbusds.jwt.SignedJWT;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -24,6 +22,7 @@ import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -183,7 +182,7 @@ public class CodePushUpdateUtils {
     public static Map<String, Object> verifyAndDecodeJWT(String jwt, PublicKey publicKey) {
         try {
             SignedJWT signedJWT = SignedJWT.parse(jwt);
-            JWSVerifier verifier = new RSASSAVerifier((RSAPublicKey)publicKey);
+            JWSVerifier verifier = new RSASSAVerifier((RSAPublicKey) publicKey);
             if (signedJWT.verify(verifier)) {
                 Map<String, Object> claims = signedJWT.getJWTClaimsSet().getClaims();
                 CodePushUtils.log("JWT verification succeeded, payload content: " + claims.toString());
@@ -216,7 +215,7 @@ public class CodePushUpdateUtils {
         }
     }
 
-    public static String getSignatureFilePath(String updateFolderPath){
+    public static String getSignatureFilePath(String updateFolderPath) {
         return CodePushUtils.appendPathComponent(
                 CodePushUtils.appendPathComponent(updateFolderPath, CodePushConstants.CODE_PUSH_FOLDER_PREFIX),
                 CodePushConstants.BUNDLE_JWT_FILE
@@ -253,7 +252,7 @@ public class CodePushUpdateUtils {
             throw new CodePushInvalidUpdateException("The update could not be verified because it was not signed by a trusted party.");
         }
 
-        final String contentHash = (String)claims.get("contentHash");
+        final String contentHash = (String) claims.get("contentHash");
         if (contentHash == null) {
             throw new CodePushInvalidUpdateException("The update could not be verified because the signature did not specify a content hash.");
         }

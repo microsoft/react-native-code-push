@@ -7,9 +7,11 @@ public enum CodePushInstallMode {
     ON_NEXT_SUSPEND(3);
 
     private final int value;
+
     CodePushInstallMode(int value) {
         this.value = value;
     }
+
     public int getValue() {
         return this.value;
     }

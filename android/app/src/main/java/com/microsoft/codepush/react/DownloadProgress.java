@@ -7,7 +7,7 @@ class DownloadProgress {
     private long mTotalBytes;
     private long mReceivedBytes;
 
-    public DownloadProgress (long totalBytes, long receivedBytes){
+    public DownloadProgress(long totalBytes, long receivedBytes) {
         mTotalBytes = totalBytes;
         mReceivedBytes = receivedBytes;
     }

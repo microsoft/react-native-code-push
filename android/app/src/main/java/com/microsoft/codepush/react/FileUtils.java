@@ -137,7 +137,7 @@ public class FileUtils {
             if (destinationFolder.exists()) {
                 deleteFileOrFolderSilently(destinationFolder);
             }
-            
+
             destinationFolder.mkdirs();
 
             byte[] buffer = new byte[WRITE_BUFFER_SIZE];

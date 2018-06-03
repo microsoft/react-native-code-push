@@ -6,9 +6,11 @@ public enum CodePushUpdateState {
     LATEST(2);
 
     private final int value;
+
     CodePushUpdateState(int value) {
         this.value = value;
     }
+
     public int getValue() {
         return this.value;
     }

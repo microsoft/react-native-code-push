@@ -30,7 +30,7 @@ public class CodePushUtils {
 
     public static WritableArray convertJsonArrayToWritable(JSONArray jsonArr) {
         WritableArray arr = Arguments.createArray();
-        for (int i=0; i<jsonArr.length(); i++) {
+        for (int i = 0; i < jsonArr.length(); i++) {
             Object obj = null;
             try {
                 obj = jsonArr.get(i);
@@ -63,7 +63,7 @@ public class CodePushUtils {
     public static WritableMap convertJsonObjectToWritable(JSONObject jsonObj) {
         WritableMap map = Arguments.createMap();
         Iterator<String> it = jsonObj.keys();
-        while(it.hasNext()){
+        while (it.hasNext()) {
             String key = it.next();
             Object obj = null;
             try {
@@ -96,7 +96,7 @@ public class CodePushUtils {
 
     public static JSONArray convertReadableToJsonArray(ReadableArray arr) {
         JSONArray jsonArr = new JSONArray();
-        for (int i=0; i<arr.size(); i++) {
+        for (int i = 0; i < arr.size(); i++) {
             ReadableType type = arr.getType(i);
             switch (type) {
                 case Map:
@@ -200,11 +200,15 @@ public class CodePushUtils {
     }
 
     public static void log(String message) {
-        Log.d(CodePushConstants.REACT_NATIVE_LOG_TAG, "[CodePush] " + message);
+        if(BuildConfig.DEBUG) {
+            Log.d(CodePushConstants.REACT_NATIVE_LOG_TAG, String.format("[CodePush] %s", message));
+        }
     }
 
     public static void log(Throwable tr) {
-        Log.e(CodePushConstants.REACT_NATIVE_LOG_TAG, "[CodePush] Exception", tr);
+        if (BuildConfig.DEBUG) {
+            Log.e(CodePushConstants.REACT_NATIVE_LOG_TAG, "[CodePush] Exception", tr);
+        }
     }
 
     public static void logBundleUrl(String path) {
@@ -215,7 +219,7 @@ public class CodePushUtils {
         try {
             json.put(key, value);
         } catch (JSONException e) {
-            throw new CodePushUnknownException("Unable to set value " + value + " for key " + key + " to JSONObject");
+            throw new CodePushUnknownException(String.format("Unable to set value %s for key %s to JSONObject", value, key));
         }
     }
 
