@@ -70,7 +70,7 @@ public class CodePushTelemetryManager {
     }
 
     public WritableMap getRollbackReport(WritableMap lastFailedPackage) {
-        WritableMap reportMap =  Arguments.createMap();
+        WritableMap reportMap = Arguments.createMap();
         reportMap.putMap(PACKAGE_KEY, lastFailedPackage);
         reportMap.putString(STATUS_KEY, DEPLOYMENT_FAILED_STATUS);
         return reportMap;
@@ -113,7 +113,7 @@ public class CodePushTelemetryManager {
         if (statusReport.hasKey(STATUS_KEY) && DEPLOYMENT_FAILED_STATUS.equals(statusReport.getString(STATUS_KEY))) {
             return;
         }
-        
+
         if (statusReport.hasKey(APP_VERSION_KEY)) {
             saveStatusReportedForIdentifier(statusReport.getString(APP_VERSION_KEY));
         } else if (statusReport.hasKey(PACKAGE_KEY)) {

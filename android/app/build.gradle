@@ -1,12 +1,12 @@
 apply plugin: "com.android.library"
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.1"
+    compileSdkVersion 27
+    buildToolsVersion "27.0.3"
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 22
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
     }
@@ -18,9 +18,17 @@ android {
     defaultConfig {
         consumerProguardFiles 'proguard-rules.pro'
     }
+    buildTypes {
+        debug {
+            buildConfigField "String", "SERVER_URL", "\"https://codepush.azurewebsites.net/\""
+        }
+        release {
+            buildConfigField "String", "SERVER_URL", "\"https://codepush.azurewebsites.net/\""
+        }
+    }
 }
 
 dependencies {
-    compile "com.facebook.react:react-native:+"
-    compile 'com.nimbusds:nimbus-jose-jwt:5.1'
+    implementation "com.facebook.react:react-native:+"
+    implementation 'com.nimbusds:nimbus-jose-jwt:5.1'
 }

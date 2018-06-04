@@ -17,7 +17,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.NotActiveException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +38,7 @@ public class CodePush implements ReactPackage {
 
     // Config properties.
     private String mDeploymentKey;
-    private static String mServerUrl = "https://codepush.azurewebsites.net/";
+    private static String mServerUrl = BuildConfig.SERVER_URL;
 
     private Context mContext;
     private final boolean mIsDebugMode;
@@ -102,7 +101,7 @@ public class CodePush implements ReactPackage {
         mServerUrl = serverUrl;
     }
 
-    private String getPublicKeyByResourceDescriptor(int publicKeyResourceDescriptor){
+    private String getPublicKeyByResourceDescriptor(int publicKeyResourceDescriptor) {
         String publicKey;
         try {
             publicKey = mContext.getString(publicKeyResourceDescriptor);
@@ -152,7 +151,7 @@ public class CodePush implements ReactPackage {
             int codePushApkBuildTimeId = this.mContext.getResources().getIdentifier(CodePushConstants.CODE_PUSH_APK_BUILD_TIME_KEY, "string", packageName);
             // replace double quotes needed for correct restoration of long value from strings.xml
             // https://github.com/Microsoft/cordova-plugin-code-push/issues/264
-            String codePushApkBuildTime = this.mContext.getResources().getString(codePushApkBuildTimeId).replaceAll("\"","");
+            String codePushApkBuildTime = this.mContext.getResources().getString(codePushApkBuildTimeId).replaceAll("\"", "");
             return Long.parseLong(codePushApkBuildTime);
         } catch (Exception e) {
             throw new CodePushUnknownException("Error in getting binary resources modified time", e);
