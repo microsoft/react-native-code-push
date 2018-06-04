@@ -12,7 +12,7 @@ The `CodePush` class' methods can be thought of as composite resolvers which alw
 
 2. As soon as you begin releasing CodePush updates, your end-users will get the JS bundle that represents the latest release for the configured deployment. This is the behavior that allows you to iterate beyond what you shipped to the store.
 
-3. As soon as you release an update to the app store (e.g. `1.1.0`), and your end-users update it, they will once again get the JS bundle that is contained within the binary. This behavior ensures that CodePush updates that targetted a previous app store version aren't used (since we don't know it they would work), and your end-users always have a working version of your app.
+3. As soon as you release an update to the app store (e.g. `1.1.0`), and your end-users update it, they will once again get the JS bundle that is contained within the binary. This behavior ensures that CodePush updates that targetted a previous app store version aren't used (since we don't know if they would work), and your end-users always have a working version of your app.
 
 4. Repeat #2 and #3 as the CodePush releases and app store releases continue on into infinity (and beyond?)
 
