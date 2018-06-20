@@ -12,6 +12,7 @@ module.exports = () => {
     console.log("Running ios postlink script");
 
     var ignoreNodeModules = { ignore: "node_modules/**" };
+    var ignoreNodeModulesAndPods = { ignore: ["node_modules/**", "ios/Pods/**"] };
     var appDelegatePaths = glob.sync("**/AppDelegate.+(mm|m)", ignoreNodeModules);
 
     // Fix for https://github.com/Microsoft/react-native-code-push/issues/477
@@ -150,7 +151,7 @@ module.exports = () => {
     }
 
     function getPlistPath(){
-        var xcodeProjectPaths = glob.sync(`**/*.xcodeproj/project.pbxproj`, ignoreNodeModules);
+        var xcodeProjectPaths = glob.sync(`**/*.xcodeproj/project.pbxproj`, ignoreNodeModulesAndPods);
         if (!xcodeProjectPaths){
             return getDefaultPlistPath();
         }

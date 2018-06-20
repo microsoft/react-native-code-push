@@ -32,27 +32,33 @@ And that's it! Isn't RNPM awesome? :)
 
 #### Plugin Installation (iOS - CocoaPods)
 
-1. Add the CodePush plugin dependency to your `Podfile`, pointing at the path where NPM installed it
+1. Add the ReactNative and CodePush plugin dependencies to your `Podfile`, pointing at the path where NPM installed it
 
-    ```ruby
+    ```
+    # React Native requirements
+    pod 'React', :path => '../node_modules/react-native', :subspecs => [
+       'Core',
+       'CxxBridge', # Include this for RN >= 0.47
+       'DevSupport', # Include this to enable In-App Devmenu if RN >= 0.43
+       'RCTText',
+       'RCTNetwork',
+       'RCTWebSocket', # Needed for debugging
+       'RCTAnimation', # Needed for FlatList and animations running on native UI thread
+       # Add any other subspecs you want to use in your project
+    ]
+    # Explicitly include Yoga if you are using RN >= 0.42.0
+    pod 'yoga', :path => '../node_modules/react-native/ReactCommon/yoga'
+    pod 'DoubleConversion', :podspec => '../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec'
+    pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
+    pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
+      
+    # CodePush plugin dependency
     pod 'CodePush', :path => '../node_modules/react-native-code-push'
     ```
 
-    CodePush depends on an internal copy of the `SSZipArchive`, `JWT` and `Base64` libraries, so if your project already includes some of them (either directly or via a transitive dependency), then you can install a version of CodePush which excludes it by depending specifically on the needed subspecs:
+    *NOTE: The above path needs to be relative to your app's `Podfile`, so adjust it as necessary.*
 
-    ```ruby
-    # `SSZipArchive`, `JWT` and `Base64` already in use
-    pod 'CodePush', :path => '../node_modules/react-native-code-push', :subspecs => ['Core']
-
-    # or for example
-
-    # `SSZipArchive` and `Base64` already in use
-    pod 'CodePush', :path => '../node_modules/react-native-code-push', :subspecs => ['Core', 'JWT']
-    ```
-
-    *NOTE: The above paths needs to be relative to your app's `Podfile`, so adjust it as neccessary.*
-
-    *NOTE: `JWT` library should be of version 3.0.x*
+    *NOTE: `JWT` library should be >= version 3.0.x*
 
 2. Run `pod install`
 

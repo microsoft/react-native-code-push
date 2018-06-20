@@ -233,7 +233,7 @@ export interface StatusReport {
  *
  * @param options Options used to configure the end-user sync and update experience (e.g. when to check for updates?, show an prompt?, install the update immediately?).
  */
-declare function CodePush(options?: CodePushOptions): Function;
+declare function CodePush(options?: CodePushOptions): (x: any) => any;
 
 declare namespace CodePush {
     /**

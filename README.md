@@ -53,22 +53,23 @@ In order to ensure that your end users always have a functioning version of your
 
 We try our best to maintain backwards compatability of our plugin with previous versions of React Native, but due to the nature of the platform, and the existence of breaking changes between releases, it is possible that you need to use a specific version of the CodePush plugin in order to support the exact version of React Native you are using. The following table outlines which CodePush plugin versions officially support the respective React Native versions:
 
-| React Native version(s) | Supporting CodePush version(s)                       |
-|-------------------------|------------------------------------------------------|
-| <0.14                   | **Unsupported**                                      |
-| v0.14                   | v1.3 *(introduced Android support)*                  |
-| v0.15-v0.18             | v1.4-v1.6 *(introduced iOS asset support)*           |
-| v0.19-v0.28             | v1.7-v1.17 *(introduced Android asset support)*      |
-| v0.29-v0.30             | v1.13-v1.17 *(RN refactored native hosting code)*    |
-| v0.31-v0.33             | v1.14.6-v1.17 *(RN refactored native hosting code)*  |
-| v0.34-v0.35             | v1.15-v1.17 *(RN refactored native hosting code)*    |
-| v0.36-v0.39             | v1.16-v1.17 *(RN refactored resume handler)*         |
-| v0.40-v0.42             | v1.17 *(RN refactored iOS header files)*             |
-| v0.43-v0.44             | v2.0+ *(RN refactored uimanager dependencies)*       |
-| v0.45                   | v3.0+ *(RN refactored instance manager code)*        |
-| v0.46                   | v4.0+ *(RN refactored js bundle loader code)*        |
-| v0.46-v0.52             | v5.1+ *(RN removed unused registration of JS modules)*|
-| v0.53+                  | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
+| React Native version(s) | Supporting CodePush version(s)                        |
+|-------------------------|-------------------------------------------------------|
+| <0.14                   | **Unsupported**                                       |
+| v0.14                   | v1.3 *(introduced Android support)*                   |
+| v0.15-v0.18             | v1.4-v1.6 *(introduced iOS asset support)*            |
+| v0.19-v0.28             | v1.7-v1.17 *(introduced Android asset support)*       |
+| v0.29-v0.30             | v1.13-v1.17 *(RN refactored native hosting code)*     |
+| v0.31-v0.33             | v1.14.6-v1.17 *(RN refactored native hosting code)*   |
+| v0.34-v0.35             | v1.15-v1.17 *(RN refactored native hosting code)*     |
+| v0.36-v0.39             | v1.16-v1.17 *(RN refactored resume handler)*          |
+| v0.40-v0.42             | v1.17 *(RN refactored iOS header files)*              |
+| v0.43-v0.44             | v2.0+ *(RN refactored uimanager dependencies)*        |
+| v0.45                   | v3.0+ *(RN refactored instance manager code)*         |
+| v0.46                   | v4.0+ *(RN refactored js bundle loader code)*         |
+| v0.46-v0.53             | v5.1+ *(RN removed unused registration of JS modules)*|
+| v0.54-v0.55             | v5.3+ *(Android Gradle Plugin 3.x integration)*       |
+| v0.55+                  | TBD :) We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
 
 ### Supported Components
 
@@ -204,7 +205,7 @@ To further remain in compliance with Apple's guidelines we suggest that App Stor
 
 > Apps must not force users to rate the app, review the app, download other apps, or other similar actions in order to access functionality, content, or use of the app.
 
-This is not necessarely the case for `updateDialog`, since it won't force the user to download the new version, but at least you should be aware of that ruling if you decide to show it.
+This is not necessarily the case for `updateDialog`, since it won't force the user to download the new version, but at least you should be aware of that ruling if you decide to show it.
 
 ## Releasing Updates
 
@@ -357,7 +358,6 @@ Now you'll be able to see CodePush logs in either debug or release mode, on both
 | Update not being displayed after restart | If you're not calling `sync` on app start (e.g. within `componentDidMount` of your root component), then you need to explicitly call `notifyApplicationReady` on app start, otherwise, the plugin will think your update failed and roll it back. |
 | I've released an update for iOS but my Android app also shows an update and it breaks it | Be sure you have different deployment keys for each platform in order to receive updates correctly |
 | I've released new update but changes are not reflected | Be sure that you are running app in modes other than Debug. In Debug mode, React Native app always downloads JS bundle generated by packager, so JS bundle downloaded by CodePush does not apply.
-| Images dissappear after installing CodePush update | If your app is using the React Native assets system to load images (i.e. the `require(./foo.png)` syntax), then you **MUST** release your assets along with your JS bundle to CodePush. Follow [these instructions](#releasing-updates-javascript--images) to see how to do this. |
 | No JS bundle is being found when running your app against the iOS simulator | By default, React Native doesn't generate your JS bundle when running against the simulator. Therefore, if you're using `[CodePush bundleURL]`, and targetting the iOS simulator, you may be getting a `nil` result. This issue will be fixed in RN 0.22.0, but only for release builds. You can unblock this scenario right now by making [this change](https://github.com/facebook/react-native/commit/9ae3714f4bebdd2bcab4d7fdbf23acebdc5ed2ba) locally.
 
 ### Continuous Integration / Delivery
