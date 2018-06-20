@@ -1,5 +1,7 @@
 ## Windows Setup
 
+*NOTE: CodePush plugin requires UWP(Universal Windows Platform). [Setup UWP doc](https://docs.microsoft.com/en-us/windows/uwp/get-started/get-set-up).*
+
 Once you've acquired the CodePush plugin, you need to integrate it into the Visual Studio project of your React Native app and configure it correctly. To do this, take the following steps:
 
 ### Plugin Installation (Windows)
