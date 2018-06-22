@@ -57,4 +57,6 @@ As an alternative to constructors *you can also use `CodePushBuilder`* to setup 
 
 - __getBundleUrl(String bundleName)__ - Returns the path to the most recent version of your app's JS bundle file, using the specified resource name (e.g. `index.android.bundle`). This method has the same resolution behavior as the Objective-C equivalent described above.
 
+- __getPackageFolder()__ - Returns the path to the current update folder.
+
 - __overrideAppVersion(String appVersionOverride)__ - Sets the version of the application's binary interface, which would otherwise default to the Play Store version specified as the `versionName` in the `build.gradle`. This should be called a single time, before the CodePush instance is constructed.
