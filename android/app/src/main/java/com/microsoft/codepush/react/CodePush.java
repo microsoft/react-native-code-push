@@ -160,6 +160,9 @@ public class CodePush implements ReactPackage {
 
     public String getPackageFolder() {
         JSONObject codePushLocalPackage = mUpdateManager.getCurrentPackage();
+        if (codePushLocalPackage == null) {
+            return null;
+        }
         return mUpdateManager.getPackageFolderPath(codePushLocalPackage.optString("packageHash"));
     }
 
