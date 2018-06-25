@@ -1,15 +1,9 @@
 package com.microsoft.codepush.common.testutils;
 
 import android.content.Context;
-import android.os.Environment;
 
-import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
-import com.microsoft.codepush.common.exceptions.CodePushGeneralException;
 import com.microsoft.codepush.common.interfaces.CodePushPlatformUtils;
-
-import java.io.File;
-import java.io.IOException;
 
 /**
  * Platform specific implementation of utils (only for testing).
@@ -41,7 +35,7 @@ public class CommonTestPlatformUtils implements CodePushPlatformUtils {
 
     //TODO Implement test for this method
     @Override
-    public boolean isPackageLatest(CodePushLocalPackage packageMetadata, String currentAppVersion, Context context) throws CodePushGeneralException {
+    public boolean isPackageLatest(CodePushLocalPackage packageMetadata, String currentAppVersion, Context context) {
         return false;
     }
 
@@ -53,7 +47,7 @@ public class CommonTestPlatformUtils implements CodePushPlatformUtils {
 
     //TODO Implement test for this method
     @Override
-    public void clearDebugCache(Context context) throws IOException {
+    public void clearDebugCache(Context context) {
 
     }
 }

@@ -209,7 +209,7 @@ public class SettingManagerAndroidTests {
      * Tests workflow save identifier -> get identifier.
      */
     @Test
-    public void identifierTest() throws Exception {
+    public void identifierTest() {
         mSettingsManager.saveIdentifierOfReportedStatus(new CodePushStatusReportIdentifier("123", "1.2"));
         CodePushStatusReportIdentifier codePushStatusReportIdentifier = mSettingsManager.getPreviousStatusReportIdentifier();
         assertEquals(codePushStatusReportIdentifier.getDeploymentKey(), "123");

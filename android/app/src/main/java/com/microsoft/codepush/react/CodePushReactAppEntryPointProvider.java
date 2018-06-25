@@ -1,6 +1,5 @@
 package com.microsoft.codepush.react;
 
-import com.microsoft.codepush.common.exceptions.CodePushNativeApiCallException;
 import com.microsoft.codepush.common.interfaces.CodePushAppEntryPointProvider;
 
 /**
@@ -23,7 +22,7 @@ public class CodePushReactAppEntryPointProvider implements CodePushAppEntryPoint
     }
 
     @Override
-    public String getAppEntryPoint() throws CodePushNativeApiCallException {
+    public String getAppEntryPoint() {
         if (mAppEntryPoint == null) {
             return CodePushReactNativeCore.DEFAULT_JS_BUNDLE_NAME;
         } else {

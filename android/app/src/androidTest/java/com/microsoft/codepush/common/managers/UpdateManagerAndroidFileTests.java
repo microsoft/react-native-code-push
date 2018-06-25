@@ -5,8 +5,6 @@ import android.os.Environment;
 import com.microsoft.codepush.common.CodePushConfiguration;
 import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.apirequests.ApiHttpRequest;
-import com.microsoft.codepush.common.apirequests.DownloadPackageTask;
-import com.microsoft.codepush.common.datacontracts.CodePushDownloadPackageResult;
 import com.microsoft.codepush.common.exceptions.CodePushDownloadPackageException;
 import com.microsoft.codepush.common.exceptions.CodePushSignatureVerificationException;
 import com.microsoft.codepush.common.exceptions.CodePushUnzipException;
@@ -25,12 +23,10 @@ import java.io.IOException;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 /**
  * This class is for testing those {@link CodePushUpdateManager} test cases that depend on {@link FileUtils} methods failure.

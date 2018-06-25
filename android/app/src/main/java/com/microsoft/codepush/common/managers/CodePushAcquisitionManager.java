@@ -119,7 +119,7 @@ public class CodePushAcquisitionManager {
      * @param deploymentStatusReport instance of {@link CodePushDeploymentStatusReport}.
      * @throws CodePushReportStatusException exception occurred when sending the status.
      */
-    public void reportStatusDeploy(CodePushConfiguration configuration, CodePushDeploymentStatusReport deploymentStatusReport) throws CodePushReportStatusException {
+    public void reportStatusDeploy(CodePushConfiguration configuration, CodePushDeploymentStatusReport deploymentStatusReport) {
 
         /* Extract parameters from configuration */
         String appVersion = configuration.getAppVersion();

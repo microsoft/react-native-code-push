@@ -1,16 +1,5 @@
 package com.microsoft.codepush.common.managers;
 
-import com.microsoft.codepush.common.interfaces.CodePushRestartListener;
-
-import org.junit.Before;
-import org.junit.Test;
-
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 /**
  * This class is for testing {@link com.microsoft.codepush.common.managers.CodePushRestartManager}.
  */

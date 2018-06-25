@@ -3,7 +3,6 @@ package com.microsoft.codepush.react;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.facebook.react.bridge.Callback;
@@ -14,7 +13,6 @@ import com.facebook.react.bridge.ReactMethod;
 import com.microsoft.codepush.common.exceptions.CodePushGeneralException;
 import com.microsoft.codepush.common.interfaces.CodePushConfirmationCallback;
 import com.microsoft.codepush.common.interfaces.CodePushConfirmationDialog;
-import com.microsoft.codepush.common.utils.CodePushLogUtils;
 
 import java.util.Arrays;
 

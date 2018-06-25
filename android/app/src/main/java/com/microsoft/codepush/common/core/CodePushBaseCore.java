@@ -294,18 +294,14 @@ public abstract class CodePushBaseCore {
         /* Initialize update after restart. */
         try {
             initializeUpdateAfterRestart();
-        } catch (CodePushGetPackageException | CodePushPlatformUtilsException | CodePushRollbackException | CodePushGeneralException | CodePushMalformedDataException e) {
+        } catch (CodePushGetPackageException | CodePushRollbackException | CodePushGeneralException | CodePushMalformedDataException e) {
             throw new CodePushInitializeException(e);
         }
         mCurrentInstance = this;
 
         /* appEntryPointProvider.getAppEntryPoint() implementation for RN uses static instance on CodePushBaseCore
          * so we place it here to avoid null pointer reference. */
-        try {
-            mAppEntryPoint = appEntryPointProvider.getAppEntryPoint();
-        } catch (CodePushNativeApiCallException e) {
-            throw new CodePushInitializeException(e);
-        }
+        mAppEntryPoint = appEntryPointProvider.getAppEntryPoint();
     }
 
     /**
@@ -891,7 +887,7 @@ public abstract class CodePushBaseCore {
      * @throws CodePushRollbackException      if error occurred during rolling back of package.
      */
     @SuppressWarnings("WeakerAccess")
-    protected void initializeUpdateAfterRestart() throws CodePushGetPackageException, CodePushRollbackException, CodePushPlatformUtilsException, CodePushGeneralException, CodePushMalformedDataException {
+    protected void initializeUpdateAfterRestart() throws CodePushGetPackageException, CodePushRollbackException, CodePushGeneralException, CodePushMalformedDataException {
 
         /* Reset the state which indicates that the app was just freshly updated. */
         mState.mDidUpdate = false;
@@ -976,7 +972,7 @@ public abstract class CodePushBaseCore {
             return mState.mDidUpdate
                     && !isEmpty(packageHash)
                     && packageHash.equals(mManagers.mUpdateManager.getCurrentPackageHash());
-        } catch (IOException | CodePushMalformedDataException e) {
+        } catch (CodePushMalformedDataException e) {
             throw new CodePushNativeApiCallException(e);
         }
     }
@@ -1077,7 +1073,7 @@ public abstract class CodePushBaseCore {
                 mManagers.mAcquisitionManager.reportStatusDeploy(configuration, statusReport);
             }
             saveReportedStatus(statusReport);
-        } catch (CodePushReportStatusException | CodePushIllegalArgumentException e) {
+        } catch (CodePushIllegalArgumentException e) {
 
             /* In order to do not lose original exception if another one will be thrown during the retry
              * we need to wrap it */

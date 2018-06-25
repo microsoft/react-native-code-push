@@ -6,8 +6,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameter;
 import org.junit.runners.Parameterized.Parameters;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.internal.mockcreation.MockCreator;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -37,7 +35,7 @@ public class FinalizeResourcesTest {
     private static Closeable createGoodResource() {
         return new Closeable() {
             @Override
-            public void close() throws IOException {
+            public void close() {
             }
         };
     }

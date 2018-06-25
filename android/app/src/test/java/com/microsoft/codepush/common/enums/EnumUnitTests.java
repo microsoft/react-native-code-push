@@ -10,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 public class EnumUnitTests {
 
     @Test
-    public void enumsTest() throws Exception {
+    public void enumsTest() {
         CodePushCheckFrequency codePushCheckFrequency = CodePushCheckFrequency.MANUAL;
         int checkFrequencyValue = codePushCheckFrequency.getValue();
         assertEquals(2, checkFrequencyValue);

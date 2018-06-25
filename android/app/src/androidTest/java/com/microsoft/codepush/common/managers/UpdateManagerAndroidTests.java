@@ -192,7 +192,7 @@ public class UpdateManagerAndroidTests {
      * It downloads signed package and tests case when it is verified and when no public key passed to signed package.
      */
     @Test
-    public void verifyTest() throws Exception {
+    public void verifyTest() {
         //TODO refactor test
 //        executeWorkflow(codePushUpdateManager, SIGNED_PACKAGE_HASH, SIGNED_PACKAGE_URL);
 //        codePushUpdateManager.mergeDiff(SIGNED_PACKAGE_HASH, SIGNED_PACKAGE_PUBLIC_KEY, "index.html");

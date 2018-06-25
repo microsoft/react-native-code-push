@@ -490,7 +490,7 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
      * @return instance of {@link ReactInstanceHolder}.
      */
 
-    private static ReactInstanceManager getReactInstanceManager() throws CodePushNativeApiCallException {
+    private static ReactInstanceManager getReactInstanceManager() {
         if (sReactInstanceHolder == null) {
             if (sReactInstanceManager == null) {
                 AppCenterLog.info(LOG_TAG, "You haven't set up neither ReactInstanceManger nor ReactInstanceHolder. Please refer to the documentation for more info.");
@@ -555,7 +555,7 @@ public class CodePushReactNativeCore extends CodePushBaseCore {
      * @return returns instance of {@link ReactInstanceManager}.
      * @throws CodePushNativeApiCallException exception occurred when performing the operation.
      */
-    private ReactInstanceManager resolveInstanceManager() throws CodePushNativeApiCallException {
+    private ReactInstanceManager resolveInstanceManager() {
         ReactInstanceManager instanceManager = CodePushReactNativeCore.getReactInstanceManager();
         if (instanceManager != null) {
             return instanceManager;

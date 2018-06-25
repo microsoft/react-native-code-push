@@ -1,6 +1,5 @@
 package com.microsoft.codepush.common.datacontracts;
 
-import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 /**

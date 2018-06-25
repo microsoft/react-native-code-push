@@ -119,7 +119,7 @@ public class UtilsAndroidTest {
      * Tests converting java object to json string.
      */
     @Test
-    public void testConvertObjectToJsonString() throws Exception {
+    public void testConvertObjectToJsonString() {
         SampleObject object = new SampleObject("000-000-000");
         Assert.assertEquals("{\"id\":\"000-000-000\"}", mUtils.convertObjectToJsonString(object));
     }
@@ -183,7 +183,7 @@ public class UtilsAndroidTest {
      * Cleanup created temporary test directories.
      */
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         File testFolder = CommonFileTestUtils.getTestingDirectory();
         testFolder.delete();
     }

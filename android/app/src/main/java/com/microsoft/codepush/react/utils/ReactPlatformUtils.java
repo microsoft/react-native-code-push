@@ -1,9 +1,7 @@
 package com.microsoft.codepush.react.utils;
 
 import android.content.Context;
-import android.os.Environment;
 
-import com.microsoft.codepush.common.CodePushConstants;
 import com.microsoft.codepush.common.datacontracts.CodePushLocalPackage;
 import com.microsoft.codepush.common.exceptions.CodePushGeneralException;
 import com.microsoft.codepush.common.interfaces.CodePushPlatformUtils;

@@ -152,7 +152,7 @@ public class FileFinalizeAndroidTests {
      * After running tests on file, we must delete all the created folders.
      */
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         File testFolder = getTestingDirectory();
         testFolder.delete();
     }

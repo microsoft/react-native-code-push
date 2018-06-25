@@ -132,7 +132,7 @@ public class FileAndroidTests {
      * if <code>null</code> path is passed.
      */
     @Test
-    public void fileAtNullPathNotExist() throws Exception {
+    public void fileAtNullPathNotExist() {
         assertFalse(mFileUtils.fileAtPathExists(null));
     }
 
@@ -230,7 +230,7 @@ public class FileAndroidTests {
      * After running tests on file, we must delete all the created folders.
      */
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         File testFolder = getTestingDirectory();
         testFolder.delete();
     }
@@ -240,7 +240,7 @@ public class FileAndroidTests {
      * if <code>listFiles</code> returned <code>null</code>.
      */
     @Test
-    public void deleteFileFailsIfListFilesFails() throws Exception {
+    public void deleteFileFailsIfListFilesFails() {
         File testFile = mock(File.class);
         doReturn(null).when(testFile).listFiles();
         doReturn(true).when(testFile).isDirectory();
@@ -252,7 +252,7 @@ public class FileAndroidTests {
      * if <code>delete</code> returned <code>null</code>.
      */
     @Test
-    public void deleteFileFailsIfDeleteFails() throws Exception {
+    public void deleteFileFailsIfDeleteFails() {
         File testFile = mock(File.class);
         doReturn(false).when(testFile).delete();
         mFileUtils.deleteFileOrFolderSilently(testFile);
@@ -263,7 +263,7 @@ public class FileAndroidTests {
      * if <code>delete</code> on child file returned <code>null</code>.
      */
     @Test
-    public void deleteFileFailsIfDeleteOnChildFails() throws Exception {
+    public void deleteFileFailsIfDeleteOnChildFails() {
         File testFile = mock(File.class);
         doReturn(false).when(testFile).delete();
         File newTestFile = mock(File.class);

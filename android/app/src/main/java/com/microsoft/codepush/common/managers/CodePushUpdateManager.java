@@ -144,7 +144,7 @@ public class CodePushUpdateManager {
      * @throws IOException                    read/write error occurred while accessing the file system.
      * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
-    public CodePushPackageInfo getCurrentPackageInfo() throws CodePushMalformedDataException, IOException {
+    public CodePushPackageInfo getCurrentPackageInfo() throws CodePushMalformedDataException {
         String statusFilePath = getStatusFilePath();
         if (!mFileUtils.fileAtPathExists(statusFilePath)) {
             return new CodePushPackageInfo();
@@ -245,7 +245,7 @@ public class CodePushUpdateManager {
      * @throws IOException                    read/write error occurred while accessing the file system.
      * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      */
-    public String getCurrentPackageHash() throws IOException, CodePushMalformedDataException {
+    public String getCurrentPackageHash() throws CodePushMalformedDataException {
         CodePushPackageInfo info = getCurrentPackageInfo();
         return info.getCurrentPackage();
     }
@@ -257,7 +257,7 @@ public class CodePushUpdateManager {
      * @throws IOException                    read/write error occurred while accessing the file system.
      * @throws CodePushMalformedDataException error thrown when actual data is broken (i .e. different from the expected).
      **/
-    public String getPreviousPackageHash() throws IOException, CodePushMalformedDataException {
+    public String getPreviousPackageHash() throws CodePushMalformedDataException {
         CodePushPackageInfo info = getCurrentPackageInfo();
         return info.getPreviousPackage();
     }
@@ -272,7 +272,7 @@ public class CodePushUpdateManager {
         String packageHash;
         try {
             packageHash = getCurrentPackageHash();
-        } catch (IOException | CodePushMalformedDataException e) {
+        } catch (CodePushMalformedDataException e) {
             throw new CodePushGetPackageException(e);
         }
         if (packageHash == null) {
@@ -291,7 +291,7 @@ public class CodePushUpdateManager {
         String packageHash;
         try {
             packageHash = getPreviousPackageHash();
-        } catch (IOException | CodePushMalformedDataException e) {
+        } catch (CodePushMalformedDataException e) {
             throw new CodePushGetPackageException(e);
         }
         if (packageHash == null) {
