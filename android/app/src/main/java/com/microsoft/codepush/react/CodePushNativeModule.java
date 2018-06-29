@@ -588,8 +588,16 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         }
     }
 
+    /**
+     * This method clears CodePush's downloaded updates.
+     * It is needed to switch to a different deployment if the current deployment is more recent.
+     * Note: we don’t recommend to use this method in scenarios other than that (CodePush will call
+     * this method automatically when needed in other cases) as it could lead to unpredictable
+     * behavior.
+     */
     @ReactMethod
     public void clearUpdates() {
+        CodePushUtils.log("Clearing updates.");
         mCodePush.clearUpdates();
     }
 }
