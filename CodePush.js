@@ -542,6 +542,7 @@ if (NativeCodePush) {
     sync,
     disallowRestart: RestartManager.disallow,
     allowRestart: RestartManager.allow,
+    clearUpdates: NativeCodePush.clearUpdates,
     InstallMode: {
       IMMEDIATE: NativeCodePush.codePushInstallModeImmediate, // Restart the app immediately
       ON_NEXT_RESTART: NativeCodePush.codePushInstallModeOnNextRestart, // Don't artificially restart the app. Allow the update to be "picked up" on the next app restart

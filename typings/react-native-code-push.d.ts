@@ -274,6 +274,12 @@ declare namespace CodePush {
     function disallowRestart(): void;
 
     /**
+     * Clear all downloaded CodePush updates.
+     * This is useful when switching to a different deployment which may have an older release than the current package.
+     */
+    function clearUpdates(): void;
+
+    /**
      * Immediately restarts the app.
      *
      * @param onlyIfUpdateIsPending Indicates whether you want the restart to no-op if there isn't currently a pending update.

@@ -209,8 +209,6 @@ static NSString *bundleResourceSubdirectory = nil;
     [CodePushConfig current].deploymentKey = deploymentKey;
 }
 
-#pragma mark - Test-only methods
-
 /*
  * WARNING: This cleans up all downloaded and pending updates.
  */
@@ -220,6 +218,8 @@ static NSString *bundleResourceSubdirectory = nil;
     [self removePendingUpdate];
     [self removeFailedUpdates];
 }
+
+#pragma mark - Test-only methods
 
 /*
  * This returns a boolean value indicating whether CodePush has
@@ -865,6 +865,14 @@ RCT_EXPORT_METHOD(restartApp:(BOOL)onlyIfUpdateIsPending
     }
 
     resolve(@(NO));
+}
+
+/*
+ * This method clears CodePush's downloaded updates.
+ * It is needed to switch to a different deployment if the current deployment is more recent.
+ */
+RCT_EXPORT_METHOD(clearUpdates) {
+    [CodePush clearUpdates];
 }
 
 #pragma mark - JavaScript-exported module methods (Private)
