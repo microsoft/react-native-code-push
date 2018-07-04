@@ -118,7 +118,12 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
 
     private void loadBundle() {
         clearLifecycleEventListener();
-        mCodePush.clearDebugCacheIfNeeded();
+        try {
+            mCodePush.clearDebugCacheIfNeeded(resolveInstanceManager());
+        } catch(Exception e) {
+            mCodePush.clearDebugCacheIfNeeded(null);
+        }
+
         try {
             // #1) Get the ReactInstanceManager instance, which is what includes the
             //     logic to reload the current React context.

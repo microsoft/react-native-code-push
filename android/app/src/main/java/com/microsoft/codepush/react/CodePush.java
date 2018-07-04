@@ -11,6 +11,8 @@ import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.devsupport.DevInternalSettings;
+import com.facebook.react.devsupport.interfaces.DevSupportManager;
 import com.facebook.react.uimanager.ViewManager;
 
 import org.json.JSONException;
@@ -76,7 +78,7 @@ public class CodePush implements ReactPackage {
 
         mCurrentInstance = this;
 
-        clearDebugCacheIfNeeded();
+        clearDebugCacheIfNeeded(null);
         initializeUpdateAfterRestart();
     }
 
@@ -119,8 +121,18 @@ public class CodePush implements ReactPackage {
         return publicKey;
     }
 
-    public void clearDebugCacheIfNeeded() {
-        if (mIsDebugMode && mSettingsManager.isPendingUpdate(null)) {
+    public void clearDebugCacheIfNeeded(ReactInstanceManager instanceManager) {
+        boolean isLiveReloadEnabled = false;
+
+        if(instanceManager != null) {
+            DevSupportManager devSupportManager = instanceManager.getDevSupportManager();
+            if(devSupportManager != null) {
+                DevInternalSettings devInternalSettings = (DevInternalSettings)devSupportManager.getDevSettings();
+                isLiveReloadEnabled = devInternalSettings.isReloadOnJSChangeEnabled();
+            }
+        }
+
+        if (mIsDebugMode && mSettingsManager.isPendingUpdate(null) && !isLiveReloadEnabled) {
             // This needs to be kept in sync with https://github.com/facebook/react-native/blob/master/ReactAndroid/src/main/java/com/facebook/react/devsupport/DevSupportManager.java#L78
             File cachedDevBundle = new File(mContext.getFilesDir(), "ReactNativeDevBundle.js");
             if (cachedDevBundle.exists()) {
