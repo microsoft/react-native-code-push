@@ -124,9 +124,9 @@ public class CodePush implements ReactPackage {
     public void clearDebugCacheIfNeeded(ReactInstanceManager instanceManager) {
         boolean isLiveReloadEnabled = false;
 
-        if(instanceManager != null) {
+        if (instanceManager != null) {
             DevSupportManager devSupportManager = instanceManager.getDevSupportManager();
-            if(devSupportManager != null) {
+            if (devSupportManager != null) {
                 DevInternalSettings devInternalSettings = (DevInternalSettings)devSupportManager.getDevSettings();
                 isLiveReloadEnabled = devInternalSettings.isReloadOnJSChangeEnabled();
             }
