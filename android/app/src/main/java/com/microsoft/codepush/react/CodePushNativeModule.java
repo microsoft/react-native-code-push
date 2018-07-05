@@ -121,6 +121,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         try {
             mCodePush.clearDebugCacheIfNeeded(resolveInstanceManager());
         } catch(Exception e) {
+            // If we got error in out reflection we should clear debug cache anyway.
             mCodePush.clearDebugCacheIfNeeded(null);
         }
 

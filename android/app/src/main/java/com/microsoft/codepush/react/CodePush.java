@@ -124,6 +124,8 @@ public class CodePush implements ReactPackage {
     public void clearDebugCacheIfNeeded(ReactInstanceManager instanceManager) {
         boolean isLiveReloadEnabled = false;
 
+        // Use instanceManager for checking if we use LiveRelaod mode. In this case we should not remove ReactNativeDevBundle.js file
+        // because we get error with tring to get this after reloading. Issue: https://github.com/Microsoft/react-native-code-push/issues/1272
         if (instanceManager != null) {
             DevSupportManager devSupportManager = instanceManager.getDevSupportManager();
             if (devSupportManager != null) {
