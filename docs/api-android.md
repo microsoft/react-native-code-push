@@ -35,13 +35,11 @@ As an alternative to constructors *you can also use `CodePushBuilder`* to setup 
 
     @Override
     protected List<ReactPackage> getPackages() {
-
-        int publicKeyResourceDescriptor = getCodePushPublicKeyResourceIdentifier();
         return Arrays.<ReactPackage>asList(
             new MainReactPackage(),
             new CodePushBuilder("deployment-key-here",getApplicationContext())
                 .setIsDebugMode(BuildConfig.DEBUG)
-                .setPublicKeyResourceDescriptor(publicKeyResouceDescriptor)
+                .setPublicKeyResourceDescriptor(getCodePushPublicKeyResourceIdentifier())
                 .setServerUrl("https://yourcodepush.server.com")
                 .build() //return configured CodePush instance
       );
