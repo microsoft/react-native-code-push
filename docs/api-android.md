@@ -42,7 +42,7 @@ As an alternative to constructors *you can also use `CodePushBuilder`* to setup 
                 .setPublicKeyResourceDescriptor(getCodePushPublicKeyResourceIdentifier())
                 .setServerUrl("https://yourcodepush.server.com")
                 .build() //return configured CodePush instance
-      );
+        );
     }
 ```
 
