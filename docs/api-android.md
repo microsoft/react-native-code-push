@@ -25,10 +25,18 @@ Constructs the CodePush client runtime and represents the `ReactPackage` instanc
 As an alternative to constructors *you can also use `CodePushBuilder`* to setup a CodePush instance configured with *only parameters you want*.
 
 ```java
+    private int getCodePushPublicKeyResourceIdentifier() {
+        Resources resources = getApplicationContext().getResources();
+        String packageName = getPackageName();
+
+        return resources.getIdentifier("code_push_public_key", "string", packageName);
+    }
+
+
     @Override
     protected List<ReactPackage> getPackages() {
 
-        int publicKeyResourceDescriptor = ...;
+        int publicKeyResourceDescriptor = getCodePushPublicKeyResourceIdentifier();
         return Arrays.<ReactPackage>asList(
             new MainReactPackage(),
             new CodePushBuilder("deployment-key-here",getApplicationContext())
