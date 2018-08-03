@@ -9,7 +9,7 @@
 Once you have installed `node.js` and `npm`, install the dev dependencies for the project.
 
 ```
-npm install
+npm install --production=false
 ```
 
 ### Using the plugin manually
@@ -20,7 +20,7 @@ Follow these steps to test your modifications to the plugin manually:
 
 	Navigate to the root folder from your command line console and run:
 	```
-	npm install
+	npm install --production=false
 	```
 - install the plugin in a React-Native project
 
