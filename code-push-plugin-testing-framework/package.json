@@ -22,7 +22,7 @@
     "node-uuid": "^1.4.3",
     "q": "^1.4.1",
     "replace": "latest",
-    "superagent": "^1.7.2",
+    "superagent": "^3.8.3",
     "superagent-proxy": "^1.0.0"
   },
   "bugs": {
