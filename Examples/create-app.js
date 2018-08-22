@@ -98,7 +98,9 @@ function generatePlainReactNativeApp(appName, reactNativeVersion) {
 
 function installCodePush(reactNativeCodePushVersion) {
     console.log(`Installing React Native Module for CodePush...`);
-    execSync(`npm i --save ${reactNativeCodePushVersion}`);
+    // execSync(`npm i --save ${reactNativeCodePushVersion}`);
+    // Fixed some problems with dependencies
+    execSync(`yarn add ${reactNativeCodePushVersion}`);
     console.log(`React Native Module for CodePush has been installed \n`);
 }
 
@@ -174,7 +176,7 @@ function optimizeToTestInDebugMode() {
     execSync(`sed -ie 's/if \\[\\[ "\$PLATFORM_NAME" == \\*simulator \\]\\]; then/if false; then/' ${rnXcodeShPath}`);
     
     execSync(`perl -i -p0e 's/#ifdef DEBUG.*?#endif/jsCodeLocation = [CodePush bundleURL];/s' ios/${appName}/AppDelegate.m`);
-    execSync(`sed -ie 's/targetName.toLowerCase().contains("release")$/true/' node_modules/react-native/react.gradle`);
+    execSync(`sed -ie 's/targetName.toLowerCase().contains("release")/true/' node_modules/react-native/react.gradle`);
 }
 
 function grantAccess(folderPath) {
