@@ -85,3 +85,19 @@ Ankh.NoLoad
 #NuGet
 packages/
 *.nupkg
+
+# VSCode
+.vscode/
+
+# IntelliJIDEA
+.idea/
+
+
+# Github
+.github/
+
+# Git
+.git/
+
+.watchmanconfig
+
