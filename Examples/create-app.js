@@ -32,18 +32,18 @@ if (fs.existsSync(appName)) {
     process.exit();
 }
 
+// Checking if yarn is installed
+try {
+    execSync('yarn bin');
+} catch (err) {
+    console.error(`You must install 'yarn' to use this script!`);
+    process.exit();
+}
+
 let appNameAndroid = `${appName}-android`;
 let appNameIOS = `${appName}-ios`;
 let reactNativeVersion = args[1] || `react-native@${execSync('npm view react-native version')}`.trim();
-
-let reactNativeVersionBellowV049;
-if (reactNativeVersion) {
-    let reactNativeVersionNumberString = reactNativeVersion.split("@")[1];
-    reactNativeVersionBellowV049 = reactNativeVersionNumberString.split('.')[1] < 49
-} else {
-    reactNativeVersionBellowV049 = false;
-}
-
+let reactNativeVersionIsLowerThanV049 = isReactNativeVesionLowerThan(49);
 let reactNativeCodePushVersion = args[2] || `react-native-code-push@${execSync('npm view react-native-code-push version')}`.trim();
 
 console.log(`App name: ${appName}`);
@@ -98,8 +98,6 @@ function generatePlainReactNativeApp(appName, reactNativeVersion) {
 
 function installCodePush(reactNativeCodePushVersion) {
     console.log(`Installing React Native Module for CodePush...`);
-    // execSync(`npm i --save ${reactNativeCodePushVersion}`);
-    // Fixed some problems with dependencies
     execSync(`yarn add ${reactNativeCodePushVersion}`);
     console.log(`React Native Module for CodePush has been installed \n`);
 }
@@ -124,10 +122,10 @@ function linkCodePush(androidStagingDeploymentKey, iosStagingDeploymentKey) {
 
 function setupAssets() {
     let fileToEdit;
-    if (reactNativeVersionBellowV049) {
+    if (reactNativeVersionIsLowerThanV049) {
         fs.unlinkSync('./index.ios.js');
         fs.unlinkSync('./index.android.js');
-        
+
         fs.writeFileSync('demo.js', fs.readFileSync('../CodePushDemoApp-pre0.49/demo.js'));
         fs.writeFileSync('index.ios.js', fs.readFileSync('../CodePushDemoApp-pre0.49/index.ios.js'));
         fs.writeFileSync('index.android.js', fs.readFileSync('../CodePushDemoApp-pre0.49/index.android.js'));
@@ -137,7 +135,7 @@ function setupAssets() {
         fs.writeFileSync('App.js', fs.readFileSync('../CodePushDemoApp/App.js'));
         fileToEdit = 'index.js'
     }
-    
+
     copyRecursiveSync('../CodePushDemoApp/images', './images');
 
     fs.readFile(fileToEdit, 'utf8', function (err, data) {
@@ -170,18 +168,17 @@ function optimizeToTestInDebugMode() {
             rnXcodeShLocationFolder = 'packager';
         }
     } catch(e) {}
-    
+
     let rnXcodeShPath = `node_modules/react-native/${rnXcodeShLocationFolder}/react-native-xcode.sh`;
     // Replace "if [[ "$PLATFORM_NAME" == *simulator ]]; then" with "if false; then" to force bundling
     execSync(`sed -ie 's/if \\[\\[ "\$PLATFORM_NAME" == \\*simulator \\]\\]; then/if false; then/' ${rnXcodeShPath}`);
-    
     execSync(`perl -i -p0e 's/#ifdef DEBUG.*?#endif/jsCodeLocation = [CodePush bundleURL];/s' ios/${appName}/AppDelegate.m`);
     execSync(`sed -ie 's/targetName.toLowerCase().contains("release")/true/' node_modules/react-native/react.gradle`);
 }
 
 function grantAccess(folderPath) {
     execSync('chown -R `whoami` ' + folderPath);
-    // execSync('chmod -R 755 ' + folderPath);
+    execSync('chmod -R 755 ' + folderPath);
 }
 
 function copyRecursiveSync(src, dest) {
@@ -197,4 +194,14 @@ function copyRecursiveSync(src, dest) {
     } else {
         fs.linkSync(src, dest);
     }
+}
+
+function isReactNativeVesionLowerThan(version) {
+    if (!reactNativeVersion ||
+        reactNativeVersion == "react-native@latest" ||
+        reactNativeVersion == "react-native@next")
+        return false;
+
+    let reactNativeVersionNumberString = reactNativeVersion.split("@")[1];
+    return reactNativeVersionNumberString.split('.')[1] < version;
 }
