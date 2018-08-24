@@ -178,7 +178,6 @@ function optimizeToTestInDebugMode() {
 
 function grantAccess(folderPath) {
     execSync('chown -R `whoami` ' + folderPath);
-    execSync('chmod -R 755 ' + folderPath);
 }
 
 function copyRecursiveSync(src, dest) {
