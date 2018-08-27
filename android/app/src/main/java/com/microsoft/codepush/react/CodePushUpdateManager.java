@@ -223,6 +223,7 @@ public class CodePushUpdateManager {
             String diffManifestFilePath = CodePushUtils.appendPathComponent(unzippedFolderPath,
                     CodePushConstants.DIFF_MANIFEST_FILE_NAME);
             boolean isDiffUpdate = FileUtils.fileAtPathExists(diffManifestFilePath);
+
             if (isDiffUpdate) {
                 String currentPackageFolderPath = getCurrentPackageFolderPath();
                 CodePushUpdateUtils.copyNecessaryFilesFromCurrentPackage(diffManifestFilePath, currentPackageFolderPath, newUpdateFolderPath);
@@ -230,60 +231,65 @@ public class CodePushUpdateManager {
                 diffManifestFile.delete();
             }
 
+            // For zip updates, we need to find the relative path to the jsBundle and save it in the
+            // metadata so that we can find and run it easily the next time.
+            String relativeBundlePath = CodePushUpdateUtils.findJSBundleInUpdateContents(unzippedFolderPath, expectedBundleFileName);
+            if (relativeBundlePath == null) {
+                // delete the unzippedFolderPath as expected JS bundle file name is invalid
+                FileUtils.deleteFileAtPathSilently(unzippedFolderPath);
+                if (FileUtils.fileAtPathExists(newUpdateFolderPath)) {
+                    // delete the newUpdateFolderPath as expected JS bundle file name is invalid
+                    FileUtils.deleteFileAtPathSilently(newUpdateFolderPath);
+                }
+                throw new CodePushInvalidUpdateException("Update is invalid - A JS bundle file named \"" + expectedBundleFileName + "\" could not be found within the downloaded contents. Please check that you are releasing your CodePush updates using the exact same JS bundle file name that was shipped with your app's binary.");
+            }
+
             FileUtils.copyDirectoryContents(unzippedFolderPath, newUpdateFolderPath);
             FileUtils.deleteFileAtPathSilently(unzippedFolderPath);
 
-            // For zip updates, we need to find the relative path to the jsBundle and save it in the
-            // metadata so that we can find and run it easily the next time.
-            String relativeBundlePath = CodePushUpdateUtils.findJSBundleInUpdateContents(newUpdateFolderPath, expectedBundleFileName);
-
-            if (relativeBundlePath == null) {
-                throw new CodePushInvalidUpdateException("Update is invalid - A JS bundle file named \"" + expectedBundleFileName + "\" could not be found within the downloaded contents. Please check that you are releasing your CodePush updates using the exact same JS bundle file name that was shipped with your app's binary.");
-            } else {
-                if (FileUtils.fileAtPathExists(newUpdateMetadataPath)) {
-                    File metadataFileFromOldUpdate = new File(newUpdateMetadataPath);
-                    metadataFileFromOldUpdate.delete();
-                }
-
-                if (isDiffUpdate) {
-                    CodePushUtils.log("Applying diff update.");
-                } else {
-                    CodePushUtils.log("Applying full update.");
-                }
-
-                boolean isSignatureVerificationEnabled = (stringPublicKey != null);
-
-                String signaturePath = CodePushUpdateUtils.getSignatureFilePath(newUpdateFolderPath);
-                boolean isSignatureAppearedInBundle = FileUtils.fileAtPathExists(signaturePath);
-
-                if (isSignatureVerificationEnabled) {
-                    if (isSignatureAppearedInBundle) {
-                        CodePushUpdateUtils.verifyFolderHash(newUpdateFolderPath, newUpdateHash);
-                        CodePushUpdateUtils.verifyUpdateSignature(newUpdateFolderPath, newUpdateHash, stringPublicKey);
-                    } else {
-                        throw new CodePushInvalidUpdateException(
-                                "Error! Public key was provided but there is no JWT signature within app bundle to verify. " +
-                                "Possible reasons, why that might happen: \n" +
-                                "1. You've been released CodePush bundle update using version of CodePush CLI that is not support code signing.\n" +
-                                "2. You've been released CodePush bundle update without providing --privateKeyPath option."
-                        );
-                    }
-                } else {
-                    if (isSignatureAppearedInBundle) {
-                        CodePushUtils.log(
-                                "Warning! JWT signature exists in codepush update but code integrity check couldn't be performed because there is no public key configured. " +
-                                "Please ensure that public key is properly configured within your application."
-                        );
-                        CodePushUpdateUtils.verifyFolderHash(newUpdateFolderPath, newUpdateHash);
-                    } else {
-                        if (isDiffUpdate) {
-                            CodePushUpdateUtils.verifyFolderHash(newUpdateFolderPath, newUpdateHash);
-                        }
-                    }
-                }
-
-                CodePushUtils.setJSONValueForKey(updatePackage, CodePushConstants.RELATIVE_BUNDLE_PATH_KEY, relativeBundlePath);
+            if (FileUtils.fileAtPathExists(newUpdateMetadataPath)) {
+                File metadataFileFromOldUpdate = new File(newUpdateMetadataPath);
+                metadataFileFromOldUpdate.delete();
             }
+
+            if (isDiffUpdate) {
+                CodePushUtils.log("Applying diff update.");
+            } else {
+                CodePushUtils.log("Applying full update.");
+            }
+
+            boolean isSignatureVerificationEnabled = (stringPublicKey != null);
+
+            String signaturePath = CodePushUpdateUtils.getSignatureFilePath(newUpdateFolderPath);
+            boolean isSignatureAppearedInBundle = FileUtils.fileAtPathExists(signaturePath);
+
+            if (isSignatureVerificationEnabled) {
+                if (isSignatureAppearedInBundle) {
+                    CodePushUpdateUtils.verifyFolderHash(newUpdateFolderPath, newUpdateHash);
+                    CodePushUpdateUtils.verifyUpdateSignature(newUpdateFolderPath, newUpdateHash, stringPublicKey);
+                } else {
+                    throw new CodePushInvalidUpdateException(
+                            "Error! Public key was provided but there is no JWT signature within app bundle to verify. " +
+                                    "Possible reasons, why that might happen: \n" +
+                                    "1. You've been released CodePush bundle update using version of CodePush CLI that is not support code signing.\n" +
+                                    "2. You've been released CodePush bundle update without providing --privateKeyPath option."
+                    );
+                }
+            } else {
+                if (isSignatureAppearedInBundle) {
+                    CodePushUtils.log(
+                            "Warning! JWT signature exists in codepush update but code integrity check couldn't be performed because there is no public key configured. " +
+                                    "Please ensure that public key is properly configured within your application."
+                    );
+                    CodePushUpdateUtils.verifyFolderHash(newUpdateFolderPath, newUpdateHash);
+                } else {
+                    if (isDiffUpdate) {
+                        CodePushUpdateUtils.verifyFolderHash(newUpdateFolderPath, newUpdateHash);
+                    }
+                }
+            }
+
+            CodePushUtils.setJSONValueForKey(updatePackage, CodePushConstants.RELATIVE_BUNDLE_PATH_KEY, relativeBundlePath);
         } else {
             // File is a jsbundle, move it to a folder with the packageHash as its name
             FileUtils.moveFile(downloadFile, newUpdateFolderPath, expectedBundleFileName);
