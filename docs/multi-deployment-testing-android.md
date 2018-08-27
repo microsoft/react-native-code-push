@@ -26,6 +26,7 @@ To set this up, perform the following steps:
             releaseStaging {
                 ...
                 buildConfigField "String", "CODEPUSH_KEY", '"<INSERT_STAGING_KEY>"'
+                matchingFallbacks = ['release', 'debug']
                 ...
             }
 
