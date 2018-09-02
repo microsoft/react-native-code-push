@@ -27,6 +27,8 @@ import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import name.fraser.neil.plaintext.diff_match_patch;
@@ -118,8 +120,13 @@ public class CodePushUpdateUtils {
     public static void diffPatchApplyNecessaryFilesFromCurrentPackage(String diffManifestFilePath, String currentPackageFolderPath, String unzippedFolderPath) throws IOException {
         diff_match_patch dmp = new diff_match_patch();
         JSONObject diffManifest = CodePushUtils.getJsonObjectFromFile(diffManifestFilePath);
+        JSONArray patchedFiles = new JSONArray();
         try {
-            JSONArray patchedFiles = diffManifest.getJSONArray("patchedFiles");
+            patchedFiles = diffManifest.getJSONArray("patchedFiles");
+        } catch (JSONException ignored) {
+
+        }
+        try {
             for (int i = 0; i < patchedFiles.length(); i++) {
                 String fileNameToPatch = patchedFiles.getString(i);
                 File fileToPatch = new File(currentPackageFolderPath, fileNameToPatch);
