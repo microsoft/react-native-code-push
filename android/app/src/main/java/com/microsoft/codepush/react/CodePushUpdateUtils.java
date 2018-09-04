@@ -27,7 +27,11 @@ import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+
+import name.fraser.neil.plaintext.diff_match_patch;
 
 public class CodePushUpdateUtils {
 
@@ -110,6 +114,31 @@ public class CodePushUpdateUtils {
             }
         } catch (JSONException e) {
             throw new CodePushUnknownException("Unable to copy files from current package during diff update", e);
+        }
+    }
+
+    public static void diffPatchApplyNecessaryFilesFromCurrentPackage(String diffManifestFilePath, String currentPackageFolderPath, String unzippedFolderPath) throws IOException {
+        diff_match_patch dmp = new diff_match_patch();
+        JSONObject diffManifest = CodePushUtils.getJsonObjectFromFile(diffManifestFilePath);
+        JSONArray patchedFiles = new JSONArray();
+        try {
+            patchedFiles = diffManifest.getJSONArray("patchedFiles");
+        } catch (JSONException ignored) {
+
+        }
+        try {
+            for (int i = 0; i < patchedFiles.length(); i++) {
+                String fileNameToPatch = patchedFiles.getString(i);
+                File fileToPatch = new File(currentPackageFolderPath, fileNameToPatch);
+                File patchFile = new File(unzippedFolderPath, fileNameToPatch);
+                if (fileToPatch.exists() && patchFile.exists()) {
+                    List<diff_match_patch.Patch> patches = dmp.patch_fromText(FileUtils.readFileToOriginString(patchFile.getAbsolutePath()));
+                    Object[] results = dmp.patch_apply((LinkedList<diff_match_patch.Patch>) patches, FileUtils.readFileToOriginString(fileToPatch.getAbsolutePath()));
+                    FileUtils.writeStringToFile((String) results[0], patchFile.getAbsolutePath());
+                }
+            }
+        } catch (JSONException e) {
+            throw new CodePushUnknownException("Unable to diff-patch-apply files from current package during diff update", e);
         }
     }
 

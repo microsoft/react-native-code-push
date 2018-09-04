@@ -103,6 +103,23 @@ public class FileUtils {
         }
     }
 
+    public static String readFileToOriginString(String filePath) throws IOException {
+        BufferedInputStream bufferedInputStream = null;
+        StringBuffer sb = new StringBuffer("");
+        try {
+            File file = new File(filePath);
+            bufferedInputStream = new BufferedInputStream(new FileInputStream(file));
+            int len = 0;
+            byte[] temp = new byte[1024];
+            while ((len = bufferedInputStream.read(temp)) != -1) {
+                sb.append(new String(temp, 0, len));
+            }
+        } finally {
+            if (bufferedInputStream != null) bufferedInputStream.close();
+        }
+        return sb.toString();
+    }
+
     public static String readFileToString(String filePath) throws IOException {
         FileInputStream fin = null;
         BufferedReader reader = null;
