@@ -132,8 +132,8 @@ public class CodePushUpdateUtils {
                 File fileToPatch = new File(currentPackageFolderPath, fileNameToPatch);
                 File patchFile = new File(unzippedFolderPath, fileNameToPatch);
                 if (fileToPatch.exists() && patchFile.exists()) {
-                    List<diff_match_patch.Patch> patches = dmp.patch_fromText(FileUtils.readFileToString(patchFile.getAbsolutePath()));
-                    Object[] results = dmp.patch_apply((LinkedList<diff_match_patch.Patch>) patches, FileUtils.readFileToString(fileToPatch.getAbsolutePath()));
+                    List<diff_match_patch.Patch> patches = dmp.patch_fromText(FileUtils.readFileToOriginString(patchFile.getAbsolutePath()));
+                    Object[] results = dmp.patch_apply((LinkedList<diff_match_patch.Patch>) patches, FileUtils.readFileToOriginString(fileToPatch.getAbsolutePath()));
                     FileUtils.writeStringToFile((String) results[0], patchFile.getAbsolutePath());
                 }
             }
