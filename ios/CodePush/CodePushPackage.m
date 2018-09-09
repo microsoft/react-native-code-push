@@ -1,5 +1,6 @@
 #import "CodePush.h"
 #import "SSZipArchive.h"
+#import "DiffMatchPatch.h"
 
 @implementation CodePushPackage
 
@@ -177,6 +178,29 @@ static NSString *const UnzippedFolderName = @"unzipped";
                                                                         failCallback(error);
                                                                         return;
                                                                     }
+                                                                }
+                                                            }
+                                                            
+                                                            DiffMatchPatch *dmp = [DiffMatchPatch new];
+                                                            NSArray *patchedFiles = manifestJSON[@"patchedFiles"];
+                                                            for (NSString *patchedFileName in patchedFiles) {
+                                                                NSString *absoluteFilePath = [newUpdateFolderPath stringByAppendingPathComponent:patchedFileName];
+                                                                NSString *absolutePatchedFilePath = [unzippedFolderPath stringByAppendingPathComponent:patchedFileName];
+                                                                if ([[NSFileManager defaultManager] fileExistsAtPath:absoluteFilePath]
+                                                                    && [[NSFileManager defaultManager] fileExistsAtPath:absolutePatchedFilePath]
+                                                                    ) {
+                                                                    NSData *patchData =[[NSFileManager defaultManager] contentsAtPath:absolutePatchedFilePath];
+                                                                    NSString *patchStr = [[NSString alloc] initWithData:patchData encoding:NSUTF8StringEncoding];
+                                                                    NSMutableArray *patches = [dmp patch_fromText:patchStr error:&error];
+                                                                    if (error) {
+                                                                        failCallback(error);
+                                                                        return;
+                                                                    }
+                                                                    NSData *currentData = [[NSFileManager defaultManager] contentsAtPath:absoluteFilePath];
+                                                                    NSString *currentStr = [[NSString alloc] initWithData:currentData encoding:NSUTF8StringEncoding];
+                                                                    NSArray *results = [dmp patch_apply:patches toString:currentStr];
+                                                                    NSString *resultStr = [results objectAtIndex:0];
+                                                                    [resultStr writeToFile:absolutePatchedFilePath atomically:YES encoding:NSUTF8StringEncoding error:nil];
                                                                 }
                                                             }
                                                             

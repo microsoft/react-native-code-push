@@ -59,6 +59,20 @@
 		81D51F3A1B6181C2000DA084 /* CodePushConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 81D51F391B6181C2000DA084 /* CodePushConfig.m */; };
 		8482F84C1E24C58300F793DB /* CodePush.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 13BE3DEC1AC21097009241FE /* CodePush.h */; };
 		8482F84E1E24C66300F793DB /* CodePush.h in Headers */ = {isa = PBXBuildFile; fileRef = 13BE3DEC1AC21097009241FE /* CodePush.h */; };
+		DA44B1D0214555C600A55AC6 /* DiffMatchPatch.h in Headers */ = {isa = PBXBuildFile; fileRef = DA44B1C2214555C600A55AC6 /* DiffMatchPatch.h */; };
+		DA44B1D1214555C600A55AC6 /* DiffMatchPatchCFUtilities.c in Sources */ = {isa = PBXBuildFile; fileRef = DA44B1C3214555C600A55AC6 /* DiffMatchPatchCFUtilities.c */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		DA44B1D2214555C600A55AC6 /* DiffMatchPatch_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = DA44B1C4214555C600A55AC6 /* DiffMatchPatch_Prefix.pch */; };
+		DA44B1D3214555C600A55AC6 /* NSString+UriCompatibility.h in Headers */ = {isa = PBXBuildFile; fileRef = DA44B1C5214555C600A55AC6 /* NSString+UriCompatibility.h */; };
+		DA44B1D4214555C600A55AC6 /* NSString+JavaSubstring.h in Headers */ = {isa = PBXBuildFile; fileRef = DA44B1C6214555C600A55AC6 /* NSString+JavaSubstring.h */; };
+		DA44B1D5214555C600A55AC6 /* NSMutableDictionary+DMPExtensions.h in Headers */ = {isa = PBXBuildFile; fileRef = DA44B1C7214555C600A55AC6 /* NSMutableDictionary+DMPExtensions.h */; };
+		DA44B1D6214555C600A55AC6 /* NSString+UnicharUtilities.m in Sources */ = {isa = PBXBuildFile; fileRef = DA44B1C8214555C600A55AC6 /* NSString+UnicharUtilities.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		DA44B1D7214555C600A55AC6 /* DiffMatchPatchCFUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = DA44B1C9214555C600A55AC6 /* DiffMatchPatchCFUtilities.h */; };
+		DA44B1D8214555C600A55AC6 /* DiffMatchPatch.m in Sources */ = {isa = PBXBuildFile; fileRef = DA44B1CA214555C600A55AC6 /* DiffMatchPatch.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		DA44B1D9214555C600A55AC6 /* NSString+JavaSubstring.m in Sources */ = {isa = PBXBuildFile; fileRef = DA44B1CB214555C600A55AC6 /* NSString+JavaSubstring.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		DA44B1DA214555C600A55AC6 /* NSString+UriCompatibility.m in Sources */ = {isa = PBXBuildFile; fileRef = DA44B1CC214555C600A55AC6 /* NSString+UriCompatibility.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		DA44B1DB214555C600A55AC6 /* NSString+UnicharUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = DA44B1CD214555C600A55AC6 /* NSString+UnicharUtilities.h */; };
+		DA44B1DC214555C600A55AC6 /* MinMaxMacros.h in Headers */ = {isa = PBXBuildFile; fileRef = DA44B1CE214555C600A55AC6 /* MinMaxMacros.h */; };
+		DA44B1DD214555C600A55AC6 /* NSMutableDictionary+DMPExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = DA44B1CF214555C600A55AC6 /* NSMutableDictionary+DMPExtensions.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		F85736761F4F03BF00C9C00A /* MF_Base64Additions.h in Headers */ = {isa = PBXBuildFile; fileRef = F85736731F4F03BF00C9C00A /* MF_Base64Additions.h */; };
 		F85736771F4F03BF00C9C00A /* MF_Base64Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = F85736741F4F03BF00C9C00A /* MF_Base64Additions.m */; };
 		F85736781F4F03BF00C9C00A /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = F85736751F4F03BF00C9C00A /* README.md */; };
@@ -180,6 +194,20 @@
 		54FFEDDF1BF550630061DD23 /* CodePushDownloadHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CodePushDownloadHandler.m; path = CodePush/CodePushDownloadHandler.m; sourceTree = "<group>"; };
 		810D4E6C1B96935000B397E9 /* CodePushPackage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CodePushPackage.m; path = CodePush/CodePushPackage.m; sourceTree = "<group>"; };
 		81D51F391B6181C2000DA084 /* CodePushConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CodePushConfig.m; path = CodePush/CodePushConfig.m; sourceTree = "<group>"; };
+		DA44B1C2214555C600A55AC6 /* DiffMatchPatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DiffMatchPatch.h; sourceTree = "<group>"; };
+		DA44B1C3214555C600A55AC6 /* DiffMatchPatchCFUtilities.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = DiffMatchPatchCFUtilities.c; sourceTree = "<group>"; };
+		DA44B1C4214555C600A55AC6 /* DiffMatchPatch_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DiffMatchPatch_Prefix.pch; sourceTree = "<group>"; };
+		DA44B1C5214555C600A55AC6 /* NSString+UriCompatibility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+UriCompatibility.h"; sourceTree = "<group>"; };
+		DA44B1C6214555C600A55AC6 /* NSString+JavaSubstring.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+JavaSubstring.h"; sourceTree = "<group>"; };
+		DA44B1C7214555C600A55AC6 /* NSMutableDictionary+DMPExtensions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableDictionary+DMPExtensions.h"; sourceTree = "<group>"; };
+		DA44B1C8214555C600A55AC6 /* NSString+UnicharUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+UnicharUtilities.m"; sourceTree = "<group>"; };
+		DA44B1C9214555C600A55AC6 /* DiffMatchPatchCFUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DiffMatchPatchCFUtilities.h; sourceTree = "<group>"; };
+		DA44B1CA214555C600A55AC6 /* DiffMatchPatch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DiffMatchPatch.m; sourceTree = "<group>"; };
+		DA44B1CB214555C600A55AC6 /* NSString+JavaSubstring.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+JavaSubstring.m"; sourceTree = "<group>"; };
+		DA44B1CC214555C600A55AC6 /* NSString+UriCompatibility.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+UriCompatibility.m"; sourceTree = "<group>"; };
+		DA44B1CD214555C600A55AC6 /* NSString+UnicharUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+UnicharUtilities.h"; sourceTree = "<group>"; };
+		DA44B1CE214555C600A55AC6 /* MinMaxMacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MinMaxMacros.h; sourceTree = "<group>"; };
+		DA44B1CF214555C600A55AC6 /* NSMutableDictionary+DMPExtensions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableDictionary+DMPExtensions.m"; sourceTree = "<group>"; };
 		F85736731F4F03BF00C9C00A /* MF_Base64Additions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MF_Base64Additions.h; sourceTree = "<group>"; };
 		F85736741F4F03BF00C9C00A /* MF_Base64Additions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MF_Base64Additions.m; sourceTree = "<group>"; };
 		F85736751F4F03BF00C9C00A /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -321,6 +349,7 @@
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				DA44B1C1214555C600A55AC6 /* DiffMatchPatch */,
 				5498D8F51D21F14100B5EB43 /* CodePushUtils.m */,
 				13BE3DEC1AC21097009241FE /* CodePush.h */,
 				13BE3DED1AC21097009241FE /* CodePush.m */,
@@ -346,6 +375,28 @@
 			children = (
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		DA44B1C1214555C600A55AC6 /* DiffMatchPatch */ = {
+			isa = PBXGroup;
+			children = (
+				DA44B1C2214555C600A55AC6 /* DiffMatchPatch.h */,
+				DA44B1C3214555C600A55AC6 /* DiffMatchPatchCFUtilities.c */,
+				DA44B1C4214555C600A55AC6 /* DiffMatchPatch_Prefix.pch */,
+				DA44B1C5214555C600A55AC6 /* NSString+UriCompatibility.h */,
+				DA44B1C6214555C600A55AC6 /* NSString+JavaSubstring.h */,
+				DA44B1C7214555C600A55AC6 /* NSMutableDictionary+DMPExtensions.h */,
+				DA44B1C8214555C600A55AC6 /* NSString+UnicharUtilities.m */,
+				DA44B1C9214555C600A55AC6 /* DiffMatchPatchCFUtilities.h */,
+				DA44B1CA214555C600A55AC6 /* DiffMatchPatch.m */,
+				DA44B1CB214555C600A55AC6 /* NSString+JavaSubstring.m */,
+				DA44B1CC214555C600A55AC6 /* NSString+UriCompatibility.m */,
+				DA44B1CD214555C600A55AC6 /* NSString+UnicharUtilities.h */,
+				DA44B1CE214555C600A55AC6 /* MinMaxMacros.h */,
+				DA44B1CF214555C600A55AC6 /* NSMutableDictionary+DMPExtensions.m */,
+			);
+			name = DiffMatchPatch;
+			path = CodePush/DiffMatchPatch;
 			sourceTree = "<group>";
 		};
 		F85736711F4F03BF00C9C00A /* Base64 */ = {
@@ -538,15 +589,23 @@
 				F88664791F4AD1EE0036D01B /* JWTErrorDescription.h in Headers */,
 				F85736761F4F03BF00C9C00A /* MF_Base64Additions.h in Headers */,
 				F88664541F4AD1EE0036D01B /* JWTAlgorithmDataHolder.h in Headers */,
+				DA44B1D7214555C600A55AC6 /* DiffMatchPatchCFUtilities.h in Headers */,
 				F88664501F4AD1EE0036D01B /* JWTAlgorithmNone.h in Headers */,
+				DA44B1D4214555C600A55AC6 /* NSString+JavaSubstring.h in Headers */,
 				F88664671F4AD1EE0036D01B /* JWTClaimsSetSerializer.h in Headers */,
+				DA44B1D5214555C600A55AC6 /* NSMutableDictionary+DMPExtensions.h in Headers */,
 				F88664521F4AD1EE0036D01B /* JWTAlgorithmESBase.h in Headers */,
 				F88664781F4AD1EE0036D01B /* JWTDeprecations.h in Headers */,
 				F88664631F4AD1EE0036D01B /* JWTClaim.h in Headers */,
+				DA44B1D3214555C600A55AC6 /* NSString+UriCompatibility.h in Headers */,
+				DA44B1DC214555C600A55AC6 /* MinMaxMacros.h in Headers */,
+				DA44B1D2214555C600A55AC6 /* DiffMatchPatch_Prefix.pch in Headers */,
 				F886645A1F4AD1EE0036D01B /* JWTAlgorithmRSBase.h in Headers */,
 				F886645F1F4AD1EE0036D01B /* JWTCryptoKeyExtractor.h in Headers */,
 				F88664651F4AD1EE0036D01B /* JWTClaimsSet.h in Headers */,
+				DA44B1DB214555C600A55AC6 /* NSString+UnicharUtilities.h in Headers */,
 				F886644E1F4AD1EE0036D01B /* JWTAlgorithmFactory.h in Headers */,
+				DA44B1D0214555C600A55AC6 /* DiffMatchPatch.h in Headers */,
 				F886645C1F4AD1EE0036D01B /* JWTRSAlgorithm.h in Headers */,
 				F88664731F4AD1EE0036D01B /* JWTCoding.h in Headers */,
 				F88664581F4AD1EE0036D01B /* JWTAlgorithmHSBase.h in Headers */,
@@ -645,6 +704,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA44B1DA214555C600A55AC6 /* NSString+UriCompatibility.m in Sources */,
 				F88664621F4AD1EE0036D01B /* JWTCryptoSecurity.m in Sources */,
 				F88664701F4AD1EE0036D01B /* JWTCoding+VersionThree.m in Sources */,
 				54A0026D1C0E2880004C3CEC /* aeskey.c in Sources */,
@@ -666,10 +726,13 @@
 				54FFEDE01BF550630061DD23 /* CodePushDownloadHandler.m in Sources */,
 				F88664551F4AD1EE0036D01B /* JWTAlgorithmDataHolder.m in Sources */,
 				54A002711C0E2880004C3CEC /* hmac.c in Sources */,
+				DA44B1D6214555C600A55AC6 /* NSString+UnicharUtilities.m in Sources */,
 				F88664681F4AD1EE0036D01B /* JWTClaimsSetSerializer.m in Sources */,
+				DA44B1D8214555C600A55AC6 /* DiffMatchPatch.m in Sources */,
 				54A002721C0E2880004C3CEC /* prng.c in Sources */,
 				5421FE311C58AD5A00986A55 /* CodePushTelemetryManager.m in Sources */,
 				F886646C1F4AD1EE0036D01B /* JWTCoding+ResultTypes.m in Sources */,
+				DA44B1D1214555C600A55AC6 /* DiffMatchPatchCFUtilities.c in Sources */,
 				F88664601F4AD1EE0036D01B /* JWTCryptoKeyExtractor.m in Sources */,
 				F88664571F4AD1EE0036D01B /* JWTAlgorithmDataHolderChain.m in Sources */,
 				54A002731C0E2880004C3CEC /* pwd2key.c in Sources */,
@@ -682,6 +745,7 @@
 				F88664641F4AD1EE0036D01B /* JWTClaim.m in Sources */,
 				F88664741F4AD1EE0036D01B /* JWTCoding.m in Sources */,
 				1B762E901C9A5E9A006EF800 /* CodePushErrorUtils.m in Sources */,
+				DA44B1DD214555C600A55AC6 /* NSMutableDictionary+DMPExtensions.m in Sources */,
 				54A002701C0E2880004C3CEC /* fileenc.c in Sources */,
 				F886645B1F4AD1EE0036D01B /* JWTAlgorithmRSBase.m in Sources */,
 				F886647A1F4AD1EF0036D01B /* JWTErrorDescription.m in Sources */,
@@ -691,6 +755,7 @@
 				F88664511F4AD1EE0036D01B /* JWTAlgorithmNone.m in Sources */,
 				5498D8F61D21F14100B5EB43 /* CodePushUtils.m in Sources */,
 				810D4E6D1B96935000B397E9 /* CodePushPackage.m in Sources */,
+				DA44B1D9214555C600A55AC6 /* NSString+JavaSubstring.m in Sources */,
 				F88664531F4AD1EE0036D01B /* JWTAlgorithmESBase.m in Sources */,
 				F88664721F4AD1EE0036D01B /* JWTCoding+VersionTwo.m in Sources */,
 			);
