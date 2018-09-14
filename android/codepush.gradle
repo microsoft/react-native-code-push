@@ -68,6 +68,14 @@ gradle.projectsEvaluated {
             jsBundleDir = elvisFile(config."$jsBundleDirConfigName") ?:
                     file("$buildDir/intermediates/assets/${targetPath}")
 
+             // In Case version of 'Android Plugin for Gradle'' is 3.2.0 and higher
+            // 'assets' folder is moved to 'merged_assets' with different structure inside
+            def variantName = variant.name
+
+            if (!jsBundleDir.exists() && file("$buildDir/intermediates/merged_assets/${variantName}/merge${targetName}Assets/out").exists()) {
+                jsBundleDir = file("$buildDir/intermediates/merged_assets/${variantName}/merge${targetName}Assets/out")
+            }
+            
             def resourcesDirConfigName = "resourcesDir${targetName}"
             resourcesDir = elvisFile(config."${resourcesDirConfigName}") ?:
                     file("$buildDir/intermediates/res/merged/${targetPath}")
