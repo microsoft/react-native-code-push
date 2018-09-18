@@ -404,3 +404,4 @@ new CodePushBuilder("deployment-key-here",getApplicationContext())
     .setPublicKeyResourceDescriptor(R.string.CodePushPublicKey)
     .build()
 ```
+Note: In version 5.3.4 have a problem with CodePushPublicKey when using constructor, we recommend you using builder 
