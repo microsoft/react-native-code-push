@@ -1,22 +1,3 @@
-// Define an interal interface for Promise, so that
-// we don't need to reference an additional d.ts file.
-interface Promise<T> {
-    /**
-     * Append a rejection handler callback to the promise.
-     *
-     * @param onRejected Callback to be triggered when the promise is rejected.
-     */
-    catch(onRejected?: (reason: any) => Promise<T>): Promise<T>;
-
-    /**
-     * Append a fulfillment and/or rejection handler to the promise.
-     *
-     * @param onFulfilled Callback to be triggered when the promise is fulfilled.
-     * @param onRejected Callback to be triggered when the promise is rejected.
-     */
-    then(onFulfilled?: (value: T) => void, onRejected?: (reason: any) => Promise<T>): Promise<T>;
-}
-
 export type DowloadProgressCallback = (progress: DownloadProgress) => void;
 export type SyncStatusChangedCallback = (status: CodePush.SyncStatus) => void;
 export type HandleBinaryVersionMismatchCallback = (update: RemotePackage) => void;
