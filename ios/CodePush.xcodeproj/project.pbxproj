@@ -61,8 +61,6 @@
 		8482F84E1E24C66300F793DB /* CodePush.h in Headers */ = {isa = PBXBuildFile; fileRef = 13BE3DEC1AC21097009241FE /* CodePush.h */; };
 		F85736761F4F03BF00C9C00A /* MF_Base64Additions.h in Headers */ = {isa = PBXBuildFile; fileRef = F85736731F4F03BF00C9C00A /* MF_Base64Additions.h */; };
 		F85736771F4F03BF00C9C00A /* MF_Base64Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = F85736741F4F03BF00C9C00A /* MF_Base64Additions.m */; };
-		F85736781F4F03BF00C9C00A /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = F85736751F4F03BF00C9C00A /* README.md */; };
-		F857367B1F4F155300C9C00A /* README.md in Sources */ = {isa = PBXBuildFile; fileRef = F857367A1F4F155300C9C00A /* README.md */; };
 		F886644D1F4AD1EE0036D01B /* JWTAlgorithm.h in Headers */ = {isa = PBXBuildFile; fileRef = F88664151F4AD1EE0036D01B /* JWTAlgorithm.h */; };
 		F886644E1F4AD1EE0036D01B /* JWTAlgorithmFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = F88664161F4AD1EE0036D01B /* JWTAlgorithmFactory.h */; };
 		F886644F1F4AD1EE0036D01B /* JWTAlgorithmFactory.m in Sources */ = {isa = PBXBuildFile; fileRef = F88664171F4AD1EE0036D01B /* JWTAlgorithmFactory.m */; };
@@ -651,13 +649,11 @@
 				540D20121C7684FE00D6EF41 /* CodePushUpdateUtils.m in Sources */,
 				54A0026E1C0E2880004C3CEC /* aestab.c in Sources */,
 				54A002761C0E2880004C3CEC /* mztools.c in Sources */,
-				F857367B1F4F155300C9C00A /* README.md in Sources */,
 				F886646E1F4AD1EE0036D01B /* JWTCoding+VersionOne.m in Sources */,
 				1BCC09A71CC19EB700DDC0DD /* RCTConvert+CodePushUpdateState.m in Sources */,
 				54A002781C0E2880004C3CEC /* zip.c in Sources */,
 				F88664661F4AD1EE0036D01B /* JWTClaimsSet.m in Sources */,
 				54A002791C0E2880004C3CEC /* SSZipArchive.m in Sources */,
-				F85736781F4F03BF00C9C00A /* README.md in Sources */,
 				1B23B9141BF9267B000BB2F0 /* RCTConvert+CodePushInstallMode.m in Sources */,
 				F886645E1F4AD1EE0036D01B /* JWTCryptoKey.m in Sources */,
 				81D51F3A1B6181C2000DA084 /* CodePushConfig.m in Sources */,
