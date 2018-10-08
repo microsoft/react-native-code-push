@@ -16,13 +16,9 @@
 #   public *;
 #}
 
-# Invoked via reflection, when forcing javascript restarts.
--keepclassmembers class com.facebook.react.ReactInstanceManagerImpl {
-    void recreateReactContextInBackground();
-}
-
--keepclassmembers class com.facebook.react.XReactInstanceManagerImpl {
-    void recreateReactContextInBackground();
+# Invoked via reflection, when setting js bundle.
+-keepclassmembers class com.facebook.react.ReactInstanceManager {
+    private final ** mBundleLoader;
 }
 
 # Can't find referenced class org.bouncycastle.**
