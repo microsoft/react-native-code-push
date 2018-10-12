@@ -241,7 +241,7 @@ const sync = (() => {
   const setSyncCompleted = () => { syncInProgress = false; };
 
   return (options = {}, syncStatusChangeCallback, downloadProgressCallback, handleBinaryVersionMismatchCallback) => {
-    let syncStatusCallbackWithTryCatch, downloadProgressCallbackkWithTryCatch;
+    let syncStatusCallbackWithTryCatch, downloadProgressCallbackWithTryCatch;
     if (typeof syncStatusChangeCallback === "function") {
       syncStatusCallbackWithTryCatch = (...args) => {
         try {
@@ -253,7 +253,7 @@ const sync = (() => {
     }
 
     if (typeof downloadProgressCallback === "function") {
-      downloadProgressCallbackkWithTryCatch = (...args) => {
+      downloadProgressCallbackWithTryCatch = (...args) => {
         try {
           downloadProgressCallback(...args);
         } catch (error) {
@@ -270,7 +270,7 @@ const sync = (() => {
     }
 
     syncInProgress = true;
-    const syncPromise = syncInternal(options, syncStatusCallbackWithTryCatch, downloadProgressCallbackkWithTryCatch, handleBinaryVersionMismatchCallback);
+    const syncPromise = syncInternal(options, syncStatusCallbackWithTryCatch, downloadProgressCallbackWithTryCatch, handleBinaryVersionMismatchCallback);
     syncPromise
       .then(setSyncCompleted)
       .catch(setSyncCompleted);
