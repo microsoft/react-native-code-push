@@ -59,6 +59,10 @@ public class CodePushUpdateUtils {
                 continue;
             }
 
+            if (relativePath.equals("app.json")) {
+                continue;
+            }
+
             if (file.isDirectory()) {
                 addContentsOfFolderToManifest(fullFilePath, relativePath, manifest);
             } else {
