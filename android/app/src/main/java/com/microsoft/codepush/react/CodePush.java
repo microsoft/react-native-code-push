@@ -245,6 +245,8 @@ public class CodePush implements ReactPackage {
     }
 
     void initializeUpdateAfterRestart() {
+        mUpdateManager.validatePackageHash(getPublicKey());
+
         // Reset the state which indicates that
         // the app was just freshly updated.
         mDidUpdate = false;
