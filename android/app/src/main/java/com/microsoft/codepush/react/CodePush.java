@@ -93,6 +93,16 @@ public class CodePush implements ReactPackage {
         mPublicKey = getPublicKeyByResourceDescriptor(publicKeyResourceDescriptor);
     }
 
+    public CodePush(String deploymentKey, Context context, boolean isDebugMode, int publicKeyResourceDescriptor, boolean shouldValidateHashOnRestart) {
+        this(deploymentKey, context, isDebugMode);
+
+        mPublicKey = getPublicKeyByResourceDescriptor(publicKeyResourceDescriptor);
+
+        if (shouldValidateHashOnRestart) {
+            mUpdateManager.validatePackageHashAndSignature(mPublicKey);
+        }
+    }
+
     public CodePush(String deploymentKey, Context context, boolean isDebugMode, @NonNull String serverUrl, Integer publicKeyResourceDescriptor) {
         this(deploymentKey, context, isDebugMode);
 
@@ -245,8 +255,6 @@ public class CodePush implements ReactPackage {
     }
 
     void initializeUpdateAfterRestart() {
-        mUpdateManager.validatePackageHash(getPublicKey());
-
         // Reset the state which indicates that
         // the app was just freshly updated.
         mDidUpdate = false;
