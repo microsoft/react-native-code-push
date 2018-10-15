@@ -367,12 +367,12 @@ public class CodePushUpdateManager {
         FileUtils.deleteDirectoryAtPath(getCodePushPath());
     }
 
-    public void validatePackageHash(String stringPublicKey) {
+    public void validatePackageHashAndSignature(String stringPublicKey) {
         String currentHash = getCurrentPackageHash();
         String currentPackagePath = getCurrentPackageFolderPath();
         if (currentHash != null) {
             CodePushUpdateUtils.verifyFolderHash(currentPackagePath, currentHash);
-            // CodePushUpdateUtils.verifyUpdateSignature(currentPackagePath, currentHash, stringPublicKey);
+            CodePushUpdateUtils.verifyUpdateSignature(currentPackagePath, currentHash, stringPublicKey);
         }
     }
 }
