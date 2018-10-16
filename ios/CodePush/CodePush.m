@@ -369,6 +369,17 @@ static NSString *bundleResourceSubdirectory = nil;
         [self initializeUpdateAfterRestart];
     }
 
+    NSString *publicKey = [[CodePushConfig current] publicKey];
+    NSString *validateHash = [[CodePushConfig current] validateHash];
+
+    if (publicKey && validateHash) {
+        [CodePushPackage 
+            validatePackageHashAndSignature:publicKey 
+            failCallback:^(NSError *err) {
+                exit(0);
+            }];
+    }
+
     return self;
 }
 
