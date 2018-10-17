@@ -84,6 +84,7 @@
 @property (copy) NSString *deploymentKey;
 @property (copy) NSString *serverURL;
 @property (copy) NSString *publicKey;
+@property (copy) NSString *validateHash;
 
 + (instancetype)current;
 
@@ -143,6 +144,7 @@ failCallback:(void (^)(NSError *err))failCallback;
                  error:(NSError **)error;
 
 + (void)rollbackPackage;
++ (void)validatePackageHashAndSignature:(NSString *)stringPublicKey;
 
 // The below methods are only used during tests.
 + (void)clearUpdates;

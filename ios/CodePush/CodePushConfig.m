@@ -13,6 +13,7 @@ static NSString * const ClientUniqueIDConfigKey = @"clientUniqueId";
 static NSString * const DeploymentKeyConfigKey = @"deploymentKey";
 static NSString * const ServerURLConfigKey = @"serverUrl";
 static NSString * const PublicKeyKey = @"publicKey";
+static NSString * const ValidateHash = @"validateHash";
 
 + (instancetype)current
 {
@@ -36,6 +37,7 @@ static NSString * const PublicKeyKey = @"publicKey";
     NSString *deploymentKey = [infoDictionary objectForKey:@"CodePushDeploymentKey"];
     NSString *serverURL = [infoDictionary objectForKey:@"CodePushServerURL"];
     NSString *publicKey = [infoDictionary objectForKey:@"CodePushPublicKey"];
+    NSString *validateHash = [infoDictionary objectForKey:@"CodePushValidateHashOnRestart"];
     
     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     NSString *clientUniqueId = [userDefaults stringForKey:ClientUniqueIDConfigKey];
@@ -56,6 +58,7 @@ static NSString * const PublicKeyKey = @"publicKey";
                             clientUniqueId,ClientUniqueIDConfigKey,
                             deploymentKey,DeploymentKeyConfigKey,
                             publicKey,PublicKeyKey,
+                            validateHash,ValidateHash,
                             nil];
 
     return self;
@@ -94,6 +97,11 @@ static NSString * const PublicKeyKey = @"publicKey";
 - (NSString *)publicKey
 {
     return [_configDictionary objectForKey:PublicKeyKey];
+}
+
+- (NSString *)validateHash
+{
+    return [_configDictionary objectForKey:ValidateHash];
 }
 
 - (void)setAppVersion:(NSString *)appVersion
