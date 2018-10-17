@@ -373,11 +373,7 @@ static NSString *bundleResourceSubdirectory = nil;
     NSString *validateHash = [[CodePushConfig current] validateHash];
 
     if (publicKey && validateHash) {
-        [CodePushPackage 
-            validatePackageHashAndSignature:publicKey 
-            failCallback:^(NSError *err) {
-                exit(0);
-            }];
+        [CodePushPackage validatePackageHashAndSignature:publicKey];
     }
 
     return self;

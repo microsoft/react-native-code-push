@@ -144,8 +144,7 @@ failCallback:(void (^)(NSError *err))failCallback;
                  error:(NSError **)error;
 
 + (void)rollbackPackage;
-+ (void)validatePackageHashAndSignature:(NSString *)stringPublicKey
-        failCallback:(void (^)(NSError *err))failCallback;
++ (void)validatePackageHashAndSignature:(NSString *)stringPublicKey;
 
 // The below methods are only used during tests.
 + (void)clearUpdates;

@@ -596,7 +596,6 @@ static NSString *const UnzippedFolderName = @"unzipped";
 }
 
 + (void)validatePackageHashAndSignature:(NSString *)stringPublicKey
-        failCallback:(void (^)(NSError *err))failCallback
 {
     NSError *error;
     NSString *currentHash = [CodePushPackage getCurrentPackageHash:&error];
@@ -607,11 +606,7 @@ static NSString *const UnzippedFolderName = @"unzipped";
                                         expectedHash:currentHash
                                                 error:&error]) {
             CPLog(@"The update contents failed the data integrity check.");
-            if (!error) {
-                error = [CodePushErrorUtils errorWithMessage:@"The update contents failed the data integrity check."];
-            }
-            
-            failCallback(error);
+            exit(0);
             return;
         } else {
             CPLog(@"The update contents succeeded the data integrity check.");
@@ -621,11 +616,7 @@ static NSString *const UnzippedFolderName = @"unzipped";
                                                                 withPublicKey:stringPublicKey
                                                                         error:&error];
         if (!isSignatureValid) {
-            CPLog(@"The update contents failed code signing check.");
-            if (!error) {
-                error = [CodePushErrorUtils errorWithMessage:@"The update contents failed code signing check."];
-            }
-            failCallback(error);
+            exit(0);
             return;
         } else {
             CPLog(@"The update contents succeeded the code signing check.");
