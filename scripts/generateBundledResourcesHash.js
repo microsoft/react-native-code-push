@@ -78,6 +78,11 @@ function addJsBundleAndMetaToManifest() {
             console.log(finalHash);
 
             var savedResourcesManifestPath = assetsDir + "/" + CODE_PUSH_HASH_FILE_NAME;
+
+            if (!fs.existsSync(assetsDir)) {
+                mkDirByPathSync(assetsDir)
+            }
+            
             fs.writeFileSync(savedResourcesManifestPath, finalHash);
 
             // "CodePushHash.json" file name breaks flow type checking.
@@ -90,6 +95,31 @@ function addJsBundleAndMetaToManifest() {
             }
         });
     });
+}
+
+function mkDirByPathSync(targetDir, {isRelativeToScript = false} = {}) {
+    const sep = path.sep;
+    const initDir = path.isAbsolute(targetDir) ? sep : '';
+    const baseDir = isRelativeToScript ? __dirname : '.';
+
+    targetDir.split(sep).reduce((parentDir, childDir) => {
+        const curDir = path.resolve(baseDir, parentDir, childDir);
+        try {
+            console.log(`Directory ${curDir} creating!`);
+            if (!fs.existsSync(curDir)) {
+                fs.mkdirSync(curDir);
+            }
+            console.log(`Directory ${curDir} created!`);
+        } catch (err) {
+            if (err.code !== 'EEXIST') {
+                throw err;
+            }
+
+            console.log(`Directory ${curDir} already exists!`);
+        }
+
+        return curDir;
+    }, initDir);
 }
 
 function addFileToManifest(folder, assetFile, manifest, done) {
