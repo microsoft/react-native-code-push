@@ -210,20 +210,47 @@ Update the `MainApplication.java` file to use CodePush via the following changes
 // 1. Declare your ReactNativeHost to extend ReactInstanceHolder. ReactInstanceHolder is a subset of ReactNativeHost, so no additional implementation is needed.
 import com.microsoft.codepush.react.ReactInstanceHolder;
 
-public class MyReactNativeHost extends ReactNativeHost implements ReactInstanceHolder {
-  // ... usual overrides
-}
-
-// 2. Provide your ReactNativeHost to CodePush.
-
 public class MainApplication extends Application implements ReactApplication {
 
-   private final MyReactNativeHost mReactNativeHost = new MyReactNativeHost(this);
+  // 2. Declare your ReactInstanceHolder custom class under MainApplication class
+  public class MyReactNativeHost extends ReactNativeHost implements ReactInstanceHolder {
+    MyReactNativeHost(Application application) {
+      super(application);
+    }
 
-   @Override
-   public void onCreate() {
-     CodePush.setReactInstanceHolder(mReactNativeHost);
-     super.onCreate();
+  	// 3. Place your MainApplication overrides under your new MyReactNativeHost class
+    @Override
+    protected String getJSBundleFile() {
+      return CodePush.getJSBundleFile();
+    }
+
+    @Override
+    public boolean getUseDeveloperSupport() {
+      return BuildConfig.DEBUG;
+    }
+
+    @Override
+    protected List<ReactPackage> getPackages() {
+      return Arrays.<ReactPackage>asList(
+        new MainReactPackage(),
+        new CodePush(BuildConfig.CODEPUSH_KEY, MainApplication.this, BuildConfig.DEBUG),
+        // ...all your dependencies
+      );
+    }
+  }
+
+  // 4. Replace the return type of mReactNativeHost by MyReactNativeHost and use new MyReactNativeHost(this) instead of new ReactNativeHost(this)
+  private final MyReactNativeHost mReactNativeHost = new MyReactNativeHost(this);
+
+  @Override
+  public void onCreate() {
+    CodePush.setReactInstanceHolder(mReactNativeHost);
+    super.onCreate();
+  }
+
+  @Override
+  public ReactNativeHost getReactNativeHost() {
+    return mReactNativeHost;
   }
 }
 ```
