@@ -22,6 +22,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Iterator;
 
+import static java.lang.Math.toIntExact;
+
 public class CodePushUtils {
 
     public static String appendPathComponent(String basePath, String appendPathComponent) {
@@ -83,6 +85,9 @@ public class CodePushUtils {
                 map.putDouble(key, (Double) obj);
             else if (obj instanceof Integer)
                 map.putInt(key, (Integer) obj);
+            // TODO: Fix it
+            else if (obj instanceof Long)
+                map.putDouble(key, ((Long) obj).doubleValue());
             else if (obj instanceof Boolean)
                 map.putBoolean(key, (Boolean) obj);
             else if (obj == null)

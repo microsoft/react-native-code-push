@@ -510,7 +510,48 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
     public void isFailedUpdate(String packageHash, Promise promise) {
         try {
             promise.resolve(mSettingsManager.isFailedHash(packageHash));
-        } catch(CodePushUnknownException e) {
+        } catch (CodePushUnknownException e) {
+            CodePushUtils.log(e);
+            promise.reject(e);
+        }
+    }
+
+    @ReactMethod
+    public void removePackageFromFailedUpdates(String packageHash, Promise promise) {
+        CodePushUtils.log("removePackageFromFailedUpdates");
+        try {
+            mSettingsManager.removePackageFromFailedUpdates(packageHash);
+            promise.resolve(null);
+        } catch (CodePushUnknownException e) {
+            CodePushUtils.log(e);
+            promise.reject(e);
+        }
+    }
+
+    @ReactMethod
+    public void getLatestRollbackInfo(Promise promise) {
+        try {
+            if (mSettingsManager.getLatestRollbackInfo() != null) {
+                CodePushUtils.log("getLatestRollbackInfo: " + mSettingsManager.getLatestRollbackInfo().toString(2));
+                promise.resolve(CodePushUtils.convertJsonObjectToWritable(mSettingsManager.getLatestRollbackInfo()));
+            } else {
+                promise.resolve(null);
+            }
+        } catch (CodePushUnknownException e) {
+            CodePushUtils.log(e);
+            promise.reject(e);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @ReactMethod
+    public void setLatestRollbackInfo(String packageHash, Promise promise) {
+        CodePushUtils.log("setLatestRollbackInfo");
+        try {
+            mSettingsManager.setLatestRollbackInfo(packageHash);
+            promise.resolve(null);
+        } catch (CodePushUnknownException e) {
             CodePushUtils.log(e);
             promise.reject(e);
         }
