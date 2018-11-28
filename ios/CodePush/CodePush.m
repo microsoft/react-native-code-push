@@ -73,6 +73,13 @@ static NSString *bundleResourceExtension = @"jsbundle";
 static NSString *bundleResourceName = @"main";
 static NSString *bundleResourceSubdirectory = nil;
 
+
+static NSString *const LatestRollbackInfoKey = @"LATEST_ROLLBACK_INFO";
+
+static NSString *const LATEST_ROLLBACK_PACKAGE_HASH_KEY = @"hash";
+static NSString *const LATEST_ROLLBACK_TIME_KEY = @"time";
+static NSString *const LATEST_ROLLBACK_COUNTER = @"counter";
+
 + (void)initialize
 {
     [super initialize];
@@ -400,6 +407,39 @@ static NSString *bundleResourceSubdirectory = nil;
             [self savePendingUpdate:pendingUpdate[PendingUpdateHashKey]
                           isLoading:YES];
         }
+    }
+}
+
++ (NSDictionary *)getRollbackInfo
+{
+    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+    NSDictionary *latestRollbackInfo = [preferences objectForKey:LatestRollbackInfoKey];
+    return latestRollbackInfo;
+}
+
++ (void)setLatestRollbackInfo:(NSString*)packageHash
+{
+    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+    NSMutableDictionary *latestRollbackInfo = [preferences objectForKey:LatestRollbackInfoKey];
+    
+    if (packageHash == nil) {
+        return;
+    } else {
+        if (latestRollbackInfo == nil) {
+            latestRollbackInfo = [[NSMutableDictionary alloc] init];
+        } else {
+            latestRollbackInfo = [latestRollbackInfo mutableCopy];
+        }
+        
+        NSTimeInterval timeStamp = [[NSDate date] timeIntervalSince1970];
+        NSNumber *timeStampObj = [NSNumber numberWithDouble: timeStamp * 1000];
+        
+        [latestRollbackInfo setValue:[NSNumber numberWithDouble:1] forKey:LATEST_ROLLBACK_COUNTER];
+        [latestRollbackInfo setValue:timeStampObj forKey:LATEST_ROLLBACK_TIME_KEY];
+        [latestRollbackInfo setValue:packageHash forKey:LATEST_ROLLBACK_PACKAGE_HASH_KEY];
+        
+        [preferences setObject:latestRollbackInfo forKey:LatestRollbackInfoKey];
+        [preferences synchronize];
     }
 }
 
@@ -820,6 +860,21 @@ RCT_EXPORT_METHOD(isFailedUpdate:(NSString *)packageHash
 {
     BOOL isFailedHash = [[self class] isFailedHash:packageHash];
     resolve(@(isFailedHash));
+}
+
+RCT_EXPORT_METHOD(setLatestRollbackInfo:(NSString *)packageHash
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject)
+{
+    [[self class] setLatestRollbackInfo:packageHash];
+}
+
+
+RCT_EXPORT_METHOD(getLatestRollbackInfo:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+    NSDictionary *latestRollbackInfo = [[self class] getRollbackInfo];
+    resolve(latestRollbackInfo);
 }
 
 /*

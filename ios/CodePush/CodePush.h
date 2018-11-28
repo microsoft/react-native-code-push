@@ -62,6 +62,10 @@
  */
 + (BOOL)isFailedHash:(NSString*)packageHash;
 
++ (NSDictionary*)getRollbackInfo:(NSString*)packageHash;
+
++ (void)setLatestRollbackInfo:(NSString*)packageHash;
+
 /*
  * This method checks to see whether a specific package hash
  * represents a downloaded and installed update, that hasn't
