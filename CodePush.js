@@ -197,6 +197,7 @@ async function tryReportStatus(statusReport, resumeListener) {
         log(`Reporting CodePush update success (${label})`);
       } else {
         log(`Reporting CodePush update rollback (${label})`);
+        NativeCodePush.setLatestRollbackInfo(statusReport.package.packageHash);
       }
 
       config.deploymentKey = statusReport.package.deploymentKey;
@@ -360,7 +361,17 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
       return CodePush.SyncStatus.UPDATE_INSTALLED;
     };
 
-    const updateShouldBeIgnored = remotePackage && (remotePackage.failedInstall && syncOptions.ignoreFailedUpdates);
+    const latestRollbackInfo = await NativeCodePush.getLatestRollbackInfo();
+    let shouldIgnoreRollback = false;
+    if (latestRollbackInfo && latestRollbackInfo.hash == remotePackage.packageHash && latestRollbackInfo.time) {
+      log("latestRollbackInfo: " + JSON.stringify(latestRollbackInfo));
+      log("Date.now() - latestRollbackInfo.time = " + ((Date.now() - latestRollbackInfo.time) / 1000));
+      if (Date.now() - latestRollbackInfo.time >= 20000) {
+        shouldIgnoreRollback = true;
+      }
+    }
+
+    const updateShouldBeIgnored = remotePackage && !shouldIgnoreRollback && (remotePackage.failedInstall && syncOptions.ignoreFailedUpdates);
     if (!remotePackage || updateShouldBeIgnored) {
       if (updateShouldBeIgnored) {
           log("An update is available, but it is being ignored due to having been previously rolled back.");
