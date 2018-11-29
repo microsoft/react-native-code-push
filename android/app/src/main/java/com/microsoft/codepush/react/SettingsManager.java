@@ -93,7 +93,7 @@ public class SettingsManager {
                 return;
             }
         } catch (JSONException e) {
-            throw new CodePushUnknownException("Unable to read packageHash from failedPackage.", e);
+            throw new CodePushUnknownException("Unable to read packageHash from package.", e);
         }
 
         String failedUpdatesString = mSettings.getString(CodePushConstants.FAILED_UPDATES_KEY, null);
@@ -134,7 +134,6 @@ public class SettingsManager {
             latestRollbackInfo.put(CodePushConstants.LATEST_ROLLBACK_TIME_KEY, System.currentTimeMillis());
             latestRollbackInfo.put(CodePushConstants.LATEST_ROLLBACK_COUNT_KEY, count + 1);
             mSettings.edit().putString(CodePushConstants.LATEST_ROLLBACK_INFO_KEY, latestRollbackInfo.toString()).commit();
-            CodePushUtils.log("setLatestRollbackInfo - Time: " + System.currentTimeMillis() + " Hash: " + packageHash);
         } catch (JSONException e) {
             throw new CodePushUnknownException("Unable to save latest rollback info.", e);
         }
