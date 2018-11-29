@@ -362,13 +362,15 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
     };
 
     const latestRollbackInfo = await NativeCodePush.getLatestRollbackInfo();
+
     let shouldIgnoreRollback = false;
-    if (latestRollbackInfo && latestRollbackInfo.hash == remotePackage.packageHash && latestRollbackInfo.time) {
-      log("latestRollbackInfo: " + JSON.stringify(latestRollbackInfo));
-      log("Date.now() - latestRollbackInfo.time = " + ((Date.now() - latestRollbackInfo.time) / 1000));
-      if (Date.now() - latestRollbackInfo.time >= 20000) {
+    if (latestRollbackInfo && latestRollbackInfo.packageHash === remotePackage.packageHash) {
+      const secSinceLatestRollback = (Date.now() - latestRollbackInfo.time) / 1000;
+      if (secSinceLatestRollback >= 15) {
         shouldIgnoreRollback = true;
       }
+      log("latestRollbackInfo: " + JSON.stringify(latestRollbackInfo));
+      log("Time since latest rollback: " + secSinceLatestRollback + "s.");
     }
 
     const updateShouldBeIgnored = remotePackage && !shouldIgnoreRollback && (remotePackage.failedInstall && syncOptions.ignoreFailedUpdates);
