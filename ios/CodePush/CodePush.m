@@ -548,19 +548,21 @@ static NSString *const LATEST_ROLLBACK_COUNTER = @"counter";
  */
 - (void)saveFailedUpdate:(NSDictionary *)failedPackage
 {
-    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
-    NSMutableArray *failedUpdates = [preferences objectForKey:FailedUpdatesKey];
-    if (failedUpdates == nil) {
-        failedUpdates = [[NSMutableArray alloc] init];
-    } else {
-        // The NSUserDefaults sytem always returns immutable
-        // objects, regardless if you stored something mutable.
-        failedUpdates = [failedUpdates mutableCopy];
-    }
+    if (![[self class] isFailedHash:[failedPackage objectForKey:PackageHashKey]]) {
+        NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+        NSMutableArray *failedUpdates = [preferences objectForKey:FailedUpdatesKey];
+        if (failedUpdates == nil) {
+            failedUpdates = [[NSMutableArray alloc] init];
+        } else {
+            // The NSUserDefaults sytem always returns immutable
+            // objects, regardless if you stored something mutable.
+            failedUpdates = [failedUpdates mutableCopy];
+        }
 
-    [failedUpdates addObject:failedPackage];
-    [preferences setObject:failedUpdates forKey:FailedUpdatesKey];
-    [preferences synchronize];
+        [failedUpdates addObject:failedPackage];
+        [preferences setObject:failedUpdates forKey:FailedUpdatesKey];
+        [preferences synchronize];
+    }
 }
 
 /*
