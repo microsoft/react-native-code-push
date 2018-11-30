@@ -75,9 +75,9 @@ static NSString *bundleResourceSubdirectory = nil;
 
 // These constants are used for keeping latest failed package 
 static NSString *const LatestRollbackInfoKey = @"LATEST_ROLLBACK_INFO";
-static NSString *const latestRollbackPackageHashKey = @"packageHash";
-static NSString *const latestRollbackTimeKey = @"time";
-static NSString *const latestRollbackCountKey = @"count";
+static NSString *const LatestRollbackPackageHashKey = @"packageHash";
+static NSString *const LatestRollbackTimeKey = @"time";
+static NSString *const LatestRollbackCountKey = @"count";
 
 + (void)initialize
 {
@@ -432,9 +432,9 @@ static NSString *const latestRollbackCountKey = @"count";
     }
 
     NSNumber *count;
-    NSString *oldPachageHash = [latestRollbackInfo objectForKey:latestRollbackPackageHashKey];
+    NSString *oldPachageHash = [latestRollbackInfo objectForKey:LatestRollbackPackageHashKey];
     if ([packageHash isEqualToString: oldPachageHash]) {
-      NSNumber *oldCount = [latestRollbackInfo objectForKey:latestRollbackCountKey];
+      NSNumber *oldCount = [latestRollbackInfo objectForKey:LatestRollbackCountKey];
       count = [NSNumber numberWithInt:[oldCount intValue] + 1];
     } else {
       count = [NSNumber numberWithInt: 1];
@@ -443,9 +443,9 @@ static NSString *const latestRollbackCountKey = @"count";
     NSTimeInterval timeStamp = [[NSDate date] timeIntervalSince1970];
     NSNumber *timeStampMilliseconds = [NSNumber numberWithDouble: timeStamp * 1000];
 
-    [latestRollbackInfo setValue:count forKey:latestRollbackCountKey];
-    [latestRollbackInfo setValue:timeStampMilliseconds forKey:latestRollbackTimeKey];
-    [latestRollbackInfo setValue:packageHash forKey:latestRollbackPackageHashKey];
+    [latestRollbackInfo setValue:count forKey:LatestRollbackCountKey];
+    [latestRollbackInfo setValue:timeStampMilliseconds forKey:LatestRollbackTimeKey];
+    [latestRollbackInfo setValue:packageHash forKey:LatestRollbackPackageHashKey];
 
     [preferences setObject:latestRollbackInfo forKey:LatestRollbackInfoKey];
     [preferences synchronize];
