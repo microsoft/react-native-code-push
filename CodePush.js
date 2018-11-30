@@ -294,6 +294,7 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
   const syncOptions = {
     deploymentKey: null,
     ignoreFailedUpdates: true,
+    rollbackRetryOptions: null,
     installMode: CodePush.InstallMode.ON_NEXT_RESTART,
     mandatoryInstallMode: CodePush.InstallMode.IMMEDIATE,
     minimumBackgroundDuration: 0,
@@ -361,40 +362,41 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
       return CodePush.SyncStatus.UPDATE_INSTALLED;
     };
 
-    const latestRollbackShouldBeIgnored = (latestRollbackInfo, rollbackRetryOptions) => {
+    const shouldRetryPackage = async (packageHash) => {
       const MILLISECONDS_IN_HOUR = 1000 * 60 * 60;
       const DEFAULT_DELAY_IN_HOURS = 24;
       const DEFAULT_MAX_ATTEMPTS = 1;
 
-      if (!rollbackRetryOptions || typeof rollbackRetryOptions !== "object") {
+      if (!syncOptions.rollbackRetryOptions || typeof syncOptions.rollbackRetryOptions !== "object") {
         log("'rollbackRetryOptions' must be an Object");
         return false;
       }
-      
-      const { delayInHours = DEFAULT_DELAY_IN_HOURS, maxAttempts = DEFAULT_MAX_ATTEMPTS } = rollbackRetryOptions;
-      if (maxAttempts < 1) {
+
+      const latestRollbackInfo = await NativeCodePush.getLatestRollbackInfo();
+      if (!latestRollbackInfo || latestRollbackInfo.packageHash !== packageHash) {
         return false;
       }
 
+      const { delayInHours = DEFAULT_DELAY_IN_HOURS, maxAttempts = DEFAULT_MAX_ATTEMPTS } = syncOptions.rollbackRetryOptions;
+      if (maxAttempts < 1) {
+        return false;
+      }
       const hoursSinceLatestRollback = (Date.now() - latestRollbackInfo.time) / MILLISECONDS_IN_HOUR;
       if (hoursSinceLatestRollback >= delayInHours && maxAttempts >= latestRollbackInfo.count) {
-        log("Previous rollback is being ignored due to rollback retry options.");
+        log("Previous rollback should be ignored due to rollback retry options.");
         return true;
       }
     }
 
     const isFailedPackage = remotePackage && remotePackage.failedInstall;
-    
-    let rollbackShouldBeIgnored = false;
-    if (isFailedPackage && syncOptions.rollbackRetryOptions) {
-      const latestRollbackInfo = await NativeCodePush.getLatestRollbackInfo();
-      if (latestRollbackInfo && latestRollbackInfo.packageHash === remotePackage.packageHash) {
-        rollbackShouldBeIgnored = latestRollbackShouldBeIgnored(latestRollbackInfo, syncOptions.rollbackRetryOptions);
-      }
+
+    let shouldRetryUpdate = false;
+    if (isFailedPackage) {
+      shouldRetryUpdate = await shouldRetryPackage(remotePackage.packageHash);
     }
 
-    const updateShouldBeIgnored = isFailedPackage && syncOptions.ignoreFailedUpdates && !rollbackShouldBeIgnored;
-    
+    const updateShouldBeIgnored = isFailedPackage && syncOptions.ignoreFailedUpdates && !shouldRetryUpdate;
+
     if (!remotePackage || updateShouldBeIgnored) {
       if (updateShouldBeIgnored) {
           log("An update is available, but it is being ignored due to having been previously rolled back.");
