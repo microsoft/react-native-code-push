@@ -419,31 +419,31 @@ static NSString *const LATEST_ROLLBACK_COUNTER = @"counter";
 
 + (void)setLatestRollbackInfo:(NSString*)packageHash
 {
+    if (packageHash == nil) {
+        return;
+    }
+
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSMutableDictionary *latestRollbackInfo = [preferences objectForKey:LatestRollbackInfoKey];
     NSNumber *count = 0;
 
-    if (packageHash == nil) {
-        return;
+    if (latestRollbackInfo == nil) {
+        latestRollbackInfo = [[NSMutableDictionary alloc] init];
     } else {
-        if (latestRollbackInfo == nil) {
-            latestRollbackInfo = [[NSMutableDictionary alloc] init];
-        } else {
-            latestRollbackInfo = [latestRollbackInfo mutableCopy];
-        }
-
-        count = [latestRollbackInfo objectForKey:LATEST_ROLLBACK_COUNTER];
-
-        NSTimeInterval timeStamp = [[NSDate date] timeIntervalSince1970];
-        NSNumber *timeStampObj = [NSNumber numberWithDouble: timeStamp * 1000];
-
-        [latestRollbackInfo setValue:[NSNumber numberWithInt:[count intValue] + 1] forKey:LATEST_ROLLBACK_COUNTER];
-        [latestRollbackInfo setValue:timeStampObj forKey:LATEST_ROLLBACK_TIME_KEY];
-        [latestRollbackInfo setValue:packageHash forKey:LATEST_ROLLBACK_PACKAGE_HASH_KEY];
-
-        [preferences setObject:latestRollbackInfo forKey:LatestRollbackInfoKey];
-        [preferences synchronize];
+        latestRollbackInfo = [latestRollbackInfo mutableCopy];
     }
+
+    count = [latestRollbackInfo objectForKey:LATEST_ROLLBACK_COUNTER];
+
+    NSTimeInterval timeStamp = [[NSDate date] timeIntervalSince1970];
+    NSNumber *timeStampObj = [NSNumber numberWithDouble: timeStamp * 1000];
+
+    [latestRollbackInfo setValue:[NSNumber numberWithInt:[count intValue] + 1] forKey:LATEST_ROLLBACK_COUNTER];
+    [latestRollbackInfo setValue:timeStampObj forKey:LATEST_ROLLBACK_TIME_KEY];
+    [latestRollbackInfo setValue:packageHash forKey:LATEST_ROLLBACK_PACKAGE_HASH_KEY];
+
+    [preferences setObject:latestRollbackInfo forKey:LatestRollbackInfoKey];
+    [preferences synchronize];
 }
 
 /*
