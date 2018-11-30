@@ -363,7 +363,6 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
     };
 
     const shouldRetryPackage = async (packageHash) => {
-      const MILLISECONDS_IN_HOUR = 1000 * 60 * 60;
       const DEFAULT_DELAY_IN_HOURS = 24;
       const DEFAULT_MAX_ATTEMPTS = 1;
 
@@ -381,21 +380,18 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
       if (maxAttempts < 1) {
         return false;
       }
-      const hoursSinceLatestRollback = (Date.now() - latestRollbackInfo.time) / MILLISECONDS_IN_HOUR;
+
+      const hoursSinceLatestRollback = (Date.now() - latestRollbackInfo.time) / 1000 * 60 * 60;
       if (hoursSinceLatestRollback >= delayInHours && maxAttempts >= latestRollbackInfo.count) {
         log("Previous rollback should be ignored due to rollback retry options.");
         return true;
       }
     }
 
-    const isFailedPackage = remotePackage && remotePackage.failedInstall;
-
-    let shouldRetryUpdate = false;
-    if (isFailedPackage) {
-      shouldRetryUpdate = await shouldRetryPackage(remotePackage.packageHash);
-    }
-
-    const updateShouldBeIgnored = isFailedPackage && syncOptions.ignoreFailedUpdates && !shouldRetryUpdate;
+    const updateShouldBeIgnored = remotePackage &&
+      remotePackage.failedInstall &&
+      syncOptions.ignoreFailedUpdates &&
+      (!syncOptions.rollbackRetryOptions || !await shouldRetryPackage(remotePackage.packageHash));
 
     if (!remotePackage || updateShouldBeIgnored) {
       if (updateShouldBeIgnored) {
