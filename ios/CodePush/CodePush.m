@@ -425,7 +425,7 @@ static NSString *const LATEST_ROLLBACK_COUNTER = @"counter";
 
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSMutableDictionary *latestRollbackInfo = [preferences objectForKey:LatestRollbackInfoKey];
-    NSNumber *count = 0;
+    NSNumber *count;
 
     if (latestRollbackInfo == nil) {
         latestRollbackInfo = [[NSMutableDictionary alloc] init];
@@ -433,12 +433,18 @@ static NSString *const LATEST_ROLLBACK_COUNTER = @"counter";
         latestRollbackInfo = [latestRollbackInfo mutableCopy];
     }
 
-    count = [latestRollbackInfo objectForKey:LATEST_ROLLBACK_COUNTER];
+    NSString *oldPachageHash = [latestRollbackInfo objectForKey:LATEST_ROLLBACK_PACKAGE_HASH_KEY];
+    if ([packageHash isEqualToString: oldPachageHash]) {
+      NSNumber *oldCount = [latestRollbackInfo objectForKey:LATEST_ROLLBACK_COUNTER];
+      count = [NSNumber numberWithInt:[oldCount intValue] + 1];
+    } else {
+      count = [NSNumber numberWithInt: 1];
+    }
 
     NSTimeInterval timeStamp = [[NSDate date] timeIntervalSince1970];
     NSNumber *timeStampObj = [NSNumber numberWithDouble: timeStamp * 1000];
 
-    [latestRollbackInfo setValue:[NSNumber numberWithInt:[count intValue] + 1] forKey:LATEST_ROLLBACK_COUNTER];
+    [latestRollbackInfo setValue:count forKey:LATEST_ROLLBACK_COUNTER];
     [latestRollbackInfo setValue:timeStampObj forKey:LATEST_ROLLBACK_TIME_KEY];
     [latestRollbackInfo setValue:packageHash forKey:LATEST_ROLLBACK_PACKAGE_HASH_KEY];
 
