@@ -226,6 +226,42 @@ async function tryReportStatus(statusReport, resumeListener) {
   }
 }
 
+async function shouldUpdateBeIgnored(remotePackage, syncOptions) {
+  const { rollbackRetryOptions, ignoreFailedUpdates } = syncOptions;
+
+  const isFailedPackage = remotePackage && remotePackage.failedInstall;
+  if (!isFailedPackage || !ignoreFailedUpdates) {
+    return false;
+  }
+
+  if (!rollbackRetryOptions) {
+    return true;
+  }
+
+  if (typeof rollbackRetryOptions !== "object") {
+    log("'rollbackRetryOptions' must be an Object");
+    return true;
+  }
+
+  const { delayInHours = 24, maxAttempts = 1 } = rollbackRetryOptions;
+  if (maxAttempts < 1) {
+    return true;
+  }
+
+  const latestRollbackInfo = await NativeCodePush.getLatestRollbackInfo();
+  if (!latestRollbackInfo || latestRollbackInfo.packageHash !== remotePackage.packageHash) {
+    return true;
+  }
+
+  const hoursSinceLatestRollback = (Date.now() - latestRollbackInfo.time) / (1000 * 60 * 60);
+  if (hoursSinceLatestRollback >= delayInHours && maxAttempts >= latestRollbackInfo.count) {
+    log("Previous rollback should be ignored due to rollback retry options.");
+    return false;
+  }
+
+  return true;
+}
+
 var testConfig;
 
 // This function is only used for tests. Replaces the default SDK, configuration and native bridge
@@ -362,36 +398,7 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
       return CodePush.SyncStatus.UPDATE_INSTALLED;
     };
 
-    const shouldRetryPackage = async (packageHash) => {
-      const DEFAULT_DELAY_IN_HOURS = 24;
-      const DEFAULT_MAX_ATTEMPTS = 1;
-
-      if (!syncOptions.rollbackRetryOptions || typeof syncOptions.rollbackRetryOptions !== "object") {
-        log("'rollbackRetryOptions' must be an Object");
-        return false;
-      }
-
-      const latestRollbackInfo = await NativeCodePush.getLatestRollbackInfo();
-      if (!latestRollbackInfo || latestRollbackInfo.packageHash !== packageHash) {
-        return false;
-      }
-
-      const { delayInHours = DEFAULT_DELAY_IN_HOURS, maxAttempts = DEFAULT_MAX_ATTEMPTS } = syncOptions.rollbackRetryOptions;
-      if (maxAttempts < 1) {
-        return false;
-      }
-
-      const hoursSinceLatestRollback = (Date.now() - latestRollbackInfo.time) / 1000 * 60 * 60;
-      if (hoursSinceLatestRollback >= delayInHours && maxAttempts >= latestRollbackInfo.count) {
-        log("Previous rollback should be ignored due to rollback retry options.");
-        return true;
-      }
-    }
-
-    const updateShouldBeIgnored = remotePackage &&
-      remotePackage.failedInstall &&
-      syncOptions.ignoreFailedUpdates &&
-      (!syncOptions.rollbackRetryOptions || !await shouldRetryPackage(remotePackage.packageHash));
+    const updateShouldBeIgnored = await shouldUpdateBeIgnored(remotePackage, syncOptions);
 
     if (!remotePackage || updateShouldBeIgnored) {
       if (updateShouldBeIgnored) {
