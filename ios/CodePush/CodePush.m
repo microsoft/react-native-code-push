@@ -548,6 +548,10 @@ static NSString *const LATEST_ROLLBACK_COUNTER = @"counter";
  */
 - (void)saveFailedUpdate:(NSDictionary *)failedPackage
 {
+    if ([[self class] isFailedHash:[failedPackage objectForKey:PackageHashKey]]) {
+        return;
+    }
+    
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSMutableArray *failedUpdates = [preferences objectForKey:FailedUpdatesKey];
     if (failedUpdates == nil) {
