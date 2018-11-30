@@ -441,10 +441,10 @@ static NSString *const LatestRollbackCountKey = @"count";
     }
 
     NSTimeInterval timeStamp = [[NSDate date] timeIntervalSince1970];
-    NSNumber *timeStampMilliseconds = [NSNumber numberWithDouble: timeStamp * 1000];
+    NSNumber *currentTimeMillis = [NSNumber numberWithDouble: timeStamp * 1000];
 
     [latestRollbackInfo setValue:count forKey:LatestRollbackCountKey];
-    [latestRollbackInfo setValue:timeStampMilliseconds forKey:LatestRollbackTimeKey];
+    [latestRollbackInfo setValue:currentTimeMillis forKey:LatestRollbackTimeKey];
     [latestRollbackInfo setValue:packageHash forKey:LatestRollbackPackageHashKey];
 
     [preferences setObject:latestRollbackInfo forKey:LatestRollbackInfoKey];
