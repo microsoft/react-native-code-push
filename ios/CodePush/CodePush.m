@@ -73,12 +73,11 @@ static NSString *bundleResourceExtension = @"jsbundle";
 static NSString *bundleResourceName = @"main";
 static NSString *bundleResourceSubdirectory = nil;
 
-
+// These constants are used for keeping latest failed package 
 static NSString *const LatestRollbackInfoKey = @"LATEST_ROLLBACK_INFO";
-
-static NSString *const LATEST_ROLLBACK_PACKAGE_HASH_KEY = @"hash";
-static NSString *const LATEST_ROLLBACK_TIME_KEY = @"time";
-static NSString *const LATEST_ROLLBACK_COUNTER = @"counter";
+static NSString *const LatestRollbackPackageHashKey = @"packageHash";
+static NSString *const LatestRollbackTimeKey = @"time";
+static NSString *const LatestRollbackCountKey = @"count";
 
 + (void)initialize
 {
@@ -419,28 +418,37 @@ static NSString *const LATEST_ROLLBACK_COUNTER = @"counter";
 
 + (void)setLatestRollbackInfo:(NSString*)packageHash
 {
-    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
-    NSMutableDictionary *latestRollbackInfo = [preferences objectForKey:LatestRollbackInfoKey];
-    
     if (packageHash == nil) {
         return;
-    } else {
-        if (latestRollbackInfo == nil) {
-            latestRollbackInfo = [[NSMutableDictionary alloc] init];
-        } else {
-            latestRollbackInfo = [latestRollbackInfo mutableCopy];
-        }
-        
-        NSTimeInterval timeStamp = [[NSDate date] timeIntervalSince1970];
-        NSNumber *timeStampObj = [NSNumber numberWithDouble: timeStamp * 1000];
-        
-        [latestRollbackInfo setValue:[NSNumber numberWithDouble:1] forKey:LATEST_ROLLBACK_COUNTER];
-        [latestRollbackInfo setValue:timeStampObj forKey:LATEST_ROLLBACK_TIME_KEY];
-        [latestRollbackInfo setValue:packageHash forKey:LATEST_ROLLBACK_PACKAGE_HASH_KEY];
-        
-        [preferences setObject:latestRollbackInfo forKey:LatestRollbackInfoKey];
-        [preferences synchronize];
     }
+
+    NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
+    NSMutableDictionary *latestRollbackInfo = [preferences objectForKey:LatestRollbackInfoKey];
+
+    if (latestRollbackInfo == nil) {
+        latestRollbackInfo = [[NSMutableDictionary alloc] init];
+    } else {
+        latestRollbackInfo = [latestRollbackInfo mutableCopy];
+    }
+
+    NSNumber *count;
+    NSString *oldPachageHash = [latestRollbackInfo objectForKey:LatestRollbackPackageHashKey];
+    if ([packageHash isEqualToString: oldPachageHash]) {
+      NSNumber *oldCount = [latestRollbackInfo objectForKey:LatestRollbackCountKey];
+      count = [NSNumber numberWithInt:[oldCount intValue] + 1];
+    } else {
+      count = [NSNumber numberWithInt: 1];
+    }
+
+    NSTimeInterval timeStamp = [[NSDate date] timeIntervalSince1970];
+    NSNumber *currentTimeMillis = [NSNumber numberWithDouble: timeStamp * 1000];
+
+    [latestRollbackInfo setValue:count forKey:LatestRollbackCountKey];
+    [latestRollbackInfo setValue:currentTimeMillis forKey:LatestRollbackTimeKey];
+    [latestRollbackInfo setValue:packageHash forKey:LatestRollbackPackageHashKey];
+
+    [preferences setObject:latestRollbackInfo forKey:LatestRollbackInfoKey];
+    [preferences synchronize];
 }
 
 /*
