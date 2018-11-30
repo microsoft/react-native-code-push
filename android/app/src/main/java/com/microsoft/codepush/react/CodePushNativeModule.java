@@ -528,14 +528,11 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         } catch (CodePushUnknownException e) {
             CodePushUtils.log(e);
             promise.reject(e);
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
     }
 
     @ReactMethod
     public void setLatestRollbackInfo(String packageHash, Promise promise) {
-        CodePushUtils.log("setLatestRollbackInfo");
         try {
             mSettingsManager.setLatestRollbackInfo(packageHash);
             promise.resolve(null);
