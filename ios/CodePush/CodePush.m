@@ -73,12 +73,11 @@ static NSString *bundleResourceExtension = @"jsbundle";
 static NSString *bundleResourceName = @"main";
 static NSString *bundleResourceSubdirectory = nil;
 
-
+// These constants are used for keeping latest failed package 
 static NSString *const LatestRollbackInfoKey = @"LATEST_ROLLBACK_INFO";
-
-static NSString *const LATEST_ROLLBACK_PACKAGE_HASH_KEY = @"hash";
-static NSString *const LATEST_ROLLBACK_TIME_KEY = @"time";
-static NSString *const LATEST_ROLLBACK_COUNTER = @"counter";
+static NSString *const latestRollbackPackageHashKey = @"packageHash";
+static NSString *const latestRollbackTimeKey = @"time";
+static NSString *const latestRollbackCountKey = @"count";
 
 + (void)initialize
 {
@@ -425,7 +424,6 @@ static NSString *const LATEST_ROLLBACK_COUNTER = @"counter";
 
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSMutableDictionary *latestRollbackInfo = [preferences objectForKey:LatestRollbackInfoKey];
-    NSNumber *count;
 
     if (latestRollbackInfo == nil) {
         latestRollbackInfo = [[NSMutableDictionary alloc] init];
@@ -433,20 +431,21 @@ static NSString *const LATEST_ROLLBACK_COUNTER = @"counter";
         latestRollbackInfo = [latestRollbackInfo mutableCopy];
     }
 
-    NSString *oldPachageHash = [latestRollbackInfo objectForKey:LATEST_ROLLBACK_PACKAGE_HASH_KEY];
+    NSNumber *count;
+    NSString *oldPachageHash = [latestRollbackInfo objectForKey:latestRollbackPackageHashKey];
     if ([packageHash isEqualToString: oldPachageHash]) {
-      NSNumber *oldCount = [latestRollbackInfo objectForKey:LATEST_ROLLBACK_COUNTER];
+      NSNumber *oldCount = [latestRollbackInfo objectForKey:latestRollbackCountKey];
       count = [NSNumber numberWithInt:[oldCount intValue] + 1];
     } else {
       count = [NSNumber numberWithInt: 1];
     }
 
     NSTimeInterval timeStamp = [[NSDate date] timeIntervalSince1970];
-    NSNumber *timeStampObj = [NSNumber numberWithDouble: timeStamp * 1000];
+    NSNumber *timeStampMilliseconds = [NSNumber numberWithDouble: timeStamp * 1000];
 
-    [latestRollbackInfo setValue:count forKey:LATEST_ROLLBACK_COUNTER];
-    [latestRollbackInfo setValue:timeStampObj forKey:LATEST_ROLLBACK_TIME_KEY];
-    [latestRollbackInfo setValue:packageHash forKey:LATEST_ROLLBACK_PACKAGE_HASH_KEY];
+    [latestRollbackInfo setValue:count forKey:latestRollbackCountKey];
+    [latestRollbackInfo setValue:timeStampMilliseconds forKey:latestRollbackTimeKey];
+    [latestRollbackInfo setValue:packageHash forKey:latestRollbackPackageHashKey];
 
     [preferences setObject:latestRollbackInfo forKey:LatestRollbackInfoKey];
     [preferences synchronize];
