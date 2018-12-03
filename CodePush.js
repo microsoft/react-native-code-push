@@ -244,7 +244,7 @@ async function shouldUpdateBeIgnored(remotePackage, syncOptions) {
   }
 
   const { delayInHours = 24, maxAttempts = 1 } = rollbackRetryOptions;
-  if (maxAttempts < 1) {
+  if (typeof delayInHours !== "number" || typeof maxAttempts !== "number" || maxAttempts < 1) {
     return true;
   }
 
