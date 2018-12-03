@@ -240,7 +240,7 @@ async function shouldUpdateBeIgnored(remotePackage, syncOptions) {
   const { delayInHours = 24, maxAttempts = 1 } = rollbackRetryOptions;
 
   const latestRollbackInfo = await NativeCodePush.getLatestRollbackInfo();
-  if (!isLatestRollbackInfoValid(latestRollbackInfo)) {
+  if (!isLatestRollbackInfoValid(latestRollbackInfo, remotePackage.packageHash)) {
     log("The latest rollback info is not valid.");
     return true;
   }
@@ -254,12 +254,12 @@ async function shouldUpdateBeIgnored(remotePackage, syncOptions) {
   return true;
 }
 
-function isLatestRollbackInfoValid(latestRollbackInfo) {
+function isLatestRollbackInfoValid(latestRollbackInfo, packageHash) {
   return latestRollbackInfo &&
     latestRollbackInfo.time &&
     latestRollbackInfo.count &&
     latestRollbackInfo.packageHash &&
-    latestRollbackInfo.packageHash === remotePackage.packageHash
+    latestRollbackInfo.packageHash === packageHash;
 }
 
 function isRollbackRetryOptionsValid(rollbackRetryOptions) {
