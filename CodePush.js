@@ -259,14 +259,17 @@ function isRollbackRetryOptionsValid(rollbackRetryOptions) {
     return false;
   }
   const { delayInHours, maxAttempts } = rollbackRetryOptions;
+
   if (delayInHours !== undefined && typeof delayInHours !== "number") {
     log("The 'delayInHours' rollback retry parameter must be a number or undefined");
     return false;
   }
+
   if (maxAttempts !== undefined && typeof maxAttempts !== "number") {
     log("The 'maxAttempts' rollback retry parameter must be a number or undefined");
     return false;
   }
+
   if (maxAttempts < 1) {
     log("The 'maxAttempts' rollback retry parameter cannot be less then 1");
     return false;
