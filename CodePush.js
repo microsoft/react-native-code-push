@@ -240,7 +240,8 @@ async function shouldUpdateBeIgnored(remotePackage, syncOptions) {
   const { delayInHours = 24, maxAttempts = 1 } = rollbackRetryOptions;
 
   const latestRollbackInfo = await NativeCodePush.getLatestRollbackInfo();
-  if (!latestRollbackInfo || latestRollbackInfo.packageHash !== remotePackage.packageHash) {
+  if (!isLatestRollbackInfoValid(latestRollbackInfo)) {
+    log("The latest rollback info is not valid.");
     return true;
   }
 
@@ -253,25 +254,33 @@ async function shouldUpdateBeIgnored(remotePackage, syncOptions) {
   return true;
 }
 
+function isLatestRollbackInfoValid(latestRollbackInfo) {
+  return latestRollbackInfo &&
+    latestRollbackInfo.time &&
+    latestRollbackInfo.count &&
+    latestRollbackInfo.packageHash &&
+    latestRollbackInfo.packageHash === remotePackage.packageHash
+}
+
 function isRollbackRetryOptionsValid(rollbackRetryOptions) {
   if (typeof rollbackRetryOptions !== "object") {
-    log("'rollbackRetryOptions' must be an Object");
+    log("The 'rollbackRetryOptions' must be an object.");
     return false;
   }
   const { delayInHours, maxAttempts } = rollbackRetryOptions;
 
   if (delayInHours !== undefined && typeof delayInHours !== "number") {
-    log("The 'delayInHours' rollback retry parameter must be a number or undefined");
+    log("The 'delayInHours' rollback retry parameter must be a number or undefined.");
     return false;
   }
 
   if (maxAttempts !== undefined && typeof maxAttempts !== "number") {
-    log("The 'maxAttempts' rollback retry parameter must be a number or undefined");
+    log("The 'maxAttempts' rollback retry parameter must be a number or undefined.");
     return false;
   }
 
   if (maxAttempts < 1) {
-    log("The 'maxAttempts' rollback retry parameter cannot be less then 1");
+    log("The 'maxAttempts' rollback retry parameter cannot be less then 1.");
     return false;
   }
 
