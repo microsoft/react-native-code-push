@@ -234,28 +234,53 @@ async function shouldUpdateBeIgnored(remotePackage, syncOptions) {
     return false;
   }
 
-  if (!rollbackRetryOptions) {
+  if (!rollbackRetryOptions || !validateRollbackRetryOptions(rollbackRetryOptions)) {
     return true;
   }
-
-  if (typeof rollbackRetryOptions !== "object") {
-    log("'rollbackRetryOptions' must be an Object");
-    return true;
-  }
-
   const { delayInHours = 24, maxAttempts = 1 } = rollbackRetryOptions;
-  if (typeof delayInHours !== "number" || typeof maxAttempts !== "number" || maxAttempts < 1) {
-    return true;
-  }
 
   const latestRollbackInfo = await NativeCodePush.getLatestRollbackInfo();
-  if (!latestRollbackInfo || latestRollbackInfo.packageHash !== remotePackage.packageHash) {
+  if (!validateLatestRollbackInfo(latestRollbackInfo, remotePackage.packageHash)) {
+    log("The latest rollback info is not valid.");
     return true;
   }
 
   const hoursSinceLatestRollback = (Date.now() - latestRollbackInfo.time) / (1000 * 60 * 60);
   if (hoursSinceLatestRollback >= delayInHours && maxAttempts >= latestRollbackInfo.count) {
     log("Previous rollback should be ignored due to rollback retry options.");
+    return false;
+  }
+
+  return true;
+}
+
+function validateLatestRollbackInfo(latestRollbackInfo, packageHash) {
+  return latestRollbackInfo &&
+    latestRollbackInfo.time &&
+    latestRollbackInfo.count &&
+    latestRollbackInfo.packageHash &&
+    latestRollbackInfo.packageHash === packageHash;
+}
+
+function validateRollbackRetryOptions(rollbackRetryOptions) {
+  if (typeof rollbackRetryOptions !== "object") {
+    log("The 'rollbackRetryOptions' must be an object.");
+    return false;
+  }
+  const { delayInHours, maxAttempts } = rollbackRetryOptions;
+
+  if (typeof delayInHours !== "undefined" && typeof delayInHours !== "number") {
+    log("The 'delayInHours' rollback retry parameter must be a number or undefined.");
+    return false;
+  }
+
+  if (typeof maxAttempts !== "undefined" && typeof maxAttempts !== "number") {
+    log("The 'maxAttempts' rollback retry parameter must be a number or undefined.");
+    return false;
+  }
+
+  if (maxAttempts < 1) {
+    log("The 'maxAttempts' rollback retry parameter cannot be less then 1.");
     return false;
   }
 
