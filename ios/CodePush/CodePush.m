@@ -458,8 +458,8 @@ static NSString *const LatestRollbackCountKey = @"count";
  */
 + (int)getRollbackCountForPackage:(NSString*) packageHash fromLatestRollbackInfo:(NSMutableDictionary*) latestRollbackInfo
 {
-    NSString *oldPachageHash = [latestRollbackInfo objectForKey:LatestRollbackPackageHashKey];
-    if ([packageHash isEqualToString: oldPachageHash]) {
+    NSString *oldPackageHash = [latestRollbackInfo objectForKey:LatestRollbackPackageHashKey];
+    if ([packageHash isEqualToString: oldPackageHash]) {
         NSNumber *oldCount = [latestRollbackInfo objectForKey:LatestRollbackCountKey];
         return [oldCount intValue];
     } else {
