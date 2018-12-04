@@ -423,32 +423,38 @@ static NSString *const LatestRollbackCountKey = @"count";
     }
 
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
-    NSMutableDictionary *latestRollbackInfo = [preferences objectForKey:LatestRollbackInfoKey];
+    NSMutableDictionary *latestRollbackInfo = [self initNSMutableDictionaryForPreferences:[preferences objectForKey:LatestRollbackInfoKey]];
 
-    if (latestRollbackInfo == nil) {
-        latestRollbackInfo = [[NSMutableDictionary alloc] init];
-    } else {
-        latestRollbackInfo = [latestRollbackInfo mutableCopy];
-    }
-
-    NSNumber *count;
-    NSString *oldPachageHash = [latestRollbackInfo objectForKey:LatestRollbackPackageHashKey];
-    if ([packageHash isEqualToString: oldPachageHash]) {
-      NSNumber *oldCount = [latestRollbackInfo objectForKey:LatestRollbackCountKey];
-      count = [NSNumber numberWithInt:[oldCount intValue] + 1];
-    } else {
-      count = [NSNumber numberWithInt: 1];
-    }
-
+    NSNumber *count = [self getCountForLatestRollback: latestRollbackInfo packageHash:packageHash];
     NSTimeInterval timeStamp = [[NSDate date] timeIntervalSince1970];
-    NSNumber *currentTimeMillis = [NSNumber numberWithDouble: timeStamp * 1000];
+    NSNumber *timeStampObj = [NSNumber numberWithDouble: timeStamp * 1000];
 
     [latestRollbackInfo setValue:count forKey:LatestRollbackCountKey];
-    [latestRollbackInfo setValue:currentTimeMillis forKey:LatestRollbackTimeKey];
+    [latestRollbackInfo setValue:timeStampObj forKey:LatestRollbackTimeKey];
     [latestRollbackInfo setValue:packageHash forKey:LatestRollbackPackageHashKey];
 
     [preferences setObject:latestRollbackInfo forKey:LatestRollbackInfoKey];
     [preferences synchronize];
+}
+
++ (NSMutableDictionary*)initNSMutableDictionaryForPreferences:(NSMutableDictionary*)mutableDictionary
+{
+    if (mutableDictionary == nil) {
+        return [[NSMutableDictionary alloc] init];
+    } else {
+        return [mutableDictionary mutableCopy];
+    }
+}
+
++ (NSNumber*)getCountForLatestRollback:(NSMutableDictionary*)latestRollbackInfo packageHash:(NSString*) packageHash
+{
+    NSString *oldPachageHash = [latestRollbackInfo objectForKey:LatestRollbackPackageHashKey];
+    if ([packageHash isEqualToString: oldPachageHash]) {
+        NSNumber *oldCount = [latestRollbackInfo objectForKey:LatestRollbackCountKey];
+        return [NSNumber numberWithInt:[oldCount intValue] + 1];
+    } else {
+        return [NSNumber numberWithInt: 1];
+    }
 }
 
 /*
