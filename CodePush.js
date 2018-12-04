@@ -227,17 +227,26 @@ async function tryReportStatus(statusReport, resumeListener) {
 }
 
 async function shouldUpdateBeIgnored(remotePackage, syncOptions) {
-  const { rollbackRetryOptions, ignoreFailedUpdates } = syncOptions;
+  let { rollbackRetryOptions } = syncOptions;
 
   const isFailedPackage = remotePackage && remotePackage.failedInstall;
-  if (!isFailedPackage || !ignoreFailedUpdates) {
+  if (!isFailedPackage || !syncOptions.ignoreFailedUpdates) {
     return false;
   }
 
-  if (!rollbackRetryOptions || !validateRollbackRetryOptions(rollbackRetryOptions)) {
+  if (!rollbackRetryOptions) {
     return true;
   }
-  const { delayInHours = 24, maxAttempts = 1 } = rollbackRetryOptions;
+
+  if (typeof rollbackRetryOptions !== "object") {
+    rollbackRetryOptions = CodePush.DEFAULT_ROLLBACK_RETRY_OPTIONS;
+  } else {
+    rollbackRetryOptions = { ...CodePush.DEFAULT_ROLLBACK_RETRY_OPTIONS, ...rollbackRetryOptions };
+  }
+
+  if (!validateRollbackRetryOptions(rollbackRetryOptions)) {
+    return true;
+  }
 
   const latestRollbackInfo = await NativeCodePush.getLatestRollbackInfo();
   if (!validateLatestRollbackInfo(latestRollbackInfo, remotePackage.packageHash)) {
@@ -245,6 +254,7 @@ async function shouldUpdateBeIgnored(remotePackage, syncOptions) {
     return true;
   }
 
+  const { delayInHours, maxAttempts } = rollbackRetryOptions;
   const hoursSinceLatestRollback = (Date.now() - latestRollbackInfo.time) / (1000 * 60 * 60);
   if (hoursSinceLatestRollback >= delayInHours && maxAttempts >= latestRollbackInfo.count) {
     log("Previous rollback should be ignored due to rollback retry options.");
@@ -263,23 +273,17 @@ function validateLatestRollbackInfo(latestRollbackInfo, packageHash) {
 }
 
 function validateRollbackRetryOptions(rollbackRetryOptions) {
-  if (typeof rollbackRetryOptions !== "object") {
-    log("The 'rollbackRetryOptions' must be an object.");
-    return false;
-  }
-  const { delayInHours, maxAttempts } = rollbackRetryOptions;
-
-  if (typeof delayInHours !== "undefined" && typeof delayInHours !== "number") {
-    log("The 'delayInHours' rollback retry parameter must be a number or undefined.");
+  if (typeof rollbackRetryOptions.delayInHours !== "number") {
+    log("The 'delayInHours' rollback retry parameter must be a number.");
     return false;
   }
 
-  if (typeof maxAttempts !== "undefined" && typeof maxAttempts !== "number") {
-    log("The 'maxAttempts' rollback retry parameter must be a number or undefined.");
+  if (typeof rollbackRetryOptions.maxAttempts !== "number") {
+    log("The 'maxAttempts' rollback retry parameter must be a number.");
     return false;
   }
 
-  if (maxAttempts < 1) {
+  if (rollbackRetryOptions.maxAttempts < 1) {
     log("The 'maxAttempts' rollback retry parameter cannot be less then 1.");
     return false;
   }
@@ -649,6 +653,10 @@ if (NativeCodePush) {
       optionalInstallButtonLabel: "Install",
       optionalUpdateMessage: "An update is available. Would you like to install it?",
       title: "Update available"
+    },
+    DEFAULT_ROLLBACK_RETRY_OPTIONS: {
+      delayInHours: 24,
+      maxAttempts: 1
     }
   });
 } else {
