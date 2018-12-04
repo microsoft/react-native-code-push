@@ -409,6 +409,9 @@ static NSString *const LatestRollbackCountKey = @"count";
     }
 }
 
+/*
+ * This method used for getting information about latest rollback
+ */
 + (NSDictionary *)getRollbackInfo
 {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
@@ -416,6 +419,10 @@ static NSString *const LatestRollbackCountKey = @"count";
     return latestRollbackInfo;
 }
 
+/*
+ * This method save metadata about latest rollback. 
+ * This rollback info will be used for deciding if app should ignore current update or not 
+ */
 + (void)setLatestRollbackInfo:(NSString*)packageHash
 {
     if (packageHash == nil) {
@@ -423,9 +430,14 @@ static NSString *const LatestRollbackCountKey = @"count";
     }
 
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
-    NSMutableDictionary *latestRollbackInfo = [self initNSMutableDictionaryForPreferences:[preferences objectForKey:LatestRollbackInfoKey]];
+    NSMutableDictionary *latestRollbackInfo = [preferences objectForKey:LatestRollbackInfoKey];
+    if (latestRollbackInfo == nil) {
+        return [[NSMutableDictionary alloc] init];
+    } else {
+        return [latestRollbackInfo mutableCopy];
+    }
 
-    NSNumber *count = [self getCountForLatestRollback: latestRollbackInfo packageHash:packageHash];
+    NSNumber *count = [self getRollbackSumForLatestRollbackPackage: latestRollbackInfo packageHash:packageHash];
     NSTimeInterval timeStamp = [[NSDate date] timeIntervalSince1970];
     NSNumber *timeStampObj = [NSNumber numberWithDouble: timeStamp * 1000];
 
@@ -437,16 +449,10 @@ static NSString *const LatestRollbackCountKey = @"count";
     [preferences synchronize];
 }
 
-+ (NSMutableDictionary*)initNSMutableDictionaryForPreferences:(NSMutableDictionary*)mutableDictionary
-{
-    if (mutableDictionary == nil) {
-        return [[NSMutableDictionary alloc] init];
-    } else {
-        return [mutableDictionary mutableCopy];
-    }
-}
-
-+ (NSNumber*)getCountForLatestRollback:(NSMutableDictionary*)latestRollbackInfo packageHash:(NSString*) packageHash
+/*
+ * This method is used for getting sum of rollback for latest package
+ */
++ (NSNumber*)getRollbackSumForLatestRollbackPackage:(NSMutableDictionary*)latestRollbackInfo packageHash:(NSString*) packageHash
 {
     NSString *oldPachageHash = [latestRollbackInfo objectForKey:LatestRollbackPackageHashKey];
     if ([packageHash isEqualToString: oldPachageHash]) {
