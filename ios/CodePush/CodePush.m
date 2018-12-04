@@ -437,7 +437,8 @@ static NSString *const LatestRollbackCountKey = @"count";
         return [latestRollbackInfo mutableCopy];
     }
 
-    NSNumber *count = [self getRollbackSumForLatestRollbackPackage: latestRollbackInfo packageHash:packageHash];
+    int intCount = [self getRollbackCountForLatestRollbackPackage: latestRollbackInfo packageHash:packageHash];
+    NSNumber *count = [NSNumber numberWithInt: intCount + 1];
     NSNumber *currentTimeMillis = [NSNumber numberWithDouble: [[NSDate date] timeIntervalSince1970] * 1000];
 
     [latestRollbackInfo setValue:count forKey:LatestRollbackCountKey];
@@ -451,14 +452,14 @@ static NSString *const LatestRollbackCountKey = @"count";
 /*
  * This method is used to getting the sum of rollback for the latest package
  */
-+ (NSNumber*)getRollbackSumForLatestRollbackPackage:(NSMutableDictionary*)latestRollbackInfo packageHash:(NSString*) packageHash
++ (int)getRollbackCountForLatestRollbackPackage:(NSMutableDictionary*)latestRollbackInfo packageHash:(NSString*) packageHash
 {
     NSString *oldPachageHash = [latestRollbackInfo objectForKey:LatestRollbackPackageHashKey];
     if ([packageHash isEqualToString: oldPachageHash]) {
         NSNumber *oldCount = [latestRollbackInfo objectForKey:LatestRollbackCountKey];
-        return [NSNumber numberWithInt:[oldCount intValue] + 1];
+        return [oldCount intValue];
     } else {
-        return [NSNumber numberWithInt: 1];
+        return 0;
     }
 }
 
