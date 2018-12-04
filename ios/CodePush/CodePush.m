@@ -410,7 +410,7 @@ static NSString *const LatestRollbackCountKey = @"count";
 }
 
 /*
- * This method used to get information about latest rollback
+ * This method used to get information about the last rollback
  */
 + (NSDictionary *)getLatestRollbackInfo
 {
