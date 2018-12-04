@@ -234,13 +234,13 @@ async function shouldUpdateBeIgnored(remotePackage, syncOptions) {
     return false;
   }
 
-  if (!rollbackRetryOptions || !isRollbackRetryOptionsValid(rollbackRetryOptions)) {
+  if (!rollbackRetryOptions || !validateRollbackRetryOptions(rollbackRetryOptions)) {
     return true;
   }
   const { delayInHours = 24, maxAttempts = 1 } = rollbackRetryOptions;
 
   const latestRollbackInfo = await NativeCodePush.getLatestRollbackInfo();
-  if (!isLatestRollbackInfoValid(latestRollbackInfo, remotePackage.packageHash)) {
+  if (!validateLatestRollbackInfo(latestRollbackInfo, remotePackage.packageHash)) {
     log("The latest rollback info is not valid.");
     return true;
   }
@@ -254,7 +254,7 @@ async function shouldUpdateBeIgnored(remotePackage, syncOptions) {
   return true;
 }
 
-function isLatestRollbackInfoValid(latestRollbackInfo, packageHash) {
+function validateLatestRollbackInfo(latestRollbackInfo, packageHash) {
   return latestRollbackInfo &&
     latestRollbackInfo.time &&
     latestRollbackInfo.count &&
@@ -262,19 +262,19 @@ function isLatestRollbackInfoValid(latestRollbackInfo, packageHash) {
     latestRollbackInfo.packageHash === packageHash;
 }
 
-function isRollbackRetryOptionsValid(rollbackRetryOptions) {
+function validateRollbackRetryOptions(rollbackRetryOptions) {
   if (typeof rollbackRetryOptions !== "object") {
     log("The 'rollbackRetryOptions' must be an object.");
     return false;
   }
   const { delayInHours, maxAttempts } = rollbackRetryOptions;
 
-  if (delayInHours !== undefined && typeof delayInHours !== "number") {
+  if (typeof delayInHours !== "undefined" && typeof delayInHours !== "number") {
     log("The 'delayInHours' rollback retry parameter must be a number or undefined.");
     return false;
   }
 
-  if (maxAttempts !== undefined && typeof maxAttempts !== "number") {
+  if (typeof maxAttempts !== "undefined" && typeof maxAttempts !== "number") {
     log("The 'maxAttempts' rollback retry parameter must be a number or undefined.");
     return false;
   }
