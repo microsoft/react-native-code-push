@@ -412,7 +412,7 @@ static NSString *const LatestRollbackCountKey = @"count";
 /*
  * This method used for getting information about latest rollback
  */
-+ (NSDictionary *)getRollbackInfo
++ (NSDictionary *)getLatestRollbackInfo
 {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSDictionary *latestRollbackInfo = [preferences objectForKey:LatestRollbackInfoKey];
@@ -438,11 +438,10 @@ static NSString *const LatestRollbackCountKey = @"count";
     }
 
     NSNumber *count = [self getRollbackSumForLatestRollbackPackage: latestRollbackInfo packageHash:packageHash];
-    NSTimeInterval timeStamp = [[NSDate date] timeIntervalSince1970];
-    NSNumber *timeStampObj = [NSNumber numberWithDouble: timeStamp * 1000];
+    NSNumber *currentTimeMillis = [NSNumber numberWithDouble: [[NSDate date] timeIntervalSince1970] * 1000];
 
     [latestRollbackInfo setValue:count forKey:LatestRollbackCountKey];
-    [latestRollbackInfo setValue:timeStampObj forKey:LatestRollbackTimeKey];
+    [latestRollbackInfo setValue:currentTimeMillis forKey:LatestRollbackTimeKey];
     [latestRollbackInfo setValue:packageHash forKey:LatestRollbackPackageHashKey];
 
     [preferences setObject:latestRollbackInfo forKey:LatestRollbackInfoKey];
@@ -897,7 +896,7 @@ RCT_EXPORT_METHOD(setLatestRollbackInfo:(NSString *)packageHash
 RCT_EXPORT_METHOD(getLatestRollbackInfo:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
-    NSDictionary *latestRollbackInfo = [[self class] getRollbackInfo];
+    NSDictionary *latestRollbackInfo = [[self class] getLatestRollbackInfo];
     resolve(latestRollbackInfo);
 }
 
