@@ -421,7 +421,7 @@ static NSString *const LatestRollbackCountKey = @"count";
 
 /*
  * This method saves metadata about the latest rollback
- * This rollback info will be used to deciding if app should ignore the current update or not 
+ * This information will be used to decide whether the application should ignore the update or not
  */
 + (void)setLatestRollbackInfo:(NSString*)packageHash
 {
