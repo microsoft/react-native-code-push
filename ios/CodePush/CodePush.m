@@ -73,7 +73,7 @@ static NSString *bundleResourceExtension = @"jsbundle";
 static NSString *bundleResourceName = @"main";
 static NSString *bundleResourceSubdirectory = nil;
 
-// These constants are used for keeping latest failed package 
+// These constants are used to keeping latest failed package 
 static NSString *const LatestRollbackInfoKey = @"LATEST_ROLLBACK_INFO";
 static NSString *const LatestRollbackPackageHashKey = @"packageHash";
 static NSString *const LatestRollbackTimeKey = @"time";
@@ -410,7 +410,7 @@ static NSString *const LatestRollbackCountKey = @"count";
 }
 
 /*
- * This method used for getting information about latest rollback
+ * This method used to get information about latest rollback
  */
 + (NSDictionary *)getLatestRollbackInfo
 {
@@ -420,8 +420,8 @@ static NSString *const LatestRollbackCountKey = @"count";
 }
 
 /*
- * This method save metadata about latest rollback. 
- * This rollback info will be used for deciding if app should ignore current update or not 
+ * This method saves metadata about the latest rollback
+ * This rollback info will be used to deciding if app should ignore the current update or not 
  */
 + (void)setLatestRollbackInfo:(NSString*)packageHash
 {
@@ -449,7 +449,7 @@ static NSString *const LatestRollbackCountKey = @"count";
 }
 
 /*
- * This method is used for getting sum of rollback for latest package
+ * This method is used to getting the sum of rollback for the latest package
  */
 + (NSNumber*)getRollbackSumForLatestRollbackPackage:(NSMutableDictionary*)latestRollbackInfo packageHash:(NSString*) packageHash
 {
