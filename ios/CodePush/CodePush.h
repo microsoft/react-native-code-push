@@ -62,9 +62,14 @@
  */
 + (BOOL)isFailedHash:(NSString*)packageHash;
 
-+ (NSDictionary*)getRollbackInfo:(NSString*)packageHash;
 
+/*
+ * The following methods are used to save or retrieve
+ * information about the latest rollback.
+ */
++ (NSDictionary*)getRollbackInfo;
 + (void)setLatestRollbackInfo:(NSString*)packageHash;
++ (int)getRollbackCountForPackage:(NSString*) packageHash fromLatestRollbackInfo:(NSMutableDictionary*) latestRollbackInfo;
 
 /*
  * This method checks to see whether a specific package hash
