@@ -73,7 +73,7 @@ static NSString *bundleResourceExtension = @"jsbundle";
 static NSString *bundleResourceName = @"main";
 static NSString *bundleResourceSubdirectory = nil;
 
-// These constants are used for keeping latest failed package 
+// These keys represent the names we use to store information about the latest rollback
 static NSString *const LatestRollbackInfoKey = @"LATEST_ROLLBACK_INFO";
 static NSString *const LatestRollbackPackageHashKey = @"packageHash";
 static NSString *const LatestRollbackTimeKey = @"time";
@@ -409,13 +409,23 @@ static NSString *const LatestRollbackCountKey = @"count";
     }
 }
 
-+ (NSDictionary *)getRollbackInfo
+/*
+ * This method is used to get information about the latest rollback.
+ * This information will be used to decide whether the application
+ * should ignore the update or not.
+ */
++ (NSDictionary *)getLatestRollbackInfo
 {
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSDictionary *latestRollbackInfo = [preferences objectForKey:LatestRollbackInfoKey];
     return latestRollbackInfo;
 }
 
+/*
+ * This method is used to save information about the latest rollback.
+ * This information will be used to decide whether the application
+ * should ignore the update or not.
+ */
 + (void)setLatestRollbackInfo:(NSString*)packageHash
 {
     if (packageHash == nil) {
@@ -424,24 +434,15 @@ static NSString *const LatestRollbackCountKey = @"count";
 
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSMutableDictionary *latestRollbackInfo = [preferences objectForKey:LatestRollbackInfoKey];
-
     if (latestRollbackInfo == nil) {
         latestRollbackInfo = [[NSMutableDictionary alloc] init];
     } else {
         latestRollbackInfo = [latestRollbackInfo mutableCopy];
     }
 
-    NSNumber *count;
-    NSString *oldPachageHash = [latestRollbackInfo objectForKey:LatestRollbackPackageHashKey];
-    if ([packageHash isEqualToString: oldPachageHash]) {
-      NSNumber *oldCount = [latestRollbackInfo objectForKey:LatestRollbackCountKey];
-      count = [NSNumber numberWithInt:[oldCount intValue] + 1];
-    } else {
-      count = [NSNumber numberWithInt: 1];
-    }
-
-    NSTimeInterval timeStamp = [[NSDate date] timeIntervalSince1970];
-    NSNumber *currentTimeMillis = [NSNumber numberWithDouble: timeStamp * 1000];
+    int initialRollbackCount = [self getRollbackCountForPackage: packageHash fromLatestRollbackInfo: latestRollbackInfo];
+    NSNumber *count = [NSNumber numberWithInt: initialRollbackCount + 1];
+    NSNumber *currentTimeMillis = [NSNumber numberWithDouble: [[NSDate date] timeIntervalSince1970] * 1000];
 
     [latestRollbackInfo setValue:count forKey:LatestRollbackCountKey];
     [latestRollbackInfo setValue:currentTimeMillis forKey:LatestRollbackTimeKey];
@@ -449,6 +450,21 @@ static NSString *const LatestRollbackCountKey = @"count";
 
     [preferences setObject:latestRollbackInfo forKey:LatestRollbackInfoKey];
     [preferences synchronize];
+}
+
+/*
+ * This method is used to get the count of rollback for the package
+ * using the latest rollback information.
+ */
++ (int)getRollbackCountForPackage:(NSString*) packageHash fromLatestRollbackInfo:(NSMutableDictionary*) latestRollbackInfo
+{
+    NSString *oldPackageHash = [latestRollbackInfo objectForKey:LatestRollbackPackageHashKey];
+    if ([packageHash isEqualToString: oldPackageHash]) {
+        NSNumber *oldCount = [latestRollbackInfo objectForKey:LatestRollbackCountKey];
+        return [oldCount intValue];
+    } else {
+        return 0;
+    }
 }
 
 /*
@@ -885,7 +901,7 @@ RCT_EXPORT_METHOD(setLatestRollbackInfo:(NSString *)packageHash
 RCT_EXPORT_METHOD(getLatestRollbackInfo:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
-    NSDictionary *latestRollbackInfo = [[self class] getRollbackInfo];
+    NSDictionary *latestRollbackInfo = [[self class] getLatestRollbackInfo];
     resolve(latestRollbackInfo);
 }
 
