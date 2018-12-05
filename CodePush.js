@@ -254,9 +254,9 @@ async function shouldUpdateBeIgnored(remotePackage, syncOptions) {
     return true;
   }
 
-  const { delayInHours, maxAttempts } = rollbackRetryOptions;
+  const { delayInHours, maxRetryAttempts } = rollbackRetryOptions;
   const hoursSinceLatestRollback = (Date.now() - latestRollbackInfo.time) / (1000 * 60 * 60);
-  if (hoursSinceLatestRollback >= delayInHours && maxAttempts >= latestRollbackInfo.count) {
+  if (hoursSinceLatestRollback >= delayInHours && maxRetryAttempts >= latestRollbackInfo.count) {
     log("Previous rollback should be ignored due to rollback retry options.");
     return false;
   }
@@ -278,13 +278,13 @@ function validateRollbackRetryOptions(rollbackRetryOptions) {
     return false;
   }
 
-  if (typeof rollbackRetryOptions.maxAttempts !== "number") {
-    log("The 'maxAttempts' rollback retry parameter must be a number.");
+  if (typeof rollbackRetryOptions.maxRetryAttempts !== "number") {
+    log("The 'maxRetryAttempts' rollback retry parameter must be a number.");
     return false;
   }
 
-  if (rollbackRetryOptions.maxAttempts < 1) {
-    log("The 'maxAttempts' rollback retry parameter cannot be less then 1.");
+  if (rollbackRetryOptions.maxRetryAttempts < 1) {
+    log("The 'maxRetryAttempts' rollback retry parameter cannot be less then 1.");
     return false;
   }
 
@@ -656,7 +656,7 @@ if (NativeCodePush) {
     },
     DEFAULT_ROLLBACK_RETRY_OPTIONS: {
       delayInHours: 24,
-      maxAttempts: 1
+      maxRetryAttempts: 1
     }
   });
 } else {
