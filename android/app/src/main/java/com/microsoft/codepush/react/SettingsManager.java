@@ -74,8 +74,7 @@ public class SettingsManager {
             return pendingUpdate != null &&
                     !pendingUpdate.getBoolean(CodePushConstants.PENDING_UPDATE_IS_LOADING_KEY) &&
                     (packageHash == null || pendingUpdate.getString(CodePushConstants.PENDING_UPDATE_HASH_KEY).equals(packageHash));
-        }
-        catch (JSONException e) {
+        } catch (JSONException e) {
             throw new CodePushUnknownException("Unable to read pending update metadata in isPendingUpdate.", e);
         }
     }
@@ -89,6 +88,15 @@ public class SettingsManager {
     }
 
     public void saveFailedUpdate(JSONObject failedPackage) {
+        try {
+            if (isFailedHash(failedPackage.getString(CodePushConstants.PACKAGE_HASH_KEY))) {
+                // Do not need to add the package if it is already in the failedUpdates.
+                return;
+            }
+        } catch (JSONException e) {
+            throw new CodePushUnknownException("Unable to read package hash from package.", e);
+        }
+
         String failedUpdatesString = mSettings.getString(CodePushConstants.FAILED_UPDATES_KEY, null);
         JSONArray failedUpdates;
         if (failedUpdatesString == null) {
@@ -105,6 +113,49 @@ public class SettingsManager {
 
         failedUpdates.put(failedPackage);
         mSettings.edit().putString(CodePushConstants.FAILED_UPDATES_KEY, failedUpdates.toString()).commit();
+    }
+
+    public JSONObject getLatestRollbackInfo() {
+        String latestRollbackInfoString = mSettings.getString(CodePushConstants.LATEST_ROLLBACK_INFO_KEY, null);
+        if (latestRollbackInfoString == null) {
+            return null;
+        }
+
+        try {
+            return new JSONObject(latestRollbackInfoString);
+        } catch (JSONException e) {
+            // Should not happen.
+            CodePushUtils.log("Unable to parse latest rollback metadata " + latestRollbackInfoString +
+                    " stored in SharedPreferences");
+            return null;
+        }
+    }
+
+    public void setLatestRollbackInfo(String packageHash) {
+        JSONObject latestRollbackInfo = getLatestRollbackInfo();
+        int count = 0;
+
+        if (latestRollbackInfo != null) {
+            try {
+                String latestRollbackPackageHash = latestRollbackInfo.getString(CodePushConstants.LATEST_ROLLBACK_PACKAGE_HASH_KEY);
+                if (latestRollbackPackageHash.equals(packageHash)) {
+                    count = latestRollbackInfo.getInt(CodePushConstants.LATEST_ROLLBACK_COUNT_KEY);
+                }
+            } catch (JSONException e) {
+                CodePushUtils.log("Unable to parse latest rollback info.");
+            }
+        } else {
+            latestRollbackInfo = new JSONObject();
+        }
+
+        try {
+            latestRollbackInfo.put(CodePushConstants.LATEST_ROLLBACK_PACKAGE_HASH_KEY, packageHash);
+            latestRollbackInfo.put(CodePushConstants.LATEST_ROLLBACK_TIME_KEY, System.currentTimeMillis());
+            latestRollbackInfo.put(CodePushConstants.LATEST_ROLLBACK_COUNT_KEY, count + 1);
+            mSettings.edit().putString(CodePushConstants.LATEST_ROLLBACK_INFO_KEY, latestRollbackInfo.toString()).commit();
+        } catch (JSONException e) {
+            throw new CodePushUnknownException("Unable to save latest rollback info.", e);
+        }
     }
 
     public void savePendingUpdate(String packageHash, boolean isLoading) {
