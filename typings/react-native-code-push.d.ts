@@ -137,11 +137,11 @@ export interface SyncOptions {
     updateDialog?: UpdateDialog;
 
     /**
-     * An "options" object used to determine whether a rollback retry mechanism should be enabled, and if so, what settings to use.
-     * Defaults to `null`, which has the effect of disabling the retry mechanism completely. Setting this to any truthy value will enable
-     * the retry mechanism with the default settings, and passing an object to this parameter allows enabling the retry mechanism as well
-     * as overriding one or more of the default values. The rollback retry mechanism allows the application to attempt to reinstall
-     * an update that was previously rolled back (with the restrictions specified in the options).
+     * The rollback retry mechanism allows the application to attempt to reinstall an update that was previously rolled back (with the restrictions
+     * specified in the options). It is an "options" object used to determine whether a rollback retry should occur, and if so, what settings to use
+     * for the rollback retry. This defaults to null, which has the effect of disabling the retry mechanism. Setting this to any truthy value will enable
+     * the retry mechanism with the default settings, and passing an object to this parameter allows enabling the rollback retry as well as overriding
+     * one or more of the default values.
      */
     rollbackRetryOptions?: RollbackRetryOptions;
 }
