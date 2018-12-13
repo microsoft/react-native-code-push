@@ -375,6 +375,13 @@ static NSString *const LatestRollbackCountKey = @"count";
         [self initializeUpdateAfterRestart];
     }
 
+    NSString *publicKey = [[CodePushConfig current] publicKey];
+    NSString *validateHash = [[CodePushConfig current] validateHash];
+
+    if (publicKey && validateHash) {
+        [CodePushPackage validatePackageHashAndSignature:publicKey];
+    }
+
     return self;
 }
 

@@ -15,6 +15,7 @@ NSString * const BundleJWTFile = @".codepushrelease";
 NSString * const IgnoreMacOSX= @"__MACOSX/";
 NSString * const IgnoreDSStore = @".DS_Store";
 NSString * const IgnoreCodePushMetadata = @".codepushrelease";
+NSString * const IgnoreCodePushAppJson = @"app.json";
 
 + (BOOL)isHashIgnoredFor:(NSString *) relativePath
 {
@@ -22,6 +23,7 @@ NSString * const IgnoreCodePushMetadata = @".codepushrelease";
     || [relativePath isEqualToString:IgnoreDSStore]
     || [relativePath hasSuffix:[NSString stringWithFormat:@"/%@", IgnoreDSStore]]
     || [relativePath isEqualToString:IgnoreCodePushMetadata]
+    || [relativePath isEqualToString:IgnoreCodePushAppJson]
     || [relativePath hasSuffix:[NSString stringWithFormat:@"/%@", IgnoreCodePushMetadata]];
 }
 

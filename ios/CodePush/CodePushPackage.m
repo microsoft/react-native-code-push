@@ -595,4 +595,33 @@ static NSString *const UnzippedFolderName = @"unzipped";
     return YES;
 }
 
++ (void)validatePackageHashAndSignature:(NSString *)stringPublicKey
+{
+    NSError *error;
+    NSString *currentHash = [CodePushPackage getCurrentPackageHash:&error];
+    NSString *currentPackagePath = [CodePushPackage getCurrentPackageFolderPath:&error];
+    
+    if (currentHash) {
+        if (![CodePushUpdateUtils verifyFolderHash:currentPackagePath
+                                        expectedHash:currentHash
+                                                error:&error]) {
+            CPLog(@"The update contents failed the data integrity check.");
+            exit(0);
+            return;
+        } else {
+            CPLog(@"The update contents succeeded the data integrity check.");
+        }
+        BOOL isSignatureValid = [CodePushUpdateUtils verifyUpdateSignatureFor:currentPackagePath
+                                                                    expectedHash:currentHash
+                                                                withPublicKey:stringPublicKey
+                                                                        error:&error];
+        if (!isSignatureValid) {
+            exit(0);
+            return;
+        } else {
+            CPLog(@"The update contents succeeded the code signing check.");
+        }
+    }
+}
+
 @end
