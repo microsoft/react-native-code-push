@@ -197,6 +197,7 @@ async function tryReportStatus(statusReport, resumeListener) {
         log(`Reporting CodePush update success (${label})`);
       } else {
         log(`Reporting CodePush update rollback (${label})`);
+        await NativeCodePush.setLatestRollbackInfo(statusReport.package.packageHash);
       }
 
       config.deploymentKey = statusReport.package.deploymentKey;
@@ -225,6 +226,71 @@ async function tryReportStatus(statusReport, resumeListener) {
   }
 }
 
+async function shouldUpdateBeIgnored(remotePackage, syncOptions) {
+  let { rollbackRetryOptions } = syncOptions;
+
+  const isFailedPackage = remotePackage && remotePackage.failedInstall;
+  if (!isFailedPackage || !syncOptions.ignoreFailedUpdates) {
+    return false;
+  }
+
+  if (!rollbackRetryOptions) {
+    return true;
+  }
+
+  if (typeof rollbackRetryOptions !== "object") {
+    rollbackRetryOptions = CodePush.DEFAULT_ROLLBACK_RETRY_OPTIONS;
+  } else {
+    rollbackRetryOptions = { ...CodePush.DEFAULT_ROLLBACK_RETRY_OPTIONS, ...rollbackRetryOptions };
+  }
+
+  if (!validateRollbackRetryOptions(rollbackRetryOptions)) {
+    return true;
+  }
+
+  const latestRollbackInfo = await NativeCodePush.getLatestRollbackInfo();
+  if (!validateLatestRollbackInfo(latestRollbackInfo, remotePackage.packageHash)) {
+    log("The latest rollback info is not valid.");
+    return true;
+  }
+
+  const { delayInHours, maxRetryAttempts } = rollbackRetryOptions;
+  const hoursSinceLatestRollback = (Date.now() - latestRollbackInfo.time) / (1000 * 60 * 60);
+  if (hoursSinceLatestRollback >= delayInHours && maxRetryAttempts >= latestRollbackInfo.count) {
+    log("Previous rollback should be ignored due to rollback retry options.");
+    return false;
+  }
+
+  return true;
+}
+
+function validateLatestRollbackInfo(latestRollbackInfo, packageHash) {
+  return latestRollbackInfo &&
+    latestRollbackInfo.time &&
+    latestRollbackInfo.count &&
+    latestRollbackInfo.packageHash &&
+    latestRollbackInfo.packageHash === packageHash;
+}
+
+function validateRollbackRetryOptions(rollbackRetryOptions) {
+  if (typeof rollbackRetryOptions.delayInHours !== "number") {
+    log("The 'delayInHours' rollback retry parameter must be a number.");
+    return false;
+  }
+
+  if (typeof rollbackRetryOptions.maxRetryAttempts !== "number") {
+    log("The 'maxRetryAttempts' rollback retry parameter must be a number.");
+    return false;
+  }
+
+  if (rollbackRetryOptions.maxRetryAttempts < 1) {
+    log("The 'maxRetryAttempts' rollback retry parameter cannot be less then 1.");
+    return false;
+  }
+
+  return true;
+}
+
 var testConfig;
 
 // This function is only used for tests. Replaces the default SDK, configuration and native bridge
@@ -241,7 +307,7 @@ const sync = (() => {
   const setSyncCompleted = () => { syncInProgress = false; };
 
   return (options = {}, syncStatusChangeCallback, downloadProgressCallback, handleBinaryVersionMismatchCallback) => {
-    let syncStatusCallbackWithTryCatch, downloadProgressCallbackkWithTryCatch;
+    let syncStatusCallbackWithTryCatch, downloadProgressCallbackWithTryCatch;
     if (typeof syncStatusChangeCallback === "function") {
       syncStatusCallbackWithTryCatch = (...args) => {
         try {
@@ -253,7 +319,7 @@ const sync = (() => {
     }
 
     if (typeof downloadProgressCallback === "function") {
-      downloadProgressCallbackkWithTryCatch = (...args) => {
+      downloadProgressCallbackWithTryCatch = (...args) => {
         try {
           downloadProgressCallback(...args);
         } catch (error) {
@@ -270,7 +336,7 @@ const sync = (() => {
     }
 
     syncInProgress = true;
-    const syncPromise = syncInternal(options, syncStatusCallbackWithTryCatch, downloadProgressCallbackkWithTryCatch, handleBinaryVersionMismatchCallback);
+    const syncPromise = syncInternal(options, syncStatusCallbackWithTryCatch, downloadProgressCallbackWithTryCatch, handleBinaryVersionMismatchCallback);
     syncPromise
       .then(setSyncCompleted)
       .catch(setSyncCompleted);
@@ -293,6 +359,7 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
   const syncOptions = {
     deploymentKey: null,
     ignoreFailedUpdates: true,
+    rollbackRetryOptions: null,
     installMode: CodePush.InstallMode.ON_NEXT_RESTART,
     mandatoryInstallMode: CodePush.InstallMode.IMMEDIATE,
     minimumBackgroundDuration: 0,
@@ -360,7 +427,8 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
       return CodePush.SyncStatus.UPDATE_INSTALLED;
     };
 
-    const updateShouldBeIgnored = remotePackage && (remotePackage.failedInstall && syncOptions.ignoreFailedUpdates);
+    const updateShouldBeIgnored = await shouldUpdateBeIgnored(remotePackage, syncOptions);
+
     if (!remotePackage || updateShouldBeIgnored) {
       if (updateShouldBeIgnored) {
           log("An update is available, but it is being ignored due to having been previously rolled back.");
@@ -585,6 +653,10 @@ if (NativeCodePush) {
       optionalInstallButtonLabel: "Install",
       optionalUpdateMessage: "An update is available. Would you like to install it?",
       title: "Update available"
+    },
+    DEFAULT_ROLLBACK_RETRY_OPTIONS: {
+      delayInHours: 24,
+      maxRetryAttempts: 1
     }
   });
 } else {

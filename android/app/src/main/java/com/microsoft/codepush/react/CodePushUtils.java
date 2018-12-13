@@ -81,6 +81,8 @@ public class CodePushUtils {
                 map.putString(key, (String) obj);
             else if (obj instanceof Double)
                 map.putDouble(key, (Double) obj);
+            else if (obj instanceof Long)
+                map.putDouble(key, ((Long) obj).doubleValue());
             else if (obj instanceof Integer)
                 map.putInt(key, (Integer) obj);
             else if (obj instanceof Boolean)

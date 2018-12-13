@@ -62,6 +62,25 @@
  */
 + (BOOL)isFailedHash:(NSString*)packageHash;
 
+
+/*
+ * This method is used to get information about the latest rollback.
+ * This information will be used to decide whether the application
+ * should ignore the update or not.
+ */
++ (NSDictionary*)getRollbackInfo;
+/*
+ * This method is used to save information about the latest rollback.
+ * This information will be used to decide whether the application
+ * should ignore the update or not.
+ */
++ (void)setLatestRollbackInfo:(NSString*)packageHash;
+/*
+ * This method is used to get the count of rollback for the package
+ * using the latest rollback information.
+ */
++ (int)getRollbackCountForPackage:(NSString*) packageHash fromLatestRollbackInfo:(NSMutableDictionary*) latestRollbackInfo;
+
 /*
  * This method checks to see whether a specific package hash
  * represents a downloaded and installed update, that hasn't
