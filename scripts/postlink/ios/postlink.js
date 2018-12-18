@@ -40,25 +40,31 @@ module.exports = () => {
     }
 
     // 2. Modify jsCodeLocation value assignment
-    var jsCodeLocations = appDelegateContents.match(/(jsCodeLocation = .*)/);
-    var oldJsCodeLocationAssignmentStatement;
-    if (jsCodeLocations) {
-        oldJsCodeLocationAssignmentStatement = jsCodeLocations[1];
-    } else {
+    var jsCodeLocations = appDelegateContents.match(/(jsCodeLocation = .*)/g);
+
+    if (!jsCodeLocations) {
         console.log('Couldn\'t find jsCodeLocation setting in AppDelegate.');
     }
     var newJsCodeLocationAssignmentStatement = "jsCodeLocation = [CodePush bundleURL];";
     if (~appDelegateContents.indexOf(newJsCodeLocationAssignmentStatement)) {
         console.log(`"jsCodeLocation" already pointing to "[CodePush bundleURL]".`);
     } else {
-        var jsCodeLocationPatch = `
-    #ifdef DEBUG
-        ${oldJsCodeLocationAssignmentStatement}
-    #else
-        ${newJsCodeLocationAssignmentStatement}
-    #endif`;
-        appDelegateContents = appDelegateContents.replace(oldJsCodeLocationAssignmentStatement,
-            jsCodeLocationPatch);
+        if (jsCodeLocations.length === 1) {
+            var oldJsCodeLocationAssignmentStatement = jsCodeLocations[0];
+            var jsCodeLocationPatch = `
+                #ifdef DEBUG
+                    ${oldJsCodeLocationAssignmentStatement}
+                #else
+                    ${newJsCodeLocationAssignmentStatement}
+                #endif`;
+            appDelegateContents = appDelegateContents.replace(oldJsCodeLocationAssignmentStatement,
+                jsCodeLocationPatch);
+        } else if (jsCodeLocations.length === 2) {
+            appDelegateContents = appDelegateContents.replace(jsCodeLocations[1],
+                newJsCodeLocationAssignmentStatement);
+        } else {
+            console.log(`AppDelegate isn't compatible for linking`);
+        }
     }
 
     var plistPath = getPlistPath();
