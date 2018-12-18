@@ -402,6 +402,12 @@ codePush.sync();
 // about each update, and displays it to them
 // immediately after downloading it
 codePush.sync({ updateDialog: true, installMode: codePush.InstallMode.IMMEDIATE });
+
+// You'll need to manually pass callbacks for status 
+// changes if you set checkFrequency to codePush.CheckFrequency.MANUAL
+// Otherwise they will not be triggered
+codePush.sync(options, this.codePushStatusDidChange.bind(this), this.codePushDownloadDidProgress.bind(this))
+
 ```
 
 *Note: If you want to decide whether you check and/or download an available update based on the end user's device battery level, network conditions, etc. then simply wrap the call to `sync` in a condition that ensures you only call it when desired.*
