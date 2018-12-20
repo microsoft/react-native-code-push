@@ -50,7 +50,7 @@ module.exports = () => {
         console.log(`"jsCodeLocation" already pointing to "[CodePush bundleURL]".`);
     } else {
         if (jsCodeLocations.length === 1) {
-            // If there is one `jsCodeLocation` it is mean that react-native app version is low then 0.57.8 
+            // If there is one `jsCodeLocation` it means that react-native app version is lower then 0.57.8 
             // and we should replace this line with DEBUG ifdef statement and add CodePush calling for Release case
 
             var oldJsCodeLocationAssignmentStatement = jsCodeLocations[0];
@@ -63,7 +63,7 @@ module.exports = () => {
             appDelegateContents = appDelegateContents.replace(oldJsCodeLocationAssignmentStatement,
                 jsCodeLocationPatch);
         } else if (jsCodeLocations.length === 2) {
-            // If there are 2 `jsCodeLocation` It is mean that react-native app version is higher then 0.57.8 or equal
+            // If there are 2 `jsCodeLocation` it means that react-native app version is higher then 0.57.8 or equal
             // and we should replace second one(Release case) with CodePush calling
 
             appDelegateContents = appDelegateContents.replace(jsCodeLocations[1],
