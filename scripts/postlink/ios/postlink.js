@@ -40,25 +40,37 @@ module.exports = () => {
     }
 
     // 2. Modify jsCodeLocation value assignment
-    var jsCodeLocations = appDelegateContents.match(/(jsCodeLocation = .*)/);
-    var oldJsCodeLocationAssignmentStatement;
-    if (jsCodeLocations) {
-        oldJsCodeLocationAssignmentStatement = jsCodeLocations[1];
-    } else {
+    var jsCodeLocations = appDelegateContents.match(/(jsCodeLocation = .*)/g);
+
+    if (!jsCodeLocations) {
         console.log('Couldn\'t find jsCodeLocation setting in AppDelegate.');
     }
     var newJsCodeLocationAssignmentStatement = "jsCodeLocation = [CodePush bundleURL];";
     if (~appDelegateContents.indexOf(newJsCodeLocationAssignmentStatement)) {
         console.log(`"jsCodeLocation" already pointing to "[CodePush bundleURL]".`);
     } else {
-        var jsCodeLocationPatch = `
-    #ifdef DEBUG
-        ${oldJsCodeLocationAssignmentStatement}
-    #else
-        ${newJsCodeLocationAssignmentStatement}
-    #endif`;
-        appDelegateContents = appDelegateContents.replace(oldJsCodeLocationAssignmentStatement,
-            jsCodeLocationPatch);
+        if (jsCodeLocations.length === 1) {
+            // If there is one `jsCodeLocation` it means that react-native app version is lower than 0.57.8 
+            // and we should replace this line with DEBUG ifdef statement and add CodePush call for Release case
+
+            var oldJsCodeLocationAssignmentStatement = jsCodeLocations[0];
+            var jsCodeLocationPatch = `
+                #ifdef DEBUG
+                    ${oldJsCodeLocationAssignmentStatement}
+                #else
+                    ${newJsCodeLocationAssignmentStatement}
+                #endif`;
+            appDelegateContents = appDelegateContents.replace(oldJsCodeLocationAssignmentStatement,
+                jsCodeLocationPatch);
+        } else if (jsCodeLocations.length === 2) {
+            // If there are two `jsCodeLocation` it means that react-native app version is higher than 0.57.8 or equal
+            // and we should replace the second one(Release case) with CodePush call
+
+            appDelegateContents = appDelegateContents.replace(jsCodeLocations[1],
+                newJsCodeLocationAssignmentStatement);
+        } else {
+            console.log(`AppDelegate isn't compatible for linking`);
+        }
     }
 
     var plistPath = getPlistPath();
