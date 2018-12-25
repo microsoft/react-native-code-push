@@ -11,8 +11,8 @@ module.exports = () => {
 
     console.log("Running ios postlink script");
 
-    var ignoreNodeModules = { ignore: "node_modules/**" };
-    var ignoreNodeModulesAndPods = { ignore: ["node_modules/**", "ios/Pods/**"] };
+    var ignoreNodeModules = { ignore: [ "node_modules/**", "ios/Frameworks/**" ] };
+    var ignoreNodeModulesAndPods = { ignore: ["node_modules/**", "ios/Pods/**", "ios/Frameworks/**"] };
     var appDelegatePaths = glob.sync("**/AppDelegate.+(mm|m)", ignoreNodeModules);
 
     // Fix for https://github.com/Microsoft/react-native-code-push/issues/477
