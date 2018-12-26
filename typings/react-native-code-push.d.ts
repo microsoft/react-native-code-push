@@ -1,4 +1,4 @@
-export type DowloadProgressCallback = (progress: DownloadProgress) => void;
+export type DownloadProgressCallback = (progress: DownloadProgress) => void;
 export type SyncStatusChangedCallback = (status: CodePush.SyncStatus) => void;
 export type HandleBinaryVersionMismatchCallback = (update: RemotePackage) => void;
 
