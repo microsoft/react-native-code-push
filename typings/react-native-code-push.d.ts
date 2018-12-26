@@ -1,4 +1,4 @@
-export type DowloadProgressCallback = (progress: DownloadProgress) => void;
+export type DownloadProgressCallback = (progress: DownloadProgress) => void;
 export type SyncStatusChangedCallback = (status: CodePush.SyncStatus) => void;
 export type HandleBinaryVersionMismatchCallback = (update: RemotePackage) => void;
 
@@ -92,7 +92,7 @@ export interface RemotePackage extends Package {
      *
      * @param downloadProgressCallback An optional callback that allows tracking the progress of the update while it is being downloaded.
      */
-    download(downloadProgressCallback?: DowloadProgressCallback): Promise<LocalPackage>;
+    download(downloadProgressCallback?: DownloadProgressCallback): Promise<LocalPackage>;
 
     /**
      * The URL at which the package is available for download.
@@ -300,7 +300,7 @@ declare namespace CodePush {
      * @param downloadProgressCallback An optional callback that allows tracking the progress of an update while it is being downloaded.
      * @param handleBinaryVersionMismatchCallback An optional callback for handling target binary version mismatch
      */
-    function sync(options?: SyncOptions, syncStatusChangedCallback?: SyncStatusChangedCallback, downloadProgressCallback?: DowloadProgressCallback, handleBinaryVersionMismatchCallback?: HandleBinaryVersionMismatchCallback): Promise<SyncStatus>;
+    function sync(options?: SyncOptions, syncStatusChangedCallback?: SyncStatusChangedCallback, downloadProgressCallback?: DownloadProgressCallback, handleBinaryVersionMismatchCallback?: HandleBinaryVersionMismatchCallback): Promise<SyncStatus>;
 
     /**
      * Indicates when you would like an installed update to actually be applied.
