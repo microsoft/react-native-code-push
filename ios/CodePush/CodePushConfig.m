@@ -49,14 +49,14 @@ static NSString * const PublicKeyKey = @"publicKey";
         serverURL = @"https://codepush.azurewebsites.net/";
     }
 
-    _configDictionary = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
-                            appVersion,AppVersionConfigKey,
-                            buildVersion,BuildVersionConfigKey,
-                            serverURL,ServerURLConfigKey,
-                            clientUniqueId,ClientUniqueIDConfigKey,
-                            deploymentKey,DeploymentKeyConfigKey,
-                            publicKey,PublicKeyKey,
-                            nil];
+    _configDictionary = [NSMutableDictionary dictionary];
+
+    if (appVersion) [_configDictionary setObject:appVersion forKey:AppVersionConfigKey];
+    if (buildVersion) [_configDictionary setObject:buildVersion forKey:BuildVersionConfigKey];
+    if (serverURL) [_configDictionary setObject:serverURL forKey:ServerURLConfigKey];
+    if (clientUniqueId) [_configDictionary setObject:clientUniqueId forKey:ClientUniqueIDConfigKey];
+    if (deploymentKey) [_configDictionary setObject:deploymentKey forKey:DeploymentKeyConfigKey];
+    if (publicKey) [_configDictionary setObject:publicKey forKey:PublicKeyKey];
 
     return self;
 }
