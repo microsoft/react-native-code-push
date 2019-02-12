@@ -100,7 +100,7 @@ Once your Xcode project has been setup to build/link the CodePush plugin, you ne
 2. Find the following line of code, which loads your JS Bundle from the app binary for production releases:
 
     ```objective-c
-    jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
+    jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
     ```
 
 3. Replace it with this line:
@@ -121,7 +121,7 @@ For React Native 0.49 and above:
 NSURL *jsCodeLocation;
 
 #ifdef DEBUG
-    jsCodeLocation = [NSURL URLWithString:@"http://localhost:8081/index.bundle?platform=ios&dev=true"];
+    jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
 #else
     jsCodeLocation = [CodePush bundleURL];
 #endif
