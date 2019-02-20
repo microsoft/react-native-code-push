@@ -260,7 +260,7 @@ declare namespace CodePush {
      *
      * @param updateState The state of the update you want to retrieve the metadata for. Defaults to UpdateState.RUNNING.
      */
-    function getUpdateMetadata(updateState?: UpdateState) : Promise<LocalPackage>;
+    function getUpdateMetadata(updateState?: UpdateState) : Promise<LocalPackage|null>;
 
     /**
      * Notifies the CodePush runtime that an installed update is considered successful.
