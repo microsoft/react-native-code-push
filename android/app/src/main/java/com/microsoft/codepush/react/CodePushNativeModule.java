@@ -161,6 +161,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         } catch (Exception e) {
             // Our reflection logic failed somewhere
             // so fall back to restarting the Activity (if it exists)
+            CodePushUtils.log("Failed to load the bundle, falling back to restarting the Activity (if it exists). " + e.getMessage());
             loadBundleLegacy();
         }
     }
