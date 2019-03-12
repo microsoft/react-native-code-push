@@ -94,22 +94,28 @@ module.exports = () => {
 
     //3. Add deployment key
     var stringsResourcesPath = glob.sync("**/strings.xml", ignoreFolders)[0];
-    var stringsResourcesContent = fs.readFileSync(stringsResourcesPath, "utf8");
-    var deploymentKeyName = "reactNativeCodePush_androidDeploymentKey";
-    if (~stringsResourcesContent.indexOf(deploymentKeyName)) {
-        console.log(`${deploymentKeyName} already specified in the strings.xml`);
+    if (!stringsResourcesPath) {
+        return Promise.reject(new Error(`Couldn't find strings.xml. You might need to update it manually \
+        Please refer to plugin configuration section for Android at \
+        https://github.com/Microsoft/react-native-code-push/blob/master/docs/setup-android.md#code-signing-setup`));
     } else {
-        return inquirer.prompt({
-            "type": "input",
-            "name": "androidDeploymentKey",
-            "message": "What is your CodePush deployment key for Android (hit <ENTER> to ignore)"
-        }).then(function(answer) {
-            var insertAfterString = "<resources>";
-            var deploymentKeyString = `\t<string moduleConfig="true" name="${deploymentKeyName}">${answer.androidDeploymentKey || "deployment-key-here"}</string>`;
-            stringsResourcesContent = stringsResourcesContent.replace(insertAfterString,`${insertAfterString}\n${deploymentKeyString}`);
-            fs.writeFileSync(stringsResourcesPath, stringsResourcesContent);
-            return Promise.resolve();
-        });
+        var stringsResourcesContent = fs.readFileSync(stringsResourcesPath, "utf8");
+        var deploymentKeyName = "reactNativeCodePush_androidDeploymentKey";
+        if (~stringsResourcesContent.indexOf(deploymentKeyName)) {
+            console.log(`${deploymentKeyName} already specified in the strings.xml`);
+        } else {
+            return inquirer.prompt({
+                "type": "input",
+                "name": "androidDeploymentKey",
+                "message": "What is your CodePush deployment key for Android (hit <ENTER> to ignore)"
+            }).then(function(answer) {
+                var insertAfterString = "<resources>";
+                var deploymentKeyString = `\t<string moduleConfig="true" name="${deploymentKeyName}">${answer.androidDeploymentKey || "deployment-key-here"}</string>`;
+                stringsResourcesContent = stringsResourcesContent.replace(insertAfterString,`${insertAfterString}\n${deploymentKeyString}`);
+                fs.writeFileSync(stringsResourcesPath, stringsResourcesContent);
+                return Promise.resolve();
+            });
+        }
     }
 
     return Promise.resolve();
