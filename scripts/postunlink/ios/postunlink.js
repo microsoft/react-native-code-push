@@ -1,6 +1,5 @@
 var fs = require("fs");
 var glob = require("glob");
-var inquirer = require('inquirer');
 var path = require("path");
 var plist = require("plist");
 var xcode = require("xcode");
@@ -9,7 +8,7 @@ var package = require('../../../../../package.json');
 
 module.exports = () => {
 
-    console.log("Running ios postlink script");
+    console.log("Running ios postunlink script");
 
     var ignoreNodeModules = { ignore: "node_modules/**" };
     var ignoreNodeModulesAndPods = { ignore: ["node_modules/**", "ios/Pods/**"] };
@@ -22,49 +21,51 @@ module.exports = () => {
     var appDelegatePath = findFileByAppName(appDelegatePaths, package ? package.name : null) || appDelegatePaths[0];
 
     if (!appDelegatePath) {
-        return Promise.reject(`Couldn't find AppDelegate. You might need to update it manually \
+        console.log(`Couldn't find AppDelegate. You might need to update it manually \
     Please refer to plugin configuration section for iOS at \
     https://github.com/microsoft/react-native-code-push#plugin-configuration-ios`);
-    }
-
-    var appDelegateContents = fs.readFileSync(appDelegatePath, "utf8");
-
-    // 1. Add the header import statement
-    var codePushHeaderImportStatement = `#import <CodePush/CodePush.h>`;
-    if (~appDelegateContents.indexOf(codePushHeaderImportStatement)) {
-        console.log(`"CodePush.h" header already imported.`);
     } else {
-        var appDelegateHeaderImportStatement = `#import "AppDelegate.h"`;
-        appDelegateContents = appDelegateContents.replace(appDelegateHeaderImportStatement,
-            `${appDelegateHeaderImportStatement}\n${codePushHeaderImportStatement}`);
-    }
+        var appDelegateContents = fs.readFileSync(appDelegatePath, "utf8");
 
-    // 2. Modify jsCodeLocation value assignment
-    var jsCodeLocations = appDelegateContents.match(/(jsCodeLocation = .*)/g);
-
-    if (!jsCodeLocations) {
-        console.log('Couldn\'t find jsCodeLocation setting in AppDelegate.');
-    }
-    var newJsCodeLocationAssignmentStatement = "jsCodeLocation = [CodePush bundleURL];";
-    if (~appDelegateContents.indexOf(newJsCodeLocationAssignmentStatement)) {
-        console.log(`"jsCodeLocation" already pointing to "[CodePush bundleURL]".`);
-    } else {
-        if (jsCodeLocations.length === 1) {
-            // If there is one `jsCodeLocation` it means that react-native app version is lower than 0.57.8 
-            // and we should replace this line with DEBUG ifdef statement and add CodePush call for Release case
-
-            var oldJsCodeLocationAssignmentStatement = jsCodeLocations[0];
-            var jsCodeLocationPatch = `\n#ifdef DEBUG\n\t${oldJsCodeLocationAssignmentStatement}\n#else\n\t${newJsCodeLocationAssignmentStatement}\n#endif`;
-            appDelegateContents = appDelegateContents.replace(oldJsCodeLocationAssignmentStatement,
-                jsCodeLocationPatch);
-        } else if (jsCodeLocations.length === 2) {
-            // If there are two `jsCodeLocation` it means that react-native app version is higher than 0.57.8 or equal
-            // and we should replace the second one(Release case) with CodePush call
-
-            appDelegateContents = appDelegateContents.replace(jsCodeLocations[1],
-                newJsCodeLocationAssignmentStatement);
+        // 1. Remove the header import statement
+        var codePushHeaderImportStatement = `#import <CodePush/CodePush.h>`;
+        if (!~appDelegateContents.indexOf(codePushHeaderImportStatement)) {
+            console.log(`"CodePush.h" header already removed.`);
         } else {
-            console.log(`AppDelegate isn't compatible for linking`);
+            appDelegateContents = appDelegateContents.replace(`\n${codePushHeaderImportStatement}`, "");
+        }
+
+        // 2. Modify jsCodeLocation value assignment
+        var jsCodeLocations = appDelegateContents.match(/(jsCodeLocation = .*)/g);
+
+        if (!jsCodeLocations) {
+            console.log('Couldn\'t find jsCodeLocation setting in AppDelegate.');
+        } else {
+            var linkedJsCodeLocationAssignmentStatement = "jsCodeLocation = [CodePush bundleURL];";
+            if (!~appDelegateContents.indexOf(newJsCodeLocationAssignmentStatement)) {
+                console.log(`"jsCodeLocation" already not pointing to "[CodePush bundleURL]".`);
+            } else {
+                if (jsCodeLocations.length === 2) {
+                    var specialJsCodeLocationRNVersion = "0.57.8";
+                    if (package.dependencies["react-native"] === specialJsCodeLocationRNVersion) {
+                        // If version of react-native application is 0.57.8 then on default there are two different
+                        // jsCodeLocation for debug and release and we should replace only release
+                        var unlinkedJsCodeLocations = `jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];` 
+                        appDelegateContents = appDelegateContents.replace(linkedJsCodeLocationAssignmentStatement,
+                            unlinkedJsCodeLocations);
+                    } else {
+                        // If version of react-native application is not 0.57.8 then on default there are only one
+                        // jsCodeLocation and we should stay on only it
+                        var defaultJsCodeLocationAssignmentStatement = jsCodeLocations[0];
+                        var linkedCodeLocationPatch = `\n#ifdef DEBUG\n\t${defaultJsCodeLocationAssignmentStatement}\n#else\n\t${linkedJsCodeLocationAssignmentStatement}\n#endif`;
+                        appDelegateContents = appDelegateContents.replace(linkedCodeLocationPatch,
+                            defaultJsCodeLocationAssignmentStatement);
+                    }
+                    fs.writeFileSync(appDelegatePath, appDelegateContents);
+                } else {
+                    console.log(`AppDelegate isn't compatible for unlinking`);
+                }
+            }
         }
     }
 
@@ -78,30 +79,17 @@ module.exports = () => {
 
     var plistContents = fs.readFileSync(plistPath, "utf8");
 
-    // 3. Add CodePushDeploymentKey to plist file
+    // 3. Remove CodePushDeploymentKey from plist file
     var parsedInfoPlist = plist.parse(plistContents);
-    if (parsedInfoPlist.CodePushDeploymentKey) {
-        console.log(`"CodePushDeploymentKey" already specified in the plist file.`);
-        writePatches();
-        return Promise.resolve();
+    if (!parsedInfoPlist.CodePushDeploymentKey) {
+        console.log(`"CodePushDeploymentKey" already removed from the plist file.`);
     } else {
-        return inquirer.prompt({
-            "type": "input",
-            "name": "iosDeploymentKey",
-            "message": "What is your CodePush deployment key for iOS (hit <ENTER> to ignore)"
-        }).then(function(answer) {
-            parsedInfoPlist.CodePushDeploymentKey = answer.iosDeploymentKey || "deployment-key-here";
-            plistContents = plist.build(parsedInfoPlist);
-
-            writePatches();
-            return Promise.resolve();
-        });
-    }
-
-    function writePatches() {
-        fs.writeFileSync(appDelegatePath, appDelegateContents);
+        delete parsedInfoPlist.CodePushDeploymentKey;
+        plistContents = plist.build(parsedInfoPlist);
         fs.writeFileSync(plistPath, plistContents);
-    }
+    };
+
+    return Promise.resolve();
 
     // Helper that filters an array with AppDelegate.m paths for a path with the app name inside it
     // Should cover nearly all cases
@@ -150,7 +138,7 @@ module.exports = () => {
                         config.buildSettings[TEST_HOST_PROPERTY_NAME] == undefined) {
                             target = config.buildSettings[prop];
                         }
-                    }              
+                    }
                 }
             }
         }

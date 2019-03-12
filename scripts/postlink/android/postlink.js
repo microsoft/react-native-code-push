@@ -33,12 +33,8 @@ module.exports = () => {
     var mainApplicationPath = findMainApplication() || glob.sync("**/MainApplication.java", ignoreFolders)[0];
 
     // 1. Add the getJSBundleFile override
-    var getJSBundleFileOverride = `
-        @Override
-        protected String getJSBundleFile() {
-        return CodePush.getJSBundleFile();
-        }
-    `;
+    var getJSBundleFileOverride = "\n\n\t\t@Override\n\t\tprotected String getJSBundleFile()" +
+    "{\n\t\t\treturn CodePush.getJSBundleFile();\n\t\t}\n";
 
     function isAlreadyOverridden(codeContents) {
         return /@Override\s*\n\s*protected String getJSBundleFile\(\)\s*\{[\s\S]*?\}/.test(codeContents);
@@ -51,7 +47,7 @@ module.exports = () => {
         } else {
             var reactNativeHostInstantiation = "new ReactNativeHost(this) {";
             mainApplicationContents = mainApplicationContents.replace(reactNativeHostInstantiation,
-                `${reactNativeHostInstantiation}\n${getJSBundleFileOverride}`);
+                `${reactNativeHostInstantiation}${getJSBundleFileOverride}`);
             fs.writeFileSync(mainApplicationPath, mainApplicationContents);
         }
     } else {
@@ -63,7 +59,7 @@ module.exports = () => {
             } else {
                 var mainActivityClassDeclaration = "public class MainActivity extends ReactActivity {";
                 mainActivityContents = mainActivityContents.replace(mainActivityClassDeclaration,
-                    `${mainActivityClassDeclaration}\n${getJSBundleFileOverride}`);
+                    `${mainActivityClassDeclaration}${getJSBundleFileOverride}`);
                 fs.writeFileSync(mainActivityPath, mainActivityContents);
             }
         } else {
@@ -82,12 +78,12 @@ module.exports = () => {
     // 2. Add the codepush.gradle build task definitions
     var buildGradleContents = fs.readFileSync(buildGradlePath, "utf8");
     var reactGradleLink = buildGradleContents.match(/\napply from: ["'].*?react\.gradle["']/)[0];
-    var codePushGradleLink = `apply from: "../../node_modules/react-native-code-push/android/codepush.gradle"`;
+    var codePushGradleLink = `\napply from: "../../node_modules/react-native-code-push/android/codepush.gradle"`;
     if (~buildGradleContents.indexOf(codePushGradleLink)) {
         console.log(`"codepush.gradle" is already linked in the build definition`);
     } else {
         buildGradleContents = buildGradleContents.replace(reactGradleLink,
-            `${reactGradleLink}\n${codePushGradleLink}`);
+            `${reactGradleLink}${codePushGradleLink}`);
         fs.writeFileSync(buildGradlePath, buildGradleContents);
     }
 
