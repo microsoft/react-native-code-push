@@ -38,9 +38,7 @@ module.exports = () => {
         // 2. Modify jsCodeLocation value assignment
         var jsCodeLocations = appDelegateContents.match(/(jsCodeLocation = .*)/g);
 
-        if (!jsCodeLocations) {
-            console.log('Couldn\'t find jsCodeLocation setting in AppDelegate.');
-        } else {
+        if (jsCodeLocations) {
             var linkedJsCodeLocationAssignmentStatement = "jsCodeLocation = [CodePush bundleURL];";
             if (!~appDelegateContents.indexOf(newJsCodeLocationAssignmentStatement)) {
                 console.log(`"jsCodeLocation" already not pointing to "[CodePush bundleURL]".`);

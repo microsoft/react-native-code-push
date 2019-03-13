@@ -85,9 +85,7 @@ module.exports = () => {
     //3. Remove deployment key
     var stringsResourcesPath = glob.sync("**/strings.xml", ignoreFolders)[0];
     if (!stringsResourcesPath) {
-        return Promise.reject(new Error(`Couldn't find strings.xml. You might need to update it manually \
-        Please refer to plugin configuration section for Android at \
-        https://github.com/Microsoft/react-native-code-push/blob/master/docs/setup-android.md#code-signing-setup`));
+        return Promise.reject(new Error("Couldn't find strings.xml. You might need to update it manually."));
     } else {
         var stringsResourcesContent = fs.readFileSync(stringsResourcesPath, "utf8");
         var deploymentKeyName = "reactNativeCodePush_androidDeploymentKey";
