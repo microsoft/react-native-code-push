@@ -44,14 +44,13 @@ module.exports = () => {
     var pacakgeJson = JSON.parse(fs.readFileSync(packageJsonPath[0], "utf8"));
     var reactnativeVersion = pacakgeJson["dependencies"]["react-native"];
 
-    if(reactnativeVersion >= "0.59.0") {
+    if (reactnativeVersion >= "0.59.0") {
         var old = "[[NSBundle mainBundle] URLForResource:@\"main\" withExtension:@\"jsbundle\"]";
 
-        appDelegateContents = appDelegateContents.replace(old,
-            "[CodePush bundleURL]");
+        appDelegateContents = appDelegateContents.replace(old, "[CodePush bundleURL]");
     } else {
         var jsCodeLocations = appDelegateContents.match(/(jsCodeLocation = .*)/g);
-    
+
         if (!jsCodeLocations) {
             console.log('Couldn\'t find jsCodeLocation setting in AppDelegate.');
         }
