@@ -46,9 +46,18 @@ module.exports = () => {
     var reactnativeVersion = pacakgeJson["dependencies"]["react-native"];
 
     if (semver.compare(reactnativeVersion, "0.59.0") >= 0) {
-        var old = "[[NSBundle mainBundle] URLForResource:@\"main\" withExtension:@\"jsbundle\"]";
+        var oldBundleUrl = "[[NSBundle mainBundle] URLForResource:@\"main\" withExtension:@\"jsbundle\"]";
+        var codePushBundleUrl = "[CodePush bundleURL]";
 
-        appDelegateContents = appDelegateContents.replace(old, "[CodePush bundleURL]");
+        if (~appDelegateContents.indexOf(codePushBundleUrl)) {
+            console.log(`"BundleUrl" already pointing to "[CodePush bundleURL]".`);
+        } else {
+            if (~appDelegateContents.indexOf(oldBundleUrl)) {
+                appDelegateContents = appDelegateContents.replace(oldBundleUrl, codePushBundleUrl);
+            } else {
+                console.log(`AppDelegate isn't compatible for linking`);
+            }
+        }
     } else {
         var jsCodeLocations = appDelegateContents.match(/(jsCodeLocation = .*)/g);
 
