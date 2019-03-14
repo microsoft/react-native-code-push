@@ -4,6 +4,7 @@ var inquirer = require('inquirer');
 var path = require("path");
 var plist = require("plist");
 var xcode = require("xcode");
+var semver = require('semver');
 
 var package = require('../../../../../package.json');
 
@@ -44,7 +45,7 @@ module.exports = () => {
     var pacakgeJson = JSON.parse(fs.readFileSync(packageJsonPath[0], "utf8"));
     var reactnativeVersion = pacakgeJson["dependencies"]["react-native"];
 
-    if (reactnativeVersion >= "0.59.0") {
+    if (semver.compare(reactnativeVersion, "0.59.0") >= 0) {
         var old = "[[NSBundle mainBundle] URLForResource:@\"main\" withExtension:@\"jsbundle\"]";
 
         appDelegateContents = appDelegateContents.replace(old, "[CodePush bundleURL]");
