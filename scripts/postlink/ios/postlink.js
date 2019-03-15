@@ -42,10 +42,10 @@ module.exports = () => {
     }
 
     // 2. Modify jsCodeLocation value assignment
-    var pacakgeJson = JSON.parse(fs.readFileSync(packageJsonPath[0], "utf8"));
-    var reactnativeVersion = pacakgeJson["dependencies"]["react-native"];
+    var packageJson = JSON.parse(fs.readFileSync(packageJsonPath[0], "utf8"));
+    var reactnativeVersion = packageJson["dependencies"]["react-native"];
 
-    if (semver.compare(reactnativeVersion, "0.59.0") >= 0) {
+    if (semver.gte(reactnativeVersion, "0.59.0")) {
         var oldBundleUrl = "[[NSBundle mainBundle] URLForResource:@\"main\" withExtension:@\"jsbundle\"]";
         var codePushBundleUrl = "[CodePush bundleURL]";
 
@@ -132,7 +132,7 @@ module.exports = () => {
     // Helper that filters an array with AppDelegate.m paths for a path with the app name inside it
     // Should cover nearly all cases
     function findFileByAppName(array, appName) {
-        if (array.length === 0 || !appName) return null;
+        if (array.length === 0 || !appName) return null;
 
         for (var i = 0; i < array.length; i++) {
             var path = array[i];
