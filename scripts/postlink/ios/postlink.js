@@ -45,7 +45,7 @@ module.exports = () => {
 
     if (!reactNativeVersion) {
         console.log(`Can't take react-native version from package.json`);
-    } else if (semver.gte(reactNativeVersion, "0.59.0")) {
+    } else if (semver.gte(semver.coerce(reactNativeVersion), "0.59.0")) {
         var oldBundleUrl = "[[NSBundle mainBundle] URLForResource:@\"main\" withExtension:@\"jsbundle\"]";
         var codePushBundleUrl = "[CodePush bundleURL]";
 
