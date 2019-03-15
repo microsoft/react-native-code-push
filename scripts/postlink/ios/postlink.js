@@ -43,9 +43,13 @@ module.exports = () => {
 
     // 2. Modify jsCodeLocation value assignment
     var packageJson = JSON.parse(fs.readFileSync(packageJsonPath[0], "utf8"));
-    var reactnativeVersion = packageJson["dependencies"]["react-native"];
+    var reactNativeVersion = packageJson && packageJson.dependencies && packageJson.dependencies["react-native"];
 
-    if (semver.gte(reactnativeVersion, "0.59.0")) {
+    if (!reactNativeVersion) {
+        console.log(`Can't take react-native version from package.json`);
+    }
+
+    if (semver.gte(reactNativeVersion, "0.59.0")) {
         var oldBundleUrl = "[[NSBundle mainBundle] URLForResource:@\"main\" withExtension:@\"jsbundle\"]";
         var codePushBundleUrl = "[CodePush bundleURL]";
 
