@@ -15,7 +15,7 @@ module.exports = () => {
     var ignoreNodeModules = { ignore: "node_modules/**" };
     var ignoreNodeModulesAndPods = { ignore: ["node_modules/**", "ios/Pods/**"] };
     var appDelegatePaths = glob.sync("**/AppDelegate.+(mm|m)", ignoreNodeModules);
-    var packageJsonPath = glob.sync("**/package.json", ignoreNodeModules);
+    var packageJsonPath = glob.sync("./package.json", ignoreNodeModules);
 
     // Fix for https://github.com/Microsoft/react-native-code-push/issues/477
     // Typical location of AppDelegate.m for newer RN versions: $PROJECT_ROOT/ios/<project_name>/AppDelegate.m
