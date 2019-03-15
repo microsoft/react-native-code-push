@@ -15,7 +15,6 @@ module.exports = () => {
     var ignoreNodeModules = { ignore: "node_modules/**" };
     var ignoreNodeModulesAndPods = { ignore: ["node_modules/**", "ios/Pods/**"] };
     var appDelegatePaths = glob.sync("**/AppDelegate.+(mm|m)", ignoreNodeModules);
-    var packageJsonPath = glob.sync("./package.json", ignoreNodeModules);
 
     // Fix for https://github.com/Microsoft/react-native-code-push/issues/477
     // Typical location of AppDelegate.m for newer RN versions: $PROJECT_ROOT/ios/<project_name>/AppDelegate.m
@@ -42,8 +41,7 @@ module.exports = () => {
     }
 
     // 2. Modify jsCodeLocation value assignment
-    var packageJson = JSON.parse(fs.readFileSync(packageJsonPath[0], "utf8"));
-    var reactNativeVersion = packageJson && packageJson.dependencies && packageJson.dependencies["react-native"];
+    var reactNativeVersion = package && package.dependencies && package.dependencies["react-native"];
 
     if (!reactNativeVersion) {
         console.log(`Can't take react-native version from package.json`);
