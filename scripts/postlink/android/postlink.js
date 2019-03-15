@@ -1,6 +1,7 @@
 var fs = require("fs");
 var glob = require("glob");
 var path = require("path");
+var inquirer = require('inquirer');
 
 module.exports = () => {
 
@@ -89,6 +90,30 @@ module.exports = () => {
         buildGradleContents = buildGradleContents.replace(reactGradleLink,
             `${reactGradleLink}\n${codePushGradleLink}`);
         fs.writeFileSync(buildGradlePath, buildGradleContents);
+    }
+
+    //3. Add deployment key
+    var stringsResourcesPath = glob.sync("**/strings.xml", ignoreFolders)[0];
+    if (!stringsResourcesPath) {
+        return Promise.reject(new Error(`Couldn't find strings.xml. You might need to update it manually.`));
+    } else {
+        var stringsResourcesContent = fs.readFileSync(stringsResourcesPath, "utf8");
+        var deploymentKeyName = "reactNativeCodePush_androidDeploymentKey";
+        if (~stringsResourcesContent.indexOf(deploymentKeyName)) {
+            console.log(`${deploymentKeyName} already specified in the strings.xml`);
+        } else {
+            return inquirer.prompt({
+                "type": "input",
+                "name": "androidDeploymentKey",
+                "message": "What is your CodePush deployment key for Android (hit <ENTER> to ignore)"
+            }).then(function(answer) {
+                var insertAfterString = "<resources>";
+                var deploymentKeyString = `\t<string moduleConfig="true" name="${deploymentKeyName}">${answer.androidDeploymentKey || "deployment-key-here"}</string>`;
+                stringsResourcesContent = stringsResourcesContent.replace(insertAfterString,`${insertAfterString}\n${deploymentKeyString}`);
+                fs.writeFileSync(stringsResourcesPath, stringsResourcesContent);
+                return Promise.resolve();
+            });
+        }
     }
 
     return Promise.resolve();
