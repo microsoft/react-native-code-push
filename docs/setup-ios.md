@@ -97,6 +97,22 @@ Once your Xcode project has been setup to build/link the CodePush plugin, you ne
     #import <CodePush/CodePush.h>
     ```
 
+For React Native 0.59 and above:
+
+2. Find the following line of code, which set source URL for bridge for production releases:
+
+    ```objective-c
+    return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
+    ```
+
+3. Replace it with this line:
+
+    ```objective-c
+    return [CodePush bundleURL];
+    ```
+
+For React Native 0.58 and below:
+
 2. Find the following line of code, which loads your JS Bundle from the app binary for production releases:
 
     ```objective-c
