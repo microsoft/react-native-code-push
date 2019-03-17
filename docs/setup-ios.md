@@ -131,7 +131,20 @@ This change configures your app to always load the most recent version of your a
 
 Typically, you're only going to want to use CodePush to resolve your JS bundle location within release builds, and therefore, we recommend using the `DEBUG` pre-processor macro to dynamically switch between using the packager server and CodePush, depending on whether you are debugging or not. This will make it much simpler to ensure you get the right behavior you want in production, while still being able to use the Chrome Dev Tools, live reload, etc. at debug-time.
 
-For React Native 0.49 and above:
+For React Native 0.59 and above:
+
+```objective-c
+- (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
+{
+  #if DEBUG
+    return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
+  #else
+    return [CodePush bundleURL];
+  #endif
+}
+```
+
+For React Native 0.49 - 0.58:
 
 ```objective-c
 NSURL *jsCodeLocation;
