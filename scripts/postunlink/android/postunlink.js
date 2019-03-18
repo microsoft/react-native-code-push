@@ -23,7 +23,7 @@ module.exports = () => {
         } else {
             return null;
         }
-        
+
         var nameParts = appName.split('.');
         var searchPath = glob.sync("**/" + nameParts[nameParts.length - 1] + ".java", ignoreFolders)[0];
         return searchPath;

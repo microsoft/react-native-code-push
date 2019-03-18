@@ -40,7 +40,7 @@ module.exports = () => {
 
         if (jsCodeLocations) {
             var linkedJsCodeLocationAssignmentStatement = "jsCodeLocation = [CodePush bundleURL];";
-            if (!~appDelegateContents.indexOf(newJsCodeLocationAssignmentStatement)) {
+            if (!~appDelegateContents.indexOf(linkedJsCodeLocationAssignmentStatement)) {
                 console.log(`"jsCodeLocation" already not pointing to "[CodePush bundleURL]".`);
             } else {
                 if (jsCodeLocations.length === 2) {
@@ -48,7 +48,7 @@ module.exports = () => {
                     if (package.dependencies["react-native"] === specialJsCodeLocationRNVersion) {
                         // If version of react-native application is 0.57.8 then on default there are two different
                         // jsCodeLocation for debug and release and we should replace only release
-                        var unlinkedJsCodeLocations = `jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];` 
+                        var unlinkedJsCodeLocations = `jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];`
                         appDelegateContents = appDelegateContents.replace(linkedJsCodeLocationAssignmentStatement,
                             unlinkedJsCodeLocations);
                     } else {
@@ -127,7 +127,7 @@ module.exports = () => {
                     if (targetProductName) {
                         if (config.buildSettings[prop] !== undefined && config.buildSettings[PRODUCT_NAME_PROJECT_KEY] == targetProductName) {
                             target = config.buildSettings[prop];
-                        }       
+                        }
                     } else {
                         if (config.buildSettings[prop] !== undefined  &&
                         //exclude tvOS projects
