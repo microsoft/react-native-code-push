@@ -1,6 +1,6 @@
 var postlinks = [
-    require("./ios/postlink"),
-    require("./android/postlink")
+    require("./android/postlink"),
+    require("./ios/postlink")
 ];
 
 //run them sequentially

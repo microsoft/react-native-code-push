@@ -22,6 +22,7 @@
     "hoist-non-react-statics": "^2.3.1",
     "inquirer": "1.1.2",
     "plist": "3.0.1",
+    "semver": "^5.6.0",
     "xcode": "1.0.0"
   },
   "devDependencies": {
@@ -41,20 +42,13 @@
   },
   "rnpm": {
     "android": {
-      "packageInstance": "new CodePush(${androidDeploymentKey}, getApplicationContext(), BuildConfig.DEBUG)"
+      "packageInstance": "new CodePush(getResources().getString(R.string.reactNativeCodePush_androidDeploymentKey), getApplicationContext(), BuildConfig.DEBUG)"
     },
     "ios": {
       "sharedLibraries": [
         "libz"
       ]
     },
-    "params": [
-      {
-        "type": "input",
-        "name": "androidDeploymentKey",
-        "message": "What is your CodePush deployment key for Android (hit <ENTER> to ignore)"
-      }
-    ],
     "commands": {
       "postlink": "node node_modules/react-native-code-push/scripts/postlink/run",
       "postunlink": "node node_modules/react-native-code-push/scripts/postunlink/run"

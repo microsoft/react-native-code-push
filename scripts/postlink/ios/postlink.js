@@ -4,6 +4,7 @@ var inquirer = require('inquirer');
 var path = require("path");
 var plist = require("plist");
 var xcode = require("xcode");
+var semver = require('semver');
 
 var package = require('../../../../../package.json');
 
@@ -40,31 +41,51 @@ module.exports = () => {
     }
 
     // 2. Modify jsCodeLocation value assignment
-    var jsCodeLocations = appDelegateContents.match(/(jsCodeLocation = .*)/g);
+    var reactNativeVersion = package && package.dependencies && package.dependencies["react-native"];
 
-    if (!jsCodeLocations) {
-        console.log('Couldn\'t find jsCodeLocation setting in AppDelegate.');
-    }
-    var newJsCodeLocationAssignmentStatement = "jsCodeLocation = [CodePush bundleURL];";
-    if (~appDelegateContents.indexOf(newJsCodeLocationAssignmentStatement)) {
-        console.log(`"jsCodeLocation" already pointing to "[CodePush bundleURL]".`);
-    } else {
-        if (jsCodeLocations.length === 1) {
-            // If there is one `jsCodeLocation` it means that react-native app version is lower than 0.57.8 
-            // and we should replace this line with DEBUG ifdef statement and add CodePush call for Release case
+    if (!reactNativeVersion) {
+        console.log(`Can't take react-native version from package.json`);
+    } else if (semver.gte(semver.coerce(reactNativeVersion), "0.59.0")) {
+        var oldBundleUrl = "[[NSBundle mainBundle] URLForResource:@\"main\" withExtension:@\"jsbundle\"]";
+        var codePushBundleUrl = "[CodePush bundleURL]";
 
-            var oldJsCodeLocationAssignmentStatement = jsCodeLocations[0];
-            var jsCodeLocationPatch = `\n#ifdef DEBUG\n\t${oldJsCodeLocationAssignmentStatement}\n#else\n\t${newJsCodeLocationAssignmentStatement}\n#endif`;
-            appDelegateContents = appDelegateContents.replace(oldJsCodeLocationAssignmentStatement,
-                jsCodeLocationPatch);
-        } else if (jsCodeLocations.length === 2) {
-            // If there are two `jsCodeLocation` it means that react-native app version is higher than 0.57.8 or equal
-            // and we should replace the second one(Release case) with CodePush call
-
-            appDelegateContents = appDelegateContents.replace(jsCodeLocations[1],
-                newJsCodeLocationAssignmentStatement);
+        if (~appDelegateContents.indexOf(codePushBundleUrl)) {
+            console.log(`"BundleUrl" already pointing to "[CodePush bundleURL]".`);
         } else {
-            console.log(`AppDelegate isn't compatible for linking`);
+            if (~appDelegateContents.indexOf(oldBundleUrl)) {
+                appDelegateContents = appDelegateContents.replace(oldBundleUrl, codePushBundleUrl);
+            } else {
+                console.log(`AppDelegate isn't compatible for linking`);
+            }
+        }
+    } else {
+        var jsCodeLocations = appDelegateContents.match(/(jsCodeLocation = .*)/g);
+
+        if (!jsCodeLocations) {
+            console.log('Couldn\'t find jsCodeLocation setting in AppDelegate.');
+        }
+
+        var newJsCodeLocationAssignmentStatement = "jsCodeLocation = [CodePush bundleURL];";
+        if (~appDelegateContents.indexOf(newJsCodeLocationAssignmentStatement)) {
+            console.log(`"jsCodeLocation" already pointing to "[CodePush bundleURL]".`);
+        } else {
+            if (jsCodeLocations.length === 1) {
+                // If there is one `jsCodeLocation` it means that react-native app version is lower than 0.57.8 
+                // and we should replace this line with DEBUG ifdef statement and add CodePush call for Release case
+
+                var oldJsCodeLocationAssignmentStatement = jsCodeLocations[0];
+                var jsCodeLocationPatch = `\n#ifdef DEBUG\n\t${oldJsCodeLocationAssignmentStatement}\n#else\n\t${newJsCodeLocationAssignmentStatement}\n#endif`;
+                appDelegateContents = appDelegateContents.replace(oldJsCodeLocationAssignmentStatement,
+                    jsCodeLocationPatch);
+            } else if (jsCodeLocations.length === 2) {
+                // If there are two `jsCodeLocation` it means that react-native app version is higher than 0.57.8 or equal
+                // and we should replace the second one(Release case) with CodePush call
+
+                appDelegateContents = appDelegateContents.replace(jsCodeLocations[1],
+                    newJsCodeLocationAssignmentStatement);
+            } else {
+                console.log(`AppDelegate isn't compatible for linking`);
+            }
         }
     }
 
@@ -106,7 +127,7 @@ module.exports = () => {
     // Helper that filters an array with AppDelegate.m paths for a path with the app name inside it
     // Should cover nearly all cases
     function findFileByAppName(array, appName) {
-        if (array.length === 0 || !appName) return null;
+        if (array.length === 0 || !appName) return null;
 
         for (var i = 0; i < array.length; i++) {
             var path = array[i];
