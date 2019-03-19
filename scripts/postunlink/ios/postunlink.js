@@ -3,8 +3,9 @@ var glob = require("glob");
 var path = require("path");
 var plist = require("plist");
 var xcode = require("xcode");
+var semver = require('semver');
 
-var package = require('../../../../../package.json');
+var packageFile = require('../../../../../package.json');
 
 module.exports = () => {
 
@@ -18,7 +19,7 @@ module.exports = () => {
     // Typical location of AppDelegate.m for newer RN versions: $PROJECT_ROOT/ios/<project_name>/AppDelegate.m
     // Let's try to find that path by filtering the whole array for any path containing <project_name>
     // If we can't find it there, play dumb and pray it is the first path we find.
-    var appDelegatePath = findFileByAppName(appDelegatePaths, package ? package.name : null) || appDelegatePaths[0];
+    var appDelegatePath = findFileByAppName(appDelegatePaths, packageFile ? packageFile.name : null) || appDelegatePaths[0];
 
     if (!appDelegatePath) {
         console.log(`Couldn't find AppDelegate. You might need to update it manually \
@@ -36,23 +37,31 @@ module.exports = () => {
         }
 
         // 2. Modify jsCodeLocation value assignment
-        var jsCodeLocations = appDelegateContents.match(/(jsCodeLocation = .*)/g);
-
-        if (jsCodeLocations) {
-            var linkedJsCodeLocationAssignmentStatement = "jsCodeLocation = [CodePush bundleURL];";
-            if (!~appDelegateContents.indexOf(linkedJsCodeLocationAssignmentStatement)) {
-                console.log(`"jsCodeLocation" already not pointing to "[CodePush bundleURL]".`);
+        var codePushBundleUrl = "[CodePush bundleURL]";
+        if (!~appDelegateContents.indexOf(codePushBundleUrl)) {
+            console.log(`"jsCodeLocation" already not pointing to "[CodePush bundleURL]".`);
+        } else {
+            var reactNativeVersion = packageFile && packageFile.dependencies && packageFile.dependencies["react-native"];
+            if (!reactNativeVersion) {
+                console.log(`Can't take react-native version from package.json`);
+            } else if (semver.gte(semver.coerce(reactNativeVersion), "0.59.0")) {
+                var oldBundleUrl = "[[NSBundle mainBundle] URLForResource:@\"main\" withExtension:@\"jsbundle\"]";
+                appDelegateContents = appDelegateContents.replace(codePushBundleUrl, oldBundleUrl);
+                fs.writeFileSync(appDelegatePath, appDelegateContents);
             } else {
-                if (jsCodeLocations.length === 2) {
-                    var specialJsCodeLocationRNVersion = "0.57.8";
-                    if (package.dependencies["react-native"] === specialJsCodeLocationRNVersion) {
+                var linkedJsCodeLocationAssignmentStatement = "jsCodeLocation = [CodePush bundleURL];";
+                var jsCodeLocations = appDelegateContents.match(/(jsCodeLocation = .*)/g);
+                if (!jsCodeLocations || jsCodeLocations.length !== 2 || !~appDelegateContents.indexOf(linkedJsCodeLocationAssignmentStatement)) {
+                    console.log(`AppDelegate isn't compatible for unlinking`);
+                } else {
+                    if (semver.eq(semver.coerce(reactNativeVersion), "0.57.8")) {
                         // If version of react-native application is 0.57.8 then on default there are two different
                         // jsCodeLocation for debug and release and we should replace only release
-                        var unlinkedJsCodeLocations = `jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];`
+                        var unlinkedJsCodeLocations = `jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];`;
                         appDelegateContents = appDelegateContents.replace(linkedJsCodeLocationAssignmentStatement,
                             unlinkedJsCodeLocations);
                     } else {
-                        // If version of react-native application is not 0.57.8 then on default there are only one
+                        // If version of react-native application is not 0.57.8 and lower than 0.59.0 then on default there are only one
                         // jsCodeLocation and we should stay on only it
                         var defaultJsCodeLocationAssignmentStatement = jsCodeLocations[0];
                         var linkedCodeLocationPatch = `\n#ifdef DEBUG\n\t${defaultJsCodeLocationAssignmentStatement}\n#else\n\t${linkedJsCodeLocationAssignmentStatement}\n#endif`;
@@ -60,8 +69,6 @@ module.exports = () => {
                             defaultJsCodeLocationAssignmentStatement);
                     }
                     fs.writeFileSync(appDelegatePath, appDelegateContents);
-                } else {
-                    console.log(`AppDelegate isn't compatible for unlinking`);
                 }
             }
         }
@@ -85,14 +92,14 @@ module.exports = () => {
         delete parsedInfoPlist.CodePushDeploymentKey;
         plistContents = plist.build(parsedInfoPlist);
         fs.writeFileSync(plistPath, plistContents);
-    };
+    }
 
     return Promise.resolve();
 
     // Helper that filters an array with AppDelegate.m paths for a path with the app name inside it
     // Should cover nearly all cases
     function findFileByAppName(array, appName) {
-        if (array.length === 0 || !appName) return null;
+        if (array.length === 0 || !appName) return null;
 
         for (var i = 0; i < array.length; i++) {
             var path = array[i];
@@ -106,7 +113,7 @@ module.exports = () => {
 
     function getDefaultPlistPath() {
         //this is old logic in case we are unable to find PLIST from xcode/pbxproj - at least we can fallback to default solution
-        return glob.sync(`**/${package.name}/*Info.plist`, ignoreNodeModules)[0];
+        return glob.sync(`**/${packageFile.name}/*Info.plist`, ignoreNodeModules)[0];
     }
 
     // This is enhanced version of standard implementation of xcode 'getBuildProperty' function
@@ -169,7 +176,7 @@ module.exports = () => {
 
         var INFO_PLIST_PROJECT_KEY = 'INFOPLIST_FILE';
         var RELEASE_BUILD_PROPERTY_NAME = "Release";
-        var targetProductName = package ? package.name : null;
+        var targetProductName = packageFile ? packageFile.name : null;
 
         //Try to get 'Release' build of ProductName matching the package name first and if it doesn't exist then try to get any other if existing
         var plistPathValue = getBuildSettingsPropertyMatchingTargetProductName(parsedXCodeProj, INFO_PLIST_PROJECT_KEY, targetProductName, RELEASE_BUILD_PROPERTY_NAME) ||

@@ -82,7 +82,7 @@ module.exports = () => {
         }
     }
 
-    //3. Remove deployment key
+    // 3. Remove deployment key
     var stringsResourcesPath = glob.sync("**/strings.xml", ignoreFolders)[0];
     if (!stringsResourcesPath) {
         return Promise.reject(new Error("Couldn't find strings.xml. You might need to update it manually."));
@@ -97,7 +97,7 @@ module.exports = () => {
                 stringsResourcesContent = stringsResourcesContent.replace(`\n\t${AndroidDeploymentKey[0]}`,"");
                 fs.writeFileSync(stringsResourcesPath, stringsResourcesContent);
             }
-        };
+        }
     }
     return Promise.resolve();
 }
