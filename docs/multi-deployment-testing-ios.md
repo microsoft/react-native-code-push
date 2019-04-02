@@ -6,7 +6,7 @@
 > *  **without using cocoa pods**: [link](https://github.com/Microsoft/react-native-code-push/files/1259957/rncp976.copy.zip)
 > *  **using cocoa pods**: [link](https://github.com/Microsoft/react-native-code-push/files/1172217/rncp893.copy.zip)
 
-Xcode allows you to define custom build settings for each "configuration" (e.g. debug, release), which can then be referenced as the value of keys within the `Info.plist` file (e.g. the `CodePushDeploymentKey` setting). This mechanism allows you to easily configure your builds to produce binaries, which are configured to synchronize with different CodePush deployments.
+Xcode allows you to define custom build settings for each "configuration" (like debug, release), which can then be referenced as the value of keys within the `Info.plist` file (like the `CodePushDeploymentKey` setting). This mechanism allows you to easily configure your builds to produce binaries, which are configured to synchronize with different CodePush deployments.
 
 To set this up, perform the following steps:
 
