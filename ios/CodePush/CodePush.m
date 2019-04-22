@@ -181,7 +181,11 @@ static NSString *const LatestRollbackCountKey = @"count";
     NSString *packageDate = [currentPackageMetadata objectForKey:BinaryBundleDateKey];
     NSString *packageAppVersion = [currentPackageMetadata objectForKey:AppVersionKey];
 
-    if ([[CodePushUpdateUtils modifiedDateStringOfFileAtURL:binaryBundleURL] isEqualToString:packageDate] && ([CodePush isUsingTestConfiguration] ||[binaryAppVersion isEqualToString:packageAppVersion])) {
+    // Removing the folllowing check as of now
+    // Will add when required
+    //  && ([CodePush isUsingTestConfiguration] ||[binaryAppVersion isEqualToString:packageAppVersion])
+
+    if ([[CodePushUpdateUtils modifiedDateStringOfFileAtURL:binaryBundleURL] isEqualToString:packageDate]) {
         // Return package file because it is newer than the app store binary's JS bundle
         NSURL *packageUrl = [[NSURL alloc] initFileURLWithPath:packageFile];
         CPLog(logMessageFormat, packageUrl);
@@ -399,20 +403,23 @@ static NSString *const LatestRollbackCountKey = @"count";
     NSUserDefaults *preferences = [NSUserDefaults standardUserDefaults];
     NSDictionary *pendingUpdate = [preferences objectForKey:PendingUpdateKey];
     if (pendingUpdate) {
-        _isFirstRunAfterUpdate = YES;
-        BOOL updateIsLoading = [pendingUpdate[PendingUpdateIsLoadingKey] boolValue];
-        if (updateIsLoading) {
+        // COMMENTING OUT AS OF NOW
+        // IN FUTURE WE MIGHT MODIFY THIS
+
+        //_isFirstRunAfterUpdate = YES;
+        //BOOL updateIsLoading = [pendingUpdate[PendingUpdateIsLoadingKey] boolValue];
+        //if (updateIsLoading) {
             // Pending update was initialized, but notifyApplicationReady was not called.
             // Therefore, deduce that it is a broken update and rollback.
-            CPLog(@"Update did not finish loading the last time, rolling back to a previous version.");
-            needToReportRollback = YES;
-            [self rollbackPackage];
-        } else {
+        //    CPLog(@"Update did not finish loading the last time, rolling back to a previous version.");
+        //    needToReportRollback = YES;
+        //    [self rollbackPackage];
+        //} else {
             // Mark that we tried to initialize the new update, so that if it crashes,
             // we will know that we need to rollback when the app next starts.
             [self savePendingUpdate:pendingUpdate[PendingUpdateHashKey]
                           isLoading:YES];
-        }
+        //}
     }
 }
 
