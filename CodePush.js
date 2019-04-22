@@ -711,6 +711,7 @@ if (NativeCodePush) {
     downloadAndInstall,
     disallowRestart: NativeCodePush.disallow,
     allowRestart: NativeCodePush.allow,
+    downloadAndInstall,
     clearUpdates: NativeCodePush.clearUpdates,
     InstallMode: {
       IMMEDIATE: NativeCodePush.codePushInstallModeImmediate, // Restart the app immediately
