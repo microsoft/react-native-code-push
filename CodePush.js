@@ -346,6 +346,99 @@ const sync = (() => {
 })();
 
 /*
+ * Exposing downloadAndInstall method, so you can pass the object from the app making this module to 
+ * download new package and install without doing any update check
+ * update - 
+      appVersion: '1.0', - App binary version
+      description: "New update available", - Description to show in the update dialog
+      force: true, - Force download and restart
+      bundleNumber: 103, - Bundle number of the new bundle to be downloaded
+      downloadURL: "http://myUrl/download" - Url to download the index.android.bundle
+*/
+async function downloadAndInstall(update) {
+
+  let resolvedInstallMode;
+  const syncStatusChangeCallback = (syncStatus) => {
+      switch(syncStatus) {
+        case CodePush.SyncStatus.CHECKING_FOR_UPDATE:
+          log("Checking for update.");
+          break;
+        case CodePush.SyncStatus.AWAITING_USER_ACTION:
+          log("Awaiting user action.");
+          break;
+        case CodePush.SyncStatus.DOWNLOADING_PACKAGE:
+          log("Downloading package.");
+          break;
+        case CodePush.SyncStatus.INSTALLING_UPDATE:
+          log("Installing update.");
+          break;
+        case CodePush.SyncStatus.UP_TO_DATE:
+          log("App is up to date.");
+          break;
+        case CodePush.SyncStatus.UPDATE_IGNORED:
+          log("User cancelled the update.");
+          break;
+        case CodePush.SyncStatus.UPDATE_INSTALLED:
+          if (resolvedInstallMode == CodePush.InstallMode.ON_NEXT_RESTART) {
+            log("Update is installed and will be run on the next app restart.");
+          } else if (resolvedInstallMode == CodePush.InstallMode.ON_NEXT_RESUME) {
+            if (syncOptions.minimumBackgroundDuration > 0) {
+              log(`Update is installed and will be run after the app has been in the background for at least ${syncOptions.minimumBackgroundDuration} seconds.`);
+            } else {
+              log("Update is installed and will be run when the app next resumes.");
+            }
+          }
+          break;
+        case CodePush.SyncStatus.UNKNOWN_ERROR:
+          log("An unknown error occurred.");
+          break;
+      }
+  };
+
+  const doDownloadAndInstall = async () => {
+    const syncOptions = {
+      deploymentKey: null,
+      ignoreFailedUpdates: true,
+      rollbackRetryOptions: null,
+      installMode: CodePush.InstallMode.ON_NEXT_RESTART,
+      mandatoryInstallMode: CodePush.InstallMode.IMMEDIATE,
+      minimumBackgroundDuration: 0,
+      updateDialog: null,
+    };
+
+    syncStatusChangeCallback(CodePush.SyncStatus.DOWNLOADING_PACKAGE);
+    const config = await getConfiguration();
+    const sdk = getPromisifiedSdk(requestFetchAdapter, config);
+    const remotePackage = { ...update, ...PackageMixins.remote(sdk.reportStatusDownload) };
+
+    const localPackage = await remotePackage.download(() => { console.log('Progressing...'); });
+
+    // Determine the correct install mode based on whether the update is mandatory or not.
+    resolvedInstallMode = localPackage.force ? syncOptions.mandatoryInstallMode : syncOptions.installMode;
+
+    syncStatusChangeCallback(CodePush.SyncStatus.INSTALLING_UPDATE);
+    await localPackage.install(resolvedInstallMode, syncOptions.minimumBackgroundDuration, () => {
+      syncStatusChangeCallback(CodePush.SyncStatus.UPDATE_INSTALLED);
+    });
+
+    return CodePush.SyncStatus.UPDATE_INSTALLED;
+  };
+
+  try {
+    /*
+     * We are converting bundleNumber into packageHash. In future,
+     * we can remove its use by any other solution
+    */
+    update.packageHash = update.bundleNumber.toString();
+    return await doDownloadAndInstall();
+  } catch(error) {
+    syncStatusChangeCallback(CodePush.SyncStatus.UNKNOWN_ERROR);
+    log(error.message);
+    throw error;
+  }
+};
+
+/*
  * The syncInternal method provides a simple, one-line experience for
  * incorporating the check, download and installation of an update.
  *
@@ -608,6 +701,7 @@ if (NativeCodePush) {
     restartApp: RestartManager.restartApp,
     setUpTestDependencies,
     sync,
+    downloadAndInstall,
     disallowRestart: RestartManager.disallow,
     allowRestart: RestartManager.allow,
     clearUpdates: NativeCodePush.clearUpdates,
