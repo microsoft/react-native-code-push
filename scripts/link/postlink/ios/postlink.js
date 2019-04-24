@@ -22,7 +22,6 @@ module.exports = () => {
     var appDelegateContents = fs.readFileSync(appDelegatePath, "utf8");
 
     // 1. Add the header import statement
-    // var codePushHeaderImportStatement = `#import <CodePush/CodePush.h>`;
     if (~appDelegateContents.indexOf(linkTools.codePushHeaderImportStatement)) {
         console.log(`"CodePush.h" header already imported.`);
     } else {
@@ -61,7 +60,7 @@ module.exports = () => {
             console.log(`"jsCodeLocation" already pointing to "[CodePush bundleURL]".`);
         } else {
             if (jsCodeLocations.length === 1) {
-                // If there is one `jsCodeLocation` it means that react-native app version is lower than 0.57.8 
+                // If there is one `jsCodeLocation` it means that react-native app version is not the 0.57.8 or 0.57.0 and lower than 0.59 
                 // and we should replace this line with DEBUG ifdef statement and add CodePush call for Release case
 
                 var oldJsCodeLocationAssignmentStatement = jsCodeLocations[0];

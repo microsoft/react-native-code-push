@@ -19,7 +19,6 @@ module.exports = () => {
         var appDelegateContents = fs.readFileSync(appDelegatePath, "utf8");
 
         // 1. Remove the header import statement
-        // var codePushHeaderImportStatement = `#import <CodePush/CodePush.h>`;
         if (!~appDelegateContents.indexOf(linkTools.codePushHeaderImportStatement)) {
             console.log(`"CodePush.h" header already removed.`);
         } else {
