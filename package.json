@@ -50,8 +50,8 @@
       ]
     },
     "commands": {
-      "postlink": "node node_modules/react-native-code-push/scripts/postlink/run",
-      "postunlink": "node node_modules/react-native-code-push/scripts/postunlink/run"
+      "postlink": "node node_modules/react-native-code-push/scripts/link/postlink/run",
+      "postunlink": "node node_modules/react-native-code-push/scripts/link/postunlink/run"
     }
   }
 }
