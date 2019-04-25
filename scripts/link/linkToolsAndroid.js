@@ -17,7 +17,7 @@ exports.codePushGradleLink = `\napply from: "../../node_modules/react-native-cod
 exports.deploymentKeyName = "reactNativeCodePush_androidDeploymentKey";
 
 exports.getMainApplicationLocation = function () {
-    return findMainApplication() || glob.sync("**/MainApplication.java", this.ignoreFolders)[0];
+    return findMainApplication() || glob.sync("**/MainApplication.java", ignoreFolders)[0];
 }
 
 exports.getMainActivityPath = function () {
@@ -52,6 +52,6 @@ function findMainApplication() {
     }
 
     var nameParts = appName.split('.');
-    var searchPath = glob.sync("**/" + nameParts[nameParts.length - 1] + ".java", this.ignoreFolders)[0];
+    var searchPath = glob.sync("**/" + nameParts[nameParts.length - 1] + ".java", ignoreFolders)[0];
     return searchPath;
 }
