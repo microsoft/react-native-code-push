@@ -1,4 +1,4 @@
-var linkTools = require('../../linkTools');
+var linkTools = require('../../linkToolsAndroid');
 var fs = require("fs");
 var inquirer = require('inquirer');
 
@@ -29,7 +29,7 @@ module.exports = () => {
             if (linkTools.isJsBundleChangedy(mainActivityContents)) {
                 console.log(`"getJSBundleFile" is already overridden`);
             } else {
-                var mainActivityClassDeclaration = linkTools.mainActivityClassDeclaration;
+                var codePushGradleLink = linkTools.mainActivityClassDeclaration;
                 mainActivityContents = mainActivityContents.replace(mainActivityClassDeclaration,
                     `${mainActivityClassDeclaration}${getJSBundleFileOverride}`);
                 fs.writeFileSync(mainActivityPath, mainActivityContents);

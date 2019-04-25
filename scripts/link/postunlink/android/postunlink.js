@@ -1,4 +1,4 @@
-var linkTools = require('../../linkTools');
+var linkTools = require('../../linkToolsAndroid');
 var fs = require("fs");
 
 module.exports = () => {

@@ -1,4 +1,3 @@
-var fs = require("fs");
 var glob = require("glob");
 var path = require("path");
 var xcode = require("xcode");
@@ -7,24 +6,12 @@ var packageFile = require('../../../../package.json');
 var ignoreNodeModules = { ignore: "node_modules/**" };
 var ignoreNodeModulesAndPods = { ignore: ["node_modules/**", "ios/Pods/**"] };
 var appDelegatePaths = glob.sync("**/AppDelegate.+(mm|m)", ignoreNodeModules);
-var ignoreFolders = { ignore: ["node_modules/**", "**/build/**"] };
-var manifestPath = glob.sync("**/AndroidManifest.xml", ignoreFolders)[0];
 
 exports.codePushHeaderImportStatement = `#import <CodePush/CodePush.h>`;
 exports.codePushHeaderImportStatementFormatted = `\n${this.codePushHeaderImportStatement}`;
 exports.codePushBundleUrl = "[CodePush bundleURL]";
 exports.oldBundleUrl = "[[NSBundle mainBundle] URLForResource:@\"main\" withExtension:@\"jsbundle\"]";
 exports.linkedJsCodeLocationAssignmentStatement = "jsCodeLocation = [CodePush bundleURL];";
-exports.getJSBundleFileOverride = `
-    @Override
-    protected String getJSBundleFile(){
-      return CodePush.getJSBundleFile();
-    }
-`;
-exports.reactNativeHostInstantiation = "new ReactNativeHost(this) {";
-exports.mainActivityClassDeclaration = "public class MainActivity extends ReactActivity {";
-exports.codePushGradleLink = `\napply from: "../../node_modules/react-native-code-push/android/codepush.gradle"`;
-exports.deploymentKeyName = "reactNativeCodePush_androidDeploymentKey";
 
 exports.getJsCodeLocationPatch = function(defaultJsCodeLocationAssignmentStatement) {
     return `
@@ -40,22 +27,7 @@ exports.getJsCodeLocationPatch = function(defaultJsCodeLocationAssignmentStateme
 // Let's try to find that path by filtering the whole array for any path containing <project_name>
 // If we can't find it there, play dumb and pray it is the first path we find.
 exports.getAppDeletePath = function() {
-    return this.findFileByAppName(appDelegatePaths, packageFile ? packageFile.name : null) || appDelegatePaths[0];
-}
-
-// Helper that filters an array with AppDelegate.m paths for a path with the app name inside it
-// Should cover nearly all cases
-exports.findFileByAppName = function (array, appName) {
-    if (array.length === 0 || !appName) return null;
-
-    for (var i = 0; i < array.length; i++) {
-        var path = array[i];
-        if (path && path.indexOf(appName) !== -1) {
-            return path;
-        }
-    }
-
-    return null;
+    return findFileByAppName(appDelegatePaths, packageFile ? packageFile.name : null) || appDelegatePaths[0];
 }
 
 exports.getPlistPath = function() {
@@ -103,24 +75,19 @@ exports.getPlistPath = function() {
     return path.resolve(path.dirname(xcodeProjectPath), '..', plistPathValue.replace(/^"(.*)"$/, '$1'));
 }
 
-exports.getMainApplicationLocation = function () {
-        return findMainApplication() || glob.sync("**/MainApplication.java", this.ignoreFolders)[0];
-}
+// Helper that filters an array with AppDelegate.m paths for a path with the app name inside it
+// Should cover nearly all cases
+function findFileByAppName(array, appName) {
+    if (array.length === 0 || !appName) return null;
 
-exports.getMainActivityPath = function () {
-    return glob.sync("**/MainActivity.java", ignoreFolders)[0]
-}
+    for (var i = 0; i < array.length; i++) {
+        var path = array[i];
+        if (path && path.indexOf(appName) !== -1) {
+            return path;
+        }
+    }
 
-exports.getStringsResourcesPath = function () {
-    return glob.sync("**/strings.xml", ignoreFolders)[0];
-}
-
-exports.getBuildGradlePath = function () {
-    return path.join("android", "app", "build.gradle");
-}
-
-exports.isJsBundleChanged = function (codeContents) {
-    return /@Override\s*\n\s*protected String getJSBundleFile\(\)\s*\{[\s\S]*?\}/.test(codeContents);
+    return null;
 }
 
 function getDefaultPlistPath() {
@@ -160,24 +127,4 @@ function getBuildSettingsPropertyMatchingTargetProductName(parsedXCodeProj, prop
         }
     }
     return target;
-}
-
-function findMainApplication() {
-    if (!manifestPath) {
-        return null;
-    }
-
-    var manifest = fs.readFileSync(manifestPath, "utf8");
-
-    // Android manifest must include single 'application' element
-    var matchResult = manifest.match(/application\s+android:name\s*=\s*"(.*?)"/);
-    if (matchResult) {
-        var appName = matchResult[1];
-    } else {
-        return null;
-    }
-
-    var nameParts = appName.split('.');
-    var searchPath = glob.sync("**/" + nameParts[nameParts.length - 1] + ".java", this.ignoreFolders)[0];
-    return searchPath;
 }

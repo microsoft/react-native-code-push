@@ -1,5 +1,5 @@
 
-var linkTools = require('../../linkTools');
+var linkTools = require('../../linkToolsIos');
 var fs = require("fs");
 var inquirer = require('inquirer');
 var plist = require("plist");
@@ -55,7 +55,7 @@ module.exports = () => {
             console.log('Couldn\'t find jsCodeLocation setting in AppDelegate.');
         }
 
-        var newJsCodeLocationAssignmentStatement = linkTools.linkedJsCodeLocationAssignmentStatement;
+        var newJsCodeLocationAssignmentStatement = linkTools.codePushGradleLink;
         if (~appDelegateContents.indexOf(newJsCodeLocationAssignmentStatement)) {
             console.log(`"jsCodeLocation" already pointing to "[CodePush bundleURL]".`);
         } else {
