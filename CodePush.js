@@ -429,7 +429,7 @@ async function downloadAndInstall(update) {
      * We are converting bundleNumber into packageHash. In future,
      * we can remove its use by any other solution
     */
-    update.packageHash = update.bundleNumber.toString();
+    update.packageHash = update.bundleNumber + '';
     return await doDownloadAndInstall();
   } catch(error) {
     syncStatusChangeCallback(CodePush.SyncStatus.UNKNOWN_ERROR);
