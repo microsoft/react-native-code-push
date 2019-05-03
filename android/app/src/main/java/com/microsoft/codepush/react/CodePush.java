@@ -265,14 +265,17 @@ public class CodePush implements ReactPackage {
             }
 
             try {
-                boolean updateIsLoading = pendingUpdate.getBoolean(CodePushConstants.PENDING_UPDATE_IS_LOADING_KEY);
-                if (updateIsLoading) {
+                /*
+                 * This check is not needed as of now. Will only comment out the code, in case we need it later
+                 * */
+                //boolean updateIsLoading = pendingUpdate.getBoolean(CodePushConstants.PENDING_UPDATE_IS_LOADING_KEY);
+                //if (updateIsLoading) {
                     // Pending update was initialized, but notifyApplicationReady was not called.
                     // Therefore, deduce that it is a broken update and rollback.
-                    CodePushUtils.log("Update did not finish loading the last time, rolling back to a previous version.");
-                    sNeedToReportRollback = true;
-                    rollbackPackage();
-                } else {
+                    //CodePushUtils.log("Update did not finish loading the last time, rolling back to a previous version.");
+                    //sNeedToReportRollback = true;
+                    //rollbackPackage();
+                //} else {
                     // There is in fact a new update running for the first
                     // time, so update the local state to ensure the client knows.
                     mDidUpdate = true;
@@ -281,7 +284,7 @@ public class CodePush implements ReactPackage {
                     // we will know that we need to rollback when the app next starts.
                     mSettingsManager.savePendingUpdate(pendingUpdate.getString(CodePushConstants.PENDING_UPDATE_HASH_KEY),
                             /* isLoading */true);
-                }
+                //}
             } catch (JSONException e) {
                 // Should not happen.
                 throw new CodePushUnknownException("Unable to read pending update metadata stored in SharedPreferences", e);
@@ -310,9 +313,12 @@ public class CodePush implements ReactPackage {
             }
             String packageAppVersion = packageMetadata.optString("appVersion", null);
             long binaryResourcesModifiedTime = this.getBinaryResourcesModifiedTime();
+            /*
+             * If packageAppVersion is not sent, DO NOT do a equality check 
+             */
             return binaryModifiedDateDuringPackageInstall != null &&
                     binaryModifiedDateDuringPackageInstall == binaryResourcesModifiedTime &&
-                    (isUsingTestConfiguration() || sAppVersion.equals(packageAppVersion));
+                    (isUsingTestConfiguration() || (packageAppVersion != null ? sAppVersion.equals(packageAppVersion) : true));
         } catch (NumberFormatException e) {
             throw new CodePushUnknownException("Error in reading binary modified date from package metadata", e);
         }
