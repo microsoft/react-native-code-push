@@ -4,7 +4,7 @@
 
 *Note: This README is only relevant to the latest version of our plugin. If you are using an older version, please switch to the relevant tag on [our GitHub repo](https://github.com/Microsoft/react-native-code-push) to view the docs for that particular version.*
 
-![Switching tags](https://cloud.githubusercontent.com/assets/8598682/17350832/ce0dec40-58de-11e6-9c8c-906bb114c34f.png)
+![Switching tags](https://user-images.githubusercontent.com/42337914/57237511-0835de80-7030-11e9-88fa-64eb200478d0.png)
 
 This plugin provides client-side integration for the [CodePush service](https://microsoft.github.io/code-push/), allowing you to easily add a dynamic update experience to your React Native app(s).
 
