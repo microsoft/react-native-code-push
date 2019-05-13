@@ -1,4 +1,4 @@
-var linkTools = require('../../linkToolsAndroid');
+var linkTools = require('../../tools/linkToolsAndroid');
 var fs = require("fs");
 var inquirer = require('inquirer');
 
