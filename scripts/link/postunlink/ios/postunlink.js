@@ -1,5 +1,5 @@
 
-var linkTools = require('../../linkToolsIos');
+var linkTools = require('../../tools/linkToolsIos');
 var fs = require("fs");
 var plist = require("plist");
 var semver = require('semver');
