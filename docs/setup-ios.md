@@ -116,7 +116,7 @@ For React Native 0.58 and below:
 2. Find the following line of code, which loads your JS Bundle from the app binary for production releases:
 
     ```objective-c
-    jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
+    jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
     ```
 
 3. Replace it with this line:
