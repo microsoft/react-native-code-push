@@ -25,6 +25,7 @@ To set this up, perform the following steps:
 
             releaseStaging {
                 ...
+                initWith release
                 buildConfigField "String", "CODEPUSH_KEY", '"<INSERT_STAGING_KEY>"'
                 // Note: It is a good idea to provide matchingFallbacks for the new buildType you create to prevent build issues
                 // Add the following line if not already there
