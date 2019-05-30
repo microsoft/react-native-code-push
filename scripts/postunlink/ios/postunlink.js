@@ -3,7 +3,7 @@ var linkTools = require('../../tools/linkToolsIos');
 var fs = require("fs");
 var plist = require("plist");
 var semver = require('semver');
-var packageFile = require('../../../../../../package.json');
+var packageFile = require('../../../../../package.json');
 
 module.exports = () => {
 
