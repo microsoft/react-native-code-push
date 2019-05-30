@@ -44,13 +44,13 @@ module.exports = () => {
                     console.log(`AppDelegate isn't compatible for unlinking`);
                 } else {
                     if (semver.eq(semver.coerce(reactNativeVersion), "0.57.8") || semver.eq(semver.coerce(reactNativeVersion), "0.57.0")) {
-                        // If version of react-native application is 0.57.8 or 0.57 then on default there are two different
+                        // If version of react-native application is 0.57.8 or 0.57 then by default there are two different
                         // jsCodeLocation for debug and release and we should replace only release
                         var unlinkedJsCodeLocations = `jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];`;
                         appDelegateContents = appDelegateContents.replace(linkedJsCodeLocationAssignmentStatement,
                             unlinkedJsCodeLocations);
                     } else {
-                        // If version of react-native application is not 0.57.8 or 0.57 and lower than 0.59.0 then on default there are only one
+                        // If version of react-native application is not 0.57.8 or 0.57 and lower than 0.59.0 then by default there is only one
                         // jsCodeLocation and we should stay on only it
                         var defaultJsCodeLocationAssignmentStatement = jsCodeLocations[0];
                         var linkedCodeLocationPatch = linkTools.getJsCodeLocationPatch(defaultJsCodeLocationAssignmentStatement);
