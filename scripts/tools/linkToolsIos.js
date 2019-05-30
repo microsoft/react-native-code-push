@@ -1,7 +1,7 @@
 var glob = require("glob");
 var path = require("path");
 var xcode = require("xcode");
-var packageFile = require('../../../../../package.json');
+var packageFile = require('../../../../package.json');
 
 var ignoreNodeModules = { ignore: "node_modules/**" };
 var ignoreNodeModulesAndPods = { ignore: ["node_modules/**", "ios/Pods/**"] };

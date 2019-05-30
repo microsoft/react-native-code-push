@@ -5,7 +5,7 @@ var inquirer = require('inquirer');
 var plist = require("plist");
 var semver = require('semver');
 
-var package = require('../../../../../../package.json');
+var package = require('../../../../../package.json');
 
 module.exports = () => {
 
