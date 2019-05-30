@@ -12,7 +12,7 @@ module.exports = () => {
 
     if (mainApplicationPath) {
         var mainApplicationContents = fs.readFileSync(mainApplicationPath, "utf8");
-        if (!linkTools.isJsBundleChanged(mainApplicationContents)) {
+        if (!linkTools.isJsBundleOverridden(mainApplicationContents)) {
             console.log(`"getJSBundleFile" is already removed`);
         } else {
             mainApplicationContents = mainApplicationContents.replace(`${getJSBundleFileOverride}`, "");
@@ -22,7 +22,7 @@ module.exports = () => {
         var mainActivityPath = linkTools.getMainActivityPath();
         if (mainActivityPath) {
             var mainActivityContents = fs.readFileSync(mainActivityPath, "utf8");
-            if (!linkTools.isJsBundleChanged(mainActivityContents)) {
+            if (!linkTools.isJsBundleOverridden(mainActivityContents)) {
                 console.log(`"getJSBundleFile" is already removed`);
             } else {
                 mainActivityContents = mainActivityContents.replace(getJSBundleFileOverride, "");
