@@ -32,7 +32,7 @@ exports.getBuildGradlePath = function () {
     return path.join("android", "app", "build.gradle");
 }
 
-exports.isJsBundleChanged = function (codeContents) {
+exports.isJsBundleOverridden = function (codeContents) {
     return /@Override\s*\n\s*protected String getJSBundleFile\(\)\s*\{[\s\S]*?\}/.test(codeContents);
 }
 

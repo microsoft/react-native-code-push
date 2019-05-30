@@ -14,7 +14,7 @@ module.exports = () => {
 
     if (mainApplicationPath) {
         var mainApplicationContents = fs.readFileSync(mainApplicationPath, "utf8");
-        if (linkTools.isJsBundleChanged(mainApplicationContents)) {
+        if (linkTools.isJsBundleOverridden(mainApplicationContents)) {
             console.log(`"getJSBundleFile" is already overridden`);
         } else {
             var reactNativeHostInstantiation = linkTools.reactNativeHostInstantiation;
@@ -26,10 +26,10 @@ module.exports = () => {
         var mainActivityPath = linkTools.getMainActivityPath();
         if (mainActivityPath) {
             var mainActivityContents = fs.readFileSync(mainActivityPath, "utf8");
-            if (linkTools.isJsBundleChangedy(mainActivityContents)) {
+            if (linkTools.isJsBundleOverridden(mainActivityContents)) {
                 console.log(`"getJSBundleFile" is already overridden`);
             } else {
-                var codePushGradleLink = linkTools.mainActivityClassDeclaration;
+                var mainActivityClassDeclaration = linkTools.mainActivityClassDeclaration;
                 mainActivityContents = mainActivityContents.replace(mainActivityClassDeclaration,
                     `${mainActivityClassDeclaration}${getJSBundleFileOverride}`);
                 fs.writeFileSync(mainActivityPath, mainActivityContents);
