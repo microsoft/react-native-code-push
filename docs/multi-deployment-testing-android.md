@@ -25,9 +25,7 @@ To set this up, perform the following steps:
 
             releaseStaging {
                 ...
-                // The `initWith` property allows you to copy configurations from other build types,
-                // then configure only the settings you want to change. This one copies the debug build
-                // type, and then changes the manifest placeholder and application ID.
+                // The `initWith` property allows you to copy configurations from release
                 initWith release
                 buildConfigField "String", "CODEPUSH_KEY", '"<INSERT_STAGING_KEY>"'
                 // Note: It is a good idea to provide matchingFallbacks for the new buildType you create to prevent build issues
