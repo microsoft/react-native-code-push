@@ -57,7 +57,7 @@ public class FileUtils {
     /**
      * Appends file path with one more component.
      *
-     * @param basePath            path to be appended.
+     * @param basePath path to be appended.
      * @param appendPathComponent path component to be appended to the base path.
      * @return new path.
      */
@@ -69,7 +69,7 @@ public class FileUtils {
      * Copies the contents of one directory to another. Copies all the contents recursively.
      *
      * @param sourceDir path to the directory to copy files from.
-     * @param destDir   path to the directory to copy files to.
+     * @param destDir path to the directory to copy files to.
      * @throws IOException read/write error occurred while accessing the file system.
      */
     public void copyDirectoryContents(File sourceDir, File destDir) throws IOException {
@@ -86,7 +86,8 @@ public class FileUtils {
         }
         for (File sourceFile : sourceFiles) {
             if (sourceFile.isDirectory()) {
-                copyDirectoryContents(new File(appendPathComponent(sourceDir.getPath(), sourceFile.getName())), new File(appendPathComponent(destDir.getPath(), sourceFile.getName())));
+                copyDirectoryContents(new File(appendPathComponent(sourceDir.getPath(), sourceFile.getName())),
+                                      new File(appendPathComponent(destDir.getPath(), sourceFile.getName())));
             } else {
                 File destFile = new File(destDir, sourceFile.getName());
                 FileInputStream fromFileStream = null;
@@ -175,8 +176,8 @@ public class FileUtils {
     /**
      * Moves file from one folder to another.
      *
-     * @param fileToMove  path to the file to be moved.
-     * @param newFolder   path to be moved to.
+     * @param fileToMove path to the file to be moved.
+     * @param newFolder path to be moved to.
      * @param newFileName new name for the file to be moved.
      * @throws IOException read/write error occurred while accessing the file system.
      */
@@ -225,7 +226,7 @@ public class FileUtils {
     /**
      * Gets files from archive.
      *
-     * @param zipFile           path to zip-archive.
+     * @param zipFile path to zip-archive.
      * @param destinationFolder path for the unzipped files to be saved.
      * @throws IOException read/write error occurred while accessing the file system.
      */
@@ -248,7 +249,12 @@ public class FileUtils {
             while ((entry = zipStream.getNextEntry()) != null) {
                 String fileName = entry.getName();
                 File file = new File(destinationFolder, fileName);
-                unzipSingleFile(entry, file, buffer, zipStream);
+                String canonicalPath = file.getCanonicalPath();
+                if (canonicalPath.startsWith(destinationFolder.getCanonicalPath())) {
+                    unzipSingleFile(entry, file, buffer, zipStream);
+                } else {
+                    // Zip Path Traversal attack
+                }
             }
         } finally {
             Exception e = finalizeResources(
@@ -263,9 +269,9 @@ public class FileUtils {
     /**
      * Saves file from one zip entry to the specified location.
      *
-     * @param entry     zip entry.
-     * @param file      path for the unzipped file.
-     * @param buffer    read buffer.
+     * @param entry zip entry.
+     * @param file path for the unzipped file.
+     * @param buffer read buffer.
      * @param zipStream stream with zip file.
      * @throws IOException read/write error occurred while accessing the file system.
      */
@@ -309,7 +315,7 @@ public class FileUtils {
     /**
      * Writes some content to a file, existing file will be overwritten.
      *
-     * @param content  content to be written to a file.
+     * @param content content to be written to a file.
      * @param filePath path to a file.
      * @throws IOException read/write error occurred while accessing the file system.
      */
@@ -333,7 +339,7 @@ public class FileUtils {
      * {@link Closeable#close()} on them if necessary. If an exception is thrown during <code>.close()</code> call,
      * it is be logged using <code>logErrorMessage</code> parameter as general message.
      *
-     * @param resources       resources to finalize.
+     * @param resources resources to finalize.
      * @param logErrorMessage general logging message for errors occurred during resource finalization.
      * @return last {@link IOException} thrown during resource finalization, null if no exception was thrown.
      */
