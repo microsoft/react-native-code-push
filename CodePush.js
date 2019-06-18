@@ -39,7 +39,7 @@ async function checkForUpdate(deploymentKey = null, handleBinaryVersionMismatchC
    * then we want to use its package hash to determine whether a new
    * release has been made on the server. Otherwise, we only need
    * to send the app version to the server, since we are interested
-   * in any updates for current app store version, regardless of hash.
+   * in any updates for current binary version, regardless of hash.
    */
   let queryPackage;
   if (localPackage) {
@@ -58,7 +58,7 @@ async function checkForUpdate(deploymentKey = null, handleBinaryVersionMismatchC
    * ----------------------------------------------------------------
    * 1) The server said there isn't an update. This is the most common case.
    * 2) The server said there is an update but it requires a newer binary version.
-   *    This would occur when end-users are running an older app store version than
+   *    This would occur when end-users are running an older binary version than
    *    is available, and CodePush is making sure they don't get an update that
    *    potentially wouldn't be compatible with what they are running.
    * 3) The server said there is an update, but the update's hash is the same as
