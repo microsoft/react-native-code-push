@@ -111,7 +111,7 @@ public class FileAndroidTests {
         doReturn(parentFile).when(sourceFile).getParentFile();
         ZipInputStream zipInputStream = mock(ZipInputStream.class);
         byte[] buffer = new byte[1024];
-        mFileUtils.unzipSingleFile(mock(ZipEntry.class), sourceFile, buffer, zipInputStream);
+        mFileUtils.unzipSingleFile(mock(ZipEntry.class), sourceFile, sourceFile, buffer, zipInputStream);
     }
 
     /**
@@ -124,7 +124,7 @@ public class FileAndroidTests {
         ZipEntry entry = mockZipEntry(true);
         ZipInputStream zipInputStream = mock(ZipInputStream.class);
         byte[] buffer = new byte[1024];
-        mFileUtils.unzipSingleFile(entry, mocked, buffer, zipInputStream);
+        mFileUtils.unzipSingleFile(entry, mocked, mocked, buffer, zipInputStream);
     }
 
     /**
@@ -147,7 +147,7 @@ public class FileAndroidTests {
         ZipInputStream zipInputStream = mock(ZipInputStream.class);
         byte[] buffer = new byte[1024];
         doReturn(-1).when(zipInputStream).read(buffer);
-        mFileUtils.unzipSingleFile(entry, file, buffer, zipInputStream);
+        mFileUtils.unzipSingleFile(entry, file, file, buffer, zipInputStream);
     }
 
     /**
@@ -161,7 +161,7 @@ public class FileAndroidTests {
         ZipInputStream zipInputStream = mock(ZipInputStream.class);
         byte[] buffer = new byte[1024];
         doReturn(-1).when(zipInputStream).read(buffer);
-        mFileUtils.unzipSingleFile(entry, file, buffer, zipInputStream);
+        mFileUtils.unzipSingleFile(entry, file, file, buffer, zipInputStream);
     }
 
     /**

@@ -17,6 +17,7 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import static com.microsoft.codepush.common.testutils.CommonFileTestUtils.getRealFile;
+import static com.microsoft.codepush.common.testutils.CommonFileTestUtils.getRealTestFolder;
 import static com.microsoft.codepush.common.testutils.CommonFileTestUtils.getTestingDirectory;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
@@ -121,7 +122,7 @@ public class FileFinalizeAndroidTests {
     public void unzipDoubleFailure() throws Exception {
         ZipInputStream zipInputStream = mock(ZipInputStream.class);
         doThrow(new IOException()).when(zipInputStream).read(any(byte[].class));
-        mFileUtils.unzipSingleFile(FileAndroidTestUtils.mockZipEntry(false), getRealFile(), new byte[1024], zipInputStream);
+        mFileUtils.unzipSingleFile(FileAndroidTestUtils.mockZipEntry(false), getRealTestFolder(), getRealFile(), new byte[1024], zipInputStream);
     }
 
     /**

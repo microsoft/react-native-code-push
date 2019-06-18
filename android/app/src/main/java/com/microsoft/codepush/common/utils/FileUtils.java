@@ -251,7 +251,7 @@ public class FileUtils {
                 File file = new File(destinationFolder, fileName);
                 String canonicalPath = file.getCanonicalPath();
                 if (canonicalPath.startsWith(destinationFolder.getCanonicalPath())) {
-                    unzipSingleFile(entry, file, buffer, zipStream);
+                    unzipSingleFile(entry, destinationFolder, file, buffer, zipStream);
                 } else {
                     // Zip Path Traversal attack
                 }
@@ -270,12 +270,19 @@ public class FileUtils {
      * Saves file from one zip entry to the specified location.
      *
      * @param entry zip entry.
+     * @param destinationFolder directory for unzipped file.
      * @param file path for the unzipped file.
      * @param buffer read buffer.
      * @param zipStream stream with zip file.
      * @throws IOException read/write error occurred while accessing the file system.
      */
-    public void unzipSingleFile(ZipEntry entry, File file, byte[] buffer, ZipInputStream zipStream) throws IOException {
+    public void unzipSingleFile(ZipEntry entry, File destinationFolder, File file, byte[] buffer, ZipInputStream zipStream) throws IOException {
+        String canonicalPath = file.getCanonicalPath();
+        if (!canonicalPath.startsWith(destinationFolder.getCanonicalPath())) {
+            // Zip Path Traversal attack
+            return;
+        }
+
         if (entry.isDirectory()) {
             if (!file.exists()) {
                 if (!file.mkdirs()) {
