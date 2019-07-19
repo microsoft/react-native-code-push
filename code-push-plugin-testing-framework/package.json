@@ -19,11 +19,11 @@
     "base-64": "^0.1.0",
     "mocha": "latest",
     "mocha-junit-reporter": "latest",
-    "node-uuid": "^1.4.3",
-    "q": "^1.4.1",
+    "node-uuid": "^1.4.8",
+    "q": "^1.5.1",
     "replace": "latest",
     "superagent": "^3.8.3",
-    "superagent-proxy": "^1.0.0"
+    "superagent-proxy": "^1.0.3"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/code-push/issues"
