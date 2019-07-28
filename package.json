@@ -39,19 +39,5 @@
     "run-sequence": "latest",
     "tslint": "^5.18.0",
     "typescript": "^2.9.2"
-  },
-  "rnpm": {
-    "android": {
-      "packageInstance": "new CodePush(getResources().getString(R.string.reactNativeCodePush_androidDeploymentKey), getApplicationContext(), BuildConfig.DEBUG)"
-    },
-    "ios": {
-      "sharedLibraries": [
-        "libz"
-      ]
-    },
-    "commands": {
-      "postlink": "node node_modules/react-native-code-push/scripts/postlink/run",
-      "postunlink": "node node_modules/react-native-code-push/scripts/postunlink/run"
-    }
   }
 }
