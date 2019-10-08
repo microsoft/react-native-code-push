@@ -59,9 +59,11 @@ gradle.projectsEvaluated {
                     type: Exec) {
                 commandLine (*nodeExecutableAndArgs, "${nodeModulesPath}/react-native-code-push/scripts/generateBundledResourcesHash.js", resourcesDir, jsBundleFile, jsBundleDir)
 
-                enabled config."bundleIn${targetName}" ||
-                config."bundleIn${variant.buildType.name.capitalize()}" ?:
-                targetName.toLowerCase().contains("release")
+                enabled config."bundleIn${targetName}" != null
+                  ? config."bundleIn${targetName}"
+                  : config."bundleIn${variant.buildType.name.capitalize()}" != null
+                    ? config."bundleIn${variant.buildType.name.capitalize()}"
+                    : targetName.toLowerCase().contains("release")
             }   
         } else {
             def jsBundleDirConfigName = "jsBundleDir${targetName}"
