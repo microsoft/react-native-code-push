@@ -1,7 +1,7 @@
 ## Android Setup
 
 * [Plugin Installation and Configuration for React Native 0.60 version and above](#plugin-installation-and-configuration-for-react-native-0.60-version-and-above-android)
-* [Plugin Installation (Android)](#plugin-installation-android)
+* [Plugin Installation for React Native lower than 0.60 (Android)](#plugin-installation-for-react-native-lower-than-0.60-android)
   * [Plugin Installation (Android - RNPM)](#plugin-installation-android---rnpm)
   * [Plugin Installation (Android - Manual)](#plugin-installation-android---manual)
 * [Plugin Configuration (Android)](#plugin-configuration-android)
