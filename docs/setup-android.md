@@ -21,10 +21,11 @@ In order to integrate CodePush into your Android project, please perform the fol
 In order to accommodate as many developer preferences as possible, the CodePush plugin supports Android installation via two mechanisms:
 
 1. [**RNPM**](#plugin-installation-android---rnpm) - [React Native Package Manager (RNPM)](https://github.com/rnpm/rnpm) is an awesome tool that provides the simplest installation experience possible for React Native plugins. If you're already using it, or you want to use it, then we recommend this approach.
+*Note: This approach is deprecated for React Native version 0.60 and above. Please use manual approach.*
 
 2. [**"Manual"**](#plugin-installation-android---manual) - If you don't want to depend on any additional tools or are fine with a few extra installation steps (it's a one-time thing), then go with this approach.
 
-*Note: Due to a code change from the React Native repository, if your installed React Native version ranges from 0.29 to 0.32, we recommend following the manual steps to set up correctly. *
+*Note: Due to a code change from the React Native repository, if your installed React Native version ranges from 0.29 to 0.32, we recommend following the manual steps to set up correctly.*
 
 #### Plugin Installation (Android - RNPM)
 
@@ -40,7 +41,7 @@ In order to accommodate as many developer preferences as possible, the CodePush 
 
     *Note: If you don't already have RNPM installed, you can do so by simply running `npm i -g rnpm` and then executing the above command.*
 
-2. If you're using RNPM >=1.6.0, you will be prompted for the deployment key you'd like to use. If you don't already have it, you can retreive this value by running `code-push deployment ls <appName> -k`, or you can choose to ignore it (by simply hitting `<ENTER>`) and add it in later. To get started, we would recommend just using your `Staging` deployment key, so that you can test out the CodePush end-to-end.
+2. If you're using RNPM >=1.6.0, you will be prompted for the deployment key you'd like to use. If you don't already have it, you can retrieve this value by running `code-push deployment ls <appName> -k`, or you can choose to ignore it (by simply hitting `<ENTER>`) and add it in later. To get started, we would recommend just using your `Staging` deployment key, so that you can test out the CodePush end-to-end.
 
 And that's it for installation using RNPM! Continue below to the [Plugin Configuration](#plugin-configuration-android) section to complete the setup.
 
@@ -52,6 +53,7 @@ And that's it for installation using RNPM! Continue below to the [Plugin Configu
     include ':app', ':react-native-code-push'
     project(':react-native-code-push').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-code-push/android/app')
     ```
+    *Note: If you React Native version is 0.60 and above you shouldn't do this step because `autolinking` already handled it.*
 
 2. In your `android/app/build.gradle` file, add the `:react-native-code-push` project as a compile-time dependency:
 
@@ -62,6 +64,7 @@ And that's it for installation using RNPM! Continue below to the [Plugin Configu
         compile project(':react-native-code-push')
     }
     ```
+    *Note: If your React Native version is 0.60 and above you shouldn't do this step because `autolinking` already handled it.*
 
 3. In your `android/app/build.gradle` file, add the `codepush.gradle` file as an additional build task definition underneath `react.gradle`:
 
@@ -108,6 +111,8 @@ public class MainApplication extends Application implements ReactApplication {
             // 3. Instantiate an instance of the CodePush runtime and add it to the list of
             // existing packages, specifying the right deployment key. If you don't already
             // have it, you can run "code-push deployment ls <appName> -k" to retrieve your key.
+            //
+            // Note: If your React Native version is 0.60 and above you shouldn't do this step because `autolinking` already handled it.
             return Arrays.<ReactPackage>asList(
                 new MainReactPackage(),
                 new CodePush("deployment-key-here", MainApplication.this, BuildConfig.DEBUG)
