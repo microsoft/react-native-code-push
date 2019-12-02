@@ -29,26 +29,26 @@ In order to integrate CodePush into your Android project, please perform the fol
     ```
 2. Update the `MainApplication.java` file to use CodePush via the following changes:
 
-```java
-...
-// 1. Import the plugin class.
-import com.microsoft.codepush.react.CodePush;
+    ```java
+    ...
+    // 1. Import the plugin class.
+    import com.microsoft.codepush.react.CodePush;
 
-public class MainApplication extends Application implements ReactApplication {
+    public class MainApplication extends Application implements ReactApplication {
 
-    private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
-        ...
+        private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
+            ...
 
-        // 2. Override the getJSBundleFile method in order to let
-        // the CodePush runtime determine where to get the JS
-        // bundle location from on each app start
-        @Override
-        protected String getJSBundleFile() {
-            return CodePush.getJSBundleFile();
-        }
-    };
-}
-```
+            // 2. Override the getJSBundleFile method in order to let
+            // the CodePush runtime determine where to get the JS
+            // bundle location from on each app start
+            @Override
+            protected String getJSBundleFile() {
+                return CodePush.getJSBundleFile();
+            }
+        };
+    }
+    ```
 
 3. Add the Deployment key to `strings.xml`:
    
