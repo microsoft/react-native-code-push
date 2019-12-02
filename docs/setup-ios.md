@@ -29,7 +29,7 @@ Once you've acquired the CodePush plugin, you need to integrate it into the Xcod
 
    Typically, you're only going to want to use CodePush to resolve your JS bundle location within release builds, and therefore, we recommend using the `DEBUG` pre-processor macro to dynamically switch between using the packager server and CodePush, depending on whether you are debugging or not. This will make it much simpler to ensure you get the right behavior you want in production, while still being able to use the Chrome Dev Tools, live reload, etc. at debug-time.
 
-   For React Native 0.60 and above:
+   Totally your `sourceURLForBridge` method should look like this:
 
    ```objective-c
    - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
