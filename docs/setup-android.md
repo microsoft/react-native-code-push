@@ -58,7 +58,7 @@ In order to integrate CodePush into your Android project, please perform the fol
 
    In order to effectively make use of the `Staging` and `Production` deployments that were created along with your CodePush app, refer to the [multi-deployment testing](../README.md#multi-deployment-testing) docs below before actually moving your app's usage of CodePush into production.
 
-   Totally, your `strings.xml` should looks like this:
+   Your `strings.xml` should looks like this:
 
    ```xml
     <resources>
