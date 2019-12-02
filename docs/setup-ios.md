@@ -7,6 +7,7 @@ Once you've acquired the CodePush plugin, you need to integrate it into the Xcod
 In order to accommodate as many developer preferences as possible, the CodePush plugin supports iOS installation via three mechanisms:
 
 1. [**RNPM**](#plugin-installation-ios---rnpm) - [React Native Package Manager (RNPM)](https://github.com/rnpm/rnpm) is an awesome tool that provides the simplest installation experience possible for React Native plugins. If you're already using it, or you want to use it, then we recommend this approach.
+*Note: This approach is deprecated for React Native version 0.60 and above. Please use manual approach.*
 
 2. [**CocoaPods**](#plugin-installation-ios---cocoapods) - If you're building a native iOS app that is embedding React Native into it, or you simply prefer using [CocoaPods](https://cocoapods.org), then we recommend using the Podspec file that we ship as part of our plugin.
 
@@ -65,6 +66,12 @@ And that's it! Isn't RNPM awesome? :)
 *NOTE: The CodePush `.podspec` depends on the `React` pod, and so in order to ensure that it can correctly use the version of React Native that your app is built with, please make sure to define the `React` dependency in your app's `Podfile` as explained [here](https://facebook.github.io/react-native/docs/integration-with-existing-apps.html#podfile).*
 
 #### Plugin Installation (iOS - Manual)
+
+##### For React Native >= 0.60
+
+1. Run `cd ios && pod install && cd ..` to setup all the necessary dependencies.
+
+##### For React Native < 0.60
 
 1. Open your app's Xcode project
 
