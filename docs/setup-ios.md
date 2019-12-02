@@ -7,52 +7,51 @@ Once you've acquired the CodePush plugin, you need to integrate it into the Xcod
 1. Run `cd ios && pod install && cd ..` to install all the necessary CocoaPods dependencies.
 ​
 2. Open up the `AppDelegate.m` file, and add an import statement for the CodePush headers:
-​
-    ```objective-c
-    #import <CodePush/CodePush.h>
-    ```
-​
+
+   ```objective-c
+   #import <CodePush/CodePush.h>
+   ```
+
 3. Find the following line of code, which sets the source URL for bridge for production releases:
-​
-    ```objective-c
-    return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
-    ```
-​
+
+   ```objective-c
+   return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
+   ```
+
 4. Replace it with this line:
    
    ```objective-c
-    return [CodePush bundleURL];
-    ```
-    This change configures your app to always load the most recent version of your app's JS bundle. On the first launch, this will correspond to the file that was compiled with the app. However, after an update has been pushed via CodePush, this will return the location of the most recently installed update.
+   return [CodePush bundleURL];
+   ```
+   This change configures your app to always load the most recent version of your app's JS bundle. On the first launch, this will correspond to the file that was compiled with the app. However, after an update has been pushed via CodePush, this will return the location of the most recently installed update.
   
-    *NOTE: The `bundleURL` method assumes your app's JS bundle is named `main.jsbundle`. If you have configured your app to use a different file name, simply call the `bundleURLForResource:` method (which assumes you're using the `.jsbundle` extension) or `bundleURLForResource:withExtension:` method instead, in order to overwrite that default behavior*
-​
-    Typically, you're only going to want to use CodePush to resolve your JS bundle location within release builds, and therefore, we recommend using the `DEBUG` pre-processor macro to dynamically switch between using the packager server and CodePush, depending on whether you are debugging or not. This will make it much simpler to ensure you get the right behavior you want in production, while still being able to use the Chrome Dev Tools, live reload, etc. at debug-time.
-​
-    For React Native 0.60 and above:
-​
-    ```objective-c
-    - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
-    {
-      #if DEBUG
-        return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
-      #else
-        return [CodePush bundleURL];
-      #endif
-    }
-    ```
-​
-5. Add the key to `Info.plist`:
+   *NOTE: The `bundleURL` method assumes your app's JS bundle is named `main.jsbundle`. If you have configured your app to use a different file name, simply call the `bundleURLForResource:` method (which assumes you're using the `.jsbundle` extension) or `bundleURLForResource:withExtension:` method instead, in order to overwrite that default behavior*
+
+   Typically, you're only going to want to use CodePush to resolve your JS bundle location within release builds, and therefore, we recommend using the `DEBUG` pre-processor macro to dynamically switch between using the packager server and CodePush, depending on whether you are debugging or not. This will make it much simpler to ensure you get the right behavior you want in production, while still being able to use the Chrome Dev Tools, live reload, etc. at debug-time.
+
+   For React Native 0.60 and above:
+
+   ```objective-c
+   - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
+   {
+     #if DEBUG
+       return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
+     #else
+       return [CodePush bundleURL];
+     #endif
+   }
+   ```
+
+5. Add the Deployment key to `Info.plist`:
    
    To let the CodePush runtime know which deployment it should query for updates against, open your app's `Info.plist` file and add a new entry named `CodePushDeploymentKey`, whose value is the key of the deployment you want to configure this app against (like the key for the `Staging` deployment for the `FooBar` app). You can retrieve this value by running `code-push deployment ls <appName> -k` in the CodePush CLI (the `-k` flag is necessary since keys aren't displayed by default) and copying the value of the `Deployment Key` column which corresponds to the deployment you want to use (see below). Note that using the deployment's name (like Staging) will not work. That "friendly name" is intended only for authenticated management usage from the CLI, and not for public consumption within your app.
-​
-    ![Deployment list](https://cloud.githubusercontent.com/assets/116461/11601733/13011d5e-9a8a-11e5-9ce2-b100498ffb34.png)
-​
-    In order to effectively make use of the `Staging` and `Production` deployments that were created along with your CodePush app, refer to the [multi-deployment testing](../README.md#multi-deployment-testing) docs below before actually moving your app's usage of CodePush into production.
-​
-​
+
+   ![Deployment list](https://cloud.githubusercontent.com/assets/116461/11601733/13011d5e-9a8a-11e5-9ce2-b100498ffb34.png)
+
+   In order to effectively make use of the `Staging` and `Production` deployments that were created along with your CodePush app, refer to the [multi-deployment testing](../README.md#multi-deployment-testing) docs below before actually moving your app's usage of CodePush into production.
+
 ### Plugin Installation for React Native lower than 0.60 (iOS)
-​
+
 In order to accommodate as many developer preferences as possible, the CodePush plugin supports iOS installation via three mechanisms:
 
 1. [**RNPM**](#plugin-installation-ios---rnpm) - [React Native Package Manager (RNPM)](https://github.com/rnpm/rnpm) is an awesome tool that provides the simplest installation experience possible for React Native plugins. If you're already using it, or you want to use it, then we recommend this approach.
