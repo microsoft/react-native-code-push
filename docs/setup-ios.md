@@ -3,7 +3,7 @@
 Once you've acquired the CodePush plugin, you need to integrate it into the Xcode project of your React Native app and configure it correctly. To do this, take the following steps:
 ​
 ### Plugin Installation and Configuration for React Native 0.60 version and above (iOS)
-​
+
 1. Run `cd ios && pod install && cd ..` to install all the necessary CocoaPods dependencies.
 ​
 2. Open up the `AppDelegate.m` file, and add an import statement for the CodePush headers:
