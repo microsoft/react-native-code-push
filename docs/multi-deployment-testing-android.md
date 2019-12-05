@@ -12,7 +12,7 @@ To set this up, perform the following steps:
 
 **For React Native >= v0.60**
 
-1. Open the project's app level **build.gradle** file (for example `android/app/build.gradle` in standard React Native projects)
+1. Open the project's app level `build.gradle` file (for example `android/app/build.gradle` in standard React Native projects)
 
 2. Find the `android { buildTypes {} }` section and define `resValue` entries for both your `debug` and `release` build types, which reference your `Staging` and `Production` deployment keys respectively.
 
