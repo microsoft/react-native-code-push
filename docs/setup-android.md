@@ -67,6 +67,8 @@ In order to integrate CodePush into your Android project, please perform the fol
     </resources>
     ```
 
+    *Note: You can also put your deployment key in JS part with [Code-Push options](./api-js.md#CodePushOptions)*
+
 ### Plugin Installation for React Native lower than 0.60 (Android)
 
 In order to accommodate as many developer preferences as possible, the CodePush plugin supports Android installation via two mechanisms:
