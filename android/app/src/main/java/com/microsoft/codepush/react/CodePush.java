@@ -77,6 +77,12 @@ public class CodePush implements ReactPackage {
 
         mCurrentInstance = this;
 
+        String publicKeyFromStrings = getPublicKeyIfExist();
+        if(publicKeyFromStrings != null) mPublicKey = publicKeyFromStrings;
+
+        String serverUrlFromStrings = getServerUrlIfExist();
+        if (serverUrlFromStrings != null) mServerUrl = serverUrlFromStrings;
+
         clearDebugCacheIfNeeded(null);
         initializeUpdateAfterRestart();
     }
@@ -118,6 +124,44 @@ public class CodePush implements ReactPackage {
             throw new CodePushInvalidPublicKeyException("Specified public key is empty");
         }
         return publicKey;
+    }
+
+    private String getPublicKeyIfExist(){
+        String publicKey;
+      
+        String packageName = mContext.getPackageName();
+        int resId = mContext.getResources().getIdentifier("CodePushPublicKey", "string", packageName);
+        
+        if(resId != 0) {
+            publicKey = mContext.getString(resId);
+
+            if (publicKey.isEmpty()) {
+                throw new CodePushInvalidPublicKeyException("Public key is empty");
+            }
+        } else {
+            publicKey = null;
+        }
+
+        return publicKey;
+    }
+
+    private String getServerUrlIfExist(){
+        String serverUrl;
+      
+        String packageName = mContext.getPackageName();
+        int resId = mContext.getResources().getIdentifier("ServerUrl", "string", packageName);
+        
+        if(resId != 0) {
+            serverUrl = mContext.getString(resId);
+
+            if (serverUrl.isEmpty()) {
+                throw new CodePushInvalidPublicKeyException("Server Url is empty");
+            }
+        } else {
+            serverUrl = null;
+        }
+
+        return serverUrl;
     }
 
     public void clearDebugCacheIfNeeded(ReactInstanceManager instanceManager) {
