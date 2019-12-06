@@ -50,7 +50,7 @@ Once you've acquired the CodePush plugin, you need to integrate it into the Xcod
 
    In order to effectively make use of the `Staging` and `Production` deployments that were created along with your CodePush app, refer to the [multi-deployment testing](../README.md#multi-deployment-testing) docs below before actually moving your app's usage of CodePush into production.
 
-   *Note: You can also set your deployment key in JS part with [Code-Push options](./api-js.md#CodePushOptions)*
+   *Note: You can also set your deployment key in JS code using [Code-Push options](./api-js.md#CodePushOptions)*
 
 ### Plugin Installation for React Native lower than 0.60 (iOS)
 
