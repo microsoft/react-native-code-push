@@ -149,7 +149,7 @@ public class CodePush implements ReactPackage {
         String serverUrl;
       
         String packageName = mContext.getPackageName();
-        int resId = mContext.getResources().getIdentifier("ServerUrl", "string", packageName);
+        int resId = mContext.getResources().getIdentifier("CodePushServerUrl", "string", packageName);
         
         if(resId != 0) {
             serverUrl = mContext.getString(resId);
