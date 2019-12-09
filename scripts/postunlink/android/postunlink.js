@@ -63,7 +63,7 @@ module.exports = () => {
         if (!~stringsResourcesContent.indexOf(deploymentKeyName)) {
             console.log(`${deploymentKeyName} already removed from the strings.xml`);
         } else {
-            var AndroidDeploymentKey = stringsResourcesContent.match(/(<string moduleConfig="true" name="reactNativeCodePush_androidDeploymentKey">.*<\/string>)/);
+            var AndroidDeploymentKey = stringsResourcesContent.match(/(<string moduleConfig="true" name="CodePushDeploymentKey">.*<\/string>)/);
             if (AndroidDeploymentKey) {
                 stringsResourcesContent = stringsResourcesContent.replace(`\n\t${AndroidDeploymentKey[0]}`,"");
                 fs.writeFileSync(stringsResourcesPath, stringsResourcesContent);
