@@ -130,7 +130,7 @@ public class CodePush implements ReactPackage {
         String property;
       
         String packageName = mContext.getPackageName();
-        int resId = mContext.getResources().getIdentifier("CodePush" + propertyName, "string", packageName);
+        int resId = mContext.getResources().getIdentifier("reactNativeCodePush_" + propertyName, "string", packageName);
         
         if(resId != 0) {
             property = mContext.getString(resId);
