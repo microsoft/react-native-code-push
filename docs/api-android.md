@@ -1,5 +1,23 @@
 ### Java API Reference (Android)
 
+### API for React Native 0.60 version and above
+
+Since `autolinker` uses `react-native.config.js` to link plugins, constructors are specified in that file. But you can override custom variables to manage the CodePush plugin by placing these values in `strings.xml`.
+
+ * __Public Key__ - used for bundle verification in [Code Signing feature](setup-android.md#code-signing-setup).
+    To set the public key, you should add the content of the public key to `strings.xml` with name `CodePushPublicKey`. CodePush automatically gets this property and enables the Code Signing feature. For example:
+    ```xml
+    <string moduleConfig="true" name="CodePushPublicKey">your-public-key</string>
+    ```
+
+* __Server Url__ - used for setting path to custom CodePush service. 
+    To set the server url, you should add your path to `strings.xml` with name `CodePushServerUrl`. CodePush automatically gets this property and will use this path to send requests. For example:
+    ```xml
+    <string moduleConfig="true" name="CodePushServerUrl">https://yourcodepush.server.com</string>
+    ```
+
+### API for React Native lower than 0.60
+
 The Java API is made available by importing the `com.microsoft.codepush.react.CodePush` class into your `MainActivity.java` file, and consists of a single public class named `CodePush`.
 
 #### CodePush
