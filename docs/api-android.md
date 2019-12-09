@@ -10,8 +10,8 @@ Since `autolinking` uses `react-native.config.js` to link plugins, constructors 
     <string moduleConfig="true" name="CodePushPublicKey">your-public-key</string>
     ```
 
-* __Server Url__ - used for setting path to custom CodePush service. 
-    To set the server url, you should add your path to `strings.xml` with name `CodePushServerUrl`. CodePush automatically gets this property and will use this path to send requests. For example:
+* __Server Url__ - used for specifying CodePush Server Url.
+    The Default value: "https://codepush.appcenter.ms/" is overridden by adding your path to `strings.xml` with name `CodePushServerUrl`. CodePush automatically gets this property and will use this path to send requests. For example:
     ```xml
     <string moduleConfig="true" name="CodePushServerUrl">https://yourcodepush.server.com</string>
     ```
