@@ -13,7 +13,7 @@
     * [For React Native >= v0.29 (Background React Instances)](#for-react-native--v029-background-react-instances)
     * [For React Native v0.19 - v0.28 (Background React Instances)](#for-react-native-v019---v028-background-react-instances)
   * [WIX React Native Navigation applications (ver 1.x)](#wix-react-native-navigation-applications)
-  * [Code Signing setup](#code-signing-setup)
+* [Code Signing setup](#code-signing-setup)
 
 In order to integrate CodePush into your Android project, please perform the following steps:
 
@@ -414,11 +414,11 @@ public class MainApplication extends NavigationApplication {
 }
 ```
 
-#### Code Signing setup
+### Code Signing setup
 
 Starting with CLI version **2.1.0** you can self sign bundles during release and verify its signature before installation of update. For more info about Code Signing please refer to [relevant code-push documentation section](https://github.com/Microsoft/code-push/tree/master/cli#code-signing). In order to use Public Key for Code Signing you need to do following steps:
 
- 1. Add `CodePushPublicKey` string item to `/path_to_your_app/android/app/src/main/res/values/strings.xml`. It may looks like this:
+   Add `CodePushPublicKey` string item to `/path_to_your_app/android/app/src/main/res/values/strings.xml`. It may looks like this:
 
  ```xml
  <resources>
@@ -435,7 +435,7 @@ zwIDAQAB
 </resources>
  ```
 
- 2. Configure `CodePush` instance to use this parameter
+   ##### For React Native <= v0.60 you should configure `CodePush` instance to use this parameter 
 
  * using constructor
 
@@ -444,7 +444,7 @@ new CodePush(
     "deployment-key",
     getApplicationContext(),
     BuildConfig.DEBUG,
-    R.string.CodePushPublicKey)
+    R.string.CodePushublicKey)
 ```
 
  or
