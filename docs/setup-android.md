@@ -444,7 +444,7 @@ new CodePush(
     "deployment-key",
     getApplicationContext(),
     BuildConfig.DEBUG,
-    R.string.CodePushublicKey)
+    R.string.CodePushPublicKey)
 ```
 
  or

@@ -2,7 +2,7 @@
 
 ### API for React Native 0.60 version and above
 
-Since `autolinker` uses `react-native.config.js` to link plugins, constructors are specified in that file. But you can override custom variables to manage the CodePush plugin by placing these values in `strings.xml`.
+Since `autolinking` uses `react-native.config.js` to link plugins, constructors are specified in that file. But you can override custom variables to manage the CodePush plugin by placing these values in `strings.xml`.
 
  * __Public Key__ - used for bundle verification in [Code Signing feature](setup-android.md#code-signing-setup).
     To set the public key, you should add the content of the public key to `strings.xml` with name `CodePushPublicKey`. CodePush automatically gets this property and enables the Code Signing feature. For example:
