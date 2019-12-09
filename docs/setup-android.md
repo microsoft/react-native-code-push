@@ -4,8 +4,8 @@
 * [Plugin Installation for React Native lower than 0.60 (Android)](#plugin-installation-for-react-native-lower-than-060-android)
   * [Plugin Installation (Android - RNPM)](#plugin-installation-android---rnpm)
   * [Plugin Installation (Android - Manual)](#plugin-installation-android---manual)
-* [Plugin Configuration (Android)](#plugin-configuration-android)
-  * [For React Native >= v0.29](#for-react-native--v029)
+* [Plugin Configuration for React Native lower than 0.60 (Android)](#plugin-configuration-for-react-native-lower-than-060-android)
+  * [For React Native v0.29 - v0.59](#for-react-native-v029---v059)
     * [For newly created React Native application](#for-newly-created-react-native-application)
     * [For existing native application](#for-existing-native-application)
   * [For React Native v0.19 - v0.28](#for-react-native-v019---v028)
@@ -95,7 +95,7 @@ In order to accommodate as many developer preferences as possible, the CodePush 
 
 2. If you're using RNPM >=1.6.0, you will be prompted for the deployment key you'd like to use. If you don't already have it, you can retrieve this value by running `code-push deployment ls <appName> -k`, or you can choose to ignore it (by simply hitting `<ENTER>`) and add it in later. To get started, we would recommend just using your `Staging` deployment key, so that you can test out the CodePush end-to-end.
 
-And that's it for installation using RNPM! Continue below to the [Plugin Configuration](#plugin-configuration-android) section to complete the setup.
+And that's it for installation using RNPM! Continue below to the [Plugin Configuration](#plugin-configuration-for-react-native-lower-than-060-android) section to complete the setup.
 
 #### Plugin Installation (Android - Manual)
 
@@ -125,13 +125,13 @@ And that's it for installation using RNPM! Continue below to the [Plugin Configu
     ...
     ```
 
-### Plugin Configuration (Android)
+### Plugin Configuration for React Native lower than 0.60 (Android)
 
 *NOTE: If you used RNPM or `react-native link` to automatically link the plugin, these steps have already been done for you so you may skip this section.*
 
 After installing the plugin and syncing your Android Studio project with Gradle, you need to configure your app to consult CodePush for the location of your JS bundle, since it will "take control" of managing the current and all future versions. To do this:
 
-#### For React Native >= v0.29
+#### For React Native v0.29 - v0.59
 
 ##### For newly created React Native application
 

@@ -37,14 +37,14 @@ module.exports = () => {
         } else {
             return Promise.reject(`Couldn't find Android application entry point. You might need to update it manually. \
     Please refer to plugin configuration section for Android at \
-    https://github.com/microsoft/react-native-code-push#plugin-configuration-android for more details`);
+    https://github.com/microsoft/react-native-code-push/blob/master/docs/setup-android.md#plugin-configuration-for-react-native-lower-than-060-android for more details`);
         }
     }
 
     if (!fs.existsSync(buildGradlePath)) {
         return Promise.reject(`Couldn't find build.gradle file. You might need to update it manually. \
     Please refer to plugin installation section for Android at \
-    https://github.com/microsoft/react-native-code-push#plugin-installation-android---manual`);
+    https://github.com/microsoft/react-native-code-push/blob/master/docs/setup-android.md#plugin-installation-android---manual`);
     }
 
     // 2. Add the codepush.gradle build task definitions
