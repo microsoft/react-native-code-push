@@ -77,10 +77,10 @@ public class CodePush implements ReactPackage {
 
         mCurrentInstance = this;
 
-        String publicKeyFromStrings = getPublicKeyIfExist();
+        String publicKeyFromStrings = getCustomPropertyFromStringsIfExist("PublicKey");
         if(publicKeyFromStrings != null) mPublicKey = publicKeyFromStrings;
 
-        String serverUrlFromStrings = getServerUrlIfExist();
+        String serverUrlFromStrings = getCustomPropertyFromStringsIfExist("ServerUrl");
         if (serverUrlFromStrings != null) mServerUrl = serverUrlFromStrings;
 
         clearDebugCacheIfNeeded(null);
@@ -126,42 +126,23 @@ public class CodePush implements ReactPackage {
         return publicKey;
     }
 
-    private String getPublicKeyIfExist(){
-        String publicKey;
+    private String getCustomPropertyFromStringsIfExist(String propertyName){
+        String property;
       
         String packageName = mContext.getPackageName();
-        int resId = mContext.getResources().getIdentifier("CodePushPublicKey", "string", packageName);
+        int resId = mContext.getResources().getIdentifier("CodePush" + propertyName, "string", packageName);
         
         if(resId != 0) {
-            publicKey = mContext.getString(resId);
+            property = mContext.getString(resId);
 
-            if (publicKey.isEmpty()) {
-                throw new CodePushInvalidPublicKeyException("Specified public key is empty");
+            if (property.isEmpty()) {
+                throw new CodePushInvalidPublicKeyException("Specified " + propertyName + " is empty");
             }
         } else {
-            publicKey = null;
+            property = null;
         }
 
-        return publicKey;
-    }
-
-    private String getServerUrlIfExist(){
-        String serverUrl;
-      
-        String packageName = mContext.getPackageName();
-        int resId = mContext.getResources().getIdentifier("CodePushServerUrl", "string", packageName);
-        
-        if(resId != 0) {
-            serverUrl = mContext.getString(resId);
-
-            if (serverUrl.isEmpty()) {
-                throw new CodePushInvalidPublicKeyException("Specified server url is empty");
-            }
-        } else {
-            serverUrl = null;
-        }
-
-        return serverUrl;
+        return property;
     }
 
     public void clearDebugCacheIfNeeded(ReactInstanceManager instanceManager) {
