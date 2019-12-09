@@ -20,10 +20,10 @@ Constructs the CodePush client runtime and represents the `ReactPackage` instanc
 
 - __CodePush(String deploymentKey, Context context, boolean isDebugMode, String serverUrl)__ Constructor allows you to specify CodePush Server Url. The Default value: `"https://codepush.appcenter.ms/"` is overridden by value specified in `serverUrl`.
 
-*Note: You can also specify the `serverUrl` field by adding it to `strings.xml` with the name `reactNativeCodePush_ServerUrl`. For example:*
-```xml
-<string moduleConfig="true" name="reactNativeCodePush_ServerUrl">https://yourcodepush.server.com/</string>
-```
+    *Note: You can also specify the `serverUrl` field by adding it to `strings.xml` with the name `reactNativeCodePush_ServerUrl`. For example:*
+    ```xml
+    <string moduleConfig="true" name="reactNativeCodePush_ServerUrl">https://yourcodepush.server.com/</string>
+    ```
 
 ##### Builder
 
@@ -51,10 +51,10 @@ As an alternative to constructors *you can also use `CodePushBuilder`* to setup 
 
 * __public CodePushBuilder setServerUrl(String serverUrl)__ - allows you to specify CodePush Server Url. Default value: `"https://codepush.appcenter.ms/"`.
 
-*Note: You can also specify the `serverUrl` field by adding it to `strings.xml` with the name `reactNativeCodePush_ServerUrl`. For example:*
-```xml
-<string moduleConfig="true" name="reactNativeCodePush_ServerUrl">https://yourcodepush.server.com/</string>
-```
+    *Note: You can also specify the `serverUrl` field by adding it to `strings.xml` with the name `reactNativeCodePush_ServerUrl`. For example:*
+    ```xml
+    <string moduleConfig="true" name="reactNativeCodePush_ServerUrl">https://yourcodepush.server.com/</string>
+    ```
 
 * __public CodePushBuilder setPublicKeyResourceDescriptor(int publicKeyResourceDescriptor)__ - allows you to specify Public Key resource descriptor which will be used for reading Public Key content for `strings.xml` file. Please refer to [Code Signing](#code-signing) section for more detailed information about purpose of this parameter.
 
