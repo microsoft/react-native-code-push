@@ -136,7 +136,7 @@ public class CodePush implements ReactPackage {
             publicKey = mContext.getString(resId);
 
             if (publicKey.isEmpty()) {
-                throw new CodePushInvalidPublicKeyException("Public key is empty");
+                throw new CodePushInvalidPublicKeyException("Specified public key is empty");
             }
         } else {
             publicKey = null;
@@ -155,7 +155,7 @@ public class CodePush implements ReactPackage {
             serverUrl = mContext.getString(resId);
 
             if (serverUrl.isEmpty()) {
-                throw new CodePushInvalidPublicKeyException("Server Url is empty");
+                throw new CodePushInvalidPublicKeyException("Specified server url is empty");
             }
         } else {
             serverUrl = null;
