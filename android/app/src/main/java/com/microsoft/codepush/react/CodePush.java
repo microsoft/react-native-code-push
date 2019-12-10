@@ -135,15 +135,14 @@ public class CodePush implements ReactPackage {
         if (resId != 0) {
             property = mContext.getString(resId);
 
-            if (property.isEmpty()) {
+            if (!property.isEmpty()) {
+                return property;
+            } else {
                 CodePushUtils.log("Specified " + propertyName + " is empty");
-                property = null;
-            }
-        } else {
-            property = null;
+            } 
         }
 
-        return property;
+        return null;
     }
 
     public void clearDebugCacheIfNeeded(ReactInstanceManager instanceManager) {
