@@ -435,9 +435,9 @@ zwIDAQAB
 </resources>
  ```
 
-   ##### For React Native <= v0.60 you should configure `CodePush` instance to use this parameter 
+#### For React Native <= v0.60 you should configure the `CodePush` instance to use this parameter using one of the following approaches
 
- * using constructor
+##### Using constructor
 
 ```java
 new CodePush(
@@ -447,9 +447,7 @@ new CodePush(
     R.string.CodePushPublicKey)
 ```
 
- or
-
- * using builder
+##### Using builder
 
  ```java
 new CodePushBuilder("deployment-key-here",getApplicationContext())
