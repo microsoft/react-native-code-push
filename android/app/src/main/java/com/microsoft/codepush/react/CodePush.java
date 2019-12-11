@@ -77,6 +77,12 @@ public class CodePush implements ReactPackage {
 
         mCurrentInstance = this;
 
+        String publicKeyFromStrings = getCustomPropertyFromStringsIfExist("PublicKey");
+        if (publicKeyFromStrings != null) mPublicKey = publicKeyFromStrings;
+
+        String serverUrlFromStrings = getCustomPropertyFromStringsIfExist("ServerUrl");
+        if (serverUrlFromStrings != null) mServerUrl = serverUrlFromStrings;
+
         clearDebugCacheIfNeeded(null);
         initializeUpdateAfterRestart();
     }
@@ -120,10 +126,29 @@ public class CodePush implements ReactPackage {
         return publicKey;
     }
 
+    private String getCustomPropertyFromStringsIfExist(String propertyName) {
+        String property;
+      
+        String packageName = mContext.getPackageName();
+        int resId = mContext.getResources().getIdentifier("CodePush" + propertyName, "string", packageName);
+        
+        if (resId != 0) {
+            property = mContext.getString(resId);
+
+            if (!property.isEmpty()) {
+                return property;
+            } else {
+                CodePushUtils.log("Specified " + propertyName + " is empty");
+            } 
+        }
+
+        return null;
+    }
+
     public void clearDebugCacheIfNeeded(ReactInstanceManager instanceManager) {
         boolean isLiveReloadEnabled = false;
 
-        // Use instanceManager for checking if we use LiveRelaod mode. In this case we should not remove ReactNativeDevBundle.js file
+        // Use instanceManager for checking if we use LiveReload mode. In this case we should not remove ReactNativeDevBundle.js file
         // because we get error with trying to get this after reloading. Issue: https://github.com/Microsoft/react-native-code-push/issues/1272
         if (instanceManager != null) {
             DevSupportManager devSupportManager = instanceManager.getDevSupportManager();

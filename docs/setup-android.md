@@ -13,7 +13,7 @@
     * [For React Native >= v0.29 (Background React Instances)](#for-react-native--v029-background-react-instances)
     * [For React Native v0.19 - v0.28 (Background React Instances)](#for-react-native-v019---v028-background-react-instances)
   * [WIX React Native Navigation applications (ver 1.x)](#wix-react-native-navigation-applications)
-  * [Code Signing setup](#code-signing-setup)
+* [Code Signing setup](#code-signing-setup)
 
 In order to integrate CodePush into your Android project, please perform the following steps:
 
@@ -52,7 +52,7 @@ In order to integrate CodePush into your Android project, please perform the fol
 
 3. Add the Deployment key to `strings.xml`:
    
-   To let the CodePush runtime know which deployment it should query for updates against, open your app's `strings.xml` file and add a new string named `reactNativeCodePush_androidDeploymentKey`, whose value is the key of the deployment you want to configure this app against (like the key for the `Staging` deployment for the `FooBar` app). You can retrieve this value by running `code-push deployment ls <appName> -k` in the CodePush CLI (the `-k` flag is necessary since keys aren't displayed by default) and copying the value of the `Deployment Key` column which corresponds to the deployment you want to use (see below). Note that using the deployment's name (like Staging) will not work. That "friendly name" is intended only for authenticated management usage from the CLI, and not for public consumption within your app.
+   To let the CodePush runtime know which deployment it should query for updates, open your app's `strings.xml` file and add a new string named `CodePushDeploymentKey`, whose value is the key of the deployment you want to configure this app against (like the key for the `Staging` deployment for the `FooBar` app). You can retrieve this value by running `code-push deployment ls <appName> -k` in the CodePush CLI (the `-k` flag is necessary since keys aren't displayed by default) and copying the value of the `Deployment Key` column which corresponds to the deployment you want to use (see below). Note that using the deployment's name (like Staging) will not work. The "friendly name" is intended only for authenticated management usage from the CLI, and not for public consumption within your app.
 
    ![Deployment list](https://cloud.githubusercontent.com/assets/116461/11601733/13011d5e-9a8a-11e5-9ce2-b100498ffb34.png)
 
@@ -63,11 +63,11 @@ In order to integrate CodePush into your Android project, please perform the fol
    ```xml
     <resources>
         <string name="app_name">AppName</string>
-        <string moduleConfig="true" name="reactNativeCodePush_androidDeploymentKey">DeploymentKey</string>
+        <string moduleConfig="true" name="CodePushDeploymentKey">DeploymentKey</string>
     </resources>
     ```
 
-    *Note: You can also set your deployment key in JS code using [Code-Push options](./api-js.md#CodePushOptions)*
+    *Note: If you need to dynamically use a different deployment, you can also override your deployment key in JS code using [Code-Push options](./api-js.md#CodePushOptions)*
 
 ### Plugin Installation for React Native lower than 0.60 (Android)
 
@@ -414,11 +414,11 @@ public class MainApplication extends NavigationApplication {
 }
 ```
 
-#### Code Signing setup
+### Code Signing setup
 
 Starting with CLI version **2.1.0** you can self sign bundles during release and verify its signature before installation of update. For more info about Code Signing please refer to [relevant code-push documentation section](https://github.com/Microsoft/code-push/tree/master/cli#code-signing). In order to use Public Key for Code Signing you need to do following steps:
 
- 1. Add `CodePushPublicKey` string item to `/path_to_your_app/android/app/src/main/res/values/strings.xml`. It may looks like this:
+   Add `CodePushPublicKey` string item to `/path_to_your_app/android/app/src/main/res/values/strings.xml`. It may looks like this:
 
  ```xml
  <resources>
@@ -435,9 +435,9 @@ zwIDAQAB
 </resources>
  ```
 
- 2. Configure `CodePush` instance to use this parameter
+#### For React Native <= v0.60 you should configure the `CodePush` instance to use this parameter using one of the following approaches
 
- * using constructor
+##### Using constructor
 
 ```java
 new CodePush(
@@ -447,9 +447,7 @@ new CodePush(
     R.string.CodePushPublicKey)
 ```
 
- or
-
- * using builder
+##### Using builder
 
  ```java
 new CodePushBuilder("deployment-key-here",getApplicationContext())

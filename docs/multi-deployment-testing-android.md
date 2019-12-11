@@ -23,13 +23,13 @@ To set this up, perform the following steps:
             debug {
                 ...
                 // Note: CodePush updates should not be tested in Debug mode as they are overriden by the RN packager. However, because CodePush checks for updates in all modes, we must supply a key.
-                resValue "string", "reactNativeCodePush_androidDeploymentKey", '""'
+                resValue "string", "CodePushDeploymentKey", '""'
                 ...
             }
 
             releaseStaging {
                 ...
-                resValue "string", "reactNativeCodePush_androidDeploymentKey", '"<INSERT_STAGING_KEY>"'
+                resValue "string", "CodePushDeploymentKey", '"<INSERT_STAGING_KEY>"'
 
                 // Note: It is a good idea to provide matchingFallbacks for the new buildType you create to prevent build issues
                 // Add the following line if not already there
@@ -39,7 +39,7 @@ To set this up, perform the following steps:
 
             release {
                 ...
-                resValue "string", "reactNativeCodePush_androidDeploymentKey", '"<INSERT_PRODUCTION_KEY>"'
+                resValue "string", "CodePushDeploymentKey", '"<INSERT_PRODUCTION_KEY>"'
                 ...
             }
         }
