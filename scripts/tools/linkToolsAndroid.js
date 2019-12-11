@@ -14,7 +14,7 @@ exports.getJSBundleFileOverride = `
 exports.reactNativeHostInstantiation = "new ReactNativeHost(this) {";
 exports.mainActivityClassDeclaration = "public class MainActivity extends ReactActivity {";
 exports.codePushGradleLink = `\napply from: "../../node_modules/react-native-code-push/android/codepush.gradle"`;
-exports.deploymentKeyName = "reactNativeCodePush_androidDeploymentKey";
+exports.deploymentKeyName = "CodePushDeploymentKey";
 
 exports.getMainApplicationLocation = function () {
     return findMainApplication() || glob.sync("**/MainApplication.java", ignoreFolders)[0];

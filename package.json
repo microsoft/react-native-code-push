@@ -42,7 +42,7 @@
   },
   "rnpm": {
     "android": {
-      "packageInstance": "new CodePush(getResources().getString(R.string.reactNativeCodePush_androidDeploymentKey), getApplicationContext(), BuildConfig.DEBUG)"
+      "packageInstance": "new CodePush(getResources().getString(R.string.CodePushDeploymentKey), getApplicationContext(), BuildConfig.DEBUG)"
     },
     "ios": {
       "sharedLibraries": [
