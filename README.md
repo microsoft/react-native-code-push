@@ -78,6 +78,7 @@ We try our best to maintain backwards compatibility of our plugin with previous 
 | v0.54-v0.55             | v5.3+ *(Android Gradle Plugin 3.x integration)*       |
 | v0.56-v0.58             | v5.4+ *(RN upgraded versions for Android tools)*      |
 | v0.59                   | v5.6+ *(RN refactored js bundle loader code)*         |
+| v0.60-v0.61             | v6.0+ *(RN migrated to Autolinking)*                  |
 
 We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
 
