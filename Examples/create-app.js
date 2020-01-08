@@ -19,6 +19,7 @@ Parameters:
 */
 
 let fs = require('fs');
+// let plist = require('plist');
 let path = require('path');
 let nexpect = require('./nexpect');
 let child_proces = require('child_process');
@@ -42,8 +43,9 @@ try {
 
 let appNameAndroid = `${appName}-android`;
 let appNameIOS = `${appName}-ios`;
+let owner = null;
 let reactNativeVersion = args[1] || `react-native@${execSync('npm view react-native version')}`.trim();
-let reactNativeVersionIsLowerThanV049 = isReactNativeVesionLowerThan(49);
+let reactNativeVersionIsLowerThanV049 = isReactNativeVersionLowerThan(49);
 let reactNativeCodePushVersion = args[2] || `react-native-code-push@${execSync('npm view react-native-code-push version')}`.trim();
 
 console.log(`App name: ${appName}`);
@@ -56,8 +58,8 @@ let iosStagingDeploymentKey = null;
 
 
 //GENERATE START
-createCodePushApp(appNameAndroid, 'android');
-createCodePushApp(appNameIOS, 'ios');
+createCodePushApp(appNameAndroid, 'Android');
+createCodePushApp(appNameIOS, 'iOS');
 
 generatePlainReactNativeApp(appName, reactNativeVersion);
 process.chdir(appName);
@@ -67,24 +69,26 @@ linkCodePush(androidStagingDeploymentKey, iosStagingDeploymentKey);
 
 
 
-function createCodePushApp(name, platform) {
+function createCodePushApp(name, os) {
     try {
-        console.log(`Creating CodePush app "${name}" to release updates for ${platform}...`);
-        execSync(`code-push app add ${name} ${platform} react-native`);
+        console.log(`Creating CodePush app "${name}" to release updates for ${os}...`);
+        let app = JSON.parse(execSync(`appcenter apps create -n ${name} -d ${name} -o ${os} -p React-Native --output json`));
+        owner = app.owner.name;
         console.log(`App "${name}" has been created \n`);
+        execSync(`appcenter codepush deployment add -a ${owner}/${name} Staging`);
     } catch (e) {
         console.log(`App "${name}" already exists \n`);
     }
-    let deploymentKeys = JSON.parse(execSync(`code-push deployment ls ${name} -k --format json`));
-    let stagingDeploymentKey = deploymentKeys[1].key;
-    console.log(`Deployment key for ${platform}: ${stagingDeploymentKey}`);
-    console.log(`Use "code-push release-react ${name} ${platform}" command to release updates for ${platform} \n`);
+    let deploymentKeys = JSON.parse(execSync(`appcenter codepush deployment list -a ${owner}/${name} -k --output json`));
+    let stagingDeploymentKey = deploymentKeys[0][1];
+    console.log(`Deployment key for ${os}: ${stagingDeploymentKey}`);
+    console.log(`Use "appcenter codepush release-react ${owner}/${name}" command to release updates for ${os} \n`);
 
-    switch (platform) {
-        case 'android':
+    switch (os) {
+        case 'Android':
             androidStagingDeploymentKey = stagingDeploymentKey;
             break;
-        case 'ios':
+        case 'iOS':
             iosStagingDeploymentKey = stagingDeploymentKey;
             break;
     }
@@ -104,6 +108,7 @@ function installCodePush(reactNativeCodePushVersion) {
 
 function linkCodePush(androidStagingDeploymentKey, iosStagingDeploymentKey) {
     console.log(`Linking React Native Module for CodePush...`);
+    if (isReactNativeVersionLowerThan(60)) {
     nexpect.spawn(`react-native link react-native-code-push`)
         .wait("What is your CodePush deployment key for Android (hit <ENTER> to ignore)")
         .sendline(androidStagingDeploymentKey)
@@ -118,6 +123,12 @@ function linkCodePush(androidStagingDeploymentKey, iosStagingDeploymentKey) {
                 console.log(err);
             }
         });
+    } else {
+        androidSetup();
+        iosSetup();
+        setupAssets();
+        console.log(`React Native Module for CodePush has been linked \n`);
+    }
 }
 
 function setupAssets() {
@@ -195,7 +206,7 @@ function copyRecursiveSync(src, dest) {
     }
 }
 
-function isReactNativeVesionLowerThan(version) {
+function isReactNativeVersionLowerThan(version) {
     if (!reactNativeVersion ||
         reactNativeVersion == "react-native@latest" ||
         reactNativeVersion == "react-native@next")
@@ -203,4 +214,72 @@ function isReactNativeVesionLowerThan(version) {
 
     let reactNativeVersionNumberString = reactNativeVersion.split("@")[1];
     return reactNativeVersionNumberString.split('.')[1] < version;
+}
+
+// Configuring android applications for react-native version higher than 0.60
+function androidSetup() {
+    let buildGradlePath = path.join('android', 'app', 'build.gradle');
+    let mainApplicationPath = path.join('android', 'app', 'src', 'main', 'java', 'com', appName, 'MainApplication.java');
+    let stringsResourcesPath = path.join('android', 'app', 'src', 'main', 'res', 'values', 'strings.xml');
+
+    let stringsResourcesContent = fs.readFileSync(stringsResourcesPath, "utf8");
+    let insertAfterString = "<resources>";
+    let deploymentKeyString = `\t<string moduleConfig="true" name="CodePushDeploymentKey">${androidStagingDeploymentKey || "deployment-key-here"}</string>`;
+    stringsResourcesContent = stringsResourcesContent.replace(insertAfterString,`${insertAfterString}\n${deploymentKeyString}`);
+    fs.writeFileSync(stringsResourcesPath, stringsResourcesContent);
+
+    var buildGradleContents = fs.readFileSync(buildGradlePath, "utf8");
+    var reactGradleLink = buildGradleContents.match(/\napply from: ["'].*?react\.gradle["']/)[0];
+    var codePushGradleLink = `\napply from: "../../node_modules/react-native-code-push/android/codepush.gradle"`;
+    buildGradleContents = buildGradleContents.replace(reactGradleLink,
+        `${reactGradleLink}${codePushGradleLink}`);
+        fs.writeFileSync(buildGradlePath, buildGradleContents);
+
+    let getJSBundleFileOverride = `
+    @Override
+    protected String getJSBundleFile(){
+        return CodePush.getJSBundleFile();
+    }
+    `;
+    let mainApplicationContents = fs.readFileSync(mainApplicationPath, "utf8");
+    let reactNativeHostInstantiation = "new ReactNativeHost(this) {";
+    mainApplicationContents = mainApplicationContents.replace(reactNativeHostInstantiation,
+        `${reactNativeHostInstantiation}${getJSBundleFileOverride}`);
+
+    let importCodePush = `\nimport com.microsoft.codepush.react.CodePush;`;
+    let reactNativeHostInstantiationImport = "import android.app.Application;";
+    mainApplicationContents = mainApplicationContents.replace(reactNativeHostInstantiationImport,
+        `${reactNativeHostInstantiationImport}${importCodePush}`);
+    fs.writeFileSync(mainApplicationPath, mainApplicationContents);
+}
+
+// Configuring ios applications for react-native version higher than 0.60
+function iosSetup() {
+    let plistPath = path.join('ios', appName, 'Info.plist');
+    let appDelegatePath = path.join('ios', appName, 'AppDelegate.m');
+
+    let plistContents = fs.readFileSync(plistPath, "utf8");
+    // let parsedInfoPlist = plist.parse(plistContents);
+    // parsedInfoPlist.CodePushDeploymentKey = iosStagingDeploymentKey || 'deployment-key-here';
+    // plistContents = plist.build(parsedInfoPlist);
+    // fs.writeFileSync(plistPath, plistContents);
+    let falseInfoPlist = `<false/>`;
+    let codePushDeploymentKey = iosStagingDeploymentKey || 'deployment-key-here';
+    plistContents = plistContents.replace(falseInfoPlist, 
+        `${falseInfoPlist}\n\t<key>CodePushDeploymentKey</key>\n\t<string>${codePushDeploymentKey}</string>`);
+    fs.writeFileSync(plistPath, plistContents);
+
+    let appDelegateContents = fs.readFileSync(appDelegatePath, "utf8");
+    let appDelegateHeaderImportStatement = `#import "AppDelegate.h"`;
+    let codePushHeaderImportStatementFormatted = `\n#import <CodePush/CodePush.h>`;
+    appDelegateContents = appDelegateContents.replace(appDelegateHeaderImportStatement,
+        `${appDelegateHeaderImportStatement}${codePushHeaderImportStatementFormatted}`);
+    
+
+    let oldBundleUrl = "[[NSBundle mainBundle] URLForResource:@\"main\" withExtension:@\"jsbundle\"]";
+    let codePushBundleUrl = "[CodePush bundleURL]";
+    appDelegateContents = appDelegateContents.replace(oldBundleUrl,codePushBundleUrl);
+    fs.writeFileSync(appDelegatePath, appDelegateContents);
+
+    execSync(`cd ios && pod install && cd ..`);
 }
