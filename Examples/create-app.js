@@ -18,15 +18,14 @@ Parameters:
     3. <reactNativeCodePushVersion> - react-native-code-push@latest
 */
 
-let fs = require('fs');
-// let plist = require('plist');
-let path = require('path');
-let nexpect = require('./nexpect');
-let child_proces = require('child_process');
-let execSync = child_proces.execSync;
+const fs = require('fs');
+const path = require('path');
+const nexpect = require('./nexpect');
+const child_proces = require('child_process');
+const execSync = child_proces.execSync;
 
-let args = process.argv.slice(2);
-let appName = args[0] || 'CodePushDemoAppTest';
+const args = process.argv.slice(2);
+const appName = args[0] || 'CodePushDemoAppTest';
 
 if (fs.existsSync(appName)) {
     console.error(`Folder with name "${appName}" already exists! Please delete`);
@@ -35,18 +34,18 @@ if (fs.existsSync(appName)) {
 
 // Checking if yarn is installed
 try {
-    execSync('yarn bin');
+    execCommand('yarn bin');
 } catch (err) {
     console.error(`You must install 'yarn' to use this script!`);
     process.exit();
 }
 
-let appNameAndroid = `${appName}-android`;
-let appNameIOS = `${appName}-ios`;
+const appNameAndroid = `${appName}-android`;
+const appNameIOS = `${appName}-ios`;
 let owner = null;
-let reactNativeVersion = args[1] || `react-native@${execSync('npm view react-native version')}`.trim();
-let reactNativeVersionIsLowerThanV049 = isReactNativeVersionLowerThan(49);
-let reactNativeCodePushVersion = args[2] || `react-native-code-push@${execSync('npm view react-native-code-push version')}`.trim();
+const reactNativeVersion = args[1] || `react-native@${execCommand('npm view react-native version')}`.trim();
+const reactNativeVersionIsLowerThanV049 = isReactNativeVersionLowerThan(49);
+const reactNativeCodePushVersion = args[2] || `react-native-code-push@${execCommand('npm view react-native-code-push version')}`.trim();
 
 console.log(`App name: ${appName}`);
 console.log(`React Native version: ${reactNativeVersion}`);
@@ -72,15 +71,17 @@ linkCodePush(androidStagingDeploymentKey, iosStagingDeploymentKey);
 function createCodePushApp(name, os) {
     try {
         console.log(`Creating CodePush app "${name}" to release updates for ${os}...`);
-        let app = JSON.parse(execSync(`appcenter apps create -n ${name} -d ${name} -o ${os} -p React-Native --output json`));
+        const appResult = execCommand(`appcenter apps create -d ${name} -n ${name} -o ${os} -p React-Native --output json`);
+        const app = JSON.parse(appResult);
         owner = app.owner.name;
         console.log(`App "${name}" has been created \n`);
-        execSync(`appcenter codepush deployment add -a ${owner}/${name} Staging`);
+        execCommand(`appcenter codepush deployment add -a ${owner}/${name} Staging`);
     } catch (e) {
         console.log(`App "${name}" already exists \n`);
     }
-    let deploymentKeys = JSON.parse(execSync(`appcenter codepush deployment list -a ${owner}/${name} -k --output json`));
-    let stagingDeploymentKey = deploymentKeys[0][1];
+    const deploymentKeysResult = execCommand(`appcenter codepush deployment list -a ${owner}/${name} -k --output json`);
+    const deploymentKeys = JSON.parse(deploymentKeysResult);
+    const stagingDeploymentKey = deploymentKeys[0][1];
     console.log(`Deployment key for ${os}: ${stagingDeploymentKey}`);
     console.log(`Use "appcenter codepush release-react ${owner}/${name}" command to release updates for ${os} \n`);
 
@@ -96,36 +97,40 @@ function createCodePushApp(name, os) {
 
 function generatePlainReactNativeApp(appName, reactNativeVersion) {
     console.log(`Installing React Native...`);
-    execSync(`react-native init ${appName} --version ${reactNativeVersion}`);
+    execCommand(`react-native init ${appName} --version ${reactNativeVersion}`);
     console.log(`React Native has been installed \n`);
 }
 
 function installCodePush(reactNativeCodePushVersion) {
     console.log(`Installing React Native Module for CodePush...`);
-    execSync(`yarn add ${reactNativeCodePushVersion}`);
+    execCommand(`npm install ${reactNativeCodePushVersion}`);
     console.log(`React Native Module for CodePush has been installed \n`);
 }
 
 function linkCodePush(androidStagingDeploymentKey, iosStagingDeploymentKey) {
     console.log(`Linking React Native Module for CodePush...`);
     if (isReactNativeVersionLowerThan(60)) {
-    nexpect.spawn(`react-native link react-native-code-push`)
-        .wait("What is your CodePush deployment key for Android (hit <ENTER> to ignore)")
-        .sendline(androidStagingDeploymentKey)
-        .wait("What is your CodePush deployment key for iOS (hit <ENTER> to ignore)")
-        .sendline(iosStagingDeploymentKey)
-        .run(function (err) {
-            if (!err) {
-                console.log(`React Native Module for CodePush has been linked \n`);
-                setupAssets();
-            }
-            else {
-                console.log(err);
-            }
-        });
+        nexpect.spawn(`react-native link react-native-code-push`)
+            .wait("What is your CodePush deployment key for Android (hit <ENTER> to ignore)")
+            .sendline(androidStagingDeploymentKey)
+            .wait("What is your CodePush deployment key for iOS (hit <ENTER> to ignore)")
+            .sendline(iosStagingDeploymentKey)
+            .run(function (err) {
+                if (!err) {
+                    console.log(`React Native Module for CodePush has been linked \n`);
+                    setupAssets();
+                }
+                else {
+                    console.log(err);
+                }
+            });
     } else {
         androidSetup();
-        iosSetup();
+        if (process.platform === 'darwin') {
+            iosSetup();
+        } else {
+            console.log('Your OS is not "Mac OS" so the iOS application will not be configured')
+        }
         setupAssets();
         console.log(`React Native Module for CodePush has been linked \n`);
     }
@@ -172,23 +177,23 @@ function setupAssets() {
 function optimizeToTestInDebugMode() {
     let rnXcodeShLocationFolder = 'scripts';
     try {
-        let rnVersions = JSON.parse(execSync(`npm view react-native versions --json`));
+        let rnVersions = JSON.parse(execCommand(`npm view react-native versions --json`));
         let currentRNversion = JSON.parse(fs.readFileSync('./package.json'))['dependencies']['react-native'];
         if (rnVersions.indexOf(currentRNversion) > -1 &&
             rnVersions.indexOf(currentRNversion) < rnVersions.indexOf("0.46.0-rc.0")) {
             rnXcodeShLocationFolder = 'packager';
         }
-    } catch(e) {}
+    } catch (e) { }
 
     let rnXcodeShPath = `node_modules/react-native/${rnXcodeShLocationFolder}/react-native-xcode.sh`;
     // Replace "if [[ "$PLATFORM_NAME" == *simulator ]]; then" with "if false; then" to force bundling
-    execSync(`sed -ie 's/if \\[\\[ "\$PLATFORM_NAME" == \\*simulator \\]\\]; then/if false; then/' ${rnXcodeShPath}`);
-    execSync(`perl -i -p0e 's/#ifdef DEBUG.*?#endif/jsCodeLocation = [CodePush bundleURL];/s' ios/${appName}/AppDelegate.m`);
-    execSync(`sed -ie 's/targetName.toLowerCase().contains("release")/true/' node_modules/react-native/react.gradle`);
+    execCommand(`sed -ie 's/if \\[\\[ "\$PLATFORM_NAME" == \\*simulator \\]\\]; then/if false; then/' ${rnXcodeShPath}`);
+    execCommand(`perl -i -p0e 's/#ifdef DEBUG.*?#endif/jsCodeLocation = [CodePush bundleURL];/s' ios/${appName}/AppDelegate.m`);
+    execCommand(`sed -ie 's/targetName.toLowerCase().contains("release")/true/' node_modules/react-native/react.gradle`);
 }
 
 function grantAccess(folderPath) {
-    execSync('chown -R `whoami` ' + folderPath);
+    execCommand('chown -R `whoami` ' + folderPath);
 }
 
 function copyRecursiveSync(src, dest) {
@@ -225,7 +230,7 @@ function androidSetup() {
     let stringsResourcesContent = fs.readFileSync(stringsResourcesPath, "utf8");
     let insertAfterString = "<resources>";
     let deploymentKeyString = `\t<string moduleConfig="true" name="CodePushDeploymentKey">${androidStagingDeploymentKey || "deployment-key-here"}</string>`;
-    stringsResourcesContent = stringsResourcesContent.replace(insertAfterString,`${insertAfterString}\n${deploymentKeyString}`);
+    stringsResourcesContent = stringsResourcesContent.replace(insertAfterString, `${insertAfterString}\n${deploymentKeyString}`);
     fs.writeFileSync(stringsResourcesPath, stringsResourcesContent);
 
     var buildGradleContents = fs.readFileSync(buildGradlePath, "utf8");
@@ -233,7 +238,7 @@ function androidSetup() {
     var codePushGradleLink = `\napply from: "../../node_modules/react-native-code-push/android/codepush.gradle"`;
     buildGradleContents = buildGradleContents.replace(reactGradleLink,
         `${reactGradleLink}${codePushGradleLink}`);
-        fs.writeFileSync(buildGradlePath, buildGradleContents);
+    fs.writeFileSync(buildGradlePath, buildGradleContents);
 
     let getJSBundleFileOverride = `
     @Override
@@ -259,13 +264,9 @@ function iosSetup() {
     let appDelegatePath = path.join('ios', appName, 'AppDelegate.m');
 
     let plistContents = fs.readFileSync(plistPath, "utf8");
-    // let parsedInfoPlist = plist.parse(plistContents);
-    // parsedInfoPlist.CodePushDeploymentKey = iosStagingDeploymentKey || 'deployment-key-here';
-    // plistContents = plist.build(parsedInfoPlist);
-    // fs.writeFileSync(plistPath, plistContents);
     let falseInfoPlist = `<false/>`;
     let codePushDeploymentKey = iosStagingDeploymentKey || 'deployment-key-here';
-    plistContents = plistContents.replace(falseInfoPlist, 
+    plistContents = plistContents.replace(falseInfoPlist,
         `${falseInfoPlist}\n\t<key>CodePushDeploymentKey</key>\n\t<string>${codePushDeploymentKey}</string>`);
     fs.writeFileSync(plistPath, plistContents);
 
@@ -274,12 +275,18 @@ function iosSetup() {
     let codePushHeaderImportStatementFormatted = `\n#import <CodePush/CodePush.h>`;
     appDelegateContents = appDelegateContents.replace(appDelegateHeaderImportStatement,
         `${appDelegateHeaderImportStatement}${codePushHeaderImportStatementFormatted}`);
-    
+
 
     let oldBundleUrl = "[[NSBundle mainBundle] URLForResource:@\"main\" withExtension:@\"jsbundle\"]";
     let codePushBundleUrl = "[CodePush bundleURL]";
-    appDelegateContents = appDelegateContents.replace(oldBundleUrl,codePushBundleUrl);
+    appDelegateContents = appDelegateContents.replace(oldBundleUrl, codePushBundleUrl);
     fs.writeFileSync(appDelegatePath, appDelegateContents);
 
-    execSync(`cd ios && pod install && cd ..`);
+    execCommand(`cd ios && pod install && cd ..`);
+}
+
+function execCommand(command) {
+    console.log(`\n\x1b[33m${command}\x1b[0m\n`);
+    result = execSync(command).toString();
+    return result;
 }
