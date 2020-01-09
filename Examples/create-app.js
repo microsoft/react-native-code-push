@@ -9,7 +9,7 @@ Requirements:
 Usage: node create-app.js <appName> <reactNativeVersion> <reactNativeCodePushVersion>
     1. node create-app.js 
     2. node create-app.js myapp
-    3. node create-app.js myapp react-native@0.47.1 react-native-code-push@5.0.0-beta 
+    3. node create-app.js myapp react-native@0.61.5 react-native-code-push@6.0.0 
     4. node create-app.js myapp react-native@latest Microsoft/react-native-code-push
 
 Parameters:
@@ -103,7 +103,7 @@ function generatePlainReactNativeApp(appName, reactNativeVersion) {
 
 function installCodePush(reactNativeCodePushVersion) {
     console.log(`Installing React Native Module for CodePush...`);
-    execCommand(`npm install ${reactNativeCodePushVersion}`);
+    execCommand(`yarn add ${reactNativeCodePushVersion}`);
     console.log(`React Native Module for CodePush has been installed \n`);
 }
 
@@ -286,7 +286,7 @@ function iosSetup() {
 }
 
 function execCommand(command) {
-    console.log(`\n\x1b[33m${command}\x1b[0m\n`);
+    console.log(`\n${command}\n`);
     result = execSync(command).toString();
     return result;
 }
