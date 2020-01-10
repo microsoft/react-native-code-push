@@ -3,8 +3,8 @@ The script serves to generate CodePushified React Native app to reproduce issues
 
 Requirements:
     1. npm i -g react-native-cli
-    2. npm i -g code-push-cli
-    3. code-push register
+    2. npm i -g appcenter-cli
+    3. appcenter login
 
 Usage: node create-app.js <appName> <reactNativeVersion> <reactNativeCodePushVersion>
     1. node create-app.js 
@@ -158,7 +158,7 @@ function setupAssets() {
         if (err) {
             return console.error(err);
         }
-        var result = data.replace(/CodePushDemoApp/g, appName);
+        const result = data.replace(/CodePushDemoApp/g, appName);
 
         fs.writeFile(fileToEdit, result, 'utf8', function (err) {
             if (err) return console.error(err);
@@ -175,17 +175,17 @@ function setupAssets() {
 }
 
 function optimizeToTestInDebugMode() {
-    let rnXcodeShLocationFolder = 'scripts';
+    const rnXcodeShLocationFolder = 'scripts';
     try {
-        let rnVersions = JSON.parse(execCommand(`npm view react-native versions --json`));
-        let currentRNversion = JSON.parse(fs.readFileSync('./package.json'))['dependencies']['react-native'];
+        const rnVersions = JSON.parse(execCommand(`npm view react-native versions --json`));
+        const currentRNversion = JSON.parse(fs.readFileSync('./package.json'))['dependencies']['react-native'];
         if (rnVersions.indexOf(currentRNversion) > -1 &&
             rnVersions.indexOf(currentRNversion) < rnVersions.indexOf("0.46.0-rc.0")) {
             rnXcodeShLocationFolder = 'packager';
         }
     } catch (e) { }
 
-    let rnXcodeShPath = `node_modules/react-native/${rnXcodeShLocationFolder}/react-native-xcode.sh`;
+    const rnXcodeShPath = `node_modules/react-native/${rnXcodeShLocationFolder}/react-native-xcode.sh`;
     // Replace "if [[ "$PLATFORM_NAME" == *simulator ]]; then" with "if false; then" to force bundling
     execCommand(`sed -ie 's/if \\[\\[ "\$PLATFORM_NAME" == \\*simulator \\]\\]; then/if false; then/' ${rnXcodeShPath}`);
     execCommand(`perl -i -p0e 's/#ifdef DEBUG.*?#endif/jsCodeLocation = [CodePush bundleURL];/s' ios/${appName}/AppDelegate.m`);
@@ -197,9 +197,9 @@ function grantAccess(folderPath) {
 }
 
 function copyRecursiveSync(src, dest) {
-    var exists = fs.existsSync(src);
-    var stats = exists && fs.statSync(src);
-    var isDirectory = exists && stats.isDirectory();
+    const exists = fs.existsSync(src);
+    const stats = exists && fs.statSync(src);
+    const isDirectory = exists && stats.isDirectory();
     if (exists && isDirectory) {
         fs.mkdirSync(dest);
         fs.readdirSync(src).forEach(function (childItemName) {
@@ -217,42 +217,42 @@ function isReactNativeVersionLowerThan(version) {
         reactNativeVersion == "react-native@next")
         return false;
 
-    let reactNativeVersionNumberString = reactNativeVersion.split("@")[1];
+    const reactNativeVersionNumberString = reactNativeVersion.split("@")[1];
     return reactNativeVersionNumberString.split('.')[1] < version;
 }
 
 // Configuring android applications for react-native version higher than 0.60
 function androidSetup() {
-    let buildGradlePath = path.join('android', 'app', 'build.gradle');
-    let mainApplicationPath = path.join('android', 'app', 'src', 'main', 'java', 'com', appName, 'MainApplication.java');
-    let stringsResourcesPath = path.join('android', 'app', 'src', 'main', 'res', 'values', 'strings.xml');
+    const buildGradlePath = path.join('android', 'app', 'build.gradle');
+    const mainApplicationPath = path.join('android', 'app', 'src', 'main', 'java', 'com', appName, 'MainApplication.java');
+    const stringsResourcesPath = path.join('android', 'app', 'src', 'main', 'res', 'values', 'strings.xml');
 
     let stringsResourcesContent = fs.readFileSync(stringsResourcesPath, "utf8");
-    let insertAfterString = "<resources>";
-    let deploymentKeyString = `\t<string moduleConfig="true" name="CodePushDeploymentKey">${androidStagingDeploymentKey || "deployment-key-here"}</string>`;
+    const insertAfterString = "<resources>";
+    const deploymentKeyString = `\t<string moduleConfig="true" name="CodePushDeploymentKey">${androidStagingDeploymentKey || "deployment-key-here"}</string>`;
     stringsResourcesContent = stringsResourcesContent.replace(insertAfterString, `${insertAfterString}\n${deploymentKeyString}`);
     fs.writeFileSync(stringsResourcesPath, stringsResourcesContent);
 
-    var buildGradleContents = fs.readFileSync(buildGradlePath, "utf8");
-    var reactGradleLink = buildGradleContents.match(/\napply from: ["'].*?react\.gradle["']/)[0];
-    var codePushGradleLink = `\napply from: "../../node_modules/react-native-code-push/android/codepush.gradle"`;
+    let buildGradleContents = fs.readFileSync(buildGradlePath, "utf8");
+    const reactGradleLink = buildGradleContents.match(/\napply from: ["'].*?react\.gradle["']/)[0];
+    const codePushGradleLink = `\napply from: "../../node_modules/react-native-code-push/android/codepush.gradle"`;
     buildGradleContents = buildGradleContents.replace(reactGradleLink,
         `${reactGradleLink}${codePushGradleLink}`);
     fs.writeFileSync(buildGradlePath, buildGradleContents);
 
-    let getJSBundleFileOverride = `
+    const getJSBundleFileOverride = `
     @Override
     protected String getJSBundleFile(){
         return CodePush.getJSBundleFile();
     }
     `;
     let mainApplicationContents = fs.readFileSync(mainApplicationPath, "utf8");
-    let reactNativeHostInstantiation = "new ReactNativeHost(this) {";
+    const reactNativeHostInstantiation = "new ReactNativeHost(this) {";
     mainApplicationContents = mainApplicationContents.replace(reactNativeHostInstantiation,
         `${reactNativeHostInstantiation}${getJSBundleFileOverride}`);
 
-    let importCodePush = `\nimport com.microsoft.codepush.react.CodePush;`;
-    let reactNativeHostInstantiationImport = "import android.app.Application;";
+    const importCodePush = `\nimport com.microsoft.codepush.react.CodePush;`;
+    const reactNativeHostInstantiationImport = "import android.app.Application;";
     mainApplicationContents = mainApplicationContents.replace(reactNativeHostInstantiationImport,
         `${reactNativeHostInstantiationImport}${importCodePush}`);
     fs.writeFileSync(mainApplicationPath, mainApplicationContents);
@@ -260,25 +260,25 @@ function androidSetup() {
 
 // Configuring ios applications for react-native version higher than 0.60
 function iosSetup() {
-    let plistPath = path.join('ios', appName, 'Info.plist');
-    let appDelegatePath = path.join('ios', appName, 'AppDelegate.m');
+    const plistPath = path.join('ios', appName, 'Info.plist');
+    const appDelegatePath = path.join('ios', appName, 'AppDelegate.m');
 
     let plistContents = fs.readFileSync(plistPath, "utf8");
-    let falseInfoPlist = `<false/>`;
-    let codePushDeploymentKey = iosStagingDeploymentKey || 'deployment-key-here';
+    const falseInfoPlist = `<false/>`;
+    const codePushDeploymentKey = iosStagingDeploymentKey || 'deployment-key-here';
     plistContents = plistContents.replace(falseInfoPlist,
         `${falseInfoPlist}\n\t<key>CodePushDeploymentKey</key>\n\t<string>${codePushDeploymentKey}</string>`);
     fs.writeFileSync(plistPath, plistContents);
 
     let appDelegateContents = fs.readFileSync(appDelegatePath, "utf8");
-    let appDelegateHeaderImportStatement = `#import "AppDelegate.h"`;
-    let codePushHeaderImportStatementFormatted = `\n#import <CodePush/CodePush.h>`;
+    const appDelegateHeaderImportStatement = `#import "AppDelegate.h"`;
+    const codePushHeaderImportStatementFormatted = `\n#import <CodePush/CodePush.h>`;
     appDelegateContents = appDelegateContents.replace(appDelegateHeaderImportStatement,
         `${appDelegateHeaderImportStatement}${codePushHeaderImportStatementFormatted}`);
 
 
-    let oldBundleUrl = "[[NSBundle mainBundle] URLForResource:@\"main\" withExtension:@\"jsbundle\"]";
-    let codePushBundleUrl = "[CodePush bundleURL]";
+    const oldBundleUrl = "[[NSBundle mainBundle] URLForResource:@\"main\" withExtension:@\"jsbundle\"]";
+    const codePushBundleUrl = "[CodePush bundleURL]";
     appDelegateContents = appDelegateContents.replace(oldBundleUrl, codePushBundleUrl);
     fs.writeFileSync(appDelegatePath, appDelegateContents);
 
@@ -287,6 +287,6 @@ function iosSetup() {
 
 function execCommand(command) {
     console.log(`\n${command}\n`);
-    result = execSync(command).toString();
+    const result = execSync(command).toString();
     return result;
 }
