@@ -286,7 +286,7 @@ function iosSetup() {
 }
 
 function execCommand(command) {
-    console.log(`\n${command}\n`);
+    console.log(`\n\x1b[2m${command}\x1b[0m\n`);
     const result = execSync(command).toString();
     return result;
 }
