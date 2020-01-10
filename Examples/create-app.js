@@ -21,8 +21,8 @@ Parameters:
 const fs = require('fs');
 const path = require('path');
 const nexpect = require('./nexpect');
-const child_proces = require('child_process');
-const execSync = child_proces.execSync;
+const child_process = require('child_process');
+const execSync = child_process.execSync;
 
 const args = process.argv.slice(2);
 const appName = args[0] || 'CodePushDemoAppTest';
