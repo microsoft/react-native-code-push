@@ -5,6 +5,7 @@ Requirements:
     1. npm i -g react-native-cli
     2. npm i -g appcenter-cli
     3. appcenter login
+    (If you use this script on macOS for react-native v0.60+ then you need to have CocoaPods installed)
 
 Usage: node create-app.js <appName> <reactNativeVersion> <reactNativeCodePushVersion>
     1. node create-app.js 
