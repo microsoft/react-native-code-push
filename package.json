@@ -17,27 +17,31 @@
     "url": "https://github.com/Microsoft/react-native-code-push"
   },
   "dependencies": {
-    "code-push": "^3.0.1",
+    "code-push": "^3.1.0",
     "glob": "^5.0.15",
     "hoist-non-react-statics": "^2.3.1",
-    "inquirer": "^1.1.2",
+    "inquirer": "^7.0.3",
     "plist": "3.0.1",
-    "semver": "^5.6.0",
+    "semver": "^7.1.1",
     "xcode": "1.0.0"
   },
   "devDependencies": {
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^13.1.8",
+    "@types/assert": "^1.4.3",
+    "@types/mkdirp": "^0.5.2",
+    "@types/q": "^1.5.2",
     "archiver": "latest",
     "body-parser": "latest",
     "code-push-plugin-testing-framework": "file:./code-push-plugin-testing-framework",
     "del": "latest",
     "express": "latest",
-    "gulp-insert": "latest",
-    "gulp-tslint": "latest",
-    "gulp-typescript": "^5.0.1",
     "mkdirp": "latest",
+    "mocha": "^7.0.0",
+    "shx": "^0.3.2",
     "q": "^1.5.1",
     "run-sequence": "latest",
-    "tslint": "^5.18.0",
+    "tslint": "^5.20.1",
     "typescript": "^2.9.2"
   },
   "rnpm": {
