@@ -1,4 +1,3 @@
-
 "use strict";
 
 import assert = require("assert");

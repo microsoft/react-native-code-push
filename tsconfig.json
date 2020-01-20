@@ -10,8 +10,5 @@
         "rootDir": "test",
         "outDir": "bin",
         "removeComments": true
-    },
-    "exclude": [
-        "typings"
-      ]
+    }
 }
