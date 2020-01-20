@@ -42,7 +42,7 @@
     "q": "^1.5.1",
     "run-sequence": "latest",
     "tslint": "^5.20.1",
-    "typescript": "^2.9.2"
+    "typescript": "^3.7.5"
   },
   "rnpm": {
     "android": {
