@@ -1,10 +1,3 @@
-/// <reference path="./typings/assert.d.ts" />
-/// <reference path="../node_modules/code-push-plugin-testing-framework/typings/code-push-plugin-testing-framework.d.ts" />
-/// <reference path="./typings/mocha.d.ts" />
-/// <reference path="./typings/mkdirp.d.ts" />
-/// <reference path="./typings/node.d.ts" />
-/// <reference path="./typings/q.d.ts" />
-
 "use strict";
 
 import assert = require("assert");
@@ -453,7 +446,7 @@ class RNProjectManager extends ProjectManager {
                     .then<void>(targetPlatform.getEmulatorManager().launchInstalledApplication.bind(undefined, TestConfig.TestNamespace));
             });
     }
-};
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Scenarios used in the tests.
