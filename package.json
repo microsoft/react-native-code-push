@@ -12,6 +12,20 @@
   ],
   "author": "Microsoft Corporation",
   "license": "MIT",
+  "scripts": {
+    "clean": "shx rm -rf bin",
+    "setup": "npm install --quiet --no-progress",
+    "prebuild-tests": "npm run clean && npm run tslint",
+    "build-tests": "tsc",
+    "test": "npm run build-tests && npm run test-android-fast && npm run test-ios-fast",
+    "test-android": "npm run build-tests && npm run test-android-fast",
+    "test-android-fast": "mocha --recursive bin/test --android --setup",
+    "test-ios": "npm run build-tests && npm run test-ios-fast",
+    "test-ios-fast": "mocha --recursive bin/test --ios --setup",
+    "test:debugger-android": "mocha --recursive --inspect-brk=0.0.0.0 bin/test --android --setup",
+    "test:debugger-ios": "mocha --recursive --inspect-brk=0.0.0.0 bin/test --ios --setup",
+    "tslint": "tslint -c tslint.json test/**/*.ts"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/Microsoft/react-native-code-push"

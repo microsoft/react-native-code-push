@@ -1,0 +1,21 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "Build",
+            "command": "npm",
+            "args": [
+                "run",
+                "build-tests"
+            ],
+            "presentation": {
+                "echo": false,
+                "focus": false
+            },
+            "problemMatcher": [
+                "$tsc"
+            ]
+        }
+    ]
+}
