@@ -19,7 +19,7 @@
     "build-tests": "tsc",
     "test": "npm run build-tests && npm run test-setup && npm run test-fast",
     "test-setup": "mocha --recursive bin/test --android --ios --setup",
-    "tests-fast": "mocha --recursive bin/test --android --ios",
+    "test-fast": "mocha --recursive bin/test --android --ios",
     "test-android": "npm run build-tests && npm run test-android-setup && npm run test-android-fast",
     "test-android-setup": "mocha --recursive bin/test --android --setup",
     "test-android-fast": "mocha --recursive bin/test --android",
