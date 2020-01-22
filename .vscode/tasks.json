@@ -7,7 +7,7 @@
             "command": "npm",
             "args": [
                 "run",
-                "build-tests"
+                "build:tests"
             ],
             "presentation": {
                 "echo": false,
@@ -23,7 +23,7 @@
             "command": "npm",
             "args": [
                 "run",
-                "test-android-setup"
+                "test:setup:android"
             ],
             "presentation": {
                 "echo": false,
@@ -39,7 +39,7 @@
             "command": "npm",
             "args": [
                 "run",
-                "test-ios-setup"
+                "test:setup:ios"
             ],
             "presentation": {
                 "echo": false,

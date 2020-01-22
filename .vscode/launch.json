@@ -9,7 +9,7 @@
             "runtimeExecutable": "npm",
             "runtimeArgs": [
                 "run",
-                "test:debugger-android"
+                "test:debugger:android"
             ],
             "port": 9229,
             "stopOnEntry": false,
@@ -27,7 +27,7 @@
             "runtimeExecutable": "npm",
             "runtimeArgs": [
                 "run",
-                "test:debugger-ios"
+                "test:debugger:ios"
             ],
             "port": 9229,
             "stopOnEntry": false,
