@@ -16,6 +16,52 @@
             "problemMatcher": [
                 "$tsc"
             ]
+        },
+        {
+            "type": "shell",
+            "label": "Setup-android",
+            "command": "npm",
+            "args": [
+                "run",
+                "test-android-setup"
+            ],
+            "presentation": {
+                "echo": false,
+                "focus": false
+            },
+            "problemMatcher": [
+                "$tsc"
+            ]
+        },
+        {
+            "type": "shell",
+            "label": "Setup-ios",
+            "command": "npm",
+            "args": [
+                "run",
+                "test-ios-setup"
+            ],
+            "presentation": {
+                "echo": false,
+                "focus": false
+            },
+            "problemMatcher": [
+                "$tsc"
+            ]
+        },
+        {
+            "label": "Setup-tests-android",
+            "dependsOn": [
+                "Build",
+                "Setup-android"
+            ]
+        },
+        {
+            "label": "Setup-tests-ios",
+            "dependsOn": [
+                "Build",
+                "Setup-ios"
+            ]
         }
     ]
 }
