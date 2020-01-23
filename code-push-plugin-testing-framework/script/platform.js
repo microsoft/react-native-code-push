@@ -249,7 +249,16 @@ var AndroidEmulatorManager = (function () {
      * Uninstalls the app from the emulator.
      */
     AndroidEmulatorManager.prototype.uninstallApplication = function (appId) {
-        return testUtil_1.TestUtil.getProcessOutput("adb uninstall " + appId).then(function () { return null; });
+        return testUtil_1.TestUtil.getProcessOutput("adb shell pm list packages")
+            .then(function (output) {
+                return output.includes(appId);
+            }).then(function (isAppExist) {
+                if (isAppExist) {
+                    return testUtil_1.TestUtil.getProcessOutput("adb uninstall " + appId).then(function () { return null; });
+                }
+
+                return null;
+            });
     };
     AndroidEmulatorManager.ANDROID_EMULATOR_OPTION_NAME = "--androidemu";
     AndroidEmulatorManager.DEFAULT_ANDROID_EMULATOR = "emulator";
