@@ -6,7 +6,7 @@
         "noImplicitAny": true,
         "noEmitOnError": true,
         "moduleResolution": "node",
-        "sourceMap": false,
+        "sourceMap": true,
         "rootDir": "test",
         "outDir": "bin",
         "removeComments": true
