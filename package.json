@@ -44,10 +44,10 @@
     "xcode": "1.0.0"
   },
   "devDependencies": {
-    "@types/mocha": "^5.2.7",
-    "@types/node": "^13.1.8",
     "@types/assert": "^1.4.3",
     "@types/mkdirp": "^0.5.2",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^13.1.8",
     "@types/q": "^1.5.2",
     "archiver": "latest",
     "body-parser": "latest",
@@ -56,9 +56,10 @@
     "express": "latest",
     "mkdirp": "latest",
     "mocha": "^7.0.0",
-    "shx": "^0.3.2",
     "q": "^1.5.1",
     "run-sequence": "latest",
+    "shx": "^0.3.2",
+    "slash": "^3.0.0",
     "tslint": "^5.20.1",
     "typescript": "^3.7.5"
   },

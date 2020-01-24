@@ -243,22 +243,15 @@ var AndroidEmulatorManager = (function () {
      */
     AndroidEmulatorManager.prototype.prepareEmulatorForTest = function (appId) {
         return this.endRunningApplication(appId)
-            .then(function () { return testUtil_1.TestUtil.getProcessOutput("adb shell pm clear " + appId); }).then(function () { return null; });
+            .then(function () {
+                return commandWithCheckAppExistence("adb shell pm clear", appId);
+            });
     };
     /**
      * Uninstalls the app from the emulator.
      */
     AndroidEmulatorManager.prototype.uninstallApplication = function (appId) {
-        return testUtil_1.TestUtil.getProcessOutput("adb shell pm list packages")
-            .then(function (output) {
-                return output.includes(appId);
-            }).then(function (isAppExist) {
-                if (isAppExist) {
-                    return testUtil_1.TestUtil.getProcessOutput("adb uninstall " + appId).then(function () { return null; });
-                }
-
-                return null;
-            });
+        return commandWithCheckAppExistence("adb uninstall", appId);
     };
     AndroidEmulatorManager.ANDROID_EMULATOR_OPTION_NAME = "--androidemu";
     AndroidEmulatorManager.DEFAULT_ANDROID_EMULATOR = "emulator";
@@ -398,3 +391,16 @@ var IOSEmulatorManager = (function () {
     return IOSEmulatorManager;
 }());
 exports.IOSEmulatorManager = IOSEmulatorManager;
+
+function commandWithCheckAppExistence(command, appId) {
+    return testUtil_1.TestUtil.getProcessOutput("adb shell pm list packages", { noLogCommand: true, noLogStdOut: true, noLogStdErr: true })
+        .then((output) => {
+            return output.includes(appId);
+        }).then((isAppExist) => {
+            if (isAppExist) {
+                return testUtil_1.TestUtil.getProcessOutput(`${command} ${appId}`).then(function () { return null; });
+            }
+            console.log(`Command "${command}" is skipped because the application has not yet been installed`)
+            return null;
+        });
+}

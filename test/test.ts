@@ -4,12 +4,13 @@ import assert = require("assert");
 import fs = require("fs");
 import mkdirp = require("mkdirp");
 import path = require("path");
+import slash = require("slash");
 
 import { Platform, PluginTestingFramework, ProjectManager, setupTestRunScenario, setupUpdateScenario, ServerUtil, TestBuilder, TestConfig, TestUtil } from "code-push-plugin-testing-framework";
 
 import Q = require("q");
 
-var del = require("del");
+import del = require("del");
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Create the platforms to run the tests on.
@@ -76,14 +77,15 @@ class RNAndroid extends Platform.Android implements RNPlatform {
      * Installs the platform on the given project.
      */
     installPlatform(projectDirectory: string): Q.Promise<void> {
-        var innerprojectDirectory: string = path.join(projectDirectory, TestConfig.TestAppName);
+        const innerprojectDirectory: string = path.join(projectDirectory, TestConfig.TestAppName);
+        const gradleContent: string = slash(path.join(innerprojectDirectory, "node_modules", "react-native-code-push", "android", "codepush.gradle"));
         
         //// Set up gradle to build CodePush with the app
         // Add CodePush to android/app/build.gradle
-        var buildGradle = path.join(innerprojectDirectory, "android", "app", "build.gradle");
+        const buildGradle = path.join(innerprojectDirectory, "android", "app", "build.gradle");
         TestUtil.replaceString(buildGradle,
             "apply from: \"../../node_modules/react-native/react.gradle\"",
-            "apply from: \"../../node_modules/react-native/react.gradle\"\napply from: \"" + path.join(innerprojectDirectory, "node_modules", "react-native-code-push", "android", "codepush.gradle") + "\"");
+            "apply from: \"../../node_modules/react-native/react.gradle\"\napply from: \"" + gradleContent + "\"");
         TestUtil.replaceString(buildGradle,
             "compile \"com.facebook.react:react-native:+\"",
             "compile \"com.facebook.react:react-native:0.25.+\"");
@@ -102,7 +104,7 @@ class RNAndroid extends Platform.Android implements RNPlatform {
         TestUtil.replaceString(path.join(innerprojectDirectory, "android", "app", "src", "main", "AndroidManifest.xml"), "android:versionName=\"1.0\"", "android:versionName=\"1.0.0\"");
             
         //// Replace the MainActivity.java with the correct server url and deployment key
-        var mainActivity = path.join(innerprojectDirectory, "android", "app", "src", "main", "java", "com", "microsoft", "codepush", "test", "MainActivity.java");
+        const mainActivity = path.join(innerprojectDirectory, "android", "app", "src", "main", "java", "com", "microsoft", "codepush", "test", "MainActivity.java");
         TestUtil.replaceString(mainActivity, TestUtil.CODE_PUSH_TEST_APP_NAME_PLACEHOLDER, TestConfig.TestAppName);
         TestUtil.replaceString(mainActivity, TestUtil.SERVER_URL_PLACEHOLDER, this.getServerUrl());
         TestUtil.replaceString(mainActivity, TestUtil.ANDROID_KEY_PLACEHOLDER, this.getDefaultDeploymentKey());
@@ -114,7 +116,7 @@ class RNAndroid extends Platform.Android implements RNPlatform {
      * Installs the binary of the given project on this platform.
      */
     installApp(projectDirectory: string): Q.Promise<void> {
-        var androidDirectory: string = path.join(projectDirectory, TestConfig.TestAppName, "android");
+        const androidDirectory: string = path.join(projectDirectory, TestConfig.TestAppName, "android");
         return TestUtil.getProcessOutput("adb install -r " + this.getBinaryPath(projectDirectory), { cwd: androidDirectory }).then(() => { return null; });
     }
     
@@ -123,9 +125,9 @@ class RNAndroid extends Platform.Android implements RNPlatform {
      */
     buildApp(projectDirectory: string): Q.Promise<void> {
         // In order to run on Android without the package manager, we must create a release APK and then sign it with the debug certificate.
-        var androidDirectory: string = path.join(projectDirectory, TestConfig.TestAppName, "android");
-        var apkPath = this.getBinaryPath(projectDirectory);
-        return TestUtil.getProcessOutput("./gradlew assembleRelease --daemon", { cwd: androidDirectory })
+        const androidDirectory: string = path.join(projectDirectory, TestConfig.TestAppName, "android");
+        const apkPath = this.getBinaryPath(projectDirectory);
+        return TestUtil.getProcessOutput("gradlew assembleRelease --daemon", { cwd: androidDirectory })
             .then<void>(TestUtil.getProcessOutput.bind(undefined, "jarsigner -verbose -keystore ~/.android/debug.keystore -storepass android -keypass android " + apkPath + " androiddebugkey", { cwd: androidDirectory, noLogStdOut: true })).then(() => { return null; });
     }
 }
@@ -160,9 +162,9 @@ class RNIOS extends Platform.IOS implements RNPlatform {
      * Installs the platform on the given project.
      */
     installPlatform(projectDirectory: string): Q.Promise<void> {
-        var iOSProject: string = path.join(projectDirectory, TestConfig.TestAppName, "ios");
-        var infoPlistPath: string = path.join(iOSProject, TestConfig.TestAppName, "Info.plist");
-        var appDelegatePath: string = path.join(iOSProject, TestConfig.TestAppName, "AppDelegate.m");
+        const iOSProject: string = path.join(projectDirectory, TestConfig.TestAppName, "ios");
+        const infoPlistPath: string = path.join(iOSProject, TestConfig.TestAppName, "Info.plist");
+        const appDelegatePath: string = path.join(iOSProject, TestConfig.TestAppName, "AppDelegate.m");
         // Create and install the Podfile
         return TestUtil.getProcessOutput("pod init", { cwd: iOSProject })
             .then(() => { return fs.writeFileSync(path.join(iOSProject, "Podfile"),
@@ -221,13 +223,13 @@ class RNIOS extends Platform.IOS implements RNPlatform {
      * Builds the binary of the project on this platform.
      */
     buildApp(projectDirectory: string): Q.Promise<void> {
-        var iOSProject: string = path.join(projectDirectory, TestConfig.TestAppName, "ios");
+        const iOSProject: string = path.join(projectDirectory, TestConfig.TestAppName, "ios");
         
         return this.getEmulatorManager().getTargetEmulator()
             .then((targetEmulator: string) => {
-                var hashRegEx = /[(][0-9A-Z-]*[)]/g;
-                var hashWithParen = targetEmulator.match(hashRegEx)[0];
-                var hash = hashWithParen.substr(1, hashWithParen.length - 2);
+                const hashRegEx = /[(][0-9A-Z-]*[)]/g;
+                const hashWithParen = targetEmulator.match(hashRegEx)[0];
+                const hash = hashWithParen.substr(1, hashWithParen.length - 2);
                 return TestUtil.getProcessOutput("xcodebuild -workspace " + path.join(iOSProject, TestConfig.TestAppName) + ".xcworkspace -scheme " + TestConfig.TestAppName + 
                     " -configuration Release -destination \"platform=iOS Simulator,id=" + hash + "\" -derivedDataPath build", { cwd: iOSProject, maxBuffer: 1024 * 1000 * 10, noLogStdOut: true });
             })
@@ -237,7 +239,7 @@ class RNIOS extends Platform.IOS implements RNPlatform {
                     // The first time an iOS project is built, it fails because it does not finish building libReact.a before it builds the test app.
                     // Simply build again to fix the issue.
                     if (!RNIOS.iosFirstBuild[projectDirectory]) {
-                        var iosBuildFolder = path.join(iOSProject, "build");
+                        const iosBuildFolder = path.join(iOSProject, "build");
                         if (fs.existsSync(iosBuildFolder)) {
                             del.sync([iosBuildFolder], { force: true });
                         }
@@ -249,7 +251,7 @@ class RNIOS extends Platform.IOS implements RNPlatform {
     }
 }
 
-var supportedTargetPlatforms: Platform.IPlatform[] = [new RNAndroid(), new RNIOS()];
+const supportedTargetPlatforms: Platform.IPlatform[] = [new RNAndroid(), new RNIOS()];
 
 //////////////////////////////////////////////////////////////////////////////////////////
 // Create the ProjectManager to use for the tests.
@@ -267,12 +269,12 @@ class RNProjectManager extends ProjectManager {
      */
     public copyTemplate(templatePath: string, projectDirectory: string): Q.Promise<void> {
         function copyDirectoryRecursively(directoryFrom: string, directoryTo: string): Q.Promise<void> {
-            var promises: Q.Promise<void>[] = [];
+            const promises: Q.Promise<void>[] = [];
             
             fs.readdirSync(directoryFrom).forEach(file => {
-                var fileStats: fs.Stats;
-                var fileInFrom: string = path.join(directoryFrom, file);
-                var fileInTo: string = path.join(directoryTo, file);
+                let fileStats: fs.Stats;
+                const fileInFrom: string = path.join(directoryFrom, file);
+                const fileInTo: string = path.join(directoryTo, file);
                 
                 try { fileStats = fs.statSync(fileInFrom); } catch (e) { /* fs.statSync throws if the file doesn't exist. */ }
                 
@@ -338,11 +340,11 @@ class RNProjectManager extends ProjectManager {
         RNProjectManager.currentScenario[projectDirectory] = jsPath;
         RNProjectManager.currentScenarioHasBuilt[projectDirectory] = false;
         
-        var indexHtml = "index.js";
-        var templateIndexPath = path.join(templatePath, indexHtml);
-        var destinationIndexPath = path.join(projectDirectory, TestConfig.TestAppName, indexHtml);
+        const indexHtml = "index.js";
+        const templateIndexPath = path.join(templatePath, indexHtml);
+        const destinationIndexPath = path.join(projectDirectory, TestConfig.TestAppName, indexHtml);
         
-        var scenarioJs = "scenarios/" + jsPath;
+        const scenarioJs = "scenarios/" + jsPath;
         
         console.log("Setting up scenario " + jsPath + " in " + projectDirectory);
 
@@ -358,10 +360,10 @@ class RNProjectManager extends ProjectManager {
      * Creates a CodePush update package zip for a project.
      */
     public createUpdateArchive(projectDirectory: string, targetPlatform: Platform.IPlatform, isDiff?: boolean): Q.Promise<string> {
-        var bundleFolder: string = path.join(projectDirectory, TestConfig.TestAppName, "CodePush/");
-        var bundleName: string = (<RNPlatform><any>targetPlatform).getBundleName();
-        var bundlePath: string = path.join(bundleFolder, bundleName);
-        var deferred = Q.defer<string>();
+        const bundleFolder: string = path.join(projectDirectory, TestConfig.TestAppName, "CodePush/");
+        const bundleName: string = (<RNPlatform><any>targetPlatform).getBundleName();
+        const bundlePath: string = path.join(bundleFolder, bundleName);
+        const deferred = Q.defer<string>();
         fs.exists(bundleFolder, (exists) => {
             if (exists) del.sync([bundleFolder], { force: true });
             mkdirp.sync(bundleFolder);
@@ -388,9 +390,9 @@ class RNProjectManager extends ProjectManager {
      * Prepares a specific platform for tests.
      */
     public preparePlatform(projectDirectory: string, targetPlatform: Platform.IPlatform): Q.Promise<void> {
-        var deferred= Q.defer<string>();
+        const deferred= Q.defer<string>();
         
-        var platformsJSONPath = path.join(projectDirectory, RNProjectManager.platformsJSON);
+        const platformsJSONPath = path.join(projectDirectory, RNProjectManager.platformsJSON);
         
         // We create a JSON file in the project folder to contain the installed platforms.
         // Check the file to see if the plugin for this platform has been installed and update the file appropriately.
@@ -399,7 +401,7 @@ class RNProjectManager extends ProjectManager {
                 fs.writeFileSync(platformsJSONPath, "{}");
             }
             
-            var platformJSON = eval("(" + fs.readFileSync(platformsJSONPath, "utf8") + ")");
+            const platformJSON = eval("(" + fs.readFileSync(platformsJSONPath, "utf8") + ")");
             if (platformJSON[targetPlatform.getName()] === true) deferred.reject("Platform " + targetPlatform.getName() + " is already installed in " + projectDirectory + "!");
             else {
                 platformJSON[targetPlatform.getName()] = true;
@@ -485,7 +487,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
             () => {
                 TestBuilder.it("window.codePush.checkForUpdate.noUpdate", false,
                     (done: MochaDone) => {
-                        var noUpdateResponse = ServerUtil.createDefaultResponse();
+                        const noUpdateResponse = ServerUtil.createDefaultResponse();
                         noUpdateResponse.isAvailable = false;
                         noUpdateResponse.appVersion = "0.0.1";
                         ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
@@ -510,7 +512,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                             return;
                         }
                         
-                        var noUpdateResponse = ServerUtil.createDefaultResponse();
+                        const noUpdateResponse = ServerUtil.createDefaultResponse();
                             noUpdateResponse.isAvailable = false;
                             noUpdateResponse.appVersion = "0.0.1";
 
@@ -538,7 +540,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                 
                 TestBuilder.it("window.codePush.checkForUpdate.noUpdate.updateAppVersion", false,
                     (done: MochaDone) => {
-                        var updateAppVersionResponse = ServerUtil.createDefaultResponse();
+                        const updateAppVersionResponse = ServerUtil.createDefaultResponse();
                         updateAppVersionResponse.updateAppVersion = true;
                         updateAppVersionResponse.appVersion = "2.0.0";
 
@@ -558,14 +560,14 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                 
                 TestBuilder.it("window.codePush.checkForUpdate.update", true,
                     (done: MochaDone) => {
-                        var updateResponse = ServerUtil.createUpdateResponse();
+                        const updateResponse = ServerUtil.createUpdateResponse();
                         ServerUtil.updateResponse = { updateInfo: updateResponse };
 
                         ServerUtil.testMessageCallback = (requestBody: any) => {
                             try {
                                 assert.equal(requestBody.message, ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE);
                                 assert.notEqual(requestBody.args[0], null);
-                                var remotePackage: any = requestBody.args[0];
+                                const remotePackage: any = requestBody.args[0];
                                 assert.equal(remotePackage.downloadUrl, updateResponse.downloadURL);
                                 assert.equal(remotePackage.isMandatory, updateResponse.isMandatory);
                                 assert.equal(remotePackage.label, updateResponse.label);
@@ -611,7 +613,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
             () => {
                 TestBuilder.it("window.codePush.checkForUpdate.customKey.update", false,
                 (done: MochaDone) => {
-                    var updateResponse = ServerUtil.createUpdateResponse();
+                    const updateResponse = ServerUtil.createUpdateResponse();
                     ServerUtil.updateResponse = { updateInfo: updateResponse };
 
                     ServerUtil.updateCheckCallback = (request: any) => {
@@ -1027,7 +1029,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                         // Tests where sync is called just once
                         TestBuilder.it("window.codePush.sync.noupdate", false,
                             (done: MochaDone) => {
-                                var noUpdateResponse = ServerUtil.createDefaultResponse();
+                                const noUpdateResponse = ServerUtil.createDefaultResponse();
                                 noUpdateResponse.isAvailable = false;
                                 noUpdateResponse.appVersion = "0.0.1";
                                 ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
@@ -1056,7 +1058,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                         
                         TestBuilder.it("window.codePush.sync.downloaderror", false,
                             (done: MochaDone) => {
-                                var invalidUrlResponse = ServerUtil.createUpdateResponse();
+                                const invalidUrlResponse = ServerUtil.createUpdateResponse();
                                 invalidUrlResponse.downloadURL = path.join(TestConfig.templatePath, "invalid_path.zip");
                                 ServerUtil.updateResponse = { updateInfo: invalidUrlResponse };
 
@@ -1103,7 +1105,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                                     })
                                     .then<void>(() => {
                                         // restart the app and make sure it didn't roll out!
-                                        var noUpdateResponse = ServerUtil.createDefaultResponse();
+                                        const noUpdateResponse = ServerUtil.createDefaultResponse();
                                         noUpdateResponse.isAvailable = false;
                                         noUpdateResponse.appVersion = "0.0.1";
                                         ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
@@ -1122,7 +1124,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                         // Tests where sync is called again before the first sync finishes
                         TestBuilder.it("window.codePush.sync.2x.noupdate", false,
                             (done: MochaDone) => {
-                                var noUpdateResponse = ServerUtil.createDefaultResponse();
+                                const noUpdateResponse = ServerUtil.createDefaultResponse();
                                 noUpdateResponse.isAvailable = false;
                                 noUpdateResponse.appVersion = "0.0.1";
                                 ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
@@ -1153,7 +1155,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                         
                         TestBuilder.it("window.codePush.sync.2x.downloaderror", false,
                             (done: MochaDone) => {
-                                var invalidUrlResponse = ServerUtil.createUpdateResponse();
+                                const invalidUrlResponse = ServerUtil.createUpdateResponse();
                                 invalidUrlResponse.downloadURL = path.join(TestConfig.templatePath, "invalid_path.zip");
                                 ServerUtil.updateResponse = { updateInfo: invalidUrlResponse };
 
@@ -1206,7 +1208,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                                     })
                                     .then<void>(() => {
                                         // restart the app and make sure it didn't roll out!
-                                        var noUpdateResponse = ServerUtil.createDefaultResponse();
+                                        const noUpdateResponse = ServerUtil.createDefaultResponse();
                                         noUpdateResponse.isAvailable = false;
                                         noUpdateResponse.appVersion = "0.0.1";
                                         ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
@@ -1237,7 +1239,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                                     new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UPDATE_INSTALLED])]);
                             })
                             .then<void>(() => {
-                                var noUpdateResponse = ServerUtil.createDefaultResponse();
+                                const noUpdateResponse = ServerUtil.createDefaultResponse();
                                 noUpdateResponse.isAvailable = false;
                                 noUpdateResponse.appVersion = "0.0.1";
                                 ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
@@ -1263,7 +1265,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                                     new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UPDATE_INSTALLED])]);
                             })
                             .then(() => {
-                                var noUpdateResponse = ServerUtil.createDefaultResponse();
+                                const noUpdateResponse = ServerUtil.createDefaultResponse();
                                 noUpdateResponse.isAvailable = false;
                                 noUpdateResponse.appVersion = "0.0.1";
                                 ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
@@ -1292,7 +1294,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                                     new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UPDATE_INSTALLED])]);
                             })
                             .then<void>(() => {
-                                var noUpdateResponse = ServerUtil.createDefaultResponse();
+                                const noUpdateResponse = ServerUtil.createDefaultResponse();
                                 noUpdateResponse.isAvailable = false;
                                 noUpdateResponse.appVersion = "0.0.1";
                                 ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
@@ -1336,7 +1338,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                                     new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UPDATE_INSTALLED])]);
                             })
                             .then<void>(() => {
-                                var noUpdateResponse = ServerUtil.createDefaultResponse();
+                                const noUpdateResponse = ServerUtil.createDefaultResponse();
                                 noUpdateResponse.isAvailable = false;
                                 noUpdateResponse.appVersion = "0.0.1";
                                 ServerUtil.updateResponse = { updateInfo: noUpdateResponse };
