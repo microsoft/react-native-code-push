@@ -164,7 +164,7 @@ class RNIOS extends Platform.IOS implements RNPlatform {
         var infoPlistPath: string = path.join(iOSProject, TestConfig.TestAppName, "Info.plist");
         var appDelegatePath: string = path.join(iOSProject, TestConfig.TestAppName, "AppDelegate.m");
         // Create and install the Podfile
-        return TestUtil.getProcessOutput("pod init", { cwd: iOSProject })
+        return this.podInit(iOSProject)
             .then(() => { return fs.writeFileSync(path.join(iOSProject, "Podfile"),
                 "target '" + TestConfig.TestAppName + "'\n  pod 'React', :path => '../node_modules/react-native', :subspecs => [ 'Core', 'RCTImage', 'RCTNetwork', 'RCTText', 'RCTWebSocket', ]\n  pod 'CodePush', :path => '../node_modules/react-native-code-push'\n"); })
             // Put the IOS deployment key in the Info.plist
@@ -196,7 +196,19 @@ class RNIOS extends Platform.IOS implements RNPlatform {
                 appDelegatePath, true))
             .then<void>(TestUtil.replaceString.bind(undefined, appDelegatePath, TestUtil.CODE_PUSH_TEST_APP_NAME_PLACEHOLDER, TestConfig.TestAppName));
     }
-    
+
+    /**
+     * Run "pod init" command if podfile doesn't exist.
+     */
+    podInit(iOSProject: string): Q.Promise<string> {
+        if (fs.existsSync(path.join(iOSProject, "Podfile"))) {
+            return Q.Promise<string>((resolve, reject) => {
+                resolve(null);
+            });
+        }
+        return TestUtil.getProcessOutput("pod init", { cwd: iOSProject });
+    }
+
     /**
      * Installs the binary of the given project on this platform.
      */
