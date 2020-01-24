@@ -5,7 +5,7 @@
             "name": "Tests-android",
             "type": "node",
             "request": "launch",
-            "preLaunchTask": "Setup-tests-android",
+            "preLaunchTask": "Setup-android",
             "runtimeExecutable": "npm",
             "runtimeArgs": [
                 "run",
@@ -23,7 +23,7 @@
             "name": "Tests-ios",
             "type": "node",
             "request": "launch",
-            "preLaunchTask": "Setup-tests-ios",
+            "preLaunchTask": "Setup-ios",
             "runtimeExecutable": "npm",
             "runtimeArgs": [
                 "run",
