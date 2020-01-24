@@ -20,6 +20,7 @@
         {
             "type": "shell",
             "label": "Setup-android",
+            "dependsOn": "Build",
             "command": "npm",
             "args": [
                 "run",
@@ -36,6 +37,7 @@
         {
             "type": "shell",
             "label": "Setup-ios",
+            "dependsOn": "Build",
             "command": "npm",
             "args": [
                 "run",
@@ -47,20 +49,6 @@
             },
             "problemMatcher": [
                 "$tsc"
-            ]
-        },
-        {
-            "label": "Setup-tests-android",
-            "dependsOn": [
-                "Build",
-                "Setup-android"
-            ]
-        },
-        {
-            "label": "Setup-tests-ios",
-            "dependsOn": [
-                "Build",
-                "Setup-ios"
             ]
         }
     ]
