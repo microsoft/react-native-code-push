@@ -44,7 +44,7 @@ var Android = (function () {
         return "mock-android-deployment-key";
     };
     Android.ANDROID_SERVER_URL_OPTION_NAME = "--androidserver";
-    Android.DEFAULT_ANDROID_SERVER_URL = "http://127.0.0.1:3001";
+    Android.DEFAULT_ANDROID_SERVER_URL = "http://10.0.2.2:3001";
     return Android;
 }());
 exports.Android = Android;
