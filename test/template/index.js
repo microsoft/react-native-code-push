@@ -24,6 +24,7 @@ class CODE_PUSH_TEST_APP_NAME extends Component {
     // CodePush API Callbacks
     constructor() {
         super();
+        this.state = { message: '' };
     }
     // checkForUpdate
     checkUpdateSuccess(remotePackage) {
