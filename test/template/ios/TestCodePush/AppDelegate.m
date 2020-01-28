@@ -10,12 +10,9 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-  NSURL *jsCodeLocation;
-
-  jsCodeLocation = [CodePush bundleURL];
 
   RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];
-  RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:jsCodeLocation
+  RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge
                                                    moduleName:@"CODE_PUSH_TEST_APP_NAME"
                                             initialProperties:nil];
 
@@ -28,5 +25,10 @@
   [self.window makeKeyAndVisible];
   return YES;
 }
+
+ - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
+ {
+    return [CodePush bundleURL];
+ }
 
 @end
