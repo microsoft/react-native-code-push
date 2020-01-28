@@ -163,23 +163,17 @@ class RNIOS extends Platform.IOS implements RNPlatform {
         var iOSProject: string = path.join(projectDirectory, TestConfig.TestAppName, "ios");
         var infoPlistPath: string = path.join(iOSProject, TestConfig.TestAppName, "Info.plist");
         var appDelegatePath: string = path.join(iOSProject, TestConfig.TestAppName, "AppDelegate.m");
-        var appVersion = 0.61;
 
         // Create and install the Podfile
         return this.podInit(iOSProject)
-            .then(() => { 
-                if (appVersion >= 0.60) {
-                    return null;
-                }
-
-                return fs.writeFileSync(path.join(iOSProject, "Podfile"),
-                "target '" + TestConfig.TestAppName + "'\n  pod 'React', :path => '../node_modules/react-native', :subspecs => [ 'Core', 'RCTImage', 'RCTNetwork', 'RCTText', 'RCTWebSocket', ]\n  pod 'CodePush', :path => '../node_modules/react-native-code-push'\n"); })
+            // .then(() => { return fs.writeFileSync(path.join(iOSProject, "Podfile"),
+            // "target '" + TestConfig.TestAppName + "'\n  pod 'React', :path => '../node_modules/react-native', :subspecs => [ 'Core', 'RCTImage', 'RCTNetwork', 'RCTText', 'RCTWebSocket', ]\n  pod 'CodePush', :path => '../node_modules/react-native-code-push'\n"); })
             // Put the IOS deployment key in the Info.plist
             .then(TestUtil.replaceString.bind(undefined, infoPlistPath,
                 "</dict>\n</plist>",
                 "<key>CodePushDeploymentKey</key>\n\t<string>" + this.getDefaultDeploymentKey() + "</string>\n\t<key>CodePushServerURL</key>\n\t<string>" + this.getServerUrl() + "</string>\n\t</dict>\n</plist>"))
             // Add the correct linker flags to the project.pbxproj
-            //.then(TestUtil.replaceString.bind(undefined, path.join(iOSProject, TestConfig.TestAppName + ".xcodeproj", "project.pbxproj"), 
+            // .then(TestUtil.replaceString.bind(undefined, path.join(iOSProject, TestConfig.TestAppName + ".xcodeproj", "project.pbxproj"), 
             //    "\"-lc[+][+]\",", "\"-lc++\", \"$(inherited)\""))
             // Install the Pod
             .then(TestUtil.getProcessOutput.bind(undefined, "pod install", { cwd: iOSProject }))
@@ -193,10 +187,10 @@ class RNIOS extends Platform.IOS implements RNPlatform {
             .then(TestUtil.replaceString.bind(undefined, path.join(iOSProject, TestConfig.TestAppName + ".xcodeproj", "project.pbxproj"), 
                 "\"[$][(]inherited[)]\",\\s*[)];", "\"$(inherited)\"\n\t\t\t\t);"))
             // Prevent the packager from starting during builds by replacing the script that starts it with nothing.
-            .then(TestUtil.replaceString.bind(undefined, 
-                path.join(projectDirectory, TestConfig.TestAppName, "node_modules", "react-native", "React", "React.xcodeproj", "project.pbxproj"),
-                "shellScript = \".*\";",
-                "shellScript = \"\";"))
+            // .then(TestUtil.replaceString.bind(undefined, 
+            //     path.join(projectDirectory, TestConfig.TestAppName, "node_modules", "react-native", "React", "React.xcodeproj", "project.pbxproj"),
+            //     "shellScript = \".*\";",
+            //     "shellScript = \"\";"))
             // Copy the AppDelegate.m to the project
             .then(TestUtil.copyFile.bind(undefined,
                 path.join(TestConfig.templatePath, "ios", TestConfig.TestAppName, "AppDelegate.m"),
@@ -325,7 +319,7 @@ class RNProjectManager extends ProjectManager {
 
         return TestUtil.getProcessOutput("react-native init " + appName + " --package " + appNamespace, { cwd: projectDirectory })
             .then(this.copyTemplate.bind(this, templatePath, projectDirectory))
-            .then<void>(TestUtil.getProcessOutput.bind(undefined, "npm install " + TestConfig.thisPluginPath, { cwd: path.join(projectDirectory, TestConfig.TestAppName) })).then(() => { return null; });
+            .then<void>(TestUtil.getProcessOutput.bind(undefined, "npm install react-native-code-push" , { cwd: path.join(projectDirectory, TestConfig.TestAppName) })).then(() => { return null; });
     }
     
     /** JSON mapping project directories to the current scenario

@@ -19,7 +19,9 @@ var SETUP_FLAG_NAME = "--setup";
 var RESTART_EMULATORS_FLAG_NAME = "--clean";
 // CONST VARIABLES
 exports.TestAppName = "TestCodePush";
-exports.TestNamespace = "com.microsoft.codepush.test";
+// TODO: Should be removed after adding additional logic for changing bundle identifier
+exports.TestNamespace = "org.reactjs.native.example.TestCodePush";
+//exports.TestNamespace = "com.microsoft.codepush.test";
 exports.AcquisitionSDKPluginName = "code-push";
 exports.templatePath = path.join(__dirname, "../../test/template");
 exports.thisPluginPath = TestUtil_1.TestUtil.readMochaCommandLineFlag(PULL_FROM_NPM_FLAG_NAME) ? NPM_PLUGIN_PATH : DEFAULT_PLUGIN_PATH;
