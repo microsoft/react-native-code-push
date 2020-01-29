@@ -164,19 +164,12 @@ class RNIOS extends Platform.IOS implements RNPlatform {
         var infoPlistPath: string = path.join(iOSProject, TestConfig.TestAppName, "Info.plist");
         var appDelegatePath: string = path.join(iOSProject, TestConfig.TestAppName, "AppDelegate.m");
 
-        // Create and install the Podfile
-        return this.podInit(iOSProject)
-            // .then(() => { return fs.writeFileSync(path.join(iOSProject, "Podfile"),
-            // "target '" + TestConfig.TestAppName + "'\n  pod 'React', :path => '../node_modules/react-native', :subspecs => [ 'Core', 'RCTImage', 'RCTNetwork', 'RCTText', 'RCTWebSocket', ]\n  pod 'CodePush', :path => '../node_modules/react-native-code-push'\n"); })
+        // Install the Podfile
+        return TestUtil.getProcessOutput("pod install", { cwd: iOSProject })
             // Put the IOS deployment key in the Info.plist
             .then(TestUtil.replaceString.bind(undefined, infoPlistPath,
                 "</dict>\n</plist>",
                 "<key>CodePushDeploymentKey</key>\n\t<string>" + this.getDefaultDeploymentKey() + "</string>\n\t<key>CodePushServerURL</key>\n\t<string>" + this.getServerUrl() + "</string>\n\t</dict>\n</plist>"))
-            // Add the correct linker flags to the project.pbxproj
-            // .then(TestUtil.replaceString.bind(undefined, path.join(iOSProject, TestConfig.TestAppName + ".xcodeproj", "project.pbxproj"), 
-            //    "\"-lc[+][+]\",", "\"-lc++\", \"$(inherited)\""))
-            // Install the Pod
-            .then(TestUtil.getProcessOutput.bind(undefined, "pod install", { cwd: iOSProject }))
             // Add the correct bundle identifier to the Info.plist
             .then(TestUtil.replaceString.bind(undefined, infoPlistPath, 
                 "org[.]reactjs[.]native[.]example[.][$][(]PRODUCT_NAME:rfc1034identifier[)]",
@@ -186,28 +179,11 @@ class RNIOS extends Platform.IOS implements RNPlatform {
             // Fix the linker flag list in project.pbxproj (pod install adds an extra comma)
             .then(TestUtil.replaceString.bind(undefined, path.join(iOSProject, TestConfig.TestAppName + ".xcodeproj", "project.pbxproj"), 
                 "\"[$][(]inherited[)]\",\\s*[)];", "\"$(inherited)\"\n\t\t\t\t);"))
-            // Prevent the packager from starting during builds by replacing the script that starts it with nothing.
-            // .then(TestUtil.replaceString.bind(undefined, 
-            //     path.join(projectDirectory, TestConfig.TestAppName, "node_modules", "react-native", "React", "React.xcodeproj", "project.pbxproj"),
-            //     "shellScript = \".*\";",
-            //     "shellScript = \"\";"))
             // Copy the AppDelegate.m to the project
             .then(TestUtil.copyFile.bind(undefined,
                 path.join(TestConfig.templatePath, "ios", TestConfig.TestAppName, "AppDelegate.m"),
                 appDelegatePath, true))
             .then<void>(TestUtil.replaceString.bind(undefined, appDelegatePath, TestUtil.CODE_PUSH_TEST_APP_NAME_PLACEHOLDER, TestConfig.TestAppName));
-    }
-
-    /**
-     * Run "pod init" command if podfile doesn't exist.
-     */
-    podInit(iOSProject: string): Q.Promise<string> {
-        if (fs.existsSync(path.join(iOSProject, "Podfile"))) {
-            return Q.Promise<string>((resolve, reject) => {
-                resolve(null);
-            });
-        }
-        return TestUtil.getProcessOutput("pod init", { cwd: iOSProject });
     }
 
     /**
