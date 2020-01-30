@@ -172,15 +172,14 @@ class RNIOS extends Platform.IOS implements RNPlatform {
             .then(TestUtil.replaceString.bind(undefined, infoPlistPath,
                 "</dict>\n</plist>",
                 "<key>CodePushDeploymentKey</key>\n\t<string>" + this.getDefaultDeploymentKey() + "</string>\n\t<key>CodePushServerURL</key>\n\t<string>" + this.getServerUrl() + "</string>\n\t</dict>\n</plist>"))
-            // Add the correct bundle identifier to the Info.plist
-            .then(TestUtil.replaceString.bind(undefined, infoPlistPath, 
-                "org[.]reactjs[.]native[.]example[.][$][(]PRODUCT_NAME:rfc1034identifier[)]",
-                TestConfig.TestNamespace))
             // Set the app version to 1.0.0 instead of 1.0 in the Info.plist
             .then(TestUtil.replaceString.bind(undefined, infoPlistPath, "1.0", "1.0.0"))
             // Fix the linker flag list in project.pbxproj (pod install adds an extra comma)
             .then(TestUtil.replaceString.bind(undefined, path.join(iOSProject, TestConfig.TestAppName + ".xcodeproj", "project.pbxproj"), 
                 "\"[$][(]inherited[)]\",\\s*[)];", "\"$(inherited)\"\n\t\t\t\t);"))
+            // Add the correct bundle identifier
+            .then(TestUtil.replaceString.bind(undefined, path.join(iOSProject, TestConfig.TestAppName + ".xcodeproj", "project.pbxproj"), 
+            "PRODUCT_BUNDLE_IDENTIFIER = [^;]*", "PRODUCT_BUNDLE_IDENTIFIER = \"" + TestConfig.TestNamespace + "\""))
             // Copy the AppDelegate.m to the project
             .then(TestUtil.copyFile.bind(undefined,
                 path.join(TestConfig.templatePath, "ios", TestConfig.TestAppName, "AppDelegate.m"),
@@ -297,7 +296,7 @@ class RNProjectManager extends ProjectManager {
 
         return TestUtil.getProcessOutput("react-native init " + appName + " --package " + appNamespace, { cwd: projectDirectory })
             .then(this.copyTemplate.bind(this, templatePath, projectDirectory))
-            .then<void>(TestUtil.getProcessOutput.bind(undefined, "npm install " + TestConfig.thisPluginPath, { cwd: path.join(projectDirectory, TestConfig.TestAppName) })).then(() => { return null; });
+            .then<void>(TestUtil.getProcessOutput.bind(undefined, "npm install react-native-code-push" , { cwd: path.join(projectDirectory, TestConfig.TestAppName) })).then(() => { return null; });
     }
     
     /** JSON mapping project directories to the current scenario
