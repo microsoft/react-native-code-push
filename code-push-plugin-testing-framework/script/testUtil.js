@@ -79,6 +79,11 @@ var TestUtil = (function () {
         var packageFile = eval("(" + fs.readFileSync("./package.json", "utf8") + ")");
         return packageFile.name;
     };
+
+    TestUtil.getPluginVersion = function () {
+        var packageFile = eval("(" + fs.readFileSync("./package.json", "utf8") + ")");
+        return packageFile.version;
+    };
     /**
      * Replaces a regex in a file with a given string.
      */
