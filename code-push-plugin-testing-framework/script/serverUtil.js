@@ -20,14 +20,14 @@ function setupServer(targetPlatform) {
         res.setHeader("Access-Control-Allow-Headers", "origin, content-type, accept, X-CodePush-SDK-Version");
         next();
     });
-    app.get("/v0.1/public/codepush/update_check", function (req, res) {
+    app.get("/updateCheck", function (req, res) {
         exports.updateCheckCallback && exports.updateCheckCallback(req);
         res.send(exports.updateResponse);
         console.log("Update check called from the app.");
         console.log("Request: " + JSON.stringify(req.query));
         console.log("Response: " + JSON.stringify(exports.updateResponse));
     });
-    app.get("/v0.1/public/codepush/report_status/download", function (req, res) {
+    app.get("/download", function (req, res) {
         console.log("Application downloading the package.");
         res.download(exports.updatePackagePath);
     });
