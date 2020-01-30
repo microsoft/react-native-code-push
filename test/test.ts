@@ -95,8 +95,10 @@ class RNAndroid extends Platform.Android implements RNPlatform {
             
         //// Replace the MainApplication.java with the correct server url and deployment key
         const string = path.join(innerprojectDirectory, "android", "app", "src", "main", "res", "values", "strings.xml");
+        const AndroidManifest = path.join(innerprojectDirectory, "android", "app", "src", "main", "AndroidManifest.xml");
         TestUtil.replaceString(string, TestUtil.SERVER_URL_PLACEHOLDER, this.getServerUrl());
         TestUtil.replaceString(string, TestUtil.ANDROID_KEY_PLACEHOLDER, this.getDefaultDeploymentKey());
+        TestUtil.replaceString(AndroidManifest, "android:allowBackup=\"false\"", "android:allowBackup=\"false\"" + "\n\t" + "android:usesCleartextTraffic=\"true\"");
 
         
         return Q<void>(null);
@@ -298,7 +300,7 @@ class RNProjectManager extends ProjectManager {
 
         return TestUtil.getProcessOutput("react-native init " + appName, { cwd: projectDirectory })
             .then(this.copyTemplate.bind(this, templatePath, projectDirectory))
-            .then<void>(TestUtil.getProcessOutput.bind(undefined, "npm install " + "react-native-code-push", { cwd: path.join(projectDirectory, TestConfig.TestAppName) })).then(() => { return null; });
+            .then<void>(TestUtil.getProcessOutput.bind(undefined, "npm install " + TestConfig.thisPluginPath, { cwd: path.join(projectDirectory, TestConfig.TestAppName) })).then(() => { return null; });
     }
     
     /** JSON mapping project directories to the current scenario
