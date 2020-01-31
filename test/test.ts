@@ -154,9 +154,9 @@ class RNIOS extends Platform.IOS implements RNPlatform {
      * Installs the platform on the given project.
      */
     installPlatform(projectDirectory: string): Q.Promise<void> {
-        var iOSProject: string = path.join(projectDirectory, TestConfig.TestAppName, "ios");
-        var infoPlistPath: string = path.join(iOSProject, TestConfig.TestAppName, "Info.plist");
-        var appDelegatePath: string = path.join(iOSProject, TestConfig.TestAppName, "AppDelegate.m");
+        const iOSProject: string = path.join(projectDirectory, TestConfig.TestAppName, "ios");
+        const infoPlistPath: string = path.join(iOSProject, TestConfig.TestAppName, "Info.plist");
+        const appDelegatePath: string = path.join(iOSProject, TestConfig.TestAppName, "AppDelegate.m");
 
         // Install the Podfile
         return TestUtil.getProcessOutput("pod install", { cwd: iOSProject })
