@@ -83,15 +83,15 @@ exports.UpdateCheckRequestMock = UpdateCheckRequestMock;
  */
 function createDefaultResponse() {
     var defaultResponse = new CheckForUpdateResponseMock();
-    defaultResponse.downloadURL = "";
+    defaultResponse.download_url = "";
     defaultResponse.description = "";
-    defaultResponse.isAvailable = false;
+    defaultResponse.is_available = false;
     defaultResponse.isMandatory = false;
-    defaultResponse.appVersion = "";
-    defaultResponse.packageHash = "";
+    defaultResponse.app_version = "";
+    defaultResponse.package_hash = "";
     defaultResponse.label = "";
-    defaultResponse.packageSize = 0;
-    defaultResponse.updateAppVersion = false;
+    defaultResponse.package_size = 0;
+    defaultResponse.update_app_version = false;
     return defaultResponse;
 }
 exports.createDefaultResponse = createDefaultResponse;
@@ -102,19 +102,19 @@ function createUpdateResponse(mandatory, targetPlatform, randomHash) {
     if (mandatory === void 0) { mandatory = false; }
     if (randomHash === void 0) { randomHash = true; }
     var updateResponse = new CheckForUpdateResponseMock();
-    updateResponse.isAvailable = true;
-    updateResponse.appVersion = "1.0.0";
-    updateResponse.downloadURL = "mock.url/download";
+    updateResponse.is_available = true;
+    updateResponse.app_version = "1.0.0";
+    updateResponse.download_url = "mock.url/v0.1/public/codepush/report_status/download";
     updateResponse.isMandatory = mandatory;
     updateResponse.label = "mock-update";
-    updateResponse.packageHash = "12345-67890";
-    updateResponse.packageSize = 12345;
-    updateResponse.updateAppVersion = false;
+    updateResponse.package_hash = "12345-67890";
+    updateResponse.package_size = 12345;
+    updateResponse.update_app_version = false;
     if (!!targetPlatform)
-        updateResponse.downloadURL = targetPlatform.getServerUrl() + "/download";
+        updateResponse.download_url = targetPlatform.getServerUrl() + "/v0.1/public/codepush/report_status/download";
     // We need unique hashes to avoid conflicts.
     if (randomHash) {
-        updateResponse.packageHash = "randomHash-" + Math.floor(Math.random() * 10000);
+        updateResponse.package_hash = "randomHash-" + Math.floor(Math.random() * 10000);
     }
     return updateResponse;
 }
