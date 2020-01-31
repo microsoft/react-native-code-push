@@ -411,7 +411,7 @@ declare module 'code-push-plugin-testing-framework/script/testConfig' {
 	export const TestNamespace: string;
 	export const AcquisitionSDKPluginName: string;
 	export const templatePath: string;
-	export const thisPluginPath: string;
+	export const thisPluginInstallString: string;
 	export const testRunDirectory: string;
 	export const updatesDirectory: string;
 	export const onlyRunCoreTests: boolean;

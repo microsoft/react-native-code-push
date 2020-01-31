@@ -70,7 +70,7 @@ class RNAndroid extends Platform.Android implements RNPlatform {
      * Returns the path to the binary of the given project on this platform.
      */
     getBinaryPath(projectDirectory: string): string {
-        return path.join(projectDirectory, TestConfig.TestAppName, "android", "app", "build", "outputs", "apk", "app-release-unsigned.apk");
+        return path.join(projectDirectory, TestConfig.TestAppName, "android", "app", "build", "outputs", "apk", "release", "app-release.apk");
     }
     
     /**
@@ -79,35 +79,27 @@ class RNAndroid extends Platform.Android implements RNPlatform {
     installPlatform(projectDirectory: string): Q.Promise<void> {
         const innerprojectDirectory: string = path.join(projectDirectory, TestConfig.TestAppName);
         const gradleContent: string = slash(path.join(innerprojectDirectory, "node_modules", "react-native-code-push", "android", "codepush.gradle"));
-        
+
         //// Set up gradle to build CodePush with the app
         // Add CodePush to android/app/build.gradle
         const buildGradle = path.join(innerprojectDirectory, "android", "app", "build.gradle");
         TestUtil.replaceString(buildGradle,
             "apply from: \"../../node_modules/react-native/react.gradle\"",
             "apply from: \"../../node_modules/react-native/react.gradle\"\napply from: \"" + gradleContent + "\"");
-        TestUtil.replaceString(buildGradle,
-            "compile \"com.facebook.react:react-native:+\"",
-            "compile \"com.facebook.react:react-native:0.25.+\"");
-        TestUtil.replaceString(buildGradle,
-            "// From node_modules",
-            "\n    compile project(':react-native-code-push') // From node_modules");
-        // Add CodePush to android/settings.gradle
-        TestUtil.replaceString(path.join(innerprojectDirectory, "android", "settings.gradle"),
-            "include ':app'",
-            "include ':app', ':react-native-code-push'\nproject(':react-native-code-push').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-code-push/android/app')");
-        
+
         //// Set the app version to 1.0.0 instead of 1.0
         // Set the app version to 1.0.0 in android/app/build.gradle
         TestUtil.replaceString(buildGradle, "versionName \"1.0\"", "versionName \"1.0.0\"");
         // Set the app version to 1.0.0 in AndroidManifest.xml
         TestUtil.replaceString(path.join(innerprojectDirectory, "android", "app", "src", "main", "AndroidManifest.xml"), "android:versionName=\"1.0\"", "android:versionName=\"1.0.0\"");
             
-        //// Replace the MainActivity.java with the correct server url and deployment key
-        const mainActivity = path.join(innerprojectDirectory, "android", "app", "src", "main", "java", "com", "microsoft", "codepush", "test", "MainActivity.java");
-        TestUtil.replaceString(mainActivity, TestUtil.CODE_PUSH_TEST_APP_NAME_PLACEHOLDER, TestConfig.TestAppName);
-        TestUtil.replaceString(mainActivity, TestUtil.SERVER_URL_PLACEHOLDER, this.getServerUrl());
-        TestUtil.replaceString(mainActivity, TestUtil.ANDROID_KEY_PLACEHOLDER, this.getDefaultDeploymentKey());
+        //// Replace the MainApplication.java with the correct server url and deployment key
+        const string = path.join(innerprojectDirectory, "android", "app", "src", "main", "res", "values", "strings.xml");
+        const AndroidManifest = path.join(innerprojectDirectory, "android", "app", "src", "main", "AndroidManifest.xml");
+        TestUtil.replaceString(string, TestUtil.SERVER_URL_PLACEHOLDER, this.getServerUrl());
+        TestUtil.replaceString(string, TestUtil.ANDROID_KEY_PLACEHOLDER, this.getDefaultDeploymentKey());
+        TestUtil.replaceString(AndroidManifest, "android:allowBackup=\"false\"", "android:allowBackup=\"false\"" + "\n\t" + "android:usesCleartextTraffic=\"true\"");
+
         
         return Q<void>(null);
     }
@@ -128,7 +120,7 @@ class RNAndroid extends Platform.Android implements RNPlatform {
         const androidDirectory: string = path.join(projectDirectory, TestConfig.TestAppName, "android");
         const apkPath = this.getBinaryPath(projectDirectory);
         return TestUtil.getProcessOutput("gradlew assembleRelease --daemon", { cwd: androidDirectory })
-            .then<void>(TestUtil.getProcessOutput.bind(undefined, "jarsigner -verbose -keystore ~/.android/debug.keystore -storepass android -keypass android " + apkPath + " androiddebugkey", { cwd: androidDirectory, noLogStdOut: true })).then(() => { return null; });
+            .then(() => { return null; });
     }
 }
 
@@ -306,9 +298,10 @@ class RNProjectManager extends ProjectManager {
         }
         mkdirp.sync(projectDirectory);
 
-        return TestUtil.getProcessOutput("react-native init " + appName + " --package " + appNamespace, { cwd: projectDirectory })
+        return TestUtil.getProcessOutput("react-native init " + appName, { cwd: projectDirectory })
             .then(this.copyTemplate.bind(this, templatePath, projectDirectory))
-            .then<void>(TestUtil.getProcessOutput.bind(undefined, "npm install " + TestConfig.thisPluginPath, { cwd: path.join(projectDirectory, TestConfig.TestAppName) })).then(() => { return null; });
+            .then<void>(TestUtil.getProcessOutput.bind(undefined, TestConfig.thisPluginInstallString, { cwd: path.join(projectDirectory, TestConfig.TestAppName) }))
+            .then(() => { return null; });
     }
     
     /** JSON mapping project directories to the current scenario
