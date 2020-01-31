@@ -17,12 +17,13 @@ var DEFAULT_PLUGIN_PATH = path.join(__dirname, "../..");
 var NPM_PLUGIN_PATH = TestUtil_1.TestUtil.getPluginName();
 var SETUP_FLAG_NAME = "--setup";
 var RESTART_EMULATORS_FLAG_NAME = "--clean";
+var DEFAULT_PLUGIN_TGZ_NAME = TestUtil_1.TestUtil.getPluginName() + "-" + TestUtil_1.TestUtil.getPluginVersion() + ".tgz";
 // CONST VARIABLES
 exports.TestAppName = "TestCodePush";
-exports.TestNamespace = "org.testcodepush";
+exports.TestNamespace = "com.testcodepush";
 exports.AcquisitionSDKPluginName = "code-push";
 exports.templatePath = path.join(__dirname, "../../test/template");
-exports.thisPluginPath = TestUtil_1.TestUtil.readMochaCommandLineFlag(PULL_FROM_NPM_FLAG_NAME) ? NPM_PLUGIN_PATH : DEFAULT_PLUGIN_PATH;
+exports.thisPluginInstallString = TestUtil_1.TestUtil.readMochaCommandLineFlag(PULL_FROM_NPM_FLAG_NAME) ? `npm install ${NPM_PLUGIN_PATH}` : `npm pack ${DEFAULT_PLUGIN_PATH} && npm install ${DEFAULT_PLUGIN_TGZ_NAME}`;
 exports.testRunDirectory = TestUtil_1.TestUtil.readMochaCommandLineOption(TEST_RUN_DIRECTORY_OPTION_NAME, DEFAULT_TEST_RUN_DIRECTORY);
 exports.updatesDirectory = TestUtil_1.TestUtil.readMochaCommandLineOption(TEST_UPDATES_DIRECTORY_OPTION_NAME, DEFAULT_UPDATES_DIRECTORY);
 exports.onlyRunCoreTests = TestUtil_1.TestUtil.readMochaCommandLineFlag(CORE_TESTS_ONLY_FLAG_NAME);
