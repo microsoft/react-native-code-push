@@ -76,12 +76,12 @@ var TestUtil = (function () {
      * Returns the name of the plugin that is being tested.
      */
     TestUtil.getPluginName = function () {
-        var packageFile = eval("(" + fs.readFileSync("./package.json", "utf8") + ")");
+        var packageFile = JSON.parse(fs.readFileSync("./package.json", "utf8"));
         return packageFile.name;
     };
 
     TestUtil.getPluginVersion = function () {
-        var packageFile = eval("(" + fs.readFileSync("./package.json", "utf8") + ")");
+        var packageFile = JSON.parse(fs.readFileSync("./package.json", "utf8"));
         return packageFile.version;
     };
     /**
