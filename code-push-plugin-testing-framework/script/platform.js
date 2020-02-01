@@ -364,8 +364,8 @@ var IOSEmulatorManager = (function () {
     IOSEmulatorManager.prototype.resumeApplication = function (appId, delayBeforeResumingMs) {
         var _this = this;
         if (delayBeforeResumingMs === void 0) { delayBeforeResumingMs = 1000; }
-        // Open a default iOS app (for example, camera).
-        return this.launchInstalledApplication("com.apple.camera")
+        // Open a default iOS app (for example, settings).
+        return this.launchInstalledApplication("com.apple.Preferences")
             .then(function () {
             console.log("Waiting for " + delayBeforeResumingMs + "ms before resuming the test application.");
             return Q.delay(delayBeforeResumingMs);
