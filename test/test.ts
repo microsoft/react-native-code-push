@@ -484,7 +484,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                     (done: MochaDone) => {
                         const noUpdateResponse = ServerUtil.createDefaultResponse();
                         noUpdateResponse.is_available = false;
-                        noUpdateResponse.app_version = "0.0.1";
+                        noUpdateResponse.target_binary_range = "0.0.1";
                         ServerUtil.updateResponse = { update_info: noUpdateResponse };
 
                         ServerUtil.testMessageCallback = (requestBody: any) => {
@@ -509,7 +509,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
 
                         const noUpdateResponse = ServerUtil.createDefaultResponse();
                         noUpdateResponse.is_available = false;
-                        noUpdateResponse.app_version = "0.0.1";
+                        noUpdateResponse.target_binary_range = "0.0.1";
 
                         ServerUtil.updateCheckCallback = (request: any) => {
                             try {
@@ -537,7 +537,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                     (done: MochaDone) => {
                         const updateAppVersionResponse = ServerUtil.createDefaultResponse();
                         updateAppVersionResponse.is_available = true;
-                        updateAppVersionResponse.app_version = "2.0.0";
+                        updateAppVersionResponse.target_binary_range = "2.0.0";
 
                         ServerUtil.updateResponse = { update_info: updateAppVersionResponse };
 
@@ -563,12 +563,12 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                                 assert.equal(requestBody.message, ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE);
                                 assert.notEqual(requestBody.args[0], null);
                                 const remotePackage: any = requestBody.args[0];
-                                assert.equal(remotePackage.download_url, updateResponse.download_url);
-                                assert.equal(remotePackage.isMandatory, updateResponse.isMandatory);
+                                assert.equal(remotePackage.downloadUrl, updateResponse.download_url);
+                                assert.equal(remotePackage.isMandatory, updateResponse.is_mandatory);
                                 assert.equal(remotePackage.label, updateResponse.label);
                                 assert.equal(remotePackage.packageHash, updateResponse.package_hash);
                                 assert.equal(remotePackage.packageSize, updateResponse.package_size);
-                                assert.equal(remotePackage.deployment_key, targetPlatform.getDefaultDeploymentKey());
+                                assert.equal(remotePackage.deploymentKey, targetPlatform.getDefaultDeploymentKey());
                                 done();
                             } catch (e) {
                                 done(e);
@@ -1026,7 +1026,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                             (done: MochaDone) => {
                                 const noUpdateResponse = ServerUtil.createDefaultResponse();
                                 noUpdateResponse.is_available = false;
-                                noUpdateResponse.app_version = "0.0.1";
+                                noUpdateResponse.target_binary_range = "0.0.1";
                                 ServerUtil.updateResponse = { update_info: noUpdateResponse };
 
                                 Q({})
@@ -1102,7 +1102,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                                         // restart the app and make sure it didn't roll out!
                                         const noUpdateResponse = ServerUtil.createDefaultResponse();
                                         noUpdateResponse.is_available = false;
-                                        noUpdateResponse.app_version = "0.0.1";
+                                        noUpdateResponse.target_binary_range = "0.0.1";
                                         ServerUtil.updateResponse = { update_info: noUpdateResponse };
                                         targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
                                         return ServerUtil.expectTestMessages([
@@ -1121,7 +1121,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                             (done: MochaDone) => {
                                 const noUpdateResponse = ServerUtil.createDefaultResponse();
                                 noUpdateResponse.is_available = false;
-                                noUpdateResponse.app_version = "0.0.1";
+                                noUpdateResponse.target_binary_range = "0.0.1";
                                 ServerUtil.updateResponse = { update_info: noUpdateResponse };
 
                                 Q({})
@@ -1205,7 +1205,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                                         // restart the app and make sure it didn't roll out!
                                         const noUpdateResponse = ServerUtil.createDefaultResponse();
                                         noUpdateResponse.is_available = false;
-                                        noUpdateResponse.app_version = "0.0.1";
+                                        noUpdateResponse.target_binary_range = "0.0.1";
                                         ServerUtil.updateResponse = { update_info: noUpdateResponse };
                                         targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
                                         return ServerUtil.expectTestMessages([
@@ -1236,7 +1236,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                             .then<void>(() => {
                                 const noUpdateResponse = ServerUtil.createDefaultResponse();
                                 noUpdateResponse.is_available = false;
-                                noUpdateResponse.app_version = "0.0.1";
+                                noUpdateResponse.target_binary_range = "0.0.1";
                                 ServerUtil.updateResponse = { update_info: noUpdateResponse };
                                 targetPlatform.getEmulatorManager().resumeApplication(TestConfig.TestNamespace);
                                 return ServerUtil.expectTestMessages([
@@ -1262,7 +1262,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                             .then(() => {
                                 const noUpdateResponse = ServerUtil.createDefaultResponse();
                                 noUpdateResponse.is_available = false;
-                                noUpdateResponse.app_version = "0.0.1";
+                                noUpdateResponse.target_binary_range = "0.0.1";
                                 ServerUtil.updateResponse = { update_info: noUpdateResponse };
                                 return targetPlatform.getEmulatorManager().resumeApplication(TestConfig.TestNamespace, 3 * 1000);
                             })
@@ -1291,7 +1291,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                             .then<void>(() => {
                                 const noUpdateResponse = ServerUtil.createDefaultResponse();
                                 noUpdateResponse.is_available = false;
-                                noUpdateResponse.app_version = "0.0.1";
+                                noUpdateResponse.target_binary_range = "0.0.1";
                                 ServerUtil.updateResponse = { update_info: noUpdateResponse };
                                 targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
                                 return ServerUtil.expectTestMessages([
@@ -1335,7 +1335,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                             .then<void>(() => {
                                 const noUpdateResponse = ServerUtil.createDefaultResponse();
                                 noUpdateResponse.is_available = false;
-                                noUpdateResponse.app_version = "0.0.1";
+                                noUpdateResponse.target_binary_range = "0.0.1";
                                 ServerUtil.updateResponse = { update_info: noUpdateResponse };
                                 targetPlatform.getEmulatorManager().resumeApplication(TestConfig.TestNamespace, 5 * 1000);
                                 return ServerUtil.expectTestMessages([
