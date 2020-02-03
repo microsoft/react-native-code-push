@@ -300,14 +300,16 @@ declare module 'code-push-plugin-testing-framework/script/serverUtil' {
 	 */
 	export class CheckForUpdateResponseMock {
 	    download_url: string;
-	    is_available: boolean;
+		is_available: boolean;
+		should_run_binary_version: boolean;
 	    package_size: number;
 	    update_app_version: boolean;
-	    app_version: string;
+		target_binary_range: string;
+		is_disabled: boolean;
 	    description: string;
 	    label: string;
 	    package_hash: string;
-	    isMandatory: boolean;
+	    is_mandatory: boolean;
 	}
 	/**
 	 * The model class of the codePush.checkForUpdate() request to the server.
