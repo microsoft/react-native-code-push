@@ -127,7 +127,6 @@ declare module 'code-push-plugin-testing-framework/script/platform' {
 	}
 	export class AndroidEmulatorManager implements IEmulatorManager {
 	    private static ANDROID_EMULATOR_OPTION_NAME;
-	    private static DEFAULT_ANDROID_EMULATOR;
 	    private targetEmulator;
 	    /**
 	     * Returns the target emulator, which is specified through the command line.
