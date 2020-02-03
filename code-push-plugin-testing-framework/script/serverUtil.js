@@ -84,13 +84,15 @@ exports.UpdateCheckRequestMock = UpdateCheckRequestMock;
 function createDefaultResponse() {
     var defaultResponse = new CheckForUpdateResponseMock();
     defaultResponse.download_url = "";
+    defaultResponse.is_disabled = false;
     defaultResponse.description = "";
     defaultResponse.is_available = false;
-    defaultResponse.isMandatory = false;
-    defaultResponse.app_version = "";
+    defaultResponse.is_mandatory = false;
+    defaultResponse.target_binary_range = "";
     defaultResponse.package_hash = "";
     defaultResponse.label = "";
     defaultResponse.package_size = 0;
+    defaultResponse.should_run_binary_version = false;
     defaultResponse.update_app_version = false;
     return defaultResponse;
 }
@@ -103,12 +105,14 @@ function createUpdateResponse(mandatory, targetPlatform, randomHash) {
     if (randomHash === void 0) { randomHash = true; }
     var updateResponse = new CheckForUpdateResponseMock();
     updateResponse.is_available = true;
-    updateResponse.app_version = "1.0.0";
+    updateResponse.is_disabled = false;
+    updateResponse.target_binary_range = "1.0.0";
     updateResponse.download_url = "mock.url/v0.1/public/codepush/report_status/download";
-    updateResponse.isMandatory = mandatory;
+    updateResponse.is_mandatory = mandatory;
     updateResponse.label = "mock-update";
     updateResponse.package_hash = "12345-67890";
     updateResponse.package_size = 12345;
+    updateResponse.should_run_binary_version = false;
     updateResponse.update_app_version = false;
     if (!!targetPlatform)
         updateResponse.download_url = targetPlatform.getServerUrl() + "/v0.1/public/codepush/report_status/download";
