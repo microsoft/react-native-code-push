@@ -1,6 +1,7 @@
 "use strict";
 var Q = require("q");
 var testUtil_1 = require("./testUtil");
+var TestConfig = require("./testConfig");
 //////////////////////////////////////////////////////////////////////////////////////////
 // PLATFORMS
 /**
@@ -326,25 +327,7 @@ var IOSEmulatorManager = (function () {
      * Ends a running application given its app id.
      */
     IOSEmulatorManager.prototype.endRunningApplication = function (appId) {
-        return testUtil_1.TestUtil.getProcessOutput("xcrun simctl spawn booted launchctl list", { noLogCommand: true, noLogStdOut: true, noLogStdErr: true })
-            .then(function (processListOutput) {
-            // Find the app's process.
-            var regex = new RegExp("(\\S+" + appId + "\\S+)");
-            var execResult = regex.exec(processListOutput);
-            if (execResult) {
-                return execResult[0];
-            }
-            else {
-                return Q.reject("Could not get the running application label.");
-            }
-        })
-            .then(function (applicationLabel) {
-            // Kill the app if we found the process.
-            return testUtil_1.TestUtil.getProcessOutput("xcrun simctl spawn booted launchctl stop " + applicationLabel, undefined).then(function () { return null; });
-        }, function (error) {
-            // We couldn't find the app's process so it must not be running.
-            return Q.resolve(error);
-        });
+        return testUtil_1.TestUtil.getProcessOutput("xcrun simctl terminate booted " + appId, undefined).then(function () { return null; })
     };
     /**
      * Restarts an already installed application by app id.
