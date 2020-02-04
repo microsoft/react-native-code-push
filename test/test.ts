@@ -22,11 +22,6 @@ interface RNPlatform {
     getBundleName(): string;
 
     /**
-     * Returns whether or not this platform supports diffs.
-     */
-    isDiffsSupported(): boolean;
-
-    /**
      * Returns the path to the binary of the given project on this platform.
      */
     getBinaryPath(projectDirectory: string): string;
@@ -57,13 +52,6 @@ class RNAndroid extends Platform.Android implements RNPlatform {
      */
     getBundleName(): string {
         return "index.android.bundle";
-    }
-
-    /**
-     * Returns whether or not this platform supports diffs.
-     */
-    isDiffsSupported(): boolean {
-        return true;
     }
 
     /**
@@ -134,13 +122,6 @@ class RNIOS extends Platform.IOS implements RNPlatform {
      */
     getBundleName(): string {
         return "main.jsbundle";
-    }
-
-    /**
-     * Returns whether or not this platform supports diffs.
-     */
-    isDiffsSupported(): boolean {
-        return true;
     }
 
     /**
@@ -367,7 +348,7 @@ class RNProjectManager extends ProjectManager {
         return deferred.promise
             .then(TestUtil.getProcessOutput.bind(undefined, "react-native bundle --platform " + targetPlatform.getName() + " --entry-file index." + targetPlatform.getName() + ".js --bundle-output " + bundlePath + " --assets-dest " + bundleFolder + " --dev false",
                 { cwd: path.join(projectDirectory, TestConfig.TestAppName) }))
-            .then<string>(TestUtil.archiveFolder.bind(undefined, bundleFolder, "", path.join(projectDirectory, TestConfig.TestAppName, "update.zip"), (<RNPlatform><any>targetPlatform).isDiffsSupported() && isDiff));
+            .then<string>(TestUtil.archiveFolder.bind(undefined, bundleFolder, "", path.join(projectDirectory, TestConfig.TestAppName, "update.zip"), isDiff));
     }
 
     /** JSON file containing the platforms the plugin is currently installed for.
@@ -501,12 +482,6 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
 
                 TestBuilder.it("window.codePush.checkForUpdate.sendsBinaryHash", false,
                     (done: MochaDone) => {
-                        if (!(<RNPlatform><any>targetPlatform).isDiffsSupported()) {
-                            console.log(targetPlatform.getName() + " does not send a binary hash!");
-                            done();
-                            return;
-                        }
-
                         const noUpdateResponse = ServerUtil.createDefaultResponse();
                         noUpdateResponse.is_available = false;
                         noUpdateResponse.target_binary_range = "0.0.1";
@@ -682,12 +657,6 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
 
                 TestBuilder.it("localPackage.install.handlesDiff.againstBinary", false,
                     (done: MochaDone) => {
-                        if (!(<RNPlatform><any>targetPlatform).isDiffsSupported()) {
-                            console.log(targetPlatform.getName() + " does not support diffs!");
-                            done();
-                            return;
-                        }
-
                         ServerUtil.updateResponse = { update_info: ServerUtil.createUpdateResponse(false, targetPlatform) };
 
                         /* create an update */
@@ -1055,7 +1024,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                         TestBuilder.it("window.codePush.sync.downloaderror", false,
                             (done: MochaDone) => {
                                 const invalidUrlResponse = ServerUtil.createUpdateResponse();
-                                invalidUrlResponse.download_url = path.join(TestConfig.templatePath, "invalid_path.zip");
+                                invalidUrlResponse.download_url = "http://" + path.join(TestConfig.templatePath, "invalid_path.zip");
                                 ServerUtil.updateResponse = { update_info: invalidUrlResponse };
 
                                 Q({})
@@ -1152,7 +1121,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                         TestBuilder.it("window.codePush.sync.2x.downloaderror", false,
                             (done: MochaDone) => {
                                 const invalidUrlResponse = ServerUtil.createUpdateResponse();
-                                invalidUrlResponse.download_url = path.join(TestConfig.templatePath, "invalid_path.zip");
+                                invalidUrlResponse.download_url = "http://" + path.join(TestConfig.templatePath, "invalid_path.zip");
                                 ServerUtil.updateResponse = { update_info: invalidUrlResponse };
 
                                 Q({})
