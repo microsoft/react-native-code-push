@@ -171,9 +171,28 @@ var AndroidEmulatorManager = (function () {
         if (this.targetEmulator)
             return Q(this.targetEmulator);
         else {
-            this.targetEmulator = testUtil_1.TestUtil.readMochaCommandLineOption(AndroidEmulatorManager.ANDROID_EMULATOR_OPTION_NAME, AndroidEmulatorManager.DEFAULT_ANDROID_EMULATOR);
-            console.log("Using Android emulator named " + this.targetEmulator);
-            return Q(this.targetEmulator);
+            const deferred = Q.defer();
+            const targetAndroidEmulator = testUtil_1.TestUtil.readMochaCommandLineOption(AndroidEmulatorManager.ANDROID_EMULATOR_OPTION_NAME);
+            if (!targetAndroidEmulator) {
+                // If no Android simulator is specified, get the most recent Android simulator to run tests on.
+                testUtil_1.TestUtil.getProcessOutput("emulator -list-avds", { noLogCommand: true, noLogStdOut: true, noLogStdErr: true })
+                    .then((Devices) => {
+                    const listOfDevices = Devices.trim().split("\n");
+                    deferred.resolve(listOfDevices[listOfDevices.length - 1]);
+                }, (error) => {
+                    deferred.reject(error);
+                });
+            }
+            else {
+                // Use the simulator specified on the command line.
+                deferred.resolve(targetAndroidEmulator);
+            }
+            return deferred.promise
+                .then((targetEmulator) => {
+                this.targetEmulator = targetEmulator;
+                console.log("Using Android simulator named " + this.targetEmulator);
+                return this.targetEmulator;
+            });
         }
     };
     /**
@@ -255,7 +274,6 @@ var AndroidEmulatorManager = (function () {
         return commandWithCheckAppExistence("adb uninstall", appId);
     };
     AndroidEmulatorManager.ANDROID_EMULATOR_OPTION_NAME = "--androidemu";
-    AndroidEmulatorManager.DEFAULT_ANDROID_EMULATOR = "emulator";
     return AndroidEmulatorManager;
 }());
 exports.AndroidEmulatorManager = AndroidEmulatorManager;
