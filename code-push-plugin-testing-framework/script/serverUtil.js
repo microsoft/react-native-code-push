@@ -83,15 +83,17 @@ exports.UpdateCheckRequestMock = UpdateCheckRequestMock;
  */
 function createDefaultResponse() {
     var defaultResponse = new CheckForUpdateResponseMock();
-    defaultResponse.downloadURL = "";
+    defaultResponse.download_url = "";
+    defaultResponse.is_disabled = false;
     defaultResponse.description = "";
-    defaultResponse.isAvailable = false;
-    defaultResponse.isMandatory = false;
-    defaultResponse.appVersion = "";
-    defaultResponse.packageHash = "";
+    defaultResponse.is_available = false;
+    defaultResponse.is_mandatory = false;
+    defaultResponse.target_binary_range = "";
+    defaultResponse.package_hash = "";
     defaultResponse.label = "";
-    defaultResponse.packageSize = 0;
-    defaultResponse.updateAppVersion = false;
+    defaultResponse.package_size = 0;
+    defaultResponse.should_run_binary_version = false;
+    defaultResponse.update_app_version = false;
     return defaultResponse;
 }
 exports.createDefaultResponse = createDefaultResponse;
@@ -102,19 +104,21 @@ function createUpdateResponse(mandatory, targetPlatform, randomHash) {
     if (mandatory === void 0) { mandatory = false; }
     if (randomHash === void 0) { randomHash = true; }
     var updateResponse = new CheckForUpdateResponseMock();
-    updateResponse.isAvailable = true;
-    updateResponse.appVersion = "1.0.0";
-    updateResponse.downloadURL = "mock.url/download";
-    updateResponse.isMandatory = mandatory;
+    updateResponse.is_available = true;
+    updateResponse.is_disabled = false;
+    updateResponse.target_binary_range = "1.0.0";
+    updateResponse.download_url = "mock.url/v0.1/public/codepush/report_status/download";
+    updateResponse.is_mandatory = mandatory;
     updateResponse.label = "mock-update";
-    updateResponse.packageHash = "12345-67890";
-    updateResponse.packageSize = 12345;
-    updateResponse.updateAppVersion = false;
+    updateResponse.package_hash = "12345-67890";
+    updateResponse.package_size = 12345;
+    updateResponse.should_run_binary_version = false;
+    updateResponse.update_app_version = false;
     if (!!targetPlatform)
-        updateResponse.downloadURL = targetPlatform.getServerUrl() + "/download";
+        updateResponse.download_url = targetPlatform.getServerUrl() + "/v0.1/public/codepush/report_status/download";
     // We need unique hashes to avoid conflicts.
     if (randomHash) {
-        updateResponse.packageHash = "randomHash-" + Math.floor(Math.random() * 10000);
+        updateResponse.package_hash = "randomHash-" + Math.floor(Math.random() * 10000);
     }
     return updateResponse;
 }
