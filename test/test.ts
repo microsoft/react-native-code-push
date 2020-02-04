@@ -63,7 +63,7 @@ class RNAndroid extends Platform.Android implements RNPlatform {
      * Returns whether or not this platform supports diffs.
      */
     isDiffsSupported(): boolean {
-        return false;
+        return true;
     }
 
     /**
@@ -538,6 +538,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                         const updateAppVersionResponse = ServerUtil.createDefaultResponse();
                         updateAppVersionResponse.is_available = true;
                         updateAppVersionResponse.target_binary_range = "2.0.0";
+                        updateAppVersionResponse.update_app_version = true;
 
                         ServerUtil.updateResponse = { update_info: updateAppVersionResponse };
 
@@ -647,7 +648,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                         ServerUtil.updateResponse = { update_info: ServerUtil.createUpdateResponse(false, targetPlatform) };
 
                         /* pass an invalid update url */
-                        ServerUtil.updateResponse.update_info.download_url = "invalid_url";
+                        ServerUtil.updateResponse.update_info.download_url = "http://invalid_url";
 
                         projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
 
