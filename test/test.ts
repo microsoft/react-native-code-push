@@ -138,35 +138,21 @@ class RNIOS extends Platform.IOS implements RNPlatform {
         const iOSProject: string = path.join(projectDirectory, TestConfig.TestAppName, "ios");
         const infoPlistPath: string = path.join(iOSProject, TestConfig.TestAppName, "Info.plist");
         const appDelegatePath: string = path.join(iOSProject, TestConfig.TestAppName, "AppDelegate.m");
-        // Create and install the Podfile
-        return TestUtil.getProcessOutput("pod init", { cwd: iOSProject })
-            .then(() => {
-                return fs.writeFileSync(path.join(iOSProject, "Podfile"),
-                    "target '" + TestConfig.TestAppName + "'\n  pod 'React', :path => '../node_modules/react-native', :subspecs => [ 'Core', 'RCTImage', 'RCTNetwork', 'RCTText', 'RCTWebSocket', ]\n  pod 'CodePush', :path => '../node_modules/react-native-code-push'\n");
-            })
+
+        // Install the Podfile
+        return TestUtil.getProcessOutput("pod install", { cwd: iOSProject })
             // Put the IOS deployment key in the Info.plist
             .then(TestUtil.replaceString.bind(undefined, infoPlistPath,
                 "</dict>\n</plist>",
                 "<key>CodePushDeploymentKey</key>\n\t<string>" + this.getDefaultDeploymentKey() + "</string>\n\t<key>CodePushServerURL</key>\n\t<string>" + this.getServerUrl() + "</string>\n\t</dict>\n</plist>"))
-            // Add the correct linker flags to the project.pbxproj
-            .then(TestUtil.replaceString.bind(undefined, path.join(iOSProject, TestConfig.TestAppName + ".xcodeproj", "project.pbxproj"),
-                "\"-lc[+][+]\",", "\"-lc++\", \"$(inherited)\""))
-            // Install the Pod
-            .then(TestUtil.getProcessOutput.bind(undefined, "pod install", { cwd: iOSProject }))
-            // Add the correct bundle identifier to the Info.plist
-            .then(TestUtil.replaceString.bind(undefined, infoPlistPath,
-                "org[.]reactjs[.]native[.]example[.][$][(]PRODUCT_NAME:rfc1034identifier[)]",
-                TestConfig.TestNamespace))
             // Set the app version to 1.0.0 instead of 1.0 in the Info.plist
             .then(TestUtil.replaceString.bind(undefined, infoPlistPath, "1.0", "1.0.0"))
             // Fix the linker flag list in project.pbxproj (pod install adds an extra comma)
             .then(TestUtil.replaceString.bind(undefined, path.join(iOSProject, TestConfig.TestAppName + ".xcodeproj", "project.pbxproj"),
                 "\"[$][(]inherited[)]\",\\s*[)];", "\"$(inherited)\"\n\t\t\t\t);"))
-            // Prevent the packager from starting during builds by replacing the script that starts it with nothing.
-            .then(TestUtil.replaceString.bind(undefined,
-                path.join(projectDirectory, TestConfig.TestAppName, "node_modules", "react-native", "React", "React.xcodeproj", "project.pbxproj"),
-                "shellScript = \".*\";",
-                "shellScript = \"\";"))
+            // Add the correct bundle identifier
+            .then(TestUtil.replaceString.bind(undefined, path.join(iOSProject, TestConfig.TestAppName + ".xcodeproj", "project.pbxproj"), 
+            "PRODUCT_BUNDLE_IDENTIFIER = [^;]*", "PRODUCT_BUNDLE_IDENTIFIER = \"" + TestConfig.TestNamespace + "\""))
             // Copy the AppDelegate.m to the project
             .then(TestUtil.copyFile.bind(undefined,
                 path.join(TestConfig.templatePath, "ios", TestConfig.TestAppName, "AppDelegate.m"),
