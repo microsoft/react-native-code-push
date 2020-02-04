@@ -817,13 +817,13 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                             })
                             .then<void>(() => {
                                 /* restart the application */
-                                console.log("Update hash: " + ServerUtil.updateResponse.update_info.packageHash);
+                                console.log("Update hash: " + ServerUtil.updateResponse.update_info.package_hash);
                                 targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
                                 return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
                             })
                             .then<void>(() => {
                                 /* restart the application */
-                                console.log("Update hash: " + ServerUtil.updateResponse.update_info.packageHash);
+                                console.log("Update hash: " + ServerUtil.updateResponse.update_info.package_hash);
                                 targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
                                 return ServerUtil.expectTestMessages([ServerUtil.TestMessage.UPDATE_FAILED_PREVIOUSLY]);
                             })
