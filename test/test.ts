@@ -817,13 +817,13 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                             })
                             .then<void>(() => {
                                 /* restart the application */
-                                console.log("Update hash: " + ServerUtil.updateResponse.update_info.packageHash);
+                                console.log("Update hash: " + ServerUtil.updateResponse.update_info.package_hash);
                                 targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
                                 return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
                             })
                             .then<void>(() => {
                                 /* restart the application */
-                                console.log("Update hash: " + ServerUtil.updateResponse.update_info.packageHash);
+                                console.log("Update hash: " + ServerUtil.updateResponse.update_info.package_hash);
                                 targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
                                 return ServerUtil.expectTestMessages([ServerUtil.TestMessage.UPDATE_FAILED_PREVIOUSLY]);
                             })
@@ -921,7 +921,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                                     new ServerUtil.AppMessage(ServerUtil.TestMessage.PENDING_PACKAGE, [null]),
                                     new ServerUtil.AppMessage(ServerUtil.TestMessage.CURRENT_PACKAGE, [null]),
                                     new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UPDATE_INSTALLED]),
-                                    new ServerUtil.AppMessage(ServerUtil.TestMessage.PENDING_PACKAGE, [ServerUtil.updateResponse.update_info.packageHash]),
+                                    new ServerUtil.AppMessage(ServerUtil.TestMessage.PENDING_PACKAGE, [ServerUtil.updateResponse.update_info.package_hash]),
                                     new ServerUtil.AppMessage(ServerUtil.TestMessage.CURRENT_PACKAGE, [null]),
                                     ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
                             })
