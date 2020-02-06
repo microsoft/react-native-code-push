@@ -1,7 +1,6 @@
 "use strict";
 var Q = require("q");
 var testUtil_1 = require("./testUtil");
-var TestConfig = require("./testConfig");
 //////////////////////////////////////////////////////////////////////////////////////////
 // PLATFORMS
 /**

@@ -1,7 +1,7 @@
 "use strict";
 // IMPORTS
 var assert = require("assert");
-var bodyparser = require("body-parser");
+var bodyParser = require("body-parser");
 var express = require("express");
 var Q = require("q");
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -12,8 +12,8 @@ var Q = require("q");
 function setupServer(targetPlatform) {
     console.log("Setting up server at " + targetPlatform.getServerUrl());
     var app = express();
-    app.use(bodyparser.json());
-    app.use(bodyparser.urlencoded({ extended: true }));
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({ extended: true }));
     app.use(function (req, res, next) {
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.setHeader("Access-Control-Allow-Methods", "*");
