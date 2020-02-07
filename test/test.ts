@@ -21,9 +21,9 @@ interface RNPlatform {
      */
     getBundleName(): string;
 
-     /**
-     * Returns whether or not this platform supports diffs.
-     */
+    /**
+    * Returns whether or not this platform supports diffs.
+    */
     isDiffsSupported(): boolean;
 
     /**
@@ -119,8 +119,13 @@ class RNAndroid extends Platform.Android implements RNPlatform {
         // In order to run on Android without the package manager, we must create a release APK and then sign it with the debug certificate.
         const androidDirectory: string = path.join(projectDirectory, TestConfig.TestAppName, "android");
         const apkPath = this.getBinaryPath(projectDirectory);
-        return TestUtil.getProcessOutput("gradlew assembleRelease --daemon", { cwd: androidDirectory })
-            .then(() => { return null; });
+        if (process.platform === "darwin") {
+            return TestUtil.getProcessOutput(`./gradlew assembleRelease --daemon`, { cwd: androidDirectory })
+                .then(() => { return null; });
+        } else {
+            return TestUtil.getProcessOutput(`gradlew assembleRelease --daemon`, { cwd: androidDirectory })
+                .then(() => { return null; });
+        }
     }
 }
 
@@ -142,7 +147,7 @@ class RNIOS extends Platform.IOS implements RNPlatform {
     isDiffsSupported(): boolean {
         return true;
     }
-    
+
     /**
      * Returns the path to the binary of the given project on this platform.
      */
@@ -170,8 +175,8 @@ class RNIOS extends Platform.IOS implements RNPlatform {
             .then(TestUtil.replaceString.bind(undefined, path.join(iOSProject, TestConfig.TestAppName + ".xcodeproj", "project.pbxproj"),
                 "\"[$][(]inherited[)]\",\\s*[)];", "\"$(inherited)\"\n\t\t\t\t);"))
             // Add the correct bundle identifier
-            .then(TestUtil.replaceString.bind(undefined, path.join(iOSProject, TestConfig.TestAppName + ".xcodeproj", "project.pbxproj"), 
-            "PRODUCT_BUNDLE_IDENTIFIER = [^;]*", "PRODUCT_BUNDLE_IDENTIFIER = \"" + TestConfig.TestNamespace + "\""))
+            .then(TestUtil.replaceString.bind(undefined, path.join(iOSProject, TestConfig.TestAppName + ".xcodeproj", "project.pbxproj"),
+                "PRODUCT_BUNDLE_IDENTIFIER = [^;]*", "PRODUCT_BUNDLE_IDENTIFIER = \"" + TestConfig.TestNamespace + "\""))
             // Copy the AppDelegate.m to the project
             .then(TestUtil.copyFile.bind(undefined,
                 path.join(TestConfig.templatePath, "ios", TestConfig.TestAppName, "AppDelegate.m"),
