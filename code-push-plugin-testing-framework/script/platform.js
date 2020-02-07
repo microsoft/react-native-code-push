@@ -206,7 +206,14 @@ var AndroidEmulatorManager = (function () {
             return testUtil_1.TestUtil.getProcessOutput("adb shell pm list packages", { noLogCommand: true, noLogStdOut: true, noLogStdErr: true }).then(function () { return null; });
         }
         function startAndroidEmulator(androidEmulatorName) {
-            return testUtil_1.TestUtil.getProcessOutput("emulator @" + androidEmulatorName + " &", { noLogStdErr: true, timeout: 5000}).then(function () { return null; });
+            const androidEmulatorCommand = `emulator @${androidEmulatorName}`;
+            let osSpecificCommand = "";
+            if (process.platform === "darwin") {
+                osSpecificCommand = `${androidEmulatorCommand} &`;
+            } else {
+                osSpecificCommand = `START /B ${androidEmulatorCommand}`;
+            }
+            return testUtil_1.TestUtil.getProcessOutput(osSpecificCommand, { noLogStdErr: true, timeout: 5000 });
         }
         function killAndroidEmulator() {
             return testUtil_1.TestUtil.getProcessOutput("adb emu kill").then(function () { return null; });
