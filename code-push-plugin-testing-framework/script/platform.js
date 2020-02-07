@@ -168,6 +168,7 @@ var AndroidEmulatorManager = (function () {
      * Returns the target emulator, which is specified through the command line.
      */
     AndroidEmulatorManager.prototype.getTargetEmulator = function () {
+        let _this = this;
         if (this.targetEmulator)
             return Q(this.targetEmulator);
         else {
@@ -189,9 +190,9 @@ var AndroidEmulatorManager = (function () {
             }
             return deferred.promise
                 .then((targetEmulator) => {
-                this.targetEmulator = targetEmulator;
-                console.log("Using Android simulator named " + this.targetEmulator);
-                return this.targetEmulator;
+                _this.targetEmulator = targetEmulator;
+                console.log("Using Android simulator named " + _this.targetEmulator);
+                return _this.targetEmulator;
             });
         }
     };
