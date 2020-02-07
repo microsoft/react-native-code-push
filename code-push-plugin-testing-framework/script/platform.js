@@ -117,11 +117,11 @@ function bootEmulatorInternal(platformName, restartEmulators, targetEmulator, ch
         // Dummy command that succeeds if emulator is ready and fails otherwise.
         checkEmulator()
             .then(function () {
-            checkDeferred.resolve(undefined);
-        }, function (error) {
-            console.log(platformName + " emulator is not ready yet!");
-            checkDeferred.reject(error);
-        });
+                checkDeferred.resolve(undefined);
+            }, function (error) {
+                console.log(platformName + " emulator is not ready yet!");
+                checkDeferred.reject(error);
+            });
         return checkDeferred.promise;
     }
     var emulatorReadyAttempts = 0;
@@ -137,11 +137,11 @@ function bootEmulatorInternal(platformName, restartEmulators, targetEmulator, ch
         setTimeout(function () {
             checkEmulatorReady()
                 .then(function () {
-                looperDeferred.resolve(undefined);
-                onEmulatorReady();
-            }, function () {
-                return checkEmulatorReadyLooper().then(function () { looperDeferred.resolve(undefined); }, function () { looperDeferred.reject(undefined); });
-            });
+                    looperDeferred.resolve(undefined);
+                    onEmulatorReady();
+                }, function () {
+                    return checkEmulatorReadyLooper().then(function () { looperDeferred.resolve(undefined); }, function () { looperDeferred.reject(undefined); });
+                });
         }, emulatorReadyCheckDelayMs);
         return looperDeferred.promise;
     }
@@ -178,11 +178,11 @@ var AndroidEmulatorManager = (function () {
                 // If no Android simulator is specified, get the most recent Android simulator to run tests on.
                 testUtil_1.TestUtil.getProcessOutput("emulator -list-avds", { noLogCommand: true, noLogStdOut: true, noLogStdErr: true })
                     .then((Devices) => {
-                    const listOfDevices = Devices.trim().split("\n");
-                    deferred.resolve(listOfDevices[listOfDevices.length - 1]);
-                }, (error) => {
-                    deferred.reject(error);
-                });
+                        const listOfDevices = Devices.trim().split("\n");
+                        deferred.resolve(listOfDevices[listOfDevices.length - 1]);
+                    }, (error) => {
+                        deferred.reject(error);
+                    });
             }
             else {
                 // Use the simulator specified on the command line.
@@ -190,10 +190,10 @@ var AndroidEmulatorManager = (function () {
             }
             return deferred.promise
                 .then((targetEmulator) => {
-                _this.targetEmulator = targetEmulator;
-                console.log("Using Android simulator named " + _this.targetEmulator);
-                return _this.targetEmulator;
-            });
+                    _this.targetEmulator = targetEmulator;
+                    console.log("Using Android simulator named " + _this.targetEmulator);
+                    return _this.targetEmulator;
+                });
         }
     };
     /**
@@ -213,8 +213,8 @@ var AndroidEmulatorManager = (function () {
         }
         return this.getTargetEmulator()
             .then(function (targetEmulator) {
-            return bootEmulatorInternal("Android", restartEmulators, targetEmulator, checkAndroidEmulator, startAndroidEmulator, killAndroidEmulator);
-        });
+                return bootEmulatorInternal("Android", restartEmulators, targetEmulator, checkAndroidEmulator, startAndroidEmulator, killAndroidEmulator);
+            });
     };
     /**
      * Launches an already installed application by app id.
@@ -235,12 +235,12 @@ var AndroidEmulatorManager = (function () {
         var _this = this;
         return this.endRunningApplication(appId)
             .then(function () {
-            // Wait for a second before restarting.
-            return Q.delay(1000);
-        })
+                // Wait for a second before restarting.
+                return Q.delay(1000);
+            })
             .then(function () {
-            return _this.launchInstalledApplication(appId);
-        });
+                return _this.launchInstalledApplication(appId);
+            });
     };
     /**
      * Navigates away from the current app, waits for a delay (defaults to 1 second), then navigates to the specified app.
@@ -251,13 +251,13 @@ var AndroidEmulatorManager = (function () {
         // Open a default Android app (for example, settings).
         return this.launchInstalledApplication("com.android.settings")
             .then(function () {
-            console.log("Waiting for " + delayBeforeResumingMs + "ms before resuming the test application.");
-            return Q.delay(delayBeforeResumingMs);
-        })
+                console.log("Waiting for " + delayBeforeResumingMs + "ms before resuming the test application.");
+                return Q.delay(delayBeforeResumingMs);
+            })
             .then(function () {
-            // Reopen the app.
-            return _this.launchInstalledApplication(appId);
-        });
+                // Reopen the app.
+                return _this.launchInstalledApplication(appId);
+            });
     };
     /**
      * Prepares the emulator for a test.
@@ -285,34 +285,34 @@ var IOSEmulatorManager = (function () {
      * Returns the target emulator, which is specified through the command line.
      */
     IOSEmulatorManager.prototype.getTargetEmulator = function () {
-        var _this = this;
+        let _this = this;
         if (this.targetEmulator)
             return Q(this.targetEmulator);
         else {
-            var deferred = Q.defer();
-            var targetIOSEmulator = testUtil_1.TestUtil.readMochaCommandLineOption(IOSEmulatorManager.IOS_EMULATOR_OPTION_NAME);
+            let deferred = Q.defer();
+            let targetIOSEmulator = testUtil_1.TestUtil.readMochaCommandLineOption(IOSEmulatorManager.IOS_EMULATOR_OPTION_NAME);
             if (!targetIOSEmulator) {
                 // If no iOS simulator is specified, get the most recent iOS simulator to run tests on.
                 testUtil_1.TestUtil.getProcessOutput("xcrun simctl list", { noLogCommand: true, noLogStdOut: true, noLogStdErr: true })
-                    .then(function (listOfDevicesWithDevicePairs) {
-                    var listOfDevices = listOfDevicesWithDevicePairs.slice(listOfDevicesWithDevicePairs.indexOf("-- iOS"), listOfDevicesWithDevicePairs.indexOf("-- tvOS"));
-                    var phoneDevice = /iPhone (\S* )*(\(([0-9A-Z-]*)\))/g;
-                    var match = listOfDevices.match(phoneDevice);
-                    deferred.resolve(match[match.length - 1]);
-                }, function (error) {
-                    deferred.reject(error);
-                });
+                    .then((listOfDevicesWithDevicePairs) => {
+                        let listOfDevices = listOfDevicesWithDevicePairs.slice(listOfDevicesWithDevicePairs.indexOf("-- iOS"), listOfDevicesWithDevicePairs.indexOf("-- tvOS"));
+                        let phoneDevice = /iPhone (\S* )*(\(([0-9A-Z-]*)\))/g;
+                        let match = listOfDevices.match(phoneDevice);
+                        deferred.resolve(match[match.length - 1]);
+                    }, (error) => {
+                        deferred.reject(error);
+                    });
             }
             else {
                 // Use the simulator specified on the command line.
                 deferred.resolve(targetIOSEmulator);
             }
             return deferred.promise
-                .then(function (targetEmulator) {
-                _this.targetEmulator = targetEmulator;
-                console.log("Using iOS simulator named " + _this.targetEmulator);
-                return _this.targetEmulator;
-            });
+                .then((targetEmulator) => {
+                    _this.targetEmulator = targetEmulator;
+                    console.log("Using iOS simulator named " + _this.targetEmulator);
+                    return _this.targetEmulator;
+                });
         }
     };
     /**
@@ -333,8 +333,8 @@ var IOSEmulatorManager = (function () {
         }
         return this.getTargetEmulator()
             .then(function (targetEmulator) {
-            return bootEmulatorInternal("iOS", restartEmulators, targetEmulator, checkIOSEmulator, startIOSEmulator, killIOSEmulator);
-        });
+                return bootEmulatorInternal("iOS", restartEmulators, targetEmulator, checkIOSEmulator, startIOSEmulator, killIOSEmulator);
+            });
     };
     /**
      * Launches an already installed application by app id.
@@ -355,9 +355,9 @@ var IOSEmulatorManager = (function () {
         var _this = this;
         return this.endRunningApplication(appId)
             .then(function () {
-            // Wait for a second before restarting.
-            return Q.delay(1000);
-        })
+                // Wait for a second before restarting.
+                return Q.delay(1000);
+            })
             .then(function () { return _this.launchInstalledApplication(appId); });
     };
     /**
@@ -369,13 +369,13 @@ var IOSEmulatorManager = (function () {
         // Open a default iOS app (for example, settings).
         return this.launchInstalledApplication("com.apple.Preferences")
             .then(function () {
-            console.log("Waiting for " + delayBeforeResumingMs + "ms before resuming the test application.");
-            return Q.delay(delayBeforeResumingMs);
-        })
+                console.log("Waiting for " + delayBeforeResumingMs + "ms before resuming the test application.");
+                return Q.delay(delayBeforeResumingMs);
+            })
             .then(function () {
-            // Reopen the app.
-            return _this.launchInstalledApplication(appId);
-        });
+                // Reopen the app.
+                return _this.launchInstalledApplication(appId);
+            });
     };
     /**
      * Prepares the emulator for a test.
