@@ -21,6 +21,11 @@ interface RNPlatform {
      */
     getBundleName(): string;
 
+     /**
+     * Returns whether or not this platform supports diffs.
+     */
+    isDiffsSupported(): boolean;
+
     /**
      * Returns the path to the binary of the given project on this platform.
      */
@@ -52,6 +57,13 @@ class RNAndroid extends Platform.Android implements RNPlatform {
      */
     getBundleName(): string {
         return "index.android.bundle";
+    }
+
+    /**
+     * Returns whether or not this platform supports diffs.
+     */
+    isDiffsSupported(): boolean {
+        return false;
     }
 
     /**
@@ -124,6 +136,13 @@ class RNIOS extends Platform.IOS implements RNPlatform {
         return "main.jsbundle";
     }
 
+    /**
+     * Returns whether or not this platform supports diffs.
+     */
+    isDiffsSupported(): boolean {
+        return true;
+    }
+    
     /**
      * Returns the path to the binary of the given project on this platform.
      */
@@ -468,6 +487,12 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
 
                 TestBuilder.it("window.codePush.checkForUpdate.sendsBinaryHash", false,
                     (done: MochaDone) => {
+                        if (!(<RNPlatform><any>targetPlatform).isDiffsSupported()) {
+                            console.log(targetPlatform.getName() + " does not send a binary hash!");
+                            done();
+                            return;
+                        }
+
                         const noUpdateResponse = ServerUtil.createDefaultResponse();
                         noUpdateResponse.is_available = false;
                         noUpdateResponse.target_binary_range = "0.0.1";
