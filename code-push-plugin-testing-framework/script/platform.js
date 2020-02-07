@@ -97,8 +97,8 @@ exports.IOS = IOS;
 //////////////////////////////////////////////////////////////////////////////////////////
 // EMULATOR MANAGERS
 // bootEmulatorInternal constants
-var emulatorMaxReadyAttempts = 5;
-var emulatorReadyCheckDelayMs = 30 * 1000;
+var emulatorMaxReadyAttempts = 50;
+var emulatorReadyCheckDelayMs = 5 * 1000;
 /**
  * Helper function for EmulatorManager implementations to use to boot an emulator with a given platformName and check, start, and kill methods.
  */
@@ -206,7 +206,7 @@ var AndroidEmulatorManager = (function () {
             return testUtil_1.TestUtil.getProcessOutput("adb shell pm list packages", { noLogCommand: true, noLogStdOut: true, noLogStdErr: true }).then(function () { return null; });
         }
         function startAndroidEmulator(androidEmulatorName) {
-            return testUtil_1.TestUtil.getProcessOutput("emulator @" + androidEmulatorName).then(function () { return null; });
+            return testUtil_1.TestUtil.getProcessOutput("emulator @" + androidEmulatorName + " &", { noLogStdErr: true, timeout: 5000}).then(function () { return null; });
         }
         function killAndroidEmulator() {
             return testUtil_1.TestUtil.getProcessOutput("adb emu kill").then(function () { return null; });
