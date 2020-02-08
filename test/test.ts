@@ -22,8 +22,8 @@ interface RNPlatform {
     getBundleName(): string;
 
     /**
-     * Returns whether or not this platform supports diffs.
-     */
+    * Returns whether or not this platform supports diffs.
+    */
     isDiffsSupported(): boolean;
 
     /**
@@ -119,8 +119,13 @@ class RNAndroid extends Platform.Android implements RNPlatform {
         // In order to run on Android without the package manager, we must create a release APK and then sign it with the debug certificate.
         const androidDirectory: string = path.join(projectDirectory, TestConfig.TestAppName, "android");
         const apkPath = this.getBinaryPath(projectDirectory);
-        return TestUtil.getProcessOutput("gradlew assembleRelease --daemon", { cwd: androidDirectory })
-            .then(() => { return null; });
+        if (process.platform === "darwin") {
+            return TestUtil.getProcessOutput(`./gradlew assembleRelease --daemon`, { cwd: androidDirectory })
+                .then(() => { return null; });
+        } else {
+            return TestUtil.getProcessOutput(`gradlew assembleRelease --daemon`, { cwd: androidDirectory })
+                .then(() => { return null; });
+        }
     }
 }
 
@@ -170,8 +175,8 @@ class RNIOS extends Platform.IOS implements RNPlatform {
             .then(TestUtil.replaceString.bind(undefined, path.join(iOSProject, TestConfig.TestAppName + ".xcodeproj", "project.pbxproj"),
                 "\"[$][(]inherited[)]\",\\s*[)];", "\"$(inherited)\"\n\t\t\t\t);"))
             // Add the correct bundle identifier
-            .then(TestUtil.replaceString.bind(undefined, path.join(iOSProject, TestConfig.TestAppName + ".xcodeproj", "project.pbxproj"), 
-            "PRODUCT_BUNDLE_IDENTIFIER = [^;]*", "PRODUCT_BUNDLE_IDENTIFIER = \"" + TestConfig.TestNamespace + "\""))
+            .then(TestUtil.replaceString.bind(undefined, path.join(iOSProject, TestConfig.TestAppName + ".xcodeproj", "project.pbxproj"),
+                "PRODUCT_BUNDLE_IDENTIFIER = [^;]*", "PRODUCT_BUNDLE_IDENTIFIER = \"" + TestConfig.TestNamespace + "\""))
             // Copy the AppDelegate.m to the project
             .then(TestUtil.copyFile.bind(undefined,
                 path.join(TestConfig.templatePath, "ios", TestConfig.TestAppName, "AppDelegate.m"),
@@ -353,7 +358,7 @@ class RNProjectManager extends ProjectManager {
         return deferred.promise
             .then(TestUtil.getProcessOutput.bind(undefined, "react-native bundle --platform " + targetPlatform.getName() + " --entry-file index." + targetPlatform.getName() + ".js --bundle-output " + bundlePath + " --assets-dest " + bundleFolder + " --dev false",
                 { cwd: path.join(projectDirectory, TestConfig.TestAppName) }))
-            .then<string>(TestUtil.archiveFolder.bind(undefined, bundleFolder, "", path.join(projectDirectory, TestConfig.TestAppName, "update.zip"), (<RNPlatform><any>targetPlatform).isDiffsSupported() && isDiff));
+            .then<string>(TestUtil.archiveFolder.bind(undefined, bundleFolder, "", path.join(projectDirectory, TestConfig.TestAppName, "update.zip"), isDiff));
     }
 
     /** JSON file containing the platforms the plugin is currently installed for.
@@ -524,6 +529,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                         const updateAppVersionResponse = ServerUtil.createDefaultResponse();
                         updateAppVersionResponse.is_available = true;
                         updateAppVersionResponse.target_binary_range = "2.0.0";
+                        updateAppVersionResponse.update_app_version = true;
 
                         ServerUtil.updateResponse = { update_info: updateAppVersionResponse };
 
@@ -633,7 +639,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                         ServerUtil.updateResponse = { update_info: ServerUtil.createUpdateResponse(false, targetPlatform) };
 
                         /* pass an invalid update url */
-                        ServerUtil.updateResponse.update_info.download_url = "invalid_url";
+                        ServerUtil.updateResponse.update_info.download_url = "http://invalid_url";
 
                         projectManager.runApplication(TestConfig.testRunDirectory, targetPlatform);
 
@@ -667,12 +673,6 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
 
                 TestBuilder.it("localPackage.install.handlesDiff.againstBinary", false,
                     (done: MochaDone) => {
-                        if (!(<RNPlatform><any>targetPlatform).isDiffsSupported()) {
-                            console.log(targetPlatform.getName() + " does not support diffs!");
-                            done();
-                            return;
-                        }
-
                         ServerUtil.updateResponse = { update_info: ServerUtil.createUpdateResponse(false, targetPlatform) };
 
                         /* create an update */
@@ -847,13 +847,13 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                             })
                             .then<void>(() => {
                                 /* restart the application */
-                                console.log("Update hash: " + ServerUtil.updateResponse.update_info.packageHash);
+                                console.log("Update hash: " + ServerUtil.updateResponse.update_info.package_hash);
                                 targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
                                 return ServerUtil.expectTestMessages([ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
                             })
                             .then<void>(() => {
                                 /* restart the application */
-                                console.log("Update hash: " + ServerUtil.updateResponse.update_info.packageHash);
+                                console.log("Update hash: " + ServerUtil.updateResponse.update_info.package_hash);
                                 targetPlatform.getEmulatorManager().restartApplication(TestConfig.TestNamespace);
                                 return ServerUtil.expectTestMessages([ServerUtil.TestMessage.UPDATE_FAILED_PREVIOUSLY]);
                             })
@@ -951,7 +951,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                                     new ServerUtil.AppMessage(ServerUtil.TestMessage.PENDING_PACKAGE, [null]),
                                     new ServerUtil.AppMessage(ServerUtil.TestMessage.CURRENT_PACKAGE, [null]),
                                     new ServerUtil.AppMessage(ServerUtil.TestMessage.SYNC_STATUS, [ServerUtil.TestMessage.SYNC_UPDATE_INSTALLED]),
-                                    new ServerUtil.AppMessage(ServerUtil.TestMessage.PENDING_PACKAGE, [ServerUtil.updateResponse.update_info.packageHash]),
+                                    new ServerUtil.AppMessage(ServerUtil.TestMessage.PENDING_PACKAGE, [ServerUtil.updateResponse.update_info.package_hash]),
                                     new ServerUtil.AppMessage(ServerUtil.TestMessage.CURRENT_PACKAGE, [null]),
                                     ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
                             })
@@ -1040,7 +1040,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                         TestBuilder.it("window.codePush.sync.downloaderror", false,
                             (done: MochaDone) => {
                                 const invalidUrlResponse = ServerUtil.createUpdateResponse();
-                                invalidUrlResponse.download_url = path.join(TestConfig.templatePath, "invalid_path.zip");
+                                invalidUrlResponse.download_url = "http://" + path.join(TestConfig.templatePath, "invalid_path.zip");
                                 ServerUtil.updateResponse = { update_info: invalidUrlResponse };
 
                                 Q({})
@@ -1137,7 +1137,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                         TestBuilder.it("window.codePush.sync.2x.downloaderror", false,
                             (done: MochaDone) => {
                                 const invalidUrlResponse = ServerUtil.createUpdateResponse();
-                                invalidUrlResponse.download_url = path.join(TestConfig.templatePath, "invalid_path.zip");
+                                invalidUrlResponse.download_url = "http://" + path.join(TestConfig.templatePath, "invalid_path.zip");
                                 ServerUtil.updateResponse = { update_info: invalidUrlResponse };
 
                                 Q({})
