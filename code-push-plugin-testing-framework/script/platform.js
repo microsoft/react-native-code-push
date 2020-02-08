@@ -96,8 +96,8 @@ exports.IOS = IOS;
 //////////////////////////////////////////////////////////////////////////////////////////
 // EMULATOR MANAGERS
 // bootEmulatorInternal constants
-var emulatorMaxReadyAttempts = 5;
-var emulatorReadyCheckDelayMs = 30 * 1000;
+var emulatorMaxReadyAttempts = 50;
+var emulatorReadyCheckDelayMs = 5 * 1000;
 /**
  * Helper function for EmulatorManager implementations to use to boot an emulator with a given platformName and check, start, and kill methods.
  */
@@ -167,6 +167,7 @@ var AndroidEmulatorManager = (function () {
      * Returns the target emulator, which is specified through the command line.
      */
     AndroidEmulatorManager.prototype.getTargetEmulator = function () {
+        let _this = this;
         if (this.targetEmulator)
             return Q(this.targetEmulator);
         else {
@@ -188,9 +189,9 @@ var AndroidEmulatorManager = (function () {
             }
             return deferred.promise
                 .then((targetEmulator) => {
-                    this.targetEmulator = targetEmulator;
-                    console.log("Using Android simulator named " + this.targetEmulator);
-                    return this.targetEmulator;
+                    _this.targetEmulator = targetEmulator;
+                    console.log("Using Android simulator named " + _this.targetEmulator);
+                    return _this.targetEmulator;
                 });
         }
     };
@@ -204,7 +205,14 @@ var AndroidEmulatorManager = (function () {
             return testUtil_1.TestUtil.getProcessOutput("adb shell pm list packages", { noLogCommand: true, noLogStdOut: true, noLogStdErr: true }).then(function () { return null; });
         }
         function startAndroidEmulator(androidEmulatorName) {
-            return testUtil_1.TestUtil.getProcessOutput("emulator @" + androidEmulatorName).then(function () { return null; });
+            const androidEmulatorCommand = `emulator @${androidEmulatorName}`;
+            let osSpecificCommand = "";
+            if (process.platform === "darwin") {
+                osSpecificCommand = `${androidEmulatorCommand} &`;
+            } else {
+                osSpecificCommand = `START /B ${androidEmulatorCommand}`;
+            }
+            return testUtil_1.TestUtil.getProcessOutput(osSpecificCommand, { noLogStdErr: true, timeout: 5000 });
         }
         function killAndroidEmulator() {
             return testUtil_1.TestUtil.getProcessOutput("adb emu kill").then(function () { return null; });
@@ -283,21 +291,21 @@ var IOSEmulatorManager = (function () {
      * Returns the target emulator, which is specified through the command line.
      */
     IOSEmulatorManager.prototype.getTargetEmulator = function () {
-        var _this = this;
+        let _this = this;
         if (this.targetEmulator)
             return Q(this.targetEmulator);
         else {
-            var deferred = Q.defer();
-            var targetIOSEmulator = testUtil_1.TestUtil.readMochaCommandLineOption(IOSEmulatorManager.IOS_EMULATOR_OPTION_NAME);
+            let deferred = Q.defer();
+            let targetIOSEmulator = testUtil_1.TestUtil.readMochaCommandLineOption(IOSEmulatorManager.IOS_EMULATOR_OPTION_NAME);
             if (!targetIOSEmulator) {
                 // If no iOS simulator is specified, get the most recent iOS simulator to run tests on.
                 testUtil_1.TestUtil.getProcessOutput("xcrun simctl list", { noLogCommand: true, noLogStdOut: true, noLogStdErr: true })
-                    .then(function (listOfDevicesWithDevicePairs) {
-                        var listOfDevices = listOfDevicesWithDevicePairs.slice(listOfDevicesWithDevicePairs.indexOf("-- iOS"), listOfDevicesWithDevicePairs.indexOf("-- tvOS"));
-                        var phoneDevice = /iPhone (\S* )*(\(([0-9A-Z-]*)\))/g;
-                        var match = listOfDevices.match(phoneDevice);
+                    .then((listOfDevicesWithDevicePairs) => {
+                        let listOfDevices = listOfDevicesWithDevicePairs.slice(listOfDevicesWithDevicePairs.indexOf("-- iOS"), listOfDevicesWithDevicePairs.indexOf("-- tvOS"));
+                        let phoneDevice = /iPhone (\S* )*(\(([0-9A-Z-]*)\))/g;
+                        let match = listOfDevices.match(phoneDevice);
                         deferred.resolve(match[match.length - 1]);
-                    }, function (error) {
+                    }, (error) => {
                         deferred.reject(error);
                     });
             }
@@ -306,7 +314,7 @@ var IOSEmulatorManager = (function () {
                 deferred.resolve(targetIOSEmulator);
             }
             return deferred.promise
-                .then(function (targetEmulator) {
+                .then((targetEmulator) => {
                     _this.targetEmulator = targetEmulator;
                     console.log("Using iOS simulator named " + _this.targetEmulator);
                     return _this.targetEmulator;
