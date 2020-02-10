@@ -143,7 +143,7 @@ var TestUtil = (function () {
     /**
      * Check that boolean environment variable string is 'true.
      */
-    TestUtil.resolveBooleanEnvironmentVariables = function(variable) {
+    TestUtil.resolveBooleanVariables = function(variable) {
         if (variable) {
             return variable.toLowerCase() === 'true';
         }
