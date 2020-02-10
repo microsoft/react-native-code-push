@@ -279,7 +279,6 @@ var AndroidEmulatorManager = (function () {
     AndroidEmulatorManager.prototype.uninstallApplication = function (appId) {
         return commandWithCheckAppExistence("adb uninstall", appId);
     };
-    AndroidEmulatorManager.ANDROID_EMULATOR_OPTION_NAME = "--androidemu";
     return AndroidEmulatorManager;
 }());
 exports.AndroidEmulatorManager = AndroidEmulatorManager;
@@ -394,7 +393,6 @@ var IOSEmulatorManager = (function () {
     IOSEmulatorManager.prototype.uninstallApplication = function (appId) {
         return testUtil_1.TestUtil.getProcessOutput("xcrun simctl uninstall booted " + appId).then(function () { return null; });
     };
-    IOSEmulatorManager.IOS_EMULATOR_OPTION_NAME = "--iosemu";
     return IOSEmulatorManager;
 }());
 exports.IOSEmulatorManager = IOSEmulatorManager;
