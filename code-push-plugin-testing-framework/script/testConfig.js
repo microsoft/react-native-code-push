@@ -21,6 +21,6 @@ exports.templatePath = path.join(__dirname, "../../test/template");
 exports.thisPluginInstallString = process.env.NPM ? `npm install ${NPM_PLUGIN_PATH}` : `npm pack ${DEFAULT_PLUGIN_PATH} && npm install ${DEFAULT_PLUGIN_TGZ_NAME}`;
 exports.testRunDirectory =  process.env.RUN_DIR ? process.env.RUN_DIR: DEFAULT_TEST_RUN_DIRECTORY;
 exports.updatesDirectory = process.env.UPDATE_DIR ? process.env.UPDATE_DIR : DEFAULT_UPDATES_DIRECTORY;
-exports.onlyRunCoreTests = process.env.CORE ? true : false;
+exports.onlyRunCoreTests = process.env.CORE.toLowerCase() === 'true' ? true : false;
 exports.shouldSetup = TestUtil_1.TestUtil.readMochaCommandLineFlag(SETUP_FLAG_NAME);
-exports.restartEmulators = process.env.CLEAN ? true : false;
+exports.restartEmulators = process.env.CLEAN.toLowerCase() === 'true' ? true : false;;
