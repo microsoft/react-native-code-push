@@ -79,7 +79,6 @@ declare module 'code-push-plugin-testing-framework/script/platform' {
 	     * Runs when the flag is present, doesn't run otherwise.
 	     */
 	    getCommandLineFlagName(): string;
-	    private static ANDROID_SERVER_URL_OPTION_NAME;
 	    private static DEFAULT_ANDROID_SERVER_URL;
 	    /**
 	     * Gets the server url used for testing.
@@ -110,7 +109,6 @@ declare module 'code-push-plugin-testing-framework/script/platform' {
 	     * Runs when the flag is present, doesn't run otherwise.
 	     */
 	    getCommandLineFlagName(): string;
-	    private static IOS_SERVER_URL_OPTION_NAME;
 	    private static DEFAULT_IOS_SERVER_URL;
 	    /**
 	     * Gets the server url used for testing.
@@ -126,7 +124,6 @@ declare module 'code-push-plugin-testing-framework/script/platform' {
 	    getDefaultDeploymentKey(): string;
 	}
 	export class AndroidEmulatorManager implements IEmulatorManager {
-	    private static ANDROID_EMULATOR_OPTION_NAME;
 	    private targetEmulator;
 	    /**
 	     * Returns the target emulator, which is specified through the command line.
@@ -162,7 +159,6 @@ declare module 'code-push-plugin-testing-framework/script/platform' {
 	    uninstallApplication(appId: string): Q.Promise<void>;
 	}
 	export class IOSEmulatorManager implements IEmulatorManager {
-	    private static IOS_EMULATOR_OPTION_NAME;
 	    private targetEmulator;
 	    /**
 	     * Returns the target emulator, which is specified through the command line.

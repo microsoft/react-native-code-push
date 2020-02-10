@@ -28,7 +28,7 @@ var Android = (function () {
      */
     Android.prototype.getServerUrl = function () {
         if (!this.serverUrl)
-            this.serverUrl = testUtil_1.TestUtil.readMochaCommandLineOption(Android.ANDROID_SERVER_URL_OPTION_NAME, Android.DEFAULT_ANDROID_SERVER_URL);
+            this.serverUrl = process.env.ANDROID_SERVER ? process.env.ANDROID_SERVER : Android.DEFAULT_ANDROID_SERVER_URL;
         return this.serverUrl;
     };
     /**
@@ -43,7 +43,6 @@ var Android = (function () {
     Android.prototype.getDefaultDeploymentKey = function () {
         return "mock-android-deployment-key";
     };
-    Android.ANDROID_SERVER_URL_OPTION_NAME = "--androidserver";
     Android.DEFAULT_ANDROID_SERVER_URL = "http://10.0.2.2:3001";
     return Android;
 }());
@@ -73,7 +72,8 @@ var IOS = (function () {
      */
     IOS.prototype.getServerUrl = function () {
         if (!this.serverUrl)
-            this.serverUrl = testUtil_1.TestUtil.readMochaCommandLineOption(IOS.IOS_SERVER_URL_OPTION_NAME, IOS.DEFAULT_IOS_SERVER_URL);
+            this.serverUrl = process.env.IOS_SERVER ? process.env.IOS_SERVER : IOS.DEFAULT_IOS_SERVER_URL;
+
         return this.serverUrl;
     };
     /**
@@ -88,7 +88,6 @@ var IOS = (function () {
     IOS.prototype.getDefaultDeploymentKey = function () {
         return "mock-ios-deployment-key";
     };
-    IOS.IOS_SERVER_URL_OPTION_NAME = "--iosserver";
     IOS.DEFAULT_IOS_SERVER_URL = "http://127.0.0.1:3000";
     return IOS;
 }());
@@ -172,7 +171,7 @@ var AndroidEmulatorManager = (function () {
             return Q(this.targetEmulator);
         else {
             const deferred = Q.defer();
-            const targetAndroidEmulator = testUtil_1.TestUtil.readMochaCommandLineOption(AndroidEmulatorManager.ANDROID_EMULATOR_OPTION_NAME);
+            const targetAndroidEmulator = process.env.ANDROID_EMU;
             if (!targetAndroidEmulator) {
                 // If no Android simulator is specified, get the most recent Android simulator to run tests on.
                 testUtil_1.TestUtil.getProcessOutput("emulator -list-avds", { noLogCommand: true, noLogStdOut: true, noLogStdErr: true })
@@ -280,7 +279,6 @@ var AndroidEmulatorManager = (function () {
     AndroidEmulatorManager.prototype.uninstallApplication = function (appId) {
         return commandWithCheckAppExistence("adb uninstall", appId);
     };
-    AndroidEmulatorManager.ANDROID_EMULATOR_OPTION_NAME = "--androidemu";
     return AndroidEmulatorManager;
 }());
 exports.AndroidEmulatorManager = AndroidEmulatorManager;
@@ -296,7 +294,7 @@ var IOSEmulatorManager = (function () {
             return Q(this.targetEmulator);
         else {
             let deferred = Q.defer();
-            let targetIOSEmulator = testUtil_1.TestUtil.readMochaCommandLineOption(IOSEmulatorManager.IOS_EMULATOR_OPTION_NAME);
+            let targetIOSEmulator = process.env.IOS_EMU;
             if (!targetIOSEmulator) {
                 // If no iOS simulator is specified, get the most recent iOS simulator to run tests on.
                 testUtil_1.TestUtil.getProcessOutput("xcrun simctl list", { noLogCommand: true, noLogStdOut: true, noLogStdErr: true })
@@ -395,7 +393,6 @@ var IOSEmulatorManager = (function () {
     IOSEmulatorManager.prototype.uninstallApplication = function (appId) {
         return testUtil_1.TestUtil.getProcessOutput("xcrun simctl uninstall booted " + appId).then(function () { return null; });
     };
-    IOSEmulatorManager.IOS_EMULATOR_OPTION_NAME = "--iosemu";
     return IOSEmulatorManager;
 }());
 exports.IOSEmulatorManager = IOSEmulatorManager;
