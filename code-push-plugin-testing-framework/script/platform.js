@@ -72,7 +72,7 @@ var IOS = (function () {
      */
     IOS.prototype.getServerUrl = function () {
         if (!this.serverUrl)
-            this.serverUrl = process.env.IOS_SERVER ? process.env.IOS_SERVER : Android.DEFAULT_ANDROID_SERVER_URL;
+            this.serverUrl = process.env.IOS_SERVER ? process.env.IOS_SERVER : IOS.DEFAULT_IOS_SERVER_URL;
 
         return this.serverUrl;
     };
