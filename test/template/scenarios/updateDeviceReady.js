@@ -1,11 +1,11 @@
 var CodePushWrapper = require("../codePushWrapper.js");
 
 module.exports = {
-    startTest: function(testApp) {
+    startTest: function (testApp) {
         testApp.readyAfterUpdate();
     },
-    
-    getScenarioName: function() {
+
+    getScenarioName: function () {
         return "Bad Update";
     }
 };
