@@ -139,6 +139,17 @@ var TestUtil = (function () {
         archive.finalize();
         return deferred.promise;
     };
+
+    /**
+     * Check that boolean environment variable string is 'true.
+     */
+    TestUtil.resolveBooleanVariables = function(variable) {
+        if (variable) {
+            return variable.toLowerCase() === 'true';
+        }
+    
+        return false;
+    }
     //// Placeholders
     // Used in the template to represent data that needs to be added by the testing framework at runtime.
     TestUtil.ANDROID_KEY_PLACEHOLDER = "CODE_PUSH_ANDROID_DEPLOYMENT_KEY";
