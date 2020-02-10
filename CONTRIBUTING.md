@@ -64,7 +64,7 @@ They then check if the required emulators are currently running.
 
 If an Android emulator is not running, it attempts to boot the latest Android emulator. You can specify an emulator by adding env variable `ANDROID_EMU=yourEmulatorNameHere` to the npm command. For example: `ANDROID_EMU=yourEmulatorNameHere npm run test:android`.
 
-If an iOS simulator is not running, it attempts to boot the latest iOS iPhone simulator. You can specify a simulator by adding env variable `IOS_EMU=yourSimulatorNameHere` to the npm command. As a `yourSimulatorNameHere` you can use the name of the device or its ID. For example: `IOS_EMU="iPhone 11 Pro" npm run test:ios` or `IOS_EMU="0567DFF8-329E-41A3-BD6D-E48E9DD5EF39" npm run test:ios`  
+If an iOS simulator is not running, it attempts to boot the latest iOS iPhone simulator. You can specify a simulator by adding env variable `IOS_EMU=yourSimulatorNameHere` to the npm command. For example: `IOS_EMU="iPhone 8 (0567DFF8-329E-41A3-BD6D-E48E9DD5EF39)" npm run test:ios`.
 
 If all the required emulators are not running and the tests fail to boot them, the tests will fail.
 
