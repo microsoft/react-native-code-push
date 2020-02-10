@@ -1,7 +1,6 @@
 "use strict";
 var archiver = require("archiver");
 var child_process = require("child_process");
-var del = require("del");
 var fs = require("fs");
 var replace = require("replace");
 var Q = require("q");
