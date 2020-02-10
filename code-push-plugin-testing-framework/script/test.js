@@ -54,10 +54,10 @@ function initializeTests(projectManager, supportedTargetPlatforms, describeTests
             // create the test project
             promises.push(createTestProject(TestConfig.testRunDirectory)
                 .then(function () {
-                console.log("Building update project.");
-                // create the update project
-                return createTestProject(TestConfig.updatesDirectory);
-            }).then(function () { return null; }));
+                    console.log("Building update project.");
+                    // create the update project
+                    return createTestProject(TestConfig.updatesDirectory);
+                }).then(function () { return null; }));
             Q.all(promises).then(function () { done(); }, function (error) { done(error); });
         });
     }
