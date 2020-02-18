@@ -50,7 +50,7 @@ async function checkForUpdate(deploymentKey = null, handleBinaryVersionMismatchC
       queryPackage.packageHash = config.packageHash;
     }
   }
-
+// test changes
   const update = await sdk.queryUpdateWithCurrentPackage(queryPackage);
 
   /*
