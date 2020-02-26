@@ -120,10 +120,10 @@ class RNAndroid extends Platform.Android implements RNPlatform {
         const androidDirectory: string = path.join(projectDirectory, TestConfig.TestAppName, "android");
         const apkPath = this.getBinaryPath(projectDirectory);
         if (process.platform === "darwin") {
-            return TestUtil.getProcessOutput(`./gradlew assembleRelease --daemon`, { cwd: androidDirectory })
+            return TestUtil.getProcessOutput(`./gradlew assembleRelease --daemon`, { noLogStdOut: true, cwd: androidDirectory })
                 .then(() => { return null; });
         } else {
-            return TestUtil.getProcessOutput(`gradlew assembleRelease --daemon`, { cwd: androidDirectory })
+            return TestUtil.getProcessOutput(`gradlew assembleRelease --daemon`, { noLogStdOut: true, cwd: androidDirectory })
                 .then(() => { return null; });
         }
     }
