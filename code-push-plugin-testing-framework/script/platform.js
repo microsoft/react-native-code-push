@@ -231,7 +231,7 @@ var AndroidEmulatorManager = (function () {
      * Ends a running application given its app id.
      */
     AndroidEmulatorManager.prototype.endRunningApplication = function (appId) {
-        return testUtil_1.TestUtil.getProcessOutput("adb shell am force-stop " + appId).then(function () { return null; });
+        return testUtil_1.TestUtil.getProcessOutput("adb shell am force-stop " + appId).then(function () { return Q.delay(10000); });
     };
     /**
      * Restarts an already installed application by app id.
@@ -240,8 +240,8 @@ var AndroidEmulatorManager = (function () {
         var _this = this;
         return this.endRunningApplication(appId)
             .then(function () {
-                // Wait for a second before restarting.
-                return Q.delay(1000);
+                // Wait for a 10 seconds before restarting.
+                return Q.delay(10000);
             })
             .then(function () {
                 return _this.launchInstalledApplication(appId);
