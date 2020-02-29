@@ -129,18 +129,25 @@ exports.createUpdateResponse = createUpdateResponse;
 function expectTestMessages(expectedMessages) {
     var deferred = Q.defer();
     var messageIndex = 0;
+    var lastRequestBody = null;
     exports.testMessageCallback = function (requestBody) {
         try {
             console.log("Message index: " + messageIndex);
-            if (typeof expectedMessages[messageIndex] === "string") {
-                assert.equal(requestBody.message, expectedMessages[messageIndex]);
-            }
-            else {
-                assert(areEqual(requestBody, expectedMessages[messageIndex]));
-            }
-            /* end of message array */
-            if (++messageIndex === expectedMessages.length) {
-                deferred.resolve(undefined);
+            // We should ignore duplicated requests. It is only CI issue. 
+            if (lastRequestBody === null || !areEqual(requestBody, lastRequestBody)) {
+                if (typeof expectedMessages[messageIndex] === "string") {
+                    assert.equal(requestBody.message, expectedMessages[messageIndex]);
+                }
+                else {
+                    assert(areEqual(requestBody, expectedMessages[messageIndex]));
+                }
+
+                lastRequestBody = requestBody;
+                
+                /* end of message array */
+                if (++messageIndex === expectedMessages.length) {
+                    deferred.resolve(undefined);
+                }
             }
         }
         catch (e) {
