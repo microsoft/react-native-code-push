@@ -118,13 +118,23 @@ class RNAndroid extends Platform.Android implements RNPlatform {
     buildApp(projectDirectory: string): Q.Promise<void> {
         // In order to run on Android without the package manager, we must create a release APK and then sign it with the debug certificate.
         const androidDirectory: string = path.join(projectDirectory, TestConfig.TestAppName, "android");
-        const apkPath = this.getBinaryPath(projectDirectory);
-        if (process.platform === "darwin") {
-            return TestUtil.getProcessOutput(`./gradlew assembleRelease --daemon`, { noLogStdOut: true, cwd: androidDirectory })
-                .then(() => { return null; });
-        } else {
-            return TestUtil.getProcessOutput(`gradlew assembleRelease --daemon`, { noLogStdOut: true, cwd: androidDirectory })
-                .then(() => { return null; });
+        // If the build fails for the first time, try  rebuild app again
+        try {
+            if (process.platform === "darwin") {
+                return TestUtil.getProcessOutput(`./gradlew assembleRelease --daemon`, { noLogStdOut: true, cwd: androidDirectory })
+                    .then(() => { return null; });
+            } else {
+                return TestUtil.getProcessOutput(`gradlew assembleRelease --daemon`, { noLogStdOut: true, cwd: androidDirectory })
+                    .then(() => { return null; });
+            }
+        } catch {
+            if (process.platform === "darwin") {
+                return TestUtil.getProcessOutput(`./gradlew assembleRelease --daemon`, { noLogStdOut: true, cwd: androidDirectory })
+                    .then(() => { return null; });
+            } else {
+                return TestUtil.getProcessOutput(`gradlew assembleRelease --daemon`, { noLogStdOut: true, cwd: androidDirectory })
+                    .then(() => { return null; });
+            }  
         }
     }
 }
