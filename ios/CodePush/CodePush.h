@@ -10,7 +10,7 @@
 
 @interface CodePush : RCTEventEmitter
 
-+ (NSURL *)binaryBundleURL;
++ (NSURL *)binaryBundleURL:(NSString *)resourceName;
 /*
  * This method is used to retrieve the URL for the most recent
  * version of the JavaScript bundle. This could be either the
@@ -22,21 +22,7 @@
  * and therefore, if it isn't, you should use either the bundleURLForResource:
  * or bundleURLForResource:withExtension: methods to override that behavior.
  */
-+ (NSURL *)bundleURL;
-
 + (NSURL *)bundleURLForResource:(NSString *)resourceName;
-
-+ (NSURL *)bundleURLForResource:(NSString *)resourceName
-                  withExtension:(NSString *)resourceExtension;
-
-+ (NSURL *)bundleURLForResource:(NSString *)resourceName
-                  withExtension:(NSString *)resourceExtension
-                   subdirectory:(NSString *)resourceSubdirectory;
-
-+ (NSURL *)bundleURLForResource:(NSString *)resourceName
-                  withExtension:(NSString *)resourceExtension
-                   subdirectory:(NSString *)resourceSubdirectory
-                         bundle:(NSBundle *)resourceBundle;
 
 + (NSString *)getApplicationSupportDirectory;
 
@@ -91,7 +77,7 @@
 // The below methods are only used during tests.
 + (BOOL)isUsingTestConfiguration;
 + (void)setUsingTestConfiguration:(BOOL)shouldUseTestConfiguration;
-+ (void)clearUpdates;
++ (void)clearUpdates:(NSString *)resourceName;
 
 @end
 
@@ -140,32 +126,35 @@ failCallback:(void (^)(NSError *err))failCallback;
 
 + (void)downloadPackage:(NSDictionary *)updatePackage
  expectedBundleFileName:(NSString *)expectedBundleFileName
+           resourceName:(NSString *)resourceName
               publicKey:(NSString *)publicKey
          operationQueue:(dispatch_queue_t)operationQueue
        progressCallback:(void (^)(long long, long long))progressCallback
            doneCallback:(void (^)())doneCallback
            failCallback:(void (^)(NSError *err))failCallback;
 
-+ (NSDictionary *)getCurrentPackage:(NSError **)error;
-+ (NSDictionary *)getPreviousPackage:(NSError **)error;
-+ (NSString *)getCurrentPackageFolderPath:(NSError **)error;
-+ (NSString *)getCurrentPackageBundlePath:(NSError **)error;
-+ (NSString *)getCurrentPackageHash:(NSError **)error;
++ (NSDictionary *)getCurrentPackage:(NSError **)error resourceName:(NSString *)resourceName;
++ (NSDictionary *)getPreviousPackage:(NSError **)error resourceName:(NSString *)resourceName;
++ (NSString *)getCurrentPackageFolderPath:(NSError **)error resourceName:(NSString *)resourceName;
++ (NSString *)getCurrentPackageBundlePath:(NSError **)error resourceName:(NSString *)resourceName;
++ (NSString *)getCurrentPackageHash:(NSError **)error resourceName:(NSString *)resourceName;
 
 + (NSDictionary *)getPackage:(NSString *)packageHash
-                       error:(NSError **)error;
+                       error:(NSError **)error
+                resourceName:(NSString *)resourceName;
 
-+ (NSString *)getPackageFolderPath:(NSString *)packageHash;
++ (NSString *)getPackageFolderPath:(NSString *)packageHash resourceName:(NSString *)resourceName;
 
 + (BOOL)installPackage:(NSDictionary *)updatePackage
    removePendingUpdate:(BOOL)removePendingUpdate
-                 error:(NSError **)error;
+                 error:(NSError **)error
+          resourceName:(NSString *)resourceName;
 
-+ (void)rollbackPackage;
++ (void)rollbackPackage:(NSString *)resourceName;
 
 // The below methods are only used during tests.
-+ (void)clearUpdates;
-+ (void)downloadAndReplaceCurrentBundle:(NSString *)remoteBundleUrl;
++ (void)clearUpdates:(NSString *)resourceName;
++ (void)downloadAndReplaceCurrentBundle:(NSString *)remoteBundleUrl resourceName:(NSString *)resourceName;
 
 @end
 
