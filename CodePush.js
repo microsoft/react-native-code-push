@@ -53,7 +53,7 @@ async function checkForUpdate({ deploymentKey = null, bundleName = '' }, handleB
   }
 
   const update = await sdk.queryUpdateWithCurrentPackage(queryPackage);
-  
+
   /*
    * There are four cases where checkForUpdate will resolve to null:
    * ----------------------------------------------------------------
@@ -229,7 +229,7 @@ async function tryReportStatus(statusReport, resumeListener, bundleName) {
 
 async function shouldUpdateBeIgnored(remotePackage, syncOptions) {
   let { rollbackRetryOptions } = syncOptions;
-
+ 
   const isFailedPackage = remotePackage && remotePackage.failedInstall;
   if (!isFailedPackage || !syncOptions.ignoreFailedUpdates) {
     return false;
@@ -248,7 +248,7 @@ async function shouldUpdateBeIgnored(remotePackage, syncOptions) {
   if (!validateRollbackRetryOptions(rollbackRetryOptions)) {
     return true;
   }
-
+  
   const latestRollbackInfo = await NativeCodePush.getLatestRollbackInfo();
   if (!validateLatestRollbackInfo(latestRollbackInfo, remotePackage.packageHash)) {
     log("The latest rollback info is not valid.");
@@ -304,8 +304,8 @@ function setUpTestDependencies(testSdk, providedTestConfig, testNativeBridge) {
 // This function allows only one syncInternal operation to proceed at any given time.
 // Parallel calls to sync() while one is ongoing yields CodePush.SyncStatus.SYNC_IN_PROGRESS.
 const sync = (() => {
-  let syncInProgress = false;
-  const setSyncCompleted = () => { syncInProgress = false; };
+  // let syncInProgress = false;
+  // const setSyncCompleted = () => { syncInProgress = false; };
 
   return (options = {}, syncStatusChangeCallback, downloadProgressCallback, handleBinaryVersionMismatchCallback) => {
     let syncStatusCallbackWithTryCatch, downloadProgressCallbackWithTryCatch;
@@ -329,18 +329,18 @@ const sync = (() => {
       }
     }
 
-    if (syncInProgress) {
-      typeof syncStatusCallbackWithTryCatch === "function"
-        ? syncStatusCallbackWithTryCatch(CodePush.SyncStatus.SYNC_IN_PROGRESS)
-        : log("Sync already in progress.");
-      return Promise.resolve(CodePush.SyncStatus.SYNC_IN_PROGRESS);
-    }
-
-    syncInProgress = true;
+    // if (syncInProgress) {
+    //   typeof syncStatusCallbackWithTryCatch === "function"
+    //     ? syncStatusCallbackWithTryCatch(CodePush.SyncStatus.SYNC_IN_PROGRESS)
+    //     : log("Sync already in progress.");
+    //   return Promise.resolve(CodePush.SyncStatus.SYNC_IN_PROGRESS);
+    // }
+    
+    // syncInProgress = true;
     const syncPromise = syncInternal(options, syncStatusCallbackWithTryCatch, downloadProgressCallbackWithTryCatch, handleBinaryVersionMismatchCallback);
-    syncPromise
-      .then(setSyncCompleted)
-      .catch(setSyncCompleted);
+    // syncPromise
+    //   .then(setSyncCompleted)
+    //   .catch(setSyncCompleted);
 
     return syncPromise;
   };
@@ -367,7 +367,7 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
     updateDialog: null,
     ...options
   };
-
+  
   syncStatusChangeCallback = typeof syncStatusChangeCallback === "function"
     ? syncStatusChangeCallback
     : (syncStatus) => {
@@ -409,13 +409,14 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
 
   try {
     await CodePush.notifyApplicationReady(syncOptions.bundleName);
-
     syncStatusChangeCallback(CodePush.SyncStatus.CHECKING_FOR_UPDATE);
-    const remotePackage = await checkForUpdate({ deploymentKey: syncOptions.deploymentKey, bundleName: syncOptions.bundleName }, handleBinaryVersionMismatchCallback);
+    const remotePackage = await checkForUpdate({ 
+      deploymentKey: syncOptions.deploymentKey, 
+      bundleName: syncOptions.bundleName 
+    }, handleBinaryVersionMismatchCallback);
     const doDownloadAndInstall = async () => {
       syncStatusChangeCallback(CodePush.SyncStatus.DOWNLOADING_PACKAGE);
       const localPackage = await remotePackage.download(downloadProgressCallback, syncOptions.bundleName);
-
       // Determine the correct install mode based on whether the update is mandatory or not.
       resolvedInstallMode = localPackage.isMandatory ? syncOptions.mandatoryInstallMode : syncOptions.installMode;
 
@@ -426,14 +427,11 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
 
       return CodePush.SyncStatus.UPDATE_INSTALLED;
     };
-
     const updateShouldBeIgnored = await shouldUpdateBeIgnored(remotePackage, syncOptions);
- 
     if (!remotePackage || updateShouldBeIgnored) {
       if (updateShouldBeIgnored) {
           log("An update is available, but it is being ignored due to having been previously rolled back.");
       }
- 
       const currentPackage = await CodePush.getCurrentPackage(bundleName);
       if (currentPackage && currentPackage.isPending) {
         syncStatusChangeCallback(CodePush.SyncStatus.UPDATE_INSTALLED);
