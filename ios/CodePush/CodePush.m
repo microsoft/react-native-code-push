@@ -715,8 +715,8 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
  * internally only by the CodePush.checkForUpdate method in order to get the
  * app version, as well as the deployment key that was configured in the Info.plist file.
  */
-RCT_EXPORT_METHOD(getConfiguration:(RCTPromiseResolveBlock)resolve
-                      resourceName:(NSString*)resourceName
+RCT_EXPORT_METHOD(getConfiguration:(NSString*)resourceName
+                          resolver:(RCTPromiseResolveBlock)resolve
                           rejecter:(RCTPromiseRejectBlock)reject)
 {
     NSDictionary *configuration = [[CodePushConfig current] configuration];
