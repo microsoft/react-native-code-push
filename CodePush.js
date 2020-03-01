@@ -9,7 +9,7 @@ import hoistStatics from 'hoist-non-react-statics';
 let NativeCodePush = require("react-native").NativeModules.CodePush;
 const PackageMixins = require("./package-mixins")(NativeCodePush);
 
-async function checkForUpdate(deploymentKey = null, handleBinaryVersionMismatchCallback = null) {
+async function checkForUpdate({ deploymentKey = null, bundleName = '' }, handleBinaryVersionMismatchCallback = null) {
   /*
    * Before we ask the server if an update exists, we
    * need to retrieve three pieces of information from the
@@ -19,7 +19,8 @@ async function checkForUpdate(deploymentKey = null, handleBinaryVersionMismatchC
    * for their specific deployment and version and which are actually
    * different from the CodePush update they have already installed.
    */
-  const nativeConfig = await getConfiguration();
+  const nativeConfig = await getConfiguration(bundleName);
+  
   /*
    * If a deployment key was explicitly provided,
    * then let's override the one we retrieved
@@ -31,7 +32,7 @@ async function checkForUpdate(deploymentKey = null, handleBinaryVersionMismatchC
   const sdk = getPromisifiedSdk(requestFetchAdapter, config);
 
   // Use dynamically overridden getCurrentPackage() during tests.
-  const localPackage = await module.exports.getCurrentPackage();
+  const localPackage = await module.exports.getCurrentPackage(bundleName);
 
   /*
    * If the app has a previously installed update, and that update
@@ -52,7 +53,7 @@ async function checkForUpdate(deploymentKey = null, handleBinaryVersionMismatchC
   }
 
   const update = await sdk.queryUpdateWithCurrentPackage(queryPackage);
-
+  
   /*
    * There are four cases where checkForUpdate will resolve to null:
    * ----------------------------------------------------------------
@@ -92,28 +93,28 @@ async function checkForUpdate(deploymentKey = null, handleBinaryVersionMismatchC
 
 const getConfiguration = (() => {
   let config;
-  return async function getConfiguration() {
+  return async function getConfiguration(bundleName) {
     if (config) {
       return config;
     } else if (testConfig) {
       return testConfig;
     } else {
-      config = await NativeCodePush.getConfiguration();
+      config = await NativeCodePush.getConfiguration(bundleName);
       return config;
     }
   }
 })();
 
-async function getCurrentPackage() {
-  return await getUpdateMetadata(CodePush.UpdateState.LATEST);
+async function getCurrentPackage(bundleName) {
+  return await getUpdateMetadata(CodePush.UpdateState.LATEST, bundleName);
 }
 
-async function getUpdateMetadata(updateState) {
-  let updateMetadata = await NativeCodePush.getUpdateMetadata(updateState || CodePush.UpdateState.RUNNING);
+async function getUpdateMetadata(updateState, bundleName) {
+  let updateMetadata = await NativeCodePush.getUpdateMetadata(updateState || CodePush.UpdateState.RUNNING, bundleName);
   if (updateMetadata) {
     updateMetadata = {...PackageMixins.local, ...updateMetadata};
     updateMetadata.failedInstall = await NativeCodePush.isFailedUpdate(updateMetadata.packageHash);
-    updateMetadata.isFirstRun = await NativeCodePush.isFirstRun(updateMetadata.packageHash);
+    updateMetadata.isFirstRun = await NativeCodePush.isFirstRun(updateMetadata.packageHash, bundleName);
   }
   return updateMetadata;
 }
@@ -164,25 +165,25 @@ function getPromisifiedSdk(requestFetchAdapter, config) {
 // in the lifetime of this module instance.
 const notifyApplicationReady = (() => {
   let notifyApplicationReadyPromise;
-  return () => {
+  return (bundleName) => {
     if (!notifyApplicationReadyPromise) {
-      notifyApplicationReadyPromise = notifyApplicationReadyInternal();
+      notifyApplicationReadyPromise = notifyApplicationReadyInternal(bundleName);
     }
 
     return notifyApplicationReadyPromise;
   };
 })();
 
-async function notifyApplicationReadyInternal() {
+async function notifyApplicationReadyInternal(bundleName) {
   await NativeCodePush.notifyApplicationReady();
-  const statusReport = await NativeCodePush.getNewStatusReport();
-  statusReport && tryReportStatus(statusReport); // Don't wait for this to complete.
+  const statusReport = await NativeCodePush.getNewStatusReport(bundleName);
+  statusReport && tryReportStatus(statusReport, null, bundleName); // Don't wait for this to complete.
 
   return statusReport;
 }
 
-async function tryReportStatus(statusReport, resumeListener) {
-  const config = await getConfiguration();
+async function tryReportStatus(statusReport, resumeListener, bundleName) {
+  const config = await getConfiguration(bundleName);
   const previousLabelOrAppVersion = statusReport.previousLabelOrAppVersion;
   const previousDeploymentKey = statusReport.previousDeploymentKey || config.deploymentKey;
   try {
@@ -214,7 +215,7 @@ async function tryReportStatus(statusReport, resumeListener) {
     if (!resumeListener) {
       resumeListener = async (newState) => {
         if (newState !== "active") return;
-        const refreshedStatusReport = await NativeCodePush.getNewStatusReport();
+        const refreshedStatusReport = await NativeCodePush.getNewStatusReport(bundleName);
         if (refreshedStatusReport) {
           tryReportStatus(refreshedStatusReport, resumeListener);
         } else {
@@ -243,7 +244,7 @@ async function shouldUpdateBeIgnored(remotePackage, syncOptions) {
   } else {
     rollbackRetryOptions = { ...CodePush.DEFAULT_ROLLBACK_RETRY_OPTIONS, ...rollbackRetryOptions };
   }
-
+  
   if (!validateRollbackRetryOptions(rollbackRetryOptions)) {
     return true;
   }
@@ -407,20 +408,19 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
       };
 
   try {
-    await CodePush.notifyApplicationReady();
+    await CodePush.notifyApplicationReady(syncOptions.bundleName);
 
     syncStatusChangeCallback(CodePush.SyncStatus.CHECKING_FOR_UPDATE);
-    const remotePackage = await checkForUpdate(syncOptions.deploymentKey, handleBinaryVersionMismatchCallback);
-
+    const remotePackage = await checkForUpdate({ deploymentKey: syncOptions.deploymentKey, bundleName: syncOptions.bundleName }, handleBinaryVersionMismatchCallback);
     const doDownloadAndInstall = async () => {
       syncStatusChangeCallback(CodePush.SyncStatus.DOWNLOADING_PACKAGE);
-      const localPackage = await remotePackage.download(downloadProgressCallback);
+      const localPackage = await remotePackage.download(downloadProgressCallback, syncOptions.bundleName);
 
       // Determine the correct install mode based on whether the update is mandatory or not.
       resolvedInstallMode = localPackage.isMandatory ? syncOptions.mandatoryInstallMode : syncOptions.installMode;
 
       syncStatusChangeCallback(CodePush.SyncStatus.INSTALLING_UPDATE);
-      await localPackage.install(resolvedInstallMode, syncOptions.minimumBackgroundDuration, () => {
+      await localPackage.install(resolvedInstallMode, syncOptions.bundleName, syncOptions.minimumBackgroundDuration, () => {
         syncStatusChangeCallback(CodePush.SyncStatus.UPDATE_INSTALLED);
       });
 
@@ -428,13 +428,13 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
     };
 
     const updateShouldBeIgnored = await shouldUpdateBeIgnored(remotePackage, syncOptions);
-
+ 
     if (!remotePackage || updateShouldBeIgnored) {
       if (updateShouldBeIgnored) {
           log("An update is available, but it is being ignored due to having been previously rolled back.");
       }
-
-      const currentPackage = await CodePush.getCurrentPackage();
+ 
+      const currentPackage = await CodePush.getCurrentPackage(bundleName);
       if (currentPackage && currentPackage.isPending) {
         syncStatusChangeCallback(CodePush.SyncStatus.UPDATE_INSTALLED);
         return CodePush.SyncStatus.UPDATE_INSTALLED;

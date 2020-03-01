@@ -8,7 +8,7 @@ import log from "./logging";
 module.exports = (NativeCodePush) => {
   const remote = (reportStatusDownload) => {
     return {
-      async download(downloadProgressCallback) {
+      async download(downloadProgressCallback, bundleName) {
         if (!this.downloadUrl) {
           throw new Error("Cannot download an update without a download url");
         }
@@ -29,7 +29,7 @@ module.exports = (NativeCodePush) => {
           const updatePackageCopy = Object.assign({}, this);
           Object.keys(updatePackageCopy).forEach((key) => (typeof updatePackageCopy[key] === 'function') && delete updatePackageCopy[key]);
 
-          const downloadedPackage = await NativeCodePush.downloadUpdate(updatePackageCopy, !!downloadProgressCallback);
+          const downloadedPackage = await NativeCodePush.downloadUpdate(updatePackageCopy, !!downloadProgressCallback, bundleName);
 
           if (reportStatusDownload) {
             reportStatusDownload(this)
@@ -49,10 +49,10 @@ module.exports = (NativeCodePush) => {
   };
 
   const local = {
-    async install(installMode = NativeCodePush.codePushInstallModeOnNextRestart, minimumBackgroundDuration = 0, updateInstalledCallback) {
+    async install(installMode = NativeCodePush.codePushInstallModeOnNextRestart, bundleName, minimumBackgroundDuration = 0, updateInstalledCallback) {
       const localPackage = this;
       const localPackageCopy = Object.assign({}, localPackage); // In dev mode, React Native deep freezes any object queued over the bridge
-      await NativeCodePush.installUpdate(localPackageCopy, installMode, minimumBackgroundDuration);
+      await NativeCodePush.installUpdate(localPackageCopy, bundleName, installMode, minimumBackgroundDuration);
       updateInstalledCallback && updateInstalledCallback();
       if (installMode == NativeCodePush.codePushInstallModeImmediate) {
         RestartManager.restartApp(false);
