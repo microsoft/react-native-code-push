@@ -229,7 +229,7 @@ async function tryReportStatus(statusReport, resumeListener, bundleName) {
 
 async function shouldUpdateBeIgnored(remotePackage, syncOptions) {
   let { rollbackRetryOptions } = syncOptions;
- 
+
   const isFailedPackage = remotePackage && remotePackage.failedInstall;
   if (!isFailedPackage || !syncOptions.ignoreFailedUpdates) {
     return false;
