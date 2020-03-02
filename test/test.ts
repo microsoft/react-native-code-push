@@ -112,6 +112,19 @@ class RNAndroid extends Platform.Android implements RNPlatform {
         return TestUtil.getProcessOutput("adb install -r " + this.getBinaryPath(projectDirectory), { cwd: androidDirectory }).then(() => { return null; });
     }
 
+    /** 
+     * Build function of the test application, the command depends on the OS 
+    */
+    buildFunction(androidDirectory: string): Q.Promise<void> {
+        if (process.platform === "darwin") {
+            return TestUtil.getProcessOutput(`./gradlew assembleRelease --daemon`, { noLogStdOut: true, cwd: androidDirectory })
+                .then(() => { return null; });
+        } else {
+            return TestUtil.getProcessOutput(`gradlew assembleRelease --daemon`, { noLogStdOut: true, cwd: androidDirectory })
+                .then(() => { return null; });
+        }
+    }
+
     /**
      * Builds the binary of the project on this platform.
      */
@@ -120,21 +133,9 @@ class RNAndroid extends Platform.Android implements RNPlatform {
         const androidDirectory: string = path.join(projectDirectory, TestConfig.TestAppName, "android");
         // If the build fails for the first time, try  rebuild app again
         try {
-            if (process.platform === "darwin") {
-                return TestUtil.getProcessOutput(`./gradlew assembleRelease --daemon`, { noLogStdOut: true, cwd: androidDirectory })
-                    .then(() => { return null; });
-            } else {
-                return TestUtil.getProcessOutput(`gradlew assembleRelease --daemon`, { noLogStdOut: true, cwd: androidDirectory })
-                    .then(() => { return null; });
-            }
+            return this.buildFunction(androidDirectory);
         } catch {
-            if (process.platform === "darwin") {
-                return TestUtil.getProcessOutput(`./gradlew assembleRelease --daemon`, { noLogStdOut: true, cwd: androidDirectory })
-                    .then(() => { return null; });
-            } else {
-                return TestUtil.getProcessOutput(`gradlew assembleRelease --daemon`, { noLogStdOut: true, cwd: androidDirectory })
-                    .then(() => { return null; });
-            }  
+            return this.buildFunction(androidDirectory);
         }
     }
 }
