@@ -112,19 +112,30 @@ class RNAndroid extends Platform.Android implements RNPlatform {
         return TestUtil.getProcessOutput("adb install -r " + this.getBinaryPath(projectDirectory), { cwd: androidDirectory }).then(() => { return null; });
     }
 
+    /** 
+     * Build function of the test application, the command depends on the OS 
+    */
+    buildFunction(androidDirectory: string): Q.Promise<void> {
+        if (process.platform === "darwin") {
+            return TestUtil.getProcessOutput(`./gradlew assembleRelease --daemon`, { noLogStdOut: true, cwd: androidDirectory })
+                .then(() => { return null; });
+        } else {
+            return TestUtil.getProcessOutput(`gradlew assembleRelease --daemon`, { noLogStdOut: true, cwd: androidDirectory })
+                .then(() => { return null; });
+        }
+    }
+
     /**
      * Builds the binary of the project on this platform.
      */
     buildApp(projectDirectory: string): Q.Promise<void> {
         // In order to run on Android without the package manager, we must create a release APK and then sign it with the debug certificate.
         const androidDirectory: string = path.join(projectDirectory, TestConfig.TestAppName, "android");
-        const apkPath = this.getBinaryPath(projectDirectory);
-        if (process.platform === "darwin") {
-            return TestUtil.getProcessOutput(`./gradlew assembleRelease --daemon`, { cwd: androidDirectory })
-                .then(() => { return null; });
-        } else {
-            return TestUtil.getProcessOutput(`gradlew assembleRelease --daemon`, { cwd: androidDirectory })
-                .then(() => { return null; });
+        // If the build fails for the first time, try  rebuild app again
+        try {
+            return this.buildFunction(androidDirectory);
+        } catch {
+            return this.buildFunction(androidDirectory);
         }
     }
 }
