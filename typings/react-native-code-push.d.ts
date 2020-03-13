@@ -122,9 +122,9 @@ export interface SyncOptions {
 
     /**
      * Specifies the minimum number of seconds that the app needs to have been in the background before restarting the app. This property
-     * only applies to updates which are installed using `InstallMode.ON_NEXT_RESUME`, and can be useful for getting your update in front
-     * of end users sooner, without being too obtrusive. Defaults to `0`, which has the effect of applying the update immediately after a
-     * resume, regardless how long it was in the background.
+     * only applies to updates which are installed using `InstallMode.ON_NEXT_RESUME` or `InstallMode.ON_NEXT_SUSPEND`, and can be useful 
+     * for getting your update in front of end users sooner, without being too obtrusive. Defaults to `0`, which has the effect of applying 
+     * the update immediately after a resume or unless the app suspension is long enough to not matter, regardless how long it was in the background.
      */
     minimumBackgroundDuration?: number;
 
@@ -317,8 +317,10 @@ declare namespace CodePush {
         ON_NEXT_RESTART,
 
         /**
-         * Indicates that you want to install the update, but don't want to restart the
-         * app until the next time the end user resumes it from the background.
+         * Indicates that you want to install the update, but don't want to restart the app until the next time
+         * the end user resumes it from the background. This way, you don't disrupt their current session,
+         * but you can get the update in front of them sooner then having to wait for the next natural restart. 
+         * This value is appropriate for silent installs that can be applied on resume in a non-invasive way.
          */
         ON_NEXT_RESUME,
 
