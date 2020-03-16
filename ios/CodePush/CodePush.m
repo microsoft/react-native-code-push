@@ -895,6 +895,7 @@ RCT_EXPORT_METHOD(setLatestRollbackInfo:(NSString *)packageHash
                   reject:(RCTPromiseRejectBlock)reject)
 {
     [[self class] setLatestRollbackInfo:packageHash];
+    resolve(nil);
 }
 
 
