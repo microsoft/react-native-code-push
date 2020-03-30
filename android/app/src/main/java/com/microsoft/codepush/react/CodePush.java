@@ -158,11 +158,14 @@ public class CodePush implements ReactPackage {
                     if (m.getName().equals("isReloadOnJSChangeEnabled")) {
                         try {
                             return (boolean) m.invoke(devInternalSettings);
-                        } catch (Exception x) { }
+                        } catch (Exception x) {
+                            return false;
+                        }
                     }
                 }
             }
         }
+
         return false;
     }
 
