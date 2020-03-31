@@ -10,7 +10,7 @@ Requirements:
 Usage: node create-app.js <appName> <reactNativeVersion> <reactNativeCodePushVersion>
     1. node create-app.js 
     2. node create-app.js myapp
-    3. node create-app.js myapp react-native@0.61.5 react-native-code-push@6.0.0 
+    3. node create-app.js myapp react-native@0.62 react-native-code-push@6.1.0 
     4. node create-app.js myapp react-native@latest Microsoft/react-native-code-push
 
 Parameters:
@@ -225,6 +225,7 @@ function isReactNativeVersionLowerThan(version) {
 // Configuring android applications for react-native version higher than 0.60
 function androidSetup() {
     const buildGradlePath = path.join('android', 'app', 'build.gradle');
+    const settingsGradlePath = path.join('android', 'settings.gradle');
     const mainApplicationPath = path.join('android', 'app', 'src', 'main', 'java', 'com', appName, 'MainApplication.java');
     const stringsResourcesPath = path.join('android', 'app', 'src', 'main', 'res', 'values', 'strings.xml');
 
@@ -240,6 +241,13 @@ function androidSetup() {
     buildGradleContents = buildGradleContents.replace(reactGradleLink,
         `${reactGradleLink}${codePushGradleLink}`);
     fs.writeFileSync(buildGradlePath, buildGradleContents);
+
+    let settingsGradleContents = fs.readFileSync(settingsGradlePath, "utf8");
+    const settingsGradleInclude = "include \':app\'";
+    const codePushProjectImport= `':react-native-code-push'\nproject(':react-native-code-push').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-code-push/android/app')`;
+    settingsGradleContents = settingsGradleContents.replace(settingsGradleInclude,
+        `${settingsGradleInclude}, ${codePushProjectImport}`);
+    fs.writeFileSync(settingsGradlePath, settingsGradleContents);
 
     const getJSBundleFileOverride = `
     @Override

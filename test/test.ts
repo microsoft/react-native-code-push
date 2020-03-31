@@ -87,6 +87,12 @@ class RNAndroid extends Platform.Android implements RNPlatform {
             "apply from: \"../../node_modules/react-native/react.gradle\"",
             "apply from: \"../../node_modules/react-native/react.gradle\"\napply from: \"" + gradleContent + "\"");
 
+        // Add CodePush to android/settings.gradle
+        const settingsGradle = path.join(innerprojectDirectory, "android", "settings.gradle");
+        TestUtil.replaceString(settingsGradle,
+            "include ':app'",
+            "include ':app', ':react-native-code-push'\nproject(':react-native-code-push').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-code-push/android/app')");
+
         //// Set the app version to 1.0.0 instead of 1.0
         // Set the app version to 1.0.0 in android/app/build.gradle
         TestUtil.replaceString(buildGradle, "versionName \"1.0\"", "versionName \"1.0.0\"");
@@ -227,7 +233,7 @@ class RNIOS extends Platform.IOS implements RNPlatform {
                 const hashWithParen = targetEmulator.match(hashRegEx)[0];
                 const hash = hashWithParen.substr(1, hashWithParen.length - 2);
                 return TestUtil.getProcessOutput("xcodebuild -workspace " + path.join(iOSProject, TestConfig.TestAppName) + ".xcworkspace -scheme " + TestConfig.TestAppName +
-                    " -configuration Release -destination \"platform=iOS Simulator,id=" + hash + "\" -derivedDataPath build", { cwd: iOSProject, maxBuffer: 1024 * 1000 * 10, noLogStdOut: true });
+                    " -configuration Release -destination \"platform=iOS Simulator,id=" + hash + "\" -derivedDataPath build", { cwd: iOSProject, maxBuffer: 1024 * 1024 * 20, noLogStdOut: true });
             })
             .then<void>(
                 () => { return null; },
