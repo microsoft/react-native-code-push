@@ -16,15 +16,15 @@
   "license": "MIT",
   "homepage": "https://microsoft.github.io/code-push",
   "dependencies": {
-    "@types/uuid": "^3.4.7",
+    "@types/uuid": "^7.0.2",
     "base-64": "^0.1.0",
     "mocha": "latest",
     "mocha-junit-reporter": "latest",
     "q": "^1.5.1",
     "replace": "latest",
     "superagent": "^5.2.1",
-    "superagent-proxy": "^1.0.3",
-    "uuid": "^3.4.0"
+    "superagent-proxy": "^2.0.0",
+    "uuid": "^7.0.3"
   },
   "bugs": {
     "url": "https://github.com/Microsoft/code-push/issues"
