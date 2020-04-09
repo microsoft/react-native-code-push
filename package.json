@@ -36,18 +36,18 @@
   },
   "dependencies": {
     "code-push": "^3.1.0",
-    "glob": "^5.0.15",
-    "hoist-non-react-statics": "^2.3.1",
-    "inquirer": "^7.0.3",
+    "glob": "^7.1.6",
+    "hoist-non-react-statics": "^3.3.2",
+    "inquirer": "^7.1.0",
     "plist": "3.0.1",
-    "semver": "^7.1.1",
-    "xcode": "1.0.0"
+    "semver": "^7.2.1",
+    "xcode": "2.1.0"
   },
   "devDependencies": {
     "@types/assert": "^1.4.3",
-    "@types/mkdirp": "^0.5.2",
-    "@types/mocha": "^5.2.7",
-    "@types/node": "^13.1.8",
+    "@types/mkdirp": "^1.0.0",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^13.11.0",
     "@types/q": "^1.5.2",
     "archiver": "latest",
     "body-parser": "latest",
@@ -55,13 +55,13 @@
     "del": "latest",
     "express": "latest",
     "mkdirp": "latest",
-    "mocha": "^7.0.0",
+    "mocha": "^7.1.1",
     "q": "^1.5.1",
     "run-sequence": "latest",
     "shx": "^0.3.2",
     "slash": "^3.0.0",
-    "tslint": "^5.20.1",
-    "typescript": "^3.7.5"
+    "tslint": "^6.1.1",
+    "typescript": "^3.8.3"
   },
   "rnpm": {
     "android": {
