@@ -643,8 +643,7 @@ static NSString *const LatestRollbackCountKey = @"count";
 - (void)applicationWillEnterForeground
 {
     if (_appSuspendTimer) {
-        [_appSuspendTimer invalidate];
-        _appSuspendTimer = nil;
+        return;
     }
     // Determine how long the app was in the background and ensure
     // that it meets the minimum duration amount of time.
