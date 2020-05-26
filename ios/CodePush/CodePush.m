@@ -644,15 +644,14 @@ static NSString *const LatestRollbackCountKey = @"count";
 {
     // Determine how long the app was in the background and ensure
     // that it meets the minimum duration amount of time.
-
     int durationInBackground = 0;
     if (_lastResignedDate) {
         durationInBackground = [[NSDate date] timeIntervalSinceDate:_lastResignedDate];
     }
 
     if (_installMode == CodePushInstallModeOnNextSuspend) {
-        // We shouldn't use loadBundle in this case, because _appSuspendTimer will call loadBundleOnTick
-        // We should cancel timer for _appSuspendTimer if durationInBackground is lower than _minimumBackgroundDuration
+        // We shouldn't use loadBundle in this case, because _appSuspendTimer will call loadBundleOnTick.
+        // We should cancel timer for _appSuspendTimer because otherwise, we would call loadBundle two times.
         if (durationInBackground < _minimumBackgroundDuration) {
             [_appSuspendTimer invalidate];
             _appSuspendTimer = nil;
