@@ -657,7 +657,7 @@ static NSString *const LatestRollbackCountKey = @"count";
             _appSuspendTimer = nil;
         }
     } else {
-        // For resume install mode
+        // For resume install mode.
         if (durationInBackground >= _minimumBackgroundDuration) {
            [self loadBundle];
         }
