@@ -1,5 +1,23 @@
 ### Java API Reference (Android)
 
+### API for React Native 0.60 version and above
+
+Since `autolinking` uses `react-native.config.js` to link plugins, constructors are specified in that file. But you can override custom variables to manage the CodePush plugin by placing these values in string resources.
+
+* __Public Key__ - used for bundle verification in the Code Signing Feature. Please refer to [Code Signing](setup-android.md#code-signing-setup) section for more details about the Code Signing Feature.
+    To set the public key, you should add the content of the public key to `strings.xml` with name `CodePushPublicKey`. CodePush automatically gets this property and enables the Code Signing feature. For example:
+    ```xml
+    <string moduleConfig="true" name="CodePushPublicKey">your-public-key</string>
+    ```
+
+* __Server Url__ - used for specifying CodePush Server Url.
+    The Default value: "https://codepush.appcenter.ms/" is overridden by adding your path to `strings.xml` with name `CodePushServerUrl`. CodePush automatically gets this property and will use this path to send requests. For example:
+    ```xml
+    <string moduleConfig="true" name="CodePushServerUrl">https://yourcodepush.server.com</string>
+    ```
+
+### API for React Native lower than 0.60
+
 The Java API is made available by importing the `com.microsoft.codepush.react.CodePush` class into your `MainActivity.java` file, and consists of a single public class named `CodePush`.
 
 #### CodePush
@@ -16,9 +34,9 @@ Constructs the CodePush client runtime and represents the `ReactPackage` instanc
 
     2. The local cache that the React Native runtime maintains in debug mode is deleted whenever a CodePush update is installed. This ensures that when the app is restarted after an update is applied, you will see the expected changes. As soon as [this PR](https://github.com/facebook/react-native/pull/4738) is merged, we won't need to do this anymore.
 
-- __CodePush(String deploymentKey, Context context, boolean isDebugMode, Integer publicKeyResourceDescriptor)__ - Equivalent to the previous constructor, but allows you to specify the public key resource descriptor needed to read public key content. Please refer to [Code Signing](setup-android.md#code-signing) section for more details about Code Signing Feature.
+- __CodePush(String deploymentKey, Context context, boolean isDebugMode, Integer publicKeyResourceDescriptor)__ - Equivalent to the previous constructor, but allows you to specify the public key resource descriptor needed to read public key content. Please refer to [Code Signing](setup-android.md#code-signing-setup) section for more details about the Code Signing Feature.
 
-- __CodePush(String deploymentKey, Context context, boolean isDebugMode, String serverUrl)__ Constructor allows you to specify CodePush Server Url. The Default value: `"https://codepush.appcenter.ms/"` is overridden by value specfied in `serverUrl`. 
+- __CodePush(String deploymentKey, Context context, boolean isDebugMode, String serverUrl)__ Constructor allows you to specify CodePush Server Url. The Default value: `"https://codepush.appcenter.ms/"` is overridden by value specified in `serverUrl`.
 
 ##### Builder
 
@@ -46,7 +64,7 @@ As an alternative to constructors *you can also use `CodePushBuilder`* to setup 
 
 * __public CodePushBuilder setServerUrl(String serverUrl)__ - allows you to specify CodePush Server Url. Default value: `"https://codepush.appcenter.ms/"`.
 
-* __public CodePushBuilder setPublicKeyResourceDescriptor(int publicKeyResourceDescriptor)__ - allows you to specify Public Key resource descriptor which will be used for reading Public Key content for `strings.xml` file. Please refer to [Code Signing](#code-signing) section for more detailed information about purpose of this parameter.
+* __public CodePushBuilder setPublicKeyResourceDescriptor(int publicKeyResourceDescriptor)__ - allows you to specify Public Key resource descriptor which will be used for reading Public Key content for `strings.xml` file. Please refer to [Code Signing](setup-android.md#code-signing-setup) section for more detailed information about purpose of this parameter.
 
 * __public CodePush build()__ - return configured `CodePush` instance.
 
