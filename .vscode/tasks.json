@@ -1,0 +1,55 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "Build",
+            "command": "npm",
+            "args": [
+                "run",
+                "build:tests"
+            ],
+            "presentation": {
+                "echo": false,
+                "focus": false
+            },
+            "problemMatcher": [
+                "$tsc"
+            ]
+        },
+        {
+            "type": "shell",
+            "label": "Setup-android",
+            "dependsOn": "Build",
+            "command": "npm",
+            "args": [
+                "run",
+                "test:setup:android"
+            ],
+            "presentation": {
+                "echo": false,
+                "focus": false
+            },
+            "problemMatcher": [
+                "$tsc"
+            ]
+        },
+        {
+            "type": "shell",
+            "label": "Setup-ios",
+            "dependsOn": "Build",
+            "command": "npm",
+            "args": [
+                "run",
+                "test:setup:ios"
+            ],
+            "presentation": {
+                "echo": false,
+                "focus": false
+            },
+            "problemMatcher": [
+                "$tsc"
+            ]
+        }
+    ]
+}
