@@ -60,7 +60,7 @@ This decorator provides support for letting you customize its behaviour to easil
     export default MyApp;
     ```
 
-2. **Silent sync everytime the app resumes**. Same as 1, except we check for updates, or apply an update if one exists every time the app returns to the foreground after being "backgrounded".
+2. **Silent sync every time the app resumes**. Same as 1, except we check for updates, or apply an update if one exists every time the app returns to the foreground after being "backgrounded".
 
     ```javascript
     // Sync for updates everytime the app resumes.
