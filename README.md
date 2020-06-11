@@ -133,6 +133,8 @@ The simplest way to do this is to "CodePush-ify" your app's root component. To d
 
 * **Option 1: Wrap your root component with the `codePush` higher-order component:**
 
+  * For class component
+
     ```javascript
     import codePush from "react-native-code-push";
 
@@ -142,9 +144,22 @@ The simplest way to do this is to "CodePush-ify" your app's root component. To d
     MyApp = codePush(MyApp);
     ```
 
+  * For functional component
+
+    ```javascript
+    import codePush from "react-native-code-push";
+
+    const App: () => React$Node = () => {
+    }
+
+    const appComponent = codePush(App);
+    ```
+
 * **Option 2: Use the [ES7 decorator](https://github.com/wycats/javascript-decorators) syntax:**
 
     *NOTE: Decorators are not yet supported in Babel 6.x pending proposal update.* You may need to enable it by installing and using [babel-preset-react-native-stage-0](https://github.com/skevy/babel-preset-react-native-stage-0#babel-preset-react-native-stage-0).
+
+  * For class component
 
     ```javascript
     import codePush from "react-native-code-push";
@@ -154,45 +169,96 @@ The simplest way to do this is to "CodePush-ify" your app's root component. To d
     }
     ```
 
+  * For functional component
+
+    ```javascript
+    import codePush from "react-native-code-push";
+
+    const App: () => React$Node = () => {
+    }
+
+    export default codePush(App);
+    ```
+
 By default, CodePush will check for updates on every app start. If an update is available, it will be silently downloaded, and installed the next time the app is restarted (either explicitly by the end user or by the OS), which ensures the least invasive experience for your end users. If an available update is mandatory, then it will be installed immediately, ensuring that the end user gets it as soon as possible.
 
 If you would like your app to discover updates more quickly, you can also choose to sync up with the CodePush server every time the app resumes from the background.
 
-```javascript
-let codePushOptions = { checkFrequency: codePush.CheckFrequency.ON_APP_RESUME };
+* For class component
 
-class MyApp extends Component {
-}
+    ```javascript
+    let codePushOptions = { checkFrequency: codePush.CheckFrequency.ON_APP_RESUME };
 
-MyApp = codePush(codePushOptions)(MyApp);
-```
+    class MyApp extends Component {
+    }
+
+    MyApp = codePush(codePushOptions)(MyApp);
+    ```
+
+* For functional component
+
+    ```javascript
+    let codePushOptions = { checkFrequency: codePush.CheckFrequency.ON_APP_RESUME };
+
+    const App: () => React$Node = () => {
+    }
+
+    const appComponent = codePush(codePushOptions)(App);
+    ```
 
 Alternatively, if you want fine-grained control over when the check happens (like a button press or timer interval), you can call [`CodePush.sync()`](docs/api-js.md#codepushsync) at any time with your desired `SyncOptions`, and optionally turn off CodePush's automatic checking by specifying a manual `checkFrequency`:
 
-```javascript
-let codePushOptions = { checkFrequency: codePush.CheckFrequency.MANUAL };
+* For class component
 
-class MyApp extends Component {
+    ```javascript
+    let codePushOptions = { checkFrequency: codePush.CheckFrequency.MANUAL };
+
+    class MyApp extends Component {
+        onButtonPress() {
+            codePush.sync({
+                updateDialog: true,
+                installMode: codePush.InstallMode.IMMEDIATE
+            });
+        }
+
+        render() {
+            return (
+                <View>
+                    <TouchableOpacity onPress={this.onButtonPress}>
+                        <Text>Check for updates</Text>
+                    </TouchableOpacity>
+                </View>
+            )
+        }
+    }
+
+    MyApp = codePush(codePushOptions)(MyApp);
+    ```
+
+* For functional component
+
+    ```javascript
+    let codePushOptions = { checkFrequency: codePush.CheckFrequency.MANUAL };
+
     onButtonPress() {
-        codePush.sync({
-            updateDialog: true,
-            installMode: codePush.InstallMode.IMMEDIATE
-        });
-    }
+            codePush.sync({
+                updateDialog: true,
+                installMode: codePush.InstallMode.IMMEDIATE
+            });
+        }
 
-    render() {
+    const App: () => React$Node = () => {
         return (
-            <View>
-                <TouchableOpacity onPress={this.onButtonPress}>
-                    <Text>Check for updates</Text>
-                </TouchableOpacity>
-            </View> 
-        )
+                <View>
+                    <TouchableOpacity onPress={this.onButtonPress}>
+                        <Text>Check for updates</Text>
+                    </TouchableOpacity>
+                </View>
+            )
     }
-}
 
-MyApp = codePush(codePushOptions)(MyApp);
-```
+    export default codePush(codePushOptions)(App);
+    ```
 
 If you would like to display an update confirmation dialog (an "active install"), configure when an available update is installed (like force an immediate restart) or customize the update experience in any other way, refer to the [`codePush()`](docs/api-js.md#codepush) API reference for information on how to tweak this default behavior.
 
