@@ -12,37 +12,60 @@
   ],
   "author": "Microsoft Corporation",
   "license": "MIT",
+  "scripts": {
+    "clean": "shx rm -rf bin",
+    "setup": "npm install --quiet --no-progress",
+    "prebuild:tests": "npm run clean && npm run tslint",
+    "build:tests": "tsc",
+    "test": "npm run build:tests && npm run test:setup && npm run test:fast",
+    "test:android": "npm run build:tests && npm run test:setup:android && npm run test:fast:android",
+    "test:ios": "npm run build:tests && npm run test:setup:ios && npm run test:fast:ios",
+    "test:setup": "mocha --recursive bin/test --android --ios --setup",
+    "test:setup:android": "mocha --recursive bin/test --android --setup",
+    "test:setup:ios": "mocha --recursive bin/test --ios --setup",
+    "test:fast": "mocha --recursive bin/test --android --ios",
+    "test:fast:android": "mocha --recursive bin/test --android",
+    "test:fast:ios": "mocha --recursive bin/test --ios",
+    "test:debugger:android": "mocha --recursive --inspect-brk=0.0.0.0 bin/test --android",
+    "test:debugger:ios": "mocha --recursive --inspect-brk=0.0.0.0 bin/test --ios",
+    "tslint": "tslint -c tslint.json test/**/*.ts"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/Microsoft/react-native-code-push"
   },
   "dependencies": {
-    "code-push": "^3.0.1",
-    "glob": "^5.0.15",
-    "hoist-non-react-statics": "^2.3.1",
-    "inquirer": "^1.1.2",
+    "code-push": "^3.1.0",
+    "glob": "^7.1.6",
+    "hoist-non-react-statics": "^3.3.2",
+    "inquirer": "^7.1.0",
     "plist": "3.0.1",
-    "semver": "^5.6.0",
-    "xcode": "1.0.0"
+    "semver": "^7.2.1",
+    "xcode": "2.1.0"
   },
   "devDependencies": {
+    "@types/assert": "^1.4.3",
+    "@types/mkdirp": "^1.0.0",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^13.11.0",
+    "@types/q": "^1.5.2",
     "archiver": "latest",
     "body-parser": "latest",
     "code-push-plugin-testing-framework": "file:./code-push-plugin-testing-framework",
     "del": "latest",
     "express": "latest",
-    "gulp-insert": "latest",
-    "gulp-tslint": "latest",
-    "gulp-typescript": "^5.0.1",
     "mkdirp": "latest",
+    "mocha": "^7.1.1",
     "q": "^1.5.1",
     "run-sequence": "latest",
-    "tslint": "^5.18.0",
-    "typescript": "^2.9.2"
+    "shx": "^0.3.2",
+    "slash": "^3.0.0",
+    "tslint": "^6.1.1",
+    "typescript": "^3.8.3"
   },
   "rnpm": {
     "android": {
-      "packageInstance": "new CodePush(getResources().getString(R.string.reactNativeCodePush_androidDeploymentKey), getApplicationContext(), BuildConfig.DEBUG)"
+      "packageInstance": "new CodePush(getResources().getString(R.string.CodePushDeploymentKey), getApplicationContext(), BuildConfig.DEBUG)"
     },
     "ios": {
       "sharedLibraries": [

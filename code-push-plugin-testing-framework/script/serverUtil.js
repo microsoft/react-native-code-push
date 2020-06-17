@@ -1,7 +1,7 @@
 "use strict";
 // IMPORTS
 var assert = require("assert");
-var bodyparser = require("body-parser");
+var bodyParser = require("body-parser");
 var express = require("express");
 var Q = require("q");
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -12,22 +12,22 @@ var Q = require("q");
 function setupServer(targetPlatform) {
     console.log("Setting up server at " + targetPlatform.getServerUrl());
     var app = express();
-    app.use(bodyparser.json());
-    app.use(bodyparser.urlencoded({ extended: true }));
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({ extended: true }));
     app.use(function (req, res, next) {
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.setHeader("Access-Control-Allow-Methods", "*");
         res.setHeader("Access-Control-Allow-Headers", "origin, content-type, accept, X-CodePush-SDK-Version");
         next();
     });
-    app.get("/updateCheck", function (req, res) {
+    app.get("/v0.1/public/codepush/update_check", function (req, res) {
         exports.updateCheckCallback && exports.updateCheckCallback(req);
         res.send(exports.updateResponse);
         console.log("Update check called from the app.");
         console.log("Request: " + JSON.stringify(req.query));
         console.log("Response: " + JSON.stringify(exports.updateResponse));
     });
-    app.get("/download", function (req, res) {
+    app.get("/v0.1/public/codepush/report_status/download", function (req, res) {
         console.log("Application downloading the package.");
         res.download(exports.updatePackagePath);
     });
@@ -83,15 +83,17 @@ exports.UpdateCheckRequestMock = UpdateCheckRequestMock;
  */
 function createDefaultResponse() {
     var defaultResponse = new CheckForUpdateResponseMock();
-    defaultResponse.downloadURL = "";
+    defaultResponse.download_url = "";
+    defaultResponse.is_disabled = false;
     defaultResponse.description = "";
-    defaultResponse.isAvailable = false;
-    defaultResponse.isMandatory = false;
-    defaultResponse.appVersion = "";
-    defaultResponse.packageHash = "";
+    defaultResponse.is_available = false;
+    defaultResponse.is_mandatory = false;
+    defaultResponse.target_binary_range = "";
+    defaultResponse.package_hash = "";
     defaultResponse.label = "";
-    defaultResponse.packageSize = 0;
-    defaultResponse.updateAppVersion = false;
+    defaultResponse.package_size = 0;
+    defaultResponse.should_run_binary_version = false;
+    defaultResponse.update_app_version = false;
     return defaultResponse;
 }
 exports.createDefaultResponse = createDefaultResponse;
@@ -102,19 +104,21 @@ function createUpdateResponse(mandatory, targetPlatform, randomHash) {
     if (mandatory === void 0) { mandatory = false; }
     if (randomHash === void 0) { randomHash = true; }
     var updateResponse = new CheckForUpdateResponseMock();
-    updateResponse.isAvailable = true;
-    updateResponse.appVersion = "1.0.0";
-    updateResponse.downloadURL = "mock.url/download";
-    updateResponse.isMandatory = mandatory;
+    updateResponse.is_available = true;
+    updateResponse.is_disabled = false;
+    updateResponse.target_binary_range = "1.0.0";
+    updateResponse.download_url = "mock.url/v0.1/public/codepush/report_status/download";
+    updateResponse.is_mandatory = mandatory;
     updateResponse.label = "mock-update";
-    updateResponse.packageHash = "12345-67890";
-    updateResponse.packageSize = 12345;
-    updateResponse.updateAppVersion = false;
+    updateResponse.package_hash = "12345-67890";
+    updateResponse.package_size = 12345;
+    updateResponse.should_run_binary_version = false;
+    updateResponse.update_app_version = false;
     if (!!targetPlatform)
-        updateResponse.downloadURL = targetPlatform.getServerUrl() + "/download";
+        updateResponse.download_url = targetPlatform.getServerUrl() + "/v0.1/public/codepush/report_status/download";
     // We need unique hashes to avoid conflicts.
     if (randomHash) {
-        updateResponse.packageHash = "randomHash-" + Math.floor(Math.random() * 10000);
+        updateResponse.package_hash = "randomHash-" + Math.floor(Math.random() * 10000);
     }
     return updateResponse;
 }
@@ -125,18 +129,25 @@ exports.createUpdateResponse = createUpdateResponse;
 function expectTestMessages(expectedMessages) {
     var deferred = Q.defer();
     var messageIndex = 0;
+    var lastRequestBody = null;
     exports.testMessageCallback = function (requestBody) {
         try {
             console.log("Message index: " + messageIndex);
-            if (typeof expectedMessages[messageIndex] === "string") {
-                assert.equal(requestBody.message, expectedMessages[messageIndex]);
-            }
-            else {
-                assert(areEqual(requestBody, expectedMessages[messageIndex]));
-            }
-            /* end of message array */
-            if (++messageIndex === expectedMessages.length) {
-                deferred.resolve(undefined);
+            // We should ignore duplicated requests. It is only CI issue. 
+            if (lastRequestBody === null || !areEqual(requestBody, lastRequestBody)) {
+                if (typeof expectedMessages[messageIndex] === "string") {
+                    assert.equal(requestBody.message, expectedMessages[messageIndex]);
+                }
+                else {
+                    assert(areEqual(requestBody, expectedMessages[messageIndex]));
+                }
+
+                lastRequestBody = requestBody;
+                
+                /* end of message array */
+                if (++messageIndex === expectedMessages.length) {
+                    deferred.resolve(undefined);
+                }
             }
         }
         catch (e) {

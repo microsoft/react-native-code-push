@@ -1,0 +1,41 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Tests-android",
+            "type": "node",
+            "request": "launch",
+            "preLaunchTask": "Setup-android",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "test:debugger:android"
+            ],
+            "port": 9229,
+            "stopOnEntry": false,
+            "sourceMaps": true,
+            "console": "internalConsole",
+            "internalConsoleOptions": "openOnSessionStart",
+            "autoAttachChildProcesses": true,
+            "timeout": 100000
+        },
+        {
+            "name": "Tests-ios",
+            "type": "node",
+            "request": "launch",
+            "preLaunchTask": "Setup-ios",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "test:debugger:ios"
+            ],
+            "port": 9229,
+            "stopOnEntry": false,
+            "sourceMaps": true,
+            "console": "internalConsole",
+            "internalConsoleOptions": "openOnSessionStart",
+            "autoAttachChildProcesses": true,
+            "timeout": 100000
+        }
+    ]
+}

@@ -4,13 +4,71 @@
 >
 > Complete demo configured with "multi-deployment testing" feature is [here](https://github.com/Microsoft/react-native-code-push/files/1314118/rncp1004.zip).
 
-The [Android Gradle plugin](http://google.github.io/android-gradle-dsl/current/index.html) allows you to define custom config settings for each "build type" (like debug, release), which in turn are generated as properties on the `BuildConfig` class that you can reference from your Java code. This mechanism allows you to easily configure your debug builds to use your CodePush staging deployment key and your release builds to use your CodePush production deployment key.
+The [Android Gradle plugin](https://google.github.io/android-gradle-dsl/current/index.html) allows you to define custom config settings for each "build type" (like debug, release). This mechanism allows you to easily configure your debug builds to use your CodePush staging deployment key and your release builds to use your CodePush production deployment key.
+
+*NOTE: As a reminder, you can retrieve these keys by running `code-push deployment ls <APP_NAME> -k` from your terminal.*
 
 To set this up, perform the following steps:
 
-1. Open your app's `build.gradle` file (for example `android/app/build.gradle` in standard React Native projects)
+**For React Native >= v0.60**
 
-2. Find the `android { buildTypes {} }` section and define `buildConfigField` entries for both your `debug` and `release` build types, which reference your `Staging` and `Production` deployment keys respectively. If you prefer, you can define the key literals in your `gradle.properties` file, and then reference them here. Either way will work, and it's just a matter of personal preference.
+1. Open the project's app level `build.gradle` file (for example `android/app/build.gradle` in standard React Native projects)
+
+2. Find the `android { buildTypes {} }` section and define `resValue` entries for both your `debug` and `release` build types, which reference your `Staging` and `Production` deployment keys respectively.
+
+    ```groovy
+    android {
+        ...
+        buildTypes {
+            debug {
+                ...
+                // Note: CodePush updates should not be tested in Debug mode as they are overriden by the RN packager. However, because CodePush checks for updates in all modes, we must supply a key.
+                resValue "string", "CodePushDeploymentKey", '""'
+                ...
+            }
+
+            releaseStaging {
+                ...
+                resValue "string", "CodePushDeploymentKey", '"<INSERT_STAGING_KEY>"'
+
+                // Note: It is a good idea to provide matchingFallbacks for the new buildType you create to prevent build issues
+                // Add the following line if not already there
+                matchingFallbacks = ['release']
+                ...
+            }
+
+            release {
+                ...
+                resValue "string", "CodePushDeploymentKey", '"<INSERT_PRODUCTION_KEY>"'
+                ...
+            }
+        }
+        ...
+    }
+    ```
+    
+    *NOTE: Remember to remove the key from `strings.xml` if you are configuring the deployment key in the build process*
+
+    *NOTE: The naming convention for `releaseStaging` is significant due to [this line](https://github.com/facebook/react-native/blob/e083f9a139b3f8c5552528f8f8018529ef3193b9/react.gradle#L79).*
+
+**For React Native v0.29 - v0.59**
+
+1. Open up your `MainApplication.java` file and make the following changes:
+
+    ```java
+    @Override
+    protected List<ReactPackage> getPackages() {
+         return Arrays.<ReactPackage>asList(
+             ...
+             new CodePush(BuildConfig.CODEPUSH_KEY, MainApplication.this, BuildConfig.DEBUG), // Add/change this line.
+             ...
+         );
+    }
+    ```
+
+2. Open your app's `build.gradle` file (for example `android/app/build.gradle` in standard React Native projects)
+
+3. Find the `android { buildTypes {} }` section and define `buildConfigField` entries for both your `debug` and `release` build types, which reference your `Staging` and `Production` deployment keys respectively. If you prefer, you can define the key literals in your `gradle.properties` file, and then reference them here. Either way will work, and it's just a matter of personal preference.
 
     ```groovy
     android {
@@ -42,26 +100,9 @@ To set this up, perform the following steps:
     }
     ```
 
-    *NOTE: As a reminder, you can retrieve these keys by running `code-push deployment ls <APP_NAME> -k` from your terminal.*
-
     *NOTE: The naming convention for `releaseStaging` is significant due to [this line](https://github.com/facebook/react-native/blob/e083f9a139b3f8c5552528f8f8018529ef3193b9/react.gradle#L79).*
 
 4. Pass the deployment key to the `CodePush` constructor via the build config you defined, as opposed to a string literal.
-
-**For React Native >= v0.29**
-
-Open up your `MainApplication.java` file and make the following changes:
-
- ```java
-@Override
-protected List<ReactPackage> getPackages() {
-     return Arrays.<ReactPackage>asList(
-         ...
-         new CodePush(BuildConfig.CODEPUSH_KEY, MainApplication.this, BuildConfig.DEBUG), // Add/change this line.
-         ...
-     );
-}
- ```
 
 **For React Native v0.19 - v0.28**
 

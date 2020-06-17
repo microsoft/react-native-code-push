@@ -642,10 +642,6 @@ static NSString *const LatestRollbackCountKey = @"count";
 // a resume-based update still pending installation.
 - (void)applicationWillEnterForeground
 {
-    if (_appSuspendTimer) {
-        [_appSuspendTimer invalidate];
-        _appSuspendTimer = nil;
-    }
     // Determine how long the app was in the background and ensure
     // that it meets the minimum duration amount of time.
     int durationInBackground = 0;
@@ -653,8 +649,18 @@ static NSString *const LatestRollbackCountKey = @"count";
         durationInBackground = [[NSDate date] timeIntervalSinceDate:_lastResignedDate];
     }
 
-    if (durationInBackground >= _minimumBackgroundDuration) {
-        [self loadBundle];
+    if (_installMode == CodePushInstallModeOnNextSuspend) {
+        // We shouldn't use loadBundle in this case, because _appSuspendTimer will call loadBundleOnTick.
+        // We should cancel timer for _appSuspendTimer because otherwise, we would call loadBundle two times.
+        if (durationInBackground < _minimumBackgroundDuration) {
+            [_appSuspendTimer invalidate];
+            _appSuspendTimer = nil;
+        }
+    } else {
+        // For resume install mode.
+        if (durationInBackground >= _minimumBackgroundDuration) {
+           [self loadBundle];
+        }
     }
 }
 
@@ -895,6 +901,7 @@ RCT_EXPORT_METHOD(setLatestRollbackInfo:(NSString *)packageHash
                   reject:(RCTPromiseRejectBlock)reject)
 {
     [[self class] setLatestRollbackInfo:packageHash];
+    resolve(nil);
 }
 
 

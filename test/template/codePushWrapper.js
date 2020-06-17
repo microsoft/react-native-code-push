@@ -3,7 +3,7 @@ import CodePush from "react-native-code-push";
 // This module wraps CodePush API calls to add test message callbacks to every function for simpler test code.
 
 module.exports = {
-    checkForUpdate: function(testApp, onSuccess, onError, deploymentKey) {
+    checkForUpdate: function (testApp, onSuccess, onError, deploymentKey) {
         return CodePush.checkForUpdate(deploymentKey)
             .then((remotePackage) => {
                 return testApp.checkUpdateSuccess(remotePackage).then(() => { return onSuccess && onSuccess(remotePackage); });
@@ -11,8 +11,8 @@ module.exports = {
                 return testApp.checkUpdateError(error).then(() => { return onError && onError(error); });
             });
     },
-    
-    download: function(testApp, onSuccess, onError, remotePackage) {
+
+    download: function (testApp, onSuccess, onError, remotePackage) {
         return remotePackage.download()
             .then((localPackage) => {
                 return testApp.downloadSuccess(localPackage).then(() => { return onSuccess && onSuccess(localPackage); });
@@ -20,8 +20,8 @@ module.exports = {
                 return testApp.downloadError(error).then(() => { return onError && onError(error); });
             });
     },
-    
-    install: function(testApp, onSuccess, onError, installMode, minBackgroundDuration, localPackage) {
+
+    install: function (testApp, onSuccess, onError, installMode, minBackgroundDuration, localPackage) {
         return localPackage.install(installMode, minBackgroundDuration)
             .then(() => {
                 // Since immediate installs cannot be reliably logged (due to async network calls), we only log "UPDATE_INSTALLED" if it is a resume or restart update.
@@ -31,14 +31,14 @@ module.exports = {
                 return testApp.installError().then(() => { return onError && onError(); });
             });
     },
-    
-    checkAndInstall: function(testApp, onSuccess, onError, installMode, minBackgroundDuration) {
+
+    checkAndInstall: function (testApp, onSuccess, onError, installMode, minBackgroundDuration) {
         var installUpdate = this.install.bind(this, testApp, onSuccess, onError, installMode, minBackgroundDuration);
         var downloadUpdate = this.download.bind(this, testApp, installUpdate, onError);
         return this.checkForUpdate(testApp, downloadUpdate, onError);
     },
-    
-    sync: function(testApp, onSyncStatus, onSyncError, options) {
+
+    sync: function (testApp, onSyncStatus, onSyncError, options) {
         return CodePush.checkForUpdate()
             .then(
                 (remotePackage) => {
@@ -48,7 +48,7 @@ module.exports = {
                     var regularUpdateIsImmediate = options && options.installMode === CodePush.InstallMode.IMMEDIATE;
                     var mandatoryUpdateIsImmediate = !options || (options && (!options.mandatoryInstallMode || options.mandatoryInstallMode === CodePush.InstallMode.IMMEDIATE));
                     var isInstallImmediate = (remotePackage && remotePackage.isMandatory) ? mandatoryUpdateIsImmediate : regularUpdateIsImmediate;
-                    
+
                     return CodePush.sync(options)
                         .then((status) => {
                             if (!(isInstallImmediate && status === CodePush.SyncStatus.UPDATE_INSTALLED)) {
