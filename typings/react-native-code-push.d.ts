@@ -239,6 +239,13 @@ export interface StatusReport {
  */
 declare function CodePush(options?: CodePushOptions): (x: any) => any;
 
+/**
+ * Decorates a React Component configuring it to sync for updates with the CodePush server.
+ *
+ * @param x the React Component that will decorated
+ */
+declare function CodePush(x: any): any
+
 declare namespace CodePush {
     /**
      * Represents the default settings that will be used by the sync method if
