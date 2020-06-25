@@ -37,7 +37,7 @@ module.exports = {
 
 function getHttpMethodName(verb) {
   // Note: This should stay in sync with the enum definition in
-  // https://github.com/Microsoft/code-push/blob/master/sdk/script/acquisition-sdk.ts#L6
+  // https://github.com/microsoft/code-push/blob/master/sdk/script/acquisition-sdk.ts#L6
   return [
     "GET",
     "HEAD",
