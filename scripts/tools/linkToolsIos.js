@@ -22,7 +22,7 @@ exports.getJsCodeLocationPatch = function(defaultJsCodeLocationAssignmentStateme
   #endif`;
 }
 
-// Fix for https://github.com/Microsoft/react-native-code-push/issues/477
+// Fix for https://github.com/microsoft/react-native-code-push/issues/477
 // Typical location of AppDelegate.m for newer RN versions: $PROJECT_ROOT/ios/<project_name>/AppDelegate.m
 // Let's try to find that path by filtering the whole array for any path containing <project_name>
 // If we can't find it there, play dumb and pray it is the first path we find.
@@ -71,7 +71,7 @@ exports.getPlistPath = function() {
     }
 
     //also remove surrounding quotes from plistPathValue to get correct path resolved
-    //(see https://github.com/Microsoft/react-native-code-push/issues/534#issuecomment-302069326 for details)
+    //(see https://github.com/microsoft/react-native-code-push/issues/534#issuecomment-302069326 for details)
     return path.resolve(path.dirname(xcodeProjectPath), '..', plistPathValue.replace(/^"(.*)"$/, '$1'));
 }
 

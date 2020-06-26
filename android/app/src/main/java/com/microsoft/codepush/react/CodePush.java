@@ -148,7 +148,7 @@ public class CodePush implements ReactPackage {
 
     private boolean isLiveReloadEnabled(ReactInstanceManager instanceManager) {
         // Use instanceManager for checking if we use LiveReload mode. In this case we should not remove ReactNativeDevBundle.js file
-        // because we get error with trying to get this after reloading. Issue: https://github.com/Microsoft/react-native-code-push/issues/1272
+        // because we get error with trying to get this after reloading. Issue: https://github.com/microsoft/react-native-code-push/issues/1272
         if (instanceManager != null) {
             DevSupportManager devSupportManager = instanceManager.getDevSupportManager();
             if (devSupportManager != null) {
@@ -200,7 +200,7 @@ public class CodePush implements ReactPackage {
             String packageName = this.mContext.getPackageName();
             int codePushApkBuildTimeId = this.mContext.getResources().getIdentifier(CodePushConstants.CODE_PUSH_APK_BUILD_TIME_KEY, "string", packageName);
             // replace double quotes needed for correct restoration of long value from strings.xml
-            // https://github.com/Microsoft/cordova-plugin-code-push/issues/264
+            // https://github.com/microsoft/cordova-plugin-code-push/issues/264
             String codePushApkBuildTime = this.mContext.getResources().getString(codePushApkBuildTimeId).replaceAll("\"","");
             return Long.parseLong(codePushApkBuildTime);
         } catch (Exception e) {

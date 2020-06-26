@@ -9,7 +9,7 @@ Pod::Spec.new do |s|
   s.author         = package['author']
   s.license        = package['license']
   s.homepage       = package['homepage']
-  s.source         = { :git => 'https://github.com/Microsoft/react-native-code-push.git', :tag => "v#{s.version}"}
+  s.source         = { :git => 'https://github.com/microsoft/react-native-code-push.git', :tag => "v#{s.version}"}
   s.ios.deployment_target = '7.0'
   s.tvos.deployment_target = '9.0'
   s.preserve_paths = '*.js'

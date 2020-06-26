@@ -83,7 +83,7 @@ function addJsBundleAndMetaToManifest() {
             // "CodePushHash.json" file name breaks flow type checking.
             // To fix the issue we need to delete "CodePushHash.json" file and
             // use "CodePushHash" file name instead to store the hash value.
-            // Relates to https://github.com/Microsoft/react-native-code-push/issues/577
+            // Relates to https://github.com/microsoft/react-native-code-push/issues/577
             var oldSavedResourcesManifestPath = assetsDir + "/" + CODE_PUSH_HASH_OLD_FILE_NAME;
             if (fs.existsSync(oldSavedResourcesManifestPath)) {
                 fs.unlinkSync(oldSavedResourcesManifestPath);
