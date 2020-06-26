@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Microsoft/code-push.git"
+    "url": "git+https://github.com/microsoft/code-push.git"
   },
   "author": {
     "name": "Microsoft Corporation"
@@ -27,7 +27,7 @@
     "uuid": "^7.0.3"
   },
   "bugs": {
-    "url": "https://github.com/Microsoft/code-push/issues"
+    "url": "https://github.com/microsoft/code-push/issues"
   },
   "readme": "ERROR: No README data found!",
   "_id": "code-push-plugin-testing-framework@0.0.1",

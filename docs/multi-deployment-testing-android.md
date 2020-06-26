@@ -2,7 +2,7 @@
 
 > NOTE
 >
-> Complete demo configured with "multi-deployment testing" feature is [here](https://github.com/Microsoft/react-native-code-push/files/1314118/rncp1004.zip).
+> Complete demo configured with "multi-deployment testing" feature is [here](https://github.com/microsoft/react-native-code-push/files/1314118/rncp1004.zip).
 
 The [Android Gradle plugin](https://google.github.io/android-gradle-dsl/current/index.html) allows you to define custom config settings for each "build type" (like debug, release). This mechanism allows you to easily configure your debug builds to use your CodePush staging deployment key and your release builds to use your CodePush production deployment key.
 
