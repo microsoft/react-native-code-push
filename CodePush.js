@@ -605,11 +605,11 @@ if (NativeCodePush) {
     log,
     notifyAppReady: notifyApplicationReady,
     notifyApplicationReady,
-    restartApp: RestartManager.restartApp,
+    restartApp: NativeCodePush.restartApp,
     setUpTestDependencies,
     sync,
-    disallowRestart: RestartManager.disallow,
-    allowRestart: RestartManager.allow,
+    disallowRestart: NativeCodePush.disallow,
+    allowRestart: NativeCodePush.allow,
     clearUpdates: NativeCodePush.clearUpdates,
     InstallMode: {
       IMMEDIATE: NativeCodePush.codePushInstallModeImmediate, // Restart the app immediately
