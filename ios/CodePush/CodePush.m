@@ -978,15 +978,6 @@ RCT_EXPORT_METHOD(disallow:(RCTPromiseResolveBlock)resolve
 /*
  * This method is the native side of the CodePush.restartApp() method.
  */
-RCT_EXPORT_METHOD(restartApp:(RCTPromiseResolveBlock)resolve
-                    rejecter:(RCTPromiseRejectBlock)reject)
-{
-    [self restartAppInternal:NO];
-}
-
-/*
- * This method is the native side of the CodePush.restartApp() method.
- */
 RCT_EXPORT_METHOD(restartApp:(BOOL)onlyIfUpdateIsPending
                      resolve:(RCTPromiseResolveBlock)resolve
                     rejecter:(RCTPromiseRejectBlock)reject)
