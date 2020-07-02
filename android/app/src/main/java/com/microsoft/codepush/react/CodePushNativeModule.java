@@ -215,26 +215,27 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         if (this._restartInProgress) {
             CodePushUtils.log("Restart request queued until the current restart is completed");
             this._restartQueue.add(onlyIfUpdateIsPending);
+            return;
         } else if (!this._allowed) {
             CodePushUtils.log("Restart request queued until restarts are re-allowed");
             this._restartQueue.add(onlyIfUpdateIsPending);
-        } else {
-            this._restartInProgress = true;
-            if (!onlyIfUpdateIsPending || mSettingsManager.isPendingUpdate(null)) {
-                loadBundle();
-                CodePushUtils.log("Restarting app");
-                return;
-            }
+            return;
+        }
 
-            this._restartInProgress = false;
-            if (this._restartQueue.size() > 0) {
-                boolean buf = this._restartQueue.get(0);
-                this._restartQueue.remove(0);
-                this.restartAppInternal(buf);
-            }
+        this._restartInProgress = true;
+        if (!onlyIfUpdateIsPending || mSettingsManager.isPendingUpdate(null)) {
+            loadBundle();
+            CodePushUtils.log("Restarting app");
+            return;
+        }
+        
+        this._restartInProgress = false;
+        if (this._restartQueue.size() > 0) {
+            boolean buf = this._restartQueue.get(0);
+            this._restartQueue.remove(0);
+            this.restartAppInternal(buf);
         }
     }
-
 
     @ReactMethod
     public void allow(Promise promise) {
