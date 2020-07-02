@@ -998,24 +998,28 @@ RCT_EXPORT_METHOD(restartApp:(BOOL)onlyIfUpdateIsPending
 - (void)restartAppInternal:(BOOL)onlyIfUpdateIsPending
 {
     if (_restartInProgress) {
-    CPLog(@"Restart request queued until the current restart is completed.");
-    [_restartQueue addObject:@(onlyIfUpdateIsPending)];
+        CPLog(@"Restart request queued until the current restart is completed.");
+        [_restartQueue addObject:@(onlyIfUpdateIsPending)];
+        return;
     } else if (!_allowed) {
         CPLog(@"Restart request queued until restarts are re-allowed.");
         [_restartQueue addObject:@(onlyIfUpdateIsPending)];
-    } else {
-        _restartInProgress = YES;
-        if (!onlyIfUpdateIsPending || [[self class] isPendingUpdate:nil]) {
-            [self loadBundle];
-            CPLog(@"Restarting app.");
-        }
+        return;
+    }
 
-        _restartInProgress = NO;
-        if ([_restartQueue count] > 0) {
-            BOOL buf = [_restartQueue valueForKey: @"@firstObject"];
-            [_restartQueue removeObjectAtIndex:0];
-            [self restartAppInternal:buf];
-        }
+    _restartInProgress = YES;
+    if (!onlyIfUpdateIsPending || [[self class] isPendingUpdate:nil]) {
+        [self loadBundle];
+        CPLog(@"Restarting app.");
+        return;
+    }
+
+    _restartInProgress = NO;
+    if ([_restartQueue count] > 0) {
+        BOOL buf = [_restartQueue valueForKey: @"@firstObject"];
+        [_restartQueue removeObjectAtIndex:0];
+        [self restartAppInternal:buf];
+    }
     }
 }
 
