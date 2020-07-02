@@ -1,5 +1,4 @@
 import { NativeEventEmitter } from "react-native";
-import RestartManager from "./RestartManager";
 import log from "./logging";
 
 // This function is used to augment remote and local
@@ -55,7 +54,7 @@ module.exports = (NativeCodePush) => {
       await NativeCodePush.installUpdate(localPackageCopy, installMode, minimumBackgroundDuration);
       updateInstalledCallback && updateInstalledCallback();
       if (installMode == NativeCodePush.codePushInstallModeImmediate) {
-        NativeCodePush.restartApp();
+        NativeCodePush.restartApp(false);
       } else {
         NativeCodePush.clearPendingRestart();
         localPackage.isPending = true; // Mark the package as pending since it hasn't been applied yet

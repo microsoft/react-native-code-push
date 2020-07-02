@@ -1020,7 +1020,6 @@ RCT_EXPORT_METHOD(restartApp:(BOOL)onlyIfUpdateIsPending
         [_restartQueue removeObjectAtIndex:0];
         [self restartAppInternal:buf];
     }
-    }
 }
 
 /*

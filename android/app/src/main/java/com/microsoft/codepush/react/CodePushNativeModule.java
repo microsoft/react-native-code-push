@@ -211,7 +211,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         return instanceManager;
     }
 
-    public void restartAppInternal(boolean onlyIfUpdateIsPending) {
+    private void restartAppInternal(boolean onlyIfUpdateIsPending) {
         if (this._restartInProgress) {
             CodePushUtils.log("Restart request queued until the current restart is completed");
             this._restartQueue.add(onlyIfUpdateIsPending);
@@ -228,7 +228,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             CodePushUtils.log("Restarting app");
             return;
         }
-        
+
         this._restartInProgress = false;
         if (this._restartQueue.size() > 0) {
             boolean buf = this._restartQueue.get(0);
@@ -254,7 +254,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    private void clearPendingRestart(Promise promise) {
+    public void clearPendingRestart(Promise promise) {
         this._restartQueue.clear();
         promise.resolve(null);
         return;
@@ -266,11 +266,6 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         this._allowed = false;
         promise.resolve(null);
         return;
-    }
-
-    @ReactMethod
-    public void restartApp(Promise promise) {
-        this.restartApp(false, promise);
     }
 
     @ReactMethod
