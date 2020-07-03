@@ -19,10 +19,6 @@
 @interface CodePush () <RCTBridgeModule, RCTFrameUpdateObserver>
 @end
 
-BOOL _allowed = YES;
-BOOL _restartInProgress = NO;
-NSMutableArray *_restartQueue;
-
 @implementation CodePush {
     BOOL _hasResumeListener;
     BOOL _isFirstRunAfterUpdate;
@@ -35,6 +31,10 @@ NSMutableArray *_restartQueue;
     long long _latestExpectedContentLength;
     long long _latestReceivedConentLength;
     BOOL _didUpdateProgress;
+    
+    BOOL _allowed;
+    BOOL _restartInProgress;
+    NSMutableArray *_restartQueue;
 }
 
 RCT_EXPORT_MODULE()
@@ -86,7 +86,6 @@ static NSString *const LatestRollbackCountKey = @"count";
 + (void)initialize
 {
     [super initialize];
-     _restartQueue = [NSMutableArray arrayWithCapacity:1];
     if (self == [CodePush class]) {
         // Use the mainBundle by default.
         bundleResourceBundle = [NSBundle mainBundle];
@@ -374,8 +373,11 @@ static NSString *const LatestRollbackCountKey = @"count";
 
 - (instancetype)init
 {
+    _allowed = YES;
+    _restartInProgress = NO;
+    _restartQueue = [NSMutableArray arrayWithCapacity:1];
+    
     self = [super init];
-
     if (self) {
         [self initializeUpdateAfterRestart];
     }
@@ -757,6 +759,33 @@ RCT_EXPORT_METHOD(downloadUpdate:(NSDictionary*)updatePackage
         }];
 }
 
+- (void)restartAppInternal:(BOOL)onlyIfUpdateIsPending
+{
+    if (_restartInProgress) {
+        CPLog(@"Restart request queued until the current restart is completed.");
+        [_restartQueue addObject:@(onlyIfUpdateIsPending)];
+        return;
+    } else if (!_allowed) {
+        CPLog(@"Restart request queued until restarts are re-allowed.");
+        [_restartQueue addObject:@(onlyIfUpdateIsPending)];
+        return;
+    }
+
+    _restartInProgress = YES;
+    if (!onlyIfUpdateIsPending || [[self class] isPendingUpdate:nil]) {
+        [self loadBundle];
+        CPLog(@"Restarting app.");
+        return;
+    }
+
+    _restartInProgress = NO;
+    if ([_restartQueue count] > 0) {
+        BOOL buf = [_restartQueue valueForKey: @"@firstObject"];
+        [_restartQueue removeObjectAtIndex:0];
+        [self restartAppInternal:buf];
+    }
+}
+
 /*
  * This is the native side of the CodePush.getConfiguration method. It isn't
  * currently exposed via the "react-native-code-push" module, and is used
@@ -984,33 +1013,6 @@ RCT_EXPORT_METHOD(restartApp:(BOOL)onlyIfUpdateIsPending
 {
     [self restartAppInternal:onlyIfUpdateIsPending];
     resolve(nil);
-}
-
-- (void)restartAppInternal:(BOOL)onlyIfUpdateIsPending
-{
-    if (_restartInProgress) {
-        CPLog(@"Restart request queued until the current restart is completed.");
-        [_restartQueue addObject:@(onlyIfUpdateIsPending)];
-        return;
-    } else if (!_allowed) {
-        CPLog(@"Restart request queued until restarts are re-allowed.");
-        [_restartQueue addObject:@(onlyIfUpdateIsPending)];
-        return;
-    }
-
-    _restartInProgress = YES;
-    if (!onlyIfUpdateIsPending || [[self class] isPendingUpdate:nil]) {
-        [self loadBundle];
-        CPLog(@"Restarting app.");
-        return;
-    }
-
-    _restartInProgress = NO;
-    if ([_restartQueue count] > 0) {
-        BOOL buf = [_restartQueue valueForKey: @"@firstObject"];
-        [_restartQueue removeObjectAtIndex:0];
-        [self restartAppInternal:buf];
-    }
 }
 
 /*
