@@ -240,8 +240,8 @@ var AndroidEmulatorManager = (function () {
         var _this = this;
         return this.endRunningApplication(appId)
             .then(function () {
-                // Wait for a 10 seconds before restarting.
-                return Q.delay(10000);
+                // Wait for a 1 second before restarting.
+                return Q.delay(1000);
             })
             .then(function () {
                 return _this.launchInstalledApplication(appId);

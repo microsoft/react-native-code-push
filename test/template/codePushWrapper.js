@@ -21,19 +21,19 @@ module.exports = {
             });
     },
 
-    install: function (testApp, onSuccess, onError, installMode, minBackgroundDuration, localPackage) {
+    install: function (testApp, onSuccess, onError, installMode, minBackgroundDuration, disallowRestart, localPackage) {
         return localPackage.install(installMode, minBackgroundDuration)
             .then(() => {
                 // Since immediate installs cannot be reliably logged (due to async network calls), we only log "UPDATE_INSTALLED" if it is a resume or restart update.
-                if (installMode !== CodePush.InstallMode.IMMEDIATE) return testApp.installSuccess().then(() => { return onSuccess && onSuccess(); });
+                if (installMode !== CodePush.InstallMode.IMMEDIATE || disallowRestart) return testApp.installSuccess().then(() => { return onSuccess && onSuccess(); });
                 return onSuccess && onSuccess();
             }, () => {
                 return testApp.installError().then(() => { return onError && onError(); });
             });
     },
 
-    checkAndInstall: function (testApp, onSuccess, onError, installMode, minBackgroundDuration) {
-        var installUpdate = this.install.bind(this, testApp, onSuccess, onError, installMode, minBackgroundDuration);
+    checkAndInstall: function (testApp, onSuccess, onError, installMode, minBackgroundDuration, disallowRestart) {
+        var installUpdate = this.install.bind(this, testApp, onSuccess, onError, installMode, minBackgroundDuration, disallowRestart);
         var downloadUpdate = this.download.bind(this, testApp, installUpdate, onError);
         return this.checkForUpdate(testApp, downloadUpdate, onError);
     },
