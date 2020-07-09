@@ -84,12 +84,12 @@ When using the React Native assets system (i.e. using the `require("./foo.png")`
 
 | Component                                       | Prop(s)                                  |
 |-------------------------------------------------|------------------------------------------|
-| `Image`                                         | `source`   |
+| `Image`                                         | `source`                                 |
 | `MapView.Marker` <br />*(Requires [react-native-maps](https://github.com/lelandrichardson/react-native-maps) `>=O.3.2`)* | `image`                             |
 | `ProgressViewIOS`                               | `progressImage`, `trackImage`            |
 | `TabBarIOS.Item`                                | `icon`, `selectedIcon`                   |
 | `ToolbarAndroid` <br />*(React Native 0.21.0+)* | `actions[].icon`, `logo`, `overflowIcon` |
-| `Video`                                         | `source`   |
+| `Video`                                         | `source`                                 |
 
 The following list represents the set of components (and props) that don't currently support their assets being updated via CodePush, due to their dependency on static images and videos (i.e. using the `{ uri: "foo" }` syntax):
 
@@ -100,7 +100,7 @@ The following list represents the set of components (and props) that don't curre
 
 As new core components are released, which support referencing assets, we'll update this list to ensure users know what exactly they can expect to update using CodePush.
 
-*Note: CodePush works correctly with Video component if using `require`. Example:*
+*Note: CodePush works correctly with Video component only if using `require`. Example:*
 
 ```javascript
 <Video source={require("foo")} />
