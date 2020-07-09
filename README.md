@@ -80,7 +80,7 @@ We work hard to respond to new RN releases, but they do occasionally break us. W
 
 ### Supported Components
 
-When using the React Native assets system (i.e. using the `require("./foo.png")` syntax), the following list represents the set of core components (and props) that support having their referenced images updated via CodePush:
+When using the React Native assets system (i.e. using the `require("./foo.png")` syntax), the following list represents the set of core components (and props) that support having their referenced images and videos updated via CodePush:
 
 | Component                                       | Prop(s)                                  |
 |-------------------------------------------------|------------------------------------------|
@@ -89,8 +89,9 @@ When using the React Native assets system (i.e. using the `require("./foo.png")`
 | `ProgressViewIOS`                               | `progressImage`, `trackImage`            |
 | `TabBarIOS.Item`                                | `icon`, `selectedIcon`                   |
 | `ToolbarAndroid` <br />*(React Native 0.21.0+)* | `actions[].icon`, `logo`, `overflowIcon` |
+| `Video`                                         | `source`   |
 
-The following list represents the set of components (and props) that don't currently support their assets being updated via CodePush, due to their dependency on static images (i.e. using the `{ uri: "foo" }` syntax):
+The following list represents the set of components (and props) that don't currently support their assets being updated via CodePush, due to their dependency on static images and videos (i.e. using the `{ uri: "foo" }` syntax):
 
 | Component   | Prop(s)                                                              |
 |-------------|----------------------------------------------------------------------|
@@ -99,7 +100,11 @@ The following list represents the set of components (and props) that don't curre
 
 As new core components are released, which support referencing assets, we'll update this list to ensure users know what exactly they can expect to update using CodePush.
 
+*Note: CodePush works correctly with Video component if using `require`. Example:*
 
+```javascript
+<Video source={require("foo")} />
+```
 
 ## Getting Started
 
