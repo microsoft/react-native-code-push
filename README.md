@@ -100,10 +100,10 @@ The following list represents the set of components (and props) that don't curre
 
 As new core components are released, which support referencing assets, we'll update this list to ensure users know what exactly they can expect to update using CodePush.
 
-*Note: CodePush works correctly with Video component only if using `require`. Example:*
+*Note: CodePush only works with Video components when using `require` in the source prop. For example:*
 
 ```javascript
-<Video source={require("foo")} />
+<Video source={require("./foo.mp4")} />
 ```
 
 ## Getting Started
