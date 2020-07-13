@@ -1483,7 +1483,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
                                 noUpdateResponse.is_available = false;
                                 noUpdateResponse.target_binary_range = "0.0.1";
                                 ServerUtil.updateResponse = { update_info: noUpdateResponse };
-                                targetPlatform.getEmulatorManager().resumeApplication(TestConfig.TestNamespace, 5 * 1000);
+                                targetPlatform.getEmulatorManager().resumeApplication(TestConfig.TestNamespace);
                                 return ServerUtil.expectTestMessages([
                                     ServerUtil.TestMessage.DEVICE_READY_AFTER_UPDATE]);
                             })
