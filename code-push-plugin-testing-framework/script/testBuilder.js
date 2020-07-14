@@ -64,7 +64,7 @@ function itInternal(func, expectation, isCoreTest, assertion) {
     if ((!TestConfig.onlyRunCoreTests || isCoreTest)) {
         // Create a wrapper around the assertion to set the timeout on the test to 10 minutes.
         var assertionWithTimeout = function (done) {
-            this.timeout(10 * 60 * 1000);
+            this.timeout(10 * 2 * 60 * 1000);
             assertion(done);
         };
         return it(expectation, assertionWithTimeout);
