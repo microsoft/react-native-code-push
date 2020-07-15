@@ -24,23 +24,29 @@ To set this up, perform the following steps:
 
 6. Select the `Build Settings` tab
 
-7. Go to `Build Location -> Per-configuration Build Products Path -> Staging` and change `Staging` value from `$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)` to `$(BUILD_DIR)/Release$(EFFECTIVE_PLATFORM_NAME)`
-
-   ![BuildFilesPath](https://cloud.githubusercontent.com/assets/4928157/22645377/b1d7df0e-ec77-11e6-83c6-291a27bcdb17.png)
-
-   *NOTE: Due to https://github.com/facebook/react-native/issues/11813, we have to do this step to make it possible to use other configurations than Debug or Release on RN 0.40.0 or higher.*
-
-8. Click the `+` button on the toolbar and select `Add User-Defined Setting`
+7. Click the `+` button on the toolbar and select `Add User-Defined Setting`
 
    ![Setting](https://cloud.githubusercontent.com/assets/116461/15764165/a16dbe30-28dd-11e6-94f2-fa3b7eb0c7de.png)
 
-9. Name this new setting something like `CODEPUSH_KEY`, expand it, and specify your `Staging` deployment key for the `Staging` config and your `Production` deployment key for the `Release` config.
+   Name this new setting something like `Multi_Deployment_Config`. Go to the setting and add value `$(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)` for Release. After that add value `$(BUILD_DIR)/Release$(EFFECTIVE_PLATFORM_NAME)` for Staging
+
+   ![MultiDeploymentConfig](https://user-images.githubusercontent.com/48414875/87178636-1d6a6500-c2e6-11ea-890d-b7773f07e503.png)
+
+   *NOTE: For Xcode 10 and lower version: Go to Build Location -> Per-configuration Build Products Path -> Staging and change Staging value from $(BUILD_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME) to $(BUILD_DIR)/Release$(EFFECTIVE_PLATFORM_NAME)*
+
+   ![BuildFilesPath1](https://cloud.githubusercontent.com/assets/4928157/22645377/b1d7df0e-ec77-11e6-83c6-291a27bcdb17.png)
+
+   *NOTE: Due to https://github.com/facebook/react-native/issues/11813, we have to do this step to make it possible to use other configurations than Debug or Release on RN 0.40.0 or higher.*
+
+8. Click the `+` button again on the toolbar and select `Add User-Defined Setting`
+
+   Name this new setting something like `CODEPUSH_KEY`, expand it, and specify your `Staging` deployment key for the `Staging` config and your `Production` deployment key for the `Release` config.
 
     ![Setting Keys](https://cloud.githubusercontent.com/assets/8598682/16821919/fc1eac4a-490d-11e6-9b11-128129c24b80.png)
 
     *NOTE: As a reminder, you can retrieve these keys by running `code-push deployment ls <APP_NAME> -k` from your terminal.*
 
-10. Open your project's `Info.plist` file and change the value of your `CodePushDeploymentKey` entry to `$(CODEPUSH_KEY)`
+9. Open your project's `Info.plist` file and change the value of your `CodePushDeploymentKey` entry to `$(CODEPUSH_KEY)`
 
     ![Infoplist](https://cloud.githubusercontent.com/assets/116461/15764252/3ac8aed2-28de-11e6-8c19-2270ae9857a7.png)
 
