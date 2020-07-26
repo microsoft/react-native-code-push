@@ -48,7 +48,7 @@ gradle.projectsEvaluated {
         // Make this task run right after the bundle task
         def generateBundledResourcesHash;
 
-        if (variant.hasProperty("bundleJsAndAssets")) {
+        if (variant.hasProperty("bundleJsAndAssets") && variant.bundleJsAndAssets.enabled) {
             def reactBundleTask = variant.bundleJsAndAssets
             jsBundleDir = reactBundleTask.generatedAssetsFolders[0].absolutePath
             resourcesDir = reactBundleTask.generatedResFolders[0].absolutePath
