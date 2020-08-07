@@ -397,9 +397,9 @@ declare module 'code-push-plugin-testing-framework/script/testBuilder' {
 	    skip(description: string, spec: () => void, scenarioPath?: string): void;
 	}
 	export interface ITestBuilderTestDefinition {
-	    (expectation: string, isCoreTest: boolean, assertion: (done: MochaDone) => void): void;
-	    only(expectation: string, isCoreTest: boolean, assertion: (done: MochaDone) => void): void;
-	    skip(expectation: string, isCoreTest: boolean, assertion: (done: MochaDone) => void): void;
+	    (expectation: string, isCoreTest: boolean, assertion: (done: Mocha.Done) => void): void;
+	    only(expectation: string, isCoreTest: boolean, assertion: (done: Mocha.Done) => void): void;
+	    skip(expectation: string, isCoreTest: boolean, assertion: (done: Mocha.Done) => void): void;
 	}
 
 }
