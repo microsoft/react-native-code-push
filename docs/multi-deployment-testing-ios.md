@@ -44,7 +44,7 @@ To set this up, perform the following steps:
 
     ![Setting Keys](https://cloud.githubusercontent.com/assets/8598682/16821919/fc1eac4a-490d-11e6-9b11-128129c24b80.png)
 
-    *NOTE: As a reminder, you can retrieve these keys by running `code-push deployment ls <APP_NAME> -k` from your terminal.*
+    *NOTE: As a reminder, you can retrieve these keys by running `appcenter codepush deployment list -a <ownerName>/<appName> -k` from your terminal.*
 
 9. Open your project's `Info.plist` file and change the value of your `CodePushDeploymentKey` entry to `$(CODEPUSH_KEY)`
 
