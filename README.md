@@ -273,7 +273,7 @@ appcenter codepush release-react -a <ownerName>/MyApp-iOS
 appcenter codepush release-react -a <ownerName>/MyApp-Android
 ```
 
-The `release-react` command enables such a simple workflow because it provides many sensible defaults (like generating a release bundle, assuming your app's entry file on iOS is either i`index.ios.js` or `index.js`). However, all of these defaults can be customized to allow incremental flexibility as necessary, which makes it a good fit for most scenarios.
+The `release-react` command enables such a simple workflow because it provides many sensible defaults (like generating a release bundle, assuming your app's entry file on iOS is either `index.ios.js` or `index.js`). However, all of these defaults can be customized to allow incremental flexibility as necessary, which makes it a good fit for most scenarios.
 
 ```shell
 # Release a mandatory update with a changelog
