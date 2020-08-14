@@ -264,7 +264,7 @@ Once your app is configured and distributed to your users, and you have made som
 
 *NOTE: Before you can start releasing updates, please log into App Center by running the `appcenter login` command.*
 
-In its most basic form, this command only requires one parameter: your owner name + "/" + app name.
+In it's the most basic form, this command only requires one parameter: your owner name + "/" + app name.
 
 ```shell
 appcenter codepush release-react -a <ownerName>/<appName>
@@ -284,7 +284,7 @@ appcenter codepush release-react -a <ownerName>/MyApp-iOS  -m --description "Mod
 appcenter codepush release-react -a <ownerName>/MyApp-iOS --entry-file MyApp.js --sourcemap-output ../maps/MyApp.map
 
 # Release a dev Android build to just 1/4 of your end users
-appcenter codepush release-react -a <ownerName>/MyApp-Android  --rollout 25% --development true
+appcenter codepush release-react -a <ownerName>/MyApp-Android  --rollout 25 --development true
 
 # Release an update that targets users running any 1.1.* binary, as opposed to
 # limiting the update to exact version name in the build.gradle file
