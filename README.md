@@ -74,7 +74,9 @@ We try our best to maintain backwards compatibility of our plugin with previous 
 | v0.56-v0.58             | v5.4+ *(RN upgraded versions for Android tools)*      |
 | v0.59                   | v5.6+ *(RN refactored js bundle loader code)*         |
 | v0.60-v0.61             | v6.0+ *(RN migrated to Autolinking)*                  |
-| v0.62                   | v6.2+ *(RN removed LiveReload)*                       |
+| v0.62-v0.63             | v6.2+ *(RN removed LiveReload)*                       |
+
+*NOTE: React-native versions are lower than to v0.45 will stop working n the near future. You can find more information in our [documentation]().*
 
 We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
 
