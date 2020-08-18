@@ -76,7 +76,7 @@ We try our best to maintain backwards compatibility of our plugin with previous 
 | v0.60-v0.61             | v6.0+ *(RN migrated to Autolinking)*                  |
 | v0.62-v0.63             | v6.2+ *(RN removed LiveReload)*                       |
 
-*NOTE: React-native versions are lower than to v0.45 will stop working n the near future. You can find more information in our [documentation](https://github.com/microsoft/code-push/blob/feature/add_doc_for_new_release/Update.md).*
+*NOTE: React-native versions are lower than to v0.45 will stop working n the near future. You can find more information in our [documentation](https://github.com/microsoft/code-push/blob/master/MigrationNotice.md).*
 
 We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
 
