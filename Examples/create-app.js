@@ -61,14 +61,15 @@ let iosStagingDeploymentKey = null;
 createCodePushApp(appNameAndroid, 'Android');
 createCodePushApp(appNameIOS, 'iOS');
 
-if (process.platform === 'darwin') {
-    try {
-        execCommand(`pod --version`);
-        console.log("Cocoapods has already installed")
-    } catch {
-        console.log("Need to install Cocoapods")
-        execCommand(`sudo gem install cocoapods`);
-    }
+if (!isReactNativeVersionLowerThan(60) && process.platform === "darwin") {
+  try {
+    console.log("Verify that CocoaPods installed");
+    execCommand("pod --version");
+  } catch {
+    console.log("Need to install CocoaPods");
+    execCommand("sudo gem install cocoapods");
+  }
+  console.log("Cocoapods has already installed");
 }
 
 generatePlainReactNativeApp(appName, reactNativeVersion);
