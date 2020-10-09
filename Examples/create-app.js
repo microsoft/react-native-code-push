@@ -41,6 +41,17 @@ try {
     process.exit();
 }
 
+if (!isReactNativeVersionLowerThan(60) && process.platform === "darwin") {
+    try {
+        console.log("Verify that CocoaPods installed");
+        execCommand("pod --version");
+        console.log("CocoaPods has installed");
+    } catch {
+        console.error(`You must install 'CocoaPods' to use this script!`);
+        process.exit();
+    }
+}
+
 const appNameAndroid = `${appName}-android`;
 const appNameIOS = `${appName}-ios`;
 let owner = null;
@@ -60,17 +71,6 @@ let iosStagingDeploymentKey = null;
 //GENERATE START
 createCodePushApp(appNameAndroid, 'Android');
 createCodePushApp(appNameIOS, 'iOS');
-
-if (!isReactNativeVersionLowerThan(60) && process.platform === "darwin") {
-  try {
-    console.log("Verify that CocoaPods installed");
-    execCommand("pod --version");
-  } catch {
-    console.log("Need to install CocoaPods");
-    execCommand("sudo gem install cocoapods");
-  }
-  console.log("Cocoapods has already installed");
-}
 
 generatePlainReactNativeApp(appName, reactNativeVersion);
 process.chdir(appName);
