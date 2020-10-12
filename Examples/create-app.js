@@ -41,24 +41,23 @@ try {
     process.exit();
 }
 
-if (!isReactNativeVersionLowerThan(60) && process.platform === "darwin") {
-    try {
-        console.log("Verify that CocoaPods installed");
-        execCommand("pod --version");
-        console.log("CocoaPods has installed");
-    } catch {
-        console.error(`'CocoaPods' are required to run the script, you can install it with\n'sudo gem install cocoapods'\ncommand
-        `);
-        process.exit();
-    }
-}
-
 const appNameAndroid = `${appName}-android`;
 const appNameIOS = `${appName}-ios`;
 let owner = null;
 const reactNativeVersion = args[1] || `react-native@${execCommand('npm view react-native version')}`.trim();
 const reactNativeVersionIsLowerThanV049 = isReactNativeVersionLowerThan(49);
 const reactNativeCodePushVersion = args[2] || `react-native-code-push@${execCommand('npm view react-native-code-push version')}`.trim();
+
+if (!isReactNativeVersionLowerThan(60) && process.platform === "darwin") {
+    try {
+        console.log("Verify that CocoaPods installed");
+        execCommand("pod --version");
+        console.log("CocoaPods has installed");
+    } catch {
+        console.error(`'CocoaPods' are required to run the script, you can install it with\n'sudo gem install cocoapods'\ncommand`);
+        process.exit();
+    }
+}
 
 console.log(`App name: ${appName}`);
 console.log(`React Native version: ${reactNativeVersion}`);
