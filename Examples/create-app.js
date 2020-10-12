@@ -54,7 +54,7 @@ if (!isReactNativeVersionLowerThan(60) && process.platform === "darwin") {
         execCommand("pod --version");
         console.log("CocoaPods has installed");
     } catch {
-        console.error(`You must install 'CocoaPods' to use this script!`);
+        console.error(`'CocoaPods' are required to run the script, you can install it with\n'sudo gem install cocoapods'\ncommand`);
         process.exit();
     }
 }
