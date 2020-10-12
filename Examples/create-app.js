@@ -41,18 +41,6 @@ try {
     process.exit();
 }
 
-if (!isReactNativeVersionLowerThan(60) && process.platform === "darwin") {
-    try {
-        console.log("Verify that CocoaPods installed");
-        execCommand("pod --version");
-        console.log("CocoaPods has installed");
-    } catch {
-        console.error(`'CocoaPods' are required to run the script, you can install it with\n'sudo gem install cocoapods'\ncommand
-        `);
-        process.exit();
-    }
-}
-
 const appNameAndroid = `${appName}-android`;
 const appNameIOS = `${appName}-ios`;
 let owner = null;
