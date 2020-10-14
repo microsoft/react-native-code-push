@@ -168,13 +168,12 @@ public class CodePushUpdateManager {
             URL downloadUrl = new URL(downloadUrlString);
             connection = (HttpsURLConnection) (downloadUrl.openConnection());
 
-            if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                if (downloadUrl.toString().startsWith("https")) {
-                    try {
-                        connection.setSSLSocketFactory(new TLSSocketFactory());
-                    } catch (Exception e) {
-                        CodePushUtils.log(e.getMessage());
-                    }
+            if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP &&
+                downloadUrl.toString().startsWith("https")) {
+                try {
+                    connection.setSSLSocketFactory(new TLSSocketFactory());
+                } catch (Exception e) {
+                    CodePushUtils.log(e.getMessage());
                 }
             }
 
