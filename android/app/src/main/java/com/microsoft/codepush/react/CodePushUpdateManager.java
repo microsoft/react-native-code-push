@@ -173,7 +173,7 @@ public class CodePushUpdateManager {
                 try {
                     connection.setSSLSocketFactory(new TLSSocketFactory());
                 } catch (Exception e) {
-                    CodePushUtils.log(e.getMessage());
+                    throw new CodePushUnknownException("Error set SSLSocketFactory. ", e);
                 }
             }
 
