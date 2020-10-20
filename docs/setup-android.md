@@ -22,7 +22,7 @@ In order to integrate CodePush into your Android project, please perform the fol
 1. In your `android/settings.gradle` file, make the following additions:
 
     ```gradle
-    include ':react-native-code-push'
+    include ':app', ':react-native-code-push'. // Append ':react-native-code-push' to :app
     project(':react-native-code-push').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-code-push/android/app')
     ```
     
@@ -30,7 +30,10 @@ In order to integrate CodePush into your Android project, please perform the fol
 
     ```gradle
     ...
-    apply from: "../../node_modules/react-native-code-push/android/codepush.gradle"
+    apply from: "../../node_modules/react-native/react.gradle"
+    // or
+    // apply from: "../../node_modules/react-native/native_modules.gradle"
+    apply from: "../../node_modules/react-native-code-push/android/codepush.gradle" // Add this
     ...
     ```
 
