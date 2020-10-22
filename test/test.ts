@@ -504,7 +504,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
 
                         ServerUtil.testMessageCallback = (requestBody: any) => {
                             try {
-                                assert.equal(requestBody.message, ServerUtil.TestMessage.CHECK_UP_TO_DATE);
+                                assert.strictEqual(requestBody.message, ServerUtil.TestMessage.CHECK_UP_TO_DATE);
                                 done();
                             } catch (e) {
                                 done(e);
@@ -538,7 +538,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
 
                         ServerUtil.testMessageCallback = (requestBody: any) => {
                             try {
-                                assert.equal(requestBody.message, ServerUtil.TestMessage.CHECK_UP_TO_DATE);
+                                assert.strictEqual(requestBody.message, ServerUtil.TestMessage.CHECK_UP_TO_DATE);
                                 done();
                             } catch (e) {
                                 done(e);
@@ -559,7 +559,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
 
                         ServerUtil.testMessageCallback = (requestBody: any) => {
                             try {
-                                assert.equal(requestBody.message, ServerUtil.TestMessage.CHECK_UP_TO_DATE);
+                                assert.strictEqual(requestBody.message, ServerUtil.TestMessage.CHECK_UP_TO_DATE);
                                 done();
                             } catch (e) {
                                 done(e);
@@ -576,15 +576,15 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
 
                         ServerUtil.testMessageCallback = (requestBody: any) => {
                             try {
-                                assert.equal(requestBody.message, ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE);
-                                assert.notEqual(requestBody.args[0], null);
+                                assert.strictEqual(requestBody.message, ServerUtil.TestMessage.CHECK_UPDATE_AVAILABLE);
+                                assert.notStrictEqual(requestBody.args[0], null);
                                 const remotePackage: any = requestBody.args[0];
-                                assert.equal(remotePackage.downloadUrl, updateResponse.download_url);
-                                assert.equal(remotePackage.isMandatory, updateResponse.is_mandatory);
-                                assert.equal(remotePackage.label, updateResponse.label);
-                                assert.equal(remotePackage.packageHash, updateResponse.package_hash);
-                                assert.equal(remotePackage.packageSize, updateResponse.package_size);
-                                assert.equal(remotePackage.deploymentKey, targetPlatform.getDefaultDeploymentKey());
+                                assert.strictEqual(remotePackage.downloadUrl, updateResponse.download_url);
+                                assert.strictEqual(remotePackage.isMandatory, updateResponse.is_mandatory);
+                                assert.strictEqual(remotePackage.label, updateResponse.label);
+                                assert.strictEqual(remotePackage.packageHash, updateResponse.package_hash);
+                                assert.strictEqual(remotePackage.packageSize, updateResponse.package_size);
+                                assert.strictEqual(remotePackage.deploymentKey, targetPlatform.getDefaultDeploymentKey());
                                 done();
                             } catch (e) {
                                 done(e);
@@ -593,8 +593,8 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
 
                         ServerUtil.updateCheckCallback = (request: any) => {
                             try {
-                                assert.notEqual(null, request);
-                                assert.equal(request.query.deployment_key, targetPlatform.getDefaultDeploymentKey());
+                                assert.notStrictEqual(null, request);
+                                assert.strictEqual(request.query.deployment_key, targetPlatform.getDefaultDeploymentKey());
                             } catch (e) {
                                 done(e);
                             }
@@ -609,7 +609,7 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
 
                         ServerUtil.testMessageCallback = (requestBody: any) => {
                             try {
-                                assert.equal(requestBody.message, ServerUtil.TestMessage.CHECK_ERROR);
+                                assert.strictEqual(requestBody.message, ServerUtil.TestMessage.CHECK_ERROR);
                                 done();
                             } catch (e) {
                                 done(e);
@@ -629,8 +629,8 @@ PluginTestingFramework.initializeTests(new RNProjectManager(), supportedTargetPl
 
                         ServerUtil.updateCheckCallback = (request: any) => {
                             try {
-                                assert.notEqual(null, request);
-                                assert.equal(request.query.deployment_key, "CUSTOM-DEPLOYMENT-KEY");
+                                assert.notStrictEqual(null, request);
+                                assert.strictEqual(request.query.deployment_key, "CUSTOM-DEPLOYMENT-KEY");
                                 done();
                             } catch (e) {
                                 done(e);
