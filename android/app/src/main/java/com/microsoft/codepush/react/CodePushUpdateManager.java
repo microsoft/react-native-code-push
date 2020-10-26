@@ -156,7 +156,7 @@ public class CodePushUpdateManager {
         }
 
         String downloadUrlString = updatePackage.optString(CodePushConstants.DOWNLOAD_URL_KEY, null);
-        HttpsURLConnection connection = null;
+        HttpURLConnection connection = null;
         BufferedInputStream bin = null;
         FileOutputStream fos = null;
         BufferedOutputStream bout = null;
@@ -166,12 +166,12 @@ public class CodePushUpdateManager {
         // Download the file while checking if it is a zip and notifying client of progress.
         try {
             URL downloadUrl = new URL(downloadUrlString);
-            connection = (HttpsURLConnection) (downloadUrl.openConnection());
+            connection = (HttpURLConnection) (downloadUrl.openConnection());
 
             if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP &&
                 downloadUrl.toString().startsWith("https")) {
                 try {
-                    connection.setSSLSocketFactory(new TLSSocketFactory());
+                    ((HttpsURLConnection)connection).setSSLSocketFactory(new TLSSocketFactory());
                 } catch (Exception e) {
                     throw new CodePushUnknownException("Error set SSLSocketFactory. ", e);
                 }
