@@ -90,6 +90,9 @@ function createCodePushApp(name, os) {
         execCommand(`appcenter codepush deployment add -a ${owner}/${name} Staging`);
     } catch (e) {
         console.log(`App "${name}" already exists \n`);
+        const ownerResult = execCommand(`appcenter profile list --output json`);
+        const ownerInfo = JSON.parse(ownerResult);
+        owner = ownerInfo.name;
     }
     const deploymentKeysResult = execCommand(`appcenter codepush deployment list -a ${owner}/${name} -k --output json`);
     const deploymentKeys = JSON.parse(deploymentKeysResult);
