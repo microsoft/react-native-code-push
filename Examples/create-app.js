@@ -83,16 +83,18 @@ linkCodePush(androidStagingDeploymentKey, iosStagingDeploymentKey);
 function createCodePushApp(name, os) {
     try {
         console.log(`Creating CodePush app "${name}" to release updates for ${os}...`);
-        const appResult = execCommand(`appcenter apps create -d ${name} -n ${name} -o ${os} -p React-Native --output json`);
-        const app = JSON.parse(appResult);
-        owner = app.owner.name;
-        console.log(`App "${name}" has been created \n`);
+        try {
+            const appResult = execCommand(`appcenter apps create -d ${name} -n ${name} -o ${os} -p React-Native --output json`);
+            const app = JSON.parse(appResult);
+            owner = app.owner.name;
+            console.log(`App "${name}" has been created \n`);
+        } catch(e) {
+            console.log("Error: ", e);
+            console.log(`Please check that you haven't application with "${name}" name on portal`);
+        }
         execCommand(`appcenter codepush deployment add -a ${owner}/${name} Staging`);
     } catch (e) {
-        console.log(`App "${name}" already exists \n`);
-        const ownerResult = execCommand(`appcenter profile list --output json`);
-        const ownerInfo = JSON.parse(ownerResult);
-        owner = ownerInfo.name;
+        console.log("Error", e);
     }
     const deploymentKeysResult = execCommand(`appcenter codepush deployment list -a ${owner}/${name} -k --output json`);
     const deploymentKeys = JSON.parse(deploymentKeysResult);
