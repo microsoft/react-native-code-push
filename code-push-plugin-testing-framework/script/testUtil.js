@@ -45,7 +45,7 @@ var TestUtil = (function () {
         options = options || {};
         // set default options
         if (options.maxBuffer === undefined)
-            options.maxBuffer = 1024 * 500;
+            options.maxBuffer = 1024 * 1024 * 500;
         if (options.timeout === undefined)
             options.timeout = 10 * 60 * 1000;
         if (!options.noLogCommand)

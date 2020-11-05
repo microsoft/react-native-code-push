@@ -188,6 +188,10 @@ async function tryReportStatus(statusReport, resumeListener) {
     if (statusReport.appVersion) {
       log(`Reporting binary update (${statusReport.appVersion})`);
 
+      if (!config.deploymentKey) {
+        throw new Error("Deployment key is missed");
+      }
+
       const sdk = getPromisifiedSdk(requestFetchAdapter, config);
       await sdk.reportStatusDeploy(/* deployedPackage */ null, /* status */ null, previousLabelOrAppVersion, previousDeploymentKey);
     } else {
