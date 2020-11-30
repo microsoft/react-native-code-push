@@ -643,28 +643,38 @@ static NSString *const LatestRollbackCountKey = @"count";
     return @[DownloadProgressEvent];
 }
 
-#pragma mark - Application lifecycle event handlers
-
-// These two handlers will only be registered when there is
-// a resume-based update still pending installation.
-- (void)applicationWillEnterForeground
+// Determine how long the app was in the background
+- (int)getDurationInBackground
 {
-    // Determine how long the app was in the background and ensure
-    // that it meets the minimum duration amount of time.
-    int durationInBackground = 0;
+    int duration = 0;
     if (_lastResignedDate) {
-        durationInBackground = [[NSDate date] timeIntervalSinceDate:_lastResignedDate];
+        duration = [[NSDate date] timeIntervalSinceDate:_lastResignedDate];
     }
 
+    return duration;
+}
+
+#pragma mark - Application lifecycle event handlers
+
+// These three handlers will only be registered when there is
+// a resume-based update still pending installation.
+- (void)applicationDidBecomeActive
+{
     if (_installMode == CodePushInstallModeOnNextSuspend) {
+        int durationInBackground = [self getDurationInBackground];
         // We shouldn't use loadBundle in this case, because _appSuspendTimer will call loadBundleOnTick.
         // We should cancel timer for _appSuspendTimer because otherwise, we would call loadBundle two times.
         if (durationInBackground < _minimumBackgroundDuration) {
             [_appSuspendTimer invalidate];
             _appSuspendTimer = nil;
         }
-    } else {
-        // For resume install mode.
+    }
+}
+
+- (void)applicationWillEnterForeground
+{
+    if (_installMode == CodePushInstallModeOnNextResume) {
+        int durationInBackground = [self getDurationInBackground];
         if (durationInBackground >= _minimumBackgroundDuration) {
             [self restartAppInternal:NO];
         }
@@ -899,6 +909,11 @@ RCT_EXPORT_METHOD(installUpdate:(NSDictionary*)updatePackage
                 // Ensure we do not add the listener twice.
                 // Register for app resume notifications so that we
                 // can check for pending updates which support "restart on resume"
+                [[NSNotificationCenter defaultCenter] addObserver:self
+                                                         selector:@selector(applicationDidBecomeActive)
+                                                             name:UIApplicationDidBecomeActiveNotification
+                                                           object:RCTSharedApplication()];
+                                                           
                 [[NSNotificationCenter defaultCenter] addObserver:self
                                                          selector:@selector(applicationWillEnterForeground)
                                                              name:UIApplicationWillEnterForegroundNotification
