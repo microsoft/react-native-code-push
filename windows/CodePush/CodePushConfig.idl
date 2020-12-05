@@ -1,0 +1,12 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+namespace Microsoft.CodePush.ReactNative
+{
+    [webhosthidden]
+    [default_interface]
+    runtimeclass CodePushConfig {
+        static void Init(IMap<String, String> configMap);
+        static void SetHost(Microsoft.ReactNative.ReactNativeHost host);
+    };
+} // namespace CppModule

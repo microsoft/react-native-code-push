@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resources">
+      <UniqueIdentifier>accd3aa8-1ba0-4223-9bbe-0c431709210b</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tga;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="CodePush">
+      <UniqueIdentifier>{c2eae772-39a8-4b12-aad7-60e9ca2072ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="miniz">
+      <UniqueIdentifier>{53513ea0-fe7c-4f69-8d3e-c1a9efbb7333}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
+    <ClCompile Include="miniz\miniz.c">
+      <Filter>miniz</Filter>
+    </ClCompile>
+    <ClCompile Include="CodePushConfig.cpp">
+      <Filter>CodePush</Filter>
+    </ClCompile>
+    <ClCompile Include="CodePushDownloadHandler.cpp">
+      <Filter>CodePush</Filter>
+    </ClCompile>
+    <ClCompile Include="CodePushNativeModule.cpp">
+      <Filter>CodePush</Filter>
+    </ClCompile>
+    <ClCompile Include="CodePushPackage.cpp">
+      <Filter>CodePush</Filter>
+    </ClCompile>
+    <ClCompile Include="CodePushTelemetryManager.cpp">
+      <Filter>CodePush</Filter>
+    </ClCompile>
+    <ClCompile Include="CodePushUpdateUtils.cpp">
+      <Filter>CodePush</Filter>
+    </ClCompile>
+    <ClCompile Include="CodePushUtils.cpp">
+      <Filter>CodePush</Filter>
+    </ClCompile>
+    <ClCompile Include="FileUtils.cpp">
+      <Filter>CodePush</Filter>
+    </ClCompile>
+    <ClCompile Include="ReactPackageProvider.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="miniz\miniz.h">
+      <Filter>miniz</Filter>
+    </ClInclude>
+    <ClInclude Include="CodePushConfig.h">
+      <Filter>CodePush</Filter>
+    </ClInclude>
+    <ClInclude Include="CodePushDownloadHandler.h">
+      <Filter>CodePush</Filter>
+    </ClInclude>
+    <ClInclude Include="CodePushNativeModule.h">
+      <Filter>CodePush</Filter>
+    </ClInclude>
+    <ClInclude Include="CodePushPackage.h">
+      <Filter>CodePush</Filter>
+    </ClInclude>
+    <ClInclude Include="CodePushTelemetryManager.h">
+      <Filter>CodePush</Filter>
+    </ClInclude>
+    <ClInclude Include="CodePushUpdateUtils.h">
+      <Filter>CodePush</Filter>
+    </ClInclude>
+    <ClInclude Include="CodePushUtils.h">
+      <Filter>CodePush</Filter>
+    </ClInclude>
+    <ClInclude Include="FileUtils.h">
+      <Filter>CodePush</Filter>
+    </ClInclude>
+    <ClInclude Include="ReactPackageProvider.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="CodePush.def" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PropertySheet.props" />
+  </ItemGroup>
+  <ItemGroup>
+    <Midl Include="ReactPackageProvider.idl" />
+    <Midl Include="CodePushConfig.idl">
+      <Filter>CodePush</Filter>
+    </Midl>
+  </ItemGroup>
+</Project>
