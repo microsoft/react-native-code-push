@@ -10,5 +10,3 @@ namespace winrt::CodePushDemoAppCpp::implementation
         void CreatePackage(winrt::Microsoft::ReactNative::IReactPackageBuilder const &packageBuilder) noexcept;
     };
 } // namespace winrt::CodePushDemoAppCpp::implementation
-
-

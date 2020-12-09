@@ -17,5 +17,3 @@ namespace winrt::CodePushDemoAppCpp::factory_implementation
     {
     };
 }
-
-

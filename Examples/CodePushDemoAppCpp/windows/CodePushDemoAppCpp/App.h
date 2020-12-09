@@ -20,5 +20,3 @@ namespace winrt::CodePushDemoAppCpp::implementation
         winrt::Microsoft::ReactNative::ReactNativeHost m_host;
     };
 } // namespace winrt::CodePushDemoAppCpp::implementation
-
-

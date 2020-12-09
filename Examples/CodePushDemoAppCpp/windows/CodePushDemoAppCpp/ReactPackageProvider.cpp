@@ -14,5 +14,3 @@ void ReactPackageProvider::CreatePackage(IReactPackageBuilder const &packageBuil
 }
 
 } // namespace winrt::CodePushDemoAppCpp::implementation
-
-

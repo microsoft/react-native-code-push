@@ -20,5 +20,3 @@ namespace winrt::CodePushDemoAppCpp::implementation
         ReactRootView().ReactNativeHost(app->Host());
     }
 }
-
-
