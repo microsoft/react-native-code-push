@@ -2,7 +2,7 @@
 
 Once you've acquired the CodePush plugin, you need to integrate it into the Visual Studio project of your React Native app and configure it correctly. To do this, take the following steps:
 
-### Plugin Installation and Configuration for React Native Windows 0.63.11 version and above
+### Plugin Installation and Configuration for React Native Windows 0.63.6 version and above
 
 #### Plugin Installation (Windows-npx)
 
@@ -19,7 +19,7 @@ Once the plugin has been downloaded, run `npx react-native autolink-windows` in 
 
 3. Enter your application's app version and deployment key to the `configMap` object at the top of your app's `OnLaunched` method in `App.cpp`:
 
-```
+```c++
 ...
 void App::OnLaunched(activation::LaunchActivatedEventArgs const& e)
 {
@@ -37,7 +37,7 @@ void App::OnLaunched(activation::LaunchActivatedEventArgs const& e)
 
 #### Plugin Installation (Windows)
 
-1. Open the Visual Studio solution located at `windows\<AppName>\<AppName>.sln` within your app
+1. Open the Visual Studio solution located at `windows-legacy\<AppName>\<AppName>.sln` within your app
 
 2. Right-click the solution node in the `Solution Explorer` window and select the `Add -> Existing Project...` menu item
 
