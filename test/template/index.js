@@ -137,12 +137,17 @@ class CODE_PUSH_TEST_APP_NAME extends Component {
             <View style={styles.container}>
                 <Text style={styles.welcome}>
                     CodePush React-Native Plugin Tests
-            </Text>
+                </Text>
+                {global.HermesInternal &&
+                    <Text style={styles.hermes}>
+                    Engine: Hermes
+                </Text>
+                }
                 <Text style={styles.instructions}>
                     {testScenario.getScenarioName()}{this.state.message}
                 </Text>
             </View>
-        );
+        )
     }
 };
 
@@ -163,6 +168,12 @@ const styles = StyleSheet.create({
         color: '#333333',
         marginBottom: 5,
     },
+    hermes: {
+        fontSize: 20,
+        textAlign: 'center',
+        margin: 10,
+        color: '#008000'
+    }
 });
 
 AppRegistry.registerComponent('CODE_PUSH_TEST_APP_NAME', () => CODE_PUSH_TEST_APP_NAME);

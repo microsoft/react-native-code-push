@@ -308,7 +308,7 @@ class RNProjectManager extends ProjectManager {
         }
         mkdirp.sync(projectDirectory);
 
-        return TestUtil.getProcessOutput("react-native init " + appName, { cwd: projectDirectory })
+        return TestUtil.getProcessOutput("react-native init " + appName + " --version 0.64.0-rc.1", { cwd: projectDirectory })
             .then(this.copyTemplate.bind(this, templatePath, projectDirectory))
             .then<void>(TestUtil.getProcessOutput.bind(undefined, TestConfig.thisPluginInstallString, { cwd: path.join(projectDirectory, TestConfig.TestAppName) }))
             .then(() => { return null; });
