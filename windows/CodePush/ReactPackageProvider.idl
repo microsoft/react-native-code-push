@@ -1,0 +1,9 @@
+namespace Microsoft.CodePush.ReactNative
+{
+    [webhosthidden]
+    [default_interface]
+    runtimeclass ReactPackageProvider
+        : Microsoft.ReactNative.IReactPackageProvider {
+      ReactPackageProvider();
+    };
+} // namespace CppModule
