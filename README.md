@@ -250,7 +250,7 @@ Android Google Play and iOS App Store have corresponding guidelines that have ru
 
 #### Google play
 
-Third paragraph of [Device and Network Abuse](https://support.google.com/googleplay/android-developer/answer/9888379?hl=en) topic describe that updating source code by any method other than Google Play's update mechanism is restricted. But this restriction is not apply to updating javascript bundles.
+Third paragraph of [Device and Network Abuse](https://support.google.com/googleplay/android-developer/answer/9888379?hl=en) topic describe that updating source code by any method other than Google Play's update mechanism is restricted. But this restriction does not apply to updating javascript bundles.
 > This restriction does not apply to code that runs in a virtual machine and has limited access to Android APIs (such as JavaScript in a webview or browser).
 
 That fully allow CodePush as it updates just JS bundles and can't update native code part.
