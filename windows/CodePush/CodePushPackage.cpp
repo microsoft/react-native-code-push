@@ -172,14 +172,9 @@ namespace Microsoft::CodePush::ReactNative
 
                 if (needToVerifyHash)
                 {
-                    try
-                    {
-                        auto errorMessage{ L"Error: package content verification is not currently supported." };
-                        hresult_error error{ E_NOTIMPL, errorMessage };
-                        CodePushUtils::Log(error);
-                        throw error;
-                    }
-                    catch (...) {}
+                    auto errorMessage{ L"Error: package content verification is not currently supported." };
+                    hresult_error error{ E_NOTIMPL, errorMessage };
+                    CodePushUtils::Log(error);
                 }
             }
         }
