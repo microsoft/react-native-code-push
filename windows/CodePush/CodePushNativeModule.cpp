@@ -485,31 +485,10 @@ namespace Microsoft::CodePush::ReactNative
         auto configuration{ CodePushConfig::Current().GetConfiguration() };
         if (isRunningBinaryVersion)
         {
-            hstring binaryHash;
-            try
-            {
-                auto errorMessage{ L"Error: Package hashing is currently unimplemented. Binary hash was not obtained." };
-                auto error{ hresult_error(E_NOTIMPL, errorMessage) };
-                CodePushUtils::Log(error);
-                throw error;
-            }
-            catch(...)
-            {
-                CodePushUtils::Log(L"Error obtaining hash for binary contents.");
-                promise.Resolve(configuration);
-                co_return;
-            }
-
-            if (binaryHash.empty())
-            {
-                // The hash was not generated either due to a previous unknown error or the fact that
-                // the React Native assets were not bundled in the binary (e.g. during release)
-                // builds.
-                promise.Resolve(configuration);
-                co_return;
-            }
-
-            configuration.Insert(PackageHashKey, JsonValue::CreateStringValue(binaryHash));
+            auto errorMessage{ L"Error: Package hashing is currently unimplemented. Binary hash was not obtained." };
+            auto error{ hresult_error(E_NOTIMPL, errorMessage) };
+            CodePushUtils::Log(error);
+            CodePushUtils::Log(L"Error obtaining hash for binary contents.");
             promise.Resolve(configuration);
             co_return;
         }
