@@ -1,4 +1,4 @@
-import { AcquisitionManager as Sdk } from "code-push/script/acquisition-sdk";
+import { AcquisitionManager as Sdk } from "code-push/bin/script/acquisition-sdk";
 import { Alert } from "./AlertAdapter";
 import requestFetchAdapter from "./request-fetch-adapter";
 import { AppState, Platform } from "react-native";
