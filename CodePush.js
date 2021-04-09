@@ -8,18 +8,27 @@ import hoistStatics from 'hoist-non-react-statics';
 let NativeCodePush = require("react-native").NativeModules.CodePush;
 const PackageMixins = require("./package-mixins")(NativeCodePush);
 
+function promiseTimeout(promise, ms, errorMessage) {
+  let id;
+  // Create a promise that rejects in <ms> milliseconds
+  let timeout = new Promise((resolve, reject) => {
+    id = setTimeout(() => {
+      reject(new Error(errorMessage));
+    }, ms);
+  });
 
-function timeout(prom, time) {
-  let timer;
-	return Promise.race([
-		prom,
-		new Promise((_r, reject) => {
-      timer = setTimeout(reject, time)
-    })
-	]).finally(() => clearTimeout(timer));
+  return Promise.race([
+    promise,
+    timeout
+  ]).finally(() => {
+    if (id) {
+      clearTimeout(id);
+    }
+  });
 }
 
 async function checkForUpdate(deploymentKey = null, checkUpdateTimeout = null, handleBinaryVersionMismatchCallback = null) {
+
   async function handleCheckUpdate(){
     /*
     * Before we ask the server if an update exists, we
@@ -104,7 +113,7 @@ async function checkForUpdate(deploymentKey = null, checkUpdateTimeout = null, h
   if(checkUpdateTimeout == null){
     return handleCheckUpdate()
   }
-  return timeout(handleCheckUpdate(), checkUpdateTimeout)
+  return promiseTimeout( handleCheckUpdate(), checkUpdateTimeout, 'Check for update timed out')
 }
 
 const getConfiguration = (() => {
@@ -437,7 +446,7 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
 
     syncStatusChangeCallback(CodePush.SyncStatus.CHECKING_FOR_UPDATE);
 
-    const remotePackage = await checkForUpdate(syncOptions.deploymentKey, checkUpdateTimeout, handleBinaryVersionMismatchCallback);
+    const remotePackage = await checkForUpdate(syncOptions.deploymentKey, syncOptions.checkUpdateTimeout, handleBinaryVersionMismatchCallback);
 
     const doDownloadAndInstall = async () => {
       syncStatusChangeCallback(CodePush.SyncStatus.DOWNLOADING_PACKAGE);
@@ -500,8 +509,8 @@ async function syncInternal(options = {}, syncStatusChangeCallback, downloadProg
             }
           });
         }
-        
-        // Since the install button should be placed to the 
+
+        // Since the install button should be placed to the
         // right of any other button, add it last
         dialogButtons.push({
           text: installButtonText,
