@@ -146,7 +146,8 @@ export interface SyncOptions {
     rollbackRetryOptions?: RollbackRetryOptions;
 
     /**
-     * Add an timeout for `checkForUpdate`. Use this parameter to prevent issues with CodePush Servers (such as requests taking too much time to complete). If the timeout exceeds, the `SyncStatus` will be `UNKNOWN_ERROR`
+     * Add an timeout for `checkForUpdate`. Use this parameter to prevent issues with CodePush Servers (such as requests taking too much time to complete)
+     * or user network issues. Value should be in `milliseconds`. If the timeout exceeds, the `SyncStatus` will be `UNKNOWN_ERROR`.
      */
     checkUpdateTimeout?: number;
 }
@@ -262,7 +263,7 @@ declare namespace CodePush {
      * Asks the CodePush service whether the configured app deployment has an update available.
      *
      * @param deploymentKey The deployment key to use to query the CodePush server for an update.
-     * @param checkUpdateTimeout Add an timeout for request. Useful to prevent issues with CodePush Servers (such as requests taking too much time to complete). If the timeout exceeds, an error will thrown
+     * @param checkUpdateTimeout Add an timeout for request. Useful to prevent issues with CodePush Servers (such as requests taking too much time to complete) or user network issues. Value should be in `milliseconds`. If the timeout exceeds, an error will thrown
      * @param handleBinaryVersionMismatchCallback An optional callback for handling target binary version mismatch
      */
     function checkForUpdate(deploymentKey?: string, checkUpdateTimeout?: number, handleBinaryVersionMismatchCallback?: HandleBinaryVersionMismatchCallback): Promise<RemotePackage | null>;
