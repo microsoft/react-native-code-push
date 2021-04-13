@@ -39,7 +39,7 @@
     "glob": "^7.1.6",
     "hoist-non-react-statics": "^3.3.2",
     "inquirer": "^7.3.3",
-    "plist": "3.0.1",
+    "plist": "^3.0.2",
     "semver": "^7.3.2",
     "xcode": "3.0.1"
   },
