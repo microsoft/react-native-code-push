@@ -1124,15 +1124,16 @@
   resolved "https://registry.yarnpkg.com/@react-native-community/eslint-plugin/-/eslint-plugin-1.1.0.tgz#e42b1bef12d2415411519fd528e64b593b1363dc"
   integrity sha512-W/J0fNYVO01tioHjvYWQ9m6RgndVtbElzYozBq1ZPrHO/iCzlqoySHl4gO/fpCl9QEFjvJfjPgtPMTMlsoq5DQ==
 
-"@react-native-windows/cli@0.63.5":
-  version "0.63.5"
-  resolved "https://registry.yarnpkg.com/@react-native-windows/cli/-/cli-0.63.5.tgz#d404e6bd0d5217064a0bb862b338d60230d197de"
-  integrity sha512-mc1yrIyoEqibdBrnt9rZ8v7rzi7AVQiH5E4DhQ9OTW7MBNz96zdeIkJX6K9Ny486hjD5HzhkEdzO+D63xQqtmQ==
+"@react-native-windows/cli@0.63.11":
+  version "0.63.11"
+  resolved "https://registry.yarnpkg.com/@react-native-windows/cli/-/cli-0.63.11.tgz#239c7d905c9198fbbb08b117acb6260d5ce94828"
+  integrity sha512-RRfeoBwFIIdctcvT8Ynrew7kdYCqnGY/35CrW6M2/G+f3ZVwHhTpdF8I5zyLAQskvFgztRE40MdMofylgcRI0Q==
   dependencies:
-    "@react-native-windows/telemetry" "^0.63.4"
+    "@react-native-windows/telemetry" "^0.63.5"
     chalk "^3.0.0"
     cli-spinners "^2.2.0"
     envinfo "^7.5.0"
+    find-up "^4.1.0"
     glob "^7.1.1"
     inquirer "^3.0.6"
     mustache "^4.0.1"
@@ -1143,13 +1144,13 @@
     username "^5.1.0"
     uuid "^3.3.2"
     xml-parser "^1.2.1"
-    xmldom "^0.3.0"
+    xmldom "^0.5.0"
     xpath "^0.0.27"
 
-"@react-native-windows/telemetry@^0.63.4":
-  version "0.63.4"
-  resolved "https://registry.yarnpkg.com/@react-native-windows/telemetry/-/telemetry-0.63.4.tgz#940cffe1cb890ac22c76ba04af2284e1412c7faa"
-  integrity sha512-jTCLw1JcKVaNbRYq6KJIu72VcJ61a80ZjT6++KDJcLROA6DyRxiX3LhW5anIbV4Ww9vA5CNlU0SUb2pAIw8Jpw==
+"@react-native-windows/telemetry@^0.63.5":
+  version "0.63.5"
+  resolved "https://registry.yarnpkg.com/@react-native-windows/telemetry/-/telemetry-0.63.5.tgz#77d3a490b26490a642e7d7ce21cd5c06b768f4be"
+  integrity sha512-Ifd54IIcGbPjwAGfjJkRfdk5+SNtc9oCWgKMrJszIrlJ1REYVUXBo+6Xw3taKyA1Jf1eCB7DWlb98/NbqdLgcg==
   dependencies:
     applicationinsights "^1.8.8"
 
@@ -6831,13 +6832,13 @@ react-native-code-push@^6.4.0:
     semver "^7.3.2"
     xcode "3.0.1"
 
-react-native-windows@^0.63.5:
-  version "0.63.11"
-  resolved "https://registry.yarnpkg.com/react-native-windows/-/react-native-windows-0.63.11.tgz#fbb1c73f0bbb0d64614ca08f2e338e813225ba7e"
-  integrity sha512-fthP6RvKy44PCO30PgidfsLPZwnfOexfcI/R/xC3p7YEBGw4TGodHJb+9m3AJdkYXvHUW0zxneCEpQuzw9NVyw==
+react-native-windows@^0.63.6:
+  version "0.63.27"
+  resolved "https://registry.yarnpkg.com/react-native-windows/-/react-native-windows-0.63.27.tgz#fae0b876b10a9e58c563ba2df452bb40cb802238"
+  integrity sha512-uJ6aIOfhnJPfEcIBS+JQPlIgKPZlEO3e4PxZQU3ta9H60s+e6nGT7ZCE8s2LVFj6VKPoGQ4pe57+e/zQrq4pSA==
   dependencies:
     "@babel/runtime" "^7.8.4"
-    "@react-native-windows/cli" "0.63.5"
+    "@react-native-windows/cli" "0.63.11"
     abort-controller "^3.0.0"
     anser "^1.4.9"
     base64-js "^1.1.2"
@@ -8727,10 +8728,15 @@ xmldom@0.1.x:
   resolved "https://registry.yarnpkg.com/xmldom/-/xmldom-0.1.31.tgz#b76c9a1bd9f0a9737e5a72dc37231cf38375e2ff"
   integrity sha512-yS2uJflVQs6n+CyjHoaBmVSqIDevTAWrzMmjG1Gc7h1qQ7uVozNhEPJAwZXWyGQ/Gafo3fCwrcaokezLPupVyQ==
 
-xmldom@0.3.0, xmldom@^0.3.0:
+xmldom@0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/xmldom/-/xmldom-0.3.0.tgz#e625457f4300b5df9c2e1ecb776147ece47f3e5a"
   integrity sha512-z9s6k3wxE+aZHgXYxSTpGDo7BYOUfJsIRyoZiX6HTjwpwfS2wpQBQKa2fD+ShLyPkqDYo5ud7KitmLZ2Cd6r0g==
+
+xmldom@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/xmldom/-/xmldom-0.5.0.tgz#193cb96b84aa3486127ea6272c4596354cb4962e"
+  integrity sha512-Foaj5FXVzgn7xFzsKeNIde9g6aFBxTPi37iwsno8QvApmtg7KYrr+OPyRHcJF7dud2a5nGRBXK3n0dL62Gf7PA==
 
 xpath@^0.0.27:
   version "0.0.27"
@@ -8760,9 +8766,9 @@ xtend@~4.0.1:
   integrity sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ==
 
 y18n@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/y18n/-/y18n-4.0.0.tgz#95ef94f85ecc81d007c264e190a120f0a3c8566b"
-  integrity sha512-r9S/ZyXu/Xu9q1tYlpsLIsa3EeLXXk0VwlxqTcFRfg9EhMW+17kbt9G0NrgCmhGb5vT2hyhJZLfDGx+7+5Uj/w==
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/y18n/-/y18n-4.0.3.tgz#b5f259c82cd6e336921efd7bfd8bf560de9eeedf"
+  integrity sha512-JKhqTOwSrqNA1NY5lSztJ1GrBiUodLMmIZuLiDaMRJ+itFd+ABVE8XBjOvIWL+rSqNDC74LCSFmlb/U4UZ4hJQ==
 
 yallist@^2.1.2:
   version "2.1.2"
