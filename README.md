@@ -426,7 +426,7 @@ Now you'll be able to see CodePush logs in either debug or release mode, on both
 
 ### Continuous Integration / Delivery
 
-In addition to being able to use the CodePush CLI to "manually" release updates, we believe that it's important to create a repeatable and sustainable solution for contiously delivering updates to your app. That way, it's simple enough for you and/or your team to create and maintain the rhythm of performing agile deployments. In order to assist with seting up a CodePush-based CD pipeline, refer to the following integrations with various CI servers:
+In addition to being able to use the CodePush CLI to "manually" release updates, we believe that it's important to create a repeatable and sustainable solution for contiously delivering updates to your app. That way, it's simple enough for you and/or your team to create and maintain the rhythm of performing agile deployments. In order to assist with setting up a CodePush-based CD pipeline, refer to the following integrations with various CI servers:
 
 * [Visual Studio Team Services](https://marketplace.visualstudio.com/items?itemName=ms-vsclient.code-push) - *NOTE: VSTS also has extensions for publishing to [HockeyApp](https://marketplace.visualstudio.com/items?itemName=ms.hockeyapp) and the [Google Play](https://github.com/microsoft/google-play-vsts-extension) store, so it provides a pretty great mobile CD solution in general.*
 * [Travis CI](https://github.com/mondora/code-push-travis-cli)
