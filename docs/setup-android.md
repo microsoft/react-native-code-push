@@ -65,6 +65,8 @@ In order to integrate CodePush into your Android project, please perform the fol
 
    ![Deployment list](https://cloud.githubusercontent.com/assets/116461/11601733/13011d5e-9a8a-11e5-9ce2-b100498ffb34.png)
 
+   If no key is shown, running the add command `appcenter codepush deployment add -a {UserName}/{ProjectNameInAppCenter} DEPLOYMENT_ENV` will generate a deployment key for the specified deployment environment. Use 'Staging', 'Developpment' or 'Production' as the deployment environments.
+
    In order to effectively make use of the `Staging` and `Production` deployments that were created along with your CodePush app, refer to the [multi-deployment testing](../README.md#multi-deployment-testing) docs below before actually moving your app's usage of CodePush into production.
 
    Your `strings.xml` should looks like this:
