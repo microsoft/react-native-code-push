@@ -277,12 +277,12 @@ declare namespace CodePush {
     /**
      * Allow CodePush to restart the app.
      */
-    function allowRestart(): void;
+    function allowRestart(): Promise<null>;
 
     /**
      * Forbid CodePush to restart the app.
      */
-    function disallowRestart(): void;
+    function disallowRestart(): Promise<null>;
 
     /**
      * Clear all downloaded CodePush updates.
