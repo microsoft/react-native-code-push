@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "react": "^16.13.1",
-    "react-native": "^0.64.0",
+    "react-native": "^0.64.1",
     "react-native-code-push": "^7.0.0",
     "react-native-windows": "^1.0.0"
   },
