@@ -33,6 +33,29 @@ void App::OnLaunched(activation::LaunchActivatedEventArgs const& e)
 ...
 ```
 
+#### Plugin Configuration (Windows) C#
+
+1. add name space `Microsoft.CodePush` to `App.xaml.cs`
+
+2. add app version and deployment key to `configMap` at the start of your app's `OnLaunched` method in `App.xaml.cs`.
+
+```c#
+using Microsoft.CodePush;
+
+...
+protected override void OnLaunched(LaunchActivatedEventArgs e)
+{
+    Microsoft.CodePush.ReactNative.CodePushConfig.SetHost(Host);
+    IDictionary<string, string> configMap = new Dictionary<string, string>();
+    configMap.Add("appVersion", "1.0.0");
+    configMap.Add("deploymentKey", "deployment key");
+    Microsoft.CodePush.ReactNative.CodePushConfig.Init(configMap);
+...
+}
+...
+```
+
+
 ### Plugin Installation and Configuration for React Native Windows lower than 0.60
 
 #### Plugin Installation (Windows)
