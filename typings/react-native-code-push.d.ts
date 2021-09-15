@@ -232,6 +232,19 @@ export interface StatusReport {
     previousLabelOrAppVersion?: string;
 }
 
+export interface NativeConfiguration {
+    buildVersion: number;
+    deploymentKey: string;
+    serverUrl: string;
+    /** A GUID identifying this device -- identifierForVendor on iOS */
+    clientUniqueId: string; 
+    /** Your app binary's marketing version eg. 1.2.3 */
+    appVersion: string;
+    /** This is only present in release builds / if you're not running against the packager */
+    packageHash?: string;
+    publicKey?: string;
+}
+
 /**
  * Decorates a React Component configuring it to sync for updates with the CodePush server.
  *
@@ -308,6 +321,11 @@ declare namespace CodePush {
      * @param handleBinaryVersionMismatchCallback An optional callback for handling target binary version mismatch
      */
     function sync(options?: SyncOptions, syncStatusChangedCallback?: SyncStatusChangedCallback, downloadProgressCallback?: DownloadProgressCallback, handleBinaryVersionMismatchCallback?: HandleBinaryVersionMismatchCallback): Promise<SyncStatus>;
+    
+    /**
+     * Gives you information about the current binary, and CodePush Configuration settings, including the current deploymentKey
+     */
+    export function getConfiguration(): Promise<NativeConfiguration>;
 
     /**
      * Indicates when you would like an installed update to actually be applied.
