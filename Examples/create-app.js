@@ -5,7 +5,8 @@ Requirements:
     1. npm i -g react-native-cli
     2. npm i -g appcenter-cli
     3. appcenter login
-    (If you use this script on macOS for react-native v0.60+ then you need to have CocoaPods installed)
+    4. If you use this script on macOS for react-native v0.60+ then you need to have CocoaPods installed. Use this command to (re)install CocoaPods:
+        sudo gem install cocoapods -n/usr/local/bin
 
 Usage: node create-app.js <appName> <reactNativeVersion> <reactNativeCodePushVersion>
     1. node create-app.js 
@@ -114,7 +115,7 @@ function createCodePushApp(name, os) {
 
 function generatePlainReactNativeApp(appName, reactNativeVersion) {
     console.log(`Installing React Native...`);
-    execCommand(`react-native init ${appName} --version ${reactNativeVersion}`);
+    execCommand(`react-native init ${appName} --version ${reactNativeVersion.split('@')[1]}`);
     console.log(`React Native has been installed \n`);
 }
 
@@ -306,7 +307,6 @@ function iosSetup() {
     const codePushBundleUrl = "[CodePush bundleURL]";
     appDelegateContents = appDelegateContents.replace(oldBundleUrl, codePushBundleUrl);
     fs.writeFileSync(appDelegatePath, appDelegateContents);
-
     execCommand(`cd ios && pod install && cd ..`);
 }
 
