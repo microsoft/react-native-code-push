@@ -52,6 +52,8 @@ gradle.projectsEvaluated {
             def reactBundleTask = variant.bundleJsAndAssets
             jsBundleDir = reactBundleTask.generatedAssetsFolders[0].absolutePath
             resourcesDir = reactBundleTask.generatedResFolders[0].absolutePath
+            new File(jsBundleDir).mkdirs()
+            new File(resourcesDir).mkdirs()
             jsBundleFile = file("$jsBundleDir/$bundleAssetName")
 
             generateBundledResourcesHash = tasks.create(
