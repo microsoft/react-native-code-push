@@ -6,7 +6,7 @@ Requirements:
     2. npm i -g appcenter-cli
     3. appcenter login
     4. If you use this script on macOS for react-native v0.60+ then you need to have CocoaPods installed. Use this command to (re)install CocoaPods:
-        sudo gem install cocoapods -n/usr/local/bin
+        sudo gem install cocoapods -n /usr/local/bin
 
 Usage: node create-app.js <appName> <reactNativeVersion> <reactNativeCodePushVersion>
     1. node create-app.js 
@@ -55,7 +55,7 @@ if (!isReactNativeVersionLowerThan(60) && process.platform === "darwin") {
         execCommand("pod --version");
         console.log("CocoaPods has installed");
     } catch {
-        console.error(`'CocoaPods' are required to run the script, you can install it with\n'sudo gem install cocoapods'\ncommand`);
+        console.error(`'CocoaPods' are required to run the script, you can install it with\n'sudo gem install cocoapods -n /usr/local/bin'\ncommand`);
         process.exit();
     }
 }
