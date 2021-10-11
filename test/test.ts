@@ -193,7 +193,7 @@ class RNIOS extends Platform.IOS implements RNPlatform {
                 "\"[$][(]inherited[)]\",\\s*[)];", "\"$(inherited)\"\n\t\t\t\t);"))
             // Add the correct bundle identifier
             .then(TestUtil.replaceString.bind(undefined, path.join(iOSProject, TestConfig.TestAppName + ".xcodeproj", "project.pbxproj"),
-                "PRODUCT_BUNDLE_IDENTIFIER = [^;]*", "PRODUCT_BUNDLE_IDENTIFIER = \"" + TestConfig.TestNamespace + "\""))
+                "PRODUCT_BUNDLE_IDENTIFIER = [^;]*", 'PRODUCT_BUNDLE_IDENTIFIER = "' + TestConfig.TestNamespace + '"'))
             // Copy the AppDelegate.m to the project
             .then(TestUtil.copyFile.bind(undefined,
                 path.join(TestConfig.templatePath, "ios", TestConfig.TestAppName, "AppDelegate.m"),
