@@ -232,8 +232,15 @@ class RNIOS extends Platform.IOS implements RNPlatform {
                 const hashRegEx = /[(][0-9A-Z-]*[)]/g;
                 const hashWithParen = targetEmulator.match(hashRegEx)[0];
                 const hash = hashWithParen.substr(1, hashWithParen.length - 2);
-                return TestUtil.getProcessOutput("xcodebuild -workspace " + path.join(iOSProject, TestConfig.TestAppName) + ".xcworkspace -scheme " + TestConfig.TestAppName +
-                    " -configuration Release -destination \"platform=iOS Simulator,id=" + hash + "\" -derivedDataPath build EXCLUDED_ARCHS=arm64", { cwd: iOSProject, maxBuffer: 1024 * 1024 * 500, noLogStdOut: true });
+                let res;
+                try {
+                    res = TestUtil.getProcessOutput("xcodebuild -workspace " + path.join(iOSProject, TestConfig.TestAppName) + ".xcworkspace -scheme " + TestConfig.TestAppName +
+                        " -configuration Release -destination \"platform=iOS Simulator,id=" + hash + "\" -derivedDataPath build EXCLUDED_ARCHS=arm64", { cwd: iOSProject, maxBuffer: 1024 * 1024 * 500, noLogStdOut: true });
+                    console.log(res);
+                    return res;
+                } catch (e) {
+                    console.log(e);
+                }
             })
             .then<void>(
                 () => { return null; },
