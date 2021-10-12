@@ -199,9 +199,9 @@ class RNIOS extends Platform.IOS implements RNPlatform {
                 path.join(TestConfig.templatePath, "ios", TestConfig.TestAppName, "AppDelegate.m"),
                 appDelegatePath, true))
             .then<void>(TestUtil.replaceString.bind(undefined, appDelegatePath, TestUtil.CODE_PUSH_TEST_APP_NAME_PLACEHOLDER, TestConfig.TestAppName))
-            .then<void>(() => {setTimeout(function(){ //sleep 5s
-                //do what you need here
-            }, 5000);})
+            .then<void>(() => {setTimeout(function(){ // sleep 5s
+                // do what you need here
+            }, 5000); });
     }
 
     /**
