@@ -179,7 +179,7 @@ class RNIOS extends Platform.IOS implements RNPlatform {
         const iOSProject: string = path.join(projectDirectory, TestConfig.TestAppName, "ios");
         const infoPlistPath: string = path.join(iOSProject, TestConfig.TestAppName, "Info.plist");
         const appDelegatePath: string = path.join(iOSProject, TestConfig.TestAppName, "AppDelegate.m");
-        
+
         // Install the Podfile
         return TestUtil.getProcessOutput("pod install", { cwd: iOSProject })
             // Put the IOS deployment key in the Info.plist
@@ -232,7 +232,7 @@ class RNIOS extends Platform.IOS implements RNPlatform {
                 const hashRegEx = /[(][0-9A-Z-]*[)]/g;
                 const hashWithParen = targetEmulator.match(hashRegEx)[0];
                 const hash = hashWithParen.substr(1, hashWithParen.length - 2);
-                TestUtil.getProcessOutput("xcodebuild -workspace " + path.join(iOSProject, TestConfig.TestAppName) + ".xcworkspace -scheme " + TestConfig.TestAppName +
+                return TestUtil.getProcessOutput("xcodebuild -workspace " + path.join(iOSProject, TestConfig.TestAppName) + ".xcworkspace -scheme " + TestConfig.TestAppName +
                     " -configuration Release -destination \"platform=iOS Simulator,id=" + hash + "\" -derivedDataPath build EXCLUDED_ARCHS=arm64", { cwd: iOSProject, maxBuffer: 1024 * 1024 * 500, noLogStdOut: true });
             })
             .then<void>(
