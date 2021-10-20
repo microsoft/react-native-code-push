@@ -176,12 +176,15 @@ class RNIOS extends Platform.IOS implements RNPlatform {
      * Installs the platform on the given project.
      */
     installPlatform(projectDirectory: string): Q.Promise<void> {
+        console.log("Start installPlatform");
         const iOSProject: string = path.join(projectDirectory, TestConfig.TestAppName, "ios");
         const infoPlistPath: string = path.join(iOSProject, TestConfig.TestAppName, "Info.plist");
         const appDelegatePath: string = path.join(iOSProject, TestConfig.TestAppName, "AppDelegate.m");
-
+        
+        console.log(`Start install Podfile: cwd=${iOSProject}`);
         // Install the Podfile
         return TestUtil.getProcessOutput("pod install", { cwd: iOSProject })
+            .then((e) => { console.log("Pod install successful"); return e; })
             // Put the IOS deployment key in the Info.plist
             .then(TestUtil.replaceString.bind(undefined, infoPlistPath,
                 "</dict>\n</plist>",
@@ -276,7 +279,9 @@ class RNProjectManager extends ProjectManager {
      * Copies over the template files into the specified project, overwriting existing files.
      */
     public copyTemplate(templatePath: string, projectDirectory: string): Q.Promise<void> {
+        console.log("Start copyTemplate");
         function copyDirectoryRecursively(directoryFrom: string, directoryTo: string): Q.Promise<void> {
+            console.log("Start copyDirectoryRecursively");
             const promises: Q.Promise<void>[] = [];
 
             fs.readdirSync(directoryFrom).forEach(file => {
@@ -297,6 +302,7 @@ class RNProjectManager extends ProjectManager {
                 }
             });
 
+            console.log("End copyDirectoryRecursively");
             // Chain promise so that it maintains Q.Promise<void> type instead of Q.Promise<void[]>
             return Q.all<void>(promises).then(() => { return null; });
         }

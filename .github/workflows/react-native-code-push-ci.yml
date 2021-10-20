@@ -51,6 +51,6 @@ jobs:
       - name: Instal Cocoapods
         run: sudo gem install cocoapods -n/usr/local/bin
       - name: Setup tests
-        run: npm run test:setup:ios
+        run: npm run test:setup:ios --verbose
       - name: Run tests
         run: npm run test:fast:ios
