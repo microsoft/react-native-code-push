@@ -176,15 +176,12 @@ class RNIOS extends Platform.IOS implements RNPlatform {
      * Installs the platform on the given project.
      */
     installPlatform(projectDirectory: string): Q.Promise<void> {
-        console.log("Start installPlatform");
         const iOSProject: string = path.join(projectDirectory, TestConfig.TestAppName, "ios");
         const infoPlistPath: string = path.join(iOSProject, TestConfig.TestAppName, "Info.plist");
         const appDelegatePath: string = path.join(iOSProject, TestConfig.TestAppName, "AppDelegate.m");
         
-        console.log(`Start install Podfile: cwd=${iOSProject}`);
         // Install the Podfile
         return TestUtil.getProcessOutput("pod install", { cwd: iOSProject })
-            .then((e) => { console.log("Pod install successful"); return e; })
             // Put the IOS deployment key in the Info.plist
             .then(TestUtil.replaceString.bind(undefined, infoPlistPath,
                 "</dict>\n</plist>",
@@ -235,14 +232,8 @@ class RNIOS extends Platform.IOS implements RNPlatform {
                 const hashRegEx = /[(][0-9A-Z-]*[)]/g;
                 const hashWithParen = targetEmulator.match(hashRegEx)[0];
                 const hash = hashWithParen.substr(1, hashWithParen.length - 2);
-                let res;
-                try {
-                    res = TestUtil.getProcessOutput("xcodebuild -workspace " + path.join(iOSProject, TestConfig.TestAppName) + ".xcworkspace -scheme " + TestConfig.TestAppName +
-                        " -configuration Release -destination \"platform=iOS Simulator,id=" + hash + "\" -derivedDataPath build EXCLUDED_ARCHS=arm64", { cwd: iOSProject, maxBuffer: 1024 * 1024 * 500, noLogStdOut: true });
-                    return res;
-                } catch (e) {
-                    console.log(e);
-                }
+                TestUtil.getProcessOutput("xcodebuild -workspace " + path.join(iOSProject, TestConfig.TestAppName) + ".xcworkspace -scheme " + TestConfig.TestAppName +
+                    " -configuration Release -destination \"platform=iOS Simulator,id=" + hash + "\" -derivedDataPath build EXCLUDED_ARCHS=arm64", { cwd: iOSProject, maxBuffer: 1024 * 1024 * 500, noLogStdOut: true });
             })
             .then<void>(
                 () => { return null; },
@@ -279,9 +270,7 @@ class RNProjectManager extends ProjectManager {
      * Copies over the template files into the specified project, overwriting existing files.
      */
     public copyTemplate(templatePath: string, projectDirectory: string): Q.Promise<void> {
-        console.log("Start copyTemplate");
         function copyDirectoryRecursively(directoryFrom: string, directoryTo: string): Q.Promise<void> {
-            console.log("Start copyDirectoryRecursively");
             const promises: Q.Promise<void>[] = [];
 
             fs.readdirSync(directoryFrom).forEach(file => {
@@ -302,7 +291,6 @@ class RNProjectManager extends ProjectManager {
                 }
             });
 
-            console.log("End copyDirectoryRecursively");
             // Chain promise so that it maintains Q.Promise<void> type instead of Q.Promise<void[]>
             return Q.all<void>(promises).then(() => { return null; });
         }
@@ -322,7 +310,7 @@ class RNProjectManager extends ProjectManager {
 
         return TestUtil.getProcessOutput("react-native init " + appName, { cwd: projectDirectory })
             .then((e) => { console.log(`"react-native init ${appName}" success. cwd=${projectDirectory}`); return e; })
-            .catch((error) => console.log(`"react-native init ${appName}. cwd=${projectDirectory}" failed`, error))
+            .catch((error) => console.log(`"react-native init ${appName} failed. cwd=${projectDirectory}"`, error))
             .then(this.copyTemplate.bind(this, templatePath, projectDirectory))
             .then<void>(TestUtil.getProcessOutput.bind(undefined, TestConfig.thisPluginInstallString, { cwd: path.join(projectDirectory, TestConfig.TestAppName) }))
             .then(() => { return null; });
