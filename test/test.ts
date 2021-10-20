@@ -322,7 +322,7 @@ class RNProjectManager extends ProjectManager {
 
         return TestUtil.getProcessOutput("react-native init " + appName, { cwd: projectDirectory })
             .then((e) => { console.log(`"react-native init ${appName}" success. cwd=${projectDirectory}`); return e; })
-            .catch((error) => console.log(`"react-native init ${appName}" failed`, error))
+            .catch((error) => console.log(`"react-native init ${appName}. cwd=${projectDirectory}" failed`, error))
             .then(this.copyTemplate.bind(this, templatePath, projectDirectory))
             .then<void>(TestUtil.getProcessOutput.bind(undefined, TestConfig.thisPluginInstallString, { cwd: path.join(projectDirectory, TestConfig.TestAppName) }))
             .then(() => { return null; });
