@@ -46,6 +46,10 @@ jobs:
         run: npm install react-native-cli
       - name: Build tests
         run: npm run build:tests
+      - name: Check Cocoapods
+        run: pod --version
+      - name: Instal Cocoapods
+        run: sudo gem install cocoapods -n/usr/local/bin
       - name: Setup tests
         run: npm run test:setup:ios
       - name: Run tests
