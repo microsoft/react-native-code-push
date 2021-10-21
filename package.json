@@ -38,9 +38,6 @@
     "code-push": "^4.0.5",
     "glob": "^7.1.7",
     "hoist-non-react-statics": "^3.3.2",
-    "inquirer": "^8.1.5",
-    "plist": "^3.0.4",
-    "semver": "^7.3.5",
     "xcode": "3.0.1"
   },
   "devDependencies": {
@@ -62,19 +59,5 @@
     "slash": "^3.0.0",
     "tslint": "^6.1.3",
     "typescript": "^4.4.3"
-  },
-  "rnpm": {
-    "android": {
-      "packageInstance": "new CodePush(getResources().getString(R.string.CodePushDeploymentKey), getApplicationContext(), BuildConfig.DEBUG)"
-    },
-    "ios": {
-      "sharedLibraries": [
-        "libz"
-      ]
-    },
-    "commands": {
-      "postlink": "node node_modules/react-native-code-push/scripts/postlink/run",
-      "postunlink": "node node_modules/react-native-code-push/scripts/postunlink/run"
-    }
   }
 }
