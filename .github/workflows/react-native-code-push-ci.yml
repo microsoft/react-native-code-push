@@ -44,5 +44,9 @@ jobs:
         run: npm install
       - name: Install react-native-cli
         run: npm install react-native-cli
+      - name: Build tests
+        run: npm run build:tests
+      - name: Setup tests
+        run: npm run test:setup:ios
       - name: Run tests
-        run: npm run test:ios
+        run: npm run test:fast:ios
