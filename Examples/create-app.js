@@ -1,4 +1,5 @@
 /*
+Test
 The script serves to generate CodePushified React Native app to reproduce issues or for testing purposes.
 
 Requirements:
