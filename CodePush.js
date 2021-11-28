@@ -184,6 +184,7 @@ async function tryReportStatus(statusReport, resumeListener) {
   const config = await getConfiguration();
   const previousLabelOrAppVersion = statusReport.previousLabelOrAppVersion;
   const previousDeploymentKey = statusReport.previousDeploymentKey || config.deploymentKey;
+  let appStateEventHandler;
   try {
     if (statusReport.appVersion) {
       log(`Reporting binary update (${statusReport.appVersion})`);
@@ -209,7 +210,7 @@ async function tryReportStatus(statusReport, resumeListener) {
     }
 
     NativeCodePush.recordStatusReported(statusReport);
-    resumeListener && AppState.removeEventListener("change", resumeListener);
+    resumeListener && appStateEventHandler.remove()
   } catch (e) {
     log(`Report status failed: ${JSON.stringify(statusReport)}`);
     NativeCodePush.saveStatusReportForRetry(statusReport);
@@ -221,10 +222,10 @@ async function tryReportStatus(statusReport, resumeListener) {
         if (refreshedStatusReport) {
           tryReportStatus(refreshedStatusReport, resumeListener);
         } else {
-          AppState.removeEventListener("change", resumeListener);
+          appStateEventHandler.remove()
         }
       };
-      AppState.addEventListener("change", resumeListener);
+      appStateEventHandler = AppState.addEventListener("change", resumeListener);
     }
   }
 }
@@ -566,7 +567,7 @@ function codePushify(options = {}) {
 
           CodePush.sync(options, syncStatusCallback, downloadProgressCallback, handleBinaryVersionMismatchCallback);
           if (options.checkFrequency === CodePush.CheckFrequency.ON_APP_RESUME) {
-            ReactNative.AppState.addEventListener("change", (newState) => {
+            appStateEventHandler = ReactNative.AppState.addEventListener("change", (newState) => {
               newState === "active" && CodePush.sync(options, syncStatusCallback, downloadProgressCallback);
             });
           }
