@@ -90,27 +90,34 @@ function createCodePushApp(name, os) {
             owner = app.owner.name;
             console.log(`App "${name}" has been created \n`);
         } catch(e) {
-            console.log("Error: ", e);
-            console.log(`Please check that you haven't application with "${name}" name on portal`);
+            console.error(`Error: Unable to create CodePush app. Please check that you haven't application with "${name}" name on portal.`, );
+            console.error("Error: ", e.toString());
         }
         execCommand(`appcenter codepush deployment add -a ${owner}/${name} Staging`);
     } catch (e) {
-        console.log("Error", e);
+        console.error("Error", e.toString());
     }
-    const deploymentKeysResult = execCommand(`appcenter codepush deployment list -a ${owner}/${name} -k --output json`);
-    const deploymentKeys = JSON.parse(deploymentKeysResult);
-    const stagingDeploymentKey = deploymentKeys[0][1];
-    console.log(`Deployment key for ${os}: ${stagingDeploymentKey}`);
-    console.log(`Use "appcenter codepush release-react ${owner}/${name}" command to release updates for ${os} \n`);
 
-    switch (os) {
-        case 'Android':
-            androidStagingDeploymentKey = stagingDeploymentKey;
-            break;
-        case 'iOS':
-            iosStagingDeploymentKey = stagingDeploymentKey;
-            break;
+    try {
+        const deploymentKeysResult = execCommand(`appcenter codepush deployment list -a ${owner}/${name} -k --output json`);
+        const deploymentKeys = JSON.parse(deploymentKeysResult);
+        const stagingDeploymentKey = deploymentKeys[0][1];
+        console.log(`Deployment key for ${os}: ${stagingDeploymentKey}`);
+        console.log(`Use "appcenter codepush release-react ${owner}/${name}" command to release updates for ${os} \n`);
+
+        switch (os) {
+            case 'Android':
+                androidStagingDeploymentKey = stagingDeploymentKey;
+                break;
+            case 'iOS':
+                iosStagingDeploymentKey = stagingDeploymentKey;
+                break;
+        }
+    } catch (e) {
+        console.error("Error: Unable to load deployment keys");
+        console.error("Error: ", e.toString());
     }
+
 }
 
 function generatePlainReactNativeApp(appName, reactNativeVersion) {
