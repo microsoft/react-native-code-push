@@ -172,12 +172,12 @@ function setupAssets() {
         fs.writeFileSync('index.android.js', fs.readFileSync('../CodePushDemoApp-pre0.49/index.android.js'));
         fileToEdit = 'demo.js'
     } else {
-        fs.writeFileSync('index.js', fs.readFileSync('../CodePushDemoApp/index.js'));
-        fs.writeFileSync('App.js', fs.readFileSync('../CodePushDemoApp/App.js'));
+        fs.writeFileSync('index.js', fs.readFileSync(__dirname + '/CodePushDemoApp/index.js'));
+        fs.writeFileSync('App.js', fs.readFileSync(__dirname + '/CodePushDemoApp/App.js'));
         fileToEdit = 'index.js'
     }
 
-    copyRecursiveSync('../CodePushDemoApp/images', './images');
+    copyRecursiveSync(__dirname + '/CodePushDemoApp/images', './images');
 
     fs.readFile(fileToEdit, 'utf8', function (err, data) {
         if (err) {
