@@ -63,6 +63,7 @@ gradle.projectsEvaluated {
                 config."bundleIn${variant.buildType.name.capitalize()}" ?:
                 targetName.toLowerCase().contains("release")
             }
+            
             runBefore("merge${targetName}Resources", generateBundledResourcesHash)
             runBefore("merge${targetName}Assets", generateBundledResourcesHash)   
         } else {
