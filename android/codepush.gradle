@@ -62,7 +62,10 @@ gradle.projectsEvaluated {
                 enabled config."bundleIn${targetName}" ||
                 config."bundleIn${variant.buildType.name.capitalize()}" ?:
                 targetName.toLowerCase().contains("release")
-            }   
+            }
+            
+            runBefore("merge${targetName}Resources", generateBundledResourcesHash)
+            runBefore("merge${targetName}Assets", generateBundledResourcesHash)   
         } else {
             def jsBundleDirConfigName = "jsBundleDir${targetName}"
             jsBundleDir = elvisFile(config."$jsBundleDirConfigName") ?:
