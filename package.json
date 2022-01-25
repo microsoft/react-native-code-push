@@ -55,7 +55,7 @@
     "del": "latest",
     "express": "latest",
     "mkdirp": "latest",
-    "mocha": "^9.1.1",
+    "mocha": "^9.2.0",
     "q": "^1.5.1",
     "run-sequence": "latest",
     "shx": "^0.3.4",
