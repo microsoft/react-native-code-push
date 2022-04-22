@@ -309,6 +309,9 @@ declare namespace CodePush {
      */
     function sync(options?: SyncOptions, syncStatusChangedCallback?: SyncStatusChangedCallback, downloadProgressCallback?: DownloadProgressCallback, handleBinaryVersionMismatchCallback?: HandleBinaryVersionMismatchCallback): Promise<SyncStatus>;
 
+    /** Need to change from  any <- TO DO */
+    function downloadAndInstall(update: any): void;
+
     /**
      * Indicates when you would like an installed update to actually be applied.
      */
