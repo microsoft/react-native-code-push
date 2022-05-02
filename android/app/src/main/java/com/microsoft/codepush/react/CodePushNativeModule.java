@@ -29,6 +29,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -44,6 +45,10 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
     private SettingsManager mSettingsManager;
     private CodePushTelemetryManager mTelemetryManager;
     private CodePushUpdateManager mUpdateManager;
+
+    private  boolean _allowed = true;
+    private  boolean _restartInProgress = false;
+    private  ArrayList<Boolean> _restartQueue = new ArrayList<>();
 
     public CodePushNativeModule(ReactApplicationContext reactContext, CodePush codePush, CodePushUpdateManager codePushUpdateManager, CodePushTelemetryManager codePushTelemetryManager, SettingsManager settingsManager) {
         super(reactContext);
@@ -168,7 +173,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
 
     // This workaround has been implemented in order to fix https://github.com/facebook/react-native/issues/14533
     // resetReactRootViews allows to call recreateReactContextInBackground without any exceptions
-    // This fix also relates to https://github.com/Microsoft/react-native-code-push/issues/878
+    // This fix also relates to https://github.com/microsoft/react-native-code-push/issues/878
     private void resetReactRootViews(ReactInstanceManager instanceManager) throws NoSuchFieldException, IllegalAccessException {
         Field mAttachedRootViewsField = instanceManager.getClass().getDeclaredField("mAttachedRootViews");
         mAttachedRootViewsField.setAccessible(true);
@@ -204,6 +209,74 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         instanceManager = reactApplication.getReactNativeHost().getReactInstanceManager();
 
         return instanceManager;
+    }
+
+    private void restartAppInternal(boolean onlyIfUpdateIsPending) {
+        if (this._restartInProgress) {
+            CodePushUtils.log("Restart request queued until the current restart is completed");
+            this._restartQueue.add(onlyIfUpdateIsPending);
+            return;
+        } else if (!this._allowed) {
+            CodePushUtils.log("Restart request queued until restarts are re-allowed");
+            this._restartQueue.add(onlyIfUpdateIsPending);
+            return;
+        }
+
+        this._restartInProgress = true;
+        if (!onlyIfUpdateIsPending || mSettingsManager.isPendingUpdate(null)) {
+            loadBundle();
+            CodePushUtils.log("Restarting app");
+            return;
+        }
+
+        this._restartInProgress = false;
+        if (this._restartQueue.size() > 0) {
+            boolean buf = this._restartQueue.get(0);
+            this._restartQueue.remove(0);
+            this.restartAppInternal(buf);
+        }
+    }
+
+    @ReactMethod
+    public void allow(Promise promise) {
+        CodePushUtils.log("Re-allowing restarts");
+        this._allowed = true;
+
+        if (_restartQueue.size() > 0) {
+            CodePushUtils.log("Executing pending restart");
+            boolean buf = this._restartQueue.get(0);
+            this._restartQueue.remove(0);
+            this.restartAppInternal(buf);
+        }
+
+        promise.resolve(null);
+        return;
+    }
+
+    @ReactMethod
+    public void clearPendingRestart(Promise promise) {
+        this._restartQueue.clear();
+        promise.resolve(null);
+        return;
+    }
+
+    @ReactMethod
+    public void disallow(Promise promise) {
+        CodePushUtils.log("Disallowing restarts");
+        this._allowed = false;
+        promise.resolve(null);
+        return;
+    }
+
+    @ReactMethod
+    public void restartApp(boolean onlyIfUpdateIsPending, Promise promise) {
+        try {
+            restartAppInternal(onlyIfUpdateIsPending);
+            promise.resolve(null);
+        } catch(CodePushUnknownException e) {
+            CodePushUtils.log(e);
+            promise.reject(e);
+        }
     }
 
     @ReactMethod
@@ -411,7 +484,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                             return null;
                         }
                     }
-
+                    
                     promise.resolve("");
                 } catch(CodePushUnknownException e) {
                     CodePushUtils.log(e);
@@ -460,7 +533,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                                     @Override
                                     public void run() {
                                         CodePushUtils.log("Loading bundle on suspend");
-                                        loadBundle();
+                                        restartAppInternal(false);
                                     }
                                 };
 
@@ -474,7 +547,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                                         if (installMode == CodePushInstallMode.IMMEDIATE.getValue()
                                                 || durationInBackground >= CodePushNativeModule.this.mMinimumBackgroundDuration) {
                                             CodePushUtils.log("Loading bundle on resume");
-                                            loadBundle();
+                                            restartAppInternal(false);
                                         }
                                     }
                                 }
@@ -579,24 +652,6 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             mTelemetryManager.recordStatusReported(statusReport);
         } catch(CodePushUnknownException e) {
             CodePushUtils.log(e);
-        }
-    }
-
-    @ReactMethod
-    public void restartApp(boolean onlyIfUpdateIsPending, Promise promise) {
-        try {
-            // If this is an unconditional restart request, or there
-            // is current pending update, then reload the app.
-            if (!onlyIfUpdateIsPending || mSettingsManager.isPendingUpdate(null)) {
-                loadBundle();
-                promise.resolve(true);
-                return;
-            }
-
-            promise.resolve(false);
-        } catch(CodePushUnknownException e) {
-            CodePushUtils.log(e);
-            promise.reject(e);
         }
     }
 

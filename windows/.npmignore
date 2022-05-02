@@ -6,3 +6,6 @@ x86/
 bin/
 obj/
 .vs/
+
+# Don't publish settings used for developement
+Directory.Build.props

@@ -2,7 +2,7 @@ var CodePushWrapper = require("../codePushWrapper.js");
 import CodePush from "react-native-code-push";
 
 module.exports = {
-    startTest: function(testApp) {
+    startTest: function (testApp) {
         testApp.sendCurrentAndPendingPackage()
             .then(() => {
                 CodePushWrapper.sync(testApp, (status) => {
@@ -12,8 +12,8 @@ module.exports = {
                 }, undefined, { installMode: CodePush.InstallMode.ON_NEXT_RESTART });
             });
     },
-    
-    getScenarioName: function() {
+
+    getScenarioName: function () {
         return "Restart";
     }
 };

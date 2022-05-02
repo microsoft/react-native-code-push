@@ -9,8 +9,8 @@ Pod::Spec.new do |s|
   s.author         = package['author']
   s.license        = package['license']
   s.homepage       = package['homepage']
-  s.source         = { :git => 'https://github.com/Microsoft/react-native-code-push.git', :tag => "v#{s.version}"}
-  s.ios.deployment_target = '7.0'
+  s.source         = { :git => 'https://github.com/microsoft/react-native-code-push.git', :tag => "v#{s.version}"}
+  s.ios.deployment_target = '9.0'
   s.tvos.deployment_target = '9.0'
   s.preserve_paths = '*.js'
   s.library        = 'z'
@@ -20,8 +20,8 @@ Pod::Spec.new do |s|
   # Note: Even though there are copy/pasted versions of some of these dependencies in the repo, 
   # we explicitly let CocoaPods pull in the versions below so all dependencies are resolved and 
   # linked properly at a parent workspace level.
-  s.dependency 'React'
-  s.dependency 'SSZipArchive', '~> 2.1'
-  s.dependency 'JWT', '~> 3.0.0-beta.7'
+  s.dependency 'React-Core'
+  s.dependency 'SSZipArchive', '~> 2.2.2'
+  s.dependency 'JWT', '~> 3.0.0-beta.12'
   s.dependency 'Base64', '~> 1.1'
 end

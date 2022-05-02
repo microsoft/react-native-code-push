@@ -16,7 +16,7 @@ What actually happens?
 
 ### Reproducible Demo
 
-* Download https://github.com/Microsoft/react-native-code-push/archive/master.zip and unzip. From `Examples` folder run `node create-app.js appName react-native@0.47.1 react-native-code-push@5.0.0-beta` command to generate plain CodePushified React Native app. Please see description on top of `create-app.js` file content if needed
+* Download https://github.com/microsoft/react-native-code-push/archive/master.zip and unzip. From `Examples` folder run `node create-app.js appName react-native@0.61.5 react-native-code-push@6.0.0` command to generate plain CodePushified React Native app. Please see description on top of `create-app.js` file content if needed
 * If you can't reproduce the bug on it, provide us as much info as possible about your project
 
 ### Environment

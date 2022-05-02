@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <!-- We use the CodePushDemoAppCpp example for module development and testing -->
+    <ReactNativeWindowsDir Condition="'$(SolutionName)' == 'CodePushDemoAppCpp' and Exists('$(SolutionDir)\..\node_modules\react-native-windows\package.json')">$([MSBuild]::NormalizeDirectory('$(SolutionDir)\..\node_modules\react-native-windows\'))</ReactNativeWindowsDir>
+  </PropertyGroup>
+</Project>

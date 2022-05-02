@@ -12,37 +12,60 @@
   ],
   "author": "Microsoft Corporation",
   "license": "MIT",
+  "scripts": {
+    "clean": "shx rm -rf bin",
+    "setup": "npm install --quiet --no-progress",
+    "prebuild:tests": "npm run clean && npm run tslint",
+    "build:tests": "tsc",
+    "test": "npm run build:tests && npm run test:setup && npm run test:fast",
+    "test:android": "npm run build:tests && npm run test:setup:android && npm run test:fast:android",
+    "test:ios": "npm run build:tests && npm run test:setup:ios && npm run test:fast:ios",
+    "test:setup": "mocha --recursive bin/test --android --ios --setup",
+    "test:setup:android": "mocha --recursive bin/test --android --setup",
+    "test:setup:ios": "mocha --recursive bin/test --ios --setup",
+    "test:fast": "mocha --recursive bin/test --android --ios",
+    "test:fast:android": "mocha --recursive bin/test --android",
+    "test:fast:ios": "mocha --recursive bin/test --ios",
+    "test:debugger:android": "mocha --recursive --inspect-brk=0.0.0.0 bin/test --android",
+    "test:debugger:ios": "mocha --recursive --inspect-brk=0.0.0.0 bin/test --ios",
+    "tslint": "tslint -c tslint.json test/**/*.ts"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Microsoft/react-native-code-push"
+    "url": "https://github.com/microsoft/react-native-code-push"
   },
   "dependencies": {
-    "code-push": "2.0.6",
-    "glob": "^5.0.15",
-    "hoist-non-react-statics": "^2.3.1",
-    "inquirer": "1.1.2",
-    "plist": "3.0.1",
-    "semver": "^5.6.0",
-    "xcode": "1.0.0"
+    "code-push": "^4.0.5",
+    "glob": "^7.1.7",
+    "hoist-non-react-statics": "^3.3.2",
+    "inquirer": "^8.1.5",
+    "plist": "^3.0.4",
+    "semver": "^7.3.5",
+    "xcode": "3.0.1"
   },
   "devDependencies": {
+    "@types/assert": "^1.5.2",
+    "@types/mkdirp": "^1.0.1",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "^14.0.27",
+    "@types/q": "^1.5.4",
     "archiver": "latest",
     "body-parser": "latest",
     "code-push-plugin-testing-framework": "file:./code-push-plugin-testing-framework",
     "del": "latest",
     "express": "latest",
-    "gulp-insert": "latest",
-    "gulp-tslint": "latest",
-    "gulp-typescript": "2.12.2",
     "mkdirp": "latest",
-    "q": "^1.4.1",
+    "mocha": "^9.2.0",
+    "q": "^1.5.1",
     "run-sequence": "latest",
-    "tslint": "^4.3.1",
-    "typescript": "^2.1.5"
+    "shx": "^0.3.4",
+    "slash": "^3.0.0",
+    "tslint": "^6.1.3",
+    "typescript": "^4.4.3"
   },
   "rnpm": {
     "android": {
-      "packageInstance": "new CodePush(getResources().getString(R.string.reactNativeCodePush_androidDeploymentKey), getApplicationContext(), BuildConfig.DEBUG)"
+      "packageInstance": "new CodePush(getResources().getString(R.string.CodePushDeploymentKey), getApplicationContext(), BuildConfig.DEBUG)"
     },
     "ios": {
       "sharedLibraries": [
@@ -50,7 +73,8 @@
       ]
     },
     "commands": {
-      "postlink": "node node_modules/react-native-code-push/scripts/postlink/run"
+      "postlink": "node node_modules/react-native-code-push/scripts/postlink/run",
+      "postunlink": "node node_modules/react-native-code-push/scripts/postunlink/run"
     }
   }
 }

@@ -1,0 +1,52 @@
+name: React-native-code-push CI
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  test-android:
+    name: Test Android app
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        api-level: [27]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Start adb server
+        run: adb devices
+      - name: Download system image "android-${{ matrix.api-level }}"
+        run: $ANDROID_HOME/tools/bin/sdkmanager "system-images;android-${{ matrix.api-level }};google_apis;x86"
+      - name: Create android emulator
+        run: $ANDROID_HOME/tools/bin/avdmanager create avd --force --name TestEmulator --abi google_apis/x86 --package 'system-images;android-${{ matrix.api-level }};google_apis;x86' --device "Nexus 6P"
+      - name: Start android emulator
+        run: $ANDROID_HOME/emulator/emulator -avd TestEmulator -noaudio -no-window -no-snapshot-save -no-boot-anim -memory 6144 &
+      - run: sleep 120
+      - run: adb shell settings put global window_animation_scale 0.0
+      - run: adb shell settings put global transition_animation_scale 0.0
+      - run: adb shell settings put global animator_duration_scale 0.0
+      - name: Package Installation
+        run: npm install
+      - name: Install react-native-cli
+        run: npm install react-native-cli
+      - name: test:android
+        run: npm run test:android
+
+  test-iOS:
+    name: Test iOS app
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install dependecies
+        run: npm install
+      - name: Install react-native-cli
+        run: npm install react-native-cli
+      - name: Build tests
+        run: npm run build:tests
+      - name: Setup tests
+        run: npm run test:setup:ios
+      - name: Run tests
+        run: npm run test:fast:ios

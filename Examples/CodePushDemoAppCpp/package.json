@@ -1,0 +1,36 @@
+{
+  "name": "CodePushDemoAppCpp",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "react-native start",
+    "test": "jest",
+    "lint": "eslint .",
+    "windows": "react-native run-windows"
+  },
+  "dependencies": {
+    "react": "^17.0.2",
+    "react-native": "^0.67.1",
+    "react-native-code-push": "^7.0.0",
+    "react-native-windows": "^1.0.0"
+  },
+  "resolutions": {
+    "strip-ansi": "^6.0.1",
+    "ansi-regex": "^5.0.1",
+    "node-fetch": "^2.6.7"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.8.4",
+    "@babel/runtime": "^7.8.4",
+    "@react-native-community/eslint-config": "^3.0.1",
+    "appcenter-cli": "^2.10.7",
+    "babel-jest": "^27.2.5",
+    "eslint": "^8.0.0",
+    "jest": "^27.2.5",
+    "metro-react-native-babel-preset": "^0.66.2",
+    "react-test-renderer": "17.0.2"
+  },
+  "jest": {
+    "preset": "react-native"
+  }
+}

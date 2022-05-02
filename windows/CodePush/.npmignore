@@ -1,0 +1,11 @@
+# Make sure we don't publish build artifacts to NPM
+.vs/
+ARM/
+ARM64/
+x64/
+x86/
+Debug/
+Release/
+bin/
+obj/
+Generated Files/

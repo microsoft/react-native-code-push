@@ -2,7 +2,6 @@ import { AcquisitionManager as Sdk } from "code-push/script/acquisition-sdk";
 import { Alert } from "./AlertAdapter";
 import requestFetchAdapter from "./request-fetch-adapter";
 import { AppState, Platform } from "react-native";
-import RestartManager from "./RestartManager";
 import log from "./logging";
 import hoistStatics from 'hoist-non-react-statics';
 
@@ -39,7 +38,7 @@ async function checkForUpdate(deploymentKey = null, handleBinaryVersionMismatchC
    * then we want to use its package hash to determine whether a new
    * release has been made on the server. Otherwise, we only need
    * to send the app version to the server, since we are interested
-   * in any updates for current app store version, regardless of hash.
+   * in any updates for current binary version, regardless of hash.
    */
   let queryPackage;
   if (localPackage) {
@@ -58,7 +57,7 @@ async function checkForUpdate(deploymentKey = null, handleBinaryVersionMismatchC
    * ----------------------------------------------------------------
    * 1) The server said there isn't an update. This is the most common case.
    * 2) The server said there is an update but it requires a newer binary version.
-   *    This would occur when end-users are running an older app store version than
+   *    This would occur when end-users are running an older binary version than
    *    is available, and CodePush is making sure they don't get an update that
    *    potentially wouldn't be compatible with what they are running.
    * 3) The server said there is an update, but the update's hash is the same as
@@ -189,6 +188,10 @@ async function tryReportStatus(statusReport, resumeListener) {
     if (statusReport.appVersion) {
       log(`Reporting binary update (${statusReport.appVersion})`);
 
+      if (!config.deploymentKey) {
+        throw new Error("Deployment key is missed");
+      }
+
       const sdk = getPromisifiedSdk(requestFetchAdapter, config);
       await sdk.reportStatusDeploy(/* deployedPackage */ null, /* status */ null, previousLabelOrAppVersion, previousDeploymentKey);
     } else {
@@ -298,6 +301,10 @@ function setUpTestDependencies(testSdk, providedTestConfig, testNativeBridge) {
   if (testSdk) module.exports.AcquisitionSdk = testSdk;
   if (providedTestConfig) testConfig = providedTestConfig;
   if (testNativeBridge) NativeCodePush = testNativeBridge;
+}
+
+async function restartApp(onlyIfUpdateIsPending = false) {
+  NativeCodePush.restartApp(onlyIfUpdateIsPending);
 }
 
 // This function allows only one syncInternal operation to proceed at any given time.
@@ -698,12 +705,13 @@ if (NativeCodePush) {
     log,
     notifyAppReady: notifyApplicationReady,
     notifyApplicationReady,
-    restartApp: RestartManager.restartApp,
+    restartApp,
     setUpTestDependencies,
     sync,
     downloadAndInstall,
-    disallowRestart: RestartManager.disallow,
-    allowRestart: RestartManager.allow,
+    disallowRestart: NativeCodePush.disallow,
+    allowRestart: NativeCodePush.allow,
+    downloadAndInstall,
     clearUpdates: NativeCodePush.clearUpdates,
     InstallMode: {
       IMMEDIATE: NativeCodePush.codePushInstallModeImmediate, // Restart the app immediately

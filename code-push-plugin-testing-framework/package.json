@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Microsoft/code-push.git"
+    "url": "git+https://github.com/microsoft/code-push.git"
   },
   "author": {
     "name": "Microsoft Corporation"
@@ -16,17 +16,18 @@
   "license": "MIT",
   "homepage": "https://microsoft.github.io/code-push",
   "dependencies": {
-    "base-64": "^0.1.0",
+    "@types/uuid": "^8.3.1",
+    "base-64": "^1.0.0",
     "mocha": "latest",
     "mocha-junit-reporter": "latest",
-    "node-uuid": "^1.4.3",
-    "q": "^1.4.1",
+    "q": "^1.5.1",
     "replace": "latest",
-    "superagent": "^3.8.3",
-    "superagent-proxy": "^1.0.0"
+    "superagent": "^6.1.0",
+    "superagent-proxy": "^3.0.0",
+    "uuid": "^8.3.2"
   },
   "bugs": {
-    "url": "https://github.com/Microsoft/code-push/issues"
+    "url": "https://github.com/microsoft/code-push/issues"
   },
   "readme": "ERROR: No README data found!",
   "_id": "code-push-plugin-testing-framework@0.0.1",

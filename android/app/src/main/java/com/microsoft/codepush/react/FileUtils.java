@@ -123,6 +123,19 @@ public class FileUtils {
         }
     }
 
+    private static String validateFileName(String fileName, File destinationFolder) throws IOException {
+        String destinationFolderCanonicalPath = destinationFolder.getCanonicalPath();
+
+        File file = new File(destinationFolderCanonicalPath, fileName);
+        String canonicalPath = file.getCanonicalPath();
+
+        if (!canonicalPath.startsWith(destinationFolderCanonicalPath)) {
+            throw new IllegalStateException("File is outside extraction target directory.");
+        }
+
+        return canonicalPath;
+    }
+
     public static void unzipFile(File zipFile, String destination) throws IOException {
         FileInputStream fileStream = null;
         BufferedInputStream bufferedStream = null;
@@ -137,13 +150,13 @@ public class FileUtils {
             if (destinationFolder.exists()) {
                 deleteFileOrFolderSilently(destinationFolder);
             }
-            
+
             destinationFolder.mkdirs();
 
             byte[] buffer = new byte[WRITE_BUFFER_SIZE];
             while ((entry = zipStream.getNextEntry()) != null) {
-                String fileName = entry.getName();
-                File file = new File(destinationFolder, fileName);
+                String fileName = validateFileName(entry.getName(), destinationFolder);
+                File file = new File(fileName);
                 if (entry.isDirectory()) {
                     file.mkdirs();
                 } else {

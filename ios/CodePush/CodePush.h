@@ -45,7 +45,7 @@
 /*
  * This method allows the version of the app's binary interface
  * to be specified, which would otherwise default to the
- * App Store version of the app.
+ * binary version of the app.
  */
 + (void)overrideAppVersion:(NSString *)appVersion;
 

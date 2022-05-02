@@ -1,7 +1,6 @@
 "use strict";
 var archiver = require("archiver");
 var child_process = require("child_process");
-var del = require("del");
 var fs = require("fs");
 var replace = require("replace");
 var Q = require("q");
@@ -46,7 +45,7 @@ var TestUtil = (function () {
         options = options || {};
         // set default options
         if (options.maxBuffer === undefined)
-            options.maxBuffer = 1024 * 500;
+            options.maxBuffer = 1024 * 1024 * 500;
         if (options.timeout === undefined)
             options.timeout = 10 * 60 * 1000;
         if (!options.noLogCommand)
@@ -76,8 +75,13 @@ var TestUtil = (function () {
      * Returns the name of the plugin that is being tested.
      */
     TestUtil.getPluginName = function () {
-        var packageFile = eval("(" + fs.readFileSync("./package.json", "utf8") + ")");
+        var packageFile = JSON.parse(fs.readFileSync("./package.json", "utf8"));
         return packageFile.name;
+    };
+
+    TestUtil.getPluginVersion = function () {
+        var packageFile = JSON.parse(fs.readFileSync("./package.json", "utf8"));
+        return packageFile.version;
     };
     /**
      * Replaces a regex in a file with a given string.
@@ -135,6 +139,17 @@ var TestUtil = (function () {
         archive.finalize();
         return deferred.promise;
     };
+
+    /**
+     * Check that boolean environment variable string is 'true.
+     */
+    TestUtil.resolveBooleanVariables = function(variable) {
+        if (variable) {
+            return variable.toLowerCase() === 'true';
+        }
+    
+        return false;
+    }
     //// Placeholders
     // Used in the template to represent data that needs to be added by the testing framework at runtime.
     TestUtil.ANDROID_KEY_PLACEHOLDER = "CODE_PUSH_ANDROID_DEPLOYMENT_KEY";

@@ -20,7 +20,7 @@ void runBefore(String dependentTaskName, Task task) {
 gradle.projectsEvaluated {
     android.buildTypes.each {
         // to prevent incorrect long value restoration from strings.xml we need to wrap it with double quotes
-        // https://github.com/Microsoft/cordova-plugin-code-push/issues/264
+        // https://github.com/microsoft/cordova-plugin-code-push/issues/264
         it.resValue 'string', "CODE_PUSH_APK_BUILD_TIME", String.format("\"%d\"", System.currentTimeMillis())
     }
     
@@ -62,7 +62,10 @@ gradle.projectsEvaluated {
                 enabled config."bundleIn${targetName}" ||
                 config."bundleIn${variant.buildType.name.capitalize()}" ?:
                 targetName.toLowerCase().contains("release")
-            }   
+            }
+            
+            runBefore("merge${targetName}Resources", generateBundledResourcesHash)
+            runBefore("merge${targetName}Assets", generateBundledResourcesHash)   
         } else {
             def jsBundleDirConfigName = "jsBundleDir${targetName}"
             jsBundleDir = elvisFile(config."$jsBundleDirConfigName") ?:

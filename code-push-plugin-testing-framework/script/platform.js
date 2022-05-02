@@ -28,7 +28,7 @@ var Android = (function () {
      */
     Android.prototype.getServerUrl = function () {
         if (!this.serverUrl)
-            this.serverUrl = testUtil_1.TestUtil.readMochaCommandLineOption(Android.ANDROID_SERVER_URL_OPTION_NAME, Android.DEFAULT_ANDROID_SERVER_URL);
+            this.serverUrl = process.env.ANDROID_SERVER ? process.env.ANDROID_SERVER : Android.DEFAULT_ANDROID_SERVER_URL;
         return this.serverUrl;
     };
     /**
@@ -43,7 +43,6 @@ var Android = (function () {
     Android.prototype.getDefaultDeploymentKey = function () {
         return "mock-android-deployment-key";
     };
-    Android.ANDROID_SERVER_URL_OPTION_NAME = "--androidserver";
     Android.DEFAULT_ANDROID_SERVER_URL = "http://10.0.2.2:3001";
     return Android;
 }());
@@ -73,7 +72,8 @@ var IOS = (function () {
      */
     IOS.prototype.getServerUrl = function () {
         if (!this.serverUrl)
-            this.serverUrl = testUtil_1.TestUtil.readMochaCommandLineOption(IOS.IOS_SERVER_URL_OPTION_NAME, IOS.DEFAULT_IOS_SERVER_URL);
+            this.serverUrl = process.env.IOS_SERVER ? process.env.IOS_SERVER : IOS.DEFAULT_IOS_SERVER_URL;
+
         return this.serverUrl;
     };
     /**
@@ -88,7 +88,6 @@ var IOS = (function () {
     IOS.prototype.getDefaultDeploymentKey = function () {
         return "mock-ios-deployment-key";
     };
-    IOS.IOS_SERVER_URL_OPTION_NAME = "--iosserver";
     IOS.DEFAULT_IOS_SERVER_URL = "http://127.0.0.1:3000";
     return IOS;
 }());
@@ -96,8 +95,8 @@ exports.IOS = IOS;
 //////////////////////////////////////////////////////////////////////////////////////////
 // EMULATOR MANAGERS
 // bootEmulatorInternal constants
-var emulatorMaxReadyAttempts = 5;
-var emulatorReadyCheckDelayMs = 30 * 1000;
+var emulatorMaxReadyAttempts = 50;
+var emulatorReadyCheckDelayMs = 5 * 1000;
 /**
  * Helper function for EmulatorManager implementations to use to boot an emulator with a given platformName and check, start, and kill methods.
  */
@@ -116,11 +115,11 @@ function bootEmulatorInternal(platformName, restartEmulators, targetEmulator, ch
         // Dummy command that succeeds if emulator is ready and fails otherwise.
         checkEmulator()
             .then(function () {
-            checkDeferred.resolve(undefined);
-        }, function (error) {
-            console.log(platformName + " emulator is not ready yet!");
-            checkDeferred.reject(error);
-        });
+                checkDeferred.resolve(undefined);
+            }, function (error) {
+                console.log(platformName + " emulator is not ready yet!");
+                checkDeferred.reject(error);
+            });
         return checkDeferred.promise;
     }
     var emulatorReadyAttempts = 0;
@@ -136,11 +135,11 @@ function bootEmulatorInternal(platformName, restartEmulators, targetEmulator, ch
         setTimeout(function () {
             checkEmulatorReady()
                 .then(function () {
-                looperDeferred.resolve(undefined);
-                onEmulatorReady();
-            }, function () {
-                return checkEmulatorReadyLooper().then(function () { looperDeferred.resolve(undefined); }, function () { looperDeferred.reject(undefined); });
-            });
+                    looperDeferred.resolve(undefined);
+                    onEmulatorReady();
+                }, function () {
+                    return checkEmulatorReadyLooper().then(function () { looperDeferred.resolve(undefined); }, function () { looperDeferred.reject(undefined); });
+                });
         }, emulatorReadyCheckDelayMs);
         return looperDeferred.promise;
     }
@@ -167,12 +166,32 @@ var AndroidEmulatorManager = (function () {
      * Returns the target emulator, which is specified through the command line.
      */
     AndroidEmulatorManager.prototype.getTargetEmulator = function () {
+        let _this = this;
         if (this.targetEmulator)
             return Q(this.targetEmulator);
         else {
-            this.targetEmulator = testUtil_1.TestUtil.readMochaCommandLineOption(AndroidEmulatorManager.ANDROID_EMULATOR_OPTION_NAME, AndroidEmulatorManager.DEFAULT_ANDROID_EMULATOR);
-            console.log("Using Android emulator named " + this.targetEmulator);
-            return Q(this.targetEmulator);
+            const deferred = Q.defer();
+            const targetAndroidEmulator = process.env.ANDROID_EMU;
+            if (!targetAndroidEmulator) {
+                // If no Android simulator is specified, get the most recent Android simulator to run tests on.
+                testUtil_1.TestUtil.getProcessOutput("emulator -list-avds", { noLogCommand: true, noLogStdOut: true, noLogStdErr: true })
+                    .then((Devices) => {
+                        const listOfDevices = Devices.trim().split("\n");
+                        deferred.resolve(listOfDevices[listOfDevices.length - 1]);
+                    }, (error) => {
+                        deferred.reject(error);
+                    });
+            }
+            else {
+                // Use the simulator specified on the command line.
+                deferred.resolve(targetAndroidEmulator);
+            }
+            return deferred.promise
+                .then((targetEmulator) => {
+                    _this.targetEmulator = targetEmulator;
+                    console.log("Using Android simulator named " + _this.targetEmulator);
+                    return _this.targetEmulator;
+                });
         }
     };
     /**
@@ -185,15 +204,22 @@ var AndroidEmulatorManager = (function () {
             return testUtil_1.TestUtil.getProcessOutput("adb shell pm list packages", { noLogCommand: true, noLogStdOut: true, noLogStdErr: true }).then(function () { return null; });
         }
         function startAndroidEmulator(androidEmulatorName) {
-            return testUtil_1.TestUtil.getProcessOutput("emulator @" + androidEmulatorName).then(function () { return null; });
+            const androidEmulatorCommand = `emulator @${androidEmulatorName}`;
+            let osSpecificCommand = "";
+            if (process.platform === "darwin") {
+                osSpecificCommand = `${androidEmulatorCommand} &`;
+            } else {
+                osSpecificCommand = `START /B ${androidEmulatorCommand}`;
+            }
+            return testUtil_1.TestUtil.getProcessOutput(osSpecificCommand, { noLogStdErr: true, timeout: 5000 });
         }
         function killAndroidEmulator() {
             return testUtil_1.TestUtil.getProcessOutput("adb emu kill").then(function () { return null; });
         }
         return this.getTargetEmulator()
             .then(function (targetEmulator) {
-            return bootEmulatorInternal("Android", restartEmulators, targetEmulator, checkAndroidEmulator, startAndroidEmulator, killAndroidEmulator);
-        });
+                return bootEmulatorInternal("Android", restartEmulators, targetEmulator, checkAndroidEmulator, startAndroidEmulator, killAndroidEmulator);
+            });
     };
     /**
      * Launches an already installed application by app id.
@@ -205,7 +231,7 @@ var AndroidEmulatorManager = (function () {
      * Ends a running application given its app id.
      */
     AndroidEmulatorManager.prototype.endRunningApplication = function (appId) {
-        return testUtil_1.TestUtil.getProcessOutput("adb shell am force-stop " + appId).then(function () { return null; });
+        return testUtil_1.TestUtil.getProcessOutput("adb shell am force-stop " + appId).then(function () { return Q.delay(10000); });
     };
     /**
      * Restarts an already installed application by app id.
@@ -214,12 +240,12 @@ var AndroidEmulatorManager = (function () {
         var _this = this;
         return this.endRunningApplication(appId)
             .then(function () {
-            // Wait for a second before restarting.
-            return Q.delay(1000);
-        })
+                // Wait for a 1 second before restarting.
+                return Q.delay(1000);
+            })
             .then(function () {
-            return _this.launchInstalledApplication(appId);
-        });
+                return _this.launchInstalledApplication(appId);
+            });
     };
     /**
      * Navigates away from the current app, waits for a delay (defaults to 1 second), then navigates to the specified app.
@@ -230,29 +256,29 @@ var AndroidEmulatorManager = (function () {
         // Open a default Android app (for example, settings).
         return this.launchInstalledApplication("com.android.settings")
             .then(function () {
-            console.log("Waiting for " + delayBeforeResumingMs + "ms before resuming the test application.");
-            return Q.delay(delayBeforeResumingMs);
-        })
+                console.log("Waiting for " + delayBeforeResumingMs + "ms before resuming the test application.");
+                return Q.delay(delayBeforeResumingMs);
+            })
             .then(function () {
-            // Reopen the app.
-            return _this.launchInstalledApplication(appId);
-        });
+                // Reopen the app.
+                return _this.launchInstalledApplication(appId);
+            });
     };
     /**
      * Prepares the emulator for a test.
      */
     AndroidEmulatorManager.prototype.prepareEmulatorForTest = function (appId) {
         return this.endRunningApplication(appId)
-            .then(function () { return testUtil_1.TestUtil.getProcessOutput("adb shell pm clear " + appId); }).then(function () { return null; });
+            .then(function () {
+                return commandWithCheckAppExistence("adb shell pm clear", appId);
+            });
     };
     /**
      * Uninstalls the app from the emulator.
      */
     AndroidEmulatorManager.prototype.uninstallApplication = function (appId) {
-        return testUtil_1.TestUtil.getProcessOutput("adb uninstall " + appId).then(function () { return null; });
+        return commandWithCheckAppExistence("adb uninstall", appId);
     };
-    AndroidEmulatorManager.ANDROID_EMULATOR_OPTION_NAME = "--androidemu";
-    AndroidEmulatorManager.DEFAULT_ANDROID_EMULATOR = "emulator";
     return AndroidEmulatorManager;
 }());
 exports.AndroidEmulatorManager = AndroidEmulatorManager;
@@ -263,34 +289,34 @@ var IOSEmulatorManager = (function () {
      * Returns the target emulator, which is specified through the command line.
      */
     IOSEmulatorManager.prototype.getTargetEmulator = function () {
-        var _this = this;
+        let _this = this;
         if (this.targetEmulator)
             return Q(this.targetEmulator);
         else {
-            var deferred = Q.defer();
-            var targetIOSEmulator = testUtil_1.TestUtil.readMochaCommandLineOption(IOSEmulatorManager.IOS_EMULATOR_OPTION_NAME);
+            let deferred = Q.defer();
+            let targetIOSEmulator = process.env.IOS_EMU;
             if (!targetIOSEmulator) {
                 // If no iOS simulator is specified, get the most recent iOS simulator to run tests on.
                 testUtil_1.TestUtil.getProcessOutput("xcrun simctl list", { noLogCommand: true, noLogStdOut: true, noLogStdErr: true })
-                    .then(function (listOfDevicesWithDevicePairs) {
-                    var listOfDevices = listOfDevicesWithDevicePairs.slice(listOfDevicesWithDevicePairs.indexOf("-- iOS"), listOfDevicesWithDevicePairs.indexOf("-- tvOS"));
-                    var phoneDevice = /iPhone (\S* )*(\(([0-9A-Z-]*)\))/g;
-                    var match = listOfDevices.match(phoneDevice);
-                    deferred.resolve(match[match.length - 1]);
-                }, function (error) {
-                    deferred.reject(error);
-                });
+                    .then((listOfDevicesWithDevicePairs) => {
+                        let listOfDevices = listOfDevicesWithDevicePairs.slice(listOfDevicesWithDevicePairs.indexOf("-- iOS"), listOfDevicesWithDevicePairs.indexOf("-- tvOS"));
+                        let phoneDevice = /iPhone (\S* )*(\(([0-9A-Z-]*)\))/g;
+                        let match = listOfDevices.match(phoneDevice);
+                        deferred.resolve(match[match.length - 1]);
+                    }, (error) => {
+                        deferred.reject(error);
+                    });
             }
             else {
                 // Use the simulator specified on the command line.
                 deferred.resolve(targetIOSEmulator);
             }
             return deferred.promise
-                .then(function (targetEmulator) {
-                _this.targetEmulator = targetEmulator;
-                console.log("Using iOS simulator named " + _this.targetEmulator);
-                return _this.targetEmulator;
-            });
+                .then((targetEmulator) => {
+                    _this.targetEmulator = targetEmulator;
+                    console.log("Using iOS simulator named " + _this.targetEmulator);
+                    return _this.targetEmulator;
+                });
         }
     };
     /**
@@ -311,8 +337,8 @@ var IOSEmulatorManager = (function () {
         }
         return this.getTargetEmulator()
             .then(function (targetEmulator) {
-            return bootEmulatorInternal("iOS", restartEmulators, targetEmulator, checkIOSEmulator, startIOSEmulator, killIOSEmulator);
-        });
+                return bootEmulatorInternal("iOS", restartEmulators, targetEmulator, checkIOSEmulator, startIOSEmulator, killIOSEmulator);
+            });
     };
     /**
      * Launches an already installed application by app id.
@@ -324,25 +350,7 @@ var IOSEmulatorManager = (function () {
      * Ends a running application given its app id.
      */
     IOSEmulatorManager.prototype.endRunningApplication = function (appId) {
-        return testUtil_1.TestUtil.getProcessOutput("xcrun simctl spawn booted launchctl list", { noLogCommand: true, noLogStdOut: true, noLogStdErr: true })
-            .then(function (processListOutput) {
-            // Find the app's process.
-            var regex = new RegExp("(\\S+" + appId + "\\S+)");
-            var execResult = regex.exec(processListOutput);
-            if (execResult) {
-                return execResult[0];
-            }
-            else {
-                return Q.reject("Could not get the running application label.");
-            }
-        })
-            .then(function (applicationLabel) {
-            // Kill the app if we found the process.
-            return testUtil_1.TestUtil.getProcessOutput("xcrun simctl spawn booted launchctl stop " + applicationLabel, undefined).then(function () { return null; });
-        }, function (error) {
-            // We couldn't find the app's process so it must not be running.
-            return Q.resolve(error);
-        });
+        return testUtil_1.TestUtil.getProcessOutput("xcrun simctl terminate booted " + appId, undefined).then(function () { return null; })
     };
     /**
      * Restarts an already installed application by app id.
@@ -351,9 +359,9 @@ var IOSEmulatorManager = (function () {
         var _this = this;
         return this.endRunningApplication(appId)
             .then(function () {
-            // Wait for a second before restarting.
-            return Q.delay(1000);
-        })
+                // Wait for a second before restarting.
+                return Q.delay(1000);
+            })
             .then(function () { return _this.launchInstalledApplication(appId); });
     };
     /**
@@ -362,16 +370,16 @@ var IOSEmulatorManager = (function () {
     IOSEmulatorManager.prototype.resumeApplication = function (appId, delayBeforeResumingMs) {
         var _this = this;
         if (delayBeforeResumingMs === void 0) { delayBeforeResumingMs = 1000; }
-        // Open a default iOS app (for example, camera).
-        return this.launchInstalledApplication("com.apple.camera")
+        // Open a default iOS app (for example, settings).
+        return this.launchInstalledApplication("com.apple.Preferences")
             .then(function () {
-            console.log("Waiting for " + delayBeforeResumingMs + "ms before resuming the test application.");
-            return Q.delay(delayBeforeResumingMs);
-        })
+                console.log("Waiting for " + delayBeforeResumingMs + "ms before resuming the test application.");
+                return Q.delay(delayBeforeResumingMs);
+            })
             .then(function () {
-            // Reopen the app.
-            return _this.launchInstalledApplication(appId);
-        });
+                // Reopen the app.
+                return _this.launchInstalledApplication(appId);
+            });
     };
     /**
      * Prepares the emulator for a test.
@@ -385,7 +393,19 @@ var IOSEmulatorManager = (function () {
     IOSEmulatorManager.prototype.uninstallApplication = function (appId) {
         return testUtil_1.TestUtil.getProcessOutput("xcrun simctl uninstall booted " + appId).then(function () { return null; });
     };
-    IOSEmulatorManager.IOS_EMULATOR_OPTION_NAME = "--iosemu";
     return IOSEmulatorManager;
 }());
 exports.IOSEmulatorManager = IOSEmulatorManager;
+
+function commandWithCheckAppExistence(command, appId) {
+    return testUtil_1.TestUtil.getProcessOutput("adb shell pm list packages", { noLogCommand: true, noLogStdOut: true, noLogStdErr: true })
+        .then((output) => {
+            return output.includes(appId);
+        }).then((isAppExist) => {
+            if (isAppExist) {
+                return testUtil_1.TestUtil.getProcessOutput(`${command} ${appId}`).then(function () { return null; });
+            }
+            console.log(`Command "${command}" is skipped because the application has not yet been installed`)
+            return null;
+        });
+}

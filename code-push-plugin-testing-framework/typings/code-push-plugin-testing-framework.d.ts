@@ -79,7 +79,6 @@ declare module 'code-push-plugin-testing-framework/script/platform' {
 	     * Runs when the flag is present, doesn't run otherwise.
 	     */
 	    getCommandLineFlagName(): string;
-	    private static ANDROID_SERVER_URL_OPTION_NAME;
 	    private static DEFAULT_ANDROID_SERVER_URL;
 	    /**
 	     * Gets the server url used for testing.
@@ -110,7 +109,6 @@ declare module 'code-push-plugin-testing-framework/script/platform' {
 	     * Runs when the flag is present, doesn't run otherwise.
 	     */
 	    getCommandLineFlagName(): string;
-	    private static IOS_SERVER_URL_OPTION_NAME;
 	    private static DEFAULT_IOS_SERVER_URL;
 	    /**
 	     * Gets the server url used for testing.
@@ -126,8 +124,6 @@ declare module 'code-push-plugin-testing-framework/script/platform' {
 	    getDefaultDeploymentKey(): string;
 	}
 	export class AndroidEmulatorManager implements IEmulatorManager {
-	    private static ANDROID_EMULATOR_OPTION_NAME;
-	    private static DEFAULT_ANDROID_EMULATOR;
 	    private targetEmulator;
 	    /**
 	     * Returns the target emulator, which is specified through the command line.
@@ -163,7 +159,6 @@ declare module 'code-push-plugin-testing-framework/script/platform' {
 	    uninstallApplication(appId: string): Q.Promise<void>;
 	}
 	export class IOSEmulatorManager implements IEmulatorManager {
-	    private static IOS_EMULATOR_OPTION_NAME;
 	    private targetEmulator;
 	    /**
 	     * Returns the target emulator, which is specified through the command line.
@@ -299,15 +294,17 @@ declare module 'code-push-plugin-testing-framework/script/serverUtil' {
 	 * Class used to mock the codePush.checkForUpdate() response from the server.
 	 */
 	export class CheckForUpdateResponseMock {
-	    downloadURL: string;
-	    isAvailable: boolean;
-	    packageSize: number;
-	    updateAppVersion: boolean;
-	    appVersion: string;
-	    description: string;
-	    label: string;
-	    packageHash: string;
-	    isMandatory: boolean;
+		download_url: string;
+		is_available: boolean;
+		should_run_binary_version: boolean;
+		package_size: number;
+		update_app_version: boolean;
+		target_binary_range: string;
+		is_disabled: boolean;
+		description: string;
+		label: string;
+		package_hash: string;
+		is_mandatory: boolean;
 	}
 	/**
 	 * The model class of the codePush.checkForUpdate() request to the server.
@@ -400,9 +397,9 @@ declare module 'code-push-plugin-testing-framework/script/testBuilder' {
 	    skip(description: string, spec: () => void, scenarioPath?: string): void;
 	}
 	export interface ITestBuilderTestDefinition {
-	    (expectation: string, isCoreTest: boolean, assertion: (done: MochaDone) => void): void;
-	    only(expectation: string, isCoreTest: boolean, assertion: (done: MochaDone) => void): void;
-	    skip(expectation: string, isCoreTest: boolean, assertion: (done: MochaDone) => void): void;
+	    (expectation: string, isCoreTest: boolean, assertion: (done: Mocha.Done) => void): void;
+	    only(expectation: string, isCoreTest: boolean, assertion: (done: Mocha.Done) => void): void;
+	    skip(expectation: string, isCoreTest: boolean, assertion: (done: Mocha.Done) => void): void;
 	}
 
 }
@@ -411,7 +408,7 @@ declare module 'code-push-plugin-testing-framework/script/testConfig' {
 	export const TestNamespace: string;
 	export const AcquisitionSDKPluginName: string;
 	export const templatePath: string;
-	export const thisPluginPath: string;
+	export const thisPluginInstallString: string;
 	export const testRunDirectory: string;
 	export const updatesDirectory: string;
 	export const onlyRunCoreTests: boolean;
