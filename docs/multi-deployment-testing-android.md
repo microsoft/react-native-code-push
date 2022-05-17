@@ -47,6 +47,32 @@ To set this up, perform the following steps:
     }
     ```
     
+3. If you have **Hermes** enabled, **default in React Native 0.68.0 and later**, you will need to add the `releaseStaging` created inside the condition that exists in the scope of `dependencies`.
+    ```
+    ...
+    project.ext.react = [
+        enableHermes: true,  // If is true
+    ]
+    ...
+    android {
+        ...
+    }
+
+    dependencies {
+        ...
+        if (enableHermes) {
+            def hermesPath = "../../node_modules/hermes-engine/android/";
+            debugImplementation files(hermesPath + "hermes-debug.aar")
+            releaseStagingImplementation files(hermesPath + "hermes-release.aar") // Add/change this line.
+            releaseImplementation files(hermesPath + "hermes-release.aar")
+        } else {
+            ...
+        }
+        ...
+    }
+    ...
+    ```
+    
     *NOTE: Remember to remove the key from `strings.xml` if you are configuring the deployment key in the build process*
 
     *NOTE: The naming convention for `releaseStaging` is significant due to [this line](https://github.com/facebook/react-native/blob/e083f9a139b3f8c5552528f8f8018529ef3193b9/react.gradle#L79).*
