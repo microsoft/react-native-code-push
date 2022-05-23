@@ -34,7 +34,16 @@ In order to integrate CodePush into your Android project, please perform the fol
     apply from: "../../node_modules/react-native/react.gradle"
     apply from: "../../node_modules/react-native-code-push/android/codepush.gradle"
     ...
+    
+    
+    android {
+      defaultConfig {
+        resValue 'string', "CODE_PUSH_APK_BUILD_TIME", String.format("\"%d\"", System.currentTimeMillis())
+      }
+      ...
+    }
     ```
+
 
 3. Update the `MainApplication.java` file to use CodePush via the following changes:
 
