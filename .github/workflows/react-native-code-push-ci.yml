@@ -11,15 +11,10 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        api-level: [27]
+        api-level: [ 27 ]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'microsoft'
-          java-version: '11'
       - name: Start adb server
         run: adb devices
       - name: Download system image "android-${{ matrix.api-level }}"
@@ -32,12 +27,23 @@ jobs:
       - run: adb shell settings put global window_animation_scale 0.0
       - run: adb shell settings put global transition_animation_scale 0.0
       - run: adb shell settings put global animator_duration_scale 0.0
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'microsoft'
+          java-version: '11'
       - name: Package Installation
-        run: npm install
+        run: npm i
+      - name: Install react-native
+        run: npm install -g react-native
+      - name: Setup Android tests
+        run: npm run build:tests && npm run test:setup:android
+      - name: Remove react-native
+        run: npm remove -g react-native
       - name: Install react-native-cli
-        run: npm install react-native-cli
-      - name: test:android
-        run: npm run test:android
+        run: npm install -g react-native-cli
+      - name: Run Android test
+        run: npm run test:fast:android
 
   test-iOS:
     name: Test iOS app
@@ -49,6 +55,8 @@ jobs:
         run: npm install
       - name: Install react-native-cli
         run: npm install react-native-cli
+      - name: Install reacti-native
+        run: npm install react-native
       - name: Build tests
         run: npm run build:tests
       - name: Setup tests
