@@ -15,11 +15,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'microsoft'
-          java-version: '11'
       - name: Start adb server
         run: adb devices
       - name: Download system image "android-${{ matrix.api-level }}"
@@ -38,6 +33,11 @@ jobs:
         run: npm install react-native-cli
       - name: Install react-native
         run: npm install react-native
+     - name: Setup Java
+       uses: actions/setup-java@v3
+       with:
+         distribution: 'microsoft'
+         java-version: '11'
       - name: test:android
         run: npm run test:android
 
@@ -51,6 +51,8 @@ jobs:
         run: npm install
       - name: Install react-native-cli
         run: npm install react-native-cli
+      - name: Install reacti-native
+        run: npm install react-native
       - name: Build tests
         run: npm run build:tests
       - name: Setup tests
