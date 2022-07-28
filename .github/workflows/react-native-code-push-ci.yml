@@ -33,11 +33,11 @@ jobs:
         run: npm install react-native-cli
       - name: Install react-native
         run: npm install react-native
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'microsoft'
-          java-version: '11'
+     - name: Setup Java
+       uses: actions/setup-java@v3
+       with:
+         distribution: 'microsoft'
+         java-version: '11'
       - name: test:android
         run: npm run test:android
 
