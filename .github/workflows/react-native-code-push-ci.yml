@@ -11,7 +11,7 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        api-level: [27]
+        api-level: [ 27 ]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -29,10 +29,10 @@ jobs:
       - run: adb shell settings put global animator_duration_scale 0.0
       - name: Package Installation
         run: npm install
-      - name: Install react-native-cli
-        run: npm install react-native-cli
       - name: Install react-native
         run: npm install react-native
+      - name: Install react-native-cli
+        run: npm install -i --force react-native-cli
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
