@@ -124,7 +124,7 @@ public class FileUtils {
     }
 
     private static String validateFileName(String fileName, File destinationFolder) throws IOException {
-        String destinationFolderCanonicalPath = destinationFolder.getCanonicalPath();
+        String destinationFolderCanonicalPath = destinationFolder.getCanonicalPath() + File.separator;
 
         File file = new File(destinationFolderCanonicalPath, fileName);
         String canonicalPath = file.getCanonicalPath();
