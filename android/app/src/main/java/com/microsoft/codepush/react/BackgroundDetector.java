@@ -21,7 +21,8 @@ public class BackgroundDetector {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (Throwable e) {
+            CodePushUtils.log(e);
             return false;
         }
         return true;

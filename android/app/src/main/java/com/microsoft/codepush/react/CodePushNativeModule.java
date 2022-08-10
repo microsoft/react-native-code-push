@@ -710,12 +710,12 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             }
             boolean updateIsLoading = pendingUpdate.getBoolean(CodePushConstants.PENDING_UPDATE_IS_LOADING_KEY);
             if (!updateIsLoading) {
-                CodePushUtils.log("Skipping resetPendingUpdateLoadingState: updateIsLoading=false");
+                CodePushUtils.log("Skipping resetPendingUpdateLoadingState: pendingUpdate isLoading=false");
                 return;
             }
             String updateHash = pendingUpdate.getString(CodePushConstants.PENDING_UPDATE_HASH_KEY);
             mSettingsManager.savePendingUpdate(updateHash, false);
-            CodePushUtils.log("resetPendingUpdateLoadingState: JS started in background");
+            CodePushUtils.log("Reset pendingUpdate isLoading state: JS started in background");
         } catch (Throwable e) {
             CodePushUtils.log(e);
         }
