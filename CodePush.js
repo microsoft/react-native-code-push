@@ -666,6 +666,9 @@ if (NativeCodePush) {
       maxRetryAttempts: 1
     }
   });
+  if (Platform.OS === 'android') {
+    NativeCodePush.notifyJSInitialized()
+  }
 } else {
   log("The CodePush module doesn't appear to be properly installed. Please double-check that everything is setup correctly.");
 }
