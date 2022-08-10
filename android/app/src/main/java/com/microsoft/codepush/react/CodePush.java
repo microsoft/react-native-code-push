@@ -27,6 +27,7 @@ public class CodePush implements ReactPackage {
     private static boolean sIsRunningBinaryVersion = false;
     private static boolean sNeedToReportRollback = false;
     private static boolean sTestConfigurationFlag = false;
+    private static boolean sIsAppInitInBackground = false;
     private static String sAppVersion = null;
 
     private boolean mDidUpdate = false;
@@ -66,6 +67,7 @@ public class CodePush implements ReactPackage {
         mDeploymentKey = deploymentKey;
         mIsDebugMode = isDebugMode;
         mSettingsManager = new SettingsManager(mContext);
+        sIsAppInitInBackground = BackgroundDetector.isInBackground(mContext);
 
         if (sAppVersion == null) {
             try {
@@ -313,6 +315,11 @@ public class CodePush implements ReactPackage {
                     // There is in fact a new update running for the first
                     // time, so update the local state to ensure the client knows.
                     mDidUpdate = true;
+
+                    if(sIsAppInitInBackground){
+                        CodePushUtils.log("Skipping savePendingUpdate with isLoading=true: App initialized in background");
+                        return;
+                    }
 
                     // Mark that we tried to initialize the new update, so that if it crashes,
                     // we will know that we need to rollback when the app next starts.
