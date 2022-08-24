@@ -693,4 +693,14 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         CodePushUtils.log("Clearing updates.");
         mCodePush.clearUpdates();
     }
+
+    @ReactMethod
+    public void addListener(String eventName) {
+        // Set up any upstream listeners or background tasks as necessary
+    }
+
+    @ReactMethod
+    public void removeListeners(Integer count) {
+        // Remove upstream listeners, stop unnecessary background tasks
+    }
 }
