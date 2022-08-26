@@ -693,4 +693,10 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         CodePushUtils.log("Clearing updates.");
         mCodePush.clearUpdates();
     }
+
+    @ReactMethod
+    public void overrideAppVersion(String appVersionOverride) {
+        CodePushUtils.log("Override AppVersion to " + appVersionOverride);
+        CodePush.overrideAppVersion(appVersionOverride);
+    }
 }

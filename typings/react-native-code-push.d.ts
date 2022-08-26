@@ -310,6 +310,13 @@ declare namespace CodePush {
     function sync(options?: SyncOptions, syncStatusChangedCallback?: SyncStatusChangedCallback, downloadProgressCallback?: DownloadProgressCallback, handleBinaryVersionMismatchCallback?: HandleBinaryVersionMismatchCallback): Promise<SyncStatus>;
 
     /**
+     * Ovveride AppVersion for custom install.
+     *
+     * @param appVersionOverride string of app version, this will be used for codepush sync.
+     */
+    function overrideAppVersion(appVersionOverride: string): void;
+
+    /**
      * Indicates when you would like an installed update to actually be applied.
      */
     enum InstallMode {

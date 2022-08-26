@@ -702,6 +702,12 @@ static NSString *const LatestRollbackCountKey = @"count";
 
 #pragma mark - JavaScript-exported module methods (Public)
 
+
+RCT_EXPORT_METHOD(overrideAppVersion:(NSString*)appVersionOverride)
+{
+    [CodePush overrideAppVersion:appVersionOverride];
+}
+
 /*
  * This is native-side of the RemotePackage.download method
  */

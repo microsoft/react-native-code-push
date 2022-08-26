@@ -307,6 +307,10 @@ async function restartApp(onlyIfUpdateIsPending = false) {
   NativeCodePush.restartApp(onlyIfUpdateIsPending);
 }
 
+function overrideAppVersion(appVersionOverride) {
+  NativeCodePush.overrideAppVersion(appVersionOverride);
+}
+
 // This function allows only one syncInternal operation to proceed at any given time.
 // Parallel calls to sync() while one is ongoing yields CodePush.SyncStatus.SYNC_IN_PROGRESS.
 const sync = (() => {
@@ -613,6 +617,7 @@ if (NativeCodePush) {
     notifyAppReady: notifyApplicationReady,
     notifyApplicationReady,
     restartApp,
+    overrideAppVersion,
     setUpTestDependencies,
     sync,
     disallowRestart: NativeCodePush.disallow,
