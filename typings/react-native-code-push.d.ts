@@ -260,7 +260,7 @@ declare namespace CodePush {
      * 
      * @param handleBinaryVersionMismatchCallback An optional callback for handling target binary version mismatch
      */
-    function checkForUpdate(deploymentKey?: string, handleBinaryVersionMismatchCallback?: HandleBinaryVersionMismatchCallback): Promise<RemotePackage | null>;
+    function checkForUpdate(deploymentKey?: string, handleBinaryVersionMismatchCallback?: HandleBinaryVersionMismatchCallback, appVersion?: string): Promise<RemotePackage | null>;
 
     /**
      * Retrieves the metadata for an installed update (e.g. description, mandatory).
