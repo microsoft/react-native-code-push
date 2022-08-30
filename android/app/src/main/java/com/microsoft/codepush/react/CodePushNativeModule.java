@@ -697,6 +697,6 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void overrideAppVersion(String appVersionOverride) {
         CodePushUtils.log("Override AppVersion to " + appVersionOverride);
-        CodePush.overrideAppVersion(appVersionOverride);
+        mCodePush.overrideAppVersion(appVersionOverride);
     }
 }

@@ -1,6 +1,8 @@
 package com.microsoft.codepush.react;
 
+import static android.content.Context.MODE_PRIVATE;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -70,7 +72,8 @@ public class CodePush implements ReactPackage {
         if (sAppVersion == null) {
             try {
                 PackageInfo pInfo = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
-                sAppVersion = pInfo.versionName;
+                SharedPreferences sharedPreferences = mContext.getSharedPreferences(pInfo.packageName, MODE_PRIVATE);
+                sAppVersion = sharedPreferences.getString(CodePushConstants.OVERRIDE_APP_VERSION, pInfo.versionName);
             } catch (PackageManager.NameNotFoundException e) {
                 throw new CodePushUnknownException("Unable to get package info for " + mContext.getPackageName(), e);
             }
@@ -129,10 +132,10 @@ public class CodePush implements ReactPackage {
 
     private String getCustomPropertyFromStringsIfExist(String propertyName) {
         String property;
-      
+
         String packageName = mContext.getPackageName();
         int resId = mContext.getResources().getIdentifier("CodePush" + propertyName, "string", packageName);
-        
+
         if (resId != 0) {
             property = mContext.getString(resId);
 
@@ -140,7 +143,7 @@ public class CodePush implements ReactPackage {
                 return property;
             } else {
                 CodePushUtils.log("Specified " + propertyName + " is empty");
-            } 
+            }
         }
 
         return null;
@@ -364,8 +367,15 @@ public class CodePush implements ReactPackage {
         return sNeedToReportRollback;
     }
 
-    public static void overrideAppVersion(String appVersionOverride) {
+    public void overrideAppVersion(String appVersionOverride) {
         sAppVersion = appVersionOverride;
+        try {
+            PackageInfo pInfo = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
+            SharedPreferences sharedPreferences = mContext.getSharedPreferences(pInfo.packageName, MODE_PRIVATE);
+            sharedPreferences.edit().putString(CodePushConstants.OVERRIDE_APP_VERSION, sAppVersion).commit();
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new CodePushUnknownException("Unable to get package info for " + mContext.getPackageName(), e);
+        }
     }
 
     private void rollbackPackage() {
