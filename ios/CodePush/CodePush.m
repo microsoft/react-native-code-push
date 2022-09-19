@@ -212,6 +212,7 @@ static NSString *const LatestRollbackCountKey = @"count";
 + (void)overrideAppVersion:(NSString *)appVersion
 {
     [CodePushConfig current].appVersion = appVersion;
+    [[NSUserDefaults standardUserDefaults] setValue:appVersion forKey:@"OVERRIDE_APP_VERSION"];
 }
 
 + (void)setDeploymentKey:(NSString *)deploymentKey
