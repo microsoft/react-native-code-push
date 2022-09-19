@@ -30,14 +30,19 @@ static NSString * const PublicKeyKey = @"publicKey";
 {
     self = [super init];
     NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
 
     NSString *appVersion = [infoDictionary objectForKey:@"CFBundleShortVersionString"];
+    NSString *savedVersion =  [userDefaults valueForKey:@"OVERRIDE_APP_VERSION"];
+    if(savedVersion != nil) {
+        appVersion = savedVersion;
+    }
     NSString *buildVersion = [infoDictionary objectForKey:(NSString *)kCFBundleVersionKey];
     NSString *deploymentKey = [infoDictionary objectForKey:@"CodePushDeploymentKey"];
     NSString *serverURL = [infoDictionary objectForKey:@"CodePushServerURL"];
     NSString *publicKey = [infoDictionary objectForKey:@"CodePushPublicKey"];
     
-    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+
     NSString *clientUniqueId = [userDefaults stringForKey:ClientUniqueIDConfigKey];
     if (clientUniqueId == nil) {
         clientUniqueId = [[[UIDevice currentDevice] identifierForVendor] UUIDString];
