@@ -17,10 +17,10 @@ void runBefore(String dependentTaskName, Task task) {
     }
 }
 
-android.buildTypes.each {
+android.buildTypes.each { buildType ->
     // to prevent incorrect long value restoration from strings.xml we need to wrap it with double quotes
     // https://github.com/microsoft/cordova-plugin-code-push/issues/264
-    resValue 'string', "CODE_PUSH_APK_BUILD_TIME", String.format("\"%d\"", System.currentTimeMillis())
+    buildType.resValue 'string', "CODE_PUSH_APK_BUILD_TIME", String.format("\"%d\"", System.currentTimeMillis())
 }
 
 gradle.projectsEvaluated { 
