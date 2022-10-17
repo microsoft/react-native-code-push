@@ -17,7 +17,8 @@ void runBefore(String dependentTaskName, Task task) {
     }
 }
 
-gradle.projectsEvaluated {
+// https://github.com/microsoft/react-native-code-push/issues/1981
+afterEvaluate {
     android.buildTypes.each {
         // to prevent incorrect long value restoration from strings.xml we need to wrap it with double quotes
         // https://github.com/microsoft/cordova-plugin-code-push/issues/264
