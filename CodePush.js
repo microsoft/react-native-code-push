@@ -180,7 +180,7 @@ async function notifyApplicationReadyInternal() {
   return statusReport;
 }
 
-async function tryReportStatus(statusReport, resumeListener) {
+async function tryReportStatus(statusReport, resumeListener, appStateListener) {
   const config = await getConfiguration();
   const previousLabelOrAppVersion = statusReport.previousLabelOrAppVersion;
   const previousDeploymentKey = statusReport.previousDeploymentKey || config.deploymentKey;
@@ -209,22 +209,23 @@ async function tryReportStatus(statusReport, resumeListener) {
     }
 
     NativeCodePush.recordStatusReported(statusReport);
-    resumeListener && AppState.removeEventListener("change", resumeListener);
+    appStateListener && appStateListener.remove();
   } catch (e) {
     log(`Report status failed: ${JSON.stringify(statusReport)}`);
     NativeCodePush.saveStatusReportForRetry(statusReport);
+    let localAppStateListener = appStateListener;
     // Try again when the app resumes
     if (!resumeListener) {
       resumeListener = async (newState) => {
         if (newState !== "active") return;
         const refreshedStatusReport = await NativeCodePush.getNewStatusReport();
         if (refreshedStatusReport) {
-          tryReportStatus(refreshedStatusReport, resumeListener);
+          tryReportStatus(refreshedStatusReport, resumeListener, localAppStateListener);
         } else {
-          AppState.removeEventListener("change", resumeListener);
+          localAppStateListener && localAppStateListener.remove();
         }
       };
-      AppState.addEventListener("change", resumeListener);
+      localAppStateListener = AppState.addEventListener("change", resumeListener);
     }
   }
 }
