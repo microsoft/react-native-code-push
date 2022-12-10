@@ -82,6 +82,11 @@ gradle.projectsEvaluated {
                 resourcesDir = file("$buildDir/intermediates/res/${targetPath}")
             }
 
+            // For versions of RN / Gradle which use 'merged_res' folder instead of 'res' or 'res/merged'
+            if (!resourcesDir.exists() && file("$buildDir/intermediates/merged_res/${targetPath}").exists()) {
+                resourcesDir = file("$buildDir/intermediates/merged_res/${targetPath}")
+            }
+
             jsBundleFile = file("$jsBundleDir/$bundleAssetName")
 
             def resourcesMapTempFileName = "CodePushResourcesMap-" + java.util.UUID.randomUUID().toString().substring(0,8) + ".json"
