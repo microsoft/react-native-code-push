@@ -40,7 +40,7 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-snapshot-save -no-boot-anim
           disable-animations: true
           ram-size: 6144
-          script: echo "Generated AVD snapshot for caching."
+          script: ./gradlew connectedCheck
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
