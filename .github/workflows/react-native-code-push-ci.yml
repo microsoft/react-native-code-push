@@ -31,7 +31,13 @@ jobs:
           timeout_seconds: 15
           max_attempts: 10
           expected: 1
-          command: adb shell getprop sys.boot_completed
+          command: |
+            BOOTCOMPLETED=$(adb shell getprop sys.boot_completed)
+            if [[ $BOOTCOMPLETED =~ "1" ]]; then
+              exit 0 
+            else
+              exit 1
+            fi
       - run: adb shell settings put global window_animation_scale 0.0
       - run: adb shell settings put global transition_animation_scale 0.0
       - run: adb shell settings put global animator_duration_scale 0.0
