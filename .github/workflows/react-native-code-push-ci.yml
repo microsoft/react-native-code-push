@@ -32,8 +32,8 @@ jobs:
         with:
           distribution: 'microsoft'
           java-version: '11'
-
-      - uses: ruby/setup-ruby@v1
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.0.4'
           bundler-cache: true
