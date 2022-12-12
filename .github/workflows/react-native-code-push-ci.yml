@@ -25,19 +25,8 @@ jobs:
         run: $ANDROID_HOME/tools/bin/avdmanager create avd --force --name TestEmulator --abi google_apis/x86 --package 'system-images;android-${{ matrix.api-level }};google_apis;x86' --device "Nexus 6P"
       - name: Start android emulator
         run: $ANDROID_HOME/emulator/emulator -avd TestEmulator -noaudio -no-window -no-snapshot-save -no-boot-anim -memory 6144 &
-      - name: Wait for emulator to become alive
-        uses: nick-fields/retry@v2
-        with:
-          timeout_seconds: 15
-          max_attempts: 15
-          command: |
-            BOOTCOMPLETED=$(adb shell getprop sys.boot_completed)
-            echo $BOOTCOMPLETED
-            if [[ "$BOOTCOMPLETED" == "1" ]]; then
-              exit 0 
-            else
-              exit 1
-            fi
+      - name: Wait for emulator
+        run: $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done'
       - run: adb shell settings put global window_animation_scale 0.0
       - run: adb shell settings put global transition_animation_scale 0.0
       - run: adb shell settings put global animator_duration_scale 0.0
