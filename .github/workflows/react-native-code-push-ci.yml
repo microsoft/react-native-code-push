@@ -17,16 +17,30 @@ jobs:
         uses: actions/checkout@v3
       - name: Start adb server
         run: adb devices
-      - name: Download system image "android-${{ matrix.api-level }}"
-        run: $ANDROID_HOME/tools/bin/sdkmanager "system-images;android-${{ matrix.api-level }};google_apis;x86"
-      - name: Create android emulator
-        run: $ANDROID_HOME/tools/bin/avdmanager create avd --force --name TestEmulator --abi google_apis/x86 --package 'system-images;android-${{ matrix.api-level }};google_apis;x86' --device "Nexus 6P"
-      - name: Start android emulator
-        run: $ANDROID_HOME/emulator/emulator -avd TestEmulator -noaudio -no-window -no-snapshot-save -no-boot-anim -memory 6144 &
-      - run: sleep 120
-      - run: adb shell settings put global window_animation_scale 0.0
-      - run: adb shell settings put global transition_animation_scale 0.0
-      - run: adb shell settings put global animator_duration_scale 0.0
+      - name: Gradle cache
+        uses: gradle/gradle-build-action@v2
+      - name: AVD cache
+        uses: actions/cache@v3
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ matrix.api-level }}
+      - name: create AVD and generate snapshot for caching
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          arch: 'x86'
+          target: 'google_apis'
+          avd-name: 'TestEmulator'
+          profile: 'Nexus 6P'
+          force-avd-creation: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-snapshot-save -no-boot-anim
+          disable-animations: true
+          ram-size: 6144
+          script: echo "Generated AVD snapshot for caching."
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
@@ -35,7 +49,7 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.0.4'
+          ruby-version: '2.7.5'
           bundler-cache: true
       - name: Package Installation
         run: npm i
