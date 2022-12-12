@@ -32,7 +32,7 @@ jobs:
           max_attempts: 15
           command: |
             BOOTCOMPLETED=$(adb shell getprop sys.boot_completed)
-            if [[ "$BOOTCOMPLETED" =~ "1" ]]; then
+            if [[ "$BOOTCOMPLETED" == "1" ]]; then
               exit 0 
             else
               exit 1
