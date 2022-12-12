@@ -30,7 +30,6 @@ jobs:
         with:
           timeout_seconds: 15
           max_attempts: 10
-          expected: 1
           command: |
             BOOTCOMPLETED=$(adb shell getprop sys.boot_completed)
             if [[ $BOOTCOMPLETED =~ "1" ]]; then
