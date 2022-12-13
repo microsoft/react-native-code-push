@@ -42,14 +42,10 @@ jobs:
           bundler-cache: true
       - name: Package Installation
         run: npm i
-      - name: Install react-native
-        run: npm install -g react-native
+      - name: Install react-native-cli
+        run: npm install react-native-cli
       - name: Setup Android tests
         run: npm run build:tests && npm run test:setup:android
-      - name: Remove react-native
-        run: npm remove -g react-native
-      - name: Install react-native-cli
-        run: npm install -g react-native-cli
       - name: Run Android test
         run: npm run test:fast:android
 
@@ -68,8 +64,6 @@ jobs:
         run: npm install
       - name: Install react-native-cli
         run: npm install react-native-cli
-      - name: Install reacti-native
-        run: npm install react-native
       - name: Build tests
         run: npm run build:tests
       - name: Setup tests
