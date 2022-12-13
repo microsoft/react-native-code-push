@@ -326,12 +326,12 @@ var IOSEmulatorManager = (function () {
     IOSEmulatorManager.prototype.bootEmulator = function (restartEmulators) {
         function checkIOSEmulator(iOSEmulatorId) {
             // A command that does nothing but only succeeds if the emulator is running.
-            return testUtil_1.TestUtil.getProcessOutput("xcrun simctl getenv booted SIMULATOR_UDID", { noLogCommand: false, noLogStdOut: false, noLogStdErr: false }).then(function (simUdid) {
-                return simUdid === iOSEmulatorId ? true : Promise.reject(new Error('Waiting for device to boot')); 
+            return testUtil_1.TestUtil.getProcessOutput("xcrun simctl getenv booted SIMULATOR_UDID", { noLogCommand: true, noLogStdOut: true, noLogStdErr: true }).then(function (simUdid) {
+                return trim(simUdid) == trim(iOSEmulatorId) ? true : Promise.reject(new Error('Waiting for device to boot')); 
             });
         }
         function startIOSEmulator(iOSEmulatorId) {
-            return testUtil_1.TestUtil.getProcessOutput("xcrun simctl boot " + iOSEmulatorId, { noLogStdErr: false })
+            return testUtil_1.TestUtil.getProcessOutput("xcrun simctl boot " + iOSEmulatorId, { noLogStdErr: true })
                 .catch(function (error) { return undefined; /* Always fails because we do not specify a template, which is not necessary to just start the emulator */ }).then(function () { return null; });
         }
         function killIOSEmulator() {
