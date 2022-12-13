@@ -326,7 +326,7 @@ var IOSEmulatorManager = (function () {
         function checkIOSEmulator() {
             // A command that does nothing but only succeeds if the emulator is running.
             // Get the environment variable with the name "asdf" (return null, not an error, if not initialized).
-            return testUtil_1.TestUtil.getProcessOutput("xcrun simctl getenv booted asdf", { noLogCommand: true, noLogStdOut: true, noLogStdErr: true }).then(function () { return null; });
+            return testUtil_1.TestUtil.getProcessOutput("xcrun simctl getenv booted SIMULATOR_UDID", { noLogCommand: true, noLogStdOut: true, noLogStdErr: true }).then(function () { return null; });
         }
         function startIOSEmulator(iOSEmulatorName) {
             return testUtil_1.TestUtil.getProcessOutput("xcrun simctl boot \"" + iOSEmulatorName + "\"", { noLogStdErr: true })
