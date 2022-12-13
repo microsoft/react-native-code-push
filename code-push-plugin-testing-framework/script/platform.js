@@ -327,7 +327,7 @@ var IOSEmulatorManager = (function () {
         function checkIOSEmulator(iOSEmulatorId) {
             // A command that does nothing but only succeeds if the emulator is running.
             return testUtil_1.TestUtil.getProcessOutput("xcrun simctl getenv booted SIMULATOR_UDID", { noLogCommand: true, noLogStdOut: true, noLogStdErr: true }).then(function (simUdid) {
-                return trim(simUdid) == trim(iOSEmulatorId) ? true : Promise.reject(new Error('Waiting for device to boot')); 
+                return simUdid.trim() == iOSEmulatorId.trim() ? true : Promise.reject(new Error('Waiting for device to boot')); 
             });
         }
         function startIOSEmulator(iOSEmulatorId) {
