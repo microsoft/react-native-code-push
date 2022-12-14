@@ -230,7 +230,7 @@ class RNIOS extends Platform.IOS implements RNPlatform {
         return this.getEmulatorManager().getTargetEmulator()
             .then((targetEmulator: string) => {
                 return TestUtil.getProcessOutput("xcodebuild -workspace " + path.join(iOSProject, TestConfig.TestAppName) + ".xcworkspace -scheme " + TestConfig.TestAppName +
-                    " -configuration Release -destination \"platform=iOS Simulator,id=" + targetEmulator + "\" -derivedDataPath build EXCLUDED_ARCHS=arm64", { cwd: iOSProject, maxBuffer: 1024 * 1024 * 500, noLogStdOut: true });
+                    " -configuration Release -destination \"platform=iOS Simulator,id=" + targetEmulator + "\" -derivedDataPath build EXCLUDED_ARCHS=arm64", { cwd: iOSProject, maxBuffer: 1024 * 1024 * 500, noLogStdOut: false });
             })
             .then<void>(
                 () => { return null; },
