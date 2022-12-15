@@ -52,7 +52,7 @@
     "archiver": "latest",
     "body-parser": "latest",
     "code-push-plugin-testing-framework": "file:./code-push-plugin-testing-framework",
-    "del": "latest",
+    "del": "v6.0.0",
     "express": "latest",
     "mkdirp": "latest",
     "mocha": "^9.2.0",

@@ -230,11 +230,12 @@ class RNIOS extends Platform.IOS implements RNPlatform {
         return this.getEmulatorManager().getTargetEmulator()
             .then((targetEmulator: string) => {
                 return TestUtil.getProcessOutput("xcodebuild -workspace " + path.join(iOSProject, TestConfig.TestAppName) + ".xcworkspace -scheme " + TestConfig.TestAppName +
-                    " -configuration Release -destination \"platform=iOS Simulator,id=" + targetEmulator + "\" -derivedDataPath build EXCLUDED_ARCHS=arm64", { cwd: iOSProject, maxBuffer: 1024 * 1024 * 500, noLogStdOut: false });
+                    " -configuration Release -destination \"platform=iOS Simulator,id=" + targetEmulator + "\" -derivedDataPath build EXCLUDED_ARCHS=arm64", { cwd: iOSProject, maxBuffer: 1024 * 1024 * 500, noLogStdOut: true });
             })
             .then<void>(
                 () => { return null; },
-                () => {
+                (error: any) => {
+                    console.info(error);
                     // The first time an iOS project is built, it fails because it does not finish building libReact.a before it builds the test app.
                     // Simply build again to fix the issue.
                     if (!RNIOS.iosFirstBuild[projectDirectory]) {
