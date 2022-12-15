@@ -41,13 +41,11 @@ jobs:
           ruby-version: '2.7.5'
           bundler-cache: true
       - name: Package Installation
-        run: npm i
-      - name: Install react-native-cli
-        run: npm install react-native-cli
+        run: yarn install
       - name: Setup Android tests
-        run: npm run build:tests && npm run test:setup:android
+        run: yarn build:tests && yarn test:setup:android
       - name: Run Android test
-        run: npm run test:fast:android
+        run: yarn test:fast:android
 
   test-iOS:
     name: Test iOS app
@@ -65,13 +63,11 @@ jobs:
         with:
           ruby-version: '2.7.5'
           bundler-cache: true
-      - name: Install dependecies
-        run: npm install
-      - name: Install react-native-cli
-        run: npm install react-native-cli
+      - name: Install dependencies
+        run: yarn install
       - name: Build tests
-        run: npm run build:tests
+        run: yarn build:tests
       - name: Setup tests
-        run: npm run test:setup:ios
+        run: yarn test:setup:ios
       - name: Run tests
-        run: npm run test:fast:ios
+        run: yarn test:fast:ios
