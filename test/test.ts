@@ -181,7 +181,7 @@ class RNIOS extends Platform.IOS implements RNPlatform {
         const appDelegatePath: string = path.join(iOSProject, TestConfig.TestAppName, "AppDelegate.m");
 
         // Install the Podfile
-        return TestUtil.getProcessOutput("npx pod-install", { cwd: iOSProject })
+        return TestUtil.getProcessOutput("npx pod-install", { cwd: projectDirectory })
             // Put the IOS deployment key in the Info.plist
             .then(TestUtil.replaceString.bind(undefined, infoPlistPath,
                 "</dict>\n</plist>",
