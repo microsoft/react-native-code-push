@@ -52,6 +52,8 @@ jobs:
   test-iOS:
     name: Test iOS app
     runs-on: macos-latest
+    env:
+      NO_FLIPPER: ${{ secrets.NO_FLIPPER }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
