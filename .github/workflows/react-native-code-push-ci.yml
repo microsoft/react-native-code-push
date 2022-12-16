@@ -58,11 +58,6 @@ jobs:
           xcode-version: 13.2.1
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '2.7.5'
-          bundler-cache: true
       - name: Install dependencies
         run: yarn install
       - name: Build tests
