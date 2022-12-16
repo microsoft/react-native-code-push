@@ -65,9 +65,7 @@ jobs:
           bundler-cache: true
       - name: Install dependencies
         run: yarn install
-      - name: Build tests
-        run: yarn build:tests
-      - name: Setup tests
-        run: yarn test:setup:ios
+      - name: Setup iOS tests
+        run: yarn build:tests && yarn test:setup:ios
       - name: Run tests
         run: yarn test:fast:ios
