@@ -67,5 +67,7 @@ jobs:
         run: yarn install
       - name: Setup iOS tests
         run: yarn build:tests && yarn test:setup:ios
+      - name: build ios
+        run: xcodebuild -workspace $RUN_DIR/TestCodePush/ios/TestCodePush.xcworkspace -scheme TestCodePush -configuration Release -destination "platform=iOS Simulator" -derivedDataPath build EXCLUDED_ARCHS=arm64 -sdk iphonesimulator16.2
       - name: Run tests
         run: yarn test:fast:ios
