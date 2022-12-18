@@ -52,7 +52,6 @@ jobs:
     runs-on: macOS-11
     env:
       NO_FLIPPER: ${{ secrets.NO_FLIPPER }}
-      SIM_ID: ''
     steps:
       - uses: maxim-lobanov/setup-xcode@v1
         with:
@@ -69,6 +68,6 @@ jobs:
       - name: Setup iOS tests
         run: yarn build:tests && yarn test:setup:ios
       - name: build ios
-        run: xcodebuild -workspace $TMPDIR/react-native-code-push/test-run/TestCodePush/ios/TestCodePush.xcworkspace -scheme TestCodePush -configuration Release -destination "platform=iOS Simulator,id=${SIM_ID}" -derivedDataPath build EXCLUDED_ARCHS=arm64
+        run: xcodebuild -workspace $TMPDIR/react-native-code-push/test-run/TestCodePush/ios/TestCodePush.xcworkspace -scheme TestCodePush -configuration Release -derivedDataPath build EXCLUDED_ARCHS=arm64
       - name: Run tests
         run: yarn test:fast:ios
