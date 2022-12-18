@@ -68,6 +68,6 @@ jobs:
       - name: Setup iOS tests
         run: yarn build:tests && yarn test:setup:ios
       - name: build ios
-        run: xcodebuild -workspace $TMPDIR/react-native-code-push/test-run/TestCodePush/ios/TestCodePush.xcworkspace -scheme TestCodePush -configuration Release -derivedDataPath build EXCLUDED_ARCHS=arm64 ARCHS=armv7
+        run: xcodebuild -workspace $TMPDIR/react-native-code-push/test-run/TestCodePush/ios/TestCodePush.xcworkspace -scheme TestCodePush -configuration Release -derivedDataPath build
       - name: Run tests
         run: yarn test:fast:ios
