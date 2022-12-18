@@ -67,6 +67,8 @@ jobs:
         run: yarn install
       - name: Setup iOS tests
         run: yarn build:tests && yarn test:setup:ios
+      - name: Install
+        run: yarn setupiOS
       - name: build ios
         run: xcodebuild -workspace $TMPDIR/react-native-code-push/test-run/TestCodePush/ios/TestCodePush.xcworkspace -scheme TestCodePush -configuration Release -derivedDataPath build
       - name: Run tests
