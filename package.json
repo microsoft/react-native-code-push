@@ -17,7 +17,6 @@
     "setup": "npm install --quiet --no-progress",
     "prebuild:tests": "npm run clean && npm run tslint",
     "build:tests": "tsc",
-    "setupiOS": "node code-push-plugin-testing-framework/script/setupiOS.js",
     "test": "npm run build:tests && npm run test:setup && npm run test:fast",
     "test:android": "npm run build:tests && npm run test:setup:android && npm run test:fast:android",
     "test:ios": "npm run build:tests && npm run test:setup:ios && npm run test:fast:ios",

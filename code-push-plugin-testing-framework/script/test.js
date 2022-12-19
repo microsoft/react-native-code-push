@@ -58,6 +58,10 @@ function initializeTests(projectManager, supportedTargetPlatforms, describeTests
                     // create the update project
                     return createTestProject(TestConfig.updatesDirectory);
                 }).then(function () { return null; }));
+            targetPlatforms.forEach(function (platform) {
+                promises.push(projectManager.preparePlatform.bind(projectManager, TestConfig.testRunDirectory, platform));
+                promises.push(projectManager.preparePlatform.bind(projectManager, TestConfig.updatesDirectory, platform));
+            });
             Q.all(promises).then(function () { done(); }, function (error) { done(error); });
         });
     }
