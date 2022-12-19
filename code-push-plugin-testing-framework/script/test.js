@@ -73,7 +73,14 @@ function initializeTests(projectManager, supportedTargetPlatforms, describeTests
                     });
                     return Q.all(ppromises);
                 }));
-            Q.all(promises).then(function () { done(); }, function (error) { done(error); });
+            Q.all(promises).then(function() {
+                var ppromises = [];
+                targetPlatforms.forEach(function (platform) {
+                    console.log("Preparing targetPlatforms.");
+                    ppromises.push(projectManager.preparePlatform.bind(projectManager, TestConfig.testRunDirectory, platform));
+                });
+                return Q.all(ppromises);
+            }).then(function () { done(); }, function (error) { done(error); });
         });
     }
     /**
