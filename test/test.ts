@@ -180,6 +180,8 @@ class RNIOS extends Platform.IOS implements RNPlatform {
         const infoPlistPath: string = path.join(iOSProject, TestConfig.TestAppName, "Info.plist");
         const appDelegatePath: string = path.join(iOSProject, TestConfig.TestAppName, "AppDelegate.m");
 
+        console.info("installPlatform ios");
+
         // Install the Podfile
         return TestUtil.getProcessOutput("pod install", { cwd: iOSProject })
             // Put the IOS deployment key in the Info.plist
@@ -396,6 +398,7 @@ class RNProjectManager extends ProjectManager {
      * Prepares a specific platform for tests.
      */
     public preparePlatform(projectDirectory: string, targetPlatform: Platform.IPlatform): Q.Promise<void> {
+        console.info("starting preparing platform: " + targetPlatform.getName());
         const deferred = Q.defer<string>();
 
         const platformsJSONPath = path.join(projectDirectory, RNProjectManager.platformsJSON);
