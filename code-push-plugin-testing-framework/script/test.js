@@ -55,8 +55,8 @@ function initializeTests(projectManager, supportedTargetPlatforms, describeTests
             promises.push(createTestProject(TestConfig.testRunDirectory)
                 .then(function () {
                     var ppromises = [];
+                    console.log("Preparing targetPlatforms.");
                     targetPlatforms.forEach(function (platform) {
-                        console.log("Preparing targetPlatforms.");
                         ppromises.push(projectManager.preparePlatform.bind(projectManager, TestConfig.testRunDirectory, platform));
                     });
                     return Q.all(ppromises);
