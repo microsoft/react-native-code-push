@@ -54,15 +54,25 @@ function initializeTests(projectManager, supportedTargetPlatforms, describeTests
             // create the test project
             promises.push(createTestProject(TestConfig.testRunDirectory)
                 .then(function () {
+                    var ppromises = [];
+                    targetPlatforms.forEach(function (platform) {
+                        console.log("Preparing targetPlatforms.");
+                        ppromises.push(projectManager.preparePlatform.bind(projectManager, TestConfig.testRunDirectory, platform));
+                    });
+                    return Q.all(ppromises);
+                })
+                .then(function () {
                     console.log("Building update project.");
                     // create the update project
                     return createTestProject(TestConfig.updatesDirectory);
+                }).then(function() {
+                    var ppromises = [];
+                    targetPlatforms.forEach(function (platform) {
+                        console.log("Preparing targetPlatforms.");
+                        ppromises.push(projectManager.preparePlatform.bind(projectManager, TestConfig.updatesDirectory, platform));
+                    });
+                    return Q.all(ppromises);
                 }));
-            targetPlatforms.forEach(function (platform) {
-                console.log("Preparing targetPlatforms.");
-                promises.push(projectManager.preparePlatform.bind(projectManager, TestConfig.testRunDirectory, platform));
-                promises.push(projectManager.preparePlatform.bind(projectManager, TestConfig.updatesDirectory, platform));
-            });
             Q.all(promises).then(function () { done(); }, function (error) { done(error); });
         });
     }
