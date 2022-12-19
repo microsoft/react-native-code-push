@@ -57,7 +57,7 @@ function initializeTests(projectManager, supportedTargetPlatforms, describeTests
                     console.log("Building update project.");
                     // create the update project
                     return createTestProject(TestConfig.updatesDirectory);
-                }).then(function () { return null; }));
+                }));
             targetPlatforms.forEach(function (platform) {
                 console.log("Preparing targetPlatforms.");
                 promises.push(projectManager.preparePlatform.bind(projectManager, TestConfig.testRunDirectory, platform));
