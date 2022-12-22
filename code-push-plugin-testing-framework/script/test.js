@@ -57,6 +57,7 @@ function initializeTests(projectManager, supportedTargetPlatforms, describeTests
                     var ppromises = [];
                     targetPlatforms.forEach(function (platform) {
                         ppromises.push(projectManager.preparePlatform(TestConfig.testRunDirectory, platform));
+                        ppromises.push(projectManager.setupScenario(TestConfig.testRunDirectory, TestConfig.TestNamespace, TestConfig.templatePath, "scenarioInstall.js", platform));
                     });
                     return Q.all(ppromises);
                 })
@@ -69,6 +70,7 @@ function initializeTests(projectManager, supportedTargetPlatforms, describeTests
                     targetPlatforms.forEach(function (platform) {
                         console.log("Preparing targetPlatforms.");
                         ppromises.push(projectManager.preparePlatform(TestConfig.updatesDirectory, platform));
+                        ppromises.push(projectManager.setupScenario(TestConfig.updatesDirectory, TestConfig.TestNamespace, TestConfig.templatePath, "scenarioInstall.js", platform));
                     });
                     return Q.all(ppromises);
                 }));
