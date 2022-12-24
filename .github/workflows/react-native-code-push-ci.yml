@@ -53,9 +53,6 @@ jobs:
     env:
       NO_FLIPPER: ${{ secrets.NO_FLIPPER }}
     steps:
-      - uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: 13.2.1
       - name: Checkout
         uses: actions/checkout@v2
       - name: Setup Ruby
