@@ -54,34 +54,11 @@ function initializeTests(projectManager, supportedTargetPlatforms, describeTests
             // create the test project
             promises.push(createTestProject(TestConfig.testRunDirectory)
                 .then(function () {
-                    var ppromises = [];
-                    targetPlatforms.forEach(function (platform) {
-                        ppromises.push(projectManager.preparePlatform(TestConfig.testRunDirectory, platform));
-                        ppromises.push(projectManager.setupScenario(TestConfig.testRunDirectory, TestConfig.TestNamespace, TestConfig.templatePath, "scenarioInstall.js", platform));
-                    });
-                    return Q.all(ppromises);
-                })
-                .then(function () {
                     console.log("Building update project.");
                     // create the update project
                     return createTestProject(TestConfig.updatesDirectory);
-                }).then(function() {
-                    var ppromises = [];
-                    targetPlatforms.forEach(function (platform) {
-                        console.log("Preparing targetPlatforms.");
-                        ppromises.push(projectManager.preparePlatform(TestConfig.updatesDirectory, platform));
-                        ppromises.push(projectManager.setupScenario(TestConfig.updatesDirectory, TestConfig.TestNamespace, TestConfig.templatePath, "scenarioInstall.js", platform));
-                    });
-                    return Q.all(ppromises);
-                }));
-            Q.all(promises).then(function() {
-                var ppromises = [];
-                targetPlatforms.forEach(function (platform) {
-                    console.log("Preparing targetPlatforms.");
-                    ppromises.push(projectManager.preparePlatform.bind(projectManager, TestConfig.testRunDirectory, platform));
-                });
-                return Q.all(ppromises);
-            }).then(function () { done(); }, function (error) { done(error); });
+                }).then(function () { return null; }));
+            Q.all(promises).then(function () { done(); }, function (error) { done(error); });
         });
     }
     /**

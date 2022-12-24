@@ -180,7 +180,6 @@ class RNIOS extends Platform.IOS implements RNPlatform {
         const infoPlistPath: string = path.join(iOSProject, TestConfig.TestAppName, "Info.plist");
         const appDelegatePath: string = path.join(iOSProject, TestConfig.TestAppName, "AppDelegate.m");
 
-        console.info("installPlatform ios");
 
         // Install the Podfile
         return TestUtil.getProcessOutput("pod install", { cwd: iOSProject })
@@ -232,7 +231,7 @@ class RNIOS extends Platform.IOS implements RNPlatform {
         return this.getEmulatorManager().getTargetEmulator()
             .then((targetEmulator: string) => {
                 return TestUtil.getProcessOutput("xcodebuild -workspace " + path.join(iOSProject, TestConfig.TestAppName) + ".xcworkspace -scheme " + TestConfig.TestAppName +
-                    " -configuration Release -destination \"platform=iOS Simulator,id=" + targetEmulator + "\" -derivedDataPath build EXCLUDED_ARCHS=arm64", { cwd: iOSProject, timeout: 0, maxBuffer: 10 * 1024 * 1024 * 5000, noLogStdOut: true });
+                    " -configuration Release -destination \"platform=iOS Simulator,id=" + targetEmulator + "\" -derivedDataPath build EXCLUDED_ARCHS=arm64", { cwd: iOSProject, timeout: 30 * 60 * 1000, maxBuffer: 1024 * 1024 * 5000, noLogStdOut: true });
             })
             .then<void>(
                 () => { return null; },
@@ -398,7 +397,6 @@ class RNProjectManager extends ProjectManager {
      * Prepares a specific platform for tests.
      */
     public preparePlatform(projectDirectory: string, targetPlatform: Platform.IPlatform): Q.Promise<void> {
-        console.info("starting preparing platform: " + targetPlatform.getName());
         const deferred = Q.defer<string>();
 
         const platformsJSONPath = path.join(projectDirectory, RNProjectManager.platformsJSON);
