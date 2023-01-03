@@ -41,11 +41,11 @@ jobs:
           ruby-version: '2.7.4'
           bundler-cache: true
       - name: Package Installation
-        run: yarn install
+        run: npm install
       - name: Setup Android tests
-        run: yarn build:tests && yarn test:setup:android
+        run: npm run build:tests && npm run test:setup:android
       - name: Run Android test
-        run: yarn test:fast:android
+        run: npm run test:fast:android
 
   test-iOS:
     name: Test iOS app
@@ -61,8 +61,8 @@ jobs:
           ruby-version: '2.7.4'
           bundler-cache: true
       - name: Install dependencies
-        run: yarn install
+        run: npm install
       - name: Setup iOS tests
-        run: yarn build:tests && yarn test:setup:ios
+        run: npm run build:tests && npm run test:setup:ios
       - name: Run tests
-        run: yarn test:fast:ios
+        run: npm run test:fast:ios
