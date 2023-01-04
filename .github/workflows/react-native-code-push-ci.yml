@@ -17,13 +17,16 @@ jobs:
         uses: actions/checkout@v3
       - name: Start adb server
         run: adb devices
+      - name: Gradle cache
+        uses: gradle/gradle-build-action@v2
       - name: Download system image "android-${{ matrix.api-level }}"
         run: $ANDROID_HOME/tools/bin/sdkmanager "system-images;android-${{ matrix.api-level }};google_apis;x86"
       - name: Create android emulator
         run: $ANDROID_HOME/tools/bin/avdmanager create avd --force --name TestEmulator --abi google_apis/x86 --package 'system-images;android-${{ matrix.api-level }};google_apis;x86' --device "Nexus 6P"
       - name: Start android emulator
         run: $ANDROID_HOME/emulator/emulator -avd TestEmulator -noaudio -no-window -no-snapshot-save -no-boot-anim -memory 6144 &
-      - run: sleep 120
+      - name: Wait for emulator to boot
+        run: $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done'
       - run: adb shell settings put global window_animation_scale 0.0
       - run: adb shell settings put global transition_animation_scale 0.0
       - run: adb shell settings put global animator_duration_scale 0.0
@@ -32,34 +35,34 @@ jobs:
         with:
           distribution: 'microsoft'
           java-version: '11'
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '2.7.4'
+          bundler-cache: true
       - name: Package Installation
-        run: npm i
-      - name: Install react-native
-        run: npm install -g react-native
+        run: npm install
       - name: Setup Android tests
         run: npm run build:tests && npm run test:setup:android
-      - name: Remove react-native
-        run: npm remove -g react-native
-      - name: Install react-native-cli
-        run: npm install -g react-native-cli
       - name: Run Android test
         run: npm run test:fast:android
 
   test-iOS:
     name: Test iOS app
     runs-on: macos-latest
+    env:
+      NO_FLIPPER: ${{ secrets.NO_FLIPPER }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Install dependecies
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '2.7.4'
+          bundler-cache: true
+      - name: Install dependencies
         run: npm install
-      - name: Install react-native-cli
-        run: npm install react-native-cli
-      - name: Install reacti-native
-        run: npm install react-native
-      - name: Build tests
-        run: npm run build:tests
-      - name: Setup tests
-        run: npm run test:setup:ios
+      - name: Setup iOS tests
+        run: npm run build:tests && npm run test:setup:ios
       - name: Run tests
         run: npm run test:fast:ios
