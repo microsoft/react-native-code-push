@@ -1,4 +1,4 @@
-import { withIosBuildscriptDependency } from './buildscriptDependency';
-import { withIosAppDelegateDependency } from './appDelegateDependency';
+import { withIosAppDelegateDependency } from './appDelegateDependency'
+import { withIosBuildscriptDependency } from './buildscriptDependency'
 
-export { withIosBuildscriptDependency, withIosAppDelegateDependency };
+export { withIosBuildscriptDependency, withIosAppDelegateDependency }
