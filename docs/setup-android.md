@@ -1,5 +1,6 @@
 ## Android Setup
 
+* [Plugin Installation for Expo (Android)](#plugin-installation-for-expo-android)
 * [Plugin Installation and Configuration for React Native 0.60 version and above](#plugin-installation-and-configuration-for-react-native-060-version-and-above-android)
 * [Plugin Installation for React Native lower than 0.60 (Android)](#plugin-installation-for-react-native-lower-than-060-android)
   * [Plugin Installation (Android - RNPM)](#plugin-installation-android---rnpm)
@@ -16,6 +17,31 @@
 * [Code Signing setup](#code-signing-setup)
 
 In order to integrate CodePush into your Android project, please perform the following steps:
+
+### Plugin Installation for Expo (Android)
+
+React Native Code Push comes packaged with a plugin to automate some of the setup process:
+
+1. Open your Expo app config file (app.config.json or app.config.js instead of app.json).
+
+2. Insert the following into the plugins section of your config (Don't duplicate configuration, if the 'react-native-code-push' item already exists, simply add the android portion.). Create the plugins section if it doesn't already exist.
+
+    ```javascript
+    "plugins": [
+      [
+        'react-native-code-push',
+        {
+          android: {
+            CodePushDeploymentKey: 'YOUR_ANDROID_CODE_PUSH_KEY',
+          }
+        }
+      ]
+    ]
+    ```
+
+3. Replace `YOUR_ANDROID_CODE_PUSH_KEY` with the Deployment key.
+
+4. Run `npx expo prebuild --clean` to regenerate your native code with the codepush dependencies.
 
 ### Plugin Installation and Configuration for React Native 0.60 version and above (Android)
 
