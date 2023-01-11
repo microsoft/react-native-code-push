@@ -25,7 +25,7 @@ React Native Code Push comes packaged with a plugin to automate some of the setu
 
 3. Replace `YOUR_IOS_CODE_PUSH_KEY` with the Deployment key.
 
-4. Run `npx expo prebuild --clean` to regenerate your native code with the codepush dependencies.
+4. Run `npx expo prebuild` to regenerate your native code with the codepush dependencies.
 ​
 ### Plugin Installation and Configuration for React Native 0.60 version and above (iOS)
 
