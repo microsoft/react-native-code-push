@@ -148,7 +148,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                 @Override
                 public void run() {
                     try {
-                        // We don't need to resetReactRootViews anymore 
+                        // We don't need to resetReactRootViews anymore
                         // due the issue https://github.com/facebook/react-native/issues/14533
                         // has been fixed in RN 0.46.0
                         //resetReactRootViews(instanceManager);
@@ -484,7 +484,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                             return null;
                         }
                     }
-                    
+
                     promise.resolve("");
                 } catch(CodePushUnknownException e) {
                     CodePushUtils.log(e);
@@ -692,6 +692,16 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
     public void clearUpdates() {
         CodePushUtils.log("Clearing updates.");
         mCodePush.clearUpdates();
+    }
+
+    @ReactMethod
+    public void addListener(String eventName) {
+        // Set up any upstream listeners or background tasks as necessary
+    }
+
+    @ReactMethod
+    public void removeListeners(Integer count) {
+        // Remove upstream listeners, stop unnecessary background tasks
     }
 
     @ReactMethod
