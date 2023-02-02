@@ -7,5 +7,6 @@ export interface PluginConfigType {
   }
   android: {
     CodePushDeploymentKey: string
+    CodePushPublicKey?: string
   }
 }
