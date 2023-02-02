@@ -7,13 +7,13 @@ import { PluginConfigType } from '../pluginConfig'
  * Update `<project>/settings.gradle` by adding react-native-code-push
  */
 
-function setStrings(strings: ResourceXML, value: string) {
+function setStrings(strings: ResourceXML, name: string, value: string) {
   // Helper to add string.xml JSON items or overwrite existing items with the same name.
   return AndroidConfig.Strings.setStringItem(
     [
       // XML represented as JSON
-      // <string moduleConfig="true" name="CodePushDeploymentKey">value</string>
-      { $: { name: 'CodePushDeploymentKey' }, _: value },
+      // <string moduleConfig="true" name="">value</string>
+      { $: { name }, _: value },
     ],
     strings
   )
@@ -21,7 +21,8 @@ function setStrings(strings: ResourceXML, value: string) {
 
 export const withAndroidStringsDependency: ConfigPlugin<PluginConfigType> = (config, props) => {
   return withStringsXml(config, (config) => {
-    config.modResults = setStrings(config.modResults, props.android.CodePushDeploymentKey)
+    config.modResults = setStrings(config.modResults, 'CodePushDeploymentKey', props.android.CodePushDeploymentKey)
+    if (props.android.CodePushPublicKey) config.modResults = setStrings(config.modResults, 'CodePushPublicKey', props.android.CodePushPublicKey)
     return config
   })
 }
