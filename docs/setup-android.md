@@ -24,7 +24,7 @@ React Native Code Push comes packaged with a plugin to automate some of the setu
 
 1. Open your Expo app config file (app.config.json or app.config.js instead of app.json).
 
-2. Insert the following into the plugins section of your config (Don't duplicate configuration, if the 'react-native-code-push' item already exists, simply add the android portion.). Create the plugins section if it doesn't already exist.
+2. Insert the following into the plugins section of your config (Don't duplicate configuration, if the 'react-native-code-push' item already exists, simply add the android portion.). Create the plugins section if it doesn't already exist. CodePushPublicKey is optional, see Code Signing setup for more information.
 
     ```javascript
     "plugins": [
@@ -33,6 +33,7 @@ React Native Code Push comes packaged with a plugin to automate some of the setu
         {
           android: {
             CodePushDeploymentKey: 'YOUR_ANDROID_CODE_PUSH_KEY',
+            CodePushPublicKey: 'YOUR_ANDROID_PUBLIC_KEY',
           }
         }
       ]
