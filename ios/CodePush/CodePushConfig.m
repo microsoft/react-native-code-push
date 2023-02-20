@@ -58,6 +58,14 @@ static NSString * const PublicKeyKey = @"publicKey";
     if (deploymentKey) [_configDictionary setObject:deploymentKey forKey:DeploymentKeyConfigKey];
     if (publicKey) [_configDictionary setObject:publicKey forKey:PublicKeyKey];
 
+    // Try to get app version from custom configs
+    NSString *rnAppInfoDictionaryPath = [[NSBundle mainBundle] pathForResource: @"RNAppInfo" ofType: @"plist"];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:rnAppInfoDictionaryPath]) {
+        NSDictionary *rnAppInfoDictionary = [NSDictionary dictionaryWithContentsOfFile: rnAppInfoDictionaryPath];
+        NSString *rnAppNativeVersion = [rnAppInfoDictionary objectForKey:@"RNAppNativeVersion"];
+        if (rnAppNativeVersion) [_configDictionary setObject:rnAppNativeVersion forKey:AppVersionConfigKey];
+    }
+
     return self;
 }
 

@@ -69,6 +69,14 @@ public class CodePush implements ReactPackage {
         mSettingsManager = new SettingsManager(mContext);
         sIsAppInitInBackground = BackgroundDetector.isInBackground(mContext);
 
+        // Try to get app version from custom configs
+        if (sAppVersion == null) {
+            int rnAppNativeVersionResId = mContext.getResources().getIdentifier("RNAppNativeVersion", "string", mContext.getPackageName());
+            if (rnAppNativeVersionResId != 0) {
+                sAppVersion = mContext.getString(rnAppNativeVersionResId);
+            }
+        }
+
         if (sAppVersion == null) {
             try {
                 PackageInfo pInfo = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
