@@ -21,7 +21,7 @@ Pod::Spec.new do |s|
   # we explicitly let CocoaPods pull in the versions below so all dependencies are resolved and 
   # linked properly at a parent workspace level.
   s.dependency 'React-Core'
-  s.dependency 'SSZipArchive', '~> 2.2.2'
+  s.dependency 'SSZipArchive', '~> 2.5.4'
   s.dependency 'JWT', '~> 3.0.0-beta.12'
   s.dependency 'Base64', '~> 1.1'
 end

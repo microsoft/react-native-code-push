@@ -345,7 +345,7 @@ PODS:
     - React-jsi (= 0.66.0)
     - React-logger (= 0.66.0)
     - React-perflogger (= 0.66.0)
-  - SSZipArchive (2.2.3)
+  - SSZipArchive (2.5.4)
   - Yoga (1.14.0)
   - YogaKit (1.18.1):
     - Yoga (~> 1.14)
