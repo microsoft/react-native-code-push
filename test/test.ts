@@ -122,7 +122,7 @@ class RNAndroid extends Platform.Android implements RNPlatform {
      * Build function of the test application, the command depends on the OS 
     */
     buildFunction(androidDirectory: string): Q.Promise<void> {
-        if (process.platform === "darwin") {
+        if (process.platform === "darwin" || process.platform === "linux") {
             return TestUtil.getProcessOutput(`./gradlew assembleRelease --daemon`, { noLogStdOut: true, cwd: androidDirectory })
                 .then(() => { return null; });
         } else {
