@@ -180,6 +180,7 @@ class RNIOS extends Platform.IOS implements RNPlatform {
         const infoPlistPath: string = path.join(iOSProject, TestConfig.TestAppName, "Info.plist");
         const appDelegatePath: string = path.join(iOSProject, TestConfig.TestAppName, "AppDelegate.m");
 
+
         // Install the Podfile
         return TestUtil.getProcessOutput("pod install", { cwd: iOSProject })
             // Put the IOS deployment key in the Info.plist
@@ -229,15 +230,13 @@ class RNIOS extends Platform.IOS implements RNPlatform {
 
         return this.getEmulatorManager().getTargetEmulator()
             .then((targetEmulator: string) => {
-                const hashRegEx = /[(][0-9A-Z-]*[)]/g;
-                const hashWithParen = targetEmulator.match(hashRegEx)[0];
-                const hash = hashWithParen.substr(1, hashWithParen.length - 2);
                 return TestUtil.getProcessOutput("xcodebuild -workspace " + path.join(iOSProject, TestConfig.TestAppName) + ".xcworkspace -scheme " + TestConfig.TestAppName +
-                    " -configuration Release -destination \"platform=iOS Simulator,id=" + hash + "\" -derivedDataPath build EXCLUDED_ARCHS=arm64", { cwd: iOSProject, maxBuffer: 1024 * 1024 * 500, noLogStdOut: true });
+                    " -configuration Release -destination \"platform=iOS Simulator,id=" + targetEmulator + "\" -derivedDataPath build EXCLUDED_ARCHS=arm64", { cwd: iOSProject, timeout: 30 * 60 * 1000, maxBuffer: 1024 * 1024 * 5000, noLogStdOut: true });
             })
             .then<void>(
                 () => { return null; },
-                () => {
+                (error: any) => {
+                    console.info(error);
                     // The first time an iOS project is built, it fails because it does not finish building libReact.a before it builds the test app.
                     // Simply build again to fix the issue.
                     if (!RNIOS.iosFirstBuild[projectDirectory]) {
@@ -308,13 +307,13 @@ class RNProjectManager extends ProjectManager {
         }
         mkdirp.sync(projectDirectory);
 
-        return TestUtil.getProcessOutput("react-native init " + appName, { cwd: projectDirectory, timeout: 30 * 60 * 1000 })
-            .then((e) => { console.log(`"react-native init ${appName}" success. cwd=${projectDirectory}`); return e; })
+        return TestUtil.getProcessOutput("npx react-native init " + appName + " --version 0.67.1", { cwd: projectDirectory, timeout: 30 * 60 * 1000 })
+            .then((e) => { console.log(`"npx react-native init ${appName}" success. cwd=${projectDirectory}`); return e; })
             .then(this.copyTemplate.bind(this, templatePath, projectDirectory))
             .then<void>(TestUtil.getProcessOutput.bind(undefined, TestConfig.thisPluginInstallString, { cwd: path.join(projectDirectory, TestConfig.TestAppName) }))
             .then(() => { return null; })
             .catch((error) => {
-                console.log(`"react-native init ${appName} failed". cwd=${projectDirectory}`, error);
+                console.log(`"npx react-native init ${appName} failed". cwd=${projectDirectory}`, error);
                 throw new Error(error);
             });
     }
@@ -378,7 +377,7 @@ class RNProjectManager extends ProjectManager {
             deferred.resolve(undefined);
         });
         return deferred.promise
-            .then(TestUtil.getProcessOutput.bind(undefined, "react-native bundle --platform " + targetPlatform.getName() + " --entry-file index." + targetPlatform.getName() + ".js --bundle-output " + bundlePath + " --assets-dest " + bundleFolder + " --dev false",
+            .then(TestUtil.getProcessOutput.bind(undefined, "npx react-native bundle --platform " + targetPlatform.getName() + " --entry-file index." + targetPlatform.getName() + ".js --bundle-output " + bundlePath + " --assets-dest " + bundleFolder + " --dev false",
                 { cwd: path.join(projectDirectory, TestConfig.TestAppName) }))
             .then<string>(TestUtil.archiveFolder.bind(undefined, bundleFolder, "", path.join(projectDirectory, TestConfig.TestAppName, "update.zip"), isDiff));
     }
