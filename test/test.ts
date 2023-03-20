@@ -179,7 +179,7 @@ class RNIOS extends Platform.IOS implements RNPlatform {
     installPlatform(projectDirectory: string): Q.Promise<void> {
         const iOSProject: string = path.join(projectDirectory, TestConfig.TestAppName, "ios");
         const infoPlistPath: string = path.join(iOSProject, TestConfig.TestAppName, "Info.plist");
-        const appDelegatePath: string = path.join(iOSProject, TestConfig.TestAppName, "AppDelegate.m");
+        const appDelegatePath: string = path.join(iOSProject, TestConfig.TestAppName, "AppDelegate.mm");
 
 
         // Install the Podfile
@@ -196,9 +196,9 @@ class RNIOS extends Platform.IOS implements RNPlatform {
             // Add the correct bundle identifier
             .then(TestUtil.replaceString.bind(undefined, path.join(iOSProject, TestConfig.TestAppName + ".xcodeproj", "project.pbxproj"),
                 "PRODUCT_BUNDLE_IDENTIFIER = [^;]*", "PRODUCT_BUNDLE_IDENTIFIER = \"" + TestConfig.TestNamespace + "\""))
-            // Copy the AppDelegate.m to the project
+            // Copy the AppDelegate.mm to the project
             .then(TestUtil.copyFile.bind(undefined,
-                path.join(TestConfig.templatePath, "ios", TestConfig.TestAppName, "AppDelegate.m"),
+                path.join(TestConfig.templatePath, "ios", TestConfig.TestAppName, "AppDelegate.mm"),
                 appDelegatePath, true))
             .then<void>(TestUtil.replaceString.bind(undefined, appDelegatePath, TestUtil.CODE_PUSH_TEST_APP_NAME_PLACEHOLDER, TestConfig.TestAppName));
     }
@@ -378,7 +378,7 @@ class RNProjectManager extends ProjectManager {
             deferred.resolve(undefined);
         });
         return deferred.promise
-            .then(TestUtil.getProcessOutput.bind(undefined, "npx react-native bundle --platform " + targetPlatform.getName() + " --entry-file index." + targetPlatform.getName() + ".js --bundle-output " + bundlePath + " --assets-dest " + bundleFolder + " --dev false",
+            .then(TestUtil.getProcessOutput.bind(undefined, "npx react-native bundle --platform " + targetPlatform.getName() + " --bundle-output " + bundlePath + " --assets-dest " + bundleFolder + " --dev false",
                 { cwd: path.join(projectDirectory, TestConfig.TestAppName) }))
             .then<string>(TestUtil.archiveFolder.bind(undefined, bundleFolder, "", path.join(projectDirectory, TestConfig.TestAppName, "update.zip"), isDiff));
     }
