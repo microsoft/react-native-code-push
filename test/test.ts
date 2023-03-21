@@ -378,7 +378,7 @@ class RNProjectManager extends ProjectManager {
             deferred.resolve(undefined);
         });
         return deferred.promise
-            .then(TestUtil.getProcessOutput.bind(undefined, "npx react-native bundle --platform " + targetPlatform.getName() + " --bundle-output " + bundlePath + " --assets-dest " + bundleFolder + " --dev false",
+            .then(TestUtil.getProcessOutput.bind(undefined, "npx react-native bundle --entry-file index.js --platform " + targetPlatform.getName() + " --bundle-output " + bundlePath + " --assets-dest " + bundleFolder + " --dev false",
                 { cwd: path.join(projectDirectory, TestConfig.TestAppName) }))
             .then<string>(TestUtil.archiveFolder.bind(undefined, bundleFolder, "", path.join(projectDirectory, TestConfig.TestAppName, "update.zip"), isDiff));
     }
