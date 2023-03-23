@@ -2,7 +2,7 @@
 // IMPORTS //
 var os = require("os");
 var path = require("path");
-var TestUtil_1 = require("./TestUtil");
+var TestUtil_1 = require("./testUtil");
 //////////////////////////////////////////////////////////////////////////////////////////
 // Configuration variables.
 // What plugin to use, what project directories to use, etc.

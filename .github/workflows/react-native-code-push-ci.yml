@@ -38,7 +38,7 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '2.7.4'
+          ruby-version: '2.7.6'
           bundler-cache: true
       - name: Package Installation
         run: npm install
@@ -58,7 +58,7 @@ jobs:
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '2.7.4'
+          ruby-version: '2.7.6'
           bundler-cache: true
       - name: Install dependencies
         run: npm install
