@@ -6,7 +6,7 @@ Once you've acquired the CodePush plugin, you need to integrate it into the Xcod
 
 1. Run `cd ios && pod install && cd ..` to install all the necessary CocoaPods dependencies.
 ​
-2. Open up the `AppDelegate.m` file, and add an import statement for the CodePush headers:
+2. Open up the `AppDelegate.mm` file, and add an import statement for the CodePush headers:
 
    ```objective-c
    #import <CodePush/CodePush.h>
