@@ -23,7 +23,7 @@ exports.getJsCodeLocationPatch = function(defaultJsCodeLocationAssignmentStateme
 }
 
 // Fix for https://github.com/microsoft/react-native-code-push/issues/477
-// Typical location of AppDelegate.m for newer RN versions: $PROJECT_ROOT/ios/<project_name>/AppDelegate.m
+// Typical location of AppDelegate.mm for newer RN versions: $PROJECT_ROOT/ios/<project_name>/AppDelegate.mm
 // Let's try to find that path by filtering the whole array for any path containing <project_name>
 // If we can't find it there, play dumb and pray it is the first path we find.
 exports.getAppDeletePath = function() {
@@ -75,7 +75,7 @@ exports.getPlistPath = function() {
     return path.resolve(path.dirname(xcodeProjectPath), '..', plistPathValue.replace(/^"(.*)"$/, '$1'));
 }
 
-// Helper that filters an array with AppDelegate.m paths for a path with the app name inside it
+// Helper that filters an array with AppDelegate.mm paths for a path with the app name inside it
 // Should cover nearly all cases
 function findFileByAppName(array, appName) {
     if (array.length === 0 || !appName) return null;
