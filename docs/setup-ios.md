@@ -6,7 +6,7 @@ Once you've acquired the CodePush plugin, you need to integrate it into the Xcod
 
 1. Run `cd ios && pod install && cd ..` to install all the necessary CocoaPods dependencies.
 ​
-2. Open up the `AppDelegate.m` file, and add an import statement for the CodePush headers:
+2. Open up the `AppDelegate.mm` file, and add an import statement for the CodePush headers:
 
    ```objective-c
    #import <CodePush/CodePush.h>
@@ -141,7 +141,7 @@ And that's it! Isn't RNPM awesome? :)
 
 Once your Xcode project has been setup to build/link the CodePush plugin, you need to configure your app to consult CodePush for the location of your JS bundle, since it is responsible for synchronizing it with updates that are released to the CodePush server. To do this, perform the following steps:
 
-1. Open up the `AppDelegate.m` file, and add an import statement for the CodePush headers:
+1. Open up the `AppDelegate.mm` file, and add an import statement for the CodePush headers:
 
     ```objective-c
     #import <CodePush/CodePush.h>
