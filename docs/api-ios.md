@@ -1,10 +1,10 @@
 ### Objective-C API Reference (iOS)
 
-The Objective-C API is made available by importing the `CodePush.h` header into your `AppDelegate.m` file, and consists of a single public class named `CodePush`.
+The Objective-C API is made available by importing the `CodePush.h` header into your `AppDelegate.mm` file, and consists of a single public class named `CodePush`.
 
 #### CodePush
 
-Contains static methods for retreiving the `NSURL` that represents the most recent JavaScript bundle file, and can be passed to the `RCTRootView`'s `initWithBundleURL` method when bootstrapping your app in the `AppDelegate.m` file.
+Contains static methods for retreiving the `NSURL` that represents the most recent JavaScript bundle file, and can be passed to the `RCTRootView`'s `initWithBundleURL` method when bootstrapping your app in the `AppDelegate.mm` file.
 
 The `CodePush` class' methods can be thought of as composite resolvers which always load the appropriate bundle, in order to accommodate the following scenarios:
 
