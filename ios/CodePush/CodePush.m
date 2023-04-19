@@ -350,7 +350,7 @@ static NSString *const LatestRollbackCountKey = @"count";
             "If you'd like to test CodePush using the simulator, you can do one of the following depending on your "
             "React Native version and/or preferred workflow:\n\n"
 
-            "1. Update your AppDelegate.m file to load the JS bundle from the packager instead of from CodePush. "
+            "1. Update your AppDelegate.mm file to load the JS bundle from the packager instead of from CodePush. "
             "You can still test your CodePush update experience using this workflow (Debug builds only).\n\n"
 
             "2. Force the JS bundle to be generated in simulator builds by adding 'export FORCE_BUNDLING=true' to the script under "
