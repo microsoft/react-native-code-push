@@ -213,7 +213,7 @@ function optimizeToTestInDebugMode() {
     const rnXcodeShPath = `node_modules/react-native/${rnXcodeShLocationFolder}/react-native-xcode.sh`;
     // Replace "if [[ "$PLATFORM_NAME" == *simulator ]]; then" with "if false; then" to force bundling
     execCommand(`sed -ie 's/if \\[\\[ "\$PLATFORM_NAME" == \\*simulator \\]\\]; then/if false; then/' ${rnXcodeShPath}`);
-    execCommand(`perl -i -p0e 's/#ifdef DEBUG.*?#endif/jsCodeLocation = [CodePush bundleURL];/s' ios/${appName}/AppDelegate.m`);
+    execCommand(`perl -i -p0e 's/#ifdef DEBUG.*?#endif/jsCodeLocation = [CodePush bundleURL];/s' ios/${appName}/AppDelegate.mm`);
     execCommand(`sed -ie 's/targetName.toLowerCase().contains("release")/true/' node_modules/react-native/react.gradle`);
 }
 
@@ -294,7 +294,7 @@ function androidSetup() {
 // Configuring ios applications for react-native version higher than 0.60
 function iosSetup() {
     const plistPath = path.join('ios', appName, 'Info.plist');
-    const appDelegatePath = path.join('ios', appName, 'AppDelegate.m');
+    const appDelegatePath = path.join('ios', appName, 'AppDelegate.mm');
 
     let plistContents = fs.readFileSync(plistPath, "utf8");
     const falseInfoPlist = `<false/>`;
