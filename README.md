@@ -75,7 +75,8 @@ We try our best to maintain backwards compatibility of our plugin with previous 
 | v0.59                   | v5.6+ *(RN refactored js bundle loader code)*         |
 | v0.60-v0.61             | v6.0+ *(RN migrated to Autolinking)*                  |
 | v0.62-v0.64             | v6.2+ *(RN removed LiveReload)*                       |
-| v0.65-v0.69             | v7.2+ *(RN updated iPhone-target-version)*            |
+| v0.65-v0.70             | v7.0+ *(RN updated iPhone-target-version)*            |
+| v0.71                   | v7.2+ *(RN moved to react-native-gradle-plugin)*      |
 
 *NOTE: `react-native-code-push` versions lower than **[v5.7.0](https://github.com/microsoft/react-native-code-push/releases/tag/v5.7.0)** will stop working in the near future. You can find more information in our [documentation](https://github.com/microsoft/code-push/blob/master/migration-notice.md).*
 
