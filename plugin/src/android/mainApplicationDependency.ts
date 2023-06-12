@@ -29,15 +29,31 @@ export const withAndroidMainApplicationDependency: ConfigPlugin<PluginConfigType
       'import expo.modules.ReactNativeHostWrapper;',
       `\nimport com.microsoft.codepush.react.CodePush;`
     )
-    config.modResults.contents = applyImplementation(
-      config.modResults.contents,
-      `new ReactNativeHost(this) {`,
-      `
+    if (
+      config.modResults.contents.includes("new DefaultReactNativeHost(this) {")
+    ) {
+      config.modResults.contents = applyImplementation(
+        config.modResults.contents,
+        `new DefaultReactNativeHost(this) {`,
+        `
+          @Override
+          protected String getJSBundleFile() {
+            return CodePush.getJSBundleFile();
+          }\n`
+      );
+    } else if (
+      config.modResults.contents.includes(" new ReactNativeHost(this) {")
+    ) {
+      config.modResults.contents = applyImplementation(
+        config.modResults.contents,
+        `new ReactNativeHost(this) {`,
+        `
     @Override
     protected String getJSBundleFile() {
       return CodePush.getJSBundleFile();
     }\n`
-    )
-    return config
+      );
+    }
+    return config;
   })
 }
