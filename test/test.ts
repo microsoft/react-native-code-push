@@ -187,6 +187,8 @@ class RNIOS extends Platform.IOS implements RNPlatform {
                 "<key>CodePushDeploymentKey</key>\n\t<string>" + this.getDefaultDeploymentKey() + "</string>\n\t<key>CodePushServerURL</key>\n\t<string>" + this.getServerUrl() + "</string>\n\t</dict>\n</plist>"))
             // Set the app version to 1.0.0 instead of 1.0 in the Info.plist
             .then(TestUtil.replaceString.bind(undefined, infoPlistPath, "1.0", "1.0.0"))
+            // Remove dependence of CFBundleShortVersionString from project.pbxproj
+            .then(TestUtil.replaceString.bind(undefined, infoPlistPath, "\\$\\(MARKETING_VERSION\\)", "1.0.0"))
             // Fix the linker flag list in project.pbxproj (pod install adds an extra comma)
             .then(TestUtil.replaceString.bind(undefined, path.join(iOSProject, TestConfig.TestAppName + ".xcodeproj", "project.pbxproj"),
                 "\"[$][(]inherited[)]\",\\s*[)];", "\"$(inherited)\"\n\t\t\t\t);"))
