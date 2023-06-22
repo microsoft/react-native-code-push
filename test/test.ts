@@ -83,9 +83,10 @@ class RNAndroid extends Platform.Android implements RNPlatform {
         //// Set up gradle to build CodePush with the app
         // Add CodePush to android/app/build.gradle
         const buildGradle = path.join(innerprojectDirectory, "android", "app", "build.gradle");
+
         TestUtil.replaceString(buildGradle,
-            "apply from: \"../../node_modules/react-native/react.gradle\"",
-            "apply from: \"../../node_modules/react-native/react.gradle\"\napply from: \"" + gradleContent + "\"");
+            "apply from: file\\(\"../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle\"\\); applyNativeModulesAppBuildGradle\\(project\\)",
+            "apply from: file(\"../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle\"); applyNativeModulesAppBuildGradle(project)\napply from: \"" + gradleContent + "\"");
 
         // Add CodePush to android/settings.gradle
         const settingsGradle = path.join(innerprojectDirectory, "android", "settings.gradle");
@@ -122,13 +123,10 @@ class RNAndroid extends Platform.Android implements RNPlatform {
      * Build function of the test application, the command depends on the OS 
     */
     buildFunction(androidDirectory: string): Q.Promise<void> {
-        if (process.platform === "darwin") {
-            return TestUtil.getProcessOutput(`./gradlew assembleRelease --daemon`, { noLogStdOut: true, cwd: androidDirectory })
+        const gradlewCommand = process.platform === "darwin" || process.platform === "linux" ? "./gradlew" : "gradlew";
+        return TestUtil.getProcessOutput(`${gradlewCommand} clean`, { noLogStdOut: true, cwd: androidDirectory })
+                .then(() => TestUtil.getProcessOutput(`${gradlewCommand} assembleRelease --daemon`, { noLogStdOut: true, cwd: androidDirectory }))
                 .then(() => { return null; });
-        } else {
-            return TestUtil.getProcessOutput(`gradlew assembleRelease --daemon`, { noLogStdOut: true, cwd: androidDirectory })
-                .then(() => { return null; });
-        }
     }
 
     /**
@@ -178,7 +176,7 @@ class RNIOS extends Platform.IOS implements RNPlatform {
     installPlatform(projectDirectory: string): Q.Promise<void> {
         const iOSProject: string = path.join(projectDirectory, TestConfig.TestAppName, "ios");
         const infoPlistPath: string = path.join(iOSProject, TestConfig.TestAppName, "Info.plist");
-        const appDelegatePath: string = path.join(iOSProject, TestConfig.TestAppName, "AppDelegate.m");
+        const appDelegatePath: string = path.join(iOSProject, TestConfig.TestAppName, "AppDelegate.mm");
 
 
         // Install the Podfile
@@ -189,15 +187,17 @@ class RNIOS extends Platform.IOS implements RNPlatform {
                 "<key>CodePushDeploymentKey</key>\n\t<string>" + this.getDefaultDeploymentKey() + "</string>\n\t<key>CodePushServerURL</key>\n\t<string>" + this.getServerUrl() + "</string>\n\t</dict>\n</plist>"))
             // Set the app version to 1.0.0 instead of 1.0 in the Info.plist
             .then(TestUtil.replaceString.bind(undefined, infoPlistPath, "1.0", "1.0.0"))
+            // Remove dependence of CFBundleShortVersionString from project.pbxproj
+            .then(TestUtil.replaceString.bind(undefined, infoPlistPath, "\\$\\(MARKETING_VERSION\\)", "1.0.0"))
             // Fix the linker flag list in project.pbxproj (pod install adds an extra comma)
             .then(TestUtil.replaceString.bind(undefined, path.join(iOSProject, TestConfig.TestAppName + ".xcodeproj", "project.pbxproj"),
                 "\"[$][(]inherited[)]\",\\s*[)];", "\"$(inherited)\"\n\t\t\t\t);"))
             // Add the correct bundle identifier
             .then(TestUtil.replaceString.bind(undefined, path.join(iOSProject, TestConfig.TestAppName + ".xcodeproj", "project.pbxproj"),
                 "PRODUCT_BUNDLE_IDENTIFIER = [^;]*", "PRODUCT_BUNDLE_IDENTIFIER = \"" + TestConfig.TestNamespace + "\""))
-            // Copy the AppDelegate.m to the project
+            // Copy the AppDelegate.mm to the project
             .then(TestUtil.copyFile.bind(undefined,
-                path.join(TestConfig.templatePath, "ios", TestConfig.TestAppName, "AppDelegate.m"),
+                path.join(TestConfig.templatePath, "ios", TestConfig.TestAppName, "AppDelegate.mm"),
                 appDelegatePath, true))
             .then<void>(TestUtil.replaceString.bind(undefined, appDelegatePath, TestUtil.CODE_PUSH_TEST_APP_NAME_PLACEHOLDER, TestConfig.TestAppName));
     }
@@ -307,7 +307,7 @@ class RNProjectManager extends ProjectManager {
         }
         mkdirp.sync(projectDirectory);
 
-        return TestUtil.getProcessOutput("npx react-native init " + appName + " --version 0.67.1", { cwd: projectDirectory, timeout: 30 * 60 * 1000 })
+        return TestUtil.getProcessOutput("npx react-native init " + appName + " --version 0.71.3", { cwd: projectDirectory, timeout: 30 * 60 * 1000 })
             .then((e) => { console.log(`"npx react-native init ${appName}" success. cwd=${projectDirectory}`); return e; })
             .then(this.copyTemplate.bind(this, templatePath, projectDirectory))
             .then<void>(TestUtil.getProcessOutput.bind(undefined, TestConfig.thisPluginInstallString, { cwd: path.join(projectDirectory, TestConfig.TestAppName) }))
@@ -377,7 +377,7 @@ class RNProjectManager extends ProjectManager {
             deferred.resolve(undefined);
         });
         return deferred.promise
-            .then(TestUtil.getProcessOutput.bind(undefined, "npx react-native bundle --platform " + targetPlatform.getName() + " --entry-file index." + targetPlatform.getName() + ".js --bundle-output " + bundlePath + " --assets-dest " + bundleFolder + " --dev false",
+            .then(TestUtil.getProcessOutput.bind(undefined, "npx react-native bundle --entry-file index.js --platform " + targetPlatform.getName() + " --bundle-output " + bundlePath + " --assets-dest " + bundleFolder + " --dev false",
                 { cwd: path.join(projectDirectory, TestConfig.TestAppName) }))
             .then<string>(TestUtil.archiveFolder.bind(undefined, bundleFolder, "", path.join(projectDirectory, TestConfig.TestAppName, "update.zip"), isDiff));
     }
