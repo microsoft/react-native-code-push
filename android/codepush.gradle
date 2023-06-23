@@ -23,9 +23,7 @@ android.buildTypes.each { buildType ->
     buildType.resValue 'string', "CODE_PUSH_APK_BUILD_TIME", String.format("\"%d\"", System.currentTimeMillis())
 }
 
-
 gradle.projectsEvaluated {
-
     def debuggableVariants = config.debuggableVariants.get() ?: ['debug']
 
     android.applicationVariants.all { variant ->
