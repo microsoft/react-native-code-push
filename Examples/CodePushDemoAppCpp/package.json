@@ -23,7 +23,7 @@
     "@babel/core": "^7.8.4",
     "@babel/runtime": "^7.8.4",
     "@react-native-community/eslint-config": "^3.0.1",
-    "appcenter-cli": "^2.13.0",
+    "appcenter-cli": "^2.13.9",
     "babel-jest": "^27.2.5",
     "eslint": "^8.0.0",
     "jest": "^27.2.5",
