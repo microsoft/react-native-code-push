@@ -137,6 +137,13 @@ export interface SyncOptions {
     updateDialog?: UpdateDialog;
 
     /**
+     * It does not ignore failed updates, and you can continue to retry.
+     * It has a higher priority than rollbackRetryOptions.
+     * The default value is true.
+     */
+    ignoreFailedUpdates?: boolean;
+
+    /**
      * The rollback retry mechanism allows the application to attempt to reinstall an update that was previously rolled back (with the restrictions
      * specified in the options). It is an "options" object used to determine whether a rollback retry should occur, and if so, what settings to use
      * for the rollback retry. This defaults to null, which has the effect of disabling the retry mechanism. Setting this to any truthy value will enable
