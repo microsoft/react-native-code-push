@@ -1,10 +1,10 @@
-import { AndroidConfig, ConfigPlugin, withStringsXml } from '@expo/config-plugins'
-import { ResourceXML } from '@expo/config-plugins/build/android/Resources'
+import { AndroidConfig, ConfigPlugin, withStringsXml } from 'expo/config-plugins'
+import { ResourceXML } from 'expo/config-plugins/build/android/Resources'
 
 import { PluginConfigType } from '../pluginConfig'
 
 /**
- * Update `<project>/settings.gradle` by adding react-native-code-push
+ * Update `<project>/app/src/main/res/values/strings.xml` by adding react-native-code-push deployment key
  */
 
 function setStrings(strings: ResourceXML, name: string, value: string) {

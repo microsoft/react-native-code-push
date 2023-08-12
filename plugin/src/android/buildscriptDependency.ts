@@ -1,4 +1,4 @@
-import { ConfigPlugin, withAppBuildGradle } from '@expo/config-plugins'
+import { ConfigPlugin, withAppBuildGradle } from 'expo/config-plugins'
 
 import { PluginConfigType } from '../pluginConfig'
 

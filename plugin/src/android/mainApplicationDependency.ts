@@ -1,4 +1,4 @@
-import { ConfigPlugin, withMainApplication } from '@expo/config-plugins'
+import { ConfigPlugin, withMainApplication } from 'expo/config-plugins'
 
 import { PluginConfigType } from '../pluginConfig'
 
