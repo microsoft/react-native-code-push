@@ -97,8 +97,10 @@ public class CodePushUpdateUtils {
     }
 
     public static void copyNecessaryFilesFromCurrentPackage(String diffManifestFilePath, String currentPackageFolderPath, String newPackageFolderPath) throws IOException {
-        if (currentPackageFolderPath != null) {
+        if (currentPackageFolderPath != null && new File(currentPackageFolderPath).exists()) {
             FileUtils.copyDirectoryContents(currentPackageFolderPath, newPackageFolderPath);
+        } else {
+            CodePushUtils.log("Unable to copy files from current package during diff update, because currentPackageFolderPath is invalid.");
         }
         JSONObject diffManifest = CodePushUtils.getJsonObjectFromFile(diffManifestFilePath);
         try {
