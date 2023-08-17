@@ -97,7 +97,9 @@ public class CodePushUpdateUtils {
     }
 
     public static void copyNecessaryFilesFromCurrentPackage(String diffManifestFilePath, String currentPackageFolderPath, String newPackageFolderPath) throws IOException {
-        FileUtils.copyDirectoryContents(currentPackageFolderPath, newPackageFolderPath);
+        if (currentPackageFolderPath != null) {
+            FileUtils.copyDirectoryContents(currentPackageFolderPath, newPackageFolderPath);
+        }
         JSONObject diffManifest = CodePushUtils.getJsonObjectFromFile(diffManifestFilePath);
         try {
             JSONArray deletedFiles = diffManifest.getJSONArray("deletedFiles");
