@@ -35,7 +35,7 @@
     "url": "https://github.com/microsoft/react-native-code-push"
   },
   "dependencies": {
-    "code-push": "^4.1.0",
+    "code-push": "^4.2.0",
     "glob": "^7.1.7",
     "hoist-non-react-statics": "^3.3.2",
     "inquirer": "^8.1.5",
