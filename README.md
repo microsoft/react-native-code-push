@@ -386,11 +386,6 @@ The React Native community has graciously created some awesome open source apps 
 * [GeoEncoding](https://github.com/LynxITDigital/GeoEncoding) - An app by [Lynx IT Digital](https://digital.lynxit.com.au) which demonstrates how to use numerous React Native components and modules.
 * [Math Facts](https://github.com/Khan/math-facts) - An app by Khan Academy to help memorize math facts more easily.
 
-Additionally, if you're looking to get started with React Native + CodePush, and are looking for an awesome starter kit, you should check out the following:
-
-* [Native Starter Pro](http://strapmobile.com/native-starter-pro/)
-* [Pepperoni](http://getpepperoni.com/)
-
 *Note: If you've developed a React Native app using CodePush, that is also open-source, please let us know. We would love to add it to this list!*
 
 ### Debugging / Troubleshooting
