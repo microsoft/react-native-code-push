@@ -754,7 +754,7 @@ namespace Microsoft::CodePush::ReactNative
      */
     fire_and_forget CodePushNativeModule::DownloadAndReplaceCurrentBundle(std::wstring remoteBundleUrl) noexcept 
     {
-        auto errorMessage{ L"Error: DownloadAndReplaceCurrentBundle is not currently implmented" };
+        auto errorMessage{ L"Error: DownloadAndReplaceCurrentBundle is not currently implemented" };
         hresult_error error{ E_NOTIMPL, errorMessage };
         CodePushUtils::Log(error);
         throw error;

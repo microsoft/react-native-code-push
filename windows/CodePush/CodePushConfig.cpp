@@ -15,11 +15,10 @@ namespace winrt::Microsoft::CodePush::ReactNative::implementation
     using namespace Windows::Data::Json;
     using namespace Windows::Foundation::Collections;
 
-    CodePushConfig CodePushConfig::s_currentConfig{};
-
     /*static*/ CodePushConfig& CodePushConfig::Current() noexcept
     {
-        return s_currentConfig;
+        static com_ptr<CodePushConfig> s_currentConfig = make_self<CodePushConfig>();
+        return *s_currentConfig;
     }
 
     JsonObject CodePushConfig::GetConfiguration()
@@ -49,11 +48,12 @@ namespace winrt::Microsoft::CodePush::ReactNative::implementation
             serverUrl = configMap.TryLookup(ServerURLConfigKey);
         }
 
-        s_currentConfig.m_configuration = winrt::single_threaded_map<hstring, hstring>();
-        auto addToConfiguration = [=](std::wstring_view key, std::optional<hstring> optValue) {
+        CodePushConfig& currentConfig = Current();
+        currentConfig.m_configuration = winrt::single_threaded_map<hstring, hstring>();
+        auto addToConfiguration = [&currentConfig](std::wstring_view key, std::optional<hstring> optValue) {
             if (optValue.has_value())
             {
-                s_currentConfig.m_configuration.Insert(key, optValue.value());
+                currentConfig.m_configuration.Insert(key, optValue.value());
             }
         };
 
@@ -77,11 +77,11 @@ namespace winrt::Microsoft::CodePush::ReactNative::implementation
         addToConfiguration(PublicKeyKey, publicKey);
         addToConfiguration(ServerURLConfigKey, serverUrl);
 
-        s_currentConfig.m_configuration.Insert(ClientUniqueIDConfigKey, clientUniqueId);
+        currentConfig.m_configuration.Insert(ClientUniqueIDConfigKey, clientUniqueId);
 
         if (!serverUrl.has_value())
         {
-            s_currentConfig.m_configuration.Insert(ServerURLConfigKey, L"https://codepush.appcenter.ms/");
+            currentConfig.m_configuration.Insert(ServerURLConfigKey, L"https://codepush.appcenter.ms/");
         }
 
         ::Microsoft::CodePush::ReactNative::CodePushNativeModule::LoadBundle();

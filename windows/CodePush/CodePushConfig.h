@@ -47,7 +47,6 @@ namespace winrt::Microsoft::CodePush::ReactNative::implementation
         static constexpr std::wstring_view PublicKeyKey{ L"publicKey" };
 
         Windows::Foundation::Collections::IMap<hstring, hstring> m_configuration;
-        static CodePushConfig s_currentConfig;
 
         hstring QueryConfig(std::wstring_view key);
     };
