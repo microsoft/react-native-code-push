@@ -9,6 +9,7 @@
     "windows": "react-native run-windows"
   },
   "dependencies": {
+    "@babel/traverse": "^7.23.2",
     "react": "^17.0.2",
     "react-native": "^0.68.5",
     "react-native-code-push": "^8.1.0",
