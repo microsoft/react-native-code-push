@@ -1,5 +1,5 @@
-import { AndroidConfig, ConfigPlugin, withStringsXml } from 'expo/config-plugins'
-import { ResourceXML } from 'expo/config-plugins/build/android/Resources'
+import { AndroidConfig, ConfigPlugin, withStringsXml } from '@expo/config-plugins'
+import { ResourceXML } from '@expo/config-plugins/build/android/Resources'
 
 import { PluginConfigType } from '../pluginConfig'
 

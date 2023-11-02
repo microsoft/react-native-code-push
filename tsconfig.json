@@ -1,14 +1,12 @@
 {
     "compilerOptions": {
-        "target": "ES5",
         "module": "commonjs",
-        "lib": ["es6"],
-        "noImplicitAny": true,
+        "noImplicitAny": false,
         "noEmitOnError": true,
         "moduleResolution": "node",
         "sourceMap": true,
-        "rootDir": "test",
         "outDir": "bin",
+        "typeRoots": ["./types", "./node_modules/@types"],
         "removeComments": true
     }
 }
