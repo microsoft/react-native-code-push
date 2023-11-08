@@ -113,10 +113,11 @@ function bootEmulatorInternal(platformName, restartEmulators, targetEmulator, ch
         var checkDeferred = Q.defer();
         console.log("Checking if " + platformName + " emulator is ready yet...");
         // Dummy command that succeeds if emulator is ready and fails otherwise.
-        checkEmulator()
+        checkEmulator(targetEmulator)
             .then(function () {
                 checkDeferred.resolve(undefined);
             }, function (error) {
+                console.info(error);
                 console.log(platformName + " emulator is not ready yet!");
                 checkDeferred.reject(error);
             });
@@ -198,7 +199,7 @@ var AndroidEmulatorManager = (function () {
      * Boots the target emulator.
      */
     AndroidEmulatorManager.prototype.bootEmulator = function (restartEmulators) {
-        function checkAndroidEmulator() {
+        function checkAndroidEmulator(androidEmulatorName) {
             // A command that does nothing but only succeeds if the emulator is running.
             // List all of the packages on the device.
             return testUtil_1.TestUtil.getProcessOutput("adb shell pm list packages", { noLogCommand: true, noLogStdOut: true, noLogStdErr: true }).then(function () { return null; });
@@ -300,9 +301,9 @@ var IOSEmulatorManager = (function () {
                 testUtil_1.TestUtil.getProcessOutput("xcrun simctl list", { noLogCommand: true, noLogStdOut: true, noLogStdErr: true })
                     .then((listOfDevicesWithDevicePairs) => {
                         let listOfDevices = listOfDevicesWithDevicePairs.slice(listOfDevicesWithDevicePairs.indexOf("-- iOS"), listOfDevicesWithDevicePairs.indexOf("-- tvOS"));
-                        let phoneDevice = /iPhone (\S* )*(\(([0-9A-Z-]*)\))/g;
-                        let match = listOfDevices.match(phoneDevice);
-                        deferred.resolve(match[match.length - 1]);
+                        let phoneDevice = /iPhone\ \S*\ ?.*?\(([0-9A-Z-]*)\)/g;
+                        let match = phoneDevice.exec(listOfDevices);
+                        deferred.resolve(match[1]);
                     }, (error) => {
                         deferred.reject(error);
                     });
@@ -323,17 +324,18 @@ var IOSEmulatorManager = (function () {
      * Boots the target emulator.
      */
     IOSEmulatorManager.prototype.bootEmulator = function (restartEmulators) {
-        function checkIOSEmulator() {
+        function checkIOSEmulator(iOSEmulatorId) {
             // A command that does nothing but only succeeds if the emulator is running.
-            // Get the environment variable with the name "asdf" (return null, not an error, if not initialized).
-            return testUtil_1.TestUtil.getProcessOutput("xcrun simctl getenv booted asdf", { noLogCommand: true, noLogStdOut: true, noLogStdErr: true }).then(function () { return null; });
+            return testUtil_1.TestUtil.getProcessOutput("xcrun simctl getenv booted SIMULATOR_UDID", { noLogCommand: true, noLogStdOut: true, noLogStdErr: true }).then(function (simUdid) {
+                return simUdid.trim() == iOSEmulatorId.trim() ? true : Promise.reject(new Error('Waiting for device to boot')); 
+            });
         }
-        function startIOSEmulator(iOSEmulatorName) {
-            return testUtil_1.TestUtil.getProcessOutput("xcrun instruments -w \"" + iOSEmulatorName + "\"", { noLogStdErr: true })
+        function startIOSEmulator(iOSEmulatorId) {
+            return testUtil_1.TestUtil.getProcessOutput("xcrun simctl boot " + iOSEmulatorId, { noLogStdErr: true })
                 .catch(function (error) { return undefined; /* Always fails because we do not specify a template, which is not necessary to just start the emulator */ }).then(function () { return null; });
         }
         function killIOSEmulator() {
-            return testUtil_1.TestUtil.getProcessOutput("killall Simulator").then(function () { return null; });
+            return testUtil_1.TestUtil.getProcessOutput("xcrun simctl shutdown all").then(function () { return null; });
         }
         return this.getTargetEmulator()
             .then(function (targetEmulator) {
