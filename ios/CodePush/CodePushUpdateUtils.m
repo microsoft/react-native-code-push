@@ -93,7 +93,7 @@ NSString * const IgnoreCodePushMetadata = @".codepushrelease";
     // The JSON serialization turns path separators into "\/", e.g. "CodePush\/assets\/image.png"
     manifestString = [manifestString stringByReplacingOccurrencesOfString:@"\\/"
                                                                withString:@"/"];
-    return [self computeHashForData:[NSData dataWithBytes:manifestString.UTF8String length:manifestString.length]];
+    return [self computeHashForData:[NSData dataWithBytes:manifestString.UTF8String length:[manifestString lengthOfBytesUsingEncoding:NSUTF8StringEncoding]]];
 }
 
 + (NSString *)computeHashForData:(NSData *)inputData

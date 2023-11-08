@@ -37,10 +37,10 @@ Follow these steps to test your modifications to the plugin manually:
 
 First, make sure you have installed the dependencies for the plugin by following the steps above.
 
-Then, make sure you have installed `react-native-cli`.
+Then, make sure you have installed `react-native`.
 
 ```
-npm install -g react-native-cli
+npm install -g react-native
 ```
 
 To run Android tests, make sure you have `sdk\tools`, `sdk\emulator` and  `sdk\platform-tools` in your PATH.
