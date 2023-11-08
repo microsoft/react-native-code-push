@@ -5,7 +5,8 @@ Requirements:
     1. npm i -g react-native-cli
     2. npm i -g appcenter-cli
     3. appcenter login
-    (If you use this script on macOS for react-native v0.60+ then you need to have CocoaPods installed)
+    4. If you use this script on macOS for react-native v0.60+ then you need to have CocoaPods installed. Use this command to (re)install CocoaPods:
+        sudo gem install cocoapods -n /usr/local/bin
 
 Usage: node create-app.js <appName> <reactNativeVersion> <reactNativeCodePushVersion>
     1. node create-app.js 
@@ -54,7 +55,7 @@ if (!isReactNativeVersionLowerThan(60) && process.platform === "darwin") {
         execCommand("pod --version");
         console.log("CocoaPods has installed");
     } catch {
-        console.error(`'CocoaPods' are required to run the script, you can install it with\n'sudo gem install cocoapods'\ncommand`);
+        console.error(`'CocoaPods' are required to run the script, you can install it with\n'sudo gem install cocoapods -n /usr/local/bin'\ncommand`);
         process.exit();
     }
 }
@@ -89,32 +90,39 @@ function createCodePushApp(name, os) {
             owner = app.owner.name;
             console.log(`App "${name}" has been created \n`);
         } catch(e) {
-            console.log("Error: ", e);
-            console.log(`Please check that you haven't application with "${name}" name on portal`);
+            console.error(`Error: Unable to create CodePush app. Please check that you haven't application with "${name}" name on portal.`, );
+            console.error("Error: ", e.toString());
         }
         execCommand(`appcenter codepush deployment add -a ${owner}/${name} Staging`);
     } catch (e) {
-        console.log("Error", e);
+        console.error("Error", e.toString());
     }
-    const deploymentKeysResult = execCommand(`appcenter codepush deployment list -a ${owner}/${name} -k --output json`);
-    const deploymentKeys = JSON.parse(deploymentKeysResult);
-    const stagingDeploymentKey = deploymentKeys[0][1];
-    console.log(`Deployment key for ${os}: ${stagingDeploymentKey}`);
-    console.log(`Use "appcenter codepush release-react ${owner}/${name}" command to release updates for ${os} \n`);
 
-    switch (os) {
-        case 'Android':
-            androidStagingDeploymentKey = stagingDeploymentKey;
-            break;
-        case 'iOS':
-            iosStagingDeploymentKey = stagingDeploymentKey;
-            break;
+    try {
+        const deploymentKeysResult = execCommand(`appcenter codepush deployment list -a ${owner}/${name} -k --output json`);
+        const deploymentKeys = JSON.parse(deploymentKeysResult);
+        const stagingDeploymentKey = deploymentKeys[0][1];
+        console.log(`Deployment key for ${os}: ${stagingDeploymentKey}`);
+        console.log(`Use "appcenter codepush release-react ${owner}/${name}" command to release updates for ${os} \n`);
+
+        switch (os) {
+            case 'Android':
+                androidStagingDeploymentKey = stagingDeploymentKey;
+                break;
+            case 'iOS':
+                iosStagingDeploymentKey = stagingDeploymentKey;
+                break;
+        }
+    } catch (e) {
+        console.error("Error: Unable to load deployment keys");
+        console.error("Error: ", e.toString());
     }
+
 }
 
 function generatePlainReactNativeApp(appName, reactNativeVersion) {
     console.log(`Installing React Native...`);
-    execCommand(`react-native init ${appName} --version ${reactNativeVersion}`);
+    execCommand(`react-native init ${appName} --version ${reactNativeVersion.split('@')[1]}`);
     console.log(`React Native has been installed \n`);
 }
 
@@ -164,12 +172,12 @@ function setupAssets() {
         fs.writeFileSync('index.android.js', fs.readFileSync('../CodePushDemoApp-pre0.49/index.android.js'));
         fileToEdit = 'demo.js'
     } else {
-        fs.writeFileSync('index.js', fs.readFileSync('../CodePushDemoApp/index.js'));
-        fs.writeFileSync('App.js', fs.readFileSync('../CodePushDemoApp/App.js'));
+        fs.writeFileSync('index.js', fs.readFileSync(__dirname + '/CodePushDemoApp/index.js'));
+        fs.writeFileSync('App.js', fs.readFileSync(__dirname + '/CodePushDemoApp/App.js'));
         fileToEdit = 'index.js'
     }
 
-    copyRecursiveSync('../CodePushDemoApp/images', './images');
+    copyRecursiveSync(__dirname + '/CodePushDemoApp/images', './images');
 
     fs.readFile(fileToEdit, 'utf8', function (err, data) {
         if (err) {
@@ -306,7 +314,6 @@ function iosSetup() {
     const codePushBundleUrl = "[CodePush bundleURL]";
     appDelegateContents = appDelegateContents.replace(oldBundleUrl, codePushBundleUrl);
     fs.writeFileSync(appDelegatePath, appDelegateContents);
-
     execCommand(`cd ios && pod install && cd ..`);
 }
 
