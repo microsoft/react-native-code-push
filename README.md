@@ -39,7 +39,7 @@ This plugin provides client-side integration for the [CodePush service](https://
 
 ## How does it work?
 
-A React Native app is composed of JavaScript files and any accompanying [images](https://facebook.github.io/react-native/docs/images.html#content), which are bundled together by the [packager](https://github.com/facebook/react-native/tree/master/packager) and distributed as part of a platform-specific binary (i.e. an `.ipa` or `.apk` file). Once the app is released, updating either the JavaScript code (e.g. making bug fixes, adding new features) or image assets, requires you to recompile and redistribute the entire binary, which of course, includes any review time associated with the store(s) you are publishing to.
+A React Native app is composed of JavaScript files and any accompanying [images](https://reactnative.dev/docs/image), which are bundled together by the [metro bundler](https://github.com/facebook/metro) and distributed as part of a platform-specific binary (i.e. an `.ipa` or `.apk` file). Once the app is released, updating either the JavaScript code (e.g. making bug fixes, adding new features) or image assets, requires you to recompile and redistribute the entire binary, which of course, includes any review time associated with the store(s) you are publishing to.
 
 The CodePush plugin helps get product improvements in front of your end users instantly, by keeping your JavaScript and images synchronized with updates you release to the CodePush server. This way, your app gets the benefits of an offline mobile experience, as well as the "web-like" agility of side-loading updates as soon as they are available. It's a win-win!
 
@@ -75,7 +75,8 @@ We try our best to maintain backwards compatibility of our plugin with previous 
 | v0.59                   | v5.6+ *(RN refactored js bundle loader code)*         |
 | v0.60-v0.61             | v6.0+ *(RN migrated to Autolinking)*                  |
 | v0.62-v0.64             | v6.2+ *(RN removed LiveReload)*                       |
-| v0.65                   | v7.2+ *(RN updated iPhone-target-version)*             |
+| v0.65-v0.70             | v7.0+ *(RN updated iPhone-target-version)*            |
+| v0.71                   | v7.2+ *(RN moved to react-native-gradle-plugin)*      |
 
 *NOTE: `react-native-code-push` versions lower than **[v5.7.0](https://github.com/microsoft/react-native-code-push/releases/tag/v5.7.0)** will stop working in the near future. You can find more information in our [documentation](https://github.com/microsoft/code-push/blob/master/migration-notice.md).*
 
@@ -251,7 +252,7 @@ Android Google Play and iOS App Store have corresponding guidelines that have ru
 
 #### Google play
 
-Third paragraph of [Device and Network Abuse](https://support.google.com/googleplay/android-developer/answer/9888379?hl=en) topic describe that updating source code by any method other than Google Play's update mechanism is restricted. But this restriction is not apply to updating javascript bundles.
+Third paragraph of [Device and Network Abuse](https://support.google.com/googleplay/android-developer/answer/9888379?hl=en) topic describe that updating source code by any method other than Google Play's update mechanism is restricted. But this restriction does not apply to updating javascript bundles.
 > This restriction does not apply to code that runs in a virtual machine and has limited access to Android APIs (such as JavaScript in a webview or browser).
 
 That fully allow CodePush as it updates just JS bundles and can't update native code part.
