@@ -42,7 +42,7 @@ Once you've acquired the CodePush plugin, you need to integrate it into the Xcod
    }
    ```
 
-5. Add the Deployment key to `Info.plist`:
+5. Add the Deployment key to `Info.plist` [Optional]:
 
    To let the CodePush runtime know which deployment it should query for updates against, open your app's `Info.plist` file and add a new entry named `CodePushDeploymentKey`, whose value is the key of the deployment you want to configure this app against (like the key for the `Staging` deployment for the `FooBar` app). You can retrieve this value by running `appcenter codepush deployment list -a <ownerName>/<appName> -k` in the AppCenter CLI (the `-k` flag is necessary since keys aren't displayed by default) and copying the value of the `Key` column which corresponds to the deployment you want to use (see below). Note that using the deployment's name (like Staging) will not work. That "friendly name" is intended only for authenticated management usage from the CLI, and not for public consumption within your app.
 
@@ -51,6 +51,8 @@ Once you've acquired the CodePush plugin, you need to integrate it into the Xcod
    In order to effectively make use of the `Staging` and `Production` deployments that were created along with your CodePush app, refer to the [multi-deployment testing](../README.md#multi-deployment-testing) docs below before actually moving your app's usage of CodePush into production.
 
    *Note: If you need to dynamically use a different deployment, you can also override your deployment key in JS code using [Code-Push options](./api-js.md#CodePushOptions)*
+
+6. As per the note, setting CodePush Deployment Keys using codePushOptions from React Native's side is also an option.
 
 ### Plugin Installation for React Native lower than 0.60 (iOS)
 
