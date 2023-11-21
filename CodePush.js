@@ -563,6 +563,23 @@ function codePushify(options = {}) {
             }
           }
 
+          if (options.installMode == CodePush.InstallMode.ON_NEXT_RESUME) {
+            const outerSyncStatusCallback = syncStatusCallback;
+            syncStatusCallback = (...args) => {
+              if (args[0] == CodePush.SyncStatus.UPDATE_INSTALLED) {
+                // We installed a new package, and the app will be restarted ON_NEXT_RESUME. The next time the
+                // app goes to the background unmount the <App /> component. This will give the App and all its
+                // libraries the opportunity to properly destruct themselves.
+                // TODO: needs handling for minimumBackgroundDuration. I'm happy to add this, after getting some
+                // initial feedback on this approach.
+                ReactNative.AppState.addEventListener("change", (newState) => {
+                  newState === "background" && this.setState({inactive: true});
+                });
+              }
+              outerSyncStatusCallback(...args);
+            }
+          }
+
           CodePush.sync(options, syncStatusCallback, downloadProgressCallback, handleBinaryVersionMismatchCallback);
           if (options.checkFrequency === CodePush.CheckFrequency.ON_APP_RESUME) {
             ReactNative.AppState.addEventListener("change", (newState) => {
@@ -579,6 +596,10 @@ function codePushify(options = {}) {
         // check it by render method
         if (RootComponent.prototype.render) {
           props.ref = "rootComponent";
+        }
+
+        if (this.state.inactive) {
+          return null;
         }
 
         return <RootComponent {...props} />
