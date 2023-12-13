@@ -533,6 +533,11 @@ function codePushify(options = {}) {
 
   var decorator = (RootComponent) => {
     const extended = class CodePushComponent extends React.Component {
+      constructor() {
+        super();
+        this.state = { inactive: false };
+      }
+
       componentDidMount() {
         if (options.checkFrequency === CodePush.CheckFrequency.MANUAL) {
           CodePush.notifyAppReady();
