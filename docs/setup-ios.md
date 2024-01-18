@@ -60,7 +60,7 @@ React Native Code Push comes packaged with a plugin to automate some of the setu
    - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
    {
      #if DEBUG
-       return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
+       return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index"];
      #else
        return [CodePush bundleURL];
      #endif
