@@ -35,7 +35,7 @@ Once you've acquired the CodePush plugin, you need to integrate it into the Xcod
    - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
    {
      #if DEBUG
-       return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
+       return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackExtension:nil];
      #else
        return [CodePush bundleURL];
      #endif
@@ -166,7 +166,7 @@ For React Native 0.58 and below:
 2. Find the following line of code, which loads your JS Bundle from the app binary for production releases:
 
     ```objective-c
-    jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
+    jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackExtension:nil];
     ```
 
 3. Replace it with this line:
@@ -187,7 +187,7 @@ For React Native 0.59 - 0.59.10:
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
 {
   #if DEBUG
-    return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
+    return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackExtension:nil];
   #else
     return [CodePush bundleURL];
   #endif
@@ -200,7 +200,7 @@ For React Native 0.49 - 0.58:
 NSURL *jsCodeLocation;
 
 #ifdef DEBUG
-    jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
+    jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackExtension:nil];
 #else
     jsCodeLocation = [CodePush bundleURL];
 #endif
