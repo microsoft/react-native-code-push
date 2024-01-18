@@ -388,7 +388,6 @@ The React Native community has graciously created some awesome open source apps 
 
 Additionally, if you're looking to get started with React Native + CodePush, and are looking for an awesome starter kit, you should check out the following:
 
-* [Native Starter Pro](http://strapmobile.com/native-starter-pro/)
 * [Pepperoni](http://getpepperoni.com/)
 
 *Note: If you've developed a React Native app using CodePush, that is also open-source, please let us know. We would love to add it to this list!*
