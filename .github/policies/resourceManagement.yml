@@ -1,0 +1,64 @@
+id: 
+name: GitOps.PullRequestIssueManagement
+description: GitOps.PullRequestIssueManagement primitive
+owner: 
+resource: repository
+disabled: false
+where: 
+configuration:
+  resourceManagementConfiguration:
+    scheduledSearches:
+    - description: 
+      frequencies:
+      - hourly:
+          hour: 4
+      filters:
+      - isOpen
+      - isNotLabeledWith:
+          label: bug
+      - isNotLabeledWith:
+          label: security
+      - isNotLabeledWith:
+          label: stale
+      - isNotLabeledWith:
+          label: do not close
+      - noActivitySince:
+          days: 60
+      - isIssue
+      - isNotAssigned
+      actions:
+      - addLabel:
+          label: stale
+      - addReply:
+          reply: This issue has been automatically marked as stale because it has not had any activity for 60 days. It will be closed if no further activity occurs within 15 days of this comment.
+    - description: 
+      frequencies:
+      - hourly:
+          hour: 6
+      filters:
+      - isOpen
+      - isIssue
+      - hasLabel:
+          label: stale
+      - isNotLabeledWith:
+          label: bug
+      - isNotLabeledWith:
+          label: do not close
+      - isNotAssigned
+      - noActivitySince:
+          days: 15
+      actions:
+      - addReply:
+          reply: This issue will now be closed because it hasn't had any activity for 15 days after stale. Please feel free to open a new issue if you still have a question/issue or suggestion.
+      - closeIssue
+    eventResponderTasks:
+    - if:
+      - payloadType: Issue_Comment
+      - hasLabel:
+          label: stale
+      then:
+      - removeLabel:
+          label: stale
+      description: 
+onFailure: 
+onSuccess: 
