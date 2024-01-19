@@ -60,8 +60,8 @@ gradle.projectsEvaluated {
             jsBundleDir = reactBundleTask.property('jsBundleDir').asFile.get()
             resourcesDir = reactBundleTask.property('resourcesDir').asFile.get()
             
-            new File(jsBundleDir.toString()).mkdirs()
-            new File(resourcesDir.toString()).mkdirs()
+            jsBundleDir.mkdirs()
+            resourcesDir.mkdirs()
 
             jsBundleFile = file("$jsBundleDir/$bundleAssetName")
 
