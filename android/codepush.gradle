@@ -33,10 +33,10 @@ gradle.projectsEvaluated {
         }
 
         def nodeModulesPath;
-        if (config.root) {
-            nodeModulesPath = Paths.get(config.root.asFile.get().absolutePath, "/node_modules");
-        } else if (project.hasProperty('nodeModulesPath')) {
+        if (project.hasProperty('nodeModulesPath')) {
             nodeModulesPath = project.nodeModulesPath
+        } else if (config.root) {
+            nodeModulesPath = Paths.get(config.root.asFile.get().absolutePath, "/node_modules");
         } else {
             nodeModulesPath = "../../node_modules";
         }
@@ -59,6 +59,10 @@ gradle.projectsEvaluated {
         if (reactBundleTask) {
             jsBundleDir = reactBundleTask.property('jsBundleDir').asFile.get()
             resourcesDir = reactBundleTask.property('resourcesDir').asFile.get()
+            
+            jsBundleDir.mkdirs()
+            resourcesDir.mkdirs()
+
             jsBundleFile = file("$jsBundleDir/$bundleAssetName")
 
             generateBundledResourcesHash = tasks.create(
