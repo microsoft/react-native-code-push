@@ -3,9 +3,9 @@ package com.microsoft.codepush.react;
 import android.content.Context;
 import android.util.Base64;
 
-import com.nimbusds.jose.crypto.JWSVerifier;
+import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
-import com.nimbusds.jose.crypto.SignedJWT;
+import com.nimbusds.jwt.SignedJWT;
 
 import java.security.interfaces.*;
 
