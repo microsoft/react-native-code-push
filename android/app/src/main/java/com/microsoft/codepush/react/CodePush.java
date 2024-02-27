@@ -81,7 +81,7 @@ public class CodePush implements ReactPackage {
         String publicKeyFromStrings = getCustomPropertyFromStringsIfExist("PublicKey");
         if (publicKeyFromStrings != null) mPublicKey = publicKeyFromStrings;
 
-        String serverUrlFromStrings = getCustomPropertyFromStringsIfExist("CodePushServerURL");
+        String serverUrlFromStrings = getCustomPropertyFromStringsIfExist("CodePushServerUrl");
         if (serverUrlFromStrings != null) mServerUrl = serverUrlFromStrings;
 
         clearDebugCacheIfNeeded(null);
