@@ -301,7 +301,7 @@ public class CodePush implements ReactPackage {
                 packageMetadata = this.mUpdateManager.getCurrentPackage();
             } catch (CodePushMalformedDataException e) {
                 // We need to recover the app in case 'codepush.json' is corrupted
-                CodePushUtils.log(e.getMessage());
+                CodePushUtils.log(e);
                 clearUpdates();
                 return;
             }
