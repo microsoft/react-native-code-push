@@ -42,11 +42,6 @@ extends:
           displayName: 'Install Node.js'
 
         - script: |
-            npm ci
-            npm run build
-          displayName: 'Install and build'
-
-        - script: |
             npm pack
             npm install -g react-native-code-push*.tgz
           displayName: 'Package appcenter-cli'
