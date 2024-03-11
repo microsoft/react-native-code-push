@@ -1,0 +1,68 @@
+trigger:
+- master
+
+pr:
+- master
+
+resources:
+  repositories:
+  - repository: 1ESPipelineTemplates
+    type: git
+    name: 1ESPipelineTemplates/1ESPipelineTemplates
+    ref: refs/tags/release
+
+extends:
+  ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
+    template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
+  ${{ else }}:
+    template: v1/1ES.Unofficial.PipelineTemplate.yml@1ESPipelineTemplates
+  parameters:
+    pool:
+      name: 1ES-PT-CBL-Mariner-2.0-Gen2
+      os: linux
+    customBuildTags:
+    - ES365AIMigrationTooling-BulkMigrated
+    sdl:
+      sourceAnalysisPool: 1ES-PT-Windows-2022
+    stages:
+    - stage: Stage
+      jobs:
+      - job: HostJob
+        templateContext:
+          outputs:
+          - output: pipelineArtifact
+            displayName: "Publish Artifact: artifacts"
+            path: '$(Build.ArtifactStagingDirectory)/npm'
+            artifactName: npm
+            
+        steps:
+        - task: NodeTool@0
+          inputs:
+            versionSpec: '14.x'
+          displayName: 'Install Node.js'
+
+        - script: |
+            npm ci
+            npm run build
+          displayName: 'Install and build'
+
+        - script: |
+            npm pack
+            npm install -g appcenter-cli*.tgz
+          displayName: 'Package appcenter-cli'
+          workingDirectory: $(Build.SourcesDirectory)
+
+        - task: DeleteFiles@1
+          inputs:
+            contents: node_modules
+          displayName: 'Delete node_modules'
+
+        - task: ArchiveFiles@2
+          inputs:
+            rootFolderOrFile: '$(Build.SourcesDirectory)'
+            includeRootFolder: false
+            archiveType: 'tar'
+            archiveFile: '$(Build.ArtifactStagingDirectory)/npm/$(Build.BuildId).tgz'
+            replaceExistingArchive: true
+            verbose: true
+          displayName: 'Prepare npm artifact'
