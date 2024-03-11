@@ -48,7 +48,7 @@ extends:
 
         - script: |
             npm pack
-            npm install -g appcenter-cli*.tgz
+            npm install -g react-native-code-push*.tgz
           displayName: 'Package appcenter-cli'
           workingDirectory: $(Build.SourcesDirectory)
 
