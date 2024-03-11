@@ -1,0 +1,33 @@
+{
+  "hydrated": false,
+  "properties": {
+    "helpUri": "https://eng.ms/docs/microsoft-security/security/azure-security/cloudai-security-fundamentals-engineering/security-integration/guardian-wiki/microsoft-guardian/general/baselines",
+    "hydrationStatus": "This file does not contain identifying data. It is safe to check into your repo. To hydrate this file with identifying data, run `guardian hydrate --help` and follow the guidance."
+  },
+  "version": "1.0.0",
+  "baselines": {
+    "default": {
+      "name": "default",
+      "createdDate": "2024-03-11 13:02:23Z",
+      "lastUpdatedDate": "2024-03-11 13:02:23Z"
+    }
+  },
+  "results": {
+    "320aac19a3c41a300a3464f071369182a42f0ab0688616e5c2995093046071c8": {
+      "signature": "320aac19a3c41a300a3464f071369182a42f0ab0688616e5c2995093046071c8",
+      "alternativeSignatures": [],
+      "memberOf": [
+        "default"
+      ],
+      "createdDate": "2024-03-11 13:02:23Z"
+    },
+    "246cd3f5b60f2fe547b03b536805c561c7734dc03233d222ad4e098fcd680b7e": {
+      "signature": "246cd3f5b60f2fe547b03b536805c561c7734dc03233d222ad4e098fcd680b7e",
+      "alternativeSignatures": [],
+      "memberOf": [
+        "default"
+      ],
+      "createdDate": "2024-03-11 13:02:23Z"
+    }
+  }
+}
