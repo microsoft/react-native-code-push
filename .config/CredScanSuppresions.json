@@ -1,0 +1,14 @@
+{
+    "tool": "Credential Scanner",
+      "suppressions": [
+          {
+              "file": "CodePushDemoAppCpp_TemporaryKey.pfx",
+              "_justification": "Test"
+          },
+          {
+              "file": "debug.keystore",
+              "_justification": "Fake token cache for test."
+          }
+  
+      ]
+  }

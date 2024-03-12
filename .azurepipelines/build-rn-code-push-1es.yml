@@ -24,9 +24,6 @@ extends:
     - ES365AIMigrationTooling-BulkMigrated
     sdl:
       sourceAnalysisPool: 1ES-PT-Windows-2022
-      baseline:
-        baselineSet: default
-        baselineFile: $(Build.SourcesDirectory)/.gdn/.gdnbaselines
     stages:
     - stage: Stage
       jobs:
@@ -47,7 +44,7 @@ extends:
         - script: |
             npm pack
             npm install -g react-native-code-push*.tgz
-          displayName: 'Package appcenter-cli'
+          displayName: 'Package react-native-code-push'
           workingDirectory: $(Build.SourcesDirectory)
 
         - task: DeleteFiles@1
