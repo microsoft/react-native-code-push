@@ -3,7 +3,11 @@
     "suppressions": [        
       {
         "file": "/Examples/CodePushDemoApp/android/app/debug.keystore",
-        "_justification": "testing"
+        "_justification": "Used only in DemoApp"
+      },
+      {
+        "file": "/Examples/CodePushDemoAppCpp/windows/CodePushDemoAppCpp/CodePushDemoAppCpp_TemporaryKey.pfx",
+        "_justification": "Used only in DemoApp"
       }
     ]
 }
