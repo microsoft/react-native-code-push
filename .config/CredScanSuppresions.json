@@ -1,10 +1,10 @@
 {
-    "tool": "Credential Scanner",
+  "tool": "Credential Scanner",
     "suppressions": [        
       {
         "file": "/Examples/CodePushDemoApp/android/app/debug.keystore",
         "_justification": "testing"
       }
     ]
-  }
+}
   
