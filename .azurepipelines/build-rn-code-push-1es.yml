@@ -25,7 +25,7 @@ extends:
     sdl:
       sourceAnalysisPool: 1ES-PT-Windows-2022
       credscan:
-        suppressionsFile: $(Build.SourcesDirectory)\.config\CredScanSuppressions.csk
+        suppressionsFile: $(Build.SourcesDirectory)/.config/CredScanSuppressions.json
     stages:
     - stage: Stage
       jobs:
