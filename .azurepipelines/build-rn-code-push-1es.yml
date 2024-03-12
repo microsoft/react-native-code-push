@@ -24,8 +24,8 @@ extends:
     - ES365AIMigrationTooling-BulkMigrated
     sdl:
       sourceAnalysisPool: 1ES-PT-Windows-2022
-  credscan:
-    suppressionsFile: $(Build.SourcesDirectory)\.config\CredScanSuppressions.json
+    credscan:
+      suppressionsFile: $(Build.SourcesDirectory)\.config\CredScanSuppressions.json
     stages:
     - stage: Stage
       jobs:
