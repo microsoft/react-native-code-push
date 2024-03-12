@@ -28,7 +28,7 @@ extends:
       credscan:
         suppressionsFile: $(Build.SourcesDirectory)/.config/CredScanSuppressions.json
     stages:
-    - stage: Build NPM Artifact
+    - stage: Stage
       jobs:
       - job: HostJob
         templateContext:
