@@ -10,6 +10,7 @@ resources:
     type: git
     name: 1ESPipelineTemplates/1ESPipelineTemplates
     ref: refs/tags/release
+name: $(Build.SourceBranchName)_$(date:yyyyMMdd)$(rev:.r)
 
 extends:
   ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
@@ -24,11 +25,10 @@ extends:
     - ES365AIMigrationTooling-BulkMigrated
     sdl:
       sourceAnalysisPool: 1ES-PT-Windows-2022
-      baseline:
-        baselineSet: default
-        baselineFile: $(Build.SourcesDirectory)/.gdn/.gdnbaselines
+      credscan:
+        suppressionsFile: $(Build.SourcesDirectory)/.config/CredScanSuppressions.json
     stages:
-    - stage: Stage
+    - stage: Build NPM Artifact
       jobs:
       - job: HostJob
         templateContext:
@@ -47,7 +47,7 @@ extends:
         - script: |
             npm pack
             npm install -g react-native-code-push*.tgz
-          displayName: 'Package appcenter-cli'
+          displayName: 'Package react-native-code-push'
           workingDirectory: $(Build.SourcesDirectory)
 
         - task: DeleteFiles@1
