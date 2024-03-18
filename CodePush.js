@@ -49,44 +49,54 @@ async function checkForUpdate(deploymentKey = null, handleBinaryVersionMismatchC
       queryPackage.packageHash = config.packageHash;
     }
   }
-
-  const update = await sdk.queryUpdateWithCurrentPackage(queryPackage);
-
+  
   /*
-   * There are four cases where checkForUpdate will resolve to null:
-   * ----------------------------------------------------------------
-   * 1) The server said there isn't an update. This is the most common case.
-   * 2) The server said there is an update but it requires a newer binary version.
-   *    This would occur when end-users are running an older binary version than
-   *    is available, and CodePush is making sure they don't get an update that
-   *    potentially wouldn't be compatible with what they are running.
-   * 3) The server said there is an update, but the update's hash is the same as
-   *    the currently running update. This should _never_ happen, unless there is a
-   *    bug in the server, but we're adding this check just to double-check that the
-   *    client app is resilient to a potential issue with the update check.
-   * 4) The server said there is an update, but the update's hash is the same as that
-   *    of the binary's currently running version. This should only happen in Android -
-   *    unlike iOS, we don't attach the binary's hash to the updateCheck request
-   *    because we want to avoid having to install diff updates against the binary's
-   *    version, which we can't do yet on Android.
+   * Handle case where queryUpdateWithCurrentPackage rejects,
+   * for example if an invalid response is received from the
+   * CodePush server.
    */
-  if (!update || update.updateAppVersion ||
-      localPackage && (update.packageHash === localPackage.packageHash) ||
-      (!localPackage || localPackage._isDebugOnly) && config.packageHash === update.packageHash) {
-    if (update && update.updateAppVersion) {
-      log("An update is available but it is not targeting the binary version of your app.");
-      if (handleBinaryVersionMismatchCallback && typeof handleBinaryVersionMismatchCallback === "function") {
-        handleBinaryVersionMismatchCallback(update)
-      }
-    }
+  try {
+    const update = await sdk.queryUpdateWithCurrentPackage(queryPackage);
 
+    /*
+     * There are four cases where checkForUpdate will resolve to null:
+     * ----------------------------------------------------------------
+     * 1) The server said there isn't an update. This is the most common case.
+     * 2) The server said there is an update but it requires a newer binary version.
+     *    This would occur when end-users are running an older binary version than
+     *    is available, and CodePush is making sure they don't get an update that
+     *    potentially wouldn't be compatible with what they are running.
+     * 3) The server said there is an update, but the update's hash is the same as
+     *    the currently running update. This should _never_ happen, unless there is a
+     *    bug in the server, but we're adding this check just to double-check that the
+     *    client app is resilient to a potential issue with the update check.
+     * 4) The server said there is an update, but the update's hash is the same as that
+     *    of the binary's currently running version. This should only happen in Android -
+     *    unlike iOS, we don't attach the binary's hash to the updateCheck request
+     *    because we want to avoid having to install diff updates against the binary's
+     *    version, which we can't do yet on Android.
+     */
+    if (!update || update.updateAppVersion ||
+        localPackage && (update.packageHash === localPackage.packageHash) ||
+        (!localPackage || localPackage._isDebugOnly) && config.packageHash === update.packageHash) {
+      if (update && update.updateAppVersion) {
+        log("An update is available but it is not targeting the binary version of your app.");
+        if (handleBinaryVersionMismatchCallback && typeof handleBinaryVersionMismatchCallback === "function") {
+          handleBinaryVersionMismatchCallback(update)
+        }
+      }
+  
+      return null;
+    } else {
+      const remotePackage = { ...update, ...PackageMixins.remote(sdk.reportStatusDownload) };
+      remotePackage.failedInstall = await NativeCodePush.isFailedUpdate(remotePackage.packageHash);
+      remotePackage.deploymentKey = deploymentKey || nativeConfig.deploymentKey;
+      return remotePackage;
+    }
+  } catch (e) {
+    log("There was an error during communication with the CodePush server.");
     return null;
-  } else {
-    const remotePackage = { ...update, ...PackageMixins.remote(sdk.reportStatusDownload) };
-    remotePackage.failedInstall = await NativeCodePush.isFailedUpdate(remotePackage.packageHash);
-    remotePackage.deploymentKey = deploymentKey || nativeConfig.deploymentKey;
-    return remotePackage;
-  }
+  }  
 }
 
 const getConfiguration = (() => {
