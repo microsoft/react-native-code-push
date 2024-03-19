@@ -79,6 +79,7 @@ extends:
           displayName: Download Build Artifacts for APIScan
           inputs:
             artifactName: npm
+            targetPath: '$(Agent.BuildDirectory)/npm'
         - script: |
             echo "Artifact folder:"
             tree $(Agent.BuildDirectory) /f
