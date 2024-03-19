@@ -80,10 +80,6 @@ extends:
           inputs:
             artifactName: npm
             targetPath: '$(Agent.BuildDirectory)/npm'
-        - script: |
-            echo "Artifact folder:"
-            tree $(Agent.BuildDirectory) /f
-          displayName: Check artifact folder
         - task: ExtractFiles@1
           inputs:
             archiveFilePatterns: '$(Agent.BuildDirectory)/npm/*.tgz'
