@@ -79,6 +79,10 @@ extends:
           displayName: Download Build Artifacts for APIScan
           inputs:
             artifactName: npm
+        - script: |
+            echo "Artifact folder:"
+            tree $(Agent.BuildDirectory) /f
+          displayName: Check artifact folder
         - task: ExtractFiles@1
           inputs:
             archiveFilePatterns: '$(Agent.BuildDirectory)/npm/*.tgz'
