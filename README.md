@@ -277,7 +277,7 @@ Once your app is configured and distributed to your users, and you have made som
 
 *NOTE: Before you can start releasing updates, please log into App Center by running the `appcenter login` command.*
 
-In it's the most basic form, this command only requires one parameter: your owner name + "/" + app name.
+In its most basic form, this command only requires one parameter: your owner name + "/" + app name.
 
 ```shell
 appcenter codepush release-react -a <ownerName>/<appName>
