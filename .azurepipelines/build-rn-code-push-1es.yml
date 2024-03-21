@@ -64,3 +64,41 @@ extends:
             replaceExistingArchive: true
             verbose: true
           displayName: 'Prepare npm artifact'
+
+    - stage: APIScan
+      dependsOn: Stage
+      pool:
+        name: 1ES-PT-Windows-2022
+        os: windows
+      variables:
+        "agent.source.skip": true
+      jobs:
+      - job: APIScan
+        steps:
+        - task: DownloadPipelineArtifact@2
+          displayName: Download Build Artifacts for APIScan
+          inputs:
+            artifactName: npm
+            targetPath: '$(Agent.BuildDirectory)/npm'
+        - task: ExtractFiles@1
+          inputs:
+            archiveFilePatterns: '$(Agent.BuildDirectory)/npm/*.tgz'
+            destinationFolder: '$(Agent.BuildDirectory)/npm_extracted'
+        - task: AzureKeyVault@2
+          inputs:
+            azureSubscription: 'AC - Dev Infra & Build Pool'
+            KeyVaultName: 'mobile-center-sdk'
+            SecretsFilter: 'appcenter-sdk-managed-identity-clientid'
+            RunAsPreJob: false
+        - task: APIScan@2
+          displayName: 'Run APIScan'
+          inputs:
+            softwareFolder: '$(Agent.BuildDirectory)\npm_extracted'
+            softwareName: 'react-native-code-push'
+            softwareVersionNum: '$(Build.BuildId)'
+            isLargeApp: false
+            toolVersion: 'Latest'
+            verbosityLevel: verbose
+          condition: and(succeeded(), ne(variables['DisableAPIScan'], 'true'))
+          env:
+            AzureServicesAuthConnectionString: 'runAs=App;AppId=$(appcenter-sdk-managed-identity-clientid)'
