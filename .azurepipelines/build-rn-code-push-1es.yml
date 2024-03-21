@@ -95,8 +95,9 @@ extends:
           inputs:
             softwareFolder: '$(Agent.BuildDirectory)\npm_extracted'
             softwareName: 'react-native-code-push'
-            softwareVersionNum: Latest
+            softwareVersionNum: '$(Build.BuildId)'
             isLargeApp: false
+            toolVersion: 'Latest'
             verbosityLevel: verbose
           condition: and(succeeded(), ne(variables['DisableAPIScan'], 'true'))
           env:
