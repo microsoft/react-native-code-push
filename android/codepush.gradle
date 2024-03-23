@@ -2,8 +2,8 @@
 
 import java.nio.file.Paths;
 
-def config = project.extensions.findByName("react") ?: []
-def bundleAssetName = config.bundleAssetName.get() ?: "index.android.bundle"
+def config = project.extensions.findByName("react") ?: [:]
+def bundleAssetName = config.bundleAssetName ? config.bundleAssetName.get() : "index.android.bundle"
 
 // because elvis operator
 def elvisFile(thing) {
@@ -24,7 +24,7 @@ android.buildTypes.each { buildType ->
 }
 
 gradle.projectsEvaluated {
-    def debuggableVariants = config.debuggableVariants.get() ?: ['debug']
+    def debuggableVariants = config.debuggableVariants ? config.debuggableVariants.get() : ['debug']
 
     android.applicationVariants.all { variant ->
         // No code push for debuggable variants
@@ -49,8 +49,8 @@ gradle.projectsEvaluated {
         def jsBundleFile;
 
         // Additional node commandline arguments
-        def nodeExecutableAndArgs = config.nodeExecutableAndArgs.get() ?: ["node"]
-        def extraPackagerArgs = config.extraPackagerArgs.get() ?: []
+        def nodeExecutableAndArgs = config.nodeExecutableAndArgs ? config.nodeExecutableAndArgs.get(): ["node"]
+        def extraPackagerArgs = config.extraPackagerArgs ? config.extraPackagerArgs.get() : []
 
         // Make this task run right after the bundle task
         def generateBundledResourcesHash;
@@ -77,11 +77,11 @@ gradle.projectsEvaluated {
             runBefore("merge${targetName}Assets", generateBundledResourcesHash)
         } else {
             def jsBundleDirConfigName = "jsBundleDir${targetName}"
-            jsBundleDir = elvisFile(config."$jsBundleDirConfigName").get() ?:
+            jsBundleDir = elvisFile(config."$jsBundleDirConfigName") ? elvisFile(config."$jsBundleDirConfigName").get():
                     file("$buildDir/intermediates/assets/${targetPath}")
 
             def resourcesDirConfigName = "resourcesDir${targetName}"
-            resourcesDir = elvisFile(config."${resourcesDirConfigName}").get() ?:
+            resourcesDir = elvisFile(config."${resourcesDirConfigName}") ? elvisFile(config."${resourcesDirConfigName}").get():
                     file("$buildDir/intermediates/res/merged/${targetPath}")
 
             // In case version of 'Android Plugin for Gradle'' is lower than 1.3.0
