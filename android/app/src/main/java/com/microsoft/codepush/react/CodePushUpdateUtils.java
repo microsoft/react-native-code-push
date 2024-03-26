@@ -116,19 +116,23 @@ public class CodePushUpdateUtils {
     public static String findJSBundleInUpdateContents(String folderPath, String expectedFileName) {
         File folder = new File(folderPath);
         File[] folderFiles = folder.listFiles();
-        for (File file : folderFiles) {
-            String fullFilePath = CodePushUtils.appendPathComponent(folderPath, file.getName());
-            if (file.isDirectory()) {
-                String mainBundlePathInSubFolder = findJSBundleInUpdateContents(fullFilePath, expectedFileName);
-                if (mainBundlePathInSubFolder != null) {
-                    return CodePushUtils.appendPathComponent(file.getName(), mainBundlePathInSubFolder);
-                }
-            } else {
-                String fileName = file.getName();
-                if (fileName.equals(expectedFileName)) {
-                    return fileName;
+        if (folderFiles != null) {
+            for (File file : folderFiles) {
+                String fullFilePath = CodePushUtils.appendPathComponent(folderPath, file.getName());
+                if (file.isDirectory()) {
+                    String mainBundlePathInSubFolder = findJSBundleInUpdateContents(fullFilePath, expectedFileName);
+                    if (mainBundlePathInSubFolder != null) {
+                        return CodePushUtils.appendPathComponent(file.getName(), mainBundlePathInSubFolder);
+                    }
+                } else {
+                    String fileName = file.getName();
+                    if (fileName.equals(expectedFileName)) {
+                        return fileName;
+                    }
                 }
             }
+        } else {
+            CodePushUtils.log("Couldn't find JS bundle in update contents because folderFiles came null");
         }
 
         return null;
