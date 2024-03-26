@@ -3,11 +3,12 @@ package com.microsoft.codepush.react;
 import android.content.Context;
 import android.util.Base64;
 
+import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.crypto.RSASSAVerifier;
+import com.nimbusds.jwt.SignedJWT;
+
 import java.security.interfaces.*;
 
-import com.nimbusds.jose.*;
-import com.nimbusds.jose.crypto.*;
-import com.nimbusds.jwt.*;
 
 import org.json.JSONArray;
 import org.json.JSONException;
