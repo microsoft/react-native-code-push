@@ -12,7 +12,7 @@
   "dependencies": {
     "react": "17.0.2",
     "react-native": "0.68.5",
-    "react-native-code-push": "7.0.4"
+    "react-native-code-push": "8.1.0"
   },
   "resolutions": {
     "strip-ansi": "^6.0.1",

@@ -1,6 +1,7 @@
 package com.microsoft.codepush.react;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
@@ -34,6 +35,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class CodePushNativeModule extends ReactContextBaseJavaModule {
     private String mBinaryContentsHash = null;
@@ -60,7 +62,13 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
 
         // Initialize module state while we have a reference to the current context.
         mBinaryContentsHash = CodePushUpdateUtils.getHashForBinaryContents(reactContext, mCodePush.isDebugMode());
-        mClientUniqueId = Settings.Secure.getString(reactContext.getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        SharedPreferences preferences = codePush.getContext().getSharedPreferences(CodePushConstants.CODE_PUSH_PREFERENCES, 0);
+        mClientUniqueId = preferences.getString(CodePushConstants.CLIENT_UNIQUE_ID_KEY, null);
+        if (mClientUniqueId == null) {
+            mClientUniqueId = UUID.randomUUID().toString();
+            preferences.edit().putString(CodePushConstants.CLIENT_UNIQUE_ID_KEY, mClientUniqueId).apply();
+        }
     }
 
     @Override
