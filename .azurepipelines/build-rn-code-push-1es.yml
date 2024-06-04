@@ -1,0 +1,104 @@
+trigger:
+- master
+
+pr:
+- master
+
+resources:
+  repositories:
+  - repository: 1ESPipelineTemplates
+    type: git
+    name: 1ESPipelineTemplates/1ESPipelineTemplates
+    ref: refs/tags/release
+name: $(Build.SourceBranchName)_$(date:yyyyMMdd)$(rev:.r)
+
+extends:
+  ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
+    template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
+  ${{ else }}:
+    template: v1/1ES.Unofficial.PipelineTemplate.yml@1ESPipelineTemplates
+  parameters:
+    pool:
+      name: 1ES-PT-CBL-Mariner-2.0-Gen2
+      os: linux
+    customBuildTags:
+    - ES365AIMigrationTooling-BulkMigrated
+    sdl:
+      sourceAnalysisPool: 1ES-PT-Windows-2022
+      credscan:
+        suppressionsFile: $(Build.SourcesDirectory)/.config/CredScanSuppressions.json
+    stages:
+    - stage: Stage
+      jobs:
+      - job: HostJob
+        templateContext:
+          outputs:
+          - output: pipelineArtifact
+            displayName: "Publish Artifact: artifacts"
+            path: '$(Build.ArtifactStagingDirectory)/npm'
+            artifactName: npm
+            
+        steps:
+        - task: NodeTool@0
+          inputs:
+            versionSpec: '14.x'
+          displayName: 'Install Node.js'
+
+        - script: |
+            npm pack
+            npm install -g react-native-code-push*.tgz
+          displayName: 'Package react-native-code-push'
+          workingDirectory: $(Build.SourcesDirectory)
+
+        - task: DeleteFiles@1
+          inputs:
+            contents: node_modules
+          displayName: 'Delete node_modules'
+
+        - task: ArchiveFiles@2
+          inputs:
+            rootFolderOrFile: '$(Build.SourcesDirectory)'
+            includeRootFolder: false
+            archiveType: 'tar'
+            archiveFile: '$(Build.ArtifactStagingDirectory)/npm/$(Build.BuildId).tgz'
+            replaceExistingArchive: true
+            verbose: true
+          displayName: 'Prepare npm artifact'
+
+    - stage: APIScan
+      dependsOn: Stage
+      pool:
+        name: 1ES-PT-Windows-2022
+        os: windows
+      variables:
+        "agent.source.skip": true
+      jobs:
+      - job: APIScan
+        steps:
+        - task: DownloadPipelineArtifact@2
+          displayName: Download Build Artifacts for APIScan
+          inputs:
+            artifactName: npm
+            targetPath: '$(Agent.BuildDirectory)/npm'
+        - task: ExtractFiles@1
+          inputs:
+            archiveFilePatterns: '$(Agent.BuildDirectory)/npm/*.tgz'
+            destinationFolder: '$(Agent.BuildDirectory)/npm_extracted'
+        - task: AzureKeyVault@2
+          inputs:
+            azureSubscription: 'AC - Dev Infra & Build Pool'
+            KeyVaultName: 'mobile-center-sdk'
+            SecretsFilter: 'appcenter-sdk-managed-identity-clientid'
+            RunAsPreJob: false
+        - task: APIScan@2
+          displayName: 'Run APIScan'
+          inputs:
+            softwareFolder: '$(Agent.BuildDirectory)\npm_extracted'
+            softwareName: 'react-native-code-push'
+            softwareVersionNum: '$(Build.BuildId)'
+            isLargeApp: false
+            toolVersion: 'Latest'
+            verbosityLevel: verbose
+          condition: and(succeeded(), ne(variables['DisableAPIScan'], 'true'))
+          env:
+            AzureServicesAuthConnectionString: 'runAs=App;AppId=$(appcenter-sdk-managed-identity-clientid)'
