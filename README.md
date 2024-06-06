@@ -76,7 +76,7 @@ We try our best to maintain backwards compatibility of our plugin with previous 
 | v0.60-v0.61             | v6.0+ *(RN migrated to Autolinking)*                  |
 | v0.62-v0.64             | v6.2+ *(RN removed LiveReload)*                       |
 | v0.65-v0.70             | v7.0+ *(RN updated iPhone-target-version)*            |
-| v0.71                   | v7.2+ *(RN moved to react-native-gradle-plugin)*      |
+| v0.71                   | v8.0+ *(RN moved to react-native-gradle-plugin)*      |
 
 *NOTE: `react-native-code-push` versions lower than **[v5.7.0](https://github.com/microsoft/react-native-code-push/releases/tag/v5.7.0)** will stop working in the near future. You can find more information in our [documentation](https://github.com/microsoft/code-push/blob/master/migration-notice.md).*
 
@@ -277,7 +277,7 @@ Once your app is configured and distributed to your users, and you have made som
 
 *NOTE: Before you can start releasing updates, please log into App Center by running the `appcenter login` command.*
 
-In it's the most basic form, this command only requires one parameter: your owner name + "/" + app name.
+In its most basic form, this command only requires one parameter: your owner name + "/" + app name.
 
 ```shell
 appcenter codepush release-react -a <ownerName>/<appName>
@@ -388,7 +388,6 @@ The React Native community has graciously created some awesome open source apps 
 
 Additionally, if you're looking to get started with React Native + CodePush, and are looking for an awesome starter kit, you should check out the following:
 
-* [Native Starter Pro](http://strapmobile.com/native-starter-pro/)
 * [Pepperoni](http://getpepperoni.com/)
 
 *Note: If you've developed a React Native app using CodePush, that is also open-source, please let us know. We would love to add it to this list!*
@@ -433,7 +432,7 @@ In addition to being able to use the CodePush CLI to "manually" release updates,
 * [Visual Studio Team Services](https://marketplace.visualstudio.com/items?itemName=ms-vsclient.code-push) - *NOTE: VSTS also has extensions for publishing to [HockeyApp](https://marketplace.visualstudio.com/items?itemName=ms.hockeyapp) and the [Google Play](https://github.com/microsoft/google-play-vsts-extension) store, so it provides a pretty great mobile CD solution in general.*
 * [Travis CI](https://github.com/mondora/code-push-travis-cli)
 
-Additionally, if you'd like more details of what a complete mobile CI/CD workflow  can look like, which includes CodePush, check out this [excellent article](https://zeemee.engineering/zeemee-engineering-and-the-quest-for-the-holy-mobile-dev-grail-1310be4953d1#.zfwaxtbco) by the [ZeeMee engineering team](https://zeemee.engineering).
+Additionally, if you'd like more details of what a complete mobile CI/CD workflow  can look like, which includes CodePush, check out this [excellent article](https://medium.com/zeemee-engineering/zeemee-engineering-and-the-quest-for-the-holy-mobile-dev-grail-1310be4953d1) by the [ZeeMee engineering team](https://www.zeemee.com/).
 
 ### TypeScript Consumption
 
