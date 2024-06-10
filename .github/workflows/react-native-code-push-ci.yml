@@ -18,7 +18,7 @@ jobs:
       - name: Start adb server
         run: adb devices
       - name: Gradle cache
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/actions/setup-gradle@v3
       - name: Download system image "android-${{ matrix.api-level }}"
         run: $ANDROID_HOME/tools/bin/sdkmanager "system-images;android-${{ matrix.api-level }};google_apis;x86"
       - name: Create android emulator
