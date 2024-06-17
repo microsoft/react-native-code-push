@@ -18,8 +18,8 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'microsoft'
-          java-version: '17.0.10'
+          distribution: 'temurin'
+          java-version: '8'
       - name: Start adb server
         run: adb devices
       - name: Gradle cache
