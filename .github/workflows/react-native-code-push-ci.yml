@@ -10,7 +10,7 @@ jobs:
     name: Test Android app
     runs-on: macos-13
     env:
-      JAVA_HOME: JAVA_HOME_8_X64
+      JAVA_HOME: $JAVA_HOME_8_X64
     strategy:
       matrix:
         api-level: [ 27 ]
