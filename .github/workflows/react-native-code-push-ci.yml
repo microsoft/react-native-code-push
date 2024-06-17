@@ -11,15 +11,15 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        api-level: [ 27 ]
+        api-level: [ 34 ]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'oracle'
-          java-version: '8'
+          distribution: 'microsoft'
+          java-version: '17.0.10'
       - name: Start adb server
         run: adb devices
       - name: Gradle cache
