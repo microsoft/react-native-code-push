@@ -18,14 +18,14 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
-          distribution: 'adopt'
-          java-version: '8'
+          distribution: 'microsoft'
+          java-version: '11.0.19'
       - name: Start adb server
         run: adb devices
       - name: Gradle cache
         uses: gradle/actions/setup-gradle@v3
       - name: Download system image "android-${{ matrix.api-level }}"
-        run: $ANDROID_HOME/tools/bin/sdkmanager "system-images;android-${{ matrix.api-level }};google_apis;x86"
+        run:   "system-images;android-${{ matrix.api-level }};google_apis;x86"
       - name: Create android emulator
         run: $ANDROID_HOME/tools/bin/avdmanager create avd --force --name TestEmulator --abi google_apis/x86 --package 'system-images;android-${{ matrix.api-level }};google_apis;x86' --device "Nexus 6P"
       - name: Start android emulator
