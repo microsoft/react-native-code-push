@@ -9,10 +9,11 @@ jobs:
   test-android:
     name: Test Android app
     runs-on: macos-13
+    env:
+      JAVA_HOME: $(JAVA_HOME_8_X64)
     strategy:
       matrix:
         api-level: [ 27 ]
-        java-version: [8]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
