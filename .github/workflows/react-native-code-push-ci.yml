@@ -17,7 +17,7 @@ jobs:
         api-level: [ 27 ]
     steps:
       - name: Check java version
-        uses: java --version 
+        run: java --version 
       - name: Checkout
         uses: actions/checkout@v3
       - name: Start adb server
