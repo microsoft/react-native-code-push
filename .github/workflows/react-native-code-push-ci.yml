@@ -9,15 +9,10 @@ jobs:
   test-android:
     name: Test Android app
     runs-on: macos-13
-    env:
-      JAVA_HOME: $JAVA_HOME_8_X64
-      PATH: $(JAVA_HOME_8_X64)/bin:$(PATH)
     strategy:
       matrix:
         api-level: [ 27 ]
     steps:
-      - name: Check java version
-        run: java --version 
       - name: Checkout
         uses: actions/checkout@v3
       - name: Start adb server
