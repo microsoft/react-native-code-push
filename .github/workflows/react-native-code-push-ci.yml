@@ -19,6 +19,7 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
+          distribution: zulu
           java-version: ${{ matrix.java-version }}
       - name: Start adb server
         run: adb devices
