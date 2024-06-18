@@ -12,15 +12,14 @@ jobs:
     strategy:
       matrix:
         api-level: [ 27 ]
-        java-version: [ 8 ]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Setup Java
+      - name: Setup Java for sdkmanager
         uses: actions/setup-java@v3
         with:
           distribution: zulu
-          java-version: ${{ matrix.java-version }}
+          java-version: '8'
       - name: Start adb server
         run: adb devices
       - name: Gradle cache
@@ -36,6 +35,11 @@ jobs:
       - run: adb shell settings put global window_animation_scale 0.0
       - run: adb shell settings put global transition_animation_scale 0.0
       - run: adb shell settings put global animator_duration_scale 0.0
+      - name: Setup Java for Android build
+        uses: actions/setup-java@v3
+        with:
+          distribution: microsoft
+          java-version: '11'
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
