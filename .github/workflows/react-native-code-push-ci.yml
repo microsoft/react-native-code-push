@@ -65,6 +65,8 @@ jobs:
         with:
           ruby-version: '2.7.6'
           bundler-cache: true
+      - name: (Workaround) Install Cocoapods
+        run: gem install cocoapods
       - name: (Workaround) Install activesupport 7.0.8
         run: gem install activesupport -v 7.0.8
       - name: Install dependencies
