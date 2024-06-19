@@ -54,14 +54,12 @@ jobs:
 
   test-iOS:
     name: Test iOS app
-    runs-on: macos-latest
+    runs-on: macos-13
     env:
       NO_FLIPPER: ${{ secrets.NO_FLIPPER }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Enable Corepack
-        run: corepack enable
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
