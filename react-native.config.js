@@ -1,4 +1,9 @@
 module.exports = {
+    project:{
+        ios:{
+            automaticPodsInstallation:true
+        }
+    },
     dependency: {
         platforms: {
             android: {
