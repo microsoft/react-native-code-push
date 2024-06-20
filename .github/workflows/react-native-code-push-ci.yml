@@ -45,7 +45,7 @@ jobs:
       - name: Setup Android tests
         run: npm run build:tests && npm run test:setup:android
       - name: Run Android test
-        run: npm run test:fast:android
+        run: mocha --recursive bin/test  -g "window.codePush.sync.2x.checkerror" --android
 
   test-iOS:
     name: Test iOS app
