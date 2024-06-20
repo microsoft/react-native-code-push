@@ -49,7 +49,7 @@ jobs:
 
   test-iOS:
     name: Test iOS app
-    runs-on: macos-13
+    runs-on: macOS-12
     env:
       NO_FLIPPER: ${{ secrets.NO_FLIPPER }}
     steps:
