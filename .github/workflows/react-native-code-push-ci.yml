@@ -9,6 +9,7 @@ jobs:
   test-android:
     name: Test Android app
     runs-on: macOS-12
+    timeout-minutes: 90
     strategy:
       matrix:
         api-level: [ 27 ]
@@ -20,7 +21,7 @@ jobs:
       - name: Gradle cache
         uses: gradle/actions/setup-gradle@v3
       - name: Download system image "android-${{ matrix.api-level }}"
-        run:  $ANDROID_HOME/tools/bin/sdkmanager "system-images;android-${{ matrix.api-level }};google_apis;x86"
+        run: $ANDROID_HOME/tools/bin/sdkmanager "system-images;android-${{ matrix.api-level }};google_apis;x86"
       - name: Create android emulator
         run: $ANDROID_HOME/tools/bin/avdmanager create avd --force --name TestEmulator --abi google_apis/x86 --package 'system-images;android-${{ matrix.api-level }};google_apis;x86' --device "Nexus 6P"
       - name: Start android emulator

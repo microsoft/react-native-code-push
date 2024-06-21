@@ -24,7 +24,7 @@
     "test:setup:android": "mocha --recursive bin/test --android --setup",
     "test:setup:ios": "mocha --recursive bin/test --ios --setup",
     "test:fast": "mocha --recursive bin/test --android --ios",
-    "test:fast:android": "mocha --recursive bin/test --android -g 'window.codePush.sync.2x.checkerror' ",
+    "test:fast:android": "mocha --recursive bin/test --android",
     "test:fast:ios": "mocha --recursive bin/test --ios",
     "test:debugger:android": "mocha --recursive --inspect-brk=0.0.0.0 bin/test --android",
     "test:debugger:ios": "mocha --recursive --inspect-brk=0.0.0.0 bin/test --ios",
