@@ -14,69 +14,66 @@ pool:
 stages:
 - stage: TestAndroid
   jobs:
-  - job: StartAdbServer
-    displayName: 'Start adb server'
+  - job: TestAndroid
+    displayName: 'Test android'
     steps:
+    
     - script: |
         adb devices
-  - job: DownloadSystemImage
-    displayName: 'Download system image'
-    steps:
+
     - script: |
         $ANDROID_HOME/tools/bin/sdkmanager "system-images;android-$(api-level);google_apis;x86"
-  - job: CreatingAndroidEmulator
-    displayName: 'Creating Android emulator'
-    steps:
+      displayName: 'Download system image'
+
     - script: |
         $ANDROID_HOME/tools/bin/avdmanager create avd --force --name TestEmulator --abi google_apis/x86 --package 'system-images;android-$(api-level);google_apis;x86' --device "Nexus 6P"
-  - job: StartAndroidEmulator
-    displayName: 'Start Android emulator'
-    steps:
+      displayName: 'Creating Android emulator'
+
     - script: |
         $ANDROID_HOME/emulator/emulator -avd TestEmulator -noaudio -no-window -no-snapshot-save -no-boot-anim -memory 6144 &
-  - job: WaitForEmulatorToBoot
-    displayName: 'Wait for emulator to boot'
-    steps:
+      displayName: 'Start Android emulator'
+
     - script: |
         $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done'
-  - job: DisableAnimations
-    displayName: 'Disable animations and transitions'
-    steps:
+      displayName: 'Wait for emulator to boot'
+   
     - script: |
-         adb shell settings put global window_animation_scale 0.0      
+         adb shell settings put global window_animation_scale 0.0    
+      displayName: 'Disable animations and transitions'  
+
     - script: |
          adb shell settings put global transition_animation_scale 0.0
+      displayName: 'Disable animations and transitions'
+
     - script: |
          adb shell settings put global animator_duration_scale 0.0   
-  - job: ChangeJavaVersion
-    displayName: 'Change Java version'
-    steps:    
+      displayName: 'Disable animations and transitions'
+
+    
+      
     - task: JavaToolInstaller@0
       inputs:
         versionSpec: '11'
         jdkArchitectureOption: 'x64'
         jdkSourceOption: 'PreInstalled'
-  - job: ChangeRubyVersion
-    displayName: 'Change Ruby version'
-    steps:
+      displayName: 'Change Java version'
+
     - task: UseRubyVersion@0
       inputs:
         versionSpec: '2.7.6'
-  - job: PackageInstallation
-    displayName: 'Package Installation'
-    steps:
+      displayName: 'Change Ruby version'
+
     - script: |
         npm install
-  - job: SetupAndroidTests
-    displayName: 'Setup Android tests'
-    steps:
+      displayName: 'Package Installation'
+
     - script: |
         npm run build:tests && npm run test:setup:android
-  - job: RunAndroidTest
-    displayName: 'Run Android test'
-    steps:
+      displayName: 'Setup Android tests'
+
     - script: |
         npm run test:fast:android
+      displayName: 'Run Android test'
     
 
     
