@@ -1,0 +1,17 @@
+trigger:
+- master
+
+pr:
+- master
+
+pool:
+  vmImage: 'macOS-12'
+
+stages:
+- stage: TestAndroid
+  jobs:
+  - job: StartAdbServer
+    displayName: 'Start adb server'
+    steps:
+    - script: |
+        adb devices
