@@ -17,7 +17,7 @@ stages:
   - job: TestAndroid
     displayName: 'Test android'
     steps:
-    
+
     - script: |
         adb devices
 
@@ -50,18 +50,12 @@ stages:
       displayName: 'Disable animations and transitions'
 
     
-      
     - task: JavaToolInstaller@0
       inputs:
         versionSpec: '11'
         jdkArchitectureOption: 'x64'
         jdkSourceOption: 'PreInstalled'
       displayName: 'Change Java version'
-
-    - task: UseRubyVersion@0
-      inputs:
-        versionSpec: '2.7.6'
-      displayName: 'Change Ruby version'
 
     - script: |
         npm install
