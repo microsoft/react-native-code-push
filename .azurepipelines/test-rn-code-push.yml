@@ -77,7 +77,7 @@ stages:
     steps:
 
     - script: |
-        run: npm install
+        npm install
       displayName: 'Install dependencies'
 
     - script: |
