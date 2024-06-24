@@ -12,7 +12,8 @@ pool:
   vmImage: 'macOS-12'
 
 stages:
-- stage: Android
+- stage: RunTests
+  displayName: 'Run Android & IOS tests'
   jobs:
   - job: TestAndroid
     timeoutInMinutes: 120
@@ -71,8 +72,6 @@ stages:
         npm run test:fast:android
       displayName: 'Run Android test'
 
-- stage: IOS
-  jobs:
   - job: TestIOS
     displayName: 'Test IOS'
     steps:
