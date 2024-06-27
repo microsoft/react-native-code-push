@@ -1,9 +1,6 @@
 #import "CodePush.h"
-#if __has_include(<SSZipArchive/SSZipArchive.h>)
-#import <SSZipArchive/SSZipArchive.h>
-#else
-#import "SSZipArchive.h"
-#endif
+
+#import "CodePush/CodePush-Swift.h"
 
 @implementation CodePushPackage
 
@@ -101,8 +98,7 @@ static NSString *const UnzippedFolderName = @"unzipped";
                                                         }
                                                         
                                                         NSError *nonFailingError = nil;
-                                                        [SSZipArchive unzipFileAtPath:downloadFilePath
-                                                                        toDestination:unzippedFolderPath];
+                                                        [RiseUtils unzipAtPath:downloadFilePath destination:unzippedFolderPath error:&error];
                                                         [[NSFileManager defaultManager] removeItemAtPath:downloadFilePath
                                                                                                    error:&nonFailingError];
                                                         if (nonFailingError) {

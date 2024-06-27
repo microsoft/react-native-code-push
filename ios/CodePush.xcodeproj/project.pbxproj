@@ -14,20 +14,6 @@
 		540D20121C7684FE00D6EF41 /* CodePushUpdateUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 540D20111C7684FE00D6EF41 /* CodePushUpdateUtils.m */; };
 		5421FE311C58AD5A00986A55 /* CodePushTelemetryManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 5421FE301C58AD5A00986A55 /* CodePushTelemetryManager.m */; };
 		5498D8F61D21F14100B5EB43 /* CodePushUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 5498D8F51D21F14100B5EB43 /* CodePushUtils.m */; };
-		54A0026C1C0E2880004C3CEC /* aescrypt.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0024C1C0E2880004C3CEC /* aescrypt.c */; };
-		54A0026D1C0E2880004C3CEC /* aeskey.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0024D1C0E2880004C3CEC /* aeskey.c */; };
-		54A0026E1C0E2880004C3CEC /* aestab.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0024F1C0E2880004C3CEC /* aestab.c */; };
-		54A0026F1C0E2880004C3CEC /* entropy.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002531C0E2880004C3CEC /* entropy.c */; };
-		54A002701C0E2880004C3CEC /* fileenc.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002551C0E2880004C3CEC /* fileenc.c */; };
-		54A002711C0E2880004C3CEC /* hmac.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002571C0E2880004C3CEC /* hmac.c */; };
-		54A002721C0E2880004C3CEC /* prng.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002591C0E2880004C3CEC /* prng.c */; };
-		54A002731C0E2880004C3CEC /* pwd2key.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0025B1C0E2880004C3CEC /* pwd2key.c */; };
-		54A002741C0E2880004C3CEC /* sha1.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0025D1C0E2880004C3CEC /* sha1.c */; };
-		54A002751C0E2880004C3CEC /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002621C0E2880004C3CEC /* ioapi.c */; };
-		54A002761C0E2880004C3CEC /* mztools.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002641C0E2880004C3CEC /* mztools.c */; };
-		54A002771C0E2880004C3CEC /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002661C0E2880004C3CEC /* unzip.c */; };
-		54A002781C0E2880004C3CEC /* zip.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002681C0E2880004C3CEC /* zip.c */; };
-		54A002791C0E2880004C3CEC /* SSZipArchive.m in Sources */ = {isa = PBXBuildFile; fileRef = 54A0026B1C0E2880004C3CEC /* SSZipArchive.m */; };
 		54FFEDE01BF550630061DD23 /* CodePushDownloadHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 54FFEDDF1BF550630061DD23 /* CodePushDownloadHandler.m */; };
 		6463C82D1EBA0CFB0095B8CD /* CodePushUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 5498D8F51D21F14100B5EB43 /* CodePushUtils.m */; };
 		6463C82E1EBA0CFB0095B8CD /* CodePush.m in Sources */ = {isa = PBXBuildFile; fileRef = 13BE3DED1AC21097009241FE /* CodePush.m */; };
@@ -39,26 +25,16 @@
 		6463C8341EBA0CFB0095B8CD /* CodePushUpdateUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 540D20111C7684FE00D6EF41 /* CodePushUpdateUtils.m */; };
 		6463C8351EBA0CFB0095B8CD /* RCTConvert+CodePushInstallMode.m in Sources */ = {isa = PBXBuildFile; fileRef = 1B23B9131BF9267B000BB2F0 /* RCTConvert+CodePushInstallMode.m */; };
 		6463C8361EBA0CFB0095B8CD /* RCTConvert+CodePushUpdateState.m in Sources */ = {isa = PBXBuildFile; fileRef = 1BCC09A61CC19EB700DDC0DD /* RCTConvert+CodePushUpdateState.m */; };
-		6463C8371EBA0CFB0095B8CD /* aescrypt.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0024C1C0E2880004C3CEC /* aescrypt.c */; };
-		6463C8381EBA0CFB0095B8CD /* aeskey.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0024D1C0E2880004C3CEC /* aeskey.c */; };
-		6463C8391EBA0CFB0095B8CD /* aestab.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0024F1C0E2880004C3CEC /* aestab.c */; };
-		6463C83A1EBA0CFB0095B8CD /* entropy.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002531C0E2880004C3CEC /* entropy.c */; };
-		6463C83B1EBA0CFB0095B8CD /* fileenc.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002551C0E2880004C3CEC /* fileenc.c */; };
-		6463C83C1EBA0CFB0095B8CD /* hmac.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002571C0E2880004C3CEC /* hmac.c */; };
-		6463C83D1EBA0CFB0095B8CD /* prng.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002591C0E2880004C3CEC /* prng.c */; };
-		6463C83E1EBA0CFB0095B8CD /* pwd2key.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0025B1C0E2880004C3CEC /* pwd2key.c */; };
-		6463C83F1EBA0CFB0095B8CD /* sha1.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A0025D1C0E2880004C3CEC /* sha1.c */; };
-		6463C8401EBA0CFB0095B8CD /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002621C0E2880004C3CEC /* ioapi.c */; };
-		6463C8411EBA0CFB0095B8CD /* mztools.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002641C0E2880004C3CEC /* mztools.c */; };
-		6463C8421EBA0CFB0095B8CD /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002661C0E2880004C3CEC /* unzip.c */; };
-		6463C8431EBA0CFB0095B8CD /* zip.c in Sources */ = {isa = PBXBuildFile; fileRef = 54A002681C0E2880004C3CEC /* zip.c */; };
-		6463C8441EBA0CFB0095B8CD /* SSZipArchive.m in Sources */ = {isa = PBXBuildFile; fileRef = 54A0026B1C0E2880004C3CEC /* SSZipArchive.m */; };
 		6463C8451EBA0D1F0095B8CD /* CodePush.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 13BE3DEC1AC21097009241FE /* CodePush.h */; };
 		6463C8471EBA0D290095B8CD /* CodePush.h in Headers */ = {isa = PBXBuildFile; fileRef = 13BE3DEC1AC21097009241FE /* CodePush.h */; };
 		810D4E6D1B96935000B397E9 /* CodePushPackage.m in Sources */ = {isa = PBXBuildFile; fileRef = 810D4E6C1B96935000B397E9 /* CodePushPackage.m */; };
 		81D51F3A1B6181C2000DA084 /* CodePushConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 81D51F391B6181C2000DA084 /* CodePushConfig.m */; };
 		8482F84C1E24C58300F793DB /* CodePush.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 13BE3DEC1AC21097009241FE /* CodePush.h */; };
 		8482F84E1E24C66300F793DB /* CodePush.h in Headers */ = {isa = PBXBuildFile; fileRef = 13BE3DEC1AC21097009241FE /* CodePush.h */; };
+		CE27E7072C2DC7CF00B2E46D /* RiseUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE27E7062C2DC7CF00B2E46D /* RiseUtils.swift */; };
+		CE27E7082C2DC7CF00B2E46D /* RiseUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE27E7062C2DC7CF00B2E46D /* RiseUtils.swift */; };
+		CE27E72B2C2DCA5200B2E46D /* CodePush-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = CE27E7292C2DCA5200B2E46D /* CodePush-Bridging-Header.h */; };
+		CE27E72C2C2DCA5200B2E46D /* CodePush-tvOS-Bridging-Header.h in Headers */ = {isa = PBXBuildFile; fileRef = CE27E72A2C2DCA5200B2E46D /* CodePush-tvOS-Bridging-Header.h */; };
 		F85736761F4F03BF00C9C00A /* MF_Base64Additions.h in Headers */ = {isa = PBXBuildFile; fileRef = F85736731F4F03BF00C9C00A /* MF_Base64Additions.h */; };
 		F85736771F4F03BF00C9C00A /* MF_Base64Additions.m in Sources */ = {isa = PBXBuildFile; fileRef = F85736741F4F03BF00C9C00A /* MF_Base64Additions.m */; };
 		F886644D1F4AD1EE0036D01B /* JWTAlgorithm.h in Headers */ = {isa = PBXBuildFile; fileRef = F88664151F4AD1EE0036D01B /* JWTAlgorithm.h */; };
@@ -142,42 +118,12 @@
 		540D20111C7684FE00D6EF41 /* CodePushUpdateUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CodePushUpdateUtils.m; path = CodePush/CodePushUpdateUtils.m; sourceTree = "<group>"; };
 		5421FE301C58AD5A00986A55 /* CodePushTelemetryManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CodePushTelemetryManager.m; path = CodePush/CodePushTelemetryManager.m; sourceTree = "<group>"; };
 		5498D8F51D21F14100B5EB43 /* CodePushUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CodePushUtils.m; path = CodePush/CodePushUtils.m; sourceTree = "<group>"; };
-		54A0024A1C0E2880004C3CEC /* aes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aes.h; sourceTree = "<group>"; };
-		54A0024B1C0E2880004C3CEC /* aes_via_ace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aes_via_ace.h; sourceTree = "<group>"; };
-		54A0024C1C0E2880004C3CEC /* aescrypt.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = aescrypt.c; sourceTree = "<group>"; };
-		54A0024D1C0E2880004C3CEC /* aeskey.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = aeskey.c; sourceTree = "<group>"; };
-		54A0024E1C0E2880004C3CEC /* aesopt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aesopt.h; sourceTree = "<group>"; };
-		54A0024F1C0E2880004C3CEC /* aestab.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = aestab.c; sourceTree = "<group>"; };
-		54A002501C0E2880004C3CEC /* aestab.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aestab.h; sourceTree = "<group>"; };
-		54A002511C0E2880004C3CEC /* brg_endian.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = brg_endian.h; sourceTree = "<group>"; };
-		54A002521C0E2880004C3CEC /* brg_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = brg_types.h; sourceTree = "<group>"; };
-		54A002531C0E2880004C3CEC /* entropy.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = entropy.c; sourceTree = "<group>"; };
-		54A002541C0E2880004C3CEC /* entropy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = entropy.h; sourceTree = "<group>"; };
-		54A002551C0E2880004C3CEC /* fileenc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fileenc.c; sourceTree = "<group>"; };
-		54A002561C0E2880004C3CEC /* fileenc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fileenc.h; sourceTree = "<group>"; };
-		54A002571C0E2880004C3CEC /* hmac.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hmac.c; sourceTree = "<group>"; };
-		54A002581C0E2880004C3CEC /* hmac.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hmac.h; sourceTree = "<group>"; };
-		54A002591C0E2880004C3CEC /* prng.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = prng.c; sourceTree = "<group>"; };
-		54A0025A1C0E2880004C3CEC /* prng.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = prng.h; sourceTree = "<group>"; };
-		54A0025B1C0E2880004C3CEC /* pwd2key.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = pwd2key.c; sourceTree = "<group>"; };
-		54A0025C1C0E2880004C3CEC /* pwd2key.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pwd2key.h; sourceTree = "<group>"; };
-		54A0025D1C0E2880004C3CEC /* sha1.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sha1.c; sourceTree = "<group>"; };
-		54A0025E1C0E2880004C3CEC /* sha1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sha1.h; sourceTree = "<group>"; };
-		54A0025F1C0E2880004C3CEC /* Common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Common.h; sourceTree = "<group>"; };
-		54A002611C0E2880004C3CEC /* crypt.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = crypt.h; sourceTree = "<group>"; };
-		54A002621C0E2880004C3CEC /* ioapi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ioapi.c; sourceTree = "<group>"; };
-		54A002631C0E2880004C3CEC /* ioapi.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ioapi.h; sourceTree = "<group>"; };
-		54A002641C0E2880004C3CEC /* mztools.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mztools.c; sourceTree = "<group>"; };
-		54A002651C0E2880004C3CEC /* mztools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mztools.h; sourceTree = "<group>"; };
-		54A002661C0E2880004C3CEC /* unzip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = unzip.c; sourceTree = "<group>"; };
-		54A002671C0E2880004C3CEC /* unzip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = unzip.h; sourceTree = "<group>"; };
-		54A002681C0E2880004C3CEC /* zip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = zip.c; sourceTree = "<group>"; };
-		54A002691C0E2880004C3CEC /* zip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zip.h; sourceTree = "<group>"; };
-		54A0026A1C0E2880004C3CEC /* SSZipArchive.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSZipArchive.h; sourceTree = "<group>"; };
-		54A0026B1C0E2880004C3CEC /* SSZipArchive.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSZipArchive.m; sourceTree = "<group>"; };
 		54FFEDDF1BF550630061DD23 /* CodePushDownloadHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CodePushDownloadHandler.m; path = CodePush/CodePushDownloadHandler.m; sourceTree = "<group>"; };
 		810D4E6C1B96935000B397E9 /* CodePushPackage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CodePushPackage.m; path = CodePush/CodePushPackage.m; sourceTree = "<group>"; };
 		81D51F391B6181C2000DA084 /* CodePushConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CodePushConfig.m; path = CodePush/CodePushConfig.m; sourceTree = "<group>"; };
+		CE27E7062C2DC7CF00B2E46D /* RiseUtils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = RiseUtils.swift; path = CodePush/RiseUtils.swift; sourceTree = "<group>"; };
+		CE27E7292C2DCA5200B2E46D /* CodePush-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "CodePush-Bridging-Header.h"; path = "CodePush/CodePush-Bridging-Header.h"; sourceTree = "<group>"; };
+		CE27E72A2C2DCA5200B2E46D /* CodePush-tvOS-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "CodePush-tvOS-Bridging-Header.h"; path = "CodePush/CodePush-tvOS-Bridging-Header.h"; sourceTree = "<group>"; };
 		F85736731F4F03BF00C9C00A /* MF_Base64Additions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MF_Base64Additions.h; sourceTree = "<group>"; };
 		F85736741F4F03BF00C9C00A /* MF_Base64Additions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MF_Base64Additions.m; sourceTree = "<group>"; };
 		F85736751F4F03BF00C9C00A /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
@@ -259,66 +205,12 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		54A002481C0E2880004C3CEC /* SSZipArchive */ = {
-			isa = PBXGroup;
-			children = (
-				54A002491C0E2880004C3CEC /* aes */,
-				54A0025F1C0E2880004C3CEC /* Common.h */,
-				54A002601C0E2880004C3CEC /* minizip */,
-				54A0026A1C0E2880004C3CEC /* SSZipArchive.h */,
-				54A0026B1C0E2880004C3CEC /* SSZipArchive.m */,
-			);
-			name = SSZipArchive;
-			path = CodePush/SSZipArchive;
-			sourceTree = "<group>";
-		};
-		54A002491C0E2880004C3CEC /* aes */ = {
-			isa = PBXGroup;
-			children = (
-				54A0024A1C0E2880004C3CEC /* aes.h */,
-				54A0024B1C0E2880004C3CEC /* aes_via_ace.h */,
-				54A0024C1C0E2880004C3CEC /* aescrypt.c */,
-				54A0024D1C0E2880004C3CEC /* aeskey.c */,
-				54A0024E1C0E2880004C3CEC /* aesopt.h */,
-				54A0024F1C0E2880004C3CEC /* aestab.c */,
-				54A002501C0E2880004C3CEC /* aestab.h */,
-				54A002511C0E2880004C3CEC /* brg_endian.h */,
-				54A002521C0E2880004C3CEC /* brg_types.h */,
-				54A002531C0E2880004C3CEC /* entropy.c */,
-				54A002541C0E2880004C3CEC /* entropy.h */,
-				54A002551C0E2880004C3CEC /* fileenc.c */,
-				54A002561C0E2880004C3CEC /* fileenc.h */,
-				54A002571C0E2880004C3CEC /* hmac.c */,
-				54A002581C0E2880004C3CEC /* hmac.h */,
-				54A002591C0E2880004C3CEC /* prng.c */,
-				54A0025A1C0E2880004C3CEC /* prng.h */,
-				54A0025B1C0E2880004C3CEC /* pwd2key.c */,
-				54A0025C1C0E2880004C3CEC /* pwd2key.h */,
-				54A0025D1C0E2880004C3CEC /* sha1.c */,
-				54A0025E1C0E2880004C3CEC /* sha1.h */,
-			);
-			path = aes;
-			sourceTree = "<group>";
-		};
-		54A002601C0E2880004C3CEC /* minizip */ = {
-			isa = PBXGroup;
-			children = (
-				54A002611C0E2880004C3CEC /* crypt.h */,
-				54A002621C0E2880004C3CEC /* ioapi.c */,
-				54A002631C0E2880004C3CEC /* ioapi.h */,
-				54A002641C0E2880004C3CEC /* mztools.c */,
-				54A002651C0E2880004C3CEC /* mztools.h */,
-				54A002661C0E2880004C3CEC /* unzip.c */,
-				54A002671C0E2880004C3CEC /* unzip.h */,
-				54A002681C0E2880004C3CEC /* zip.c */,
-				54A002691C0E2880004C3CEC /* zip.h */,
-			);
-			path = minizip;
-			sourceTree = "<group>";
-		};
 		58B511D21A9E6C8500147676 = {
 			isa = PBXGroup;
 			children = (
+				CE27E7292C2DCA5200B2E46D /* CodePush-Bridging-Header.h */,
+				CE27E72A2C2DCA5200B2E46D /* CodePush-tvOS-Bridging-Header.h */,
+				CE27E7062C2DC7CF00B2E46D /* RiseUtils.swift */,
 				5498D8F51D21F14100B5EB43 /* CodePushUtils.m */,
 				13BE3DEC1AC21097009241FE /* CodePush.h */,
 				13BE3DED1AC21097009241FE /* CodePush.m */,
@@ -332,7 +224,6 @@
 				1BCC09A61CC19EB700DDC0DD /* RCTConvert+CodePushUpdateState.m */,
 				F85736711F4F03BF00C9C00A /* Base64 */,
 				F88664111F4AD1EE0036D01B /* JWT */,
-				54A002481C0E2880004C3CEC /* SSZipArchive */,
 				134814211AA4EA7D00B7C361 /* Products */,
 				C31BB4D5018A48D5288C5137 /* Frameworks */,
 				F886647B1F4ADB500036D01B /* libCodePush.a */,
@@ -541,6 +432,7 @@
 				F88664521F4AD1EE0036D01B /* JWTAlgorithmESBase.h in Headers */,
 				F88664781F4AD1EE0036D01B /* JWTDeprecations.h in Headers */,
 				F88664631F4AD1EE0036D01B /* JWTClaim.h in Headers */,
+				CE27E72C2C2DCA5200B2E46D /* CodePush-tvOS-Bridging-Header.h in Headers */,
 				F886645A1F4AD1EE0036D01B /* JWTAlgorithmRSBase.h in Headers */,
 				F886645F1F4AD1EE0036D01B /* JWTCryptoKeyExtractor.h in Headers */,
 				F88664651F4AD1EE0036D01B /* JWTClaimsSet.h in Headers */,
@@ -553,6 +445,7 @@
 				F88664561F4AD1EE0036D01B /* JWTAlgorithmDataHolderChain.h in Headers */,
 				F886644D1F4AD1EE0036D01B /* JWTAlgorithm.h in Headers */,
 				F88664611F4AD1EE0036D01B /* JWTCryptoSecurity.h in Headers */,
+				CE27E72B2C2DCA5200B2E46D /* CodePush-Bridging-Header.h in Headers */,
 				F88664751F4AD1EE0036D01B /* JWT.h in Headers */,
 				F886645D1F4AD1EE0036D01B /* JWTCryptoKey.h in Headers */,
 				F886646F1F4AD1EE0036D01B /* JWTCoding+VersionThree.h in Headers */,
@@ -613,9 +506,11 @@
 				TargetAttributes = {
 					58B511DA1A9E6C8500147676 = {
 						CreatedOnToolsVersion = 6.1.1;
+						LastSwiftMigration = 1540;
 					};
 					6463C8231EBA0CB60095B8CD = {
 						CreatedOnToolsVersion = 8.3.2;
+						LastSwiftMigration = 1540;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -625,6 +520,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 58B511D21A9E6C8500147676;
@@ -645,40 +541,27 @@
 			files = (
 				F88664621F4AD1EE0036D01B /* JWTCryptoSecurity.m in Sources */,
 				F88664701F4AD1EE0036D01B /* JWTCoding+VersionThree.m in Sources */,
-				54A0026D1C0E2880004C3CEC /* aeskey.c in Sources */,
 				540D20121C7684FE00D6EF41 /* CodePushUpdateUtils.m in Sources */,
-				54A0026E1C0E2880004C3CEC /* aestab.c in Sources */,
-				54A002761C0E2880004C3CEC /* mztools.c in Sources */,
 				F886646E1F4AD1EE0036D01B /* JWTCoding+VersionOne.m in Sources */,
 				1BCC09A71CC19EB700DDC0DD /* RCTConvert+CodePushUpdateState.m in Sources */,
-				54A002781C0E2880004C3CEC /* zip.c in Sources */,
 				F88664661F4AD1EE0036D01B /* JWTClaimsSet.m in Sources */,
-				54A002791C0E2880004C3CEC /* SSZipArchive.m in Sources */,
 				1B23B9141BF9267B000BB2F0 /* RCTConvert+CodePushInstallMode.m in Sources */,
 				F886645E1F4AD1EE0036D01B /* JWTCryptoKey.m in Sources */,
 				81D51F3A1B6181C2000DA084 /* CodePushConfig.m in Sources */,
-				54A002741C0E2880004C3CEC /* sha1.c in Sources */,
 				F886646A1F4AD1EE0036D01B /* JWTClaimsSetVerifier.m in Sources */,
 				54FFEDE01BF550630061DD23 /* CodePushDownloadHandler.m in Sources */,
 				F88664551F4AD1EE0036D01B /* JWTAlgorithmDataHolder.m in Sources */,
-				54A002711C0E2880004C3CEC /* hmac.c in Sources */,
 				F88664681F4AD1EE0036D01B /* JWTClaimsSetSerializer.m in Sources */,
-				54A002721C0E2880004C3CEC /* prng.c in Sources */,
 				5421FE311C58AD5A00986A55 /* CodePushTelemetryManager.m in Sources */,
+				CE27E7072C2DC7CF00B2E46D /* RiseUtils.swift in Sources */,
 				F886646C1F4AD1EE0036D01B /* JWTCoding+ResultTypes.m in Sources */,
 				F88664601F4AD1EE0036D01B /* JWTCryptoKeyExtractor.m in Sources */,
 				F88664571F4AD1EE0036D01B /* JWTAlgorithmDataHolderChain.m in Sources */,
-				54A002731C0E2880004C3CEC /* pwd2key.c in Sources */,
-				54A002751C0E2880004C3CEC /* ioapi.c in Sources */,
-				54A002771C0E2880004C3CEC /* unzip.c in Sources */,
-				54A0026F1C0E2880004C3CEC /* entropy.c in Sources */,
 				13BE3DEE1AC21097009241FE /* CodePush.m in Sources */,
-				54A0026C1C0E2880004C3CEC /* aescrypt.c in Sources */,
 				F85736771F4F03BF00C9C00A /* MF_Base64Additions.m in Sources */,
 				F88664641F4AD1EE0036D01B /* JWTClaim.m in Sources */,
 				F88664741F4AD1EE0036D01B /* JWTCoding.m in Sources */,
 				1B762E901C9A5E9A006EF800 /* CodePushErrorUtils.m in Sources */,
-				54A002701C0E2880004C3CEC /* fileenc.c in Sources */,
 				F886645B1F4AD1EE0036D01B /* JWTAlgorithmRSBase.m in Sources */,
 				F886647A1F4AD1EF0036D01B /* JWTErrorDescription.m in Sources */,
 				F886644F1F4AD1EE0036D01B /* JWTAlgorithmFactory.m in Sources */,
@@ -699,6 +582,7 @@
 				6463C82D1EBA0CFB0095B8CD /* CodePushUtils.m in Sources */,
 				6463C82E1EBA0CFB0095B8CD /* CodePush.m in Sources */,
 				6463C82F1EBA0CFB0095B8CD /* CodePushConfig.m in Sources */,
+				CE27E7082C2DC7CF00B2E46D /* RiseUtils.swift in Sources */,
 				6463C8301EBA0CFB0095B8CD /* CodePushDownloadHandler.m in Sources */,
 				6463C8311EBA0CFB0095B8CD /* CodePushErrorUtils.m in Sources */,
 				6463C8321EBA0CFB0095B8CD /* CodePushPackage.m in Sources */,
@@ -706,20 +590,6 @@
 				6463C8341EBA0CFB0095B8CD /* CodePushUpdateUtils.m in Sources */,
 				6463C8351EBA0CFB0095B8CD /* RCTConvert+CodePushInstallMode.m in Sources */,
 				6463C8361EBA0CFB0095B8CD /* RCTConvert+CodePushUpdateState.m in Sources */,
-				6463C8371EBA0CFB0095B8CD /* aescrypt.c in Sources */,
-				6463C8381EBA0CFB0095B8CD /* aeskey.c in Sources */,
-				6463C8391EBA0CFB0095B8CD /* aestab.c in Sources */,
-				6463C83A1EBA0CFB0095B8CD /* entropy.c in Sources */,
-				6463C83B1EBA0CFB0095B8CD /* fileenc.c in Sources */,
-				6463C83C1EBA0CFB0095B8CD /* hmac.c in Sources */,
-				6463C83D1EBA0CFB0095B8CD /* prng.c in Sources */,
-				6463C83E1EBA0CFB0095B8CD /* pwd2key.c in Sources */,
-				6463C83F1EBA0CFB0095B8CD /* sha1.c in Sources */,
-				6463C8401EBA0CFB0095B8CD /* ioapi.c in Sources */,
-				6463C8411EBA0CFB0095B8CD /* mztools.c in Sources */,
-				6463C8421EBA0CFB0095B8CD /* unzip.c in Sources */,
-				6463C8431EBA0CFB0095B8CD /* zip.c in Sources */,
-				6463C8441EBA0CFB0095B8CD /* SSZipArchive.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -828,6 +698,7 @@
 		58B511F01A9E6C8500147676 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
@@ -841,12 +712,16 @@
 				);
 				PRODUCT_NAME = CodePush;
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "CodePush-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
 		58B511F11A9E6C8500147676 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
@@ -860,6 +735,8 @@
 				);
 				PRODUCT_NAME = CodePush;
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "CodePush-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -868,6 +745,7 @@
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -878,6 +756,9 @@
 				PRODUCT_NAME = CodePush;
 				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "CodePush-tvOS-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 				TVOS_DEPLOYMENT_TARGET = 10.2;
 			};
 			name = Debug;
@@ -887,6 +768,7 @@
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_ENABLE_MODULES = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -897,6 +779,8 @@
 				PRODUCT_NAME = CodePush;
 				SDKROOT = appletvos;
 				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "CodePush-tvOS-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 				TVOS_DEPLOYMENT_TARGET = 10.2;
 			};
 			name = Release;
