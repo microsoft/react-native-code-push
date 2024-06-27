@@ -1,5 +1,5 @@
 {
-  "name": "react-native-code-push",
+  "name": "@kosiken/react-native-code-push",
   "version": "8.2.2",
   "description": "React Native plugin for the CodePush service",
   "main": "CodePush.js",
@@ -32,7 +32,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/react-native-code-push"
+    "url": "https://github.com/kosiken/react-native-code-push.git"
   },
   "dependencies": {
     "code-push": "^4.2.1",
