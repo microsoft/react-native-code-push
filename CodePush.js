@@ -531,42 +531,41 @@ function codePushify(options = {}) {
     );
   }
 
-  var decorator = (RootComponent) => {
-    const extended = class CodePushComponent extends React.Component {
+  const decorator = (RootComponent) => {
+    class CodePushComponent extends React.Component {
+      constructor(props) {
+        super(props);
+        this.rootComponentRef = React.createRef();
+      }
+
       componentDidMount() {
         if (options.checkFrequency === CodePush.CheckFrequency.MANUAL) {
           CodePush.notifyAppReady();
         } else {
-          let rootComponentInstance = this.refs.rootComponent;
+          const rootComponentInstance = this.rootComponentRef.current;
 
           let syncStatusCallback;
           if (rootComponentInstance && rootComponentInstance.codePushStatusDidChange) {
-            syncStatusCallback = rootComponentInstance.codePushStatusDidChange;
-            if (rootComponentInstance instanceof React.Component) {
-              syncStatusCallback = syncStatusCallback.bind(rootComponentInstance);
-            }
+            syncStatusCallback = rootComponentInstance.codePushStatusDidChange.bind(rootComponentInstance);
           }
 
           let downloadProgressCallback;
           if (rootComponentInstance && rootComponentInstance.codePushDownloadDidProgress) {
-            downloadProgressCallback = rootComponentInstance.codePushDownloadDidProgress;
-            if (rootComponentInstance instanceof React.Component) {
-              downloadProgressCallback = downloadProgressCallback.bind(rootComponentInstance);
-            }
+            downloadProgressCallback = rootComponentInstance.codePushDownloadDidProgress.bind(rootComponentInstance);
           }
 
           let handleBinaryVersionMismatchCallback;
           if (rootComponentInstance && rootComponentInstance.codePushOnBinaryVersionMismatch) {
-            handleBinaryVersionMismatchCallback = rootComponentInstance.codePushOnBinaryVersionMismatch;
-            if (rootComponentInstance instanceof React.Component) {
-              handleBinaryVersionMismatchCallback = handleBinaryVersionMismatchCallback.bind(rootComponentInstance);
-            }
+            handleBinaryVersionMismatchCallback = rootComponentInstance.codePushOnBinaryVersionMismatch.bind(rootComponentInstance);
           }
 
           CodePush.sync(options, syncStatusCallback, downloadProgressCallback, handleBinaryVersionMismatchCallback);
+
           if (options.checkFrequency === CodePush.CheckFrequency.ON_APP_RESUME) {
             ReactNative.AppState.addEventListener("change", (newState) => {
-              newState === "active" && CodePush.sync(options, syncStatusCallback, downloadProgressCallback);
+              if (newState === "active") {
+                CodePush.sync(options, syncStatusCallback, downloadProgressCallback);
+              }
             });
           }
         }
@@ -575,17 +574,17 @@ function codePushify(options = {}) {
       render() {
         const props = {...this.props};
 
-        // we can set ref property on class components only (not stateless)
-        // check it by render method
-        if (RootComponent.prototype.render) {
-          props.ref = "rootComponent";
+        // We can set ref property on class components only (not stateless)
+        // Check it by render method
+        if (RootComponent.prototype && RootComponent.prototype.render) {
+          props.ref = this.rootComponentRef;
         }
 
         return <RootComponent {...props} />
       }
     }
 
-    return hoistStatics(extended, RootComponent);
+    return hoistStatics(CodePushComponent, RootComponent);
   }
 
   if (typeof options === "function") {
