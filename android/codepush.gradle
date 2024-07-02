@@ -59,6 +59,9 @@ gradle.projectsEvaluated {
         if (reactBundleTask) {
             jsBundleDir = reactBundleTask.property('jsBundleDir').asFile.get()
             resourcesDir = reactBundleTask.property('resourcesDir').asFile.get()
+
+            // mitigates Resource and asset merger: Duplicate resources error
+            project.delete(files("${jsBundleDir}"))
             
             jsBundleDir.mkdirs()
             resourcesDir.mkdirs()
