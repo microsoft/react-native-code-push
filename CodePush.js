@@ -576,7 +576,7 @@ function codePushify(options = {}) {
 
         // We can set ref property on class components only (not stateless)
         // Check it by render method
-        if (RootComponent.prototype.render) {
+        if (RootComponent.prototype && RootComponent.prototype.render) {
           props.ref = this.rootComponentRef;
         }
 
