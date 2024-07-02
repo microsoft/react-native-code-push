@@ -78,6 +78,9 @@ function addJsBundleAndMetaToManifest() {
             console.log(finalHash);
 
             var savedResourcesManifestPath = assetsDir + "/" + CODE_PUSH_HASH_FILE_NAME;
+            if (fs.existsSync(savedResourcesManifestPath)) {
+                fs.unlinkSync(savedResourcesManifestPath);
+            }
             fs.writeFileSync(savedResourcesManifestPath, finalHash);
 
             // "CodePushHash.json" file name breaks flow type checking.
