@@ -73,6 +73,7 @@ stages:
       displayName: 'Run Android test'
 
   - job: TestIOS
+    timeoutInMinutes: 120
     displayName: 'Test IOS'
     steps:
 
