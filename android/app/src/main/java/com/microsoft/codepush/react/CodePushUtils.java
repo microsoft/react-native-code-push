@@ -67,7 +67,9 @@ public class CodePushUtils {
             String key = it.next();
             Object obj = null;
             try {
-                obj = jsonObj.get(key);
+                if (!jsonObj.isNull(key)) {
+                    obj = jsonObj.get(key);
+                }
             } catch (JSONException jsonException) {
                 // Should not happen.
                 throw new CodePushUnknownException("Key " + key + " should exist in " + jsonObj.toString() + ".", jsonException);

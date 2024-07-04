@@ -1,0 +1,94 @@
+trigger:
+- master
+
+pr:
+- master
+
+variables:
+- name: api-level
+  value: '27' 
+
+pool:
+  vmImage: 'macOS-12'
+
+stages:
+- stage: RunTests
+  displayName: 'Run Android & IOS tests'
+  jobs:
+  - job: TestAndroid
+    timeoutInMinutes: 120
+    displayName: 'Test android'
+    steps:
+
+    - script: |
+        adb devices
+      displayName: 'Start adb server'
+
+    - script: |
+        $ANDROID_HOME/tools/bin/sdkmanager "system-images;android-$(api-level);google_apis;x86"
+      displayName: 'Download system image'
+
+    - script: |
+        $ANDROID_HOME/tools/bin/avdmanager create avd --force --name TestEmulator --abi google_apis/x86 --package 'system-images;android-$(api-level);google_apis;x86' --device "Nexus 6P"
+      displayName: 'Creating Android emulator'
+
+    - script: |
+        $ANDROID_HOME/emulator/emulator -avd TestEmulator -noaudio -no-window -no-snapshot-save -no-boot-anim -memory 6144 &
+      displayName: 'Start Android emulator'
+
+    - script: |
+        $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done'
+      displayName: 'Wait for emulator to boot'
+   
+    - script: |
+         adb shell settings put global window_animation_scale 0.0    
+      displayName: 'Disable animations and transitions'  
+
+    - script: |
+         adb shell settings put global transition_animation_scale 0.0
+      displayName: 'Disable animations and transitions'
+
+    - script: |
+         adb shell settings put global animator_duration_scale 0.0   
+      displayName: 'Disable animations and transitions'
+
+    
+    - task: JavaToolInstaller@0
+      inputs:
+        versionSpec: '11'
+        jdkArchitectureOption: 'x64'
+        jdkSourceOption: 'PreInstalled'
+      displayName: 'Change Java version'
+
+    - script: |
+        npm install
+      displayName: 'Package Installation'
+
+    - script: |
+        npm run build:tests && npm run test:setup:android
+      displayName: 'Setup Android tests'
+
+    - script: |
+        npm run test:fast:android
+      displayName: 'Run Android test'
+
+  - job: TestIOS
+    timeoutInMinutes: 120
+    displayName: 'Test IOS'
+    steps:
+
+    - script: |
+        npm install
+      displayName: 'Install dependencies'
+
+    - script: |
+        npm run build:tests && npm run test:setup:ios
+      displayName: 'Setup iOS tests'
+
+    - script: |
+        npm run test:fast:ios
+      displayName: 'Run tests'
+
+    
+          
+
