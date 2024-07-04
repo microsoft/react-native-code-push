@@ -10,8 +10,8 @@ import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.devsupport.DevInternalSettings;
 import com.facebook.react.devsupport.interfaces.DevSupportManager;
+import com.facebook.react.modules.debug.interfaces.DeveloperSettings;
 import com.facebook.react.uimanager.ViewManager;
 
 import org.json.JSONException;
@@ -152,12 +152,12 @@ public class CodePush implements ReactPackage {
         if (instanceManager != null) {
             DevSupportManager devSupportManager = instanceManager.getDevSupportManager();
             if (devSupportManager != null) {
-                DevInternalSettings devInternalSettings = (DevInternalSettings)devSupportManager.getDevSettings();
-                Method[] methods = devInternalSettings.getClass().getMethods();
+                DeveloperSettings devSettings = devSupportManager.getDevSettings();
+                Method[] methods = devSettings.getClass().getMethods();
                 for (Method m : methods) {
                     if (m.getName().equals("isReloadOnJSChangeEnabled")) {
                         try {
-                            return (boolean) m.invoke(devInternalSettings);
+                            return (boolean) m.invoke(devSettings);
                         } catch (Exception x) {
                             return false;
                         }
@@ -295,7 +295,16 @@ public class CodePush implements ReactPackage {
 
         JSONObject pendingUpdate = mSettingsManager.getPendingUpdate();
         if (pendingUpdate != null) {
-            JSONObject packageMetadata = this.mUpdateManager.getCurrentPackage();
+            JSONObject packageMetadata = null;
+
+            try {
+                packageMetadata = this.mUpdateManager.getCurrentPackage();
+            } catch (CodePushMalformedDataException e) {
+                // We need to recover the app in case 'codepush.json' is corrupted
+                CodePushUtils.log(e);
+                clearUpdates();
+                return;
+            }
             if (packageMetadata == null || !isPackageBundleLatest(packageMetadata) && hasBinaryVersionChanged(packageMetadata)) {
                 CodePushUtils.log("Skipping initializeUpdateAfterRestart(), binary version is newer");
                 return;

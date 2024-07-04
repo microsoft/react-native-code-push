@@ -35,7 +35,32 @@ In order to integrate CodePush into your Android project, please perform the fol
     ...
     ```
 
-3. Update the `MainApplication.java` file to use CodePush via the following changes:
+3. Update the `MainApplication` file to use CodePush via the following changes:
+
+    For React Native 0.73 and above: update the `MainApplication.kt`
+
+    ```kotlin
+    ...
+    // 1. Import the plugin class.
+    import com.microsoft.codepush.react.CodePush
+
+    class MainApplication : Application(), ReactApplication {
+
+    override val reactNativeHost: ReactNativeHost =
+        object : DefaultReactNativeHost(this) {
+            ...
+
+            // 2. Override the getJSBundleFile method in order to let
+            // the CodePush runtime determine where to get the JS
+            // bundle location from on each app start
+            override fun getJSBundleFile(): String {
+                return CodePush.getJSBundleFile() 
+            }
+        };
+    }
+    ```
+
+    For React Native 0.72 and below: update the `MainApplication.java`
 
     ```java
     ...

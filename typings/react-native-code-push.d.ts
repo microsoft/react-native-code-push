@@ -134,7 +134,7 @@ export interface SyncOptions {
      * value will enable the dialog with the default strings, and passing an object to this parameter allows enabling the dialog as well as
      * overriding one or more of the default strings.
      */
-    updateDialog?: UpdateDialog;
+    updateDialog?: UpdateDialog | true;
 
     /**
      * The rollback retry mechanism allows the application to attempt to reinstall an update that was previously rolled back (with the restrictions
