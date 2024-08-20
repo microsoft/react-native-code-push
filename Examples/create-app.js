@@ -31,6 +31,7 @@ const execSync = child_process.execSync;
 
 const args = process.argv.slice(2);
 const appName = args[0] || 'CodePushDemoAppTest';
+
 if (fs.existsSync(appName)) {
     console.error(`Folder with name "${appName}" already exists! Please delete`);
     process.exit();
@@ -43,6 +44,7 @@ let owner = null;
 const reactNativeVersion = args[1] || `react-native@${execCommand('npm view react-native version')}`.trim();
 const reactNativeVersionIsLowerThanV049 = isReactNativeVersionLowerThan(49);
 const reactNativeCodePushVersion = args[2] || `react-native-code-push@${execCommand('npm view react-native-code-push version')}`.trim();
+
 const reactNativeVersionIsLowerThanV073 = isReactNativeVersionLowerThan(73)
 if (!isReactNativeVersionLowerThan(60) && process.platform === "darwin") {
     try {
@@ -313,7 +315,7 @@ function androidSetup() {
     fs.writeFileSync(mainApplicationPath, mainApplicationContents);
 }
 
-function getAppDelegateName() { return fs.readdirSync(path.join('ios', appName)).find(file => file.endsWith('mm') || file.endsWith('m')) };
+function getAppDelegateName() { return fs.readdirSync(path.join('ios', appName)).find(file => file === ('AppDelegate.mm') || file === 'AppDelegate.m') };
 
 // Configuring ios applications for react-native version higher than 0.60
 function iosSetup() {
