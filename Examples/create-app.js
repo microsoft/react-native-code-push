@@ -1,6 +1,9 @@
 /*
 The script serves to generate CodePushified React Native app to reproduce issues or for testing purposes.
 
+NOTE: Use CodePushDemoApp and CodePushDemoAppCpp as reference how to implement CodePush in your app. For creating a working demo app
+follow steps bellow.
+
 Requirements:
     1. npm i -g react-native-cli
     2. npm i -g appcenter-cli
@@ -34,13 +37,6 @@ if (fs.existsSync(appName)) {
     process.exit();
 }
 
-// Checking if yarn is installed
-try {
-    execCommand('yarn bin');
-} catch (err) {
-    console.error(`You must install 'yarn' to use this script!`);
-    process.exit();
-}
 
 const appNameAndroid = `${appName}-android`;
 const appNameIOS = `${appName}-ios`;
@@ -49,6 +45,7 @@ const reactNativeVersion = args[1] || `react-native@${execCommand('npm view reac
 const reactNativeVersionIsLowerThanV049 = isReactNativeVersionLowerThan(49);
 const reactNativeCodePushVersion = args[2] || `react-native-code-push@${execCommand('npm view react-native-code-push version')}`.trim();
 
+const reactNativeVersionIsLowerThanV073 = isReactNativeVersionLowerThan(73)
 if (!isReactNativeVersionLowerThan(60) && process.platform === "darwin") {
     try {
         console.log("Verify that CocoaPods installed");
@@ -89,8 +86,8 @@ function createCodePushApp(name, os) {
             const app = JSON.parse(appResult);
             owner = app.owner.name;
             console.log(`App "${name}" has been created \n`);
-        } catch(e) {
-            console.error(`Error: Unable to create CodePush app. Please check that you haven't application with "${name}" name on portal.`, );
+        } catch (e) {
+            console.error(`Error: Unable to create CodePush app. Please check that you haven't application with "${name}" name on portal.`,);
             console.error("Error: ", e.toString());
         }
         execCommand(`appcenter codepush deployment add -a ${owner}/${name} Staging`);
@@ -128,7 +125,7 @@ function generatePlainReactNativeApp(appName, reactNativeVersion) {
 
 function installCodePush(reactNativeCodePushVersion) {
     console.log(`Installing React Native Module for CodePush...`);
-    execCommand(`yarn add ${reactNativeCodePushVersion}`);
+    execCommand(`npm i ${reactNativeCodePushVersion}`);
     console.log(`React Native Module for CodePush has been installed \n`);
 }
 
@@ -213,8 +210,8 @@ function optimizeToTestInDebugMode() {
     const rnXcodeShPath = `node_modules/react-native/${rnXcodeShLocationFolder}/react-native-xcode.sh`;
     // Replace "if [[ "$PLATFORM_NAME" == *simulator ]]; then" with "if false; then" to force bundling
     execCommand(`sed -ie 's/if \\[\\[ "\$PLATFORM_NAME" == \\*simulator \\]\\]; then/if false; then/' ${rnXcodeShPath}`);
-    execCommand(`perl -i -p0e 's/#ifdef DEBUG.*?#endif/jsCodeLocation = [CodePush bundleURL];/s' ios/${appName}/AppDelegate.m`);
-    execCommand(`sed -ie 's/targetName.toLowerCase().contains("release")/true/' node_modules/react-native/react.gradle`);
+    execCommand(`perl -i -p0e 's/#ifdef DEBUG.*?#endif/jsCodeLocation = [CodePush bundleURL];/s' ios/${appName}/${getAppDelegateName()}`);
+    reactNativeVersionIsLowerThanV073 && execCommand(`sed -ie 's/targetName.toLowerCase().contains("release")/true/' node_modules/react-native/react.gradle`);
 }
 
 function grantAccess(folderPath) {
@@ -250,7 +247,8 @@ function isReactNativeVersionLowerThan(version) {
 function androidSetup() {
     const buildGradlePath = path.join('android', 'app', 'build.gradle');
     const settingsGradlePath = path.join('android', 'settings.gradle');
-    const mainApplicationPath = path.join('android', 'app', 'src', 'main', 'java', 'com', appName, 'MainApplication.java');
+    const mainApplicationType = reactNativeVersionIsLowerThanV073 ? 'java' : 'kt';
+    const mainApplicationPath = path.join('android', 'app', 'src', 'main', 'java', 'com', appName, `MainApplication.${mainApplicationType}`);
     const stringsResourcesPath = path.join('android', 'app', 'src', 'main', 'res', 'values', 'strings.xml');
 
     let stringsResourcesContent = fs.readFileSync(stringsResourcesPath, "utf8");
@@ -260,47 +258,78 @@ function androidSetup() {
     fs.writeFileSync(stringsResourcesPath, stringsResourcesContent);
 
     let buildGradleContents = fs.readFileSync(buildGradlePath, "utf8");
-    const reactGradleLink = buildGradleContents.match(/\napply from: ["'].*?react\.gradle["']/)[0];
+    const reactGradleLink = buildGradleContents.match(/\napply from: ["'].*?react\.gradle["']/);
     const codePushGradleLink = `\napply from: "../../node_modules/react-native-code-push/android/codepush.gradle"`;
-    buildGradleContents = buildGradleContents.replace(reactGradleLink,
-        `${reactGradleLink}${codePushGradleLink}`);
-    fs.writeFileSync(buildGradlePath, buildGradleContents);
+    if (reactGradleLink != null) {
+        buildGradleContents = buildGradleContents.replace(reactGradleLink[0],
+            `${reactGradleLink[0]}${codePushGradleLink}`);
+        fs.writeFileSync(buildGradlePath, buildGradleContents);
+    }
+    // react.gradle script removed from 0.71 thus this workaround
+    else {
+        const appPluginLastLine = buildGradleContents.match(/apply plugin: "com.facebook.react"/)[0];
+        buildGradleContents = buildGradleContents.replace(appPluginLastLine, `${appPluginLastLine}${codePushGradleLink}`)
+        fs.writeFileSync(buildGradlePath, buildGradleContents);
+    }
 
     let settingsGradleContents = fs.readFileSync(settingsGradlePath, "utf8");
     const settingsGradleInclude = "include \':app\'";
-    const codePushProjectImport= `':react-native-code-push'\nproject(':react-native-code-push').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-code-push/android/app')`;
+    const codePushProjectImport = `':react-native-code-push'\nproject(':react-native-code-push').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-code-push/android/app')`;
     settingsGradleContents = settingsGradleContents.replace(settingsGradleInclude,
         `${settingsGradleInclude}, ${codePushProjectImport}`);
     fs.writeFileSync(settingsGradlePath, settingsGradleContents);
 
-    const getJSBundleFileOverride = `
-    @Override
-    protected String getJSBundleFile(){
-        return CodePush.getJSBundleFile();
-    }
-    `;
+    let importCodePush = `\nimport com.microsoft.codepush.react.CodePush;`;
+    let reactNativeHostInstantiationImport = "import android.app.Application;";
     let mainApplicationContents = fs.readFileSync(mainApplicationPath, "utf8");
-    const reactNativeHostInstantiation = "new ReactNativeHost(this) {";
+    let getJSBundleFileOverride = "";
+    let reactNativeHostInstantiation = "";
+
+    // handle react-native version with java
+    if (reactNativeVersionIsLowerThanV073) {
+        reactNativeHostInstantiation = "new ReactNativeHost(this) {";
+
+        getJSBundleFileOverride = `
+        @Override
+        protected String getJSBundleFile(){
+            return CodePush.getJSBundleFile();
+        }
+        `;
+    }
+    // handle react-native version with kotlin
+    else {
+        reactNativeHostInstantiation = "object : DefaultReactNativeHost(this) {"
+        getJSBundleFileOverride = `
+         override fun getJSBundleFile(): String {
+            return CodePush.getJSBundleFile() 
+        }
+        `;
+        importCodePush = importCodePush.replace(';', '');
+        reactNativeHostInstantiationImport = reactNativeHostInstantiationImport.replace(';', '');
+    }
     mainApplicationContents = mainApplicationContents.replace(reactNativeHostInstantiation,
         `${reactNativeHostInstantiation}${getJSBundleFileOverride}`);
 
-    const importCodePush = `\nimport com.microsoft.codepush.react.CodePush;`;
-    const reactNativeHostInstantiationImport = "import android.app.Application;";
     mainApplicationContents = mainApplicationContents.replace(reactNativeHostInstantiationImport,
         `${reactNativeHostInstantiationImport}${importCodePush}`);
     fs.writeFileSync(mainApplicationPath, mainApplicationContents);
 }
 
+function getAppDelegateName() { return fs.readdirSync(path.join('ios', appName)).find(file => file === ('AppDelegate.mm') || file === 'AppDelegate.m') };
+
 // Configuring ios applications for react-native version higher than 0.60
 function iosSetup() {
     const plistPath = path.join('ios', appName, 'Info.plist');
-    const appDelegatePath = path.join('ios', appName, 'AppDelegate.m');
+
+    const appDelegatePath = path.join('ios', appName, getAppDelegateName());
 
     let plistContents = fs.readFileSync(plistPath, "utf8");
-    const falseInfoPlist = `<false/>`;
+
+    const dictPlistTag = `</dict>\n</plist>`;
+
     const codePushDeploymentKey = iosStagingDeploymentKey || 'deployment-key-here';
-    plistContents = plistContents.replace(falseInfoPlist,
-        `${falseInfoPlist}\n\t<key>CodePushDeploymentKey</key>\n\t<string>${codePushDeploymentKey}</string>`);
+    plistContents = plistContents.replace(dictPlistTag,
+        `\t<key>CodePushDeploymentKey</key>\n\t<string>${codePushDeploymentKey}</string>${dictPlistTag}`);
     fs.writeFileSync(plistPath, plistContents);
 
     let appDelegateContents = fs.readFileSync(appDelegatePath, "utf8");
