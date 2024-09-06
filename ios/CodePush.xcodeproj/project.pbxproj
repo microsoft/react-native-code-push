@@ -938,6 +938,7 @@
 					"$(SRCROOT)/../../react-native/React/**",
 					"$(SRC_ROOT)/JWT/**",
 				);
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -966,6 +967,7 @@
 					"$(SRCROOT)/../../react-native/React/**",
 					"$(SRC_ROOT)/JWT/**",
 				);
+				IPHONEOS_DEPLOYMENT_TARGET = 15.5;
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = (
 					"-ObjC",
