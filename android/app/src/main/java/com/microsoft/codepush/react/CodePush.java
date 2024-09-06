@@ -5,6 +5,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 
+import com.facebook.react.ReactHost;
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.JavaScriptModule;
@@ -49,6 +50,7 @@ public class CodePush implements ReactPackage {
 
     private static ReactInstanceHolder mReactInstanceHolder;
     private static CodePush mCurrentInstance;
+
 
     public CodePush(String deploymentKey, Context context) {
         this(deploymentKey, context, false);
@@ -107,6 +109,20 @@ public class CodePush implements ReactPackage {
         }
 
         mServerUrl = serverUrl;
+    }
+
+    static ReactHost getReactHostFromHolder() {
+        if (mReactInstanceHolder == null) {
+            return null;
+        }
+        return mReactInstanceHolder.getReactHost();
+    }
+
+    public static CodePush getInstance(String deploymentKey, Context context, boolean isDebugMode) {
+        if (mCurrentInstance == null) {
+            mCurrentInstance = new CodePush(deploymentKey,context,isDebugMode);
+        }
+        return mCurrentInstance;
     }
 
     private String getPublicKeyByResourceDescriptor(int publicKeyResourceDescriptor){

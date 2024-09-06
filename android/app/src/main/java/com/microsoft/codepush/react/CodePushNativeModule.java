@@ -9,6 +9,7 @@ import android.provider.Settings;
 import android.view.View;
 
 import com.facebook.react.ReactApplication;
+import com.facebook.react.ReactHost;
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactRootView;
 import com.facebook.react.bridge.Arguments;
@@ -23,6 +24,7 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.ChoreographerCompat;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.modules.core.ReactChoreographer;
+import com.facebook.react.runtime.ReactHostDelegate;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -129,10 +131,30 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         }
     }
 
+    private void setJSBundle(ReactHost host, String latestJSBundleFile) throws           {
+        try {
+            Field reactHostDelegate = host.getClass().getDeclaredField("mReactHostDelegate");
+            reactHostDelegate.setAccessible(true);
+            ReactHostDelegate delegate = (ReactHostDelegate) reactHostDelegate.get(host);
+            Field loader = delegate.getClass().getDeclaredField("jsBundleLoader");
+            loader.setAccessible(true);
+            JSBundleLoader latestJSBundleLoader;
+            if (latestJSBundleFile.toLowerCase().startsWith("assets://")) {
+                latestJSBundleLoader = JSBundleLoader.createAssetLoader(getReactApplicationContext(), latestJSBundleFile, true);
+            } else {
+                latestJSBundleLoader = JSBundleLoader.createFileLoader(latestJSBundleFile);
+            }
+            loader.set(delegate,latestJSBundleLoader);
+        } catch (Exception e) {
+            CodePushUtils.log("Unable to set JSBundle - CodePush may not support this version of React Native");
+            throw new IllegalAccessException("Could not setJSBundle");
+        }
+    }
+
     private void loadBundle() {
         clearLifecycleEventListener();
         try {
-            mCodePush.clearDebugCacheIfNeeded(resolveInstanceManager());
+//            mCodePush.clearDebugCacheIfNeeded(resolveInstanceManager());
         } catch(Exception e) {
             // If we got error in out reflection we should clear debug cache anyway.
             mCodePush.clearDebugCacheIfNeeded(null);
@@ -141,15 +163,15 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         try {
             // #1) Get the ReactInstanceManager instance, which is what includes the
             //     logic to reload the current React context.
-            final ReactInstanceManager instanceManager = resolveInstanceManager();
-            if (instanceManager == null) {
-                return;
-            }
+//            final ReactInstanceManager instanceManager = resolveInstanceManager();
+//            if (instanceManager == null) {
+//                return;
+//            }
 
             String latestJSBundleFile = mCodePush.getJSBundleFileInternal(mCodePush.getAssetsBundleFileName());
 
             // #2) Update the locally stored JS bundle file path
-            setJSBundle(instanceManager, latestJSBundleFile);
+//            setJSBundle(instanceManager, latestJSBundleFile);
 
             // #3) Get the context creation method and fire it on the UI thread (which RN enforces)
             new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -159,10 +181,11 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
                         // We don't need to resetReactRootViews anymore 
                         // due the issue https://github.com/facebook/react-native/issues/14533
                         // has been fixed in RN 0.46.0
-                        //resetReactRootViews(instanceManager);
-
-                        instanceManager.recreateReactContextInBackground();
-                        mCodePush.initializeUpdateAfterRestart();
+//                        resetReactRootViews(instanceManager);
+                        ReactHost host = CodePush.getReactHostFromHolder();
+                        CodePush.getReactHostFromHolder().reload("Restart-app");
+//                        instanceManager.recreateReactContextInBackground();
+//                        mCodePush.initializeUpdateAfterRestart();
                     } catch (Exception e) {
                         // The recreation method threw an unknown exception
                         // so just simply fallback to restarting the Activity (if it exists)

@@ -1,5 +1,6 @@
 package com.microsoft.codepush.react;
 
+import com.facebook.react.ReactHost;
 import com.facebook.react.ReactInstanceManager;
 
 /**
@@ -14,4 +15,5 @@ public interface ReactInstanceHolder {
    * Get the current {@link ReactInstanceManager} instance. May return null.
    */
   ReactInstanceManager getReactInstanceManager();
+  ReactHost getReactHost();
 }
