@@ -9,7 +9,6 @@ import com.nimbusds.jwt.SignedJWT;
 
 import java.security.interfaces.*;
 
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -86,8 +85,12 @@ public class CodePushUpdateUtils {
             throw new CodePushUnknownException("Unable to compute hash of update contents.", e);
         } finally {
             try {
-                if (digestInputStream != null) digestInputStream.close();
-                if (dataStream != null) dataStream.close();
+                if (digestInputStream != null) {
+                    digestInputStream.close();
+                }
+                if (dataStream != null) {
+                    dataStream.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -102,7 +105,7 @@ public class CodePushUpdateUtils {
             CodePushUtils.log("Unable to copy files from current package during diff update, because currentPackageFolderPath is invalid.");
             return;
         }
-        FileUtils.copyDirectoryContents(currentPackageFolderPath, newPackageFolderPath);     
+        FileUtils.copyDirectoryContents(currentPackageFolderPath, newPackageFolderPath);
         JSONObject diffManifest = CodePushUtils.getJsonObjectFromFile(diffManifestFilePath);
         try {
             JSONArray deletedFiles = diffManifest.getJSONArray("deletedFiles");
@@ -188,7 +191,7 @@ public class CodePushUpdateUtils {
     public static Map<String, Object> verifyAndDecodeJWT(String jwt, PublicKey publicKey) {
         try {
             SignedJWT signedJWT = SignedJWT.parse(jwt);
-            JWSVerifier verifier = new RSASSAVerifier((RSAPublicKey)publicKey);
+            JWSVerifier verifier = new RSASSAVerifier((RSAPublicKey) publicKey);
             if (signedJWT.verify(verifier)) {
                 Map<String, Object> claims = signedJWT.getJWTClaimsSet().getClaims();
                 CodePushUtils.log("JWT verification succeeded, payload content: " + claims.toString());
@@ -221,7 +224,7 @@ public class CodePushUpdateUtils {
         }
     }
 
-    public static String getSignatureFilePath(String updateFolderPath){
+    public static String getSignatureFilePath(String updateFolderPath) {
         return CodePushUtils.appendPathComponent(
                 CodePushUtils.appendPathComponent(updateFolderPath, CodePushConstants.CODE_PUSH_FOLDER_PREFIX),
                 CodePushConstants.BUNDLE_JWT_FILE
@@ -258,7 +261,7 @@ public class CodePushUpdateUtils {
             throw new CodePushInvalidUpdateException("The update could not be verified because it was not signed by a trusted party.");
         }
 
-        final String contentHash = (String)claims.get("contentHash");
+        final String contentHash = (String) claims.get("contentHash");
         if (contentHash == null) {
             throw new CodePushInvalidUpdateException("The update could not be verified because the signature did not specify a content hash.");
         }
