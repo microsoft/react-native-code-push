@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">CodePushDemoAppNewArch</string>
+    <string moduleConfig="true" name="CodePushDeploymentKey">DeploymentKey</string>
+</resources>
