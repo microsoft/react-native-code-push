@@ -5,24 +5,31 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
-import android.provider.Settings;
 import android.view.View;
 
+import androidx.annotation.OptIn;
+
 import com.facebook.react.ReactApplication;
+import com.facebook.react.ReactHost;
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactRootView;
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.BaseJavaModule;
 import com.facebook.react.bridge.JSBundleLoader;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
-import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.common.annotations.UnstableReactNativeAPI;
+import com.facebook.react.devsupport.interfaces.DevSupportManager;
 import com.facebook.react.modules.core.ChoreographerCompat;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.modules.core.ReactChoreographer;
+import com.facebook.react.modules.debug.interfaces.DeveloperSettings;
+import com.facebook.react.runtime.ReactHostDelegate;
+import com.facebook.react.runtime.ReactHostImpl;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,6 +37,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -37,7 +45,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-public class CodePushNativeModule extends ReactContextBaseJavaModule {
+@OptIn(markerClass = UnstableReactNativeAPI.class)
+public class CodePushNativeModule extends BaseJavaModule {
     private String mBinaryContentsHash = null;
     private String mClientUniqueId = null;
     private LifecycleEventListener mLifecycleEventListener = null;
@@ -93,7 +102,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
     }
 
     private void loadBundleLegacy() {
-        final Activity currentActivity = getCurrentActivity();
+        final Activity currentActivity = getReactApplicationContext().getCurrentActivity();
         if (currentActivity == null) {
             // The currentActivity can be null if it is backgrounded / destroyed, so we simply
             // no-op to prevent any null pointer exceptions.
@@ -124,59 +133,155 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             bundleLoaderField.setAccessible(true);
             bundleLoaderField.set(instanceManager, latestJSBundleLoader);
         } catch (Exception e) {
-            CodePushUtils.log("Unable to set JSBundle - CodePush may not support this version of React Native");
+            CodePushUtils.log("Unable to set JSBundle of ReactInstanceManager - CodePush may not support this version of React Native");
+            throw new IllegalAccessException("Could not setJSBundle");
+        }
+    }
+
+    // Use reflection to find and set the appropriate fields on ReactHostDelegate. See #556 for a proposal for a less brittle way
+    // to approach this.
+    private void setJSBundle(ReactHostDelegate reactHostDelegate, String latestJSBundleFile) throws IllegalAccessException {
+        try {
+            JSBundleLoader latestJSBundleLoader;
+            if (latestJSBundleFile.toLowerCase().startsWith("assets://")) {
+                latestJSBundleLoader = JSBundleLoader.createAssetLoader(getReactApplicationContext(), latestJSBundleFile, false);
+            } else {
+                latestJSBundleLoader = JSBundleLoader.createFileLoader(latestJSBundleFile);
+            }
+
+            Field bundleLoaderField = reactHostDelegate.getClass().getDeclaredField("jsBundleLoader");
+            bundleLoaderField.setAccessible(true);
+            bundleLoaderField.set(reactHostDelegate, latestJSBundleLoader);
+        } catch (Exception e) {
+            CodePushUtils.log("Unable to set JSBundle of ReactHostDelegate - CodePush may not support this version of React Native");
             throw new IllegalAccessException("Could not setJSBundle");
         }
     }
 
     private void loadBundle() {
         clearLifecycleEventListener();
-        try {
-            mCodePush.clearDebugCacheIfNeeded(resolveInstanceManager());
-        } catch(Exception e) {
-            // If we got error in out reflection we should clear debug cache anyway.
-            mCodePush.clearDebugCacheIfNeeded(null);
-        }
 
-        try {
-            // #1) Get the ReactInstanceManager instance, which is what includes the
-            //     logic to reload the current React context.
-            final ReactInstanceManager instanceManager = resolveInstanceManager();
-            if (instanceManager == null) {
-                return;
+        // ReactNative core components are changed on new architecture.
+        if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
+            try {
+                DevSupportManager devSupportManager = null;
+                    ReactHost reactHost = resolveReactHost();
+                    if (reactHost != null) {
+                        devSupportManager = reactHost.getDevSupportManager();
+                    }
+                boolean isLiveReloadEnabled = isLiveReloadEnabled(devSupportManager);
+
+                mCodePush.clearDebugCacheIfNeeded(isLiveReloadEnabled);
+            } catch(Exception e) {
+                // If we got error in out reflection we should clear debug cache anyway.
+                mCodePush.clearDebugCacheIfNeeded(false);
             }
 
-            String latestJSBundleFile = mCodePush.getJSBundleFileInternal(mCodePush.getAssetsBundleFileName());
+            try {
+                // #1) Get the ReactHost instance, which is what includes the
+                //     logic to reload the current React context.
+                final ReactHost reactHost = resolveReactHost();
+                if (reactHost == null) {
+                    return;
+                }
 
-            // #2) Update the locally stored JS bundle file path
-            setJSBundle(instanceManager, latestJSBundleFile);
+                String latestJSBundleFile = mCodePush.getJSBundleFileInternal(mCodePush.getAssetsBundleFileName());
 
-            // #3) Get the context creation method and fire it on the UI thread (which RN enforces)
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                @Override
-                public void run() {
+                // #2) Update the locally stored JS bundle file path
+                setJSBundle(getReactHostDelegate((ReactHostImpl) reactHost), latestJSBundleFile);
+
+                // #3) Get the context creation method
+                try {
+                    reactHost.reload("CodePush triggers reload");
+                    mCodePush.initializeUpdateAfterRestart();
+                } catch (Exception e) {
+                    // The recreation method threw an unknown exception
+                    // so just simply fallback to restarting the Activity (if it exists)
+                    loadBundleLegacy();
+                }
+
+            } catch (Exception e) {
+                // Our reflection logic failed somewhere
+                // so fall back to restarting the Activity (if it exists)
+                CodePushUtils.log("Failed to load the bundle, falling back to restarting the Activity (if it exists). " + e.getMessage());
+                loadBundleLegacy();
+            }
+
+        } else {
+
+            try {
+                DevSupportManager devSupportManager = null;
+                ReactInstanceManager reactInstanceManager = resolveInstanceManager();
+                if (reactInstanceManager != null) {
+                    devSupportManager = reactInstanceManager.getDevSupportManager();
+                }
+                boolean isLiveReloadEnabled = isLiveReloadEnabled(devSupportManager);
+
+                mCodePush.clearDebugCacheIfNeeded(isLiveReloadEnabled);
+            } catch(Exception e) {
+                // If we got error in out reflection we should clear debug cache anyway.
+                mCodePush.clearDebugCacheIfNeeded(false);
+            }
+
+            try {
+                // #1) Get the ReactInstanceManager instance, which is what includes the
+                //     logic to reload the current React context.
+                final ReactInstanceManager instanceManager = resolveInstanceManager();
+                if (instanceManager == null) {
+                    return;
+                }
+
+                String latestJSBundleFile = mCodePush.getJSBundleFileInternal(mCodePush.getAssetsBundleFileName());
+
+                // #2) Update the locally stored JS bundle file path
+                setJSBundle(instanceManager, latestJSBundleFile);
+
+                // #3) Get the context creation method and fire it on the UI thread (which RN enforces)
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            // We don't need to resetReactRootViews anymore
+                            // due the issue https://github.com/facebook/react-native/issues/14533
+                            // has been fixed in RN 0.46.0
+                            //resetReactRootViews(instanceManager);
+
+                            instanceManager.recreateReactContextInBackground();
+                            mCodePush.initializeUpdateAfterRestart();
+                        } catch (Exception e) {
+                            // The recreation method threw an unknown exception
+                            // so just simply fallback to restarting the Activity (if it exists)
+                            loadBundleLegacy();
+                        }
+                    }
+                });
+
+            } catch (Exception e) {
+                // Our reflection logic failed somewhere
+                // so fall back to restarting the Activity (if it exists)
+                CodePushUtils.log("Failed to load the bundle, falling back to restarting the Activity (if it exists). " + e.getMessage());
+                loadBundleLegacy();
+            }
+
+        }
+    }
+
+    private boolean isLiveReloadEnabled(DevSupportManager devSupportManager) {
+        if (devSupportManager != null) {
+            DeveloperSettings devSettings = devSupportManager.getDevSettings();
+            Method[] methods = devSettings.getClass().getMethods();
+            for (Method m : methods) {
+                if (m.getName().equals("isReloadOnJSChangeEnabled")) {
                     try {
-                        // We don't need to resetReactRootViews anymore 
-                        // due the issue https://github.com/facebook/react-native/issues/14533
-                        // has been fixed in RN 0.46.0
-                        //resetReactRootViews(instanceManager);
-
-                        instanceManager.recreateReactContextInBackground();
-                        mCodePush.initializeUpdateAfterRestart();
-                    } catch (Exception e) {
-                        // The recreation method threw an unknown exception
-                        // so just simply fallback to restarting the Activity (if it exists)
-                        loadBundleLegacy();
+                        return (boolean) m.invoke(devSettings);
+                    } catch (Exception x) {
+                        return false;
                     }
                 }
-            });
-
-        } catch (Exception e) {
-            // Our reflection logic failed somewhere
-            // so fall back to restarting the Activity (if it exists)
-            CodePushUtils.log("Failed to load the bundle, falling back to restarting the Activity (if it exists). " + e.getMessage());
-            loadBundleLegacy();
+            }
         }
+
+        return false;
     }
 
     // This workaround has been implemented in order to fix https://github.com/facebook/react-native/issues/14533
@@ -208,7 +313,7 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
             return instanceManager;
         }
 
-        final Activity currentActivity = getCurrentActivity();
+        final Activity currentActivity = getReactApplicationContext().getCurrentActivity();
         if (currentActivity == null) {
             return null;
         }
@@ -217,6 +322,21 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
         instanceManager = reactApplication.getReactNativeHost().getReactInstanceManager();
 
         return instanceManager;
+    }
+
+    private ReactHost resolveReactHost() throws NoSuchFieldException, IllegalAccessException {
+        ReactHost reactHost = CodePush.getReactHost();
+        if (reactHost != null) {
+            return reactHost;
+        }
+
+        final Activity currentActivity = getReactApplicationContext().getCurrentActivity();
+        if (currentActivity == null) {
+            return null;
+        }
+
+        ReactApplication reactApplication = (ReactApplication) currentActivity.getApplication();
+        return reactApplication.getReactHost();
     }
 
     private void restartAppInternal(boolean onlyIfUpdateIsPending) {
@@ -710,5 +830,19 @@ public class CodePushNativeModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void removeListeners(Integer count) {
         // Remove upstream listeners, stop unnecessary background tasks
+    }
+
+    public ReactHostDelegate getReactHostDelegate(ReactHostImpl reactHostImpl) {
+        try {
+            Class<?> clazz = reactHostImpl.getClass();
+            Field field = clazz.getDeclaredField("mReactHostDelegate");
+            field.setAccessible(true);
+
+            // Get the value of the field for the provided instance
+            return (ReactHostDelegate) field.get(reactHostImpl);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

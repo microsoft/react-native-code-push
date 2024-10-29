@@ -1,5 +1,19 @@
 apply plugin: "com.android.library"
 
+def isNewArchitectureEnabled() {
+    // To opt-in for the New Architecture, you can either:
+    // - Set `newArchEnabled` to true inside the `gradle.properties` file
+    // - Invoke gradle with `-newArchEnabled=true`
+    // - Set an environment variable `ORG_GRADLE_PROJECT_newArchEnabled=true`
+    return project.hasProperty("newArchEnabled") && project.newArchEnabled == "true"
+}
+
+def IS_NEW_ARCHITECTURE_ENABLED = isNewArchitectureEnabled()
+
+if (IS_NEW_ARCHITECTURE_ENABLED) {
+    apply plugin: "com.facebook.react"
+}
+
 def DEFAULT_COMPILE_SDK_VERSION = 26
 def DEFAULT_BUILD_TOOLS_VERSION = "26.0.3"
 def DEFAULT_TARGET_SDK_VERSION = 26
@@ -16,6 +30,7 @@ android {
         targetSdkVersion rootProject.hasProperty('targetSdkVersion') ? rootProject.targetSdkVersion : DEFAULT_TARGET_SDK_VERSION
         versionCode 1
         versionName "1.0"
+        buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", IS_NEW_ARCHITECTURE_ENABLED.toString()
     }
 
     lintOptions {
