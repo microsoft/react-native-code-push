@@ -14,4 +14,7 @@ public interface ReactInstanceHolder {
    * Get the current {@link ReactInstanceManager} instance. May return null.
    */
   ReactInstanceManager getReactInstanceManager();
+
+
+
 }
