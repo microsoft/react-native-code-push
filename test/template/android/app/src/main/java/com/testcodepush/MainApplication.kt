@@ -26,6 +26,7 @@ class MainApplication : Application(), ReactApplication {
             }
 
         override fun getJSMainModuleName(): String = "index"
+        override fun getJSBundleFile(): String = CodePush.getJSBundleFile()
 
         override fun getUseDeveloperSupport(): Boolean = BuildConfig.DEBUG
 
