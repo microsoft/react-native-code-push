@@ -24,3 +24,4 @@ exports.updatesDirectory = process.env.UPDATE_DIR ? process.env.UPDATE_DIR : DEF
 exports.onlyRunCoreTests = TestUtil_1.TestUtil.resolveBooleanVariables(process.env.CORE);
 exports.shouldSetup = TestUtil_1.TestUtil.readMochaCommandLineFlag(SETUP_FLAG_NAME);
 exports.restartEmulators = TestUtil_1.TestUtil.resolveBooleanVariables(process.env.CLEAN);
+exports.testOldArch = TestUtil_1.TestUtil.resolveBooleanVariables(process.env.TEST_OLD_ARCH);
