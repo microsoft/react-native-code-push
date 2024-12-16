@@ -25,6 +25,7 @@ public class CodePush implements ReactPackage {
     private static boolean sIsRunningBinaryVersion = false;
     private static boolean sNeedToReportRollback = false;
     private static boolean sTestConfigurationFlag = false;
+    private static boolean sDidUpdateInitialize = false;
     private static String sAppVersion = null;
 
     private boolean mDidUpdate = false;
@@ -270,6 +271,13 @@ public class CodePush implements ReactPackage {
     }
 
     void initializeUpdateAfterRestart() {
+        if (sDidUpdateInitialize) {
+            // We have already attempted to initialize for this session.
+            CodePushUtils.log("Skipping initializeUpdateAfterRestart(), because it already executed during this session.");
+            return;
+        }
+        sDidUpdateInitialize = true;
+
         // Reset the state which indicates that
         // the app was just freshly updated.
         mDidUpdate = false;
