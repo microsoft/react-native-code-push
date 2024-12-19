@@ -1,6 +1,31 @@
 ## iOS Setup
 
 Once you've acquired the CodePush plugin, you need to integrate it into the Xcode project of your React Native app and configure it correctly. To do this, take the following steps:
+
+### Plugin Installation for Expo (iOS)
+
+React Native Code Push comes packaged with a plugin to automate some of the setup process:
+
+1. Open your Expo app config file (app.config.json or app.config.js instead of app.json).
+
+2. Insert the following into the plugins section of your config (Don't duplicate configuration, if the 'react-native-code-push' item already exists, simply add the ios portion.). Create the plugins section if it doesn't already exist.
+
+    ```javascript
+    "plugins": [
+      [
+        'react-native-code-push',
+        {
+          ios: {
+            CodePushDeploymentKey: 'YOUR_IOS_CODE_PUSH_KEY',
+          },
+        }
+      ]
+    ]
+    ```
+
+3. Replace `YOUR_IOS_CODE_PUSH_KEY` with the Deployment key.
+
+4. Run `npx expo prebuild` to regenerate your native code with the codepush dependencies.
 ​
 ### Plugin Installation and Configuration for React Native 0.60 version and above (iOS)
 
