@@ -9,7 +9,7 @@ variables:
   value: '27' 
 
 pool:
-  vmImage: 'macOS-12'
+  vmImage: 'macOS-14'
 
 stages:
 - stage: RunTests
