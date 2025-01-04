@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.util.Log;
 
 import com.facebook.react.ReactHost;
 import com.facebook.react.ReactInstanceManager;
@@ -25,7 +26,6 @@ public class CodePush implements ReactPackage {
     private static boolean sIsRunningBinaryVersion = false;
     private static boolean sNeedToReportRollback = false;
     private static boolean sTestConfigurationFlag = false;
-    private static boolean sDidUpdateInitialize = false;
     private static String sAppVersion = null;
 
     private boolean mDidUpdate = false;
@@ -61,6 +61,10 @@ public class CodePush implements ReactPackage {
     }
 
     public CodePush(String deploymentKey, Context context, boolean isDebugMode) {
+        for (StackTraceElement ste: Thread.currentThread().getStackTrace()) {
+            Log.d("#######", ste.toString());
+        }
+
         mContext = context.getApplicationContext();
 
         mUpdateManager = new CodePushUpdateManager(context.getFilesDir().getAbsolutePath());
@@ -271,13 +275,6 @@ public class CodePush implements ReactPackage {
     }
 
     void initializeUpdateAfterRestart() {
-        if (sDidUpdateInitialize) {
-            // We have already attempted to initialize for this session.
-            CodePushUtils.log("Skipping initializeUpdateAfterRestart(), because it already executed during this session.");
-            return;
-        }
-        sDidUpdateInitialize = true;
-
         // Reset the state which indicates that
         // the app was just freshly updated.
         mDidUpdate = false;
