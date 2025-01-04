@@ -85,8 +85,8 @@ class RNAndroid extends Platform.Android implements RNPlatform {
         const buildGradle = path.join(innerprojectDirectory, "android", "app", "build.gradle");
 
         TestUtil.replaceString(buildGradle,
-            "apply from: file\\(\"../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle\"\\); applyNativeModulesAppBuildGradle\\(project\\)",
-            "apply from: file(\"../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle\"); applyNativeModulesAppBuildGradle(project)\napply from: \"" + gradleContent + "\"");
+            "apply plugin: \"com.facebook.react\"",
+            "apply plugin: \"com.facebook.react\"\napply from: \"" + gradleContent + "\"");
 
         // Add CodePush to android/settings.gradle
         const settingsGradle = path.join(innerprojectDirectory, "android", "settings.gradle");
@@ -94,6 +94,12 @@ class RNAndroid extends Platform.Android implements RNPlatform {
             "include ':app'",
             "include ':app', ':react-native-code-push'\nproject(':react-native-code-push').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-code-push/android/app')");
 
+        // Disable new architecture
+        if (TestConfig.testOldArch) {
+            const gradleProperties = path.join(innerprojectDirectory, "android", "gradle.properties");
+            TestUtil.replaceString(gradleProperties, "newArchEnabled=true", "newArchEnabled=false");
+        }
+        
         //// Set the app version to 1.0.0 instead of 1.0
         // Set the app version to 1.0.0 in android/app/build.gradle
         TestUtil.replaceString(buildGradle, "versionName \"1.0\"", "versionName \"1.0.0\"");
@@ -177,10 +183,12 @@ class RNIOS extends Platform.IOS implements RNPlatform {
         const iOSProject: string = path.join(projectDirectory, TestConfig.TestAppName, "ios");
         const infoPlistPath: string = path.join(iOSProject, TestConfig.TestAppName, "Info.plist");
         const appDelegatePath: string = path.join(iOSProject, TestConfig.TestAppName, "AppDelegate.mm");
-
+        const podfilePath: string = path.join(iOSProject, "Podfile");
+        
 
         // Install the Podfile
-        return TestUtil.getProcessOutput("pod install", { cwd: iOSProject })
+        return TestUtil.copyFile(path.join(TestConfig.templatePath, "ios", "Podfile"), podfilePath, true)
+            .then(() => TestUtil.getProcessOutput(`RCT_NEW_ARCH_ENABLED=${TestConfig.testOldArch ? 0 : 1} pod install`, { cwd: iOSProject }))
             // Put the IOS deployment key in the Info.plist
             .then(TestUtil.replaceString.bind(undefined, infoPlistPath,
                 "</dict>\n</plist>",
@@ -199,7 +207,7 @@ class RNIOS extends Platform.IOS implements RNPlatform {
             .then(TestUtil.copyFile.bind(undefined,
                 path.join(TestConfig.templatePath, "ios", TestConfig.TestAppName, "AppDelegate.mm"),
                 appDelegatePath, true))
-            .then<void>(TestUtil.replaceString.bind(undefined, appDelegatePath, TestUtil.CODE_PUSH_TEST_APP_NAME_PLACEHOLDER, TestConfig.TestAppName));
+            .then(TestUtil.replaceString.bind(undefined, appDelegatePath, TestUtil.CODE_PUSH_TEST_APP_NAME_PLACEHOLDER, TestConfig.TestAppName));
     }
 
     /**
@@ -307,13 +315,13 @@ class RNProjectManager extends ProjectManager {
         }
         mkdirp.sync(projectDirectory);
 
-        return TestUtil.getProcessOutput("npx react-native init " + appName + " --version 0.71.3 --install-pods", { cwd: projectDirectory, timeout: 30 * 60 * 1000 })
-            .then((e) => { console.log(`"npx react-native init ${appName}" success. cwd=${projectDirectory}`); return e; })
+        return TestUtil.getProcessOutput("npx @react-native-community/cli init " + appName + " --version 0.76.5 --install-pods", { cwd: projectDirectory, timeout: 30 * 60 * 1000 })
+            .then((e) => { console.log(`"npx @react-native-community/cli init ${appName}" success. cwd=${projectDirectory}`); return e; })
             .then(this.copyTemplate.bind(this, templatePath, projectDirectory))
             .then<void>(TestUtil.getProcessOutput.bind(undefined, TestConfig.thisPluginInstallString, { cwd: path.join(projectDirectory, TestConfig.TestAppName) }))
             .then(() => { return null; })
             .catch((error) => {
-                console.log(`"npx react-native init ${appName} failed". cwd=${projectDirectory}`, error);
+                console.log(`"npx @react-native-community/cli init ${appName} failed". cwd=${projectDirectory}`, error);
                 throw new Error(error);
             });
     }

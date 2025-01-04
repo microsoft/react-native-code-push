@@ -414,6 +414,7 @@ declare module 'code-push-plugin-testing-framework/script/testConfig' {
 	export const onlyRunCoreTests: boolean;
 	export const shouldSetup: boolean;
 	export const restartEmulators: boolean;
+	export const testOldArch: boolean;
 
 }
 declare module 'code-push-plugin-testing-framework/script/testUtil' {

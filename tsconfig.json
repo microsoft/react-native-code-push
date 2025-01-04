@@ -10,5 +10,8 @@
         "rootDir": "test",
         "outDir": "bin",
         "removeComments": true
-    }
+    },
+    "exclude": [
+        "Examples"
+    ]
 }

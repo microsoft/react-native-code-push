@@ -1,6 +1,6 @@
 {
   "name": "react-native-code-push",
-  "version": "9.0.1",
+  "version": "10.0.0",
   "description": "React Native plugin for the CodePush service",
   "main": "CodePush.js",
   "typings": "typings/react-native-code-push.d.ts",
@@ -20,6 +20,9 @@
     "test": "npm run build:tests && npm run test:setup && npm run test:fast",
     "test:android": "npm run build:tests && npm run test:setup:android && npm run test:fast:android",
     "test:ios": "npm run build:tests && npm run test:setup:ios && npm run test:fast:ios",
+    "test:oldArch": "export TEST_OLD_ARCH=true && npm run build:tests && npm run test:setup && npm run test:fast",
+    "test:oldArch:android": "export TEST_OLD_ARCH=true && npm run build:tests && npm run test:setup:android && npm run test:fast:android",
+    "test:oldArch:ios": "export TEST_OLD_ARCH=true && npm run build:tests && npm run test:setup:ios && npm run test:fast:ios",
     "test:setup": "mocha --recursive bin/test --android --ios --setup",
     "test:setup:android": "mocha --recursive bin/test --android --setup",
     "test:setup:ios": "mocha --recursive bin/test --ios --setup",
