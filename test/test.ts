@@ -188,7 +188,7 @@ class RNIOS extends Platform.IOS implements RNPlatform {
 
         // Install the Podfile
         return TestUtil.copyFile(path.join(TestConfig.templatePath, "ios", "Podfile"), podfilePath, true)
-            .then(() => TestUtil.getProcessOutput(`RCT_NEW_ARCH_ENABLED=${!TestConfig.testOldArch} pod install`, { cwd: iOSProject }))
+            .then(() => TestUtil.getProcessOutput(`RCT_NEW_ARCH_ENABLED=${TestConfig.testOldArch ? 0 : 1} pod install`, { cwd: iOSProject }))
             // Put the IOS deployment key in the Info.plist
             .then(TestUtil.replaceString.bind(undefined, infoPlistPath,
                 "</dict>\n</plist>",
