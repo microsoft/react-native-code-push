@@ -183,10 +183,12 @@ class RNIOS extends Platform.IOS implements RNPlatform {
         const iOSProject: string = path.join(projectDirectory, TestConfig.TestAppName, "ios");
         const infoPlistPath: string = path.join(iOSProject, TestConfig.TestAppName, "Info.plist");
         const appDelegatePath: string = path.join(iOSProject, TestConfig.TestAppName, "AppDelegate.mm");
-
+        const podfilePath: string = path.join(iOSProject, "Podfile");
+        
 
         // Install the Podfile
-        return TestUtil.getProcessOutput("pod install", { cwd: iOSProject })
+        return TestUtil.copyFile(path.join(TestConfig.templatePath, "ios", "Podfile"), podfilePath, true)
+            .then(() => TestUtil.getProcessOutput("pod install", { cwd: iOSProject }))
             // Put the IOS deployment key in the Info.plist
             .then(TestUtil.replaceString.bind(undefined, infoPlistPath,
                 "</dict>\n</plist>",
@@ -205,7 +207,7 @@ class RNIOS extends Platform.IOS implements RNPlatform {
             .then(TestUtil.copyFile.bind(undefined,
                 path.join(TestConfig.templatePath, "ios", TestConfig.TestAppName, "AppDelegate.mm"),
                 appDelegatePath, true))
-            .then<void>(TestUtil.replaceString.bind(undefined, appDelegatePath, TestUtil.CODE_PUSH_TEST_APP_NAME_PLACEHOLDER, TestConfig.TestAppName));
+            .then(TestUtil.replaceString.bind(undefined, appDelegatePath, TestUtil.CODE_PUSH_TEST_APP_NAME_PLACEHOLDER, TestConfig.TestAppName));
     }
 
     /**

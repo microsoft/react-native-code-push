@@ -10,7 +10,7 @@ var TestUtil_1 = require("./testUtil");
 var DEFAULT_TEST_RUN_DIRECTORY = path.join(os.tmpdir(), TestUtil_1.TestUtil.getPluginName(), "test-run");
 var DEFAULT_UPDATES_DIRECTORY = path.join(os.tmpdir(), TestUtil_1.TestUtil.getPluginName(), "updates");
 var DEFAULT_PLUGIN_PATH = path.join(__dirname, "../..");
-var NPM_PLUGIN_PATH = TestUtil_1.TestUtil.getPluginName();
+var NPM_PLUGIN_PATH = "\"https://github.com/CodePushNext/react-native-code-push.git#support-new-arch\"" // TestUtil_1.TestUtil.getPluginName();
 var SETUP_FLAG_NAME = "--setup";
 var DEFAULT_PLUGIN_TGZ_NAME = TestUtil_1.TestUtil.getPluginName() + "-" + TestUtil_1.TestUtil.getPluginVersion() + ".tgz";
 // CONST VARIABLES
