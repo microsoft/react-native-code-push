@@ -17,13 +17,16 @@ import com.microsoft.codepush.react.CodePush
 @OptIn(UnstableReactNativeAPI::class)
 class MainApplication : Application(), ReactApplication {
 
+    val defaultPackageList by lazy { 
+      PackageList(this).packages.apply {
+        // Packages that cannot be autolinked yet can be added manually here, for example:
+        // add(MyReactNativePackage())
+      }
+    }
+
     override val reactNativeHost: ReactNativeHost =
       object : DefaultReactNativeHost(this) {
-        override fun getPackages(): List<ReactPackage> =
-            PackageList(this).packages.apply {
-              // Packages that cannot be autolinked yet can be added manually here, for example:
-              // add(MyReactNativePackage())
-            }
+        override fun getPackages(): List<ReactPackage> = defaultPackageList
 
         override fun getJSMainModuleName(): String = "index"
 
@@ -34,19 +37,7 @@ class MainApplication : Application(), ReactApplication {
         override val isHermesEnabled: Boolean = BuildConfig.IS_HERMES_ENABLED
       }
 
-  override val reactHost: ReactHost
-    get() = getDefaultReactHost(
-        applicationContext,
-        PackageList(this).packages.apply {
-            // Packages that cannot be autolinked yet can be added manually here, for example:
-            // add(MyReactNativePackage())
-        },
-        jsMainModulePath = "index",
-        jsBundleAssetPath = "index.android.bundle",
-        jsBundleFilePath = CodePush.getJSBundleFile(),
-        isHermesEnabled = BuildConfig.IS_HERMES_ENABLED,
-        useDevSupport = BuildConfig.DEBUG,
-    )
+  override val reactHost: ReactHost get() = getDefaultReactHost(this, reactNativeHost)
 
   override fun onCreate() {
     super.onCreate()
