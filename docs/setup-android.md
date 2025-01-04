@@ -45,6 +45,14 @@ In order to integrate CodePush into your Android project, please perform the fol
     import com.microsoft.codepush.react.CodePush
 
     class MainApplication : Application(), ReactApplication {
+   
+    // PackageList must be instantiated only one in application lifetime.
+    val defaultPackageList by lazy { 
+      PackageList(this).packages.apply {
+        // Packages that cannot be autolinked yet can be added manually here, for example:
+        // add(MyReactNativePackage())
+      }
+    }
 
     override val reactNativeHost: ReactNativeHost =
         object : DefaultReactNativeHost(this) {
