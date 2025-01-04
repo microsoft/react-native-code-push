@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.util.Log;
 
 import com.facebook.react.ReactHost;
 import com.facebook.react.ReactInstanceManager;
@@ -61,10 +60,6 @@ public class CodePush implements ReactPackage {
     }
 
     public CodePush(String deploymentKey, Context context, boolean isDebugMode) {
-        for (StackTraceElement ste: Thread.currentThread().getStackTrace()) {
-            Log.d("#######", ste.toString());
-        }
-
         mContext = context.getApplicationContext();
 
         mUpdateManager = new CodePushUpdateManager(context.getFilesDir().getAbsolutePath());
