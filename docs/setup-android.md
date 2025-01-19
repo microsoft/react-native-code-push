@@ -23,15 +23,15 @@ In order to integrate CodePush into your Android project, please perform the fol
 
     ```gradle
     ...
-    include ':app', ':react-native-code-push'
-    project(':react-native-code-push').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-code-push/android/app')
+    include ':app', ':code-push-next_react-native-code-push'
+    project(':code-push-next_react-native-code-push').projectDir = new File(rootProject.projectDir, '../node_modules/@code-push-next/react-native-code-push/android/app')
     ```
     
 2. In your `android/app/build.gradle` file, add the `codepush.gradle` file as an additional build task definition to the end of the file:
 
     ```gradle
     ...
-    apply from: "../../node_modules/react-native-code-push/android/codepush.gradle"
+    apply from: "../../node_modules/@code-push-next/react-native-code-push/android/codepush.gradle"
     ...
     ```
 
