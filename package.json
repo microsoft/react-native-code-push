@@ -1,6 +1,6 @@
 {
   "name": "@code-push-next/react-native-code-push",
-  "version": "10.0.0-alpha.2",
+  "version": "10.0.0-alpha.3",
   "description": "React Native plugin for the CodePush service",
   "main": "CodePush.js",
   "typings": "typings/react-native-code-push.d.ts",
@@ -76,8 +76,8 @@
       ]
     },
     "commands": {
-      "postlink": "node node_modules/react-native-code-push/scripts/postlink/run",
-      "postunlink": "node node_modules/react-native-code-push/scripts/postunlink/run"
+      "postlink": "node node_modules/@code-push-next/react-native-code-push/scripts/postlink/run",
+      "postunlink": "node node_modules/@code-push-next/react-native-code-push/scripts/postunlink/run"
     }
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
