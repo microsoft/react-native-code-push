@@ -69,7 +69,7 @@ gradle.projectsEvaluated {
 
         def nodeModulesPath;
         if (project.hasProperty('nodeModulesPath')) {
-            nodeModulesPath = "${project.nodeModulesPath}/react-native-code-push"
+            nodeModulesPath = "${project.nodeModulesPath}/@code-push-next/react-native-code-push"
         } else {
             nodeModulesPath = findNodeModulePath(projectDir, "@code-push-next/react-native-code-push")
         }
