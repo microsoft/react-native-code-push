@@ -1,6 +1,6 @@
 {
-  "name": "react-native-code-push",
-  "version": "10.0.0",
+  "name": "@code-push-next/react-native-code-push",
+  "version": "10.0.0-alpha",
   "description": "React Native plugin for the CodePush service",
   "main": "CodePush.js",
   "typings": "typings/react-native-code-push.d.ts",
@@ -10,7 +10,7 @@
     "code",
     "push"
   ],
-  "author": "Microsoft Corporation",
+  "author": "Code Push Next",
   "license": "MIT",
   "scripts": {
     "clean": "shx rm -rf bin",
@@ -35,7 +35,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/microsoft/react-native-code-push"
+    "url": "https://github.com/CodePushNext/react-native-code-push"
   },
   "dependencies": {
     "code-push": "4.2.3",
