@@ -92,7 +92,7 @@ class RNAndroid extends Platform.Android implements RNPlatform {
         const settingsGradle = path.join(innerprojectDirectory, "android", "settings.gradle");
         TestUtil.replaceString(settingsGradle,
             "include ':app'",
-            "include ':app', ':react-native-code-push'\nproject(':react-native-code-push').projectDir = new File(rootProject.projectDir, '../node_modules/@code-push-next/react-native-code-push/android/app')");
+            "include ':app', ':code-push-next_react-native-code-push'\nproject(':code-push-next_react-native-code-push').projectDir = new File(rootProject.projectDir, '../node_modules/@code-push-next/react-native-code-push/android/app')");
 
         // Disable new architecture
         if (TestConfig.testOldArch) {
