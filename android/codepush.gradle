@@ -71,7 +71,7 @@ gradle.projectsEvaluated {
         if (project.hasProperty('nodeModulesPath')) {
             nodeModulesPath = "${project.nodeModulesPath}/react-native-code-push"
         } else {
-            nodeModulesPath = findNodeModulePath(projectDir, "react-native-code-push")
+            nodeModulesPath = findNodeModulePath(projectDir, "@code-push-next/react-native-code-push")
         }
 
         def targetName = variant.name.capitalize()

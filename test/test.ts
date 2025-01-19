@@ -78,7 +78,7 @@ class RNAndroid extends Platform.Android implements RNPlatform {
      */
     installPlatform(projectDirectory: string): Q.Promise<void> {
         const innerprojectDirectory: string = path.join(projectDirectory, TestConfig.TestAppName);
-        const gradleContent: string = slash(path.join(innerprojectDirectory, "node_modules", "react-native-code-push", "android", "codepush.gradle"));
+        const gradleContent: string = slash(path.join(innerprojectDirectory, "node_modules", "@code-push-next/react-native-code-push", "android", "codepush.gradle"));
 
         //// Set up gradle to build CodePush with the app
         // Add CodePush to android/app/build.gradle
