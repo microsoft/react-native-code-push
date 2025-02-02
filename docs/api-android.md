@@ -1,6 +1,4 @@
-### Java API Reference (Android)
-
-### API for React Native 0.60 version and above
+### Resource Configuration 
 
 Since `autolinking` uses `react-native.config.js` to link plugins, constructors are specified in that file. But you can override custom variables to manage the CodePush plugin by placing these values in string resources.
 
@@ -16,9 +14,9 @@ Since `autolinking` uses `react-native.config.js` to link plugins, constructors 
     <string moduleConfig="true" name="CodePushServerUrl">https://yourcodepush.server.com</string>
     ```
 
-### API for React Native lower than 0.60
-
 The Java API is made available by importing the `com.microsoft.codepush.react.CodePush` class into your `MainActivity.java` file, and consists of a single public class named `CodePush`.
+
+### Java API Reference (Android)
 
 #### CodePush
 
