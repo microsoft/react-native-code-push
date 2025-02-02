@@ -1,14 +1,6 @@
-[![appcenterbanner](https://user-images.githubusercontent.com/31293287/32969262-3cc5d48a-cb99-11e7-91bf-fa57c67a371c.png)](http://microsoft.github.io/code-push/)
-
 #### [Sign up With App Center](https://appcenter.ms/signup?utm_source=CodePush&utm_medium=Azure) to use CodePush
 
 # React Native Module for CodePush
-> [!WARNING]
-> React Native CodePush won't support new Architecture. In order to use this plugin on React Native versions starting from 0.76 you will need to [opt out](https://reactnative.dev/blog/2024/10/23/the-new-architecture-is-here#opt-out) from new architecture.
->
-*Note: This README is only relevant to the latest version of our plugin. If you are using an older version, please switch to the relevant tag on [our GitHub repo](https://github.com/microsoft/react-native-code-push) to view the docs for that particular version.*
-
-![Switching tags](https://user-images.githubusercontent.com/42337914/57237511-0835de80-7030-11e9-88fa-64eb200478d0.png)
 
 This plugin provides client-side integration for the [CodePush service](https://microsoft.github.io/code-push/), allowing you to easily add a dynamic update experience to your React Native app(s).
 
@@ -57,32 +49,12 @@ In order to ensure that your end users always have a functioning version of your
 
 We try our best to maintain backwards compatibility of our plugin with previous versions of React Native, but due to the nature of the platform, and the existence of breaking changes between releases, it is possible that you need to use a specific version of the CodePush plugin in order to support the exact version of React Native you are using. The following table outlines which CodePush plugin versions officially support the respective React Native versions:
 
-| React Native version(s) | Supporting CodePush version(s)                        |
-|-------------------------|-------------------------------------------------------|
-| <0.14                   | **Unsupported**                                       |
-| v0.14                   | v1.3 *(introduced Android support)*                   |
-| v0.15-v0.18             | v1.4-v1.6 *(introduced iOS asset support)*            |
-| v0.19-v0.28             | v1.7-v1.17 *(introduced Android asset support)*       |
-| v0.29-v0.30             | v1.13-v1.17 *(RN refactored native hosting code)*     |
-| v0.31-v0.33             | v1.14.6-v1.17 *(RN refactored native hosting code)*   |
-| v0.34-v0.35             | v1.15-v1.17 *(RN refactored native hosting code)*     |
-| v0.36-v0.39             | v1.16-v1.17 *(RN refactored resume handler)*          |
-| v0.40-v0.42             | v1.17 *(RN refactored iOS header files)*              |
-| v0.43-v0.44             | v2.0+ *(RN refactored uimanager dependencies)*        |
-| v0.45                   | v3.0+ *(RN refactored instance manager code)*         |
-| v0.46                   | v4.0+ *(RN refactored js bundle loader code)*         |
-| v0.46-v0.53             | v5.1+ *(RN removed unused registration of JS modules)*|
-| v0.54-v0.55             | v5.3+ *(Android Gradle Plugin 3.x integration)*       |
-| v0.56-v0.58             | v5.4+ *(RN upgraded versions for Android tools)*      |
-| v0.59                   | v5.6+ *(RN refactored js bundle loader code)*         |
-| v0.60-v0.61             | v6.0+ *(RN migrated to Autolinking)*                  |
-| v0.62-v0.64             | v6.2+ *(RN removed LiveReload)*                       |
-| v0.65-v0.70             | v7.0+ *(RN updated iPhone-target-version)*            |
-| v0.71                   | v8.0+ *(RN moved to react-native-gradle-plugin)*      |
+| React Native version(s) | Supporting CodePush version(s)                                                                       |
+|-------------------------|------------------------------------------------------------------------------------------------------|
+| <v0.76                  | **Consider [microsoft/code-push-react-native](https://github.com/microsoft/react-native-code-push)** |
+| v0.76                   | v10.0+ *(Support for New Architecture)*                                                              |
 
-*NOTE: `react-native-code-push` versions lower than **[v5.7.0](https://github.com/microsoft/react-native-code-push/releases/tag/v5.7.0)** will stop working in the near future. You can find more information in our [documentation](https://github.com/microsoft/code-push/blob/master/migration-notice.md).*
 
-We work hard to respond to new RN releases, but they do occasionally break us. We will update this chart with each RN release, so that users can check to see what our "official" support is.
 
 ### Supported Components
 
