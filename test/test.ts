@@ -88,12 +88,6 @@ class RNAndroid extends Platform.Android implements RNPlatform {
             "apply plugin: \"com.facebook.react\"",
             "apply plugin: \"com.facebook.react\"\napply from: \"" + gradleContent + "\"");
 
-        // Add CodePush to android/settings.gradle
-        const settingsGradle = path.join(innerprojectDirectory, "android", "settings.gradle");
-        TestUtil.replaceString(settingsGradle,
-            "include ':app'",
-            "include ':app', ':code-push-next_react-native-code-push'\nproject(':code-push-next_react-native-code-push').projectDir = new File(rootProject.projectDir, '../node_modules/@code-push-next/react-native-code-push/android/app')");
-
         // Disable new architecture
         if (TestConfig.testOldArch) {
             const gradleProperties = path.join(innerprojectDirectory, "android", "gradle.properties");
