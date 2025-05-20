@@ -58,6 +58,7 @@ public class CodePush implements ReactPackage {
         return mServerUrl;
     }
 
+
     public CodePush(String deploymentKey, Context context, boolean isDebugMode) {
         mContext = context.getApplicationContext();
 
@@ -81,8 +82,14 @@ public class CodePush implements ReactPackage {
         String publicKeyFromStrings = getCustomPropertyFromStringsIfExist("PublicKey");
         if (publicKeyFromStrings != null) mPublicKey = publicKeyFromStrings;
 
+        // Make this more explicit with logging
         String serverUrlFromStrings = getCustomPropertyFromStringsIfExist("ServerUrl");
-        if (serverUrlFromStrings != null) mServerUrl = serverUrlFromStrings;
+        if (serverUrlFromStrings != null) {
+            CodePushUtils.log("Setting server URL from strings.xml: " + serverUrlFromStrings);
+            mServerUrl = serverUrlFromStrings;
+        } else {
+            CodePushUtils.log("Using default server URL: " + mServerUrl);
+        }
 
         clearDebugCacheIfNeeded(null);
         initializeUpdateAfterRestart();
@@ -129,10 +136,11 @@ public class CodePush implements ReactPackage {
 
     private String getCustomPropertyFromStringsIfExist(String propertyName) {
         String property;
-      
+
         String packageName = mContext.getPackageName();
+        // This is the key change - we're looking for the exact property name with "CodePush" prefix
         int resId = mContext.getResources().getIdentifier("CodePush" + propertyName, "string", packageName);
-        
+
         if (resId != 0) {
             property = mContext.getString(resId);
 
@@ -140,7 +148,7 @@ public class CodePush implements ReactPackage {
                 return property;
             } else {
                 CodePushUtils.log("Specified " + propertyName + " is empty");
-            } 
+            }
         }
 
         return null;
@@ -284,8 +292,8 @@ public class CodePush implements ReactPackage {
         }
     }
 
-    public String getServerUrl() {
-        return mServerUrl;
+    private String getServerUrl() {
+        return this.mServerUrl;
     }
 
     void initializeUpdateAfterRestart() {
